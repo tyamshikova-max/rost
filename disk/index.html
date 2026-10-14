@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Мастерская роста · Яндекс Диск</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root { --bg: #f5f2eb; --panel: #fffdf8; --fg: #1f1c18; --muted: #6c665b; --line: #e3ddd0; --hover: #efeadf; --acc: #6b3c8e; --ok: #2b7351; --bad: #b3361d; --warn: #a35d12;
+  --serif: "Literata", Georgia, serif; --sans: "Onest", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", Consolas, monospace; color-scheme: light }
+@media (prefers-color-scheme: dark) { :root { --bg: #17161b; --panel: #201f25; --fg: #ece8df; --muted: #a39e93; --line: #34323b; --hover: #2a2930; --acc: #bb95de; --ok: #6cc497; --bad: #ff8a6b; --warn: #e3a45c; color-scheme: dark } }
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+html, body { background: var(--bg) }
+body { margin: 0; color: var(--fg); font: 15px/1.5 var(--sans); padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px) }
+.wrap { max-width: 820px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 60px }
+h1 { font: 700 26px/1.15 var(--serif); margin: 0 }
+h2 { font: 600 18px/1.3 var(--sans); margin: 0 0 8px }
+.lead { color: var(--muted); margin: 6px 0 0 }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 16px }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.btn { background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 8px 14px; font: inherit; font-size: 14px; font-weight: 500; color: var(--fg); cursor: pointer; text-decoration: none; display: inline-flex; gap: 6px; align-items: center }
+.btn:hover { background: var(--hover) }
+.btn.pri { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.btn:disabled { opacity: .45; cursor: default }
+input[type=text] { flex: 1 1 220px; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; font: 500 14px var(--mono); color: var(--fg) }
+.muted { color: var(--muted); font-size: 13px }
+.ok { color: var(--ok) } .bad { color: var(--bad) } .warn { color: var(--warn) }
+table { width: 100%; border-collapse: collapse; font-size: 14px }
+td, th { padding: 7px 6px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top }
+th { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500 }
+td.n { font: 500 12px var(--mono); white-space: nowrap; color: var(--muted) }
+.tbl { overflow-x: auto }
+.meter { height: 8px; background: var(--hover); border-radius: 4px; overflow: hidden; margin: 8px 0 4px }
+.meter b { display: block; height: 100%; background: var(--acc) }
+#log { font: 12px/1.5 var(--mono); white-space: pre-wrap; background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 10px; max-height: 260px; overflow: auto; margin: 0 }
+.drop { border: 2px dashed var(--line); border-radius: 10px; padding: 18px; text-align: center; color: var(--muted); cursor: pointer; display: block }
+.big { font: 700 28px/1.1 var(--serif) }
+ol { padding-left: 1.3em } li { margin: 4px 0 }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Яндекс Диск для «Мастерской роста»</h1>
+  <p class="lead">Прототип: проверяем, что приложение умеет само сохранять книги и прогресс на ваш Яндекс Диск и забирать их на другом устройстве. Доступ — только к папке «Приложения» этого приложения, остальные файлы Диска ему не видны.</p>
+
+  <section class="card" id="setup">
+    <h2>1. Идентификатор приложения (ClientID)</h2>
+    <p class="muted">Его выдаёт oauth.yandex.ru после регистрации приложения. Это открытый идентификатор, не пароль.</p>
+    <div class="row"><input type="text" id="cid" placeholder="например, 0123456789abcdef0123456789abcdef" aria-label="ClientID" autocomplete="off" spellcheck="false"><button class="btn" id="cidSave" type="button">Сохранить</button></div>
+    <p class="muted">Адрес возврата (Redirect URI) при регистрации: <code id="ruri"></code></p>
+  </section>
+
+  <section class="card">
+    <h2>2. Вход</h2>
+    <div id="auth"></div>
+  </section>
+
+  <section class="card" id="diag" hidden>
+    <h2>3. Проверка связи</h2>
+    <p class="muted">Создаёт тестовый файл в папке приложения, загружает, читает обратно, сравнивает и убирает его в корзину Диска.</p>
+    <button class="btn pri" id="runAll" type="button">Проверить всё</button>
+    <div class="tbl"><table id="steps" hidden><thead><tr><th>Шаг</th><th>Итог</th><th>Время</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="card" id="books" hidden>
+    <h2>4. Книги на Диске</h2>
+    <label class="drop" id="drop"><b>Загрузить книги на Диск</b><br><span class="muted">PDF, EPUB, FB2, TXT — можно несколько; без ограничения 20 МБ</span><input type="file" id="files" multiple hidden accept=".pdf,.epub,.fb2,.txt,.md"></label>
+    <div class="meter" id="upm" hidden><b style="width:0"></b></div><div class="muted" id="upt"></div>
+    <div class="tbl"><table><thead><tr><th>Файл</th><th>Размер</th><th>Изменён</th><th></th></tr></thead><tbody id="blist"><tr><td colspan="4" class="muted">Загружаю список…</td></tr></tbody></table></div>
+  </section>
+
+  <section class="card" id="sync" hidden>
+    <h2>5. Прогресс между устройствами</h2>
+    <p class="muted">Тест синхронизации: нажмите «Отправить» здесь, затем «Получить» на другом устройстве — число и имя устройства должны совпасть.</p>
+    <div class="row"><input type="text" id="dev" aria-label="Имя устройства" placeholder="Имя этого устройства"><button class="btn pri" id="push" type="button">Отправить прогресс</button><button class="btn" id="pull" type="button">Получить прогресс</button></div>
+    <p id="state" class="muted"></p>
+  </section>
+
+  <section class="card">
+    <h2>Журнал</h2>
+    <pre id="log">—</pre>
+  </section>
+</div>
+<script>
+(function () {
+  "use strict";
+  var API = "https://cloud-api.yandex.net/v1/disk";
+  var $ = function (id) { return document.getElementById(id); };
+  var LS = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* нет */ } }, del: function (k) { try { localStorage.removeItem(k); } catch (e) { /* нет */ } } };
+  var REDIRECT = location.origin + location.pathname;
+  var CID = LS.get("yd-cid") || "";
+  var TOKEN = null;
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function size(b) { return b == null ? "" : b > 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " МБ" : Math.max(1, Math.round(b / 1024)) + " КБ"; }
+  function log(t, cls) { var l = $("log"); if (l.textContent === "—") l.textContent = ""; var d = new Date(); l.textContent += d.toLocaleTimeString("ru-RU") + "  " + t + "\n"; l.scrollTop = l.scrollHeight; }
+
+  // токен из адреса после входа
+  (function () {
+    var h = new URLSearchParams(location.hash.slice(1));
+    if (h.get("access_token")) {
+      LS.set("yd-token", JSON.stringify({ t: h.get("access_token"), exp: Date.now() + (parseInt(h.get("expires_in"), 10) || 31536000) * 1000 }));
+      history.replaceState(null, "", location.pathname);
+      log("Вход выполнен, ключ доступа сохранён на этом устройстве.");
+    } else if (h.get("error")) {
+      log("Яндекс вернул ошибку входа: " + h.get("error") + " " + (h.get("error_description") || ""));
+      history.replaceState(null, "", location.pathname);
+    }
+    try { var o = JSON.parse(LS.get("yd-token") || "null"); if (o && o.exp > Date.now()) TOKEN = o.t; } catch (e) { /* нет */ }
+  })();
+
+  function api(path, opt) {
+    opt = opt || {};
+    return fetch(API + path, { method: opt.method || "GET", headers: { Authorization: "OAuth " + TOKEN, Accept: "application/json" } })
+      .catch(function () { throw { status: 0, msg: "браузер не пустил запрос к API Диска (сеть или CORS)" }; })
+      .then(function (r) {
+        return r.text().then(function (t) {
+          var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) { /* не JSON */ }
+          if (!r.ok && !(opt.ok && opt.ok.indexOf(r.status) >= 0)) throw { status: r.status, msg: (j && (j.message || j.description)) || t || r.statusText };
+          return j || {};
+        });
+      });
+  }
+  function errText(e) { return e && e.msg ? (e.status ? "HTTP " + e.status + ": " : "") + e.msg : String(e); }
+  function folder(p) { return api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
+  function upload(path, blob, onp) {
+    return api("/resources/upload?overwrite=true&path=" + encodeURIComponent(path)).then(function (j) {
+      return new Promise(function (res, rej) {
+        var x = new XMLHttpRequest();
+        x.open("PUT", j.href);
+        x.upload.onprogress = function (e) { if (onp && e.lengthComputable) onp(e.loaded / e.total); };
+        x.onload = function () { if (x.status >= 200 && x.status < 300) res(x.status); else rej({ status: x.status, msg: "сервер загрузки ответил ошибкой" }); };
+        x.onerror = function () { rej({ status: 0, msg: "сервер загрузки не пустил запрос из браузера (CORS) — понадобится посредник" }); };
+        x.send(blob);
+      });
+    });
+  }
+  function download(path) {
+    return api("/resources/download?path=" + encodeURIComponent(path)).then(function (j) {
+      return fetch(j.href).catch(function () { throw { status: 0, msg: "сервер скачивания не пустил запрос из браузера (CORS) — понадобится посредник" }; })
+        .then(function (r) { if (!r.ok) throw { status: r.status, msg: "сервер скачивания ответил ошибкой" }; return r.blob(); });
+    });
+  }
+  function trash(path) { return api("/resources?path=" + encodeURIComponent(path), { method: "DELETE", ok: [202, 204] }); }
+
+  /* ---------- экран ---------- */
+  $("ruri").textContent = REDIRECT;
+  $("cid").value = CID;
+  $("cidSave").addEventListener("click", function () { CID = $("cid").value.trim(); LS.set("yd-cid", CID); log(CID ? "ClientID сохранён." : "ClientID очищен."); renderAuth(); });
+  function renderAuth() {
+    var a = $("auth");
+    ["diag", "books", "sync"].forEach(function (id) { $(id).hidden = !TOKEN; });
+    if (!TOKEN) {
+      a.innerHTML = CID
+        ? '<p class="muted">Откроется страница Яндекса: войдите своим аккаунтом и разрешите доступ к папке приложения.</p><a class="btn pri" href="https://oauth.yandex.ru/authorize?response_type=token&force_confirm=yes&client_id=' + encodeURIComponent(CID) + "&redirect_uri=" + encodeURIComponent(REDIRECT) + '">Войти через Яндекс</a>'
+        : '<p class="muted">Сначала сохраните ClientID в шаге 1.</p>';
+      return;
+    }
+    a.innerHTML = '<p class="muted">Проверяю доступ…</p>';
+    api("").then(function (d) {
+      var used = d.used_space || 0, tot = d.total_space || 1;
+      a.innerHTML = '<div class="row" style="justify-content:space-between"><div><div class="big">' + esc((d.user && (d.user.display_name || d.user.login)) || "Яндекс Диск") + '</div><div class="muted">занято ' + size(used) + " из " + size(tot) + '</div></div><button class="btn" id="logout" type="button">Выйти на этом устройстве</button></div><div class="meter"><b style="width:' + Math.min(100, used / tot * 100) + '%"></b></div>';
+      $("logout").addEventListener("click", function () { LS.del("yd-token"); TOKEN = null; log("Ключ доступа удалён с этого устройства."); renderAuth(); });
+      log("Диск доступен: занято " + size(used) + " из " + size(tot) + ".");
+      loadBooks();
+    }).catch(function (e) {
+      a.innerHTML = '<p class="bad">Не получилось: ' + esc(errText(e)) + '</p><button class="btn" id="relog" type="button">Войти заново</button>';
+      $("relog").addEventListener("click", function () { LS.del("yd-token"); TOKEN = null; renderAuth(); });
+      log("Ошибка доступа к Диску: " + errText(e));
+    });
+  }
+
+  /* ---------- проверка ---------- */
+  $("runAll").addEventListener("click", function () {
+    var tb = $("steps").querySelector("tbody"); tb.innerHTML = ""; $("steps").hidden = false; this.disabled = true;
+    var btn = this, name = "app:/test-" + Date.now() + ".txt", text = "Проверка связи «Мастерской роста» · " + new Date().toISOString() + " · ёжик в тумане";
+    var steps = [
+      ["Доступ к Диску", function () { return api(""); }],
+      ["Папки books и progress", function () { return folder("app:/books").then(function () { return folder("app:/progress"); }); }],
+      ["Загрузка тестового файла", function () { return upload(name, new Blob([text], { type: "text/plain" })); }],
+      ["Список папки приложения", function () { return api("/resources?limit=100&path=" + encodeURIComponent("app:/")).then(function (j) { var n = ((j._embedded && j._embedded.items) || []).filter(function (i) { return i.path.indexOf(name.slice(5)) >= 0; }).length; if (!n) throw { msg: "файл не появился в списке" }; }); }],
+      ["Скачивание и сравнение", function () { return download(name).then(function (b) { return b.text(); }).then(function (t) { if (t !== text) throw { msg: "содержимое не совпало" }; }); }],
+      ["Тестовый файл — в корзину Диска", function () { return trash(name); }]
+    ];
+    var i = 0;
+    (function next() {
+      if (i >= steps.length) { btn.disabled = false; log("Проверка закончена."); return; }
+      var s = steps[i++], t0 = performance.now(), tr = document.createElement("tr");
+      tr.innerHTML = "<td>" + s[0] + '</td><td class="muted">…</td><td class="n"></td>'; tb.appendChild(tr);
+      s[1]().then(function () {
+        tr.children[1].innerHTML = '<span class="ok">✓ работает</span>'; tr.children[2].textContent = Math.round(performance.now() - t0) + " мс"; log("✓ " + s[0]); next();
+      }).catch(function (e) {
+        tr.children[1].innerHTML = '<span class="bad">✗ ' + esc(errText(e)) + "</span>"; tr.children[2].textContent = Math.round(performance.now() - t0) + " мс"; log("✗ " + s[0] + ": " + errText(e)); btn.disabled = false;
+      });
+    })();
+  });
+
+  /* ---------- книги ---------- */
+  function loadBooks() {
+    folder("app:/books").then(function () {
+      return api("/resources?limit=500&sort=-modified&path=" + encodeURIComponent("app:/books"));
+    }).then(function (j) {
+      var items = ((j._embedded && j._embedded.items) || []).filter(function (i) { return i.type === "file"; });
+      $("blist").innerHTML = items.length ? items.map(function (i) {
+        return "<tr><td>" + esc(i.name) + '</td><td class="n">' + size(i.size) + '</td><td class="n">' + new Date(i.modified).toLocaleDateString("ru-RU") + '</td><td><button class="btn" type="button" data-get="' + esc(i.path) + '">Скачать</button></td></tr>';
+      }).join("") : '<tr><td colspan="4" class="muted">Пока пусто.</td></tr>';
+    }).catch(function (e) { $("blist").innerHTML = '<tr><td colspan="4" class="bad">' + esc(errText(e)) + "</td></tr>"; });
+  }
+  $("blist").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-get]"); if (!b) return;
+    var p = b.dataset.get, nm = p.split("/").pop(); b.disabled = true; b.textContent = "Скачиваю…";
+    download(p).then(function (blob) {
+      log("✓ Скачано «" + nm + "»: " + size(blob.size) + ".");
+      var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nm; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 20000);
+      b.textContent = "✓ Скачано";
+    }).catch(function (er) { log("✗ Скачивание «" + nm + "»: " + errText(er)); b.textContent = "Ошибка"; }).then(function () { b.disabled = false; });
+  });
+  function uploadFiles(list) {
+    var files = [].slice.call(list || []), i = 0;
+    if (!files.length) return;
+    $("upm").hidden = false;
+    (function next() {
+      if (i >= files.length) { $("upt").textContent = "Готово: " + files.length + "."; loadBooks(); return; }
+      var f = files[i++];
+      $("upt").textContent = "Загружаю " + i + " из " + files.length + ": " + f.name;
+      upload("app:/books/" + f.name.replace(/[\\/:*?"<>|]/g, "_"), f, function (p) { $("upm").firstChild.style.width = (p * 100) + "%"; })
+        .then(function () { log("✓ Загружено «" + f.name + "» (" + size(f.size) + ")."); })
+        .catch(function (e) { log("✗ Загрузка «" + f.name + "»: " + errText(e)); })
+        .then(next);
+    })();
+  }
+  $("files").addEventListener("change", function () { uploadFiles(this.files); this.value = ""; });
+  $("drop").addEventListener("dragover", function (e) { e.preventDefault(); });
+  $("drop").addEventListener("drop", function (e) { e.preventDefault(); uploadFiles(e.dataTransfer.files); });
+
+  /* ---------- прогресс ---------- */
+  $("dev").value = LS.get("yd-dev") || (/Android|iPhone|iPad/i.test(navigator.userAgent) ? "Телефон" : "Компьютер");
+  $("dev").addEventListener("change", function () { LS.set("yd-dev", this.value.trim()); });
+  function showState(s, how) { $("state").innerHTML = how + ": число <b>" + s.n + "</b>, устройство <b>" + esc(s.device) + "</b>, " + new Date(s.at).toLocaleString("ru-RU"); }
+  $("push").addEventListener("click", function () {
+    var btn = this; btn.disabled = true;
+    download("app:/progress/state.json").then(function (b) { return b.text(); }).then(function (t) { return JSON.parse(t); }).catch(function () { return { n: 0 }; })
+      .then(function (old) {
+        var s = { n: (old.n || 0) + 1, device: $("dev").value.trim() || "без имени", at: new Date().toISOString() };
+        return folder("app:/progress").then(function () { return upload("app:/progress/state.json", new Blob([JSON.stringify(s)], { type: "application/json" })); }).then(function () { showState(s, "Отправлено"); log("✓ Прогресс отправлен: " + s.n + "."); });
+      }).catch(function (e) { log("✗ Отправка прогресса: " + errText(e)); }).then(function () { btn.disabled = false; });
+  });
+  $("pull").addEventListener("click", function () {
+    var btn = this; btn.disabled = true;
+    download("app:/progress/state.json").then(function (b) { return b.text(); }).then(function (t) { var s = JSON.parse(t); showState(s, "Получено"); log("✓ Прогресс получен: " + s.n + " от «" + s.device + "»."); })
+      .catch(function (e) { log("✗ Получение прогресса: " + (e && e.status === 404 ? "на Диске ещё нет прогресса — сначала отправьте" : errText(e))); }).then(function () { btn.disabled = false; });
+  });
+
+  renderAuth();
+})();
+</script>
+</body>
+</html>
