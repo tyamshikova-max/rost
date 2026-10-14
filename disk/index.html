@@ -165,10 +165,49 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
     });
   }
 
+  /* ---------- прогресс частями: сжатие + свойства папок по 1 КБ ---------- */
+  var CH = 900;
+  function b64(u8) { var s = ""; for (var i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); }
+  function unb64(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+  function pack(obj) { var st = new Blob([JSON.stringify(obj)]).stream().pipeThrough(new CompressionStream("deflate")); return new Response(st).arrayBuffer().then(function (ab) { return b64(new Uint8Array(ab)); }); }
+  function unpack(z) { var st = new Blob([unb64(z)]).stream().pipeThrough(new DecompressionStream("deflate")); return new Response(st).text().then(function (t) { return JSON.parse(t); }); }
+  function pad(i) { return ("00" + i).slice(-3); }
+  function saveState(root, obj) {
+    return pack(obj).then(function (z) {
+      var parts = [], k = 0;
+      for (var i = 0; i < z.length; i += CH) parts.push(z.slice(i, i + CH));
+      function next() {
+        if (k >= parts.length) return { parts: parts.length, bytes: z.length };
+        var p = root + "/c" + pad(k), body = { custom_properties: k === 0 ? { n: parts.length, d: parts[k] } : { d: parts[k] } };
+        k++;
+        return folder(p).then(function () { return api("/resources?path=" + encodeURIComponent(p), { method: "PATCH", body: body }); }).then(next);
+      }
+      return folder("app:/progress").then(function () { return folder(root); }).then(next);
+    });
+  }
+  function loadState(root) {
+    return api("/resources?limit=1000&fields=" + encodeURIComponent("_embedded.items.name,_embedded.items.custom_properties") + "&path=" + encodeURIComponent(root)).then(function (j) {
+      var items = ((j._embedded && j._embedded.items) || []).filter(function (i) { return /^c\d{3}$/.test(i.name); }).sort(function (a, b) { return a.name < b.name ? -1 : 1; });
+      var cp = items[0] && items[0].custom_properties;
+      if (!cp || !cp.n) throw { status: 404, msg: "на Диске ещё нет прогресса" };
+      return unpack(items.slice(0, cp.n).map(function (i) { return (i.custom_properties && i.custom_properties.d) || ""; }).join(""));
+    });
+  }
+  function sample() {
+    var done = {}, hist = [], fav = [], basket = [];
+    for (var i = 1; i <= 26; i++) for (var l = 1; l <= 4; l++) done["1c:r" + i + "-l" + l] = true;
+    for (i = 1; i <= 20; i++) for (l = 1; l <= 4; l++) done["1c:w" + i + "-l" + l] = true;
+    for (i = 1; i <= 52; i++) { done["read:growth:" + i] = true; done["read:novel:" + i] = true; }
+    for (i = 1; i <= 40; i++) hist.push({ n: i, h: 5, words: i * 900, items: [{ k: "1c:r" + (i % 26 + 1) + "-l1", m: 55, ok: true }, { k: "novel:w" + (i % 12 + 1) + "-l2", m: 45, ok: true }, { k: "growth:w" + (i % 24 + 1) + "-l3", m: 40, ok: i % 3 > 0 }, { k: "prac:novel-draft", m: 120, ok: true }] });
+    for (i = 1; i <= 25; i++) fav.push("1c:w" + i % 20 + "-l" + (i % 4 + 1));
+    for (i = 1; i <= 8; i++) basket.push({ k: "novel:w" + i + "-l1", m: null });
+    return { h: 5, books: true, done: done, hist: hist, fav: fav, basket: basket, at: new Date().toISOString() };
+  }
+
   /* ---------- проверка ---------- */
   $("runAll").addEventListener("click", function () {
     var tb = $("steps").querySelector("tbody"); tb.innerHTML = ""; $("steps").hidden = false; this.disabled = true;
-    var BIG = JSON.stringify({ done: Array.apply(null, Array(300)).map(function (_, i) { return "w" + i; }) }).slice(0, 3000);
+    var SAMPLE = sample(), sjson = JSON.stringify(SAMPLE);
     var btn = this, name = "app:/test-" + Date.now() + ".txt", text = "Проверка связи «Мастерской роста» · " + new Date().toISOString() + " · ёжик в тумане";
     var steps = [
       ["Доступ к Диску", function () { return api(""); }],
@@ -176,8 +215,9 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
       ["Загрузка тестового файла", function () { return upload(name, new Blob([text], { type: "text/plain" })); }],
       ["Список папки приложения", function () { return api("/resources?limit=100&path=" + encodeURIComponent("app:/")).then(function (j) { var n = ((j._embedded && j._embedded.items) || []).filter(function (i) { return i.path.indexOf(name.slice(5)) >= 0; }).length; if (!n) throw { msg: "файл не появился в списке" }; }); }],
       ["Скачивание и сравнение", function () { return download(name).then(function (b) { return b.text(); }).then(function (t) { if (t !== text) throw { msg: "содержимое не совпало" }; }); }],
-      ["Прогресс в свойствах файла (запись 3 КБ)", function () { return api("/resources?path=" + encodeURIComponent(name), { method: "PATCH", body: { custom_properties: { p: BIG } } }); }],
-      ["Прогресс в свойствах файла (чтение)", function () { return api("/resources?fields=custom_properties&path=" + encodeURIComponent(name)).then(function (j) { if (!j.custom_properties || j.custom_properties.p !== BIG) throw { msg: "прочитано не то, что записано" }; }); }],
+      ["Прогресс частями: запись (" + Math.round(sjson.length / 1024) + " КБ данных курса за 40 недель)", function () { return saveState("app:/progress/test", SAMPLE).then(function (r) { return "сжато до " + Math.round(r.bytes / 1024 * 10) / 10 + " КБ, частей: " + r.parts; }); }],
+      ["Прогресс частями: чтение и сравнение", function () { return loadState("app:/progress/test").then(function (o) { if (JSON.stringify(o) !== sjson) throw { msg: "прочитано не то, что записано" }; return "совпало"; }); }],
+      ["Тестовый прогресс — в корзину Диска", function () { return trash("app:/progress/test"); }],
       ["Тестовый файл — в корзину Диска", function () { return trash(name); }]
     ];
     var i = 0;
@@ -185,8 +225,8 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
       if (i >= steps.length) { btn.disabled = false; log("Проверка закончена."); return; }
       var s = steps[i++], t0 = performance.now(), tr = document.createElement("tr");
       tr.innerHTML = "<td>" + s[0] + '</td><td class="muted">…</td><td class="n"></td>'; tb.appendChild(tr);
-      s[1]().then(function () {
-        tr.children[1].innerHTML = '<span class="ok">✓ работает</span>'; tr.children[2].textContent = Math.round(performance.now() - t0) + " мс"; log("✓ " + s[0]); next();
+      s[1]().then(function (note) {
+        tr.children[1].innerHTML = '<span class="ok">✓ ' + (typeof note === "string" ? esc(note) : "работает") + "</span>"; tr.children[2].textContent = Math.round(performance.now() - t0) + " мс"; log("✓ " + s[0]); next();
       }).catch(function (e) {
         tr.children[1].innerHTML = '<span class="bad">✗ ' + esc(errText(e)) + "</span>"; tr.children[2].textContent = Math.round(performance.now() - t0) + " мс"; log("✗ " + s[0] + ": " + errText(e)); next();
       });
@@ -240,16 +280,15 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
   function showState(s, how) { $("state").innerHTML = how + ": число <b>" + s.n + "</b>, устройство <b>" + esc(s.device) + "</b>, " + new Date(s.at).toLocaleString("ru-RU"); }
   $("push").addEventListener("click", function () {
     var btn = this; btn.disabled = true;
-    download("app:/progress/state.json").then(function (b) { return b.text(); }).then(function (t) { return JSON.parse(t); }).catch(function () { return { n: 0 }; })
-      .then(function (old) {
-        var s = { n: (old.n || 0) + 1, device: $("dev").value.trim() || "без имени", at: new Date().toISOString() };
-        return folder("app:/progress").then(function () { return upload("app:/progress/state.json", new Blob([JSON.stringify(s)], { type: "application/json" })); }).then(function () { showState(s, "Отправлено"); log("✓ Прогресс отправлен: " + s.n + "."); });
-      }).catch(function (e) { log("✗ Отправка прогресса: " + errText(e)); }).then(function () { btn.disabled = false; });
+    loadState("app:/progress/state").catch(function () { return { n: 0 }; }).then(function (old) {
+      var st = { n: (old.n || 0) + 1, device: $("dev").value.trim() || "без имени", at: new Date().toISOString() };
+      return saveState("app:/progress/state", st).then(function () { showState(st, "Отправлено"); log("✓ Прогресс отправлен: " + st.n + "."); });
+    }).catch(function (e) { log("✗ Отправка прогресса: " + errText(e)); }).then(function () { btn.disabled = false; });
   });
   $("pull").addEventListener("click", function () {
     var btn = this; btn.disabled = true;
-    download("app:/progress/state.json").then(function (b) { return b.text(); }).then(function (t) { var s = JSON.parse(t); showState(s, "Получено"); log("✓ Прогресс получен: " + s.n + " от «" + s.device + "»."); })
-      .catch(function (e) { log("✗ Получение прогресса: " + (e && e.status === 404 ? "на Диске ещё нет прогресса — сначала отправьте" : errText(e))); }).then(function () { btn.disabled = false; });
+    loadState("app:/progress/state").then(function (st) { showState(st, "Получено"); log("✓ Прогресс получен: " + st.n + " от «" + st.device + "»."); })
+      .catch(function (e) { log("✗ Получение прогресса: " + errText(e)); }).then(function () { btn.disabled = false; });
   });
 
   renderAuth();
