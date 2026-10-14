@@ -49,7 +49,7 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
 
   <section class="card" id="setup">
     <h2>1. Идентификатор приложения (ClientID)</h2>
-    <p class="muted">Его выдаёт oauth.yandex.ru после регистрации приложения. Это открытый идентификатор, не пароль.</p>
+    <p class="muted">Уже заполнен: приложение «Мастерская роста» зарегистрировано на oauth.yandex.ru. Это открытый идентификатор, не пароль; менять не нужно.</p>
     <div class="row"><input type="text" id="cid" placeholder="например, 0123456789abcdef0123456789abcdef" aria-label="ClientID" autocomplete="off" spellcheck="false"><button class="btn" id="cidSave" type="button">Сохранить</button></div>
     <p class="muted">Адрес возврата (Redirect URI) при регистрации: <code id="ruri"></code></p>
   </section>
@@ -92,7 +92,7 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
   var $ = function (id) { return document.getElementById(id); };
   var LS = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* нет */ } }, del: function (k) { try { localStorage.removeItem(k); } catch (e) { /* нет */ } } };
   var REDIRECT = location.origin + location.pathname;
-  var CID = LS.get("yd-cid") || "";
+  var CID = LS.get("yd-cid") || "6ed6ba861f5e4a2ab848e53e3cc474e1";
   var TOKEN = null;
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function size(b) { return b == null ? "" : b > 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " МБ" : Math.max(1, Math.round(b / 1024)) + " КБ"; }
