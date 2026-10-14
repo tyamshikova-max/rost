@@ -1,5 +1,5 @@
 // Офлайн-кэш приложения «Мастерская роста» (сводный курс)
-const CACHE = 'skv-app-2026-10-14-2';
+const CACHE = 'skv-app-2026-10-14-3';
 const CORE = ['./', 'index.html', 'manifest.webmanifest'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
