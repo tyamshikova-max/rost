@@ -47,34 +47,28 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
   <h1>Яндекс Диск для «Мастерской роста»</h1>
   <p class="lead">Прототип: проверяем, что приложение умеет само сохранять книги и прогресс на ваш Яндекс Диск и забирать их на другом устройстве. Доступ — только к папке «Приложения» этого приложения, остальные файлы Диска ему не видны.</p>
 
-  <section class="card" id="setup">
-    <h2>1. Идентификатор приложения (ClientID)</h2>
-    <p class="muted">Уже заполнен: приложение «Мастерская роста» зарегистрировано на oauth.yandex.ru. Это открытый идентификатор, не пароль; менять не нужно.</p>
-    <div class="row"><input type="text" id="cid" placeholder="например, 0123456789abcdef0123456789abcdef" aria-label="ClientID" autocomplete="off" spellcheck="false"><button class="btn" id="cidSave" type="button">Сохранить</button></div>
-    <p class="muted">Адрес возврата (Redirect URI) при регистрации: <code id="ruri"></code></p>
-  </section>
 
   <section class="card">
-    <h2>2. Вход</h2>
+    <h2>1. Вход</h2>
     <div id="auth"></div>
   </section>
 
   <section class="card" id="diag" hidden>
-    <h2>3. Проверка связи</h2>
+    <h2>2. Проверка связи</h2>
     <p class="muted">Создаёт тестовый файл в папке приложения, загружает, читает обратно, сравнивает и убирает его в корзину Диска.</p>
     <button class="btn pri" id="runAll" type="button">Проверить всё</button>
     <div class="tbl"><table id="steps" hidden><thead><tr><th>Шаг</th><th>Итог</th><th>Время</th></tr></thead><tbody></tbody></table></div>
   </section>
 
   <section class="card" id="books" hidden>
-    <h2>4. Книги на Диске</h2>
+    <h2>3. Книги на Диске</h2>
     <label class="drop" id="drop"><b>Загрузить книги на Диск</b><br><span class="muted">PDF, EPUB, FB2, TXT — можно несколько; без ограничения 20 МБ</span><input type="file" id="files" multiple hidden accept=".pdf,.epub,.fb2,.txt,.md"></label>
     <div class="meter" id="upm" hidden><b style="width:0"></b></div><div class="muted" id="upt"></div>
     <div class="tbl"><table><thead><tr><th>Файл</th><th>Размер</th><th>Изменён</th><th></th></tr></thead><tbody id="blist"><tr><td colspan="4" class="muted">Загружаю список…</td></tr></tbody></table></div>
   </section>
 
   <section class="card" id="sync" hidden>
-    <h2>5. Прогресс между устройствами</h2>
+    <h2>4. Прогресс между устройствами</h2>
     <p class="muted">Тест синхронизации: нажмите «Отправить» здесь, затем «Получить» на другом устройстве — число и имя устройства должны совпасть.</p>
     <div class="row"><input type="text" id="dev" aria-label="Имя устройства" placeholder="Имя этого устройства"><button class="btn pri" id="push" type="button">Отправить прогресс</button><button class="btn" id="pull" type="button">Получить прогресс</button></div>
     <p id="state" class="muted"></p>
@@ -92,7 +86,7 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
   var $ = function (id) { return document.getElementById(id); };
   var LS = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* нет */ } }, del: function (k) { try { localStorage.removeItem(k); } catch (e) { /* нет */ } } };
   var REDIRECT = location.origin + location.pathname;
-  var CID = LS.get("yd-cid") || "6ed6ba861f5e4a2ab848e53e3cc474e1";
+  var CID = "6ed6ba861f5e4a2ab848e53e3cc474e1";
   var TOKEN = null;
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function size(b) { return b == null ? "" : b > 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " МБ" : Math.max(1, Math.round(b / 1024)) + " КБ"; }
@@ -147,16 +141,11 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
   function trash(path) { return api("/resources?path=" + encodeURIComponent(path), { method: "DELETE", ok: [202, 204] }); }
 
   /* ---------- экран ---------- */
-  $("ruri").textContent = REDIRECT;
-  $("cid").value = CID;
-  $("cidSave").addEventListener("click", function () { CID = $("cid").value.trim(); LS.set("yd-cid", CID); log(CID ? "ClientID сохранён." : "ClientID очищен."); renderAuth(); });
   function renderAuth() {
     var a = $("auth");
     ["diag", "books", "sync"].forEach(function (id) { $(id).hidden = !TOKEN; });
     if (!TOKEN) {
-      a.innerHTML = CID
-        ? '<p class="muted">Откроется страница Яндекса: войдите своим аккаунтом и разрешите доступ к папке приложения.</p><a class="btn pri" href="https://oauth.yandex.ru/authorize?response_type=token&force_confirm=yes&client_id=' + encodeURIComponent(CID) + "&redirect_uri=" + encodeURIComponent(REDIRECT) + '">Войти через Яндекс</a>'
-        : '<p class="muted">Сначала сохраните ClientID в шаге 1.</p>';
+      a.innerHTML = '<p class="muted">Откроется страница Яндекса: войдите своим аккаунтом и разрешите доступ к папке приложения.</p><a class="btn pri" href="https://oauth.yandex.ru/authorize?response_type=token&force_confirm=yes&client_id=' + encodeURIComponent(CID) + "&redirect_uri=" + encodeURIComponent(REDIRECT) + '">Войти через Яндекс</a>';
       return;
     }
     a.innerHTML = '<p class="muted">Проверяю доступ…</p>';
