@@ -108,7 +108,9 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
 
   function api(path, opt) {
     opt = opt || {};
-    return fetch(API + path, { method: opt.method || "GET", headers: { Authorization: "OAuth " + TOKEN, Accept: "application/json" } })
+    var hd = { Authorization: "OAuth " + TOKEN, Accept: "application/json" };
+    if (opt.body) hd["Content-Type"] = "application/json";
+    return fetch(API + path, { method: opt.method || "GET", headers: hd, body: opt.body ? JSON.stringify(opt.body) : undefined })
       .catch(function () { throw { status: 0, msg: "браузер не пустил запрос к API Диска (сеть или CORS)" }; })
       .then(function (r) {
         return r.text().then(function (t) {
@@ -134,7 +136,8 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
   }
   function download(path) {
     return api("/resources/download?path=" + encodeURIComponent(path)).then(function (j) {
-      return fetch(j.href).catch(function () { throw { status: 0, msg: "сервер скачивания не пустил запрос из браузера (CORS) — понадобится посредник" }; })
+      var host = ""; try { host = new URL(j.href).host; } catch (e) { /* нет */ }
+      return fetch(j.href).catch(function () { throw { status: 0, msg: "сервер скачивания (" + host + ") не пустил запрос из браузера (CORS)" }; })
         .then(function (r) { if (!r.ok) throw { status: r.status, msg: "сервер скачивания ответил ошибкой" }; return r.blob(); });
     });
   }
@@ -165,6 +168,7 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
   /* ---------- проверка ---------- */
   $("runAll").addEventListener("click", function () {
     var tb = $("steps").querySelector("tbody"); tb.innerHTML = ""; $("steps").hidden = false; this.disabled = true;
+    var BIG = JSON.stringify({ done: Array.apply(null, Array(300)).map(function (_, i) { return "w" + i; }) }).slice(0, 3000);
     var btn = this, name = "app:/test-" + Date.now() + ".txt", text = "Проверка связи «Мастерской роста» · " + new Date().toISOString() + " · ёжик в тумане";
     var steps = [
       ["Доступ к Диску", function () { return api(""); }],
@@ -172,6 +176,8 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
       ["Загрузка тестового файла", function () { return upload(name, new Blob([text], { type: "text/plain" })); }],
       ["Список папки приложения", function () { return api("/resources?limit=100&path=" + encodeURIComponent("app:/")).then(function (j) { var n = ((j._embedded && j._embedded.items) || []).filter(function (i) { return i.path.indexOf(name.slice(5)) >= 0; }).length; if (!n) throw { msg: "файл не появился в списке" }; }); }],
       ["Скачивание и сравнение", function () { return download(name).then(function (b) { return b.text(); }).then(function (t) { if (t !== text) throw { msg: "содержимое не совпало" }; }); }],
+      ["Прогресс в свойствах файла (запись 3 КБ)", function () { return api("/resources?path=" + encodeURIComponent(name), { method: "PATCH", body: { custom_properties: { p: BIG } } }); }],
+      ["Прогресс в свойствах файла (чтение)", function () { return api("/resources?fields=custom_properties&path=" + encodeURIComponent(name)).then(function (j) { if (!j.custom_properties || j.custom_properties.p !== BIG) throw { msg: "прочитано не то, что записано" }; }); }],
       ["Тестовый файл — в корзину Диска", function () { return trash(name); }]
     ];
     var i = 0;
@@ -182,7 +188,7 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
       s[1]().then(function () {
         tr.children[1].innerHTML = '<span class="ok">✓ работает</span>'; tr.children[2].textContent = Math.round(performance.now() - t0) + " мс"; log("✓ " + s[0]); next();
       }).catch(function (e) {
-        tr.children[1].innerHTML = '<span class="bad">✗ ' + esc(errText(e)) + "</span>"; tr.children[2].textContent = Math.round(performance.now() - t0) + " мс"; log("✗ " + s[0] + ": " + errText(e)); btn.disabled = false;
+        tr.children[1].innerHTML = '<span class="bad">✗ ' + esc(errText(e)) + "</span>"; tr.children[2].textContent = Math.round(performance.now() - t0) + " мс"; log("✗ " + s[0] + ": " + errText(e)); next();
       });
     })();
   });
@@ -194,11 +200,13 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
     }).then(function (j) {
       var items = ((j._embedded && j._embedded.items) || []).filter(function (i) { return i.type === "file"; });
       $("blist").innerHTML = items.length ? items.map(function (i) {
-        return "<tr><td>" + esc(i.name) + '</td><td class="n">' + size(i.size) + '</td><td class="n">' + new Date(i.modified).toLocaleDateString("ru-RU") + '</td><td><button class="btn" type="button" data-get="' + esc(i.path) + '">Скачать</button></td></tr>';
+        return "<tr><td>" + esc(i.name) + '</td><td class="n">' + size(i.size) + '</td><td class="n">' + new Date(i.modified).toLocaleDateString("ru-RU") + '</td><td class="row"><button class="btn" type="button" data-get="' + esc(i.path) + '">Скачать в приложение</button><button class="btn" type="button" data-link="' + esc(i.path) + '">Открыть по ссылке</button></td></tr>';
       }).join("") : '<tr><td colspan="4" class="muted">Пока пусто.</td></tr>';
     }).catch(function (e) { $("blist").innerHTML = '<tr><td colspan="4" class="bad">' + esc(errText(e)) + "</td></tr>"; });
   }
   $("blist").addEventListener("click", function (e) {
+    var l = e.target.closest("[data-link]");
+    if (l) { var w = window.open("", "_blank"); api("/resources/download?path=" + encodeURIComponent(l.dataset.link)).then(function (j) { if (w) w.location = j.href; else location.href = j.href; log("✓ Ссылка на «" + l.dataset.link.split("/").pop() + "» открыта."); }).catch(function (er) { if (w) w.close(); log("✗ Ссылка: " + errText(er)); }); return; }
     var b = e.target.closest("[data-get]"); if (!b) return;
     var p = b.dataset.get, nm = p.split("/").pop(); b.disabled = true; b.textContent = "Скачиваю…";
     download(p).then(function (blob) {
