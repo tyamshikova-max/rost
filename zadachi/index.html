@@ -2854,10 +2854,34 @@ CREATE TABLE inbox (
   function busyUI() { if (GDR) return true; var a = document.activeElement; return !!(a && (/INPUT|TEXTAREA|SELECT/.test(a.tagName) || a.isContentEditable)) || !!RN || !!SUB || !$("ctx").hidden || !$("pal").hidden || !!DRAG || !!RS; }
   function softRender() { if (busyUI()) { PEND = true; return; } PEND = false; render(); if (OPEN && !$("panel").contains(document.activeElement)) renderPanel(); }
   document.addEventListener("focusout", function () { if (PEND) setTimeout(function () { if (PEND && !busyUI()) softRender(); }, 80); });
+  // путь до поля, чтобы найти его же после перерисовки
+  function fieldKey(el) {
+    if (el.id) return "#" + el.id;
+    var ds = el.dataset || {}, ks = Object.keys(ds);
+    if (ks.length) return el.tagName.toLowerCase() + ks.map(function (k) { return "[data-" + k.replace(/[A-Z]/g, function (c) { return "-" + c.toLowerCase(); }) + '="' + String(ds[k]).replace(/"/g, '\\"') + '"]'; }).join("");
+    return null;
+  }
+  var RTIMES = [], RWARN = false;
   function render() {
+    // курсор и набранный текст не теряются, если страница перерисовалась, пока вы печатали
+    var ae = document.activeElement, keep = null;
+    if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && ($("view").contains(ae) || $("side").contains(ae)) && !ae.classList.contains("rn")) {
+      var fk = fieldKey(ae);
+      if (fk) keep = { k: fk, v: ae.value, dv: ae.defaultValue, s: ae.selectionStart, e: ae.selectionEnd, txt: /^(text|search|url|number|)$/.test(ae.type || "") || ae.tagName === "TEXTAREA", own: ae.id === "qa" || ae.id === "subin" };
+    }
+    // слишком частые перерисовки — показать, откуда они (для диагностики)
+    var now = Date.now(); RTIMES.push(now); if (RTIMES.length > 45) RTIMES.shift();
+    if (!RWARN && RTIMES.length >= 40 && now - RTIMES[RTIMES.length - 40] < 3000) { RWARN = true; showErr("Слишком частые перерисовки страницы (40 за 3 с). Скопируйте этот текст и пришлите разработчику · " + V + " · " + String(new Error().stack || "").split("\n").slice(2, 7).join(" ").replace(/\s+/g, " ")); }
     try { renderInner(); } catch (er) {
       showErr((er && er.message || er) + " · " + V + (ARG ? "-" + ARG : "") + (er && er.stack ? " · " + String(er.stack).split("\n").slice(1, 3).join(" ").replace(/\s+/g, " ") : ""));
       try { $("view").innerHTML = '<p class="warnc">Не удалось показать эту страницу: ' + esc(er && er.message) + '. Остальное работает — откройте другой список слева.</p>'; } catch (e2) { /* нет */ }
+    }
+    if (keep && (!document.activeElement || document.activeElement === document.body)) {
+      var nf = null; try { nf = document.querySelector(keep.k); } catch (e) { nf = null; }
+      if (nf && /^(INPUT|TEXTAREA|SELECT)$/.test(nf.tagName)) {
+        if (keep.txt && !keep.own && keep.v !== keep.dv && nf.value === keep.dv) nf.value = keep.v;
+        try { nf.focus({ preventScroll: true }); if (keep.txt && keep.s !== null && keep.s !== undefined) nf.setSelectionRange(keep.s, keep.e); } catch (e) { /* поле без курсора */ }
+      }
     }
   }
   function renderInner() {
