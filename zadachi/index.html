@@ -512,7 +512,9 @@ ol.steps li { margin: 6px 0 }
 @media (max-width: 760px) { .stnav .hq { flex: 0 0 180px; margin: 0 } .stbody.help { padding: 2px 14px 12px } }
 /* диагностика */
 #diagbox { position: fixed; right: 10px; bottom: 10px; z-index: 200; max-width: min(520px, calc(100vw - 20px)); background: var(--panel); color: var(--fg); border: 2px solid var(--warn); border-radius: 10px; padding: 8px 10px; font: 12px/1.4 var(--mono); box-shadow: 0 6px 20px rgba(0,0,0,.2) }
-#diagbox .dl { margin: 6px 0; max-height: 110px; overflow: auto; color: var(--muted); word-break: break-all }
+#diagbox .dl { margin: 6px 0; max-height: 110px; overflow: auto; color: var(--muted); word-break: break-all; white-space: pre-wrap }
+#diagbox .dr { display: block; width: 100%; height: 140px; margin-top: 6px; font: 11px/1.35 var(--mono); background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 6px }
+#diagbox .dr[hidden] { display: none }
 #diagbox button { font: inherit; margin-right: 6px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--side); color: var(--fg); cursor: pointer }
 /* секции, колонки, сортировка, просрочка */
 .sech { display: flex; align-items: center; gap: 6px; margin-top: 18px } .sech .sn { cursor: text } .sech .sn:hover { text-decoration: underline dotted }
@@ -3034,14 +3036,33 @@ CREATE TABLE inbox (
   /* ---------- диагностика: что происходит на странице (включается в «Настройки» → «Данные») ---------- */
   var DIAG = { on: LS.get("zd-diag") === "1", log: [], renders: [] };
   function dstack() { return String(new Error().stack || "").split("\n").slice(3, 7).map(function (x) { return x.replace(/^\s*at\s*/, "").replace(/\(?https?:[^)]*?\/([^/:)]+):(\d+):\d+\)?/, "$1:$2"); }).join(" ← "); }
-  function dlog(kind, info) { if (!DIAG.on) return; DIAG.log.push(new Date().toLocaleTimeString("ru-RU") + "." + ("00" + (Date.now() % 1000)).slice(-3) + " " + kind + (info ? " " + info : "")); if (DIAG.log.length > 160) DIAG.log.shift(); diagShow(); }
+  function dlog(kind, info) { if (!DIAG.on) return; DIAG.log.push(new Date().toLocaleTimeString("ru-RU") + "." + ("00" + (Date.now() % 1000)).slice(-3) + " " + kind + (info ? " " + info : "")); if (DIAG.log.length > 160) DIAG.log.shift(); clearTimeout(DIAG.t); DIAG.t = setTimeout(diagText, 120); }
   function delDesc(el) { if (!el || !el.tagName) return String(el); var d = el.dataset || {}; return el.tagName.toLowerCase() + (el.id ? "#" + el.id : "") + (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 2).join(".") : "") + Object.keys(d).slice(0, 2).map(function (k) { return "[" + k + "=" + String(d[k]).slice(0, 20) + "]"; }).join("") + (el.isConnected ? "" : " (уже удалён со страницы)"); }
   function diagShow() {
     var b = $("diagbox");
     if (!DIAG.on) { if (b) b.remove(); return; }
-    if (!b) { b = document.createElement("div"); b.id = "diagbox"; document.body.appendChild(b); b.addEventListener("click", function (e) { var a = e.target.dataset && e.target.dataset.dg; if (a === "copy") copyText(diagReport(), "Отчёт скопирован — пришлите его"); if (a === "off") { DIAG.on = false; LS.del("zd-diag"); diagShow(); toast("Диагностика выключена"); } if (a === "clr") { DIAG.log = []; DIAG.renders = []; diagShow(); } }); }
+    if (!b) {
+      b = document.createElement("div"); b.id = "diagbox";
+      b.innerHTML = '<div class="dh"></div><div class="dl"></div><div class="db"><button type="button" data-dg="copy">Скопировать отчёт</button><button type="button" data-dg="clr">Очистить</button><button type="button" data-dg="off">Выключить</button></div><textarea class="dr" hidden readonly></textarea>';
+      document.body.appendChild(b);
+      b.addEventListener("click", function (e) {
+        var a = e.target.dataset && e.target.dataset.dg; if (!a) return;
+        if (a === "copy") {
+          var txt = diagReport(), ta = b.querySelector(".dr"); ta.hidden = false; ta.value = txt; ta.focus(); ta.select();
+          var done = function () { toast("Отчёт скопирован — вставьте его в сообщение (Ctrl+V)"); };
+          try { if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done, function () { try { document.execCommand("copy"); done(); } catch (er) { toast("Выделите текст в окошке и нажмите Ctrl+C"); } }); else { document.execCommand("copy"); done(); } } catch (er) { toast("Выделите текст в окошке и нажмите Ctrl+C"); }
+        }
+        if (a === "clr") { DIAG.log = []; DIAG.renders = []; b.querySelector(".dr").hidden = true; diagText(); }
+        if (a === "off") { DIAG.on = false; LS.del("zd-diag"); b.remove(); toast("Диагностика выключена"); }
+      });
+    }
+    diagText();
+  }
+  function diagText() {
+    var b = $("diagbox"); if (!b) return;
     var now = Date.now(); DIAG.renders = DIAG.renders.filter(function (x) { return now - x < 60000; });
-    b.innerHTML = "<b>Диагностика</b> · перерисовок за минуту: " + DIAG.renders.length + " · в фокусе: " + esc(delDesc(document.activeElement)) + '<div class="dl">' + DIAG.log.slice(-6).map(esc).join("<br>") + '</div><button type="button" data-dg="copy">Скопировать отчёт</button><button type="button" data-dg="clr">Очистить</button><button type="button" data-dg="off">Выключить</button>';
+    b.querySelector(".dh").textContent = "Диагностика · перерисовок за минуту: " + DIAG.renders.length + " · в фокусе: " + delDesc(document.activeElement);
+    b.querySelector(".dl").textContent = DIAG.log.slice(-6).join("\n");
   }
   function diagReport() {
     var sz = 0; try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); sz += k.length + (localStorage.getItem(k) || "").length; } } catch (e) { sz = -1; }
@@ -3052,8 +3073,9 @@ CREATE TABLE inbox (
   }
   if (DIAG.on) {
     ["mousedown", "click", "change"].forEach(function (ev) { document.addEventListener(ev, function (e) { if (e.target.closest && e.target.closest("#diagbox")) return; dlog(ev, delDesc(e.target) + (ev === "change" && "checked" in e.target && e.target.type === "checkbox" ? " → " + (e.target.checked ? "вкл" : "выкл") : "")); }, true); });
-    document.addEventListener("focusin", function (e) { dlog("фокус →", delDesc(e.target)); }, true);
-    document.addEventListener("focusout", function (e) { dlog("фокус ушёл с", delDesc(e.target)); }, true);
+    document.addEventListener("focusin", function (e) { if (!e.target.closest || !e.target.closest("#diagbox")) dlog("фокус →", delDesc(e.target)); }, true);
+    document.addEventListener("focusout", function (e) { if (!e.target.closest || !e.target.closest("#diagbox")) dlog("фокус ушёл с", delDesc(e.target)); }, true);
+    document.addEventListener("pointerup", function (e) { if (!e.target.closest || !e.target.closest("#diagbox")) dlog("pointerup", delDesc(e.target)); }, true);
     window.addEventListener("error", function (e) { dlog("ОШИБКА", (e.message || "") + " :" + e.lineno); });
     setTimeout(diagShow, 300);
   }
@@ -3071,8 +3093,12 @@ CREATE TABLE inbox (
   });
   // фоновые обновления (синхронизация, Telegram, таймер) ждут, пока человек печатает или выбирает в списке
   var PEND = false;
-  function busyUI() { if (GDR || RNX) return true; var a = document.activeElement; return !!(a && (/INPUT|TEXTAREA|SELECT/.test(a.tagName) || a.isContentEditable)) || !!RN || !!SUB || !$("ctx").hidden || !$("pal").hidden || !!DRAG || !!RS; }
+  function busyUI() { if (GDR || RNX || PDOWN) return true; var a = document.activeElement; return !!(a && (/INPUT|TEXTAREA|SELECT/.test(a.tagName) || a.isContentEditable)) || !!RN || !!SUB || !$("ctx").hidden || !$("pal").hidden || !!DRAG || !!RS; }
   function softRender() { if (busyUI()) { PEND = true; if (DIAG && DIAG.on) dlog("фоновая перерисовка отложена"); return; } PEND = false; render(); if (OPEN && !$("panel").contains(document.activeElement)) renderPanel(); }
+  var PDOWN = false;
+  document.addEventListener("pointerdown", function () { PDOWN = true; }, true);
+  function pUp() { if (!PDOWN) return; PDOWN = false; if (PEND) setTimeout(function () { if (PEND && !busyUI()) softRender(); }, 60); }
+  document.addEventListener("pointerup", pUp, true); document.addEventListener("pointercancel", pUp, true); window.addEventListener("blur", pUp);
   document.addEventListener("focusout", function () { if (PEND) setTimeout(function () { if (PEND && !busyUI()) softRender(); }, 80); });
   // путь до поля, чтобы найти его же после перерисовки
   function fieldKey(el) {
