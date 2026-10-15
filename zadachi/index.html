@@ -510,6 +510,13 @@ ol.steps li { margin: 6px 0 }
 .stbody.help { display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px 22px 16px; max-width: 860px }
 .stbody.help > h2:first-child { margin-top: 14px }
 @media (max-width: 760px) { .stnav .hq { flex: 0 0 180px; margin: 0 } .stbody.help { padding: 2px 14px 12px } }
+/* пункты «Списков» — переключатели */
+.lchk .lt { display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 5px 4px; border-radius: 6px; font: inherit; font-size: 14px; color: var(--fg); cursor: pointer; text-align: left }
+.lchk .lt:hover { background: var(--hover) } .lchk .lt:disabled { cursor: default; opacity: .55 } .lchk .lt:disabled:hover { background: none }
+.lchk .lt svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none }
+.lchk .lbox { width: 16px; height: 16px; border: 2px solid var(--muted); border-radius: 4px; flex: none; display: grid; place-items: center; box-sizing: border-box }
+.lchk .lt.on .lbox { background: var(--acc); border-color: var(--acc) } .lchk .lt.on .lbox::after { content: ""; width: 7px; height: 4px; border: 2px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px) }
+.lchk .lt:not(.on) span:last-child { color: var(--muted) }
 /* диагностика */
 #diagbox.min { padding: 0; border: 0; background: none; box-shadow: none } #diagbox.min .dbody { display: none } #diagbox:not(.min) .dpill { display: none }
 #diagbox .dpill { border: 2px solid var(--warn) !important; border-radius: 16px !important; background: var(--panel) !important; padding: 3px 10px !important; box-shadow: 0 3px 10px rgba(0,0,0,.18) }
@@ -2890,7 +2897,7 @@ CREATE TABLE inbox (
     var th = LS.get("zd-theme") || "system";
     var hid = hiddenLists();
     h += '<section class="card" id="s-lists"><h2>Пункты «Списков»</h2><p class="muted" style="margin:0">Снимите галочку, чтобы скрыть пункт из левой панели (в Ctrl+K он останется). «Входящие» видны всегда. Скрыть можно и правым кликом по пункту.</p><div class="lchk">' +
-      listsAll().map(function (k) { return '<label><input type="checkbox" data-lhide="' + k + '"' + (k === "inbox" || hid.indexOf(k) < 0 ? " checked" : "") + (k === "inbox" ? " disabled" : "") + "> " + ic(k === "stats" ? "stats" : k) + " " + LISTN[k] + "</label>"; }).join("") + "</div></section>";
+      listsAll().map(function (k) { var on = k === "inbox" || hid.indexOf(k) < 0; return '<button type="button" class="lt' + (on ? " on" : "") + '" data-a="lhide" data-id="' + k + '" role="switch" aria-checked="' + on + '"' + (k === "inbox" ? " disabled" : "") + '><span class="lbox"></span>' + ic(k) + "<span>" + LISTN[k] + "</span></button>"; }).join("") + "</div></section>";
     h += '<section class="card"><h2>Левая панель</h2><p class="muted" style="margin:0">Блоки («Избранное», «Списки», «Проекты», «Фильтры», «Теги», «Служебное») переставляются перетаскиванием за заголовок, пункты «Списков» — перетаскиванием самих пунктов. Порядок синхронизируется между устройствами.</p><div class="r"><button class="btn" type="button" data-a="side-reset">Вернуть исходный порядок</button><button class="btn" type="button" data-a="mini">' + (document.body.classList.contains("mini") ? "Развернуть панель" : "Свернуть панель до иконок") + "</button></div></section>";
     h += '<section class="card"><h2>Оформление</h2><div class="seg" role="radiogroup" aria-label="Тема">' + [["system", "Как в системе"], ["light", "Светлая"], ["dark", "Тёмная"]].map(function (o) { return '<button type="button" data-theme="' + o[0] + '" class="' + (th === o[0] ? "on" : "") + '" role="radio" aria-checked="' + (th === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div></section>";
     h += '<section class="card" id="s-flags"><h2>Флажки</h2><p class="muted" style="margin:0">У задачи может стоять один из этих флажков. Название и цвет меняются здесь, порядок — стрелкой ↑. Задачи с флажками собраны в списке «С флажком».</p><div class="fled">' +
@@ -3522,6 +3529,7 @@ CREATE TABLE inbox (
         var blob = new Blob([JSON.stringify({ format: "zadachi-backup", v: 2, at: new Date().toISOString(), tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, opt: S.opt })], { type: "application/json" });
         var ln = document.createElement("a"); ln.href = URL.createObjectURL(blob); ln.download = "Задачи — копия " + dKey(Date.now()) + ".json"; document.body.appendChild(ln); ln.click(); ln.remove(); setTimeout(function () { URL.revokeObjectURL(ln.href); }, 60000); return;
       case "wipe": CONF = "wipe"; render(); return;
+      case "lhide": var lh = el.dataset.id, wasHid = hiddenLists().indexOf(lh) >= 0; setListHidden(lh, !wasHid); toast(wasHid ? "«" + LISTN[lh] + "» снова в панели" : "«" + LISTN[lh] + "» скрыто из панели"); return;
       case "diag": if (DIAG.on) { LS.del("zd-diag"); toast("Диагностика выключится после обновления страницы"); } else { LS.set("zd-diag", "1"); toast("Диагностика включится после обновления страницы — обновите её (F5)"); } setTimeout(function () { location.reload(); }, 900); return;
       case "wipe-yes": var wn = wipeAll(); go("inbox"); render(); toast("База очищена" + (wn ? " · удалено задач: " + wn : "")); return;
       case "imp-replace":
