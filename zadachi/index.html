@@ -68,7 +68,11 @@ a { color: var(--acc) }
 .side .lab button { margin-left: auto; background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 6px; border-radius: 6px }
 .side .lab button:hover { background: var(--hover); color: var(--fg) }
 .side .lab.dropin { outline: 2px solid var(--acc) }
-.side .lab[draggable] { cursor: grab; user-select: none }
+.side .lab[draggable] { cursor: pointer; user-select: none }
+.side .lab:hover { color: var(--fg) }
+.side .lab .sfch { width: 12px; flex: none; font-size: 9px; margin-right: 4px; opacity: .7 }
+body:not(.mini) .sblk.fold > nav, body:not(.mini) .sblk.fold > .none { display: none }
+body.mini .side .lab .sfch { display: none }
 .side .lab .gh { width: 0; overflow: hidden; opacity: 0; transition: opacity .15s, width .15s; color: var(--muted); font-size: 12px }
 .side .lab:hover .gh { width: 14px; opacity: 1 }
 .sblk { border-radius: 8px }
@@ -1884,7 +1888,9 @@ CREATE TABLE inbox (
   function listsOrder() { var hid = hiddenLists(); return listsAll().filter(function (x) { return x === "inbox" || hid.indexOf(x) < 0; }); }
   var LISTN = { inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
   function setListHidden(id, hide) { if (id === "inbox") return; var h = hiddenLists().filter(function (x) { return x !== id; }); if (hide) h.push(id); S.opt.hideLists = h; LS.set("zd-hide", JSON.stringify(h)); optTouch(); save(); render(); }
-  function blockHead(id, title, extra) { return '<div class="lab" draggable="true" data-bdrag="' + id + '"' + (id === "projects" ? ' data-droproot="1"' : "") + ' title="Перетащите, чтобы переставить блок"><span class="gh" aria-hidden="true">⠿</span>' + title + (extra || "") + "</div>"; }
+  // блоки левой панели сворачиваются кликом по заголовку (запоминается на этом устройстве)
+  function sideFold() { try { return JSON.parse(LS.get("zd-sfold") || "{}") || {}; } catch (e) { return {}; } }
+  function blockHead(id, title, extra) { var f = sideFold()[id]; return '<div class="lab" draggable="true" data-bdrag="' + id + '"' + (id === "projects" ? ' data-droproot="1"' : "") + ' data-a="sfold" data-id="' + id + '" title="' + (f ? "Развернуть" : "Свернуть") + ' (перетащите, чтобы переставить блок)"><span class="gh" aria-hidden="true">⠿</span><span class="sfch" aria-hidden="true">' + (f ? "▸" : "▾") + "</span>" + title + (extra || "") + "</div>"; }
   function sideHTML() {
     var mini = document.body.classList.contains("mini");
     var h = '<div class="sidetop"><button type="button" class="ibtn" data-a="mini" title="' + (mini ? "Развернуть панель" : "Свернуть панель до иконок") + '" aria-label="' + (mini ? "Развернуть панель" : "Свернуть панель до иконок") + '">' + (mini ? "»" : "«") + "</button></div>";
@@ -1931,7 +1937,8 @@ CREATE TABLE inbox (
       sb("svc-theme", ic(dark ? "sun" : "moon"), dark ? "Светлая тема" : "Тёмная тема") +
       (YD.on ? sb("svc-sync", ic("cloud"), !YD.token() ? "Войти через Яндекс для синхронизации" : SYNC.st === "err" ? "Нет связи с Диском" : SYNC.at ? "Синхронизация · " + hm(SYNC.at) : "Синхронизация через Яндекс Диск") : "") +
       sv("settings", ic("settings"), "Настройки") + sv("help", ic("help"), "Справка") + "</div>";
-    sideOrder().forEach(function (k) { if (B[k]) h += '<div class="sblk" data-blk="' + k + '">' + B[k] + "</div>"; });
+    var sf = sideFold();
+    sideOrder().forEach(function (k) { if (B[k]) h += '<div class="sblk' + (sf[k] && k !== "service" ? " fold" : "") + '" data-blk="' + k + '">' + B[k] + "</div>"; });
     return h;
   }
 
@@ -3529,6 +3536,7 @@ CREATE TABLE inbox (
         var blob = new Blob([JSON.stringify({ format: "zadachi-backup", v: 2, at: new Date().toISOString(), tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, opt: S.opt })], { type: "application/json" });
         var ln = document.createElement("a"); ln.href = URL.createObjectURL(blob); ln.download = "Задачи — копия " + dKey(Date.now()) + ".json"; document.body.appendChild(ln); ln.click(); ln.remove(); setTimeout(function () { URL.revokeObjectURL(ln.href); }, 60000); return;
       case "wipe": CONF = "wipe"; render(); return;
+      case "sfold": var sfm = sideFold(); sfm[el.dataset.id] = !sfm[el.dataset.id]; LS.set("zd-sfold", JSON.stringify(sfm)); render(); return;
       case "lhide": var lh = el.dataset.id, wasHid = hiddenLists().indexOf(lh) >= 0; setListHidden(lh, !wasHid); toast(wasHid ? "«" + LISTN[lh] + "» снова в панели" : "«" + LISTN[lh] + "» скрыто из панели"); return;
       case "diag": if (DIAG.on) { LS.del("zd-diag"); toast("Диагностика выключится после обновления страницы"); } else { LS.set("zd-diag", "1"); toast("Диагностика включится после обновления страницы — обновите её (F5)"); } setTimeout(function () { location.reload(); }, 900); return;
       case "wipe-yes": var wn = wipeAll(); go("inbox"); render(); toast("База очищена" + (wn ? " · удалено задач: " + wn : "")); return;
