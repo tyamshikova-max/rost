@@ -204,6 +204,11 @@ ol.steps li { margin: 6px 0 }
 .sptable th { font-size: 12px; color: var(--muted); font-weight: 500 }
 .sptable .prog { margin: 0; min-width: 80px }
 @media (max-width: 760px) { .board { grid-template-columns: 1fr } }
+.board.kb { display: flex; overflow-x: auto; align-items: flex-start; padding-bottom: 8px; scroll-snap-type: x proximity }
+.board.kb .bcol { flex: 0 0 272px; max-height: calc(100vh - 230px); overflow-y: auto; scroll-snap-align: start }
+.board.kb .bcol.empty { opacity: .7 }
+.board.kb .bh { position: sticky; top: -8px; background: var(--side); z-index: 1; padding-block: 4px }
+@media (max-width: 760px) { .board.kb .bcol { flex-basis: 82vw; max-height: none } }
 /* --- свёрнутая боковая панель: только иконки --- */
 .sidetop { display: flex; justify-content: flex-end; margin: -4px 0 4px }
 .sidetop button { font-size: 16px; color: var(--muted) }
@@ -1318,9 +1323,10 @@ CREATE TABLE inbox (
     });
     return h || '<p class="empty">' + (o.empty || "Задач нет.") + "</p>";
   }
+  function vmode() { return (VIEWS[curKey()] || {}).mode || "list"; }
   function toolbar(o) {
-    o = o || {}; var vo = vopt();
-    return '<div class="tbar"><label>Группировка <select data-vo="group">' + Object.keys(GROUPN).map(function (k) { return '<option value="' + k + '"' + (vo.group === k ? " selected" : "") + ">" + GROUPN[k] + "</option>"; }).join("") + "</select></label>" +
+    o = o || {}; var vo = vopt(), md = vmode();
+    return '<div class="tbar"><div class="seg" role="radiogroup" aria-label="Вид"><button type="button" data-a="vmode" data-x="list" class="' + (md === "list" ? "on" : "") + '" title="Списком">☰ Список</button><button type="button" data-a="vmode" data-x="board" class="' + (md === "board" ? "on" : "") + '" title="Канбан-доска: колонки по группировке">▦ Доска</button></div><label>' + (md === "board" ? "Колонки" : "Группировка") + ' <select data-vo="group">' + Object.keys(GROUPN).map(function (k) { return '<option value="' + k + '"' + (vo.group === k ? " selected" : "") + ">" + GROUPN[k] + "</option>"; }).join("") + "</select></label>" +
       '<label>Сортировка <select data-vo="sort">' + Object.keys(SORTN).map(function (k) { return '<option value="' + k + '"' + (vo.sort === k ? " selected" : "") + ">" + SORTN[k] + "</option>"; }).join("") + "</select></label>" +
       (o.sub ? '<label><input type="checkbox" data-vo="sub"' + (vo.sub ? " checked" : "") + "> с задачами вложенных проектов</label>" : "") + "</div>";
   }
@@ -1331,12 +1337,57 @@ CREATE TABLE inbox (
 
   /* ---------- страницы ---------- */
   function head(title, sub) { return "<h1>" + title + "</h1>" + (sub ? '<p class="sub">' + sub + "</p>" : ""); }
-  function std(title, sub, list, o) { return head(title, sub) + addBox() + toolbar(o) + renderGroups(list, vopt(), o); }
-  function vInbox() { return std("Входящие", "Без даты и без проекта: всё, что ещё не разобрано. Сюда же попадают сообщения боту в Telegram.", inboxList(), { empty: "Пусто — всё разобрано 🎉" }); }
-  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы»." }); }
-  function vPlans() { return std("Планы", "Задачи по датам: просроченные, две недели вперёд и дальше.", tasks().filter(function (t) { return !t.done && t.at; }), { plans: true }); }
-  function vFlag() { return std("С флажком", "Задачи, отмеченные флажком 🚩 — важное, к чему нужно вернуться.", flagList(), { empty: "Нет задач с флажком. Флажок ставится кнопкой ⚑ у задачи или «!!» при вводе." }); }
-  function vAll() { return std("Все задачи", "Все невыполненные задачи.", tasks().filter(function (t) { return !t.done; }), {}); }
+  // список или канбан-доска; колонки доски — по текущей группировке (без группировки — по статусу)
+  function listOrBoard(list, vo, o) { return vmode() === "board" ? boardHTML(list, vo, o || {}) : renderGroups(list, vo, o); }
+  function boardHTML(list, vo, o) {
+    var g = vo.group === "none" || vo.group === "status" ? "status" : vo.group, cols;
+    if (g === "status") {
+      var wk = Date.now() - 7 * DAY, done = o.scope ? tasks().filter(function (t) { return t.done && (t.dt || 0) > wk && o.scope(t); }) : [];
+      cols = [["status:todo", "Нужно сделать", list.filter(function (t) { return colOf(t) === "todo"; })], ["status:doing", "В работе", list.filter(function (t) { return colOf(t) === "doing"; })], ["status:done", "Готово · 7 дней", done]];
+    } else {
+      cols = groupsOf(list, g).map(function (gr) { return [g + ":" + gr.key, gr.title, gr.items, gr.color]; });
+      // пустые колонки, куда можно перетащить задачу
+      var have = {}; cols.forEach(function (c) { have[c[0]] = 1; });
+      var extra = g === "prio" ? [["prio:p1", "Приоритет 1"], ["prio:p2", "Приоритет 2"], ["prio:p3", "Приоритет 3"], ["prio:p0", "Обычный приоритет"]]
+        : g === "flag" ? [["flag:f", "🚩 С флажком"], ["flag:n", "Без флажка"]]
+        : g === "date" ? [["date:b", "Сегодня"], ["date:c", "Завтра"], ["date:d", "На этой неделе"], ["date:e", "Позже"], ["date:z", "Без срока"]]
+        : g === "sprint" ? [["sprint:" + curSprintId(), spLabel(curSprintId()) + " · текущий"], ["sprint:~", "Бэклог (без спринта)"]]
+        : g === "project" && V !== "proj" ? [["project:", "Без проекта"]].concat(ptree().map(function (x) { return ["project:" + x.p.id, picon(x.p) + " " + pname(x.p), col(x.p.c)]; })) : [];
+      extra.forEach(function (x) { if (!have[x[0]]) cols.push([x[0], x[1], [], x[2]]); });
+      var ordKeys = extra.map(function (x) { return x[0]; });
+      if (ordKeys.length) cols.sort(function (a, b) { var ia = ordKeys.indexOf(a[0]), ib = ordKeys.indexOf(b[0]); return (ia < 0 ? -1 : ia) - (ib < 0 ? -1 : ib); });
+    }
+    if (!cols.length) return '<p class="empty">' + (o.empty || "Задач нет.") + "</p>";
+    return '<div class="board kb">' + cols.map(function (c) {
+      var ids = {}; c[2].forEach(function (t) { ids[t.id] = 1; });
+      var roots = c[2].filter(function (t) { return !t.parent || !ids[t.parent]; }).sort(cmpBy(vo.sort));
+      return '<div class="bcol' + (roots.length ? "" : " empty") + '" data-col="' + esc(c[0]) + '"><div class="bh">' + (c[3] ? '<span class="pdot"><i style="background:' + c[3] + '"></i></span>' : "") + esc(c[1]) + ' <span class="c">' + roots.length + "</span></div>" + roots.map(kcard).join("") + "</div>";
+    }).join("") + "</div>";
+  }
+  // перетаскивание карточки в колонку меняет свойство задачи
+  function setGroupVal(t, key) {
+    var i = key.indexOf(":"), kind = i < 0 ? "status" : key.slice(0, i), v = i < 0 ? key : key.slice(i + 1), t0 = today0();
+    function setDay(d0) { if (t.at && !t.allday) { var o = new Date(t.at), d = new Date(d0); d.setHours(o.getHours(), o.getMinutes(), 0, 0); t.at = d.getTime(); } else { t.at = d0; t.allday = true; } }
+    function noDate() { t.at = 0; t.allday = false; t.rep = ""; t.rem = false; }
+    switch (kind) {
+      case "status": setCol(t, v); return;
+      case "project": [t].concat(tdesc(t.id)).forEach(function (x) { x.pid = v; touch(x); }); var pt = task(t.parent); if (pt && (pt.pid || "") !== v) t.parent = ""; break;
+      case "prio": t.prio = +v.slice(1) || 0; break;
+      case "flag": t.flag = v === "f"; break;
+      case "sprint": if (v === "~") t.sprint = ""; else { ensureSprint(new Date(v.slice(2) + "T00:00").getTime()); setSprint(t, v); } break;
+      case "tag": if (v.charAt(0) !== "#") return; var n = v.slice(1); if ((t.tags || []).indexOf(n) < 0) t.tags = (t.tags || []).concat(n); break;
+      case "date": if (v === "z") noDate(); else if (v === "b") setDay(t0); else if (v === "c") setDay(t0 + DAY); else if (v === "d") setDay(t0 + 3 * DAY); else if (v === "e") setDay(t0 + 7 * DAY); else return; break;
+      case "day": if (v === "z") noDate(); else if (/^\d{4}-\d\d-\d\d$/.test(v)) setDay(new Date(v + "T00:00").getTime()); else return; break;
+      default: return;
+    }
+    touch(t); save(); render(); if (OPEN === t.id) renderPanel();
+  }
+  function std(title, sub, list, o) { return head(title, sub) + addBox() + toolbar(o) + listOrBoard(list, vopt(), o); }
+  function vInbox() { return std("Входящие", "Без даты и без проекта: всё, что ещё не разобрано. Сюда же попадают сообщения боту в Telegram.", inboxList(), { empty: "Пусто — всё разобрано 🎉", scope: function (t) { return !t.pid && !t.at && !t.parent; } }); }
+  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
+  function vPlans() { return std("Планы", "Задачи по датам: просроченные, две недели вперёд и дальше.", tasks().filter(function (t) { return !t.done && t.at; }), { plans: true, scope: function (t) { return !!t.at; } }); }
+  function vFlag() { return std("С флажком", "Задачи, отмеченные флажком 🚩 — важное, к чему нужно вернуться.", flagList(), { empty: "Нет задач с флажком. Флажок ставится кнопкой ⚑ у задачи или «!!» при вводе.", scope: function (t) { return t.flag; } }); }
+  function vAll() { return std("Все задачи", "Все невыполненные задачи.", tasks().filter(function (t) { return !t.done; }), { scope: function () { return true; } }); }
   function vDone() {
     var l = tasks().filter(function (t) { return t.done; }).sort(function (a, b) { return (b.dt || 0) - (a.dt || 0); });
     var h = head("Сделано", "Выполненные задачи. Чтобы вернуть задачу в работу, снимите отметку.");
@@ -1379,7 +1430,7 @@ CREATE TABLE inbox (
     var kids = pkids(p.id);
     h += '<p class="sub">Задач: ' + l.length + (kids.length ? " · подпроекты:" : "") + "</p>";
     if (kids.length) h += '<div class="chips">' + kids.map(function (c) { return '<a class="chip" href="#proj-' + c.id + '"><i style="background:' + col(c.c) + '"></i>' + esc(c.n) + ' <span class="muted">' + tasks().filter(function (t) { return t.pid === c.id && !t.done; }).length + "</span></a>"; }).join("") + "</div>";
-    return h + addBox() + toolbar({ sub: kids.length > 0 }) + renderGroups(l, vo, { empty: "В проекте пока нет задач.", noProj: !vo.sub });
+    return h + addBox() + toolbar({ sub: kids.length > 0 }) + listOrBoard(l, vo, { empty: "В проекте пока нет задач.", noProj: !vo.sub, scope: function (t) { return ids.indexOf(t.pid) >= 0; } });
   }
   function vTag() {
     var g = tagObj(ARG);
@@ -1388,7 +1439,7 @@ CREATE TABLE inbox (
     var h = titleBar("tag", g.n, g.n, col(g.c), g.fav, true);
     if (POP) h += popHTML("tag", g);
     if (CONF === "tdel") h += '<div class="confirm"><b>Удалить тег #' + esc(g.n) + "?</b><span>Тег уберётся у всех задач, сами задачи останутся.</span><div class=\"r\"><button class=\"btn warn\" type=\"button\" data-a=\"tdel-yes\">Удалить тег</button><button class=\"btn\" type=\"button\" data-a=\"cancel\">Отмена</button></div></div>";
-    return h + '<p class="sub">Задач: ' + l.length + "</p>" + addBox() + toolbar() + renderGroups(l, vopt(), { empty: "Нет задач с этим тегом." });
+    return h + '<p class="sub">Задач: ' + l.length + "</p>" + addBox() + toolbar() + listOrBoard(l, vopt(), { empty: "Нет задач с этим тегом.", scope: function (t) { return (t.tags || []).indexOf(g.n) >= 0; } });
   }
   function filterForm(f) {
     var q = f.q || fdef(), tr = ptree();
@@ -1412,7 +1463,7 @@ CREATE TABLE inbox (
     if (CONF === "fdel") h += '<div class="confirm"><b>Удалить фильтр «' + esc(f.n) + "»?</b><span>Задачи не пострадают — удалится только подборка.</span><div class=\"r\"><button class=\"btn warn\" type=\"button\" data-a=\"fdel-yes\">Удалить фильтр</button><button class=\"btn\" type=\"button\" data-a=\"cancel\">Отмена</button></div></div>";
     h += '<p class="sub">Найдено задач: ' + l.length + ' · <button class="btn sm" type="button" data-a="fe">' + (FE === f.id ? "Скрыть условия ▴" : "Условия ▾") + "</button></p>";
     if (FE === f.id) h += filterForm(f);
-    return h + addBox() + toolbar() + renderGroups(l, vopt(), { empty: "Под условия фильтра ничего не подходит." });
+    return h + addBox() + toolbar() + listOrBoard(l, vopt(), { empty: "Под условия фильтра ничего не подходит.", scope: function (t) { var q = {}; for (var k in (f.q || {})) q[k] = f.q[k]; q.status = "all"; return matchQ(t, q); } });
   }
   function burnSVG(sp) {
     var l = spTasks(sp), useEst = l.some(function (t) { return +t.est > 0; }), val = function (t) { return useEst ? (+t.est || 0) : 1; };
@@ -1554,6 +1605,7 @@ CREATE TABLE inbox (
       '<p><b>Описание</b> — полноценный редактор. Нажмите <code>/</code> и выберите блок (можно сразу печатать название для поиска, ↑ ↓ и Enter):</p><div class="tscroll"><table><tr><th>Блок</th><th>Клавиши</th><th>Быстро</th></tr>' +
       [["Текст", "Ctrl+Shift+0", ""], ["To-do список (галочки — клик по квадратику)", "Ctrl+Shift+4", "[] пробел"], ["Заголовок 1 / 2 / 3", "Ctrl+Shift+1 / 2 / 3", "# / ## / ### пробел"], ["Маркированный список", "Ctrl+Shift+5", "- пробел"], ["Нумерованный список", "Ctrl+Shift+6", "1. пробел"], ["Спойлер (сворачивается кликом по ▸)", "Ctrl+Shift+7", ""], ["Цитата", "Ctrl+Shift+8", "> пробел"], ["Код", "Ctrl+Shift+9", "``` пробел"], ["Выноска 💡, таблица, разделитель", "через /", "--- пробел — разделитель"]].map(function (r) { return "<tr><td>" + esc(r[0]) + "</td><td><code>" + esc(r[1]) + "</code></td><td>" + (r[2] ? "<code>" + esc(r[2]) + "</code>" : "") + "</td></tr>"; }).join("") + "</table></div>" +
       "<p>Выделите текст — появится панель: жирный, курсив, подчёркнутый, зачёркнутый, код, маркер, ссылка (Ctrl+K), «убрать оформление». Tab в списке — вложить пункт, Shift+Tab — вернуть; Tab в таблице — следующая ячейка (в последней — новая строка). Ссылка открывается по Ctrl+клику. Если в описании есть to-do список, в строке задачи видно, сколько пунктов отмечено (☑ 2/5).</p>";
+    h += '<h2 id="h-board">Список или доска</h2><p>Над каждым списком (Входящие, Сегодня, Планы, С флажком, Все задачи, проекты, теги, фильтры) — переключатель <b>☰ Список / ▦ Доска</b>. На доске колонки строятся по выбранной группировке: без группировки или «по статусу» — «Нужно сделать / В работе / Готово (за 7 дней)»; «по проекту», «по приоритету», «по сроку», «по дням», «по тегу», «по флажку», «по спринту» — соответствующие колонки. Перетащите карточку в другую колонку — и у задачи поменяется статус, проект, приоритет, срок, флажок или спринт (в колонку тега — тег добавится). Клик по карточке открывает задачу. Вид запоминается для каждого списка.</p>';
     h += '<h2 id="h-sprint">Недельные спринты</h2><ul><li><b>Спринт</b> — это неделя с понедельника по воскресенье. «Спринт» в левой панели открывает текущий; стрелки ‹ › — соседние недели; «Все спринты» — история со скоростью (сколько часов или задач вы закрываете в среднем за неделю).</li>' +
       "<li><b>Планирование:</b> впишите цель спринта, внизу страницы — бэклог (задачи без спринта): «→ в спринт» у задачи, или перетащите задачу на «Спринт» в левой панели, или выберите спринт в карточке задачи. Там же — <b>оценка в часах</b>; «Вместимость недели» показывает загрузку и предупреждает о перегрузе.</li>" +
       "<li><b>Доска</b> «Нужно сделать / В работе / Готово» — перетаскивайте карточки между колонками (или меняйте «Статус» в карточке задачи). Вид «Список» — то же списком. <b>График сгорания</b> показывает, сколько осталось, и сравнивает с идеальным темпом.</li>" +
@@ -1760,7 +1812,7 @@ CREATE TABLE inbox (
     else if (k === "smart" && id === "today") { t.at = today0(); t.allday = true; touch(t); toast("Срок: сегодня"); }
     else if (k === "smart" && id === "flag") { t.flag = true; touch(t); toast("Флажок поставлен"); }
     else if (k === "smart" && id === "sprint") { ensureSprint(monday(Date.now())); setSprint(t, curSprintId()); toast("Взято в текущий спринт"); }
-    else if (k === "col") { setCol(t, id); return; }
+    else if (k === "col") { setGroupVal(t, id); return; }
     else if (k === "smart" && id === "trash") { del(t); return; }
     else if (k === "task") {
       var tg = task(id); if (!tg || tg.id === t.id || tdesc(t.id).some(function (x) { return x.id === id; })) { toast("Так вложить нельзя"); return; }
@@ -1823,6 +1875,7 @@ CREATE TABLE inbox (
       case "newfilter": var nf = touch({ id: uid(), n: "Новый фильтр", c: 2, ord: filters().length, q: fdef(), group: "project", sort: "date" }); S.filters.push(nf); save(); FE = nf.id; RN = { where: "page", k: "filter", id: nf.id }; go("filter-" + nf.id); return;
       case "fe": FE = FE === ARG ? null : ARG; render(); return;
       case "fe-close": FE = null; render(); return;
+      case "vmode": var vk = VIEWS[curKey()] = VIEWS[curKey()] || {}; vk.mode = el.dataset.x; LS.set("zd-views", JSON.stringify(VIEWS)); render(); return;
       case "mini": document.body.classList.toggle("mini"); LS.set("zd-mini", document.body.classList.contains("mini") ? "1" : "0"); render(); return;
       case "kopen": openTask(el.dataset.id); return;
       case "spgo": go("sprint-" + el.dataset.x); return;
