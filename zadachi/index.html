@@ -247,6 +247,19 @@ ol.steps li { margin: 6px 0 }
 .icg button.on { border-color: var(--acc); background: var(--acc-soft) }
 .icg .auto { font-size: 11px; color: var(--muted) }
 .pop .lbl { font-size: 12px; color: var(--muted) }
+#ctx2 { position: fixed; z-index: 71; min-width: 220px; max-height: 70vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 4px }
+#ctx button, #ctx2 button { display: grid !important; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center }
+#ctx2 button { width: 100%; text-align: left; border: 0; background: none; border-radius: 7px; padding: 7px 10px; cursor: pointer; font-size: 14px; color: var(--fg) }
+#ctx2 button:hover, #ctx button.open { background: var(--hover) }
+#ctx2 hr { border: 0; border-top: 1px solid var(--line); margin: 4px 0 }
+#ctx .mi, #ctx2 .mi { text-align: center; font-size: 14px }
+#ctx .mk, #ctx2 .mk { font: 11px var(--mono); color: var(--muted); white-space: nowrap }
+#ctx .foot { font-size: 12px; color: var(--muted); padding: 6px 10px 4px; border-top: 1px solid var(--line); margin-top: 4px }
+#pomo { position: fixed; z-index: 45; left: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 8px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 8px 10px; max-width: min(420px, calc(100vw - 32px)) }
+#pomo .pt { font: 600 16px var(--mono); color: var(--p1) }
+#pomo.break .pt { color: var(--ok) }
+#pomo .pn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; cursor: pointer }
+#pomo button { border: 1px solid var(--line); background: var(--bg); border-radius: 7px; width: 30px; height: 28px; cursor: pointer; flex: none }
 #ctx { position: fixed; z-index: 70; min-width: 220px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 4px }
 #ctx button { display: block; width: 100%; text-align: left; border: 0; background: none; border-radius: 7px; padding: 7px 10px; cursor: pointer; font-size: 14px; color: var(--fg) }
 #ctx button:hover { background: var(--hover) }
@@ -368,6 +381,8 @@ ol.steps li { margin: 6px 0 }
 <div id="slash" hidden role="listbox" aria-label="Блоки"></div>
 <div id="fmt" hidden></div>
 <div id="ctx" hidden role="menu"></div>
+<div id="ctx2" hidden role="menu"></div>
+<div id="pomo" hidden></div>
 <div id="toast" hidden></div>
 <script type="text/plain" id="srv-index">// «Задачи» — сервер в Яндекс Облаке (одна облачная функция).
 // Обслуживает три входа:
@@ -1093,6 +1108,7 @@ CREATE TABLE inbox (
   var V = "today", ARG = "", OPEN = null, CONF = null, QPV = "", RN = null, POP = null, SUB = null, FE = null;
   function parse() {
     var h = decodeURIComponent((location.hash || "").slice(1)), m;
+    if ((m = h.match(/^task-(.+)$/))) return { v: "task", a: m[1] };
     if ((m = h.match(/^(proj|tag|filter|sprint)-(.+)$/))) return { v: m[1], a: m[2] };
     if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
     if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash"].indexOf(h) >= 0) return { v: h, a: "" };
@@ -1100,7 +1116,9 @@ CREATE TABLE inbox (
   }
   function go(h) { if (location.hash.slice(1) === h) route(); else location.hash = h; }
   function route() {
-    var r = parse(), same = r.v === V && r.a === ARG;
+    var r = parse();
+    if (r.v === "task") { render(); if (task(r.a)) openTask(r.a); else toast("Задача не найдена — возможно, удалена"); return; }
+    var same = r.v === V && r.a === ARG;
     V = r.v; ARG = r.a; if (!same) { CONF = null; POP = null; SUB = null; if (RN && RN.where === "page" && RN.id !== r.a) RN = null; }
     document.body.classList.remove("menu");
     render();
@@ -1150,7 +1168,8 @@ CREATE TABLE inbox (
     var h = '<div class="sidetop"><button type="button" class="ibtn" data-a="mini" title="' + (mini ? "Развернуть панель" : "Свернуть панель до иконок") + '" aria-label="' + (mini ? "Развернуть панель" : "Свернуть панель до иконок") + '">' + (mini ? "»" : "«") + "</button></div>";
     var favs = [].concat(projects().filter(function (p) { return p.fav; }).map(function (p) { return projItem(p, 0, true); }),
       filters().filter(function (f) { return f.fav; }).map(function (f) { return itemHTML("filter", f.id, "filter-" + f.id, '<span class="dot" style="background:' + col(f.c) + '"></span>', f.n, filterRes(f).length, { fav: true }); }),
-      tags().filter(function (g) { return g.fav; }).map(function (g) { return itemHTML("tag", g.n, "tag-" + g.n, '<span class="hash" style="color:' + col(g.c) + '">#</span>', g.n, tagCount(g.n), { fav: true }); }));
+      tags().filter(function (g) { return g.fav; }).map(function (g) { return itemHTML("tag", g.n, "tag-" + g.n, '<span class="hash" style="color:' + col(g.c) + '">#</span>', g.n, tagCount(g.n), { fav: true }); }),
+      tasks().filter(function (t) { return t.fav && !t.done; }).map(function (t) { return itemHTML("task", t.id, "task-" + t.id, '<span class="pic">📌</span>', t.t, 0, { fav: true }); }));
     if (favs.length) h += '<div class="lab">Избранное</div><nav class="nav">' + favs.join("") + "</nav>";
     h += '<nav class="nav"' + (favs.length ? ' style="margin-top:10px"' : "") + ">" +
       itemHTML("smart", "inbox", "inbox", ic("inbox"), "Входящие", inboxList().length) +
@@ -1276,6 +1295,8 @@ CREATE TABLE inbox (
     (t.tags || []).forEach(function (g) { meta.push('<a class="tag" href="#tag-' + esc(g) + '" style="color:' + tcolor(g) + '">#' + esc(g) + "</a>"); });
     var bt = bodyTodo(t); if (bt) meta.push("☑ " + bt[0] + "/" + bt[1]); else if (t.body || t.note) meta.push("📝");
     if (t.src === "tg") meta.push("из Telegram");
+    if (t.fav) meta.push('<span style="color:var(--star)">★</span>');
+    if (t.pomo) meta.push("🍅 " + t.pomo);
     meta = meta.filter(function (x) { return x && x !== '<span class="when"></span>'; });
     var h = '<li class="task' + (t.done ? " done" : "") + (OPEN === t.id ? " open" : "") + '" data-id="' + t.id + '" draggable="true" style="padding-left:' + (4 + depth * 26) + 'px">' +
       '<button class="fold' + (hasKidsHere ? "" : " sp") + '" type="button" data-a="fold" aria-label="' + (t.fold ? "Показать подзадачи" : "Скрыть подзадачи") + '">' + (t.fold ? "▸" : "▾") + "</button>" +
@@ -1485,7 +1506,7 @@ CREATE TABLE inbox (
     if (+t.est) m.push("⏱ " + fmtH(t.est) + " ч");
     if (t.at) m.push('<span class="' + (isLate(t) ? "warnc" : "") + '">' + esc(whenTxt(t)) + "</span>");
     if (kids.length) m.push("☐ " + kids.filter(function (k) { return k.done; }).length + "/" + kids.length);
-    if (t.flag) m.push("🚩"); if (ccount(t.id)) m.push("💬 " + ccount(t.id));
+    if (t.flag) m.push("🚩"); if (t.fav) m.push("★"); if (t.pomo) m.push("🍅 " + t.pomo); if (ccount(t.id)) m.push("💬 " + ccount(t.id));
     var bt = bodyTodo(t); if (bt) m.push("☑ " + bt[0] + "/" + bt[1]);
     return '<div class="kcard' + (t.prio ? " p" + t.prio : "") + (t.done ? " done" : "") + '" draggable="true" data-id="' + t.id + '" data-a="kopen"><div class="kt">' + esc(t.t) + "</div>" + (m.length ? '<div class="km">' + m.join("") + "</div>" : "") + "</div>";
   }
@@ -1605,6 +1626,9 @@ CREATE TABLE inbox (
       '<p><b>Описание</b> — полноценный редактор. Нажмите <code>/</code> и выберите блок (можно сразу печатать название для поиска, ↑ ↓ и Enter):</p><div class="tscroll"><table><tr><th>Блок</th><th>Клавиши</th><th>Быстро</th></tr>' +
       [["Текст", "Ctrl+Shift+0", ""], ["To-do список (галочки — клик по квадратику)", "Ctrl+Shift+4", "[] пробел"], ["Заголовок 1 / 2 / 3", "Ctrl+Shift+1 / 2 / 3", "# / ## / ### пробел"], ["Маркированный список", "Ctrl+Shift+5", "- пробел"], ["Нумерованный список", "Ctrl+Shift+6", "1. пробел"], ["Спойлер (сворачивается кликом по ▸)", "Ctrl+Shift+7", ""], ["Цитата", "Ctrl+Shift+8", "> пробел"], ["Код", "Ctrl+Shift+9", "``` пробел"], ["Выноска 💡, таблица, разделитель", "через /", "--- пробел — разделитель"]].map(function (r) { return "<tr><td>" + esc(r[0]) + "</td><td><code>" + esc(r[1]) + "</code></td><td>" + (r[2] ? "<code>" + esc(r[2]) + "</code>" : "") + "</td></tr>"; }).join("") + "</table></div>" +
       "<p>Выделите текст — появится панель: жирный, курсив, подчёркнутый, зачёркнутый, код, маркер, ссылка (Ctrl+K), «убрать оформление». Tab в списке — вложить пункт, Shift+Tab — вернуть; Tab в таблице — следующая ячейка (в последней — новая строка). Ссылка открывается по Ctrl+клику. Если в описании есть to-do список, в строке задачи видно, сколько пунктов отмечено (☑ 2/5).</p>";
+    h += '<h2 id="h-menu">Меню задачи и горячие клавиши</h2><p>Правый клик по задаче (на телефоне — долгое нажатие) открывает меню: дата и время ›, Помодоро, приоритет ›, теги ›, чек-лист, завершить ›, флажок, избранное, изменить проект ›, спринт ›, подзадача, родительская задача, вырезать / копировать / вставить / дублировать, ссылка на задачу, удалить; внизу — когда задача создана и изменена. Клавиши работают для задачи под курсором или открытой в карточке:</p><div class="tscroll"><table><tr><th>Клавиши</th><th>Действие</th></tr>' +
+      [["Enter", "открыть задачу"], ["Delete / Backspace", "удалить в корзину"], ["Ctrl+C / Ctrl+X", "копировать / вырезать (вместе с подзадачами)"], ["Ctrl+V", "вставить: на задачу под курсором — подзадачей, иначе — в открытый список"], ["Ctrl+D", "дублировать"], ["Ctrl+G", "новый тег"], ["Ctrl+I", "чек-лист в описании"], ["Ctrl+Shift+L", "в избранное"], ["Ctrl+Shift+M", "изменить проект"], ["Alt+Shift+N", "новая подзадача"]].map(function (r) { return "<tr><td><code>" + r[0] + "</code></td><td>" + r[1] + "</td></tr>"; }).join("") + "</table></div>" +
+      "<p><b>Помодоро</b> — 25 минут работы над задачей, затем 5 минут перерыва; таймер виден в левом нижнем углу (пауза ⏸, стоп ■, клик по названию открывает задачу), по окончании — звук и уведомление, в задаче копится счётчик 🍅. <b>Избранные задачи</b> (★) собираются наверху левой панели. <b>Ссылка на задачу</b> открывает приложение сразу на ней.</p>";
     h += '<h2 id="h-board">Список или доска</h2><p>Над каждым списком (Входящие, Сегодня, Планы, С флажком, Все задачи, проекты, теги, фильтры) — переключатель <b>☰ Список / ▦ Доска</b>. На доске колонки строятся по выбранной группировке: без группировки или «по статусу» — «Нужно сделать / В работе / Готово (за 7 дней)»; «по проекту», «по приоритету», «по сроку», «по дням», «по тегу», «по флажку», «по спринту» — соответствующие колонки. Перетащите карточку в другую колонку — и у задачи поменяется статус, проект, приоритет, срок, флажок или спринт (в колонку тега — тег добавится). Клик по карточке открывает задачу. Вид запоминается для каждого списка.</p>';
     h += '<h2 id="h-sprint">Недельные спринты</h2><ul><li><b>Спринт</b> — это неделя с понедельника по воскресенье. «Спринт» в левой панели открывает текущий; стрелки ‹ › — соседние недели; «Все спринты» — история со скоростью (сколько часов или задач вы закрываете в среднем за неделю).</li>' +
       "<li><b>Планирование:</b> впишите цель спринта, внизу страницы — бэклог (задачи без спринта): «→ в спринт» у задачи, или перетащите задачу на «Спринт» в левой панели, или выберите спринт в карточке задачи. Там же — <b>оценка в часах</b>; «Вместимость недели» показывает загрузку и предупреждает о перегрузе.</li>" +
@@ -1788,7 +1812,7 @@ CREATE TABLE inbox (
     render();
   }
   function setFav(k, id) {
-    var o = k === "proj" ? proj(id) : k === "filter" ? filt(id) : k === "tag" ? tagObj(id) : null;
+    var o = k === "proj" ? proj(id) : k === "filter" ? filt(id) : k === "tag" ? tagObj(id) : k === "task" ? task(id) : null;
     if (!o) return; o.fav = !o.fav; touch(o); save(); render(); toast(o.fav ? "Добавлено в избранное" : "Убрано из избранного");
   }
   function curObj() { return V === "proj" ? proj(ARG) : V === "tag" ? tagObj(ARG) : V === "filter" ? filt(ARG) : null; }
@@ -1964,7 +1988,7 @@ CREATE TABLE inbox (
   }
   function noteToBody(s) { return String(s || "").split(/\n\s*\n/).filter(function (x) { return x.trim(); }).map(function (x) { return "<p>" + esc(x).replace(/\n/g, "<br>") + "</p>"; }).join(""); }
   function openTask(id) { flushBody(); CED = null; OPEN = id; SUB = null; renderPanel(); render(); var pt = $("pn-t"); if (pt && !task(id).t) pt.focus(); }
-  function closeTask() { flushBody(); OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); slashClose(); fmtHide(); render(); }
+  function closeTask() { if (/^#task-/.test(location.hash)) try { history.replaceState(null, "", "#" + V + (ARG ? "-" + ARG : "")); } catch (er) { /* ok */ } flushBody(); OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); slashClose(); fmtHide(); render(); }
   // ширина панели задачи: тянуть за левый край; запоминается на устройстве
   function setPW(w) { w = Math.round(Math.max(380, Math.min(w, innerWidth - 80))); document.documentElement.style.setProperty("--pw", w + "px"); return w; }
   (function () { var w = +LS.get("zd-pw"); if (w) setPW(w); })();
@@ -1986,7 +2010,7 @@ CREATE TABLE inbox (
     var crumbs = (p ? picon(ppath(p)[0]) + " " + ppath(p).map(function (x) { return esc(x.n); }).join(" / ") : "📥 Входящие");
     var anc = [], q = par, g = 0; while (q && g++ < 30) { anc.unshift(q); q = task(q.parent); }
     var full = LS.get("zd-pfull") === "1";
-    var h = '<div class="pn-top"><div class="crumbs">' + crumbs + '</div><button type="button" class="pw-btn" data-p="full" title="' + (full ? "Свернуть в панель" : "Развернуть на весь экран") + '" aria-label="' + (full ? "Свернуть в панель" : "Развернуть на весь экран") + '">' + (full ? "⤡" : "⤢") + '</button><button type="button" data-p="flag" class="' + (t.flag ? "on" : "") + '" title="' + (t.flag ? "Снять флажок" : "Флажок") + '">⚑</button><button type="button" data-p="del" title="Удалить задачу">🗑</button><button type="button" data-p="close" title="Закрыть (Esc)" aria-label="Закрыть">✕</button></div>';
+    var h = '<div class="pn-top"><div class="crumbs">' + crumbs + '</div><button type="button" class="pw-btn" data-p="full" title="' + (full ? "Свернуть в панель" : "Развернуть на весь экран") + '" aria-label="' + (full ? "Свернуть в панель" : "Развернуть на весь экран") + '">' + (full ? "⤡" : "⤢") + '</button><button type="button" data-p="fav" style="' + (t.fav ? "color:var(--star)" : "") + '" title="' + (t.fav ? "Убрать из избранного" : "В избранное") + '">' + (t.fav ? "★" : "☆") + '</button><button type="button" data-p="pomo" title="Помодоро 25 минут">⏱</button><button type="button" data-p="link" title="Скопировать ссылку на задачу">🔗</button><button type="button" data-p="flag" class="' + (t.flag ? "on" : "") + '" title="' + (t.flag ? "Снять флажок" : "Флажок") + '">⚑</button><button type="button" data-p="del" title="Удалить задачу">🗑</button><button type="button" data-p="close" title="Закрыть (Esc)" aria-label="Закрыть">✕</button></div>';
     if (anc.length) h += '<div class="pn-par">↑ Родительская задача: ' + anc.map(function (a) { return '<a data-p="open" data-id="' + a.id + '" title="Открыть «' + esc(a.t) + '»">' + esc(a.t.slice(0, 60)) + "</a>"; }).join(" › ") + "</div>";
     h += '<div class="pn-title"><button class="ck' + (t.prio ? " p" + t.prio : "") + (t.done ? " dn" : "") + '" type="button" data-p="toggle" aria-label="' + (t.done ? "Вернуть в работу" : "Готово") + '"></button><textarea id="pn-t" rows="1" aria-label="Название задачи" placeholder="Название задачи">' + esc(t.t) + "</textarea></div>";
     h += '<div class="props">' +
@@ -2046,6 +2070,9 @@ CREATE TABLE inbox (
     if (a === "full") { LS.set("zd-pfull", LS.get("zd-pfull") === "1" ? "0" : "1"); flushBody(); renderPanel(); return; }
     if (a === "del") { flushBody(); del(t); return; }
     if (a === "flag") { setTask(function (x) { x.flag = !x.flag; }); return; }
+    if (a === "fav") { setTask(function (x) { x.fav = !x.fav; }); return; }
+    if (a === "pomo") { if (POMO && POMO.tid === t.id) pomoStop(); else pomoStart(t); return; }
+    if (a === "link") { copyLink(t); return; }
     if (a === "toggle") { flushBody(); toggle(t); renderPanel(); return; }
     if (a === "prio") { setTask(function (x) { x.prio = +el.dataset.v; }); return; }
     if (a === "st") { setTask(function (x) { x.st = el.dataset.v; }); return; }
@@ -2328,57 +2355,229 @@ CREATE TABLE inbox (
   });
   $("panel").addEventListener("focusout", function (e) { if (e.target.id === "rte") { setTimeout(function () { if (!$("slash").contains(document.activeElement)) slashClose(); }, 150); if (BT) saveBody(); } });
 
+  /* ---------- Помодоро: 25 минут работы над задачей, потом 5 минут перерыва ---------- */
+  var POMO = (function () { try { return JSON.parse(LS.get("zd-pomo") || "null"); } catch (e) { return null; } })();
+  function pomoSave() { if (POMO) LS.set("zd-pomo", JSON.stringify(POMO)); else LS.del("zd-pomo"); }
+  function pomoStart(t) {
+    POMO = { tid: t.id, phase: "work", end: Date.now() + 25 * 60e3, paused: false }; pomoSave(); pomoRender();
+    try { if (window.Notification && Notification.permission === "default") Notification.requestPermission(); } catch (e) { /* нет уведомлений */ }
+    toast("🍅 Помодоро: 25 минут на «" + t.t.slice(0, 40) + "»");
+  }
+  function pomoStop() { POMO = null; pomoSave(); pomoRender(); }
+  function pomoLeft() { return POMO.paused ? POMO.left : POMO.end - Date.now(); }
+  function beep() { try { var A = window.AudioContext || window.webkitAudioContext, a = new A(), o = a.createOscillator(), g = a.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(.15, a.currentTime); g.gain.exponentialRampToValueAtTime(.001, a.currentTime + .8); o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + .8); } catch (e) { /* без звука */ } }
+  function pomoNotify(title, body) { beep(); toast(title + " · " + body); try { if (window.Notification && Notification.permission === "granted") new Notification(title, { body: body }); } catch (e) { /* нет */ } }
+  function pomoRender() {
+    var el = $("pomo"); if (!POMO) { el.hidden = true; return; }
+    var t = task(POMO.tid), ms = Math.max(0, pomoLeft()), m = Math.floor(ms / 60000), sec = Math.floor(ms % 60000 / 1000);
+    el.hidden = false; el.className = POMO.phase;
+    el.innerHTML = '<span class="pt">' + (POMO.phase === "work" ? "🍅" : "☕") + " " + p2(m) + ":" + p2(sec) + '</span><span class="pn" data-pomo="open" title="Открыть задачу">' + esc(POMO.phase === "work" ? (t ? t.t : "Задача") : "Перерыв") + '</span><button type="button" data-pomo="pause" title="' + (POMO.paused ? "Продолжить" : "Пауза") + '">' + (POMO.paused ? "▶" : "⏸") + '</button><button type="button" data-pomo="stop" title="Остановить">■</button>';
+  }
+  function pomoTick() {
+    if (!POMO) return;
+    if (!POMO.paused && Date.now() >= POMO.end) {
+      if (POMO.phase === "work") {
+        var t = task(POMO.tid); if (t) { t.pomo = (t.pomo || 0) + 1; touch(t); save(); render(); if (OPEN === t.id) renderPanel(); }
+        pomoNotify("🍅 Помодоро завершён", "перерыв 5 минут" + (t ? " · " + t.t : ""));
+        POMO = { tid: POMO.tid, phase: "break", end: Date.now() + 5 * 60e3, paused: false };
+      } else { pomoNotify("☕ Перерыв закончился", "можно начинать следующий помидор"); POMO = null; }
+      pomoSave();
+    }
+    pomoRender();
+  }
+  setInterval(pomoTick, 1000);
+  $("pomo").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-pomo]"); if (!b || !POMO) return;
+    var a = b.dataset.pomo;
+    if (a === "stop") pomoStop();
+    else if (a === "open") { if (task(POMO.tid)) openTask(POMO.tid); }
+    else if (a === "pause") { if (POMO.paused) { POMO.end = Date.now() + POMO.left; POMO.paused = false; } else { POMO.left = POMO.end - Date.now(); POMO.paused = true; } pomoSave(); pomoRender(); }
+  });
+
+  /* ---------- буфер задач: вырезать, копировать, вставить, дублировать ---------- */
+  var CLIP = null;
+  function cloneTree(src, parent, pid) {
+    var n = JSON.parse(JSON.stringify(src));
+    n.id = uid(); n.parent = parent || ""; n.pid = pid; n.created = Date.now(); n.done = false; n.dt = 0; n.pomo = 0;
+    ["sid", "src", "del", "delAt", "delBy", "purged"].forEach(function (k) { delete n[k]; });
+    touch(n); S.tasks.unshift(n);
+    tkids(src.id).forEach(function (k) { cloneTree(k, n.id, pid); });
+    return n;
+  }
+  function copyLink(t) { copyText(location.href.split("#")[0] + "#task-" + t.id, "Ссылка на задачу скопирована"); }
+  function pasteInto(target) {
+    var src = CLIP && task(CLIP.id); if (!src) { CLIP = null; toast("Сначала скопируйте или вырежьте задачу"); return; }
+    var c = viewCtx(), n;
+    if (target) {
+      if (CLIP.mode === "cut" && (target.id === src.id || tdesc(src.id).some(function (x) { return x.id === target.id; }))) { toast("Нельзя вставить задачу саму в себя"); return; }
+      if (CLIP.mode === "cut") { src.parent = target.id; [src].concat(tdesc(src.id)).forEach(function (x) { x.pid = target.pid || ""; touch(x); }); n = src; CLIP = null; }
+      else n = cloneTree(src, target.id, target.pid || "");
+      if (target.fold) { target.fold = false; touch(target); }
+    } else {
+      var pid = c.pid !== undefined ? c.pid : V === "inbox" ? "" : src.pid || "";
+      if (CLIP.mode === "cut") { src.parent = ""; [src].concat(tdesc(src.id)).forEach(function (x) { x.pid = pid; touch(x); }); n = src; CLIP = null; }
+      else n = cloneTree(src, "", pid);
+      if (c.sprint) setSprint(n, c.sprint);
+      (c.tags || []).forEach(function (g) { if ((n.tags || []).indexOf(g) < 0) n.tags = (n.tags || []).concat(g); });
+      if (c.flag) n.flag = true;
+      if (c.today && !n.at) { n.at = today0(); n.allday = true; }
+      if (V === "inbox") { n.at = 0; n.parent = ""; }
+      touch(n);
+    }
+    save(); render(); toast(target ? "Вставлено как подзадача «" + target.t.slice(0, 30) + "»" : "Вставлено");
+  }
+  function setDue(t, d0, keepTime) { if (keepTime && t.at && !t.allday) { var o = new Date(t.at), d = new Date(d0); d.setHours(o.getHours(), o.getMinutes(), 0, 0); t.at = d.getTime(); } else { t.at = d0; t.allday = true; } }
+  function addChecklist(t) {
+    openTask(t.id);
+    setTimeout(function () {
+      var r = rteEl(); if (!r) return; r.focus();
+      var last = r.lastElementChild;
+      if (last && (last.textContent.trim() || last.tagName === "UL")) { var p = document.createElement("p"); p.innerHTML = "<br>"; r.appendChild(p); last = p; }
+      if (last) caretEnd(last); applyBlock("todo"); r.classList.remove("empty"); r.scrollIntoView({ block: "center" });
+    }, 60);
+  }
   /* ---------- контекстное меню (правый клик, на телефоне — долгое нажатие) ---------- */
-  var CTX = null;
-  function ctxHide() { CTX = null; $("ctx").hidden = true; }
-  function ctxShow(x, y, items, target) {
-    CTX = target; var m = $("ctx");
-    m.innerHTML = items.map(function (it) { return it === "-" ? "<hr>" : '<button type="button" role="menuitem" data-c="' + it[0] + '"' + (it[2] ? ' class="warn"' : "") + ">" + it[1] + "</button>"; }).join("");
-    m.hidden = false;
-    m.style.left = Math.max(6, Math.min(x, innerWidth - m.offsetWidth - 6)) + "px"; m.style.top = Math.max(6, Math.min(y, innerHeight - m.offsetHeight - 6)) + "px";
+  var CTX = null, CTXI = null;
+  function ctxHide() { CTX = null; $("ctx").hidden = true; $("ctx2").hidden = true; }
+  function norm(it) { return Array.isArray(it) ? { c: it[0], l: it[1], warn: it[2] } : it; }
+  function menuHTML(items) {
+    return items.map(function (raw, i) {
+      if (!raw) return ""; if (raw === "-") return "<hr>";
+      var it = norm(raw); if (it.foot) return '<div class="foot">' + esc(it.foot) + "</div>";
+      return '<button type="button" role="menuitem" ' + (it.sub ? 'data-sub="' + i + '"' : 'data-c="' + esc(it.c) + '"') + (it.warn ? ' class="warn"' : "") + (it.pad ? ' style="padding-left:' + (10 + it.pad * 14) + 'px"' : "") + '><span class="mi">' + (it.i || "") + '</span><span class="ml">' + esc(it.l) + '</span><span class="mk">' + esc(it.k || "") + (it.sub ? " ›" : "") + "</span></button>";
+    }).join("");
+  }
+  function place(m, x, y) { m.style.left = Math.max(6, Math.min(x, innerWidth - m.offsetWidth - 6)) + "px"; m.style.top = Math.max(6, Math.min(y, innerHeight - m.offsetHeight - 6)) + "px"; }
+  function ctxShow(x, y, items, target) { CTX = target; CTXI = items; var m = $("ctx"); m.innerHTML = menuHTML(items); m.hidden = false; $("ctx2").hidden = true; place(m, x, y); }
+  function subShow(btn) {
+    var i = +btn.dataset.sub, it = norm(CTXI[i]); if (!it || !it.sub) return;
+    [].forEach.call($("ctx").querySelectorAll("button.open"), function (b) { b.classList.remove("open"); }); btn.classList.add("open");
+    var m = $("ctx2"); m.innerHTML = menuHTML(it.sub); m.hidden = false;
+    var rc = btn.getBoundingClientRect(), x = rc.right + 2; if (x + m.offsetWidth > innerWidth - 6) x = rc.left - m.offsetWidth - 2;
+    place(m, x, rc.top - 4);
+  }
+  function taskMenu(t) {
+    var t0 = today0(), mon = monday(Date.now()) + 7 * DAY, cur = curSprintId(), nxt = sprintId(addDays(monday(Date.now()), 7));
+    var ck = function (on) { return on ? "✓" : ""; };
+    return [
+      { c: "open", i: "↗", l: "Открыть", k: "Enter" },
+      { i: "📅", l: "Установить дату и время", sub: [{ c: "d:0", i: "☀", l: "Сегодня" }, { c: "d:1", i: "→", l: "Завтра" }, { c: "d:2", i: "⇉", l: "Послезавтра" }, { c: "d:mon", i: "📆", l: "В понедельник" }, { c: "d:7", i: "⏭", l: "Через неделю" }, { c: "d:pick", i: "🕑", l: "Выбрать дату и время…" }, "-", { c: "d:none", i: "∅", l: "Без срока" }] },
+      { c: "pomo", i: "⏱", l: POMO && POMO.tid === t.id ? "Остановить Помодоро" : "Запустить Помодоро" },
+      { i: "❗", l: "Приоритет", sub: [[1, "1 — срочно"], [2, "2 — важно"], [3, "3 — желательно"], [0, "обычный"]].map(function (x) { return { c: "p:" + x[0], i: ck((t.prio || 0) === x[0]), l: x[1] }; }) },
+      { i: "🏷", l: "Теги", k: "Ctrl+G", sub: tags().map(function (g) { return { c: "t:" + g.n, i: ck((t.tags || []).indexOf(g.n) >= 0), l: "#" + g.n }; }).concat(["-", { c: "t:+", i: "＋", l: "Новый тег…" }]) },
+      { c: "check", i: "☑", l: "Чек-лист", k: "Ctrl+I" },
+      t.done ? { c: "undone", i: "↺", l: "Вернуть в работу" } : { i: "✅", l: "Завершить задачу", sub: [{ c: "done", i: "✓", l: t.rep ? "Завершить (перенести на следующий раз)" : "Завершить" }, t.rep ? { c: "done-stop", i: "⏹", l: "Завершить и больше не повторять" } : null, { c: "doing", i: "▶", l: t.st === "doing" ? "Снять «В работе»" : "Отметить «В работе»" }].filter(Boolean) },
+      { c: "flag", i: "🚩", l: t.flag ? "Снять флажок" : "Флажок" },
+      { c: "fav", i: t.fav ? "★" : "☆", l: t.fav ? "Убрать из избранного" : "Добавить в избранное", k: "Ctrl+Shift+L" },
+      { i: "✥", l: "Изменить проект", k: "Ctrl+Shift+M", sub: [{ c: "m:", i: ck(!t.pid), l: "📥 Входящие (без проекта)" }].concat(ptree().map(function (x) { return { c: "m:" + x.p.id, i: ck(t.pid === x.p.id), l: picon(x.p) + " " + x.p.n, pad: x.d }; })) },
+      { i: "🏃", l: "Спринт", sub: [{ c: "s:" + cur, i: ck(t.sprint === cur), l: spLabel(cur) + " · текущий" }, { c: "s:" + nxt, i: ck(t.sprint === nxt), l: spLabel(nxt) + " · следующий" }, { c: "s:", i: ck(!t.sprint), l: "Бэклог (без спринта)" }] },
+      { c: "sub", i: "⊞", l: "Новая подзадача", k: "Alt+Shift+N" },
+      t.parent ? { c: "par", i: "↑", l: "Открыть родительскую задачу" } : null,
+      "-",
+      { c: "cut", i: "✂", l: "Вырезать", k: "Ctrl+X" },
+      { c: "copy", i: "⧉", l: "Копировать", k: "Ctrl+C" },
+      CLIP && task(CLIP.id) ? { c: "paste", i: "📋", l: "Вставить как подзадачу", k: "Ctrl+V" } : null,
+      { c: "dup", i: "⎘", l: "Дублировать", k: "Ctrl+D" },
+      { c: "link", i: "🔗", l: "Скопировать ссылку на задачу" },
+      "-",
+      { c: "del", i: "🗑", l: "Удалить в корзину", k: "Delete", warn: 1 },
+      { foot: "Создана " + new Date(t.created || t.upd || Date.now()).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) + (t.upd && t.upd !== t.created ? " · изменена " + new Date(t.upd).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "") }
+    ];
+  }
+  function taskCmd(t, c) {
+    var t0 = today0();
+    if (c === "open") { openTask(t.id); return; }
+    if (c.indexOf("d:") === 0) {
+      var v = c.slice(2);
+      if (v === "pick") { openTask(t.id); setTimeout(function () { var d = $("panel").querySelector('[data-pf="date"]'); if (d) { d.focus(); try { d.showPicker(); } catch (er) { /* ok */ } } }, 60); return; }
+      if (v === "none") { t.at = 0; t.allday = false; t.rep = ""; t.rem = false; }
+      else setDue(t, v === "mon" ? monday(Date.now()) + 7 * DAY : t0 + (+v) * DAY, true);
+      touch(t); save(); render(); if (OPEN === t.id) renderPanel(); toast(t.at ? "Срок: " + whenTxt(t) : "Срок убран"); return;
+    }
+    if (c === "pomo") { if (POMO && POMO.tid === t.id) pomoStop(); else pomoStart(t); return; }
+    if (c.indexOf("p:") === 0) { t.prio = +c.slice(2); touch(t); save(); render(); if (OPEN === t.id) renderPanel(); return; }
+    if (c === "t:+") { openTask(t.id); setTimeout(function () { var i = $("panel").querySelector('[data-pf="newtag"]'); if (i) i.focus(); }, 60); return; }
+    if (c.indexOf("t:") === 0) { var n = c.slice(2), tg = t.tags || []; t.tags = tg.indexOf(n) >= 0 ? tg.filter(function (y) { return y !== n; }) : tg.concat(n); touch(t); save(); render(); if (OPEN === t.id) renderPanel(); return; }
+    if (c === "check") { addChecklist(t); return; }
+    if (c === "done" || c === "undone") { toggle(t); return; }
+    if (c === "done-stop") { t.rep = ""; t.done = true; t.dt = Date.now(); touch(t); save(); render(); toast("Готово ✓ Повтор отключён"); return; }
+    if (c === "doing") { t.st = t.st === "doing" ? "" : "doing"; touch(t); save(); render(); return; }
+    if (c === "flag") { t.flag = !t.flag; touch(t); save(); render(); if (OPEN === t.id) renderPanel(); return; }
+    if (c === "fav") { setFav("task", t.id); if (OPEN === t.id) renderPanel(); return; }
+    if (c.indexOf("m:") === 0) { var pid = c.slice(2); [t].concat(tdesc(t.id)).forEach(function (x) { x.pid = pid; touch(x); }); var pt = task(t.parent); if (pt && (pt.pid || "") !== pid) t.parent = ""; save(); render(); if (OPEN === t.id) renderPanel(); toast(pid ? "Перенесено в «" + proj(pid).n + "»" : "Перенесено во «Входящие»"); return; }
+    if (c.indexOf("s:") === 0) { var sid = c.slice(2); if (sid) { ensureSprint(new Date(sid.slice(2) + "T00:00").getTime()); setSprint(t, sid); } else { t.sprint = ""; touch(t); } save(); render(); if (OPEN === t.id) renderPanel(); toast(sid ? "Спринт: " + spLabel(sid) : "Возвращено в бэклог"); return; }
+    if (c === "sub") { openTask(t.id); setTimeout(function () { var si = $("pn-sub"); if (si) { si.focus(); si.scrollIntoView({ block: "center" }); } }, 60); return; }
+    if (c === "par") { openTask(t.parent); return; }
+    if (c === "cut") { CLIP = { mode: "cut", id: t.id }; toast("Вырезано: «" + t.t.slice(0, 30) + "» — вставьте в другую задачу или список (Ctrl+V)"); return; }
+    if (c === "copy") { CLIP = { mode: "copy", id: t.id }; toast("Скопировано: «" + t.t.slice(0, 30) + "»" + (tdesc(t.id).length ? " с подзадачами" : "")); return; }
+    if (c === "paste") { pasteInto(t); return; }
+    if (c === "dup") { var n2 = cloneTree(t, t.parent, t.pid || ""); n2.t = t.t + " (копия)"; touch(n2); save(); render(); toast("Дубликат создан"); return; }
+    if (c === "link") { copyLink(t); return; }
+    if (c === "del") { del(t); return; }
   }
   document.addEventListener("contextmenu", function (e) {
-    if (!e.target.closest || e.target.closest("#rte,input,textarea,#ctx")) return;
+    if (!e.target.closest || e.target.closest("#rte,input,textarea,#ctx,#ctx2")) return;
     var li = e.target.closest("li.task") || e.target.closest(".kcard"), a = e.target.closest(".nav a[data-k]");
-    if (li) {
-      var t = task(li.dataset.id); if (!t) return; e.preventDefault();
-      ctxShow(e.clientX, e.clientY, [["open", "Открыть"], ["done", t.done ? "↺ Вернуть в работу" : "✓ Готово"], ["flag", t.flag ? "Снять флажок" : "🚩 Флажок"], ["sub", "＋ Подзадача"], t.parent ? ["par", "↑ Открыть родительскую задачу"] : null, t.sprint === curSprintId() ? ["unsprint", "← Убрать из спринта"] : ["sprint", "→ В текущий спринт"], "-", ["del", "🗑 Удалить в корзину", 1]].filter(Boolean), { k: "task", id: t.id });
-      return;
-    }
+    if (li) { var t = task(li.dataset.id); if (!t) return; e.preventDefault(); ctxShow(e.clientX, e.clientY, taskMenu(t), { k: "task", id: t.id }); return; }
     if (a && /^(proj|tag|filter)$/.test(a.dataset.k)) {
       var k = a.dataset.k, id = a.dataset.id, o = entityOf(k, id); if (!o) return; e.preventDefault();
       var items = [["open", "Открыть"], ["rename", "✎ Переименовать"]];
       if (k === "proj") items.push(["subproj", "＋ Подпроект"]);
+      if (k === "proj" && CLIP && task(CLIP.id)) items.push(["pasteproj", "📋 Вставить задачу сюда"]);
       items.push(["fav", o.fav ? "☆ Убрать из избранного" : "★ В избранное"], "-", ["del", "🗑 Удалить в корзину", 1]);
       ctxShow(e.clientX, e.clientY, items, { k: k, id: id });
-    }
-  });
-  $("ctx").addEventListener("click", function (e) {
-    var b = e.target.closest("[data-c]"); if (!b || !CTX) return;
-    var c = b.dataset.c, k = CTX.k, id = CTX.id; ctxHide();
-    if (k === "task") {
-      var t = task(id); if (!t) return;
-      if (c === "open") openTask(id);
-      else if (c === "done") toggle(t);
-      else if (c === "flag") { t.flag = !t.flag; touch(t); save(); render(); }
-      else if (c === "sub") { openTask(id); var si = $("pn-sub"); if (si) { si.focus(); si.scrollIntoView({ block: "center" }); } }
-      else if (c === "par") openTask(t.parent);
-      else if (c === "sprint") { ensureSprint(monday(Date.now())); setSprint(t, curSprintId()); save(); render(); toast("Взято в текущий спринт"); }
-      else if (c === "unsprint") { t.sprint = ""; touch(t); save(); render(); toast("Возвращено в бэклог"); }
-      else if (c === "del") del(t);
       return;
     }
+    if (e.target.closest("#view") && CLIP && task(CLIP.id)) { e.preventDefault(); ctxShow(e.clientX, e.clientY, [["paste-here", "📋 Вставить задачу сюда"]], { k: "view" }); }
+  });
+  function ctxClick(e) {
+    var sb = e.target.closest("[data-sub]"); if (sb) { subShow(sb); return; }
+    var b = e.target.closest("[data-c]"); if (!b || !CTX) return;
+    var c = b.dataset.c, k = CTX.k, id = CTX.id; ctxHide();
+    if (k === "task") { var t = task(id); if (t) taskCmd(t, c); return; }
+    if (k === "view") { if (c === "paste-here") pasteInto(null); return; }
     var href = (k === "proj" ? "proj-" : k === "tag" ? "tag-" : "filter-") + id;
     if (c === "open") go(href);
     else if (c === "rename") { RN = { where: "side", k: k, id: id }; render(); }
     else if (c === "fav") setFav(k, id);
     else if (c === "subproj") { var sp = newProject("Новый подпроект", id), pp = proj(id); if (pp && pp.fold) { pp.fold = false; touch(pp); } save(); RN = { where: "page", k: "proj", id: sp.id }; go("proj-" + sp.id); }
+    else if (c === "pasteproj") { var src = task(CLIP.id); if (src) { if (CLIP.mode === "cut") { src.parent = ""; [src].concat(tdesc(src.id)).forEach(function (x) { x.pid = id; touch(x); }); CLIP = null; } else cloneTree(src, "", id); save(); render(); toast("Вставлено в «" + proj(id).n + "»"); } }
     else if (c === "del") trashEntity(k, id);
-  });
-  document.addEventListener("mousedown", function (e) { if (!$("ctx").hidden && !e.target.closest("#ctx")) ctxHide(); }, true);
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("ctx").hidden) { e.stopPropagation(); ctxHide(); } }, true);
-  window.addEventListener("scroll", function () { if (!$("ctx").hidden) ctxHide(); }, true);
+  }
+  $("ctx").addEventListener("click", ctxClick);
+  $("ctx2").addEventListener("click", ctxClick);
+  $("ctx").addEventListener("mouseover", function (e) { var sb = e.target.closest("[data-sub]"); if (sb) subShow(sb); else if (e.target.closest("[data-c]")) { $("ctx2").hidden = true; [].forEach.call($("ctx").querySelectorAll("button.open"), function (b) { b.classList.remove("open"); }); } });
+  document.addEventListener("mousedown", function (e) { if (!$("ctx").hidden && !e.target.closest("#ctx,#ctx2")) ctxHide(); }, true);
+  window.addEventListener("scroll", function (e) { if (!$("ctx").hidden && !(e.target.closest && e.target.closest("#ctx2"))) ctxHide(); }, true);
   window.addEventListener("resize", ctxHide);
+
+  /* ---------- горячие клавиши для задачи под курсором (или открытой) ---------- */
+  var HOV = null;
+  document.addEventListener("mouseover", function (e) { var r = e.target.closest && (e.target.closest("li.task") || e.target.closest(".kcard")); HOV = r ? r.dataset.id : null; });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("ctx").hidden) { e.stopPropagation(); ctxHide(); } }, true);
+  document.addEventListener("keydown", function (e) {
+    var tg = e.target; if (/INPUT|TEXTAREA|SELECT/.test(tg.tagName) || tg.isContentEditable) return;
+    var t = task(HOV) || task(OPEN), mod = e.ctrlKey || e.metaKey, code = e.code;
+    var sel = getSelection(), hasSel = sel && !sel.isCollapsed && String(sel).trim();
+    if (mod && !e.shiftKey && code === "KeyV" && CLIP) { e.preventDefault(); pasteInto(task(HOV) || null); return; }
+    if (!t) return;
+    var cmd = null;
+    if ((e.key === "Delete" || e.key === "Backspace") && !mod) cmd = "del";
+    else if (mod && !e.shiftKey && code === "KeyC" && !hasSel) cmd = "copy";
+    else if (mod && !e.shiftKey && code === "KeyX" && !hasSel) cmd = "cut";
+    else if (mod && !e.shiftKey && code === "KeyD") cmd = "dup";
+    else if (mod && !e.shiftKey && code === "KeyG") cmd = "t:+";
+    else if (mod && !e.shiftKey && code === "KeyI") cmd = "check";
+    else if (mod && e.shiftKey && code === "KeyL") cmd = "fav";
+    else if (e.altKey && e.shiftKey && code === "KeyN") cmd = "sub";
+    else if (e.key === "Enter" && HOV && !mod) cmd = "open";
+    else if (mod && e.shiftKey && code === "KeyM") {
+      e.preventDefault(); var row = document.querySelector('[data-id="' + t.id + '"]'), rc = row ? row.getBoundingClientRect() : { left: 200, bottom: 200 };
+      var items = taskMenu(t).filter(function (x) { return x && x.l === "Изменить проект"; })[0].sub;
+      ctxShow(rc.left + 40, rc.bottom, items, { k: "task", id: t.id }); return;
+    }
+    if (cmd) { e.preventDefault(); taskCmd(t, cmd); }
+  });
 
   /* ---------- перетаскивание: проекты в панели, задачи на проекты/теги/списки и на другие задачи ---------- */
   var DRAG = null;
@@ -2440,8 +2639,9 @@ CREATE TABLE inbox (
   SYNC.show();
   if (SYNC.enabled()) SYNC.run();
   SRV.start();
+  pomoTick();
   setInterval(function () { var ae = document.activeElement || {}; if (!document.hidden && !RN && !SUB && !/INPUT|TEXTAREA|SELECT/.test(ae.tagName || "")) render(); }, 60000);
-  window.ZD = { ensureSprint: ensureSprint, monday: monday, setCol: setCol, S: S, parseQuick: parseQuick, firstOcc: firstOcc, remWanted: remWanted, mergeList: mergeList, SRV: SRV, filterRes: filterRes, moveProj: moveProj, moveTaskTo: moveTaskTo, task: task };
+  window.ZD = { taskCmd: taskCmd, pasteInto: pasteInto, taskMenu: taskMenu, ensureSprint: ensureSprint, monday: monday, setCol: setCol, S: S, parseQuick: parseQuick, firstOcc: firstOcc, remWanted: remWanted, mergeList: mergeList, SRV: SRV, filterRes: filterRes, moveProj: moveProj, moveTaskTo: moveTaskTo, task: task };
 })();
 </script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
