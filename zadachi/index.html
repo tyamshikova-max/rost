@@ -58,6 +58,8 @@ a { color: var(--acc) }
 .nav .chev.sp { visibility: hidden }
 .nav .fv { border: 0; background: none; cursor: pointer; color: var(--muted); padding: 0 2px; font-size: 14px; opacity: 0; width: 18px }
 .nav a:hover .fv, .nav .fv.on { opacity: 1 } .nav .fv.on { color: var(--star) }
+.nav .fv.dl { font-size: 12px } .nav .fv.dl:hover { filter: none; color: var(--warn) }
+.starb.delb { font-size: 17px; opacity: .55 } .starb.delb:hover { opacity: 1 }
 .nav input.rn { flex: 1; min-width: 0; border: 1px solid var(--acc); border-radius: 6px; padding: 2px 6px; background: var(--panel); font-size: 14px }
 .nav a.dropin { outline: 2px solid var(--acc); outline-offset: -2px }
 .nav a.dropb { box-shadow: inset 0 2px 0 var(--acc) } .nav a.dropa { box-shadow: inset 0 -2px 0 var(--acc) }
@@ -1131,7 +1133,7 @@ CREATE TABLE inbox (
       (o.chev !== undefined ? o.chev : "") + iconHTML +
       (rn ? '<input class="rn" data-rn="1" value="' + esc(label) + '" aria-label="Новое название">' : '<span class="nm">' + esc(label) + "</span>") +
       (n ? '<span class="n">' + n + "</span>" : "") +
-      (o.fav !== undefined ? '<button type="button" class="fv' + (o.fav ? " on" : "") + '" data-a="fav" data-k="' + k + '" data-id="' + esc(id) + '" title="' + (o.fav ? "Убрать из избранного" : "В избранное") + '">' + (o.fav ? "★" : "☆") + "</button>" : "") + "</a>";
+      (o.fav !== undefined ? '<button type="button" class="fv' + (o.fav ? " on" : "") + '" data-a="fav" data-k="' + k + '" data-id="' + esc(id) + '" title="' + (o.fav ? "Убрать из избранного" : "В избранное") + '">' + (o.fav ? "★" : "☆") + "</button>" : "") + (o.fav !== undefined && /^(proj|tag|filter)$/.test(k) ? '<button type="button" class="fv dl" data-a="xdel" data-k="' + k + '" data-id="' + esc(id) + '" title="Удалить в корзину">🗑</button>' : "") + "</a>";
   }
   function projItem(p, d, inFav) {
     var kids = pkids(p.id).length, n = tasks().filter(function (t) { return t.pid === p.id && !t.done; }).length;
@@ -1351,7 +1353,7 @@ CREATE TABLE inbox (
     return '<div class="phead">' + (isTag ? '<button class="hashb" type="button" data-a="pop" style="color:' + color + '" title="Цвет и действия">#</button>' : '<button class="dotb" type="button" data-a="pop" style="background:' + color + '" title="Цвет и действия" aria-label="Цвет и действия"></button>') +
       (icon ? '<button class="picb" type="button" data-a="pop" title="Иконка, цвет и действия">' + icon + "</button>" : "") +
       (rn ? '<input class="rn" data-rn="1" value="' + esc(name) + '" aria-label="Новое название">' : '<h1 class="ttl" data-a="rename" data-k="' + k + '" data-id="' + esc(id) + '" title="Нажмите, чтобы переименовать">' + esc(name) + "</h1>") +
-      '<button class="starb' + (fav ? " on" : "") + '" type="button" data-a="fav" data-k="' + k + '" data-id="' + esc(id) + '" title="' + (fav ? "Убрать из избранного" : "В избранное") + '">' + (fav ? "★" : "☆") + "</button></div>";
+      '<button class="starb' + (fav ? " on" : "") + '" type="button" data-a="fav" data-k="' + k + '" data-id="' + esc(id) + '" title="' + (fav ? "Убрать из избранного" : "В избранное") + '">' + (fav ? "★" : "☆") + '</button><button class="starb delb" type="button" data-a="xdel" data-k="' + k + '" data-id="' + esc(id) + '" title="Удалить в корзину (вернуть можно 30 дней)" aria-label="Удалить в корзину">🗑</button></div>';
   }
   function popHTML(k, obj) {
     var cur = obj.c || 0;
@@ -1557,7 +1559,7 @@ CREATE TABLE inbox (
       "<li><b>Доска</b> «Нужно сделать / В работе / Готово» — перетаскивайте карточки между колонками (или меняйте «Статус» в карточке задачи). Вид «Список» — то же списком. <b>График сгорания</b> показывает, сколько осталось, и сравнивает с идеальным темпом.</li>" +
       "<li><b>Завершить спринт…</b> — итоги (что получилось, что улучшить) и куда деть незакрытые задачи: в следующий спринт или в бэклог. Если неделя прошла, а спринт не закрыт, в новом спринте появится предложение перенести хвосты.</li><li>В фильтрах есть условие «Спринт», а в группировке — «по статусу» и «по спринту».</li></ul>";
     h += '<h2 id="h-chat">Комментарии</h2><p>Внизу карточки задачи — лента комментариев, как в чате: Enter отправляет, Shift+Enter — новая строка, ссылки кликабельны. При наведении на сообщение — ✎ изменить и × удалить. Число комментариев видно в строке задачи (💬). Комментарии синхронизируются между устройствами отдельно от задачи, поэтому сообщения с телефона и компьютера не теряются.</p>';
-    h += '<h2 id="h-trash">Удаление и корзина</h2><ul><li>Удалить можно кнопкой × у задачи (при наведении), 🗑 в карточке задачи, через меню правой кнопкой мыши (на телефоне — долгое нажатие) у задачи, проекта, тега или фильтра, в меню цветной точки проекта — или перетащив задачу на «Корзину» в левой панели.</li><li>Всё удалённое попадает в <b>Корзину</b> (внизу левой панели) и хранится там <b>30 дней</b>: «Восстановить» возвращает задачу вместе с подзадачами и комментариями, проект — вместе с его задачами и подпроектами, тег — на те задачи, где он был. «Удалить навсегда» и «Очистить корзину» стирают без возврата. Сразу после удаления внизу появляется «Вернуть».</li></ul>';
+    h += '<h2 id="h-trash">Удаление и корзина</h2><ul><li><b>Проект, тег или фильтр</b> удаляется кнопкой 🗑 рядом со звёздочкой в заголовке его страницы или значком 🗑 у пункта в левой панели (появляется при наведении). Задачи проекта при этом не пропадают — они перейдут во «Входящие», а при восстановлении проекта вернутся в него.</li><li>Задачу удалить можно кнопкой × у задачи (при наведении), 🗑 в карточке задачи, через меню правой кнопкой мыши (на телефоне — долгое нажатие) у задачи, проекта, тега или фильтра, в меню цветной точки проекта — или перетащив задачу на «Корзину» в левой панели.</li><li>Всё удалённое попадает в <b>Корзину</b> (внизу левой панели) и хранится там <b>30 дней</b>: «Восстановить» возвращает задачу вместе с подзадачами и комментариями, проект — вместе с его задачами и подпроектами, тег — на те задачи, где он был. «Удалить навсегда» и «Очистить корзину» стирают без возврата. Сразу после удаления внизу появляется «Вернуть».</li></ul>';
     h += '<h2 id="h-icons">Иконки проектов и родительские задачи</h2><p>У каждого проекта рядом с цветной точкой есть иконка: она подбирается по названию («Дом» — 🏠, «Работа» — 💼, «Учёба» — 🎓, «Финансы» — 💰…), а свою можно выбрать, нажав на точку или иконку у названия проекта. В карточке подзадачи вверху — «↑ Родительская задача»: клик открывает родителя (и всю цепочку выше); в списках ссылка «↳ …» у подзадачи тоже ведёт к родителю.</p>';
     h += '<h2 id="h-mini">Узкая панель</h2><p>Кнопка «« вверху левой панели сворачивает её до полосы с иконками (проекты — цветные точки, теги — #); подписи — при наведении. »» — развернуть обратно. Режим запоминается на этом устройстве.</p>';
     h += '<h2 id="h-fav">Теги, флажки, избранное</h2><ul><li><b>Теги</b>: пишите #тег при вводе или отмечайте в карточке задачи. У тега свой цвет и своя страница; «+» у заголовка «Теги» создаёт тег.</li><li><b>Флажок</b> 🚩 — кнопка ⚑ у задачи, галочка в карточке или «!!» при вводе. Все такие задачи — в списке «С флажком».</li><li><b>Избранное</b> — звёздочка ☆ у проекта, тега или фильтра (в заголовке или в левой панели при наведении). Избранное собирается наверху левой панели.</li></ul>';
@@ -1805,6 +1807,7 @@ CREATE TABLE inbox (
       case "cancel": CONF = null; IMPF = null; render(); return;
       case "rename": RN = { where: "page", k: el.dataset.k, id: el.dataset.id }; render(); return;
       case "fav": setFav(el.dataset.k, el.dataset.id); return;
+      case "xdel": trashEntity(el.dataset.k, el.dataset.id); return;
       case "pop": POP = !POP; CONF = null; render(); return;
       case "color": var o = curObj(); if (o) { o.c = +el.dataset.c; touch(o); save(); render(); } return;
       case "pfold": var pf = proj(el.dataset.id); if (pf) { pf.fold = !pf.fold; touch(pf); save(true); render(); } return;
