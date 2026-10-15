@@ -503,6 +503,11 @@ ol.steps li { margin: 6px 0 }
 .flrow .r { margin-left: auto; display: flex; gap: 6px }
 .sw.sm { display: flex; flex-wrap: wrap; gap: 4px } .sw.sm button { width: 20px; height: 20px }
 /* настройки по вкладкам */
+.auxh { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 1100px }
+.auxh h1 { margin: 0 }
+.auxx { padding: 6px; color: var(--muted) } .auxx svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round }
+.auxx:hover { color: var(--fg) }
+.stabs { margin-top: 12px }
 .stabs { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; align-items: start; max-width: 1100px }
 .stnav { scrollbar-width: none; position: sticky; top: 8px; display: flex; flex-direction: column; gap: 2px }
 .stnav a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; color: var(--fg); text-decoration: none; font-size: 14px }
@@ -1638,12 +1643,17 @@ CREATE TABLE inbox (
     if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats"].indexOf(h) >= 0) return { v: h, a: "" };
     return { v: "today", a: "" };
   }
+  // откуда открыли настройки или справку — туда и вернёт крестик / Esc
+  var LASTH = "today";
+  function closeAux() { go(LASTH && !/^(settings|help)/.test(LASTH) ? LASTH : "today"); }
+  function auxHead(title) { return '<div class="auxh"><h1>' + title + '</h1><button type="button" class="ibtn auxx" data-a="aux-close" title="Закрыть (Esc)" aria-label="Закрыть">' + ic("close") + "</button></div>"; }
   function go(h) { if (location.hash.slice(1) === h) route(); else location.hash = h; }
   function route() {
     var r = parse();
     if (r.v === "task") { render(); if (task(r.a)) openTask(r.a); else toast("Задача не найдена — возможно, удалена"); return; }
     var same = r.v === V && r.a === ARG;
     if (r.v === "cal" && V !== "cal") CAL.scrolled = false;
+    if (r.v !== "settings" && r.v !== "help") LASTH = location.hash.slice(1) || "today";
     V = r.v; ARG = r.a; if (!same) { CONF = null; POP = null; SUB = null; if (RN && RN.where === "page" && RN.id !== r.a) RN = null; }
     document.body.classList.remove("menu");
     render();
@@ -2626,11 +2636,11 @@ CREATE TABLE inbox (
       var k = /id="s-srv"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-sync"/.test(x) || /Резервная копия/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
       by[k] = (by[k] || "") + "<section" + x;
     });
-    return '<h1>Настройки</h1><div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
+    return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
   }
   function codeBox(id, title) { var el = $(id); return '<div class="codebox"><div class="h"><b>' + title + '</b><button class="btn sm" type="button" data-copy="' + id + '">Скопировать</button></div><pre>' + esc(el ? el.textContent.trim() : "") + "</pre></div>"; }
   function vHelp() {
-    var h = '<div class="help">' + head("Справка", "Как пользоваться «Задачами» и как подключить напоминания в Telegram.");
+    var h = '<div class="help">' + auxHead("Справка") + '<p class="sub">Как пользоваться «Задачами» и как подключить напоминания в Telegram.</p>';
     h += '<h2 id="h-start">Списки</h2><ul><li><b>Входящие</b> — задачи без даты и без проекта: всё, что ещё не разобрано, и сообщения боту в Telegram.</li><li><b>Сегодня</b> — просроченное и задачи на сегодня. <b>Планы</b> — по дням на две недели вперёд и «Позже».</li><li><b>С флажком</b> — задачи, отмеченные флажком 🚩.</li><li><b>Все задачи</b> и <b>Сделано</b> (снимите отметку, чтобы вернуть задачу).</li></ul>';
     h += '<h2 id="h-tree">Проекты, подпроекты и подзадачи</h2><ul><li>«+» у заголовка «Проекты» создаёт проект. Проекты вкладываются друг в друга на любую глубину: перетащите проект на другой проект в левой панели (на середину — внутрь, к краю — рядом), или нажмите цветную точку у названия проекта → «Вложить в проект». Там же «＋ Подпроект». Стрелка ▾ слева сворачивает ветку.</li>' +
       "<li><b>Переименовать</b> проект, тег или фильтр — нажмите на название в заголовке страницы или ещё раз на уже открытый пункт в левой панели (или дважды по пункту). Enter — сохранить, Esc — отмена.</li>" +
@@ -2999,6 +3009,7 @@ CREATE TABLE inbox (
       case "parch": var pa = proj(el.dataset.id || ARG); if (pa) { POP = null; setArch(pa.id, !pa.arch); } return;
       case "tplsave-p": POP = null; tplFromProject(proj(ARG)); render(); return;
       case "tpl-use": tplUse(el.dataset.id); return;
+      case "aux-close": closeAux(); return;
       case "flc": var fc = flagObj(el.dataset.id); if (fc) { fc.c = +el.dataset.c; touch(fc); save(); render(); } return;
       case "flup": var fl = flags(), fi = fl.map(function (x) { return x.id; }).indexOf(el.dataset.id); if (fi > 0) { var tmp = fl[fi - 1]; fl.splice(fi - 1, 2, fl[fi], tmp); fl.forEach(function (x, j) { if (x.ord !== j) { x.ord = j; touch(x); } }); save(); render(); } return;
       case "fladd": var nf2 = touch({ id: uid(), n: "Новый флажок", c: (flags().length * 3 + 2) % COLORS.length, ord: flags().length }); S.flags.push(nf2); save(); render(); var fin = document.querySelector('[data-fln="' + nf2.id + '"]'); if (fin) { fin.focus(); fin.select(); } return;
@@ -3103,6 +3114,7 @@ CREATE TABLE inbox (
     if (tg.id === "subin") { if (e.key === "Enter") { e.preventDefault(); if (tg.value.trim()) { newTaskFrom(tg.value.trim(), { parent: tg.dataset.sub }); save(); render(); } } else if (e.key === "Escape") { SUB = null; render(); } return; }
     if (e.key === "Escape" && !SL && OPEN && (!tg.closest || !tg.closest("#fmt"))) { closeTask(); return; }
     if (e.key === "Escape" && (POP || SUB)) { POP = null; SUB = null; render(); return; }
+    if (e.key === "Escape" && (V === "settings" || V === "help") && !OPEN && $("ctx").hidden && $("pal").hidden && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName)) { closeAux(); return; }
     if (e.key === "Escape" && selClear()) return;
     if ((e.ctrlKey || e.metaKey) && e.code === "KeyA" && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName) && !tg.isContentEditable && document.querySelector("#view li.task, #view .kcard")) { e.preventDefault(); [].forEach.call(document.querySelectorAll("#view li.task, #view .kcard"), function (x) { SELS[x.dataset.id] = 1; }); render(); return; }
     if ((e.key === "Delete" || e.key === "Backspace") && selIds().length > 1 && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName) && !tg.isContentEditable) { e.preventDefault(); var db = $("bulk").querySelector('[data-bk="del"]'); if (db) db.click(); return; }
