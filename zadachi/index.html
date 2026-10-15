@@ -511,6 +511,8 @@ ol.steps li { margin: 6px 0 }
 .stbody.help > h2:first-child { margin-top: 14px }
 @media (max-width: 760px) { .stnav .hq { flex: 0 0 180px; margin: 0 } .stbody.help { padding: 2px 14px 12px } }
 /* диагностика */
+#diagbox.min { padding: 0; border: 0; background: none; box-shadow: none } #diagbox.min .dbody { display: none } #diagbox:not(.min) .dpill { display: none }
+#diagbox .dpill { border: 2px solid var(--warn) !important; border-radius: 16px !important; background: var(--panel) !important; padding: 3px 10px !important; box-shadow: 0 3px 10px rgba(0,0,0,.18) }
 #diagbox { position: fixed; right: 10px; bottom: 10px; z-index: 200; max-width: min(520px, calc(100vw - 20px)); background: var(--panel); color: var(--fg); border: 2px solid var(--warn); border-radius: 10px; padding: 8px 10px; font: 12px/1.4 var(--mono); box-shadow: 0 6px 20px rgba(0,0,0,.2) }
 #diagbox .dl { margin: 6px 0; max-height: 110px; overflow: auto; color: var(--muted); word-break: break-all; white-space: pre-wrap }
 #diagbox .dr { display: block; width: 100%; height: 140px; margin-top: 6px; font: 11px/1.35 var(--mono); background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 6px }
@@ -3043,7 +3045,8 @@ CREATE TABLE inbox (
     if (!DIAG.on) { if (b) b.remove(); return; }
     if (!b) {
       b = document.createElement("div"); b.id = "diagbox";
-      b.innerHTML = '<div class="dh"></div><div class="dl"></div><div class="db"><button type="button" data-dg="copy">Скопировать отчёт</button><button type="button" data-dg="clr">Очистить</button><button type="button" data-dg="off">Выключить</button></div><textarea class="dr" hidden readonly></textarea>';
+      b.innerHTML = '<button type="button" class="dpill" data-dg="open" title="Диагностика: нажмите, чтобы открыть">🔍 <span class="dn">0</span></button><div class="dbody"><div class="dh"></div><div class="dl"></div><div class="db"><button type="button" data-dg="copy">Скопировать отчёт</button><button type="button" data-dg="clr">Очистить</button><button type="button" data-dg="min">Свернуть</button><button type="button" data-dg="off">Выключить</button></div><textarea class="dr" hidden readonly></textarea></div>';
+      b.classList.add("min");
       document.body.appendChild(b);
       b.addEventListener("click", function (e) {
         var a = e.target.dataset && e.target.dataset.dg; if (!a) return;
@@ -3052,6 +3055,8 @@ CREATE TABLE inbox (
           var done = function () { toast("Отчёт скопирован — вставьте его в сообщение (Ctrl+V)"); };
           try { if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done, function () { try { document.execCommand("copy"); done(); } catch (er) { toast("Выделите текст в окошке и нажмите Ctrl+C"); } }); else { document.execCommand("copy"); done(); } } catch (er) { toast("Выделите текст в окошке и нажмите Ctrl+C"); }
         }
+        if (a === "open") { b.classList.remove("min"); diagText(); return; }
+        if (a === "min") { b.classList.add("min"); return; }
         if (a === "clr") { DIAG.log = []; DIAG.renders = []; b.querySelector(".dr").hidden = true; diagText(); }
         if (a === "off") { DIAG.on = false; LS.del("zd-diag"); b.remove(); toast("Диагностика выключена"); }
       });
@@ -3061,6 +3066,7 @@ CREATE TABLE inbox (
   function diagText() {
     var b = $("diagbox"); if (!b) return;
     var now = Date.now(); DIAG.renders = DIAG.renders.filter(function (x) { return now - x < 60000; });
+    b.querySelector(".dn").textContent = DIAG.renders.length;
     b.querySelector(".dh").textContent = "Диагностика · перерисовок за минуту: " + DIAG.renders.length + " · в фокусе: " + delDesc(document.activeElement);
     b.querySelector(".dl").textContent = DIAG.log.slice(-6).join("\n");
   }
