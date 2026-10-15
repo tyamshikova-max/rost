@@ -175,7 +175,17 @@ ol.steps li { margin: 6px 0 }
 .scrim { display: none }
 /* --- панель задачи --- */
 .task.open { background: var(--acc-soft) }
-#panel { position: fixed; z-index: 35; top: 56px; right: 0; bottom: 0; width: min(620px, 52vw); background: var(--panel); border-left: 1px solid var(--line); box-shadow: var(--shadow); overflow-y: auto; padding: 0 22px 60px }
+#panel { position: fixed; z-index: 35; top: 56px; right: 0; bottom: 0; width: var(--pw, 620px); max-width: calc(100vw - 80px); background: var(--panel); border-left: 1px solid var(--line); box-shadow: var(--shadow); display: flex }
+#panel .grip { flex: none; width: 7px; margin-left: -4px; cursor: col-resize; position: relative; z-index: 3; touch-action: none }
+#panel .grip::after { content: ""; position: absolute; left: 3px; top: 0; bottom: 0; width: 1px; background: transparent; transition: background .15s }
+#panel .grip:hover::after, #panel.drag .grip::after { background: var(--acc); width: 3px; left: 2px }
+#panel .pn-sc { flex: 1; min-width: 0; overflow-y: auto; padding: 0 22px 60px }
+#panel .pn-in { max-width: 980px; margin: 0 auto }
+#panel.full { left: 0; width: auto; max-width: none; border-left: 0 }
+#panel.full .grip { display: none }
+#panel.full .pn-sc { padding-inline: 32px }
+#panel.drag, #panel.drag * { user-select: none; cursor: col-resize }
+@media (min-width: 1180px) { body.pnopen .layout { margin-right: min(var(--pw, 620px), calc(100vw - 80px)) } body.pnopen.pnfull .layout { margin-right: 0 } }
 .pn-top { position: sticky; top: 0; z-index: 2; background: var(--panel); display: flex; gap: 6px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); margin-bottom: 12px }
 .pn-top .crumbs { margin: 0; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .pn-top button { background: none; border: 0; border-radius: 6px; padding: 4px 8px; cursor: pointer; color: var(--muted); font-size: 15px }
@@ -239,7 +249,7 @@ ol.steps li { margin: 6px 0 }
 #fmt button { border: 0; background: none; border-radius: 6px; min-width: 30px; height: 30px; cursor: pointer; font-size: 14px }
 #fmt button:hover { background: var(--hover) }
 #fmt input { border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; width: 220px; background: var(--bg) }
-@media (max-width: 860px) { #panel { top: 0; width: 100%; padding: 0 16px 60px; padding-top: env(safe-area-inset-top, 0px) } .props { grid-template-columns: 96px minmax(0, 1fr) } }
+@media (max-width: 860px) { #panel { top: 0; left: 0; width: 100%; max-width: none; padding-top: env(safe-area-inset-top, 0px) } #panel .grip, .pn-top .pw-btn { display: none } #panel .pn-sc { padding: 0 16px 60px } .props { grid-template-columns: 96px minmax(0, 1fr) } }
 @media (max-width: 860px) {
   #menuBtn { display: inline-flex }
   .layout { display: block }
@@ -1309,7 +1319,7 @@ CREATE TABLE inbox (
       "<li><b>Цвет, вложенность, удаление</b> — нажмите цветную точку (у тега — значок #) рядом с названием.</li>" +
       "<li><b>Подзадачи</b> — кнопка ＋ у задачи (появляется при наведении) или «＋ Подзадача» в карточке задачи. У подзадач могут быть свои подзадачи — глубина любая; ▾ слева сворачивает ветку. Ещё способ: перетащите задачу на другую задачу — она станет её подзадачей; или в карточке выберите «Входит в задачу». Отметка «готово» у задачи закрывает и её незавершённые подзадачи.</li>" +
       "<li>Задачу можно перетащить на проект, тег, «Входящие», «Сегодня» или «С флажком» в левой панели.</li></ul>";
-    h += '<h2 id="h-card">Карточка задачи и описание</h2><p>Нажмите на задачу — справа откроется карточка (на телефоне — на весь экран). Всё сохраняется сразу, кнопки «Сохранить» нет. Вверху: флажок ⚑, удаление 🗑 и закрытие ✕ (или Esc). Название меняется прямо в заголовке; ниже — срок, повтор, проект, приоритет, теги, родительская задача и напоминание; внизу — подзадачи (Enter добавляет новую, клик открывает её карточку).</p>' +
+    h += '<h2 id="h-card">Карточка задачи и описание</h2><p>Нажмите на задачу — справа откроется карточка (на телефоне — на весь экран). Всё сохраняется сразу, кнопки «Сохранить» нет. Вверху: ⤢ — развернуть задачу на весь экран (⤡ — обратно в панель), флажок ⚑, удаление 🗑 и закрытие ✕ (или Esc). Ширину панели можно менять, потянув мышью за её левый край; двойной клик по краю — ширина по умолчанию. Размер и режим запоминаются. Название меняется прямо в заголовке; ниже — срок, повтор, проект, приоритет, теги, родительская задача и напоминание; внизу — подзадачи (Enter добавляет новую, клик открывает её карточку).</p>' +
       '<p><b>Описание</b> — полноценный редактор. Нажмите <code>/</code> и выберите блок (можно сразу печатать название для поиска, ↑ ↓ и Enter):</p><div class="tscroll"><table><tr><th>Блок</th><th>Клавиши</th><th>Быстро</th></tr>' +
       [["Текст", "Ctrl+Shift+0", ""], ["To-do список (галочки — клик по квадратику)", "Ctrl+Shift+4", "[] пробел"], ["Заголовок 1 / 2 / 3", "Ctrl+Shift+1 / 2 / 3", "# / ## / ### пробел"], ["Маркированный список", "Ctrl+Shift+5", "- пробел"], ["Нумерованный список", "Ctrl+Shift+6", "1. пробел"], ["Спойлер (сворачивается кликом по ▸)", "Ctrl+Shift+7", ""], ["Цитата", "Ctrl+Shift+8", "> пробел"], ["Код", "Ctrl+Shift+9", "``` пробел"], ["Выноска 💡, таблица, разделитель", "через /", "--- пробел — разделитель"]].map(function (r) { return "<tr><td>" + esc(r[0]) + "</td><td><code>" + esc(r[1]) + "</code></td><td>" + (r[2] ? "<code>" + esc(r[2]) + "</code>" : "") + "</td></tr>"; }).join("") + "</table></div>" +
       "<p>Выделите текст — появится панель: жирный, курсив, подчёркнутый, зачёркнутый, код, маркер, ссылка (Ctrl+K), «убрать оформление». Tab в списке — вложить пункт, Shift+Tab — вернуть; Tab в таблице — следующая ячейка (в последней — новая строка). Ссылка открывается по Ctrl+клику. Если в описании есть to-do список, в строке задачи видно, сколько пунктов отмечено (☑ 2/5).</p>";
@@ -1393,7 +1403,7 @@ CREATE TABLE inbox (
     var all = [t].concat(tdesc(t.id));
     UNDO = all.map(function (x) { return JSON.parse(JSON.stringify(x)); });
     all.forEach(function (x) { x.del = 1; x.t = ""; x.note = ""; touch(x); });
-    if (OPEN && all.some(function (x) { return x.id === OPEN; })) { OPEN = null; $("panel").hidden = true; slashClose(); fmtHide(); }
+    if (OPEN && all.some(function (x) { return x.id === OPEN; })) { OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); slashClose(); fmtHide(); }
     save(); render();
     var el = $("toast"); el.innerHTML = esc(all.length > 1 ? "Удалено: задача и подзадачи (" + (all.length - 1) + ")" : "Задача удалена") + ' · <a href="#" data-a="undo" style="color:inherit;font-weight:600">Вернуть</a>'; el.hidden = false; clearTimeout(tt); tt = setTimeout(function () { el.hidden = true; UNDO = null; }, 6000);
   }
@@ -1558,16 +1568,28 @@ CREATE TABLE inbox (
   }
   function noteToBody(s) { return String(s || "").split(/\n\s*\n/).filter(function (x) { return x.trim(); }).map(function (x) { return "<p>" + esc(x).replace(/\n/g, "<br>") + "</p>"; }).join(""); }
   function openTask(id) { flushBody(); OPEN = id; SUB = null; renderPanel(); render(); var pt = $("pn-t"); if (pt && !task(id).t) pt.focus(); }
-  function closeTask() { flushBody(); OPEN = null; $("panel").hidden = true; slashClose(); fmtHide(); render(); }
+  function closeTask() { flushBody(); OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); slashClose(); fmtHide(); render(); }
+  // ширина панели задачи: тянуть за левый край; запоминается на устройстве
+  function setPW(w) { w = Math.round(Math.max(380, Math.min(w, innerWidth - 80))); document.documentElement.style.setProperty("--pw", w + "px"); return w; }
+  (function () { var w = +LS.get("zd-pw"); if (w) setPW(w); })();
+  var PWD = null;
+  $("panel").addEventListener("pointerdown", function (e) {
+    if (!e.target.classList.contains("grip")) return;
+    e.preventDefault(); PWD = { id: e.pointerId }; $("panel").classList.add("drag"); e.target.setPointerCapture(e.pointerId);
+  });
+  $("panel").addEventListener("pointermove", function (e) { if (PWD) setPW(innerWidth - e.clientX); });
+  $("panel").addEventListener("pointerup", function (e) { if (!PWD) return; var w = setPW(innerWidth - e.clientX); LS.set("zd-pw", String(w)); PWD = null; $("panel").classList.remove("drag"); });
+  $("panel").addEventListener("dblclick", function (e) { if (e.target.classList.contains("grip")) { LS.del("zd-pw"); document.documentElement.style.removeProperty("--pw"); toast("Ширина по умолчанию"); } });
   function autoH(el) { el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; }
   function renderPanel() {
     var t = task(OPEN), P = $("panel");
-    if (!t) { OPEN = null; P.hidden = true; return; }
+    if (!t) { OPEN = null; P.hidden = true; document.body.classList.remove("pnopen", "pnfull"); return; }
     var p = proj(t.pid), par = task(t.parent), tg = t.tags || [], kids = tkids(t.id), date = t.at ? dKey(t.at) : "", time = t.at && !t.allday ? hm(t.at) : "";
     var ex = {}; ex[t.id] = 1; tdesc(t.id).forEach(function (d) { ex[d.id] = 1; });
     var cand = tasks().filter(function (x) { return !x.done && !ex[x.id] && (x.pid || "") === (t.pid || ""); }).slice(0, 300);
     var crumbs = (p ? ppath(p).map(function (x) { return esc(x.n); }).join(" / ") : "Входящие") + (par ? " · ↳ " + esc(par.t.slice(0, 50)) : "");
-    var h = '<div class="pn-top"><div class="crumbs">' + crumbs + '</div><button type="button" data-p="flag" class="' + (t.flag ? "on" : "") + '" title="' + (t.flag ? "Снять флажок" : "Флажок") + '">⚑</button><button type="button" data-p="del" title="Удалить задачу">🗑</button><button type="button" data-p="close" title="Закрыть (Esc)" aria-label="Закрыть">✕</button></div>';
+    var full = LS.get("zd-pfull") === "1";
+    var h = '<div class="pn-top"><div class="crumbs">' + crumbs + '</div><button type="button" class="pw-btn" data-p="full" title="' + (full ? "Свернуть в панель" : "Развернуть на весь экран") + '" aria-label="' + (full ? "Свернуть в панель" : "Развернуть на весь экран") + '">' + (full ? "⤡" : "⤢") + '</button><button type="button" data-p="flag" class="' + (t.flag ? "on" : "") + '" title="' + (t.flag ? "Снять флажок" : "Флажок") + '">⚑</button><button type="button" data-p="del" title="Удалить задачу">🗑</button><button type="button" data-p="close" title="Закрыть (Esc)" aria-label="Закрыть">✕</button></div>';
     h += '<div class="pn-title"><button class="ck' + (t.prio ? " p" + t.prio : "") + (t.done ? " dn" : "") + '" type="button" data-p="toggle" aria-label="' + (t.done ? "Вернуть в работу" : "Готово") + '"></button><textarea id="pn-t" rows="1" aria-label="Название задачи" placeholder="Название задачи">' + esc(t.t) + "</textarea></div>";
     h += '<div class="props">' +
       '<span>Срок</span><div class="v"><input type="date" data-pf="date" value="' + date + '"><input type="time" data-pf="time" value="' + time + '"' + (date ? "" : " disabled") + '><select data-pf="rep"' + (date ? "" : " disabled") + ">" + Object.keys(REPN).map(function (k) { return '<option value="' + k + '"' + ((t.rep || "") === k ? " selected" : "") + ">" + REPN[k] + "</option>"; }).join("") + "</select>" + (date ? '<button class="btn sm" type="button" data-p="nodate" title="Убрать срок">✕</button>' : "") + "</div>" +
@@ -1582,7 +1604,8 @@ CREATE TABLE inbox (
       kids.sort(cmpBy("date")).map(function (k) { return '<div class="sr' + (k.done ? " done" : "") + '"><button class="ck' + (k.prio ? " p" + k.prio : "") + (k.done ? " dn" : "") + '" type="button" data-p="subtoggle" data-id="' + k.id + '" aria-label="Готово"></button><a data-p="open" data-id="' + k.id + '">' + esc(k.t) + (tkids(k.id).length ? ' <span class="muted">· ' + tkids(k.id).length + "</span>" : "") + (k.at ? ' <span class="muted">· ' + esc(whenTxt(k)) + "</span>" : "") + "</a></div>"; }).join("") +
       '<input id="pn-sub" placeholder="+ Подзадача — Enter (можно: завтра, #тег, !1)"></div>';
     h += '<p class="pn-foot">Создана: ' + new Date(t.created || t.upd || Date.now()).toLocaleString("ru-RU") + (t.upd ? " · изменена: " + new Date(t.upd).toLocaleString("ru-RU") : "") + (t.src === "tg" ? " · из Telegram" : "") + "</p>";
-    P.innerHTML = h; P.hidden = false;
+    P.innerHTML = '<div class="grip" title="Потяните, чтобы изменить ширину; двойной клик — ширина по умолчанию"></div><div class="pn-sc"><div class="pn-in">' + h + "</div></div>";
+    P.hidden = false; P.classList.toggle("full", full); document.body.classList.add("pnopen"); document.body.classList.toggle("pnfull", full);
     autoH($("pn-t"));
     try { document.execCommand("defaultParagraphSeparator", false, "p"); } catch (er) { /* старый браузер */ }
   }
@@ -1597,6 +1620,7 @@ CREATE TABLE inbox (
     var el = e.target.closest("[data-p]"); if (!el) return;
     var a = el.dataset.p, t = task(OPEN); if (!t) return;
     if (a === "close") { closeTask(); return; }
+    if (a === "full") { LS.set("zd-pfull", LS.get("zd-pfull") === "1" ? "0" : "1"); flushBody(); renderPanel(); return; }
     if (a === "del") { flushBody(); del(t); return; }
     if (a === "flag") { setTask(function (x) { x.flag = !x.flag; }); return; }
     if (a === "toggle") { flushBody(); toggle(t); renderPanel(); return; }
