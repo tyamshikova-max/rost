@@ -346,6 +346,40 @@ ol.steps li { margin: 6px 0 }
 .mcell.today .dn { background: var(--acc); color: #fff }
 .mcell .more { font-size: 11.5px; color: var(--muted); cursor: pointer; padding-left: 4px }
 @media (max-width: 860px) { .calwrap { grid-template-columns: 1fr } .calside { position: static; max-height: 240px } .mcell { min-height: 74px } .cbody { height: 62vh } }
+/* --- матрица, привычки, статистика --- */
+.mxgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px }
+.mxq { border-top: 4px solid var(--qc); min-height: 220px }
+@media (max-width: 760px) { .mxgrid { grid-template-columns: 1fr } }
+.habit { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--hc, var(--acc)); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px }
+.habit.arch { opacity: .7 }
+.habit .hh { display: flex; gap: 12px; align-items: center; flex-wrap: wrap }
+.habit .hi { font-size: 26px }
+.habit .hn { flex: 1 1 200px; min-width: 0 } .habit .hn b { cursor: pointer; font-size: 16px } .habit .hn b:hover { color: var(--acc) }
+.habit .hs { display: flex; gap: 14px; font: 600 14px var(--mono) }
+.hweek { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap }
+.hweek > div { display: grid; justify-items: center; gap: 2px; font-size: 11px; color: var(--muted) }
+.hc { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--hc); background: none; cursor: pointer; font-weight: 700; color: #fff; padding: 0 }
+.hc.ok { background: var(--hc) } .hc.part { background: color-mix(in srgb, var(--hc) 40%, transparent); color: var(--fg) }
+.hc.off { border-style: dashed; opacity: .45 } .hc.fut { opacity: .25; cursor: default } .hc.today { box-shadow: 0 0 0 3px var(--acc-soft) }
+.heat { display: grid; grid-template-rows: repeat(7, 9px); grid-auto-flow: column; grid-auto-columns: 9px; gap: 2px; margin-top: 10px; overflow-x: auto }
+.heat i { background: var(--hover); border-radius: 2px } .heat i.ok { background: var(--hc) } .heat i.part { background: color-mix(in srgb, var(--hc) 45%, var(--hover)) } .heat i.miss { background: color-mix(in srgb, var(--warn) 25%, var(--hover)) }
+.htoday { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0 }
+.hchip { border: 1px solid var(--hc); background: var(--panel); border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: 13.5px; color: var(--fg) }
+.hchip.ok { background: var(--hc); color: #fff }
+.hform .icg { max-width: 640px }
+.stgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-top: 12px }
+.stc { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 2px }
+.stc b { font: 700 24px var(--sans) } .stc span { color: var(--muted); font-size: 13px } .stc small { font-size: 12px; color: var(--muted) }
+.chart { width: 100%; height: auto; max-width: 900px; display: block }
+.st2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px } @media (max-width: 760px) { .st2 { grid-template-columns: 1fr } }
+.hbar { display: grid; grid-template-columns: minmax(0, 160px) minmax(0, 1fr) 36px; gap: 8px; align-items: center; font-size: 13px; margin: 5px 0 }
+.hbar span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .hbar i { height: 12px; border-radius: 6px; display: block } .hbar b { font: 600 12px var(--mono); text-align: right }
+/* --- голос и ИИ --- */
+.mic { padding: 7px 10px } .mic.rec { background: var(--p1); border-color: var(--p1); color: #fff; animation: micp 1.2s infinite }
+@keyframes micp { 50% { opacity: .55 } }
+.aibox { border: 1px solid var(--acc); border-radius: 10px; padding: 12px; margin: 12px 0; background: color-mix(in srgb, var(--acc) 5%, var(--panel)); display: grid; gap: 8px }
+.aibox ol { margin: 0; padding-left: 22px } .aibox li { margin: 3px 0 }
+.aibtn { border: 1px solid var(--acc); color: var(--acc); background: var(--panel) }
 /* --- панель задачи --- */
 .task.open { background: var(--acc-soft) }
 #panel { position: fixed; z-index: 35; top: 56px; right: 0; bottom: 0; width: var(--pw, 620px); max-width: calc(100vw - 80px); background: var(--panel); border-left: 1px solid var(--line); box-shadow: var(--shadow); display: flex }
@@ -857,7 +891,7 @@ CREATE TABLE inbox (
   /* ---------- состояние ---------- */
   var COLORS = [["Зелёный", "#2f8f6f"], ["Синий", "#3b78d0"], ["Фиолетовый", "#8a5cc7"], ["Розовый", "#d0508a"], ["Красный", "#d1453b"], ["Оранжевый", "#df8a1c"], ["Жёлтый", "#c9a21a"], ["Бирюзовый", "#1b9aaa"], ["Коричневый", "#8d6748"], ["Серый", "#7d8783"]];
   var S = (function () { try { return JSON.parse(LS.get("zd-state") || "null"); } catch (e) { return null; } })() || {};
-  S.v = 2; S.tasks = S.tasks || []; S.projects = S.projects || []; S.tags = S.tags || []; S.filters = S.filters || []; S.sprints = S.sprints || []; S.comments = S.comments || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
+  S.v = 2; S.tasks = S.tasks || []; S.projects = S.projects || []; S.tags = S.tags || []; S.filters = S.filters || []; S.sprints = S.sprints || []; S.comments = S.comments || []; S.habits = S.habits || []; S.hlog = S.hlog || []; S.acts = S.acts || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
   var VIEWS = (function () { try { return JSON.parse(LS.get("zd-views") || "{}") || {}; } catch (e) { return {}; } })();
   function save(quiet) { S.at = Date.now(); LS.set("zd-state", JSON.stringify(S)); if (!quiet) { SYNC.later(); SRV.later(); } }
   function live(a) { return a.filter(function (x) { return !x.del; }); }
@@ -869,7 +903,8 @@ CREATE TABLE inbox (
   function prune() {
     var tl = Date.now() - 30 * 864e5;
     ["tasks", "projects", "tags", "filters"].forEach(function (k) { S[k].forEach(function (x) { if (x.del && !x.purged && (x.delAt || x.upd || 0) < tl) { x.purged = 1; x.t = ""; x.note = ""; x.body = ""; if (k !== "tasks") x.n = ""; } }); });
-    var lim = Date.now() - 60 * 864e5; ["tasks", "projects", "tags", "filters", "sprints", "comments"].forEach(function (k) { S[k] = S[k].filter(function (x) { return !x.del || x.upd > lim; }); }); }
+    var al = Date.now() - 400 * 864e5; S.acts = S.acts.filter(function (x) { return (x.d || 0) > al; });
+    var lim = Date.now() - 60 * 864e5; ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog"].forEach(function (k) { S[k] = S[k].filter(function (x) { return !x.del || x.upd > lim; }); }); }
 
   /* --- проекты: дерево любой глубины --- */
   function projects() { return live(S.projects); }
@@ -1133,8 +1168,8 @@ CREATE TABLE inbox (
     (b || []).forEach(function (x) { var y = m[x.id]; if (!y || (x.upd || 0) > (y.upd || 0)) m[x.id] = x; });
     return Object.keys(m).map(function (k) { return m[k]; });
   }
-  var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments"];
-  function snapshot() { return { v: 2, tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, opt: S.opt }; }
+  var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts"];
+  function snapshot() { return { v: 2, tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, opt: S.opt }; }
   var SYNC = {
     st: "off", at: 0, msg: "", parts: null, last: "", t: null, busy: false,
     enabled: function () { return YD.on && !!YD.token(); },
@@ -1208,6 +1243,11 @@ CREATE TABLE inbox (
       var rr = ruleStr(t), at = nextOcc(remAt(t), ruleOf(t), now);
       if (at > now) out["t:" + t.id] = { id: "t:" + t.id, at: at, text: t.t, rrule: rr, task: t.id };
     });
+    habits().forEach(function (h) {
+      if (h.arch || !/^\d\d:\d\d$/.test(h.time || "")) return;
+      var d = new Date(); d.setHours(+h.time.slice(0, 2), +h.time.slice(3, 5), 0, 0);
+      for (var i = 0; i < 8; i++) { var c = addDays(d.getTime(), i); if (c > now && hDue(h, c) && hCount(h, dKey(c)) < (h.goal || 1)) { out["h:" + h.id] = { id: "h:" + h.id, at: c, text: (h.ic || "🔁") + " Привычка: " + h.n, rrule: (h.days || []).length ? "R|w|1|" + h.days.join(",") + "||" + new Date().getTimezoneOffset() : "R|d|1|||" + new Date().getTimezoneOffset(), task: "" }; break; } }
+    });
     return out;
   }
   var SRV = {
@@ -1277,6 +1317,135 @@ CREATE TABLE inbox (
     }
   };
 
+  /* ---------- голосовой ввод (распознавание речи браузера) ---------- */
+  var REC = null;
+  function voice(btn) {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { toast("Голосовой ввод не поддерживается этим браузером — работает в Chrome, Edge и Яндекс Браузере"); return; }
+    if (REC) { try { REC.stop(); } catch (e) { /* ok */ } return; }
+    var inp = $(btn.dataset.for); if (!inp) return;
+    var base = inp.value ? inp.value.replace(/\s*$/, " ") : "", r = new SR();
+    r.lang = "ru-RU"; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+    r.onresult = function (e) { var txt = ""; for (var i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript; inp.value = base + txt; inp.dispatchEvent(new Event("input", { bubbles: true })); };
+    r.onerror = function (e) { toast(e.error === "not-allowed" ? "Нет доступа к микрофону — разрешите его в настройках сайта" : e.error === "no-speech" ? "Ничего не слышно — попробуйте ещё раз" : "Голосовой ввод: " + e.error); };
+    r.onend = function () { REC = null; [].forEach.call(document.querySelectorAll(".mic.rec"), function (b) { b.classList.remove("rec"); }); inp.focus(); if (inp.id === "qa" && inp.value.trim()) toast("Проверьте текст и нажмите Enter или «Добавить»"); };
+    REC = r; btn.classList.add("rec");
+    try { r.start(); toast("Говорите…"); } catch (e) { REC = null; btn.classList.remove("rec"); toast("Не удалось включить микрофон"); }
+  }
+
+  /* ---------- ИИ-помощник: те же сервисы и настройки, что в «Электронном универе» (ключ хранится только в этом браузере) ---------- */
+  var OAI = {
+    openai: { n: "ChatGPT", url: "https://api.openai.com/v1/chat/completions", models: ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini", "gpt-4o"], json: true, keys: "platform.openai.com → API keys" },
+    openrouter: { n: "OpenRouter", url: "https://openrouter.ai/api/v1/chat/completions", models: ["openai/gpt-4.1-mini", "anthropic/claude-sonnet-4", "deepseek/deepseek-chat", "google/gemini-2.5-flash"], json: false, keys: "openrouter.ai → Keys" },
+    deepseek: { n: "DeepSeek", url: "https://api.deepseek.com/chat/completions", models: ["deepseek-chat"], json: true, keys: "platform.deepseek.com → API keys" }
+  };
+  var AI = {
+    cfg: function () { try { return JSON.parse(LS.get("skv-ai") || "{}") || {}; } catch (e) { return {}; } },
+    setCfg: function (c) { LS.set("skv-ai", JSON.stringify(c)); },
+    ready: function () { var c = AI.cfg(); if (c.prov === "yandex") return !!c.url && !!c.secret; if (OAI[c.prov]) return !!c.key; return false; },
+    name: function () { var c = AI.cfg(); return c.prov === "yandex" ? "YandexGPT" : OAI[c.prov] ? OAI[c.prov].n : "ИИ"; },
+    busy: false,
+    text: function (prompt, wantJson) {
+      var c = AI.cfg(), o = OAI[c.prov], req;
+      if (o) {
+        var body = { model: c.model || o.models[0], messages: [{ role: "user", content: prompt }], temperature: 0.3, max_tokens: 3000 };
+        if (wantJson && o.json) body.response_format = { type: "json_object" };
+        var hd = { "Content-Type": "application/json", Authorization: "Bearer " + c.key };
+        if (c.prov === "openrouter") { hd["HTTP-Referer"] = location.origin; hd["X-Title"] = "Zadachi"; }
+        req = fetch(o.url, { method: "POST", headers: hd, body: JSON.stringify(body) });
+      } else req = fetch(c.url, { method: "POST", headers: { "Content-Type": "application/json", "X-App-Key": c.secret }, body: JSON.stringify({ model: c.model || "yandexgpt/latest", prompt: prompt, maxTokens: 3000, temperature: 0.3 }) });
+      return req.catch(function () { throw { msg: "нет связи с сервисом " + AI.name() }; }).then(function (r) {
+        return r.text().then(function (t) {
+          var j = null; try { j = JSON.parse(t); } catch (e) { /* не JSON */ }
+          var em = j && j.error ? (typeof j.error === "string" ? j.error : (j.error.message || j.error.code || "")) : (t || "").slice(0, 200);
+          if (r.status === 401) throw { msg: "ключ не подошёл (401)" };
+          if (r.status === 402 || (r.status === 429 && /quota|insufficient|billing/i.test(em))) throw { msg: "закончились деньги на счёте сервиса" };
+          if (r.status === 403) throw { msg: "сервис отказал в доступе (403) — возможно, недоступен из вашей страны" };
+          if (r.status === 429) throw { msg: "слишком много запросов — подождите минуту" };
+          if (!r.ok) throw { msg: "ошибка " + r.status + (em ? ": " + String(em).slice(0, 160) : "") };
+          var txt = o ? (j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) : (j && j.text);
+          if (!txt) throw { msg: "пустой ответ" };
+          return txt;
+        });
+      });
+    },
+    json: function (prompt) {
+      return AI.text(prompt + "\n\nОтветь только JSON, без пояснений и без markdown.", true).then(function (t) {
+        var x = String(t).replace(/^\s*```(?:json)?/i, "").replace(/```\s*$/, ""), a = x.indexOf("{"), b = x.lastIndexOf("}");
+        try { return JSON.parse(x.slice(a, b + 1)); } catch (e) { throw { msg: "ИИ ответил не в том формате — попробуйте ещё раз" }; }
+      });
+    }
+  };
+  var AIP = null; // предложение ИИ, ожидающее подтверждения: {kind, items, note}
+  function aiRun(label, fn) {
+    if (!AI.ready()) { toast("Подключите ИИ: «Настройки» → «ИИ-помощник»"); go("settings-ai"); return; }
+    if (AI.busy) { toast("ИИ ещё думает…"); return; }
+    AI.busy = true; toast("✨ " + label + "… (" + AI.name() + ")");
+    fn().catch(function (e) { toast("ИИ: " + ((e && e.msg) || (e && e.message) || "ошибка")); }).then(function () { AI.busy = false; });
+  }
+  function bodyPlain(t) { return bodyText(t).replace(/\s+/g, " ").slice(0, 3000); }
+  function aiTask(t, kind) {
+    var ctx = "Задача: «" + t.t + "»." + (proj(t.pid) ? " Проект: «" + pname(proj(t.pid)) + "»." : "") + (bodyPlain(t) ? " Описание: «" + bodyPlain(t) + "»." : "") + (tkids(t.id).length ? " Уже есть подзадачи: " + tkids(t.id).map(function (k) { return "«" + k.t + "»"; }).join(", ") + "." : "");
+    if (kind === "sub") aiRun("Разбиваю на подзадачи", function () {
+      return AI.json("Ты помощник по планированию. Разбей задачу на 3–8 конкретных последовательных шагов. Каждый шаг — действие с глаголом в начале, по-русски, до 80 символов, с оценкой в часах (0.25–8). Не повторяй уже существующие подзадачи. " + ctx + ' Формат: {"subtasks":[{"t":"…","est":0.5}]}').then(function (j) {
+        var l = (j.subtasks || []).filter(function (x) { return x && x.t; }).slice(0, 12), made = [];
+        l.forEach(function (x, ix) { var n = newTaskFrom(String(x.t).slice(0, 200), { parent: t.id }); n.ord = 1e9 + Date.now() / 1e6 + ix; n.est = Math.max(0, Math.round((+x.est || 0) * 4) / 4) || undefined; touch(n); made.push(n); });
+        save(); render(); if (OPEN === t.id) renderPanel();
+        toastUndo("✨ Добавлено подзадач: " + made.length, function () { made.forEach(function (n) { trashTask(n); }); });
+      });
+    });
+    if (kind === "check") aiRun("Составляю чек-лист", function () {
+      return AI.json("Составь короткий практичный чек-лист (4–10 пунктов) для выполнения задачи. Пункты — по-русски, конкретные, до 90 символов. " + ctx + ' Формат: {"items":["…"]}').then(function (j) {
+        var items = (j.items || []).filter(Boolean).slice(0, 15); if (!items.length) throw { msg: "пустой список" };
+        t.body = clean((t.body || "") + "<p><b>Чек-лист</b></p><ul class=\"todo\">" + items.map(function (x) { return "<li>" + esc(String(x).slice(0, 200)) + "</li>"; }).join("") + "</ul>"); delete t.note; touch(t); save(); render(); if (OPEN === t.id) renderPanel(); toast("✨ Чек-лист добавлен в описание");
+      });
+    });
+    if (kind === "est") aiRun("Оцениваю время", function () {
+      return AI.json("Оцени, сколько часов займёт задача у одного человека (реалистично, с запасом 20 %). " + ctx + ' Формат: {"hours":1.5,"why":"одно предложение"}').then(function (j) {
+        var hr = Math.max(0.25, Math.round((+j.hours || 0) * 4) / 4); t.est = hr; touch(t); save(); render(); if (OPEN === t.id) renderPanel(); toast("✨ Оценка: " + fmtH(hr) + " ч" + (j.why ? " — " + String(j.why).slice(0, 140) : ""));
+      });
+    });
+  }
+  function aiPlanDay() {
+    var t0 = today0(), now = new Date(), from = Math.max(+S.opt.dayFrom || 9, now.getHours() + 1), to = +S.opt.dayTo || 19;
+    var l = todayList().filter(function (t) { return !t.parent || !task(t.parent); }).slice(0, 40);
+    if (!l.length) { toast("На сегодня задач нет"); return; }
+    var fixed = l.filter(function (t) { return t.at && !t.allday && t.at >= t0; }), free = l.filter(function (t) { return !(t.at && !t.allday && t.at >= t0); });
+    if (!free.length) { toast("У всех задач на сегодня уже есть время"); return; }
+    aiRun("Планирую день", function () {
+      var lines = free.map(function (t) { return t.id + " | " + t.t + " | приоритет " + (t.prio || "обычный") + (t.est ? " | оценка " + t.est + " ч" : "") + (t.due ? " | дедлайн " + dKey(t.due) : "") + (isLate(t) ? " | просрочена" : ""); }).join("\n");
+      var busy = fixed.map(function (t) { return hm(t.at) + "–" + hm(t.at + durOf(t) * 6e4) + " " + t.t; }).join("; ");
+      return AI.json("Составь расписание на сегодня с " + from + ":00 до " + to + ":00. Сначала важное и срочное, тяжёлое — пораньше, между блоками короткие перерывы. Занятое время (не трогать): " + (busy || "нет") + ". Задачи без времени (id | название | …):\n" + lines + '\nЕсли всё не помещается — включи самое важное, остальное не включай. Формат: {"plan":[{"id":"…","start":"HH:MM","min":30}],"note":"одно-два предложения"}').then(function (j) {
+        var items = (j.plan || []).filter(function (x) { return x && task(x.id) && /^\d{1,2}:\d{2}$/.test(x.start || ""); });
+        if (!items.length) throw { msg: "не получилось составить план" };
+        AIP = { kind: "day", items: items, note: j.note || "" }; render(); window.scrollTo(0, 0);
+      });
+    });
+  }
+  function aiSprint(sp) {
+    var cap = +S.opt.cap || 20, st = spStat(sp), bl = tasks().filter(function (t) { return !t.done && !t.sprint && !t.parent; }).slice(0, 80);
+    if (!bl.length) { toast("Бэклог пуст"); return; }
+    aiRun("Подбираю задачи в спринт", function () {
+      var lines = bl.map(function (t) { return t.id + " | " + t.t + " | приоритет " + (t.prio || "обычный") + (t.est ? " | " + t.est + " ч" : " | без оценки") + (t.due ? " | дедлайн " + dKey(t.due) : "") + (proj(t.pid) ? " | " + proj(t.pid).n : ""); }).join("\n");
+      return AI.json("Помоги спланировать недельный спринт. Вместимость недели " + cap + " ч, уже запланировано " + st.est + " ч. Цель спринта: «" + (sp.goal || "не указана") + "». Выбери из бэклога задачи, которые стоит взять: важные, с близкими дедлайнами и подходящие к цели, чтобы суммарно не превысить вместимость (задачи без оценки считай по 1 ч). Бэклог (id | название | …):\n" + lines + '\nФормат: {"take":["id"],"why":"одно-два предложения"}').then(function (j) {
+        var items = (j.take || []).filter(function (id) { return task(id); }).map(function (id) { return { id: id }; });
+        if (!items.length) throw { msg: "ИИ ничего не предложил" };
+        AIP = { kind: "sprint", sp: sp.id, items: items, note: j.why || "" }; render();
+      });
+    });
+  }
+  function aiBox() {
+    if (!AIP || (AIP.kind === "day" && V !== "today") || (AIP.kind === "sprint" && V !== "sprint")) return "";
+    var li = AIP.items.map(function (x) { var t = task(x.id); return t ? "<li>" + (AIP.kind === "day" ? "<b>" + esc(x.start) + "</b> · " + esc(t.t) + ' <span class="muted">(' + (+x.min || 30) + " мин)</span>" : esc(t.t) + (t.est ? ' <span class="muted">· ' + fmtH(t.est) + " ч</span>" : "")) + "</li>" : ""; }).join("");
+    return '<div class="aibox"><b>✨ ' + (AIP.kind === "day" ? "План дня от " : "Предложение в спринт от ") + esc(AI.name()) + "</b>" + (AIP.note ? '<span class="muted">' + esc(AIP.note) + "</span>" : "") + "<ol>" + li + '</ol><div class="r"><button class="btn pri" type="button" data-a="aiok">Применить</button><button class="btn" type="button" data-a="aino">Отмена</button></div></div>';
+  }
+  function aiApply() {
+    if (!AIP) return;
+    if (AIP.kind === "day") { var t0 = today0(); AIP.items.forEach(function (x) { var t = task(x.id); if (!t) return; var p = x.start.split(":"); t.at = t0 + (+p[0] * 60 + +p[1]) * 6e4; t.allday = false; t.dur = Math.max(15, Math.min(480, Math.round((+x.min || 30) / 5) * 5)); if (S.opt.autoRem) t.rem = true; touch(t); }); toast("План применён — посмотрите в «Календаре»"); }
+    else { AIP.items.forEach(function (x) { var t = task(x.id); if (t) setSprint(t, AIP.sp); }); toast("Взято в спринт: " + AIP.items.length); }
+    AIP = null; save(); render();
+  }
+
   /* ---------- маршруты ---------- */
   var V = "today", ARG = "", OPEN = null, CONF = null, QPV = "", RN = null, POP = null, SUB = null, FE = null;
   function parse() {
@@ -1284,7 +1453,7 @@ CREATE TABLE inbox (
     if ((m = h.match(/^task-(.+)$/))) return { v: "task", a: m[1] };
     if ((m = h.match(/^(proj|tag|filter|sprint)-(.+)$/))) return { v: m[1], a: m[2] };
     if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
-    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal"].indexOf(h) >= 0) return { v: h, a: "" };
+    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "matrix", "habits", "stats"].indexOf(h) >= 0) return { v: h, a: "" };
     return { v: "today", a: "" };
   }
   function go(h) { if (location.hash.slice(1) === h) route(); else location.hash = h; }
@@ -1309,6 +1478,9 @@ CREATE TABLE inbox (
     plans: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h2M12 14h2M8 17h2M12 17h2"/>',
     flag: '<path d="M6 21V4M6 4h11l-2 4 2 4H6"/>',
     sprint: '<path d="M4 18l5-5 4 4 7-8"/><path d="M15 9h5v5"/>',
+    matrix: '<rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.5"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.5"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.5"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.5"/>',
+    habits: '<path d="M12 20.5s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.8a4.3 4.3 0 0 1 7.5 2.7c0 5.4-7.5 10-7.5 10z"/><path d="M9 12.2l2 2 4-4"/>',
+    stats: '<path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/>',
     cal: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4M7.5 13.5h2M11 13.5h2M14.5 13.5h2M7.5 16.5h2M11 16.5h2"/>',
     all: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01" stroke-width="3"/>',
     done: '<circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.3l2.4 2.4 4.8-5"/>',
@@ -1338,7 +1510,7 @@ CREATE TABLE inbox (
     return itemHTML("proj", p.id, "proj-" + p.id, '<span class="dot" style="background:' + col(p.c) + '"></span><span class="pic">' + picon(p) + "</span>", inFav ? pname(p) : p.n, n, { drag: !inFav, pad: inFav ? 0 : d, chev: chev, fav: !!p.fav });
   }
   // левая панель из блоков; порядок блоков и пунктов «Списков» меняется перетаскиванием и хранится в S.opt
-  var SIDE_DEF = ["fav", "lists", "projects", "filters", "tags", "service"], LISTS_DEF = ["inbox", "today", "cal", "sprint", "plans", "flag", "all", "done"];
+  var SIDE_DEF = ["fav", "lists", "projects", "filters", "tags", "service"], LISTS_DEF = ["inbox", "today", "cal", "matrix", "habits", "sprint", "plans", "flag", "all", "done", "stats"];
   function sideOrder() { var o = (S.opt.side || []).filter(function (x) { return SIDE_DEF.indexOf(x) >= 0; }); SIDE_DEF.forEach(function (x) { if (o.indexOf(x) < 0) o.push(x); }); return o; }
   function listsOrder() { var o = (S.opt.lists || []).filter(function (x) { return LISTS_DEF.indexOf(x) >= 0; }); LISTS_DEF.forEach(function (x) { if (o.indexOf(x) < 0) o.push(x); }); return o; }
   function blockHead(id, title, extra) { return '<div class="lab" draggable="true" data-bdrag="' + id + '"' + (id === "projects" ? ' data-droproot="1"' : "") + ' title="Перетащите, чтобы переставить блок"><span class="gh" aria-hidden="true">⠿</span>' + title + (extra || "") + "</div>"; }
@@ -1357,6 +1529,9 @@ CREATE TABLE inbox (
       sprint: function () { return itemHTML("smart", "sprint", "sprint", ic("sprint"), "Спринт", tasks().filter(function (t) { return !t.done && t.sprint === curSprintId(); }).length, { drag: true }); },
       plans: function () { return itemHTML("smart", "plans", "plans", ic("plans"), "Планы", 0, { drag: true }); },
       cal: function () { return itemHTML("smart", "cal", "cal", ic("cal"), "Календарь", 0, { drag: true }); },
+      matrix: function () { return itemHTML("smart", "matrix", "matrix", ic("matrix"), "Матрица", 0, { drag: true }); },
+      habits: function () { var n = habits().filter(function (h) { return !h.arch && hDue(h, today0()) && hCount(h, dKey(today0())) < (h.goal || 1); }).length; return itemHTML("smart", "habits", "habits", ic("habits"), "Привычки", n, { drag: true }); },
+      stats: function () { return itemHTML("smart", "stats", "stats", ic("stats"), "Статистика", 0, { drag: true }); },
       flag: function () { return itemHTML("smart", "flag", "flag", ic("flag"), "С флажком", flagList().length, { drag: true }); },
       all: function () { return itemHTML("smart", "all", "all", ic("all"), "Все задачи", 0, { drag: true }); },
       done: function () { return itemHTML("smart", "done", "done", ic("done"), "Сделано", 0, { drag: true }); }
@@ -1537,7 +1712,7 @@ CREATE TABLE inbox (
       (o.sub ? '<label><input type="checkbox" data-vo="sub"' + (vo.sub ? " checked" : "") + "> с задачами вложенных проектов</label>" : "") + "</div>";
   }
   function addBox() {
-    return '<div class="add"><div class="r1"><input class="t" id="qa" type="text" autocomplete="off" placeholder="Новая задача — например: завтра 10:00 позвонить в банк #дела" value="' + esc(QPV) + '"><button class="btn pri" type="button" data-a="add">Добавить</button></div>' +
+    return '<div class="add"><div class="r1"><input class="t" id="qa" type="text" autocomplete="off" placeholder="Новая задача — например: завтра 10:00 позвонить в банк #дела" value="' + esc(QPV) + '"><button class="btn mic" type="button" data-a="mic" data-for="qa" title="Сказать задачу голосом">🎤</button><button class="btn pri" type="button" data-a="add">Добавить</button></div>' +
       '<div class="pv" id="qpv"></div><div class="hint">Можно сразу: <code>сегодня</code> <code>завтра</code> <code>пт</code> <code>20.10</code> <code>в 18:30</code> · <code>#тег</code> · <code>+Проект</code> · <code>!1</code> приоритет · <code>!!</code> флажок · <code>каждый день</code></div></div>';
   }
 
@@ -1583,14 +1758,18 @@ CREATE TABLE inbox (
       case "sprint": if (v === "~") t.sprint = ""; else { ensureSprint(new Date(v.slice(2) + "T00:00").getTime()); setSprint(t, v); } break;
       case "tag": if (v.charAt(0) !== "#") return; var n = v.slice(1); if ((t.tags || []).indexOf(n) < 0) t.tags = (t.tags || []).concat(n); break;
       case "date": if (v === "z") noDate(); else if (v === "b") setDay(t0); else if (v === "c") setDay(t0 + DAY); else if (v === "d") setDay(t0 + 3 * DAY); else if (v === "e") setDay(t0 + 7 * DAY); else return; break;
+      case "mx": var imp = v === "q1" || v === "q2", urg = v === "q1" || v === "q3", wasImp = isImp(t), wasUrg = isUrg(t);
+        if (imp && !wasImp) { t.prio = 2; } else if (!imp && wasImp) { t.prio = 0; t.flag = false; }
+        if (urg && !wasUrg) setDay(t0); else if (!urg && wasUrg) { setDay(t0 + 7 * DAY); if (t.due && t.due < t0 + urgDays() * DAY) t.due = t0 + 7 * DAY; }
+        break;
       case "day": if (v === "z") noDate(); else if (/^\d{4}-\d\d-\d\d$/.test(v)) setDay(new Date(v + "T00:00").getTime()); else return; break;
       default: return;
     }
     touch(t); save(); render(); if (OPEN === t.id) renderPanel();
   }
-  function std(title, sub, list, o) { return head(title, sub) + addBox() + toolbar(o) + listOrBoard(list, vopt(), o); }
+  function std(title, sub, list, o) { return head(title, sub) + (o && o.pre ? o.pre : "") + addBox() + toolbar(o) + listOrBoard(list, vopt(), o); }
   function vInbox() { return std("Входящие", "Без даты и без проекта: всё, что ещё не разобрано. Сюда же попадают сообщения боту в Telegram.", inboxList(), { empty: "Пусто — всё разобрано 🎉", scope: function (t) { return !t.pid && !t.at && !t.parent; } }); }
-  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
+  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: aiBox() + '<div class="r" style="margin-top:10px"><button class="btn sm aibtn" type="button" data-a="aiday" title="ИИ расставит задачи на сегодня по времени">✨ Спланировать день</button></div>' + habitsToday(), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
   function vPlans() { return std("Планы", "Задачи по датам: просроченные, две недели вперёд и дальше.", tasks().filter(function (t) { return !t.done && (t.at || t.due); }), { plans: true, scope: function (t) { return !!(t.at || t.due); } }); }
   function vFlag() { return std("С флажком", "Задачи, отмеченные флажком 🚩 — важное, к чему нужно вернуться.", flagList(), { empty: "Нет задач с флажком. Флажок ставится кнопкой ⚑ у задачи или «!!» при вводе.", scope: function (t) { return t.flag; } }); }
   function vAll() { return std("Все задачи", "Все невыполненные задачи.", tasks().filter(function (t) { return !t.done; }), { scope: function () { return true; } }); }
@@ -1741,6 +1920,7 @@ CREATE TABLE inbox (
     h += burnSVG(sp);
     if (sp.status !== "done") {
       var bl = tasks().filter(function (t) { return !t.done && !t.sprint; });
+      h += aiBox() + '<div class="r" style="margin-top:14px"><button class="btn sm aibtn" type="button" data-a="aisprint">✨ Подобрать задачи в спринт</button></div>';
       h += "<h2>Бэклог — взять в спринт <span class=\"c\">" + bl.length + "</span></h2><p class=\"muted\" style=\"margin:0\">Задачи без спринта. Кнопка «→ в спринт» у задачи (при наведении) или перетаскивание на «Спринт» в левой панели.</p>" +
         (bl.length ? renderTree(bl.slice(0, 200), "prio", { take: true }) : '<p class="empty">Бэклог пуст.</p>');
     }
@@ -1868,6 +2048,125 @@ CREATE TABLE inbox (
   });
   function calAfterRender() { if (V !== "cal" || CAL.mode === "month") return; var b = $("cbody"); if (b && !CAL.scrolled) { b.scrollTop = 7 * HOUR; CAL.scrolled = true; } }
 
+  /* ---------- матрица Эйзенхауэра ---------- */
+  function urgDays() { return +S.opt.urgDays || 2; }
+  function isImp(t) { return t.prio === 1 || t.prio === 2 || !!t.flag; }
+  function isUrg(t) { var e = effAt(t); return isLate(t) || (!!e && e < today0() + urgDays() * DAY); }
+  function vMatrix() {
+    var l = tasks().filter(function (t) { return !t.done; }), Q = { q1: [], q2: [], q3: [], q4: [] };
+    l.forEach(function (t) { var i = isImp(t), u = isUrg(t); Q[i && u ? "q1" : i ? "q2" : u ? "q3" : "q4"].push(t); });
+    var meta = [["q1", "🔥 Важно и срочно", "Сделать сейчас", "var(--p1)"], ["q2", "🎯 Важно, но не срочно", "Запланировать", "var(--acc)"], ["q3", "⚡ Срочно, но не важно", "Делегировать или сделать быстро", "var(--p2)"], ["q4", "🌫 Не важно и не срочно", "Отложить или удалить", "var(--muted)"]];
+    var h = head("Матрица Эйзенхауэра", "Важное — приоритет 1–2 или флажок; срочное — просрочено или срок в ближайшие дни. Перетащите карточку в другой квадрант — изменятся приоритет и срок.");
+    h += '<div class="tbar"><label>Срочно — срок в ближайшие <select data-urg="1">' + [1, 2, 3, 5, 7].map(function (n) { return '<option value="' + n + '"' + (urgDays() === n ? " selected" : "") + ">" + n + " " + plural(n, ["день", "дня", "дней"]) + "</option>"; }).join("") + "</select></label></div>";
+    h += '<div class="mxgrid">' + meta.map(function (m) {
+      var items = Q[m[0]].sort(cmpBy("date")), ids = {}; items.forEach(function (t) { ids[t.id] = 1; });
+      var roots = items.filter(function (t) { return !t.parent || !ids[t.parent]; });
+      return '<div class="bcol mxq" data-col="mx:' + m[0] + '" style="--qc:' + m[3] + '"><div class="bh"><b>' + m[1] + '</b> <span class="c">' + roots.length + '</span></div><div class="muted" style="margin:-4px 4px 4px">' + m[2] + "</div>" + roots.map(kcard).join("") + "</div>";
+    }).join("") + "</div>";
+    return h;
+  }
+
+  /* ---------- привычки ---------- */
+  var HICONS = ["💧", "🏃", "🧘", "📖", "✍️", "🥗", "😴", "💪", "🚶", "🦷", "💊", "🧠", "🎸", "🗣️", "📵", "🌅", "🧹", "💰", "🙏", "☕"];
+  var HED = null;
+  function habits() { return live(S.habits).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0) || (a.created || 0) - (b.created || 0); }); }
+  function hab(id) { return live(S.habits).filter(function (h) { return h.id === id; })[0] || null; }
+  function hDue(h, ms) { var d = new Date(ms).getDay(); return !(h.days || []).length || h.days.indexOf(d) >= 0; }
+  function hRec(h, day) { return S.hlog.filter(function (x) { return x.id === h.id + "|" + day; })[0] || null; }
+  function hCount(h, day) { var r = hRec(h, day); return r && !r.del ? (+r.n || 0) : 0; }
+  function hMark(h, day, set) {
+    var r = hRec(h, day), goal = h.goal || 1, cur = r && !r.del ? (+r.n || 0) : 0, n = set !== undefined ? set : goal === 1 ? (cur ? 0 : 1) : (cur >= goal ? 0 : cur + 1);
+    if (!r) { r = { id: h.id + "|" + day, h: h.id, day: day }; S.hlog.push(r); }
+    r.n = n; if (n) delete r.del; else r.del = 1; touch(r); save();
+  }
+  // начало учёта: дата создания или самая ранняя отметка
+  function hStart(h) { var st = sod(h.created || Date.now()); S.hlog.forEach(function (x) { if (x.h === h.id && !x.del) { var d = new Date(x.day + "T00:00").getTime(); if (d < st) st = d; } }); return st; }
+  function hDone(h, ms) { return hCount(h, dKey(ms)) >= (h.goal || 1); }
+  function hStreak(h) {
+    var d = today0(), n = 0, g = 0; if (!hDone(h, d)) d = addDays(d, -1);
+    while (g++ < 1500) { if (d < hStart(h)) break; if (hDue(h, d)) { if (hDone(h, d)) n++; else break; } d = addDays(d, -1); }
+    return n;
+  }
+  function hBest(h) {
+    var d = hStart(h), end = today0(), best = 0, cur = 0, g = 0;
+    while (d <= end && g++ < 3000) { if (hDue(h, d)) { if (hDone(h, d)) { cur++; if (cur > best) best = cur; } else if (d < end) cur = 0; } d = addDays(d, 1); }
+    return best;
+  }
+  function hRate(h, days) {
+    var due = 0, ok = 0, st = Math.max(hStart(h), addDays(today0(), -days + 1));
+    for (var d = st; d <= today0(); d = addDays(d, 1)) if (hDue(h, d)) { due++; if (hDone(h, d)) ok++; }
+    return due ? Math.round(ok / due * 100) : 0;
+  }
+  function hCell(h, d) {
+    var day = dKey(d), n = hCount(h, day), goal = h.goal || 1, due = hDue(h, d), fut = d > today0();
+    return '<button type="button" class="hc' + (n >= goal ? " ok" : n ? " part" : "") + (due ? "" : " off") + (fut ? " fut" : "") + (d === today0() ? " today" : "") + '" data-a="hmark" data-h="' + h.id + '" data-d="' + day + '"' + (fut ? " disabled" : "") + ' title="' + esc(dayName(d)) + (goal > 1 ? ": " + n + " из " + goal : "") + '" style="--hc:' + col(h.c || 0) + '">' + (goal > 1 && n && n < goal ? n : n >= goal ? "✓" : "") + "</button>";
+  }
+  function habitForm(h) {
+    h = h || { n: "", ic: "", c: 0, days: [], goal: 1, time: "" };
+    return '<div class="card hform" data-hf="' + (h.id || "new") + '"><div class="r"><label class="f" style="flex:1 1 260px">Привычка<input type="text" class="inp" data-hv="n" value="' + esc(h.n) + '" placeholder="Например: пить воду, 20 минут чтения"></label><label class="f">Сколько раз в день<input type="number" class="inp" min="1" max="20" data-hv="goal" value="' + (h.goal || 1) + '" style="width:90px"></label><label class="f">Напомнить в Telegram<input type="time" class="inp" data-hv="time" value="' + esc(h.time || "") + '"></label></div>' +
+      '<div class="lbl" style="margin-top:8px">Значок</div><div class="icg">' + HICONS.map(function (ic) { return '<button type="button" data-a="hic" data-v="' + ic + '" class="' + (h.ic === ic ? "on" : "") + '">' + ic + "</button>"; }).join("") + "</div>" +
+      '<div class="lbl" style="margin-top:8px">Цвет</div><div class="sw">' + COLORS.map(function (c, i) { return '<button type="button" data-a="hcol" data-c="' + i + '" class="' + ((h.c || 0) === i ? "on" : "") + '" style="background:' + c[1] + '"></button>'; }).join("") + "</div>" +
+      '<div class="lbl" style="margin-top:8px">Дни (не выбрано — каждый день)</div><div class="seg">' + [1, 2, 3, 4, 5, 6, 0].map(function (i) { return '<button type="button" data-a="hday" data-v="' + i + '" class="' + ((h.days || []).indexOf(i) >= 0 ? "on" : "") + '">' + WDS[i] + "</button>"; }).join("") + "</div>" +
+      '<div class="r"><button class="btn pri" type="button" data-a="hsave">' + (h.id ? "Сохранить" : "Добавить привычку") + '</button><button class="btn" type="button" data-a="hcancel">Отмена</button>' + (h.id ? '<button class="btn" type="button" data-a="harch">' + (h.arch ? "Вернуть из архива" : "В архив") + '</button><button class="btn warn" type="button" data-a="hdel" style="margin-left:auto">🗑 Удалить</button>' : "") + "</div></div>";
+  }
+  function vHabits() {
+    var all = habits(), act = all.filter(function (h) { return !h.arch; }), arch = all.filter(function (h) { return h.arch; }), t0 = today0();
+    var h = head("Привычки", "Отмечайте каждый день — клик по кружку. Серия 🔥 — сколько запланированных дней подряд выполнено.") + '<div class="r" style="margin:12px 0">' + (HED === "new" ? "" : '<button class="btn pri" type="button" data-a="hnew">＋ Привычка</button>') + "</div>";
+    if (HED === "new") h += habitForm(null);
+    if (!act.length && HED !== "new") h += '<p class="empty">Привычек пока нет. Например: «Пить воду» 8 раз в день, «Зарядка» по будням, «Читать 20 минут».</p>';
+    var days = []; for (var i = 6; i >= 0; i--) days.push(addDays(t0, -i));
+    h += act.map(function (x) {
+      if (HED === x.id) return habitForm(x);
+      var heat = []; for (var k = 83; k >= 0; k--) { var d = addDays(t0, -k), n = hCount(x, dKey(d)); heat.push('<i class="' + (n >= (x.goal || 1) ? "ok" : n ? "part" : hDue(x, d) && d >= hStart(x) && d < t0 ? "miss" : "") + '" title="' + esc(dayName(d)) + '"></i>'); }
+      return '<div class="habit" style="--hc:' + col(x.c || 0) + '"><div class="hh"><span class="hi">' + (x.ic || "🔁") + '</span><div class="hn"><b data-a="hedit" data-h="' + x.id + '" title="Изменить">' + esc(x.n) + '</b><div class="muted">' + ((x.days || []).length ? "по " + x.days.slice().sort(function (a, b) { return (a + 6) % 7 - (b + 6) % 7; }).map(function (i) { return WDS[i]; }).join(", ") : "каждый день") + ((x.goal || 1) > 1 ? " · " + x.goal + " " + plural(x.goal, ["раз", "раза", "раз"]) + " в день" : "") + (x.time ? " · 🔔 " + x.time : "") + '</div></div><div class="hs"><span title="Серия">🔥 ' + hStreak(x) + '</span><span title="Лучшая серия">🏆 ' + hBest(x) + '</span><span title="За 30 дней">' + hRate(x, 30) + " %</span></div></div>" +
+        '<div class="hweek">' + days.map(function (d) { return '<div><span>' + WDS[new Date(d).getDay()] + "</span>" + hCell(x, d) + "</div>"; }).join("") + '</div><div class="heat" title="12 недель">' + heat.join("") + "</div></div>";
+    }).join("");
+    if (arch.length) h += "<h2>Архив <span class=\"c\">" + arch.length + "</span></h2>" + arch.map(function (x) { return HED === x.id ? habitForm(x) : '<div class="habit arch"><div class="hh"><span class="hi">' + (x.ic || "🔁") + '</span><div class="hn"><b data-a="hedit" data-h="' + x.id + '">' + esc(x.n) + '</b><div class="muted">в архиве · лучшая серия ' + hBest(x) + "</div></div></div></div>"; }).join("");
+    return h;
+  }
+  function habitsToday() {
+    var l = habits().filter(function (h) { return !h.arch && hDue(h, today0()); }); if (!l.length) return "";
+    return '<div class="htoday">' + l.map(function (x) { var n = hCount(x, dKey(today0())), g = x.goal || 1; return '<button type="button" class="hchip' + (n >= g ? " ok" : "") + '" data-a="hmark" data-h="' + x.id + '" data-d="' + dKey(today0()) + '" style="--hc:' + col(x.c || 0) + '" title="Отметить">' + (x.ic || "🔁") + " " + esc(x.n) + (g > 1 ? " · " + n + "/" + g : n ? " ✓" : "") + "</button>"; }).join("") + '<a class="muted" href="#habits" style="align-self:center">все привычки →</a></div>';
+  }
+
+  /* ---------- статистика ---------- */
+  function doneEvents() {
+    var ev = live(S.acts).filter(function (a) { return a.k === "done"; }).map(function (a) { return { t: a.t, d: a.d }; }), seen = {};
+    ev.forEach(function (e) { seen[e.t] = 1; });
+    S.tasks.forEach(function (t) { if (t.done && t.dt && !seen[t.id] && !t.purged) ev.push({ t: t.id, d: t.dt }); });
+    return ev;
+  }
+  function barsSVG(data, opt) {
+    opt = opt || {}; var W = opt.w || 680, H = opt.h || 170, L = 30, B = 22, T = 10, n = data.length, mx = Math.max(1, Math.max.apply(null, data.map(function (x) { return x.v; }))), bw = (W - L - 6) / n;
+    var h = '<svg viewBox="0 0 ' + W + " " + H + '" class="chart" role="img">';
+    [0, .5, 1].forEach(function (f) { var y = T + (H - T - B) * (1 - f); h += '<line x1="' + L + '" x2="' + W + '" y1="' + y + '" y2="' + y + '" style="stroke:var(--line)"/><text x="' + (L - 5) + '" y="' + (y + 4) + '" text-anchor="end" style="fill:var(--muted);font:10px var(--mono)">' + Math.round(mx * f) + "</text>"; });
+    data.forEach(function (x, i) { var bh = (H - T - B) * x.v / mx, X = L + i * bw + bw * .15; h += '<rect x="' + X.toFixed(1) + '" y="' + (H - B - bh).toFixed(1) + '" width="' + (bw * .7).toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="2" style="fill:' + (x.c || "var(--acc)") + '"><title>' + esc(x.title || x.l) + ": " + x.v + "</title></rect>"; if (x.l && (n <= 14 || i % Math.ceil(n / 12) === 0)) h += '<text x="' + (X + bw * .35).toFixed(1) + '" y="' + (H - 7) + '" text-anchor="middle" style="fill:var(--muted);font:10px var(--sans)">' + esc(x.l) + "</text>"; });
+    return h + "</svg>";
+  }
+  function vStats() {
+    var days = +LS.get("zd-stdays") || 30, t0 = today0(), from = addDays(t0, -days + 1), ev = doneEvents().filter(function (e) { return e.d >= from; }), pom = live(S.acts).filter(function (a) { return a.k === "pomo" && a.d >= from; });
+    var per = []; for (var i = 0; i < days; i++) { var d = addDays(from, i), e2 = addDays(d, 1); per.push({ l: days <= 14 ? WDS[new Date(d).getDay()] : String(new Date(d).getDate()), title: dayName(d), v: ev.filter(function (e) { return e.d >= d && e.d < e2; }).length }); }
+    var created = S.tasks.filter(function (t) { return (t.created || 0) >= from && !t.purged; }).length, late = tasks().filter(function (t) { return isLate(t); }).length, open = tasks().filter(function (t) { return !t.done; }).length;
+    // серия дней подряд с выполненными задачами
+    var all = doneEvents(), dset = {}; all.forEach(function (e) { dset[dKey(e.d)] = 1; });
+    var cs = 0, d0 = dset[dKey(t0)] ? t0 : addDays(t0, -1); while (dset[dKey(d0)]) { cs++; d0 = addDays(d0, -1); }
+    var keys = Object.keys(dset).sort(), best = 0, run = 0, prev = null; keys.forEach(function (k) { var ms = new Date(k + "T00:00").getTime(); run = prev !== null && Math.round((ms - prev) / DAY) === 1 ? run + 1 : 1; prev = ms; if (run > best) best = run; });
+    var byP = {}; ev.forEach(function (e) { var t = S.tasks.filter(function (x) { return x.id === e.t; })[0], k = t && t.pid && proj(t.pid) ? t.pid : ""; byP[k] = (byP[k] || 0) + 1; });
+    var pr = Object.keys(byP).map(function (k) { var p = proj(k); return { l: p ? picon(p) + " " + p.n : "📥 Входящие", v: byP[k], c: p ? col(p.c) : "var(--muted)" }; }).sort(function (a, b) { return b.v - a.v; }).slice(0, 8);
+    var wd = [0, 0, 0, 0, 0, 0, 0]; ev.forEach(function (e) { wd[(new Date(e.d).getDay() + 6) % 7]++; });
+    var hl = habits().filter(function (h) { return !h.arch; }), hr = hl.length ? Math.round(hl.reduce(function (a, h) { return a + hRate(h, days); }, 0) / hl.length) : null;
+    var h = head("Статистика", "Сколько вы успеваете: выполненные задачи (и повторяющиеся тоже), помидоры, привычки.");
+    h += '<div class="tbar"><div class="seg">' + [7, 30, 90].map(function (n) { return '<button type="button" data-a="stdays" data-x="' + n + '" class="' + (days === n ? "on" : "") + '">' + n + " дней</button>"; }).join("") + "</div></div>";
+    function card(v, l, s2) { return '<div class="stc"><b>' + v + "</b><span>" + l + "</span>" + (s2 ? '<small>' + s2 + "</small>" : "") + "</div>"; }
+    h += '<div class="stgrid">' + card(ev.length, "выполнено", "в среднем " + String(Math.round(ev.length / days * 10) / 10).replace(".", ",") + " в день") + card(created, "создано", "за " + days + " дней") + card(cs + " " + plural(cs, ["день", "дня", "дней"]), "серия подряд", "лучшая: " + best) + card(pom.length, "помидоров", Math.round(pom.length * 25 / 60 * 10) / 10 + " ч фокуса") + card(open, "открыто сейчас", late ? '<span class="warnc">просрочено: ' + late + "</span>" : "просроченных нет") + (hr !== null ? card(hr + " %", "привычки выполнены", hl.length + " " + plural(hl.length, ["привычка", "привычки", "привычек"])) : "") + "</div>";
+    h += "<h2>Выполнено по дням</h2>" + barsSVG(per);
+    h += '<div class="st2"><div><h2>По проектам</h2>' + (pr.length ? pr.map(function (x) { return '<div class="hbar"><span>' + esc(x.l) + '</span><i style="width:' + Math.round(x.v / pr[0].v * 100) + "%;background:" + x.c + '"></i><b>' + x.v + "</b></div>"; }).join("") : '<p class="muted">Пока нет выполненных задач.</p>') + "</div>" +
+      "<div><h2>По дням недели</h2>" + barsSVG([1, 2, 3, 4, 5, 6, 0].map(function (w, i) { return { l: WDS[w], v: wd[i] }; }), { w: 340, h: 150 }) + "</div></div>";
+    var sp = sprints().filter(function (x) { return x.status === "done" && x.stat; }).slice(-8);
+    if (sp.length) h += "<h2>Спринты: сделано задач</h2>" + barsSVG(sp.map(function (x) { return { l: "Н" + isoWeek(x.start), title: spName(x), v: x.stat.d }; }), { h: 140 });
+    return h;
+  }
+
   function vSearch() {
     var q = ($("q").value || "").trim().toLowerCase(), ws = q.split(/\s+/).filter(Boolean);
     var l = !ws.length ? [] : tasks().filter(function (t) { var hay = (t.t + " " + bodyText(t) + " " + (t.tags || []).map(function (x) { return "#" + x; }).join(" ") + " " + (proj(t.pid) ? pname(proj(t.pid)) : "")).toLowerCase(); return ws.every(function (w) { return hay.indexOf(w) >= 0; }); });
@@ -1897,6 +2196,13 @@ CREATE TABLE inbox (
     if (SRV.st.err) h += '<p class="warnc">' + esc(SRV.st.err) + "</p>";
     h += '<div class="r"><label class="f"><span><input type="checkbox" id="opt-autorem"' + (S.opt.autoRem ? " checked" : "") + "> Ставить напоминание автоматически, если у задачи указано время</span></label></div>" +
       '<div class="r"><label class="f">Напоминание для задач на весь день <select class="inp" id="opt-hour">' + [7, 8, 9, 10, 11, 12].map(function (x) { return '<option value="' + x + '"' + ((S.opt.allDayHour || 9) === x ? " selected" : "") + ">в " + x + ":00</option>"; }).join("") + "</select></label></div></section>";
+    var ac = AI.cfg(), op = OAI[ac.prov];
+    h += '<section class="card" id="s-ai"><h2>ИИ-помощник</h2><p class="muted" style="margin:0">Разбивает задачи на подзадачи, пишет чек-листы, оценивает время, планирует день и подбирает задачи в спринт. Настройки общие с «Электронным универом» в этом браузере; ключ хранится только здесь и уходит только в выбранный сервис. Запросы платные — по тарифам сервиса (обычно копейки за запрос).</p>' +
+      '<div class="r"><label class="f">Сервис<select class="inp" id="ai-prov">' + [["", "не подключён"], ["openai", "ChatGPT (OpenAI) — ключ API"], ["openrouter", "OpenRouter — ChatGPT, Claude, Gemini"], ["deepseek", "DeepSeek — ключ API"], ["yandex", "YandexGPT — через облачную функцию"]].map(function (x) { return '<option value="' + x[0] + '"' + ((ac.prov || "") === x[0] ? " selected" : "") + ">" + x[1] + "</option>"; }).join("") + "</select></label>" +
+      (op ? '<label class="f" style="flex:1 1 260px">Ключ API (' + esc(op.keys) + ')<input type="password" class="inp" id="ai-key" autocomplete="off" value="' + esc(ac.key || "") + '"></label><label class="f">Модель<input type="text" class="inp" id="ai-model" list="ai-models" value="' + esc(ac.model || op.models[0]) + '"><datalist id="ai-models">' + op.models.map(function (m) { return '<option value="' + m + '">'; }).join("") + "</datalist></label>" : "") +
+      (ac.prov === "yandex" ? '<label class="f" style="flex:1 1 260px">Адрес облачной функции<input type="url" class="inp" id="ai-url" value="' + esc(ac.url || "") + '" placeholder="https://functions.yandexcloud.net/…"></label><label class="f">Секрет приложения<input type="text" class="inp" id="ai-secret" value="' + esc(ac.secret || "") + '"></label><label class="f">Модель<input type="text" class="inp" id="ai-model" value="' + esc(ac.model || "yandexgpt/latest") + '"></label>' : "") +
+      '</div><div class="r"><button class="btn pri" type="button" data-a="ai-save">Сохранить</button><button class="btn" type="button" data-a="ai-test"' + (AI.ready() ? "" : " disabled") + '>Проверить связь</button><span class="' + (AI.ready() ? "okc" : "muted") + '">' + (AI.ready() ? "✓ Подключено: " + esc(AI.name()) : "Выберите сервис и нажмите «Сохранить»") + "</span></div>" +
+      '<p class="muted">Как получить ключ — «Справка» → «ИИ-помощник». YandexGPT подключается так же, как в «Электронном универе» (облачная функция-посредник).</p></section>';
     h += '<section class="card" id="s-sync"><h2>Синхронизация через Яндекс Диск</h2>';
     if (!YD.on) h += '<p class="muted" style="margin:0">Работает в приложении по адресу <a href="' + APPURL + '">' + APPURL + "</a>.</p>";
     else if (!YD.token()) h += '<p class="muted" style="margin:0">Задачи, проекты, теги и фильтры будут одинаковыми на компьютере и телефоне. Приложение видит только свою папку в «Приложениях» на Диске.</p><div class="r"><button class="btn pri" type="button" data-a="yd-login">Войти через Яндекс</button></div>';
@@ -1925,6 +2231,12 @@ CREATE TABLE inbox (
     h += '<h2 id="h-menu">Меню задачи и горячие клавиши</h2><p>Правый клик по задаче (на телефоне — долгое нажатие) открывает меню: дата и время ›, Помодоро, приоритет ›, теги ›, чек-лист, завершить ›, флажок, избранное, изменить проект ›, спринт ›, подзадача, родительская задача, вырезать / копировать / вставить / дублировать, ссылка на задачу, удалить; внизу — когда задача создана и изменена. Клавиши работают для задачи под курсором или открытой в карточке:</p><div class="tscroll"><table><tr><th>Клавиши</th><th>Действие</th></tr>' +
       [["Enter", "открыть задачу"], ["Delete / Backspace", "удалить в корзину"], ["Ctrl+C / Ctrl+X", "копировать / вырезать (вместе с подзадачами)"], ["Ctrl+V", "вставить: на задачу под курсором — подзадачей, иначе — в открытый список"], ["Ctrl+D", "дублировать"], ["Ctrl+G", "новый тег"], ["Ctrl+I", "чек-лист в описании"], ["Ctrl+Shift+L", "в избранное"], ["Ctrl+Shift+M", "изменить проект"], ["Alt+Shift+N", "новая подзадача"]].map(function (r) { return "<tr><td><code>" + r[0] + "</code></td><td>" + r[1] + "</td></tr>"; }).join("") + "</table></div>" +
       "<p><b>Помодоро</b> — 25 минут работы над задачей, затем 5 минут перерыва; таймер виден в левом нижнем углу (пауза ⏸, стоп ■, клик по названию открывает задачу), по окончании — звук и уведомление, в задаче копится счётчик 🍅. <b>Избранные задачи</b> (★) собираются наверху левой панели. <b>Ссылка на задачу</b> открывает приложение сразу на ней.</p>";
+    h += '<h2 id="h-ai">Голосовой ввод и ИИ-помощник</h2><ul><li><b>🎤 Голос</b> — кнопка рядом с полем новой задачи (и в комментариях). Скажите, например: «завтра в десять позвонить в банк», проверьте текст и нажмите Enter. Работает в Chrome, Edge и Яндекс Браузере; при первом нажатии браузер спросит доступ к микрофону. Речь распознаёт сервис браузера.</li>' +
+      "<li><b>✨ ИИ-помощник</b> — в карточке задачи кнопка ✨: «Разбить на подзадачи» (с оценками времени), «Чек-лист в описание», «Оценить время». В «Сегодня» — «✨ Спланировать день»: ИИ расставит задачи без времени по часам с учётом занятого времени, вы видите план и нажимаете «Применить». В спринте — «✨ Подобрать задачи в спринт» с учётом вместимости недели и цели.</li>" +
+      "<li><b>Подключение:</b> «Настройки» → «ИИ-помощник». ChatGPT — ключ на platform.openai.com (API keys, нужен пополненный баланс); OpenRouter — openrouter.ai → Keys (там же модели Claude и Gemini); DeepSeek — platform.deepseek.com. YandexGPT — через облачную функцию, как в «Электронном универе». Настройки общие с «Электронным универом» в этом браузере.</li></ul>";
+    h += '<h2 id="h-matrix">Матрица, привычки, статистика</h2><ul><li><b>Матрица Эйзенхауэра</b> делит открытые задачи на четыре квадранта: важное (приоритет 1–2 или флажок) и срочное (просрочено или срок в ближайшие дни — сколько именно, выбирается над матрицей). Перетащите карточку в другой квадрант: «важно» ставит приоритет 2, «не важно» снимает приоритет и флажок, «срочно» ставит срок на сегодня, «не срочно» переносит на неделю вперёд.</li>' +
+      "<li><b>Привычки</b> — «＋ Привычка»: название, сколько раз в день, дни недели, значок, цвет, время напоминания в Telegram. Клик по кружку отмечает день (если раз в день несколько — каждый клик +1). Видны серия 🔥, лучшая серия 🏆, процент за 30 дней и карта за 12 недель. Привычки на сегодня показаны и в «Сегодня». Клик по названию — изменить, в архив или удалить.</li>" +
+      "<li><b>Статистика</b> за 7, 30 или 90 дней: выполнено (вместе с повторяющимися задачами), создано, серия дней подряд, помидоры и часы фокуса, просроченные, привычки, график по дням, по проектам, по дням недели и по спринтам.</li></ul>";
     h += '<h2 id="h-cal">Календарь</h2><p>«Календарь» в левой панели: виды <b>День</b>, <b>Неделя</b>, <b>Месяц</b>, стрелки ‹ › и «Сегодня». Задачи со временем стоят на шкале часов, задачи на весь день и дедлайны (⏰) — в строке «весь день». Перетащите задачу на другой день или час (шаг — 15 минут); потяните нижний край — изменится длительность. Справа — задачи <b>без срока</b>: перетащите любую в календарь, чтобы запланировать. Двойной клик по пустому месту — новая задача на это время. Повторы показаны пунктиром. Клик по дню (числу) открывает его отдельно. Красная линия — текущее время.</p>';
     h += '<h2 id="h-pal">Команды, выделение, порядок</h2><ul><li><b>Ctrl+K</b> (на Mac — ⌘K) — палитра: начните печатать и перейдите к списку, проекту, тегу, фильтру или задаче, выполните команду (тема, узкая панель, список/доска, синхронизация) или сразу создайте задачу из написанного текста — быстрый ввод там тоже работает.</li>' +
       "<li><b>Несколько задач сразу:</b> Ctrl+клик (⌘+клик) отмечает задачи, Shift+клик — диапазон, Ctrl+A — все в списке. Внизу появится панель: готово, срок, проект, приоритет, тег, спринт, флажок, удалить. Esc — снять выделение.</li>" +
@@ -2020,9 +2332,9 @@ CREATE TABLE inbox (
   function renderInner() {
     CC = null;
     $("side").innerHTML = sideHTML();
-    var f = { inbox: vInbox, today: vToday, plans: vPlans, flag: vFlag, all: vAll, done: vDone, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, search: vSearch, settings: vSettings, help: vHelp }[V] || vToday;
+    var f = { inbox: vInbox, today: vToday, plans: vPlans, flag: vFlag, all: vAll, done: vDone, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, matrix: vMatrix, habits: vHabits, stats: vStats, search: vSearch, settings: vSettings, help: vHelp }[V] || vToday;
     var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
-    $("view").classList.toggle("narrow", V === "settings" || V === "help" || V === "trash");
+    $("view").classList.toggle("narrow", V === "settings" || V === "help" || V === "trash" || V === "habits");
     $("view").innerHTML = f();
     if (keepScroll !== null && $("cbody")) $("cbody").scrollTop = keepScroll; else calAfterRender();
     bulkBar();
@@ -2069,14 +2381,17 @@ CREATE TABLE inbox (
     var ni = $("qa"); if (ni) ni.focus();
     toast("Добавлено" + (t.at ? ": " + whenTxt(t) : !t.pid ? " во «Входящие»" : " в «" + proj(t.pid).n + "»"));
   }
+  function logAct(k, tid, extra) { var a = { id: uid(), k: k, t: tid, d: Date.now() }; for (var x in (extra || {})) a[x] = extra[x]; S.acts.push(touch(a)); }
   function toggle(t) {
     if (!t.done && t.rep && t.at) {
+      logAct("done", t.id);
       var nx = nextAfterDone(t);
       if (t.allday) nx = sod(nx);
       if (t.due) t.due = sod(t.due + (nx - t.at));
       t.at = nx; touch(t); save(); render(); toast("Следующий раз: " + whenTxt(t)); return;
     }
     t.done = !t.done; t.dt = t.done ? Date.now() : 0; touch(t);
+    if (t.done) logAct("done", t.id); else { var la = S.acts.filter(function (a) { return a.k === "done" && a.t === t.id && !a.del && a.d > Date.now() - DAY; }).pop(); if (la) { la.del = 1; touch(la); } }
     var n = 0;
     if (t.done) tdesc(t.id).forEach(function (k) { if (!k.done) { k.done = true; k.dt = t.dt; touch(k); n++; } });
     save(); render();
@@ -2270,6 +2585,31 @@ CREATE TABLE inbox (
       case "calmode": CAL.mode = el.dataset.x; LS.set("zd-calmode", CAL.mode); CAL.scrolled = false; render(); return;
       case "calnav": var dx = +el.dataset.x, base = CAL.d || today0(); if (!dx) CAL.d = today0(); else if (CAL.mode === "day") CAL.d = addDays(base, dx); else if (CAL.mode === "week") CAL.d = addDays(base, 7 * dx); else { var mm = new Date(base); mm.setDate(1); mm.setMonth(mm.getMonth() + dx); CAL.d = mm.getTime(); } render(); return;
       case "calday": CAL.d = +el.dataset.x; CAL.mode = "day"; LS.set("zd-calmode", "day"); CAL.scrolled = false; render(); return;
+      case "stdays": LS.set("zd-stdays", el.dataset.x); render(); return;
+      case "hmark": var hh = hab(el.dataset.h); if (hh) { hMark(hh, el.dataset.d); render(); var nn = hCount(hh, el.dataset.d); if (nn >= (hh.goal || 1) && el.dataset.d === dKey(today0())) toast((hh.ic || "🔁") + " " + hh.n + " ✓ · серия " + hStreak(hh)); } return;
+      case "hnew": HED = "new"; render(); setTimeout(function () { var i = document.querySelector('[data-hv="n"]'); if (i) i.focus(); }, 30); return;
+      case "hedit": HED = el.dataset.h; render(); return;
+      case "hcancel": HED = null; render(); return;
+      case "hic": case "hcol": case "hday":
+        var fm = el.closest("[data-hf]"); [].forEach.call(fm.querySelectorAll('[data-a="' + a + '"]'), function (b) { if (a !== "hday") b.classList.remove("on"); }); el.classList.toggle("on", a === "hday" ? !el.classList.contains("on") : true); return;
+      case "hsave":
+        var hf = el.closest("[data-hf]"), gv = function (n) { return hf.querySelector('[data-hv="' + n + '"]').value; }, nm = gv("n").trim(); if (!nm) { toast("Напишите название привычки"); return; }
+        var icb = hf.querySelector('[data-a="hic"].on'), cb = hf.querySelector('[data-a="hcol"].on'), dys = [].map.call(hf.querySelectorAll('[data-a="hday"].on'), function (b) { return +b.dataset.v; });
+        var hx = hf.dataset.hf === "new" ? touch({ id: uid(), created: Date.now(), ord: habits().length }) : hab(hf.dataset.hf);
+        hx.n = nm.slice(0, 80); hx.ic = icb ? icb.dataset.v : "🔁"; hx.c = cb ? +cb.dataset.c : 0; hx.days = dys.length === 7 ? [] : dys; hx.goal = Math.max(1, Math.min(20, +gv("goal") || 1)); hx.time = gv("time") || ""; touch(hx);
+        if (hf.dataset.hf === "new") S.habits.push(hx);
+        HED = null; save(); render(); toast("Привычка сохранена"); return;
+      case "harch": var ha = hab(el.closest("[data-hf]").dataset.hf); if (ha) { ha.arch = !ha.arch; touch(ha); HED = null; save(); render(); } return;
+      case "hdel": var hd = hab(el.closest("[data-hf]").dataset.hf); if (hd) { hd.del = 1; hd.delAt = Date.now(); touch(hd); HED = null; save(); render(); toastUndo("Привычка удалена", function () { delete hd.del; delete hd.delAt; touch(hd); }); } return;
+      case "mic": voice(el); return;
+      case "aiday": aiPlanDay(); return;
+      case "aisprint": var sx = sprint(ARG || curSprintId()); if (sx) aiSprint(sx); return;
+      case "aiok": aiApply(); return;
+      case "aino": AIP = null; render(); return;
+      case "ai-save":
+        var c = AI.cfg(); c.prov = $("ai-prov").value; if ($("ai-key")) c.key = $("ai-key").value.trim(); if ($("ai-url")) c.url = $("ai-url").value.trim(); if ($("ai-secret")) c.secret = $("ai-secret").value.trim(); if ($("ai-model")) c.model = $("ai-model").value.trim();
+        AI.setCfg(c); render(); toast(AI.ready() ? "ИИ подключён: " + AI.name() : c.prov ? "Заполните ключ" : "ИИ отключён"); return;
+      case "ai-test": aiRun("Проверяю связь", function () { return AI.text("Ответь одним словом: работает").then(function (t) { toast("✓ " + AI.name() + " отвечает: " + String(t).slice(0, 60)); }); }); return;
       case "vmode": var vk = VIEWS[curKey()] = VIEWS[curKey()] || {}; vk.mode = el.dataset.x; LS.set("zd-views", JSON.stringify(VIEWS)); render(); return;
       case "mini": document.body.classList.toggle("mini"); LS.set("zd-mini", document.body.classList.contains("mini") ? "1" : "0"); render(); return;
       case "kopen": if (selClick(e, el.dataset.id)) return; openTask(el.dataset.id); return;
@@ -2303,7 +2643,7 @@ CREATE TABLE inbox (
       case "yd-logout": YD.logout(); SYNC.st = "off"; SYNC.show(); render(); toast("Вы вышли из Яндекса на этом устройстве"); return;
       case "sync-now": SYNC.run().then(function () { render(); toast(SYNC.st === "ok" ? "Синхронизировано" : "Нет связи с Диском"); }); return;
       case "export":
-        var blob = new Blob([JSON.stringify({ format: "zadachi-backup", v: 2, at: new Date().toISOString(), tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, opt: S.opt })], { type: "application/json" });
+        var blob = new Blob([JSON.stringify({ format: "zadachi-backup", v: 2, at: new Date().toISOString(), tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, opt: S.opt })], { type: "application/json" });
         var ln = document.createElement("a"); ln.href = URL.createObjectURL(blob); ln.download = "Задачи — копия " + dKey(Date.now()) + ".json"; document.body.appendChild(ln); ln.click(); ln.remove(); setTimeout(function () { URL.revokeObjectURL(ln.href); }, 60000); return;
       case "imp-yes":
         if (!IMPF) return;
@@ -2339,6 +2679,7 @@ CREATE TABLE inbox (
   document.addEventListener("change", function (e) {
     var t = e.target, d = t.dataset || {};
     if (d.vo) { setVopt(d.vo, t.type === "checkbox" ? t.checked : t.value); render(); return; }
+    if (d.urg) { S.opt.urgDays = +t.value; S.opt.upd = Date.now(); save(); render(); return; }
     if (d.cap) { S.opt.cap = Math.max(1, +t.value || 20); S.opt.upd = Date.now(); save(); render(); return; }
     if (d.fq && d.fq !== "text") {
       var f = filt(ARG); if (!f) return; var q = f.q = f.q || fdef();
@@ -2347,6 +2688,7 @@ CREATE TABLE inbox (
       touch(f); save(); render(); return;
     }
     if (t.id === "pparent") { var p = proj(ARG); if (p) { if (t.value && pdesc(p.id).indexOf(t.value) >= 0) { toast("Нельзя вложить проект сам в себя"); return; } moveProj(p.id, t.value || null, "in"); toast(t.value ? "Проект вложен в «" + proj(t.value).n + "»" : "Проект на верхнем уровне"); } return; }
+    if (t.id === "ai-prov") { var c2 = AI.cfg(); c2.prov = t.value; AI.setCfg(c2); render(); return; }
     if (t.id === "opt-autorem") { S.opt.autoRem = t.checked; S.opt.upd = Date.now(); save(); return; }
     if (t.id === "opt-hour") { S.opt.allDayHour = +t.value; S.opt.upd = Date.now(); save(); return; }
     if (t.id === "imp") { if (t.files[0]) { IMPF = t.files[0]; CONF = "import"; render(); } t.value = ""; }
@@ -2384,7 +2726,7 @@ CREATE TABLE inbox (
     var crumbs = (p ? picon(ppath(p)[0]) + " " + ppath(p).map(function (x) { return esc(x.n); }).join(" / ") : "📥 Входящие");
     var anc = [], q = par, g = 0; while (q && g++ < 30) { anc.unshift(q); q = task(q.parent); }
     var full = LS.get("zd-pfull") === "1";
-    var h = '<div class="pn-top"><div class="crumbs">' + crumbs + '</div><button type="button" class="pw-btn" data-p="full" title="' + (full ? "Свернуть в панель" : "Развернуть на весь экран") + '" aria-label="' + (full ? "Свернуть в панель" : "Развернуть на весь экран") + '">' + (full ? "⤡" : "⤢") + '</button><button type="button" data-p="fav" style="' + (t.fav ? "color:var(--star)" : "") + '" title="' + (t.fav ? "Убрать из избранного" : "В избранное") + '">' + (t.fav ? "★" : "☆") + '</button><button type="button" data-p="pomo" title="Помодоро 25 минут">⏱</button><button type="button" data-p="link" title="Скопировать ссылку на задачу">🔗</button><button type="button" data-p="flag" class="' + (t.flag ? "on" : "") + '" title="' + (t.flag ? "Снять флажок" : "Флажок") + '">⚑</button><button type="button" data-p="del" title="Удалить задачу">🗑</button><button type="button" data-p="close" title="Закрыть (Esc)" aria-label="Закрыть">✕</button></div>';
+    var h = '<div class="pn-top"><div class="crumbs">' + crumbs + '</div><button type="button" class="pw-btn" data-p="full" title="' + (full ? "Свернуть в панель" : "Развернуть на весь экран") + '" aria-label="' + (full ? "Свернуть в панель" : "Развернуть на весь экран") + '">' + (full ? "⤡" : "⤢") + '</button><button type="button" data-p="fav" style="' + (t.fav ? "color:var(--star)" : "") + '" title="' + (t.fav ? "Убрать из избранного" : "В избранное") + '">' + (t.fav ? "★" : "☆") + '</button><button type="button" data-p="ai" title="ИИ-помощник: подзадачи, чек-лист, оценка">✨</button><button type="button" data-p="pomo" title="Помодоро 25 минут">⏱</button><button type="button" data-p="link" title="Скопировать ссылку на задачу">🔗</button><button type="button" data-p="flag" class="' + (t.flag ? "on" : "") + '" title="' + (t.flag ? "Снять флажок" : "Флажок") + '">⚑</button><button type="button" data-p="del" title="Удалить задачу">🗑</button><button type="button" data-p="close" title="Закрыть (Esc)" aria-label="Закрыть">✕</button></div>';
     if (anc.length) h += '<div class="pn-par">↑ Родительская задача: ' + anc.map(function (a) { return '<a data-p="open" data-id="' + a.id + '" title="Открыть «' + esc(a.t) + '»">' + esc(a.t.slice(0, 60)) + "</a>"; }).join(" › ") + "</div>";
     h += '<div class="pn-title"><button class="ck' + (t.prio ? " p" + t.prio : "") + (t.done ? " dn" : "") + '" type="button" data-p="toggle" aria-label="' + (t.done ? "Вернуть в работу" : "Готово") + '"></button><textarea id="pn-t" rows="1" aria-label="Название задачи" placeholder="Название задачи">' + esc(t.t) + "</textarea></div>";
     h += '<div class="props">' +
@@ -2409,7 +2751,7 @@ CREATE TABLE inbox (
       if (dd !== lastDay) { out += '<div class="day">' + esc(dd) + "</div>"; lastDay = dd; }
       return out + '<div class="msg" data-cid="' + c.id + '"><div class="mh"><b>' + (c.src === "tg" ? "Telegram" : "Я") + "</b><span>" + hm(c.at) + (c.edited ? " · изменено" : "") + '</span><button type="button" data-p="cedit" title="Изменить">✎</button><button type="button" data-p="cdel" title="Удалить">×</button></div><div class="mb">' + linkify(c.text) + "</div></div>";
     }).join("") + "</div>" + (CED ? '<div class="editing">Редактирование комментария · <a href="#" data-p="ccancel">отмена</a></div>' : "") +
-      '<div class="cin"><textarea id="pn-c" rows="1" placeholder="Комментарий… Enter — отправить, Shift+Enter — новая строка">' + esc(CED ? (live(S.comments).filter(function (c) { return c.id === CED; })[0] || {}).text || "" : "") + '</textarea><button class="btn pri sm" type="button" data-p="csend">' + (CED ? "Сохранить" : "Отправить") + "</button></div></div>";
+      '<div class="cin"><textarea id="pn-c" rows="1" placeholder="Комментарий… Enter — отправить, Shift+Enter — новая строка">' + esc(CED ? (live(S.comments).filter(function (c) { return c.id === CED; })[0] || {}).text || "" : "") + '</textarea><button class="btn mic sm" type="button" data-a="mic" data-for="pn-c" title="Надиктовать комментарий">🎤</button><button class="btn pri sm" type="button" data-p="csend">' + (CED ? "Сохранить" : "Отправить") + "</button></div></div>";
     h += '<p class="pn-foot">Создана: ' + new Date(t.created || t.upd || Date.now()).toLocaleString("ru-RU") + (t.upd ? " · изменена: " + new Date(t.upd).toLocaleString("ru-RU") : "") + (t.src === "tg" ? " · из Telegram" : "") + "</p>";
     P.innerHTML = '<div class="grip" title="Потяните, чтобы изменить ширину; двойной клик — ширина по умолчанию"></div><div class="pn-sc"><div class="pn-in">' + h + "</div></div>";
     P.hidden = false; P.classList.toggle("full", full); document.body.classList.add("pnopen"); document.body.classList.toggle("pnfull", full);
@@ -2447,6 +2789,7 @@ CREATE TABLE inbox (
   function saveTitle() { clearTimeout(TT); TT = null; var t = task(OPEN), el = $("pn-t"); if (!t || !el) return; var v = el.value.replace(/\s+/g, " ").trim(); if (v && v !== t.t) { t.t = v.slice(0, 1000); touch(t); save(); render(); } }
   function bodyLater() { clearTimeout(BT); BT = setTimeout(saveBody, 500); }
   $("panel").addEventListener("click", function (e) {
+    var mb = e.target.closest('[data-a="mic"]'); if (mb) { voice(mb); return; }
     var el = e.target.closest("[data-p]"); if (!el) return;
     var a = el.dataset.p, t = task(OPEN); if (!t) return;
     if (a === "close") { closeTask(); return; }
@@ -2456,6 +2799,7 @@ CREATE TABLE inbox (
     if (a === "fav") { setTask(function (x) { x.fav = !x.fav; }); return; }
     if (a === "pomo") { if (POMO && POMO.tid === t.id) pomoStop(); else pomoStart(t); return; }
     if (a === "link") { copyLink(t); return; }
+    if (a === "ai") { var rc = el.getBoundingClientRect(); ctxShow(rc.left - 180, rc.bottom + 4, [{ c: "sub", i: "⊞", l: "Разбить на подзадачи" }, { c: "check", i: "☑", l: "Чек-лист в описание" }, { c: "est", i: "⏱", l: "Оценить время" }, "-", { c: "cfg", i: "⚙", l: AI.ready() ? "ИИ: " + AI.name() + " — настройки" : "Подключить ИИ…" }], { k: "ai", id: t.id }); return; }
     if (a === "toggle") { flushBody(); toggle(t); renderPanel(); return; }
     if (a === "prio") { setTask(function (x) { x.prio = +el.dataset.v; }); return; }
     if (a === "st") { setTask(function (x) { x.st = el.dataset.v; }); return; }
@@ -2766,7 +3110,7 @@ CREATE TABLE inbox (
     if (!POMO) return;
     if (!POMO.paused && Date.now() >= POMO.end) {
       if (POMO.phase === "work") {
-        var t = task(POMO.tid); if (t) { t.pomo = (t.pomo || 0) + 1; touch(t); save(); render(); if (OPEN === t.id) renderPanel(); }
+        var t = task(POMO.tid); if (t) { t.pomo = (t.pomo || 0) + 1; touch(t); logAct("pomo", t.id, { m: 25 }); save(); render(); if (OPEN === t.id) renderPanel(); }
         pomoNotify("🍅 Помодоро завершён", "перерыв 5 минут" + (t ? " · " + t.t : ""));
         POMO = { tid: POMO.tid, phase: "break", end: Date.now() + 5 * 60e3, paused: false };
       } else { pomoNotify("☕ Перерыв закончился", "можно начинать следующий помидор"); POMO = null; }
@@ -2926,6 +3270,7 @@ CREATE TABLE inbox (
     if (k === "task") { var t = task(id); if (t) taskCmd(t, c); return; }
     if (k === "view") { if (c === "paste-here") pasteInto(null); return; }
     if (k === "bulk") { bulkCmd(c); return; }
+    if (k === "ai") { var ta = task(id); if (c === "cfg") go("settings-ai"); else if (ta) aiTask(ta, c); return; }
     var href = (k === "proj" ? "proj-" : k === "tag" ? "tag-" : "filter-") + id;
     if (c === "open") go(href);
     else if (c === "rename") { RN = { where: "side", k: k, id: id }; render(); }
@@ -3112,7 +3457,7 @@ CREATE TABLE inbox (
   SRV.start();
   pomoTick();
   setInterval(function () { var ae = document.activeElement || {}; if (!document.hidden && !RN && !SUB && !/INPUT|TEXTAREA|SELECT/.test(ae.tagName || "")) render(); }, 60000);
-  window.ZD = { CAL: CAL, occIn: occIn, reorderTask: reorderTask, palBuild: function (q) { palBuild(q); return PAL.items; }, SELS: function () { return selIds(); }, taskCmd: taskCmd, pasteInto: pasteInto, taskMenu: taskMenu, ensureSprint: ensureSprint, monday: monday, setCol: setCol, S: S, parseQuick: parseQuick, nextOcc: nextOcc, ruleText: ruleText, ruleOf: ruleOf, nextAfterDone: nextAfterDone, remWanted: remWanted, mergeList: mergeList, SRV: SRV, filterRes: filterRes, moveProj: moveProj, moveTaskTo: moveTaskTo, task: task };
+  window.ZD = { AI: AI, aiApply: aiApply, setAIP: function (x) { AIP = x; render(); }, habits: habits, hMark: hMark, hStreak: hStreak, doneEvents: doneEvents, CAL: CAL, occIn: occIn, reorderTask: reorderTask, palBuild: function (q) { palBuild(q); return PAL.items; }, SELS: function () { return selIds(); }, taskCmd: taskCmd, pasteInto: pasteInto, taskMenu: taskMenu, ensureSprint: ensureSprint, monday: monday, setCol: setCol, S: S, parseQuick: parseQuick, nextOcc: nextOcc, ruleText: ruleText, ruleOf: ruleOf, nextAfterDone: nextAfterDone, remWanted: remWanted, mergeList: mergeList, SRV: SRV, filterRes: filterRes, moveProj: moveProj, moveTaskTo: moveTaskTo, task: task };
 })();
 </script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
