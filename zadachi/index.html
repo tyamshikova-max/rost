@@ -510,6 +510,10 @@ ol.steps li { margin: 6px 0 }
 .stbody.help { display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px 22px 16px; max-width: 860px }
 .stbody.help > h2:first-child { margin-top: 14px }
 @media (max-width: 760px) { .stnav .hq { flex: 0 0 180px; margin: 0 } .stbody.help { padding: 2px 14px 12px } }
+/* диагностика */
+#diagbox { position: fixed; right: 10px; bottom: 10px; z-index: 200; max-width: min(520px, calc(100vw - 20px)); background: var(--panel); color: var(--fg); border: 2px solid var(--warn); border-radius: 10px; padding: 8px 10px; font: 12px/1.4 var(--mono); box-shadow: 0 6px 20px rgba(0,0,0,.2) }
+#diagbox .dl { margin: 6px 0; max-height: 110px; overflow: auto; color: var(--muted); word-break: break-all }
+#diagbox button { font: inherit; margin-right: 6px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--side); color: var(--fg); cursor: pointer }
 /* секции, колонки, сортировка, просрочка */
 .sech { display: flex; align-items: center; gap: 6px; margin-top: 18px } .sech .sn { cursor: text } .sech .sn:hover { text-decoration: underline dotted }
 .sech .sfold { border: 0; background: none; color: var(--muted); cursor: pointer; padding: 0 2px; font-size: 12px }
@@ -1093,7 +1097,7 @@ CREATE TABLE inbox (
   var S = (function () { try { return JSON.parse(LS.get("zd-state") || "null"); } catch (e) { return null; } })() || {};
   S.v = 2; S.tasks = S.tasks || []; S.projects = S.projects || []; S.tags = S.tags || []; S.filters = S.filters || []; S.sprints = S.sprints || []; S.comments = S.comments || []; S.habits = S.habits || []; S.hlog = S.hlog || []; S.acts = S.acts || []; S.tpls = S.tpls || []; S.flags = S.flags || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
   var VIEWS = (function () { try { return JSON.parse(LS.get("zd-views") || "{}") || {}; } catch (e) { return {}; } })();
-  function save(quiet) { S.at = Date.now(); LS.set("zd-state", JSON.stringify(S)); if (!quiet) { SYNC.later(); SRV.later(); } }
+  function save(quiet) { if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); LS.set("zd-state", JSON.stringify(S)); if (!quiet) { SYNC.later(); SRV.later(); } }
   function live(a) { return a.filter(function (x) { return !x.del; }); }
   // если часы другого устройства спешат, его настройки «новее» навсегда — поэтому метка только растёт
   function optTouch() { S.opt.upd = Math.max(Date.now(), (S.opt.upd || 0) + 1); }
@@ -2890,6 +2894,7 @@ CREATE TABLE inbox (
       (flags().length ? "" : '<p class="muted">Флажков нет — добавьте хотя бы один.</p>') + '</div><div class="r"><button class="btn sm" type="button" data-a="fladd">＋ Добавить флажок</button></div></section>';
     h += '<section class="card" id="s-backup"><h2>Резервная копия</h2><p class="muted" style="margin:0">Все данные одним файлом: задачи, проекты, теги, фильтры, флажки, спринты, комментарии, привычки, шаблоны и настройки. Файл сохраняется на этот компьютер или телефон — храните его где удобно.</p><div class="r"><button class="btn pri" type="button" data-a="export">💾 Сохранить всё в файл</button><label class="btn" style="cursor:pointer">📂 Восстановить из файла…<input type="file" id="imp" hidden accept=".json,application/json"></label></div>' +
       (CONF === "import" ? '<div class="confirm"><b>Восстановить данные из файла «' + esc(IMPF ? IMPF.name : "") + '»?</b><span><b>Заменить</b> — всё станет точно как в файле: то, чего в файле нет, удалится (и на других устройствах после синхронизации). <b>Объединить</b> — записи из файла добавятся к текущим, совпадающие заменятся более свежими версиями.</span><div class="r"><button class="btn pri" type="button" data-a="imp-replace">Заменить всё данными из файла</button><button class="btn" type="button" data-a="imp-yes">Объединить с текущими</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : "") + "</section>";
+    h += '<section class="card" id="s-diag"><h2>Диагностика</h2><p class="muted" style="margin:0">Если что-то работает странно (теряется курсор, не нажимается галочка), включите диагностику, повторите действие и нажмите «Скопировать отчёт» в окошке справа внизу — пришлите текст разработчику. В отчёте нет текста задач, только служебные сведения.</p><div class="r"><button class="btn" type="button" data-a="diag">' + (DIAG.on ? "Выключить диагностику" : "🔍 Включить диагностику") + "</button></div></section>";
     h += '<section class="card" id="s-wipe"><h2>Очистка базы</h2><p class="muted" style="margin:0">Удаляет все задачи, проекты, теги, фильтры, спринты, комментарии, привычки, историю и шаблоны — здесь и, после синхронизации, на других устройствах. Корзина тоже очищается. Флажки и настройки остаются.</p>' +
       (CONF === "wipe" ? '<div class="confirm"><b>Удалить все данные без возможности вернуть?</b><span>Если они могут пригодиться, сначала сохраните копию в файл — из неё всё можно будет восстановить.</span><div class="r"><button class="btn" type="button" data-a="export">💾 Сначала сохранить копию</button><button class="btn warn" type="button" data-a="wipe-yes">Удалить всё</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : '<div class="r"><button class="btn warn" type="button" data-a="wipe">🗑 Очистить всю базу…</button></div>') + "</section>";
     return h;
@@ -2899,7 +2904,7 @@ CREATE TABLE inbox (
   function vSettingsTabs() {
     var cur = stabOf(ARG), parts = vSettings().split('<section'), by = {};
     parts.slice(1).forEach(function (x) {
-      var k = /id="s-srv"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-(sync|backup|wipe)"/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
+      var k = /id="s-srv"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-(sync|backup|wipe|diag)"/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
       by[k] = (by[k] || "") + "<section" + x;
     });
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
@@ -3026,6 +3031,32 @@ CREATE TABLE inbox (
   });
   // любая ошибка — видимой полосой с текстом (чтобы её можно было прислать), приложение продолжает работать
   var ERRS = [];
+  /* ---------- диагностика: что происходит на странице (включается в «Настройки» → «Данные») ---------- */
+  var DIAG = { on: LS.get("zd-diag") === "1", log: [], renders: [] };
+  function dstack() { return String(new Error().stack || "").split("\n").slice(3, 7).map(function (x) { return x.replace(/^\s*at\s*/, "").replace(/\(?https?:[^)]*?\/([^/:)]+):(\d+):\d+\)?/, "$1:$2"); }).join(" ← "); }
+  function dlog(kind, info) { if (!DIAG.on) return; DIAG.log.push(new Date().toLocaleTimeString("ru-RU") + "." + ("00" + (Date.now() % 1000)).slice(-3) + " " + kind + (info ? " " + info : "")); if (DIAG.log.length > 160) DIAG.log.shift(); diagShow(); }
+  function delDesc(el) { if (!el || !el.tagName) return String(el); var d = el.dataset || {}; return el.tagName.toLowerCase() + (el.id ? "#" + el.id : "") + (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 2).join(".") : "") + Object.keys(d).slice(0, 2).map(function (k) { return "[" + k + "=" + String(d[k]).slice(0, 20) + "]"; }).join("") + (el.isConnected ? "" : " (уже удалён со страницы)"); }
+  function diagShow() {
+    var b = $("diagbox");
+    if (!DIAG.on) { if (b) b.remove(); return; }
+    if (!b) { b = document.createElement("div"); b.id = "diagbox"; document.body.appendChild(b); b.addEventListener("click", function (e) { var a = e.target.dataset && e.target.dataset.dg; if (a === "copy") copyText(diagReport(), "Отчёт скопирован — пришлите его"); if (a === "off") { DIAG.on = false; LS.del("zd-diag"); diagShow(); toast("Диагностика выключена"); } if (a === "clr") { DIAG.log = []; DIAG.renders = []; diagShow(); } }); }
+    var now = Date.now(); DIAG.renders = DIAG.renders.filter(function (x) { return now - x < 60000; });
+    b.innerHTML = "<b>Диагностика</b> · перерисовок за минуту: " + DIAG.renders.length + " · в фокусе: " + esc(delDesc(document.activeElement)) + '<div class="dl">' + DIAG.log.slice(-6).map(esc).join("<br>") + '</div><button type="button" data-dg="copy">Скопировать отчёт</button><button type="button" data-dg="clr">Очистить</button><button type="button" data-dg="off">Выключить</button>';
+  }
+  function diagReport() {
+    var sz = 0; try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); sz += k.length + (localStorage.getItem(k) || "").length; } } catch (e) { sz = -1; }
+    return ["Задачи — отчёт диагностики " + new Date().toLocaleString("ru-RU"), "Адрес: " + location.href.split("?")[0] + location.hash, "Браузер: " + navigator.userAgent, "Экран: " + innerWidth + "×" + innerHeight,
+      "Синхронизация: " + (YD.on ? (YD.token() ? "вход выполнен, " + SYNC.st + (SYNC.at ? ", " + new Date(SYNC.at).toLocaleTimeString("ru-RU") : "") : "без входа") : "выключена"), "Сервер: " + (SRV.usable() ? "задан" : "нет"),
+      "Хранилище браузера: ~" + Math.round(sz / 1024) + " КБ (задачи: ~" + Math.round((LS.get("zd-state") || "").length / 1024) + " КБ)", "Скрытые пункты: " + JSON.stringify(hiddenLists()) + " · в настройках: " + JSON.stringify(S.opt.hideLists || []),
+      "Перерисовок за минуту: " + DIAG.renders.length, "", "Журнал:"].concat(DIAG.log).join("\n");
+  }
+  if (DIAG.on) {
+    ["mousedown", "click", "change"].forEach(function (ev) { document.addEventListener(ev, function (e) { if (e.target.closest && e.target.closest("#diagbox")) return; dlog(ev, delDesc(e.target) + (ev === "change" && "checked" in e.target && e.target.type === "checkbox" ? " → " + (e.target.checked ? "вкл" : "выкл") : "")); }, true); });
+    document.addEventListener("focusin", function (e) { dlog("фокус →", delDesc(e.target)); }, true);
+    document.addEventListener("focusout", function (e) { dlog("фокус ушёл с", delDesc(e.target)); }, true);
+    window.addEventListener("error", function (e) { dlog("ОШИБКА", (e.message || "") + " :" + e.lineno); });
+    setTimeout(diagShow, 300);
+  }
   function showErr(msg) {
     ERRS.push(msg); var b = $("errbar"); if (!b) return;
     b.innerHTML = "<b>Ошибка в приложении</b><code>" + esc(msg).slice(0, 400) + '</code><button type="button" data-err="copy">Скопировать для отправки</button><button type="button" data-err="close">Закрыть</button>';
@@ -3041,7 +3072,7 @@ CREATE TABLE inbox (
   // фоновые обновления (синхронизация, Telegram, таймер) ждут, пока человек печатает или выбирает в списке
   var PEND = false;
   function busyUI() { if (GDR || RNX) return true; var a = document.activeElement; return !!(a && (/INPUT|TEXTAREA|SELECT/.test(a.tagName) || a.isContentEditable)) || !!RN || !!SUB || !$("ctx").hidden || !$("pal").hidden || !!DRAG || !!RS; }
-  function softRender() { if (busyUI()) { PEND = true; return; } PEND = false; render(); if (OPEN && !$("panel").contains(document.activeElement)) renderPanel(); }
+  function softRender() { if (busyUI()) { PEND = true; if (DIAG && DIAG.on) dlog("фоновая перерисовка отложена"); return; } PEND = false; render(); if (OPEN && !$("panel").contains(document.activeElement)) renderPanel(); }
   document.addEventListener("focusout", function () { if (PEND) setTimeout(function () { if (PEND && !busyUI()) softRender(); }, 80); });
   // путь до поля, чтобы найти его же после перерисовки
   function fieldKey(el) {
@@ -3059,6 +3090,7 @@ CREATE TABLE inbox (
       if (fk) keep = { k: fk, v: ae.value, dv: ae.defaultValue, s: ae.selectionStart, e: ae.selectionEnd, txt: /^(text|search|url|number|)$/.test(ae.type || "") || ae.tagName === "TEXTAREA", own: ae.id === "qa" || ae.id === "subin" };
     }
     // слишком частые перерисовки — показать, откуда они (для диагностики)
+    if (DIAG && DIAG.on) { DIAG.renders.push(Date.now()); dlog("перерисовка", "← " + dstack()); }
     var now = Date.now(); RTIMES.push(now); if (RTIMES.length > 45) RTIMES.shift();
     if (!RWARN && RTIMES.length >= 40 && now - RTIMES[RTIMES.length - 40] < 3000) { RWARN = true; showErr("Слишком частые перерисовки страницы (40 за 3 с). Скопируйте этот текст и пришлите разработчику · " + V + " · " + String(new Error().stack || "").split("\n").slice(2, 7).join(" ").replace(/\s+/g, " ")); }
     try { renderInner(); } catch (er) {
@@ -3458,6 +3490,7 @@ CREATE TABLE inbox (
         var blob = new Blob([JSON.stringify({ format: "zadachi-backup", v: 2, at: new Date().toISOString(), tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, opt: S.opt })], { type: "application/json" });
         var ln = document.createElement("a"); ln.href = URL.createObjectURL(blob); ln.download = "Задачи — копия " + dKey(Date.now()) + ".json"; document.body.appendChild(ln); ln.click(); ln.remove(); setTimeout(function () { URL.revokeObjectURL(ln.href); }, 60000); return;
       case "wipe": CONF = "wipe"; render(); return;
+      case "diag": if (DIAG.on) { LS.del("zd-diag"); toast("Диагностика выключится после обновления страницы"); } else { LS.set("zd-diag", "1"); toast("Диагностика включится после обновления страницы — обновите её (F5)"); } setTimeout(function () { location.reload(); }, 900); return;
       case "wipe-yes": var wn = wipeAll(); go("inbox"); render(); toast("База очищена" + (wn ? " · удалено задач: " + wn : "")); return;
       case "imp-replace":
         if (!IMPF) return;
