@@ -55,7 +55,8 @@ a { color: var(--acc) }
 .nav .hash { width: 18px; text-align: center; font-weight: 700; flex: none }
 .nav .chev { width: 18px; height: 18px; flex: none; border: 0; background: none; padding: 0; cursor: pointer; color: var(--muted); font-size: 11px; line-height: 18px; border-radius: 4px }
 .nav .chev:hover { background: var(--line) }
-.nav .chev.sp { visibility: hidden }
+.nav .chev.sp { display: none }
+.nav a .chev { order: 2 } .nav a .n, .nav a .fv { order: 3 }
 .nav .fv { border: 0; background: none; cursor: pointer; color: var(--muted); padding: 0 2px; font-size: 14px; opacity: 0; width: 18px }
 .nav a:hover .fv, .nav .fv.on { opacity: 1 } .nav .fv.on { color: var(--star) }
 .nav .fv.dl { font-size: 12px } .nav .fv.dl:hover { filter: none; color: var(--warn) }
@@ -433,34 +434,34 @@ ol.steps li { margin: 6px 0 }
 .pn-subs input { width: 100%; margin-top: 6px; background: var(--bg); border: 1px dashed var(--line); border-radius: 7px; padding: 6px 10px }
 .pn-foot { margin-top: 24px; color: var(--muted); font-size: 12px }
 /* --- редактор тела задачи --- */
-#rte { position: relative; min-height: 160px; outline: none; font-size: 15px; line-height: 1.6; padding: 6px 2px; overflow-wrap: anywhere }
-#rte.empty::before { content: attr(data-ph); color: var(--muted); pointer-events: none; position: absolute; left: 2px; top: 6px }
-#rte > :first-child { margin-top: 0 }
-#rte p { margin: 0 0 6px } #rte div { margin: 0 0 6px }
-#rte h1 { font-size: 24px; margin: 16px 0 6px } #rte h2 { font-size: 19px; margin: 14px 0 6px } #rte h3 { font-size: 16px; margin: 12px 0 4px }
-#rte ul, #rte ol { margin: 0 0 6px; padding-left: 24px }
-#rte ul.todo { list-style: none; padding-left: 2px }
-#rte ul.todo > li { position: relative; padding-left: 28px; margin: 2px 0 }
-#rte ul.todo > li::before { content: ""; position: absolute; left: 2px; top: 4px; width: 16px; height: 16px; border: 2px solid var(--muted); border-radius: 5px; cursor: pointer; box-sizing: border-box }
-#rte ul.todo > li[data-checked="1"] { color: var(--muted); text-decoration: line-through }
-#rte ul.todo > li[data-checked="1"]::before { background: var(--acc); border-color: var(--acc) }
-#rte ul.todo > li[data-checked="1"]::after { content: ""; position: absolute; left: 7px; top: 7px; width: 6px; height: 3px; border: 2px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg) }
-#rte blockquote { margin: 6px 0; padding: 2px 0 2px 14px; border-left: 3px solid var(--acc); color: var(--muted) }
-#rte pre { background: var(--side); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font: 13px/1.5 var(--mono); white-space: pre-wrap; margin: 6px 0 }
-#rte code { font: 13px var(--mono); background: var(--hover); border-radius: 4px; padding: 1px 4px }
-#rte pre code { background: none; padding: 0 }
-#rte mark { background: #fff0a3; color: #1c211f; border-radius: 3px; padding: 0 2px }
-#rte hr { border: 0; border-top: 2px solid var(--line); margin: 14px 0 }
-#rte .callout { background: var(--acc-soft); border-radius: 8px; padding: 10px 14px 10px 40px; position: relative; margin: 6px 0 }
-#rte .callout::before { content: "💡"; position: absolute; left: 12px; top: 9px }
-#rte details { border: 1px solid var(--line); border-radius: 8px; padding: 4px 12px; margin: 6px 0 }
-#rte details > summary { font-weight: 600; cursor: text; list-style: none; position: relative; padding-left: 20px }
-#rte details > summary::-webkit-details-marker { display: none }
-#rte details > summary::before { content: "▸"; position: absolute; left: 0; color: var(--muted); cursor: pointer; width: 18px }
-#rte details[open] > summary::before { content: "▾" }
-#rte table { border-collapse: collapse; width: 100%; margin: 6px 0; table-layout: fixed }
-#rte td, #rte th { border: 1px solid var(--line); padding: 5px 8px; vertical-align: top; min-width: 40px }
-#rte a { color: var(--acc) }
+.rte { position: relative; min-height: 160px; outline: none; font-size: 15px; line-height: 1.6; padding: 6px 2px; overflow-wrap: anywhere }
+.rte.empty::before { content: attr(data-ph); color: var(--muted); pointer-events: none; position: absolute; left: 2px; top: 6px }
+.rte > :first-child { margin-top: 0 }
+.rte p { margin: 0 0 6px } .rte div { margin: 0 0 6px }
+.rte h1 { font-size: 24px; margin: 16px 0 6px } .rte h2 { font-size: 19px; margin: 14px 0 6px } .rte h3 { font-size: 16px; margin: 12px 0 4px }
+.rte ul, .rte ol { margin: 0 0 6px; padding-left: 24px }
+.rte ul.todo { list-style: none; padding-left: 2px }
+.rte ul.todo > li { position: relative; padding-left: 28px; margin: 2px 0 }
+.rte ul.todo > li::before { content: ""; position: absolute; left: 2px; top: 4px; width: 16px; height: 16px; border: 2px solid var(--muted); border-radius: 5px; cursor: pointer; box-sizing: border-box }
+.rte ul.todo > li[data-checked="1"] { color: var(--muted); text-decoration: line-through }
+.rte ul.todo > li[data-checked="1"]::before { background: var(--acc); border-color: var(--acc) }
+.rte ul.todo > li[data-checked="1"]::after { content: ""; position: absolute; left: 7px; top: 7px; width: 6px; height: 3px; border: 2px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg) }
+.rte blockquote { margin: 6px 0; padding: 2px 0 2px 14px; border-left: 3px solid var(--acc); color: var(--muted) }
+.rte pre { background: var(--side); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font: 13px/1.5 var(--mono); white-space: pre-wrap; margin: 6px 0 }
+.rte code { font: 13px var(--mono); background: var(--hover); border-radius: 4px; padding: 1px 4px }
+.rte pre code { background: none; padding: 0 }
+.rte mark { background: #fff0a3; color: #1c211f; border-radius: 3px; padding: 0 2px }
+.rte hr { border: 0; border-top: 2px solid var(--line); margin: 14px 0 }
+.rte .callout { background: var(--acc-soft); border-radius: 8px; padding: 10px 14px 10px 40px; position: relative; margin: 6px 0 }
+.rte .callout::before { content: "💡"; position: absolute; left: 12px; top: 9px }
+.rte details { border: 1px solid var(--line); border-radius: 8px; padding: 4px 12px; margin: 6px 0 }
+.rte details > summary { font-weight: 600; cursor: text; list-style: none; position: relative; padding-left: 20px }
+.rte details > summary::-webkit-details-marker { display: none }
+.rte details > summary::before { content: "▸"; position: absolute; left: 0; color: var(--muted); cursor: pointer; width: 18px }
+.rte details[open] > summary::before { content: "▾" }
+.rte table { border-collapse: collapse; width: 100%; margin: 6px 0; table-layout: fixed }
+.rte td, .rte th { border: 1px solid var(--line); padding: 5px 8px; vertical-align: top; min-width: 40px }
+.rte a { color: var(--acc) }
 #slash, #fmt { position: fixed; z-index: 60; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow) }
 #slash { width: 330px; max-height: 360px; overflow-y: auto; padding: 6px }
 #slash .g { font-size: 12px; color: var(--muted); padding: 6px 8px 2px }
@@ -504,6 +505,15 @@ ol.steps li { margin: 6px 0 }
 .pdot .pi .mico { width: 13px; height: 13px; vertical-align: -2px }
 .gico { display: inline-flex; margin-right: 6px; vertical-align: -2px } .gico .mico { width: 16px; height: 16px }
 .arn .mico, .glab .mico { width: 16px; height: 16px }
+/* описание проекта */
+.pdesc { margin: 4px 0 12px; max-width: 900px }
+.pdh { border: 0; background: none; padding: 2px 0; font: 600 12px/1.4 inherit; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; cursor: pointer; text-align: left; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.pdh .muted { text-transform: none; letter-spacing: 0; font-weight: 400 }
+.pdh:hover { color: var(--fg) }
+#prte { min-height: 44px; margin-top: 4px; padding: 8px 12px; border: 1px solid transparent; border-radius: 10px }
+#prte:hover { border-color: var(--line) }
+#prte:focus { border-color: var(--line); background: var(--panel) }
+#prte.empty::before { left: 12px; top: 8px }
 /* флажки */
 .fli { width: 15px; height: 15px; vertical-align: -3px; flex: none }
 .fli.big { width: 22px; height: 22px }
@@ -1745,6 +1755,7 @@ CREATE TABLE inbox (
   function auxHead(title) { return '<div class="auxh"><h1>' + title + '</h1><button type="button" class="ibtn auxx" data-a="aux-close" title="Закрыть (Esc)" aria-label="Закрыть">' + ic("close") + "</button></div>"; }
   function go(h) { if (location.hash.slice(1) === h) route(); else location.hash = h; }
   function route() {
+    if (BT) saveBody();
     var r = parse();
     if (r.v === "task") { render(); if (task(r.a)) openTask(r.a); else toast("Задача не найдена — возможно, удалена"); return; }
     var same = r.v === V && r.a === ARG;
@@ -2136,6 +2147,8 @@ CREATE TABLE inbox (
     if (isArch(p.id)) { SHOWARCH = true; try { return vProjIn(p); } finally { SHOWARCH = false; } }
     return vProjIn(p);
   }
+  // свёрнуто ли описание проекта (на этом устройстве)
+  function pdFold(p) { var m = {}; try { m = JSON.parse(LS.get("zd-pdfold") || "{}") || {}; } catch (e) { m = {}; } return m[p.id] !== undefined ? !!m[p.id] : false; }
   function vProjIn(p) {
     var vo = vopt(), ids = vo.sub ? pdesc(p.id) : [p.id];
     var l = tasks().filter(function (t) { return ids.indexOf(t.pid) >= 0 && !t.done; });
@@ -2146,6 +2159,9 @@ CREATE TABLE inbox (
     var done = live(S.tasks).filter(function (t) { return ids.indexOf(t.pid) >= 0; }), dn = done.filter(function (t) { return t.done; }).length;
     if (done.length) h += '<div class="pprog" title="Выполнено задач: ' + dn + " из " + done.length + '"><i style="width:' + Math.round(dn / done.length * 100) + '%;background:' + col(p.c) + '"></i></div>';
     if (CONF === "pdel") h += '<div class="confirm"><b>Удалить проект «' + esc(p.n) + '»?</b><span>Задачи не удалятся — они перейдут во «Входящие» (или останутся в «Планах», если у них есть дата). Вложенные проекты поднимутся на уровень выше.</span><div class="r"><button class="btn warn" type="button" data-a="pdel-yes">Удалить проект</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>';
+    var dfold = pdFold(p);
+    h += '<div class="pdesc' + (dfold ? " fold" : "") + '"><button type="button" class="pdh" data-a="pdfold" data-id="' + p.id + '">' + (dfold ? "▸" : "▾") + " Описание" + (dfold && p.body ? ' <span class="muted">· ' + esc(String(p.body).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 80)) + "…</span>" : "") + "</button>" +
+      (dfold ? "" : '<div id="prte" class="rte' + (p.body ? "" : " empty") + '" data-proj="' + p.id + '" contenteditable="true" spellcheck="true" data-ph="Опишите проект: цели, ссылки, заметки… «/» — заголовок, чек-лист, спойлер, таблица">' + (clean(p.body || "") || "<p><br></p>") + "</div>") + "</div>";
     var kids = pkids(p.id);
     h += '<p class="sub">Задач: ' + l.length + (kids.length ? " · подпроекты:" : "") + "</p>";
     if (kids.length) h += '<div class="chips">' + kids.map(function (c) { return '<a class="chip" href="#proj-' + c.id + '"><i style="background:' + col(c.c) + '"></i>' + esc(c.n) + ' <span class="muted">' + tasks().filter(function (t) { return t.pid === c.id && !t.done; }).length + "</span></a>"; }).join("") + "</div>";
@@ -2437,7 +2453,7 @@ CREATE TABLE inbox (
   function tplSave(kind, n, data) { var x = touch({ id: uid(), kind: kind, n: n.slice(0, 80), data: data, created: Date.now() }); S.tpls.push(x); save(); toast("Шаблон «" + x.n + "» сохранён — «Шаблоны» внизу панели, «+» у «Проектов» или Ctrl+K"); return x; }
   function tplFromProject(p) {
     if (!p) return;
-    var ids = pdesc(p.id), projs = ids.map(function (id, i) { var x = proj(id); return { k: id, par: i ? x.parent : "", n: x.n, c: x.c, ic: x.ic || "", ord: x.ord || 0 }; });
+    var ids = pdesc(p.id), projs = ids.map(function (id, i) { var x = proj(id); return { k: id, par: i ? x.parent : "", n: x.n, c: x.c, ic: x.ic || "", ord: x.ord || 0, body: x.body || "" }; });
     tplSave("proj", p.n, { projs: projs, tasks: tplTasks(live(S.tasks).filter(function (t) { return ids.indexOf(t.pid) >= 0; })) });
   }
   function tplFromTask(t) { tplSave("task", t.t, { tasks: tplTasks([t].concat(live(S.tasks).filter(function (x) { return tdescAll(t.id).indexOf(x.id) >= 0; }))) }); }
@@ -2445,7 +2461,7 @@ CREATE TABLE inbox (
   function tplUse(id) {
     var x = tplObj(id); if (!x) return;
     var d = x.data || {}, base = today0(), pmap = {}, tmap = {}, rootP = null, now = Date.now(), ctx = viewCtx();
-    (d.projs || []).forEach(function (q) { var np = newProject(q.n, q.par ? pmap[q.par] || "" : ""); np.c = q.c; if (q.ic) np.ic = q.ic; np.ord = q.par ? q.ord : np.ord; pmap[q.k] = np.id; if (!rootP) rootP = np; });
+    (d.projs || []).forEach(function (q) { var np = newProject(q.n, q.par ? pmap[q.par] || "" : ""); np.c = q.c; if (q.ic) np.ic = q.ic; if (q.body) np.body = q.body; np.ord = q.par ? q.ord : np.ord; pmap[q.k] = np.id; if (!rootP) rootP = np; });
     (d.tasks || []).forEach(function (q, i) { tmap[q.k] = uid(); });
     (d.tasks || []).forEach(function (q, i) {
       var t = { id: tmap[q.k], t: q.t, body: q.body, prio: q.prio, flag: q.flag === true ? defFlag() : q.flag || "", tags: (q.tags || []).slice(), est: q.est, dur: q.dur, allday: q.allday, rep: q.rep, rr: q.rr ? JSON.parse(JSON.stringify(q.rr)) : undefined, rem: q.rem, remOff: q.remOff || undefined, ord: q.ord,
@@ -3146,6 +3162,7 @@ CREATE TABLE inbox (
         var np = newProject("Новый проект", ""); save(); RN = { where: "page", k: "proj", id: np.id }; go("proj-" + np.id); return;
       case "subproj": var sp = newProject("Новый подпроект", ARG); var par = proj(ARG); if (par && par.fold) { par.fold = false; touch(par); } save(); POP = null; RN = { where: "page", k: "proj", id: sp.id }; go("proj-" + sp.id); return;
       case "pdel": trashEntity("proj", ARG); return;
+      case "pdfold": var pf2 = proj(el.dataset.id); if (pf2) { if (BT) saveBody(); var fm = {}; try { fm = JSON.parse(LS.get("zd-pdfold") || "{}") || {}; } catch (er) { fm = {}; } fm[pf2.id] = !pdFold(pf2); LS.set("zd-pdfold", JSON.stringify(fm)); render(); } return;
       case "parch": var pa = proj(el.dataset.id || ARG); if (pa) { POP = null; setArch(pa.id, !pa.arch); } return;
       case "tplsave-p": POP = null; tplFromProject(proj(ARG)); render(); return;
       case "tpl-use": tplUse(el.dataset.id); return;
@@ -3348,7 +3365,7 @@ CREATE TABLE inbox (
       '<span>Входит в</span><div class="v"><select data-pf="parent"><option value="">— это главная задача —</option>' + cand.map(function (x) { return '<option value="' + x.id + '"' + (t.parent === x.id ? " selected" : "") + ">" + esc(x.t.slice(0, 60)) + "</option>"; }).join("") + "</select></div>" +
       '<span>Напоминание</span><div class="v"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-pf="rem"' + (t.rem ? " checked" : "") + (t.at ? "" : " disabled") + "> в Telegram" + (t.at && t.allday ? " в " + (S.opt.allDayHour || 9) + ":00" : "") + "</label>" + (t.rem && t.at ? '<span class="remo">' + REMO.map(function (o) { return '<button type="button" class="chip' + (remOffs(t).indexOf(o) >= 0 ? " on" : "") + '" data-p="remoff" data-v="' + o + '" title="' + (o ? "Напомнить за " + REMN[o] : "Напомнить в момент начала") + '">' + (o ? "за " : "") + REMN[o] + "</button>"; }).join("") + "</span>" : "") + (!t.at ? '<span class="muted">сначала укажите срок</span>' : SRV.ready() ? "" : '<span class="muted">— нужен <a href="#settings-srv">сервер</a></span>') + "</div></div>";
     if (!t.body && t.note) t.body = noteToBody(t.note);
-    h += '<div class="pn-sec"><h3>Описание</h3><div id="rte" class="' + (t.body ? "" : "empty") + '" contenteditable="true" spellcheck="true" data-ph="Опишите задачу… «/» — заголовок, чек-лист, спойлер, таблица">' + (clean(t.body || "") || "<p><br></p>") + "</div></div>";
+    h += '<div class="pn-sec"><h3>Описание</h3><div id="rte" class="rte' + (t.body ? "" : " empty") + '" contenteditable="true" spellcheck="true" data-ph="Опишите задачу… «/» — заголовок, чек-лист, спойлер, таблица">' + (clean(t.body || "") || "<p><br></p>") + "</div></div>";
     h += '<div class="pn-sec pn-subs"><h3>Подзадачи' + (kids.length ? " · " + kids.filter(function (k) { return k.done; }).length + "/" + kids.length : "") + "</h3>" +
       kids.sort(cmpBy("manual")).map(function (k) { return '<div class="sr' + (k.done ? " done" : "") + '"><button class="ck' + (k.prio ? " p" + k.prio : "") + (k.done ? " dn" : "") + '" type="button" data-p="subtoggle" data-id="' + k.id + '" aria-label="Готово"></button><a data-p="open" data-id="' + k.id + '">' + esc(k.t) + (tkids(k.id).length ? ' <span class="muted">· ' + tkids(k.id).length + "</span>" : "") + (k.at ? ' <span class="muted">· ' + esc(whenTxt(k)) + "</span>" : "") + "</a></div>"; }).join("") +
       '<input id="pn-sub" placeholder="+ Подзадача — Enter (можно: завтра, #тег, !1)"></div>';
@@ -3391,10 +3408,15 @@ CREATE TABLE inbox (
   function setTask(f) { var t = task(OPEN); if (!t) return; f(t); touch(t); save(); render(); renderPanel(); }
   var BT = null, TT = null;
   function bodyEmpty(r) { return !r.textContent.trim() && !r.querySelector("hr,table,ul.todo li,img"); }
-  function saveBody() { clearTimeout(BT); BT = null; var t = task(OPEN), r = $("rte"); if (!t || !r) return; var b = bodyEmpty(r) ? "" : clean(r.innerHTML); if (b !== (t.body || "")) { t.body = b; delete t.note; touch(t); save(); render(); } }
+  var BTE = null;
+  function saveBody() {
+    clearTimeout(BT); BT = null; var be = BTE; BTE = null;
+    // описание проекта: сохраняем без перерисовки страницы, чтобы не сбить курсор
+    if (be && be.id === "prte") { var pp = proj(be.dataset.proj); if (pp && document.contains(be)) { var pb = bodyEmpty(be) ? "" : clean(be.innerHTML); if (pb !== (pp.body || "")) { pp.body = pb; touch(pp); save(); } } return; }
+    var t = task(OPEN), r = $("rte"); if (!t || !r) return; var b = bodyEmpty(r) ? "" : clean(r.innerHTML); if (b !== (t.body || "")) { t.body = b; delete t.note; touch(t); save(); render(); } }
   function flushBody() { if (BT) saveBody(); if (TT) saveTitle(); }
   function saveTitle() { clearTimeout(TT); TT = null; var t = task(OPEN), el = $("pn-t"); if (!t || !el) return; var v = el.value.replace(/\s+/g, " ").trim(); if (v && v !== t.t) { t.t = v.slice(0, 1000); touch(t); save(); render(); } }
-  function bodyLater() { clearTimeout(BT); BT = setTimeout(saveBody, 500); }
+  function bodyLater() { var r = rteEl(); if (BTE && BTE !== r) saveBody(); BTE = r; clearTimeout(BT); BT = setTimeout(saveBody, 500); }
   $("panel").addEventListener("click", function (e) {
     var mb = e.target.closest('[data-a="mic"]'); if (mb) { voice(mb); return; }
     var el = e.target.closest("[data-p]"); if (!el) return;
@@ -3483,7 +3505,10 @@ CREATE TABLE inbox (
     })(root);
     return root.innerHTML;
   }
-  function rteEl() { return $("rte"); }
+  // какой редактор сейчас в работе: описание задачи (#rte) или проекта (#prte)
+  var RTE_LAST = null;
+  document.addEventListener("focusin", function (e) { var r = e.target.closest && e.target.closest(".rte"); if (r) { RTE_LAST = r; try { document.execCommand("defaultParagraphSeparator", false, "p"); } catch (er) { /* старый браузер */ } } });
+  function rteEl() { var a = document.activeElement, r = a && a.closest && a.closest(".rte"); if (r) return r; if (RTE_LAST && document.contains(RTE_LAST)) return RTE_LAST; return $("rte") || $("prte"); }
   function inRte(n) { var r = rteEl(); return !!(r && n && (n === r || r.contains(n))); }
   function closestTag(n, tag) { var r = rteEl(); while (n && n !== r) { if (n.nodeType === 1 && n.tagName === tag) return n; n = n.parentNode; } return null; }
   function blockOf(n) { var r = rteEl(); while (n && n !== r) { if (n.nodeType === 1 && /^(P|H1|H2|H3|LI|BLOCKQUOTE|PRE|DIV|SUMMARY|TD|TH)$/.test(n.tagName)) return n; n = n.parentNode; } return null; }
@@ -3631,10 +3656,10 @@ CREATE TABLE inbox (
       $("fmt").hidden = true; FMTR = null; var r = rteEl(); if (r) r.focus();
     }
   });
-  document.addEventListener("selectionchange", function () { if (!OPEN) return; if (SL) slashCheck(); clearTimeout(window.__fs); window.__fs = setTimeout(fmtShow, 30); });
+  document.addEventListener("selectionchange", function () { if (!OPEN && !$("prte")) return; if (SL) slashCheck(); clearTimeout(window.__fs); window.__fs = setTimeout(fmtShow, 30); });
   // события редактора (делегирование: редактор пересоздаётся при открытии задачи)
-  $("panel").addEventListener("input", function (e) {
-    if (e.target.id !== "rte") return;
+  document.addEventListener("input", function (e) {
+    if (!e.target.classList || !e.target.classList.contains("rte")) return;
     if (e.inputType === "insertText" && e.data === "/") {
       var s = getSelection(), n = s.anchorNode, off = s.anchorOffset;
       if (n && n.nodeType === 3 && n.data.charAt(off - 1) === "/" && (off === 1 || /\s/.test(n.data.charAt(off - 2).replace(/\u00a0/, " ")))) { SL = { node: n, off: off - 1, q: "", i: 0 }; slashRender(); }
@@ -3643,8 +3668,8 @@ CREATE TABLE inbox (
     e.target.classList.toggle("empty", bodyEmpty(e.target));
     bodyLater();
   });
-  $("panel").addEventListener("keydown", function (e) {
-    if (e.target.id !== "rte") return;
+  document.addEventListener("keydown", function (e) {
+    if (!e.target.classList || !e.target.classList.contains("rte")) return;
     if (SL) {
       var its = slashItems(SL.q);
       if (e.key === "ArrowDown") { e.preventDefault(); SL.i = (SL.i + 1) % Math.max(1, its.length); slashRender(); return; }
@@ -3678,8 +3703,8 @@ CREATE TABLE inbox (
     }
     if (e.key === " " && b && b.tagName === "SUMMARY") { e.preventDefault(); exc("insertText", " "); return; }
   });
-  $("panel").addEventListener("click", function (e) {
-    var r = rteEl(); if (!r || !r.contains(e.target)) return;
+  document.addEventListener("click", function (e) {
+    var r = e.target.closest && e.target.closest(".rte"); if (!r) return;
     var li = closestTag(e.target, "LI");
     if (li && e.target === li && li.parentNode.classList.contains("todo") && e.clientX - li.getBoundingClientRect().left < 26) {
       e.preventDefault(); if (li.getAttribute("data-checked") === "1") li.removeAttribute("data-checked"); else li.setAttribute("data-checked", "1"); bodyLater(); return;
@@ -3688,15 +3713,15 @@ CREATE TABLE inbox (
     if (sm) { e.preventDefault(); if (e.clientX - sm.getBoundingClientRect().left < 20) { sm.parentNode.open = !sm.parentNode.open; bodyLater(); } }
     var a = closestTag(e.target, "A"); if (a && (e.ctrlKey || e.metaKey)) { e.preventDefault(); window.open(a.href, "_blank", "noopener"); }
   });
-  $("panel").addEventListener("paste", function (e) {
-    if (e.target.id !== "rte" && !inRte(e.target)) return;
+  document.addEventListener("paste", function (e) {
+    if (!e.target.closest || !e.target.closest(".rte")) return;
     var cd = e.clipboardData; if (!cd) return;
     e.preventDefault();
     var html = cd.getData("text/html"), txt = cd.getData("text/plain");
     if (html) exc("insertHTML", clean(html)); else exc("insertText", txt);
     bodyLater();
   });
-  $("panel").addEventListener("focusout", function (e) { if (e.target.id === "rte") { setTimeout(function () { if (!$("slash").contains(document.activeElement)) slashClose(); }, 150); if (BT) saveBody(); } });
+  document.addEventListener("focusout", function (e) { if (e.target.classList && e.target.classList.contains("rte")) { setTimeout(function () { if (!$("slash").contains(document.activeElement)) slashClose(); }, 150); if (BT) saveBody(); } });
 
   /* ---------- Помодоро: 25 минут работы над задачей, потом 5 минут перерыва ---------- */
   var POMO = (function () { try { return JSON.parse(LS.get("zd-pomo") || "null"); } catch (e) { return null; } })();
@@ -3862,7 +3887,7 @@ CREATE TABLE inbox (
     if (c === "del") { del(t); return; }
   }
   document.addEventListener("contextmenu", function (e) {
-    if (!e.target.closest || e.target.closest("#rte,input,textarea,#ctx,#ctx2")) return;
+    if (!e.target.closest || e.target.closest(".rte,input,textarea,#ctx,#ctx2")) return;
     var li = e.target.closest("li.task") || e.target.closest(".kcard"), a = e.target.closest(".nav a[data-k]");
     if (li) { var t = task(li.dataset.id); if (!t) return; e.preventDefault(); ctxShow(e.clientX, e.clientY, taskMenu(t), { k: "task", id: t.id }); return; }
     if (a && a.dataset.k === "smart" && LISTN[a.dataset.id] && a.dataset.id !== "inbox") { e.preventDefault(); ctxShow(e.clientX, e.clientY, [{ c: "open", i: "↗", l: "Открыть" }, { c: "hide", i: ic("eyeoff"), l: "Скрыть из панели" }, { c: "cfg", i: "⚙", l: "Настроить пункты…" }], { k: "list", id: a.dataset.id }); return; }
