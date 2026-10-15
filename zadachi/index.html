@@ -44,7 +44,7 @@ a { color: var(--acc) }
 .ibtn svg, .nav svg { width: 19px; height: 19px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round }
 #menuBtn { display: none }
 .layout { display: grid; grid-template-columns: 270px minmax(0, 1fr); min-height: calc(100% - 56px) }
-.side { background: var(--side); border-right: 1px solid var(--line); padding: 12px 8px 40px; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto }
+.side { background: var(--side); border-right: 1px solid var(--line); padding: 6px 8px 40px; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto }
 .nav a { display: flex; gap: 8px; align-items: center; padding: 6px 8px; border-radius: 8px; color: var(--fg); text-decoration: none; font-size: 14.5px; min-height: 34px; position: relative }
 .nav a:hover { background: var(--hover) }
 .nav a.on { background: var(--acc-soft); color: var(--acc); font-weight: 600 }
@@ -246,12 +246,14 @@ ol.steps li { margin: 6px 0 }
 .board.kb .bh { position: sticky; top: -8px; background: var(--side); z-index: 1; padding-block: 4px }
 @media (max-width: 760px) { .board.kb .bcol { flex-basis: 82vw; max-height: none } }
 /* --- свёрнутая боковая панель: только иконки --- */
-.sidetop { display: flex; justify-content: flex-end; margin: -4px 0 4px }
+.sidetop { position: absolute; top: 4px; right: 6px; z-index: 3; margin: 0 }
+.side > .sblk:first-of-type > .lab:first-child { margin-top: 2px; padding-right: 28px }
+.side > .sblk:first-of-type > .svcbar:first-child { margin-top: 0; border-top: 0; padding-right: 30px }
 .sidetop button { font-size: 16px; color: var(--muted) }
 @media (min-width: 861px) {
   body.mini .layout { grid-template-columns: 58px minmax(0, 1fr) }
   body.mini .side { padding: 10px 6px 40px; overflow-x: hidden }
-  body.mini .sidetop { justify-content: center }
+  body.mini .sidetop { position: static; display: flex; justify-content: center; margin: 0 0 4px }
   body.mini .nav a { justify-content: center; padding: 7px 0 !important; gap: 0 }
   body.mini .nav a .nm, body.mini .nav a .n, body.mini .nav .fv, body.mini .nav .chev, body.mini .side .none { display: none }
   body.mini .nav .dot { width: 12px; height: 12px; margin: 0 }
