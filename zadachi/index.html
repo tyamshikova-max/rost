@@ -528,6 +528,27 @@ ol.steps li { margin: 6px 0 }
 .qfr .chip { font-size: 12.5px; padding: 2px 9px } .qfr input.inp { flex: 1 1 200px; min-width: 0; max-width: 340px; padding: 4px 8px } .qfr .r { margin-left: auto; display: flex; gap: 6px }
 .side .lab button + button { margin-left: 0 }
 label.fn { display: flex; align-items: center; gap: 6px; margin-top: 6px } label.fn input { width: 80px }
+/* учёт времени, вложения, планы по дням, ссылка, печать */
+#ttw { position: fixed; z-index: 45; left: 16px; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 8px; align-items: center; background: var(--panel); border: 1px solid var(--acc); border-radius: 12px; padding: 6px 8px 6px 12px; box-shadow: 0 4px 14px rgba(0,0,0,.14); max-width: min(360px, calc(100vw - 32px)); cursor: pointer }
+#ttw .tp { font: 600 15px var(--mono); color: var(--acc) } #ttw .tn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px }
+#ttw button { border: 1px solid var(--line); background: var(--bg); border-radius: 7px; width: 30px; height: 28px; cursor: pointer; flex: none }
+.ttrun { color: var(--acc); font-weight: 600 } .pn-top button.ttb { color: var(--acc) }
+.pn-files .flist { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px } .pn-files.dropin { outline: 2px dashed var(--acc); outline-offset: 4px; border-radius: 8px }
+.fitem { display: flex; align-items: center; gap: 8px; min-width: 0 } .fitem a { cursor: pointer; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1 } .fitem a:hover { color: var(--acc) }
+.fitem img { width: 56px; height: 42px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); flex: none; background: var(--side) } .fitem .fic { width: 56px; text-align: center; font-size: 22px; flex: none }
+.fpick { cursor: pointer }
+.pmode { margin: 4px 0 10px; gap: 8px }
+.pstrip { display: flex; align-items: center; gap: 6px; margin-bottom: 12px } .ptabs { display: flex; gap: 4px; overflow-x: auto; flex: 1; min-width: 0; scrollbar-width: thin; padding-bottom: 2px }
+.ptab { flex: none; width: 46px; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--fg); cursor: pointer; font: inherit }
+.ptab span { font-size: 11px; color: var(--muted) } .ptab b { font-size: 16px } .ptab i { font-style: normal; font-size: 10px; min-height: 13px; color: var(--acc); font-weight: 600 }
+.ptab.we { background: var(--side) } .ptab.td b { color: var(--acc) } .ptab.on { border-color: var(--acc); background: var(--acc-soft) } .ptab.dropin { outline: 2px dashed var(--acc) }
+.shl .ck { cursor: default } .shl li.task { cursor: default }
+@media print {
+  #side, .top, #panel, #pomo, #ttw, #bulk, #toast, #errbar, #diagbox, .add, .tbar, .qfbar, .modebar, .revhint, .aibox, .acts, .fold, .r, .pmode, .pstrip, .dnh, .dnblk, .pdesc, .sact, .chips, .habt, #scrim { display: none !important }
+  body, .main, #view { background: #fff !important; color: #000 !important } .main { margin: 0 !important; padding: 0 !important } #view { max-width: none !important }
+  li.task { break-inside: avoid; border-bottom: 1px solid #ccc } .ck { border-color: #000 !important; border-radius: 3px !important; background: none !important }
+  .mt, .mt * { color: #333 !important } a { color: #000 !important; text-decoration: none }
+}
 /* свои выпадающие списки в панели вида; справка */
 .tlab { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted) } .ddb.sm { min-width: 0; padding: 4px 10px; font-size: 13px }
 .tbar .lt { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; font: inherit; font-size: 13px; color: var(--fg); cursor: pointer; padding: 3px 4px; border-radius: 6px } .tbar .lt:hover { background: var(--hover) }
@@ -857,7 +878,9 @@ function nextAt(at, rrule, now) {
 // гибкий повтор «R|f|n|дни недели|число месяца|смещение пояса»: f = d (дни), w (недели), m (месяцы), y (годы);
 // дни недели 0–6 через запятую; число месяца или -1 (последний день). Считаем по местному времени пользователя.
 function nextRule(at, p, now) {
-  const DAY = 86400000, f = p[1], n = Math.max(1, +p[2] || 1), wd = p[3] ? p[3].split(",").map(Number) : [], md = +p[4] || 0, off = +p[5] || 0;
+  const DAY = 86400000, f = p[1], n = Math.max(1, +p[2] || 1), wd = p[3] ? p[3].split(",").map(Number) : [], off = +p[5] || 0, endD = +p[6] || 0;
+  // число месяца: «15», несколько «1,15,-1» или n-й день недели «n2:3» (2-я среда; n-1 — последний)
+  const nm = /^n(-?\d):(\d)$/.exec(p[4] || ""), mds = nm ? [] : String(p[4] || "").split(",").map(Number).filter((x) => x);
   const L = (ms) => new Date(ms - off * 60000); // местное время в полях UTC
   const di = (d) => Math.round(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / DAY);
   const last = (y, m) => new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
@@ -868,9 +891,16 @@ function nextRule(at, p, now) {
     let ok = false;
     if (f === "d") ok = dd % n === 0;
     else if (f === "w") { const days = wd.length ? wd : [a.getUTCDay()]; if (days.indexOf(d.getUTCDay()) >= 0) { const wa = di(a) - (a.getUTCDay() + 6) % 7, wdd = di(d) - (d.getUTCDay() + 6) % 7; ok = Math.round((wdd - wa) / 7) % n === 0; } }
-    else if (f === "m") { const mo = (d.getUTCFullYear() - a.getUTCFullYear()) * 12 + d.getUTCMonth() - a.getUTCMonth(); if (mo % n === 0) { const want = md || a.getUTCDate(), l = last(d.getUTCFullYear(), d.getUTCMonth()); ok = want === -1 || want > l ? d.getUTCDate() === l : d.getUTCDate() === want; } }
+    else if (f === "m") {
+      const mo = (d.getUTCFullYear() - a.getUTCFullYear()) * 12 + d.getUTCMonth() - a.getUTCMonth();
+      if (mo % n === 0) {
+        const l = last(d.getUTCFullYear(), d.getUTCMonth());
+        if (nm) ok = d.getUTCDay() === +nm[2] && (+nm[1] === -1 ? d.getUTCDate() + 7 > l : Math.ceil(d.getUTCDate() / 7) === +nm[1]);
+        else ok = (mds.length ? mds : [a.getUTCDate()]).some((want) => (want === -1 || want > l ? d.getUTCDate() === l : d.getUTCDate() === want));
+      }
+    }
     else if (f === "y") { const yr = d.getUTCFullYear() - a.getUTCFullYear(); ok = yr % n === 0 && d.getUTCMonth() === a.getUTCMonth() && d.getUTCDate() === Math.min(a.getUTCDate(), last(d.getUTCFullYear(), d.getUTCMonth())); }
-    if (ok) return cand;
+    if (ok) return endD && cand >= endD + DAY ? 0 : cand;
   }
   return 0;
 }
@@ -1363,7 +1393,13 @@ CREATE TABLE inbox (
     var dd = dayIdx(d) - dayIdx(a), n = Math.max(1, +r.n || 1); if (dd <= 0) return false;
     if (r.f === "d") return dd % n === 0;
     if (r.f === "w") { var wd = r.wd && r.wd.length ? r.wd : [a.getDay()]; if (wd.indexOf(d.getDay()) < 0) return false; var wa = dayIdx(a) - (a.getDay() + 6) % 7, wdx = dayIdx(d) - (d.getDay() + 6) % 7; return Math.round((wdx - wa) / 7) % n === 0; }
-    if (r.f === "m") { var mo = (d.getFullYear() - a.getFullYear()) * 12 + d.getMonth() - a.getMonth(); if (mo % n) return false; var md = +r.md || a.getDate(), last = lastDom(d.getFullYear(), d.getMonth()); return md === -1 || md > last ? d.getDate() === last : d.getDate() === md; }
+    if (r.f === "m") {
+      var mo = (d.getFullYear() - a.getFullYear()) * 12 + d.getMonth() - a.getMonth(); if (mo % n) return false; var last = lastDom(d.getFullYear(), d.getMonth());
+      // «2-я среда», «последняя пятница»
+      if (r.nth) { if (d.getDay() !== +r.nwd) return false; return +r.nth === -1 ? d.getDate() + 7 > last : Math.ceil(d.getDate() / 7) === +r.nth; }
+      var mds = r.mds && r.mds.length ? r.mds : [+r.md || a.getDate()];
+      return mds.some(function (md) { md = +md; return md === -1 || md > last ? d.getDate() === last : d.getDate() === md; });
+    }
     if (r.f === "y") { var yr = d.getFullYear() - a.getFullYear(); if (yr % n || d.getMonth() !== a.getMonth()) return false; var l2 = lastDom(d.getFullYear(), d.getMonth()); return d.getDate() === Math.min(a.getDate(), l2); }
     return false;
   }
@@ -1372,7 +1408,7 @@ CREATE TABLE inbox (
     if (!at || !r) return at;
     if (at > now) return at;
     var a = new Date(at);
-    for (var i = 1; i < 2400; i++) { var d = new Date(a.getFullYear(), a.getMonth(), a.getDate() + i, a.getHours(), a.getMinutes()); if (d.getTime() > now && ruleMatch(r, a, d)) return d.getTime(); }
+    for (var i = 1; i < 2400; i++) { var d = new Date(a.getFullYear(), a.getMonth(), a.getDate() + i, a.getHours(), a.getMinutes()); if (d.getTime() > now && ruleMatch(r, a, d)) return r.endD && d.getTime() >= +r.endD + DAY ? 0 : d.getTime(); }
     return 0;
   }
   // следующий срок после выполнения задачи
@@ -1388,12 +1424,18 @@ CREATE TABLE inbox (
     var n = Math.max(1, +r.n || 1), u = { d: ["день", "дня", "дней"], w: ["неделю", "недели", "недель"], m: ["месяц", "месяца", "месяцев"], y: ["год", "года", "лет"] }[r.f] || ["", "", ""];
     var s = n === 1 ? { d: "каждый день", w: "каждую неделю", m: "каждый месяц", y: "каждый год" }[r.f] : "каждые " + n + " " + plural(n, u);
     if (r.f === "w" && r.wd && r.wd.length) { var w = r.wd.slice().sort(function (a, b) { return (a + 6) % 7 - (b + 6) % 7; }); s = (n === 1 ? (w.join() === "1,2,3,4,5" ? "по будням" : "по " + w.map(function (i) { return WDS[i]; }).join(", ")) : s + " по " + w.map(function (i) { return WDS[i]; }).join(", ")); }
-    if (r.f === "m") s += +r.md === -1 ? " в последний день" : r.md ? ", " + r.md + "-го" : "";
+    // род дня недели: понедельник — «2-й», среда — «2-ю», воскресенье — «2-е»
+    var WDF = ["воскресенье", "понедельник", "вторник", "среду", "четверг", "пятницу", "субботу"], gnd = [2, 0, 0, 1, 0, 1, 1][+r.nwd || 0], end3 = ["й", "ю", "е"][gnd];
+    if (r.f === "m" && r.nth) s += " " + (+r.nth === -1 ? "в " + ["последний", "последнюю", "последнее"][gnd] : (+r.nth === 2 ? "во " : "в ") + r.nth + "-" + end3) + " " + WDF[+r.nwd || 0];
+    else if (r.f === "m" && r.mds && r.mds.length) s += ", " + r.mds.map(function (x) { return +x === -1 ? "в последний день" : x + "-го"; }).join(", ");
+    else if (r.f === "m") s += +r.md === -1 ? " в последний день" : r.md ? ", " + r.md + "-го" : "";
+    if (r.endN) s += " · всего " + r.endN + " " + plural(+r.endN, ["раз", "раза", "раз"]);
+    if (r.endD) s += " · до " + new Date(+r.endD).toLocaleDateString("ru-RU");
     if (r.after) s += " после выполнения";
     return s;
   }
   // правило для сервера напоминаний: R|f|n|дни|число|смещение пояса (повтор «от выполнения» сервер не ведёт — его пересчитывает приложение)
-  function ruleStr(t) { var r = ruleOf(t); if (!r || r.after) return ""; return "R|" + r.f + "|" + (r.n || 1) + "|" + (r.wd || []).join(",") + "|" + (r.md || "") + "|" + new Date().getTimezoneOffset(); }
+  function ruleStr(t) { var r = ruleOf(t); if (!r || r.after) return ""; return "R|" + r.f + "|" + (r.n || 1) + "|" + (r.wd || []).join(",") + "|" + (r.nth ? "n" + r.nth + ":" + (+r.nwd || 0) : r.mds && r.mds.length ? r.mds.join(",") : r.md || "") + "|" + new Date().getTimezoneOffset() + "|" + (r.endD || ""); }
   function effAt(t) { return t.at || t.due || 0; }
   function remAt(t) { return t.allday ? t.at + (S.opt.allDayHour || 9) * 3600e3 : t.at; }
 
@@ -1593,12 +1635,27 @@ CREATE TABLE inbox (
         if (at > now) out[id] = { id: id, at: at, text: off ? "через " + REMN[off] + " — " + t.t : t.t, rrule: off < 1440 ? rr : "", task: t.id };
       });
     });
+    var dg = S.opt.digest;
+    if (dg && dg.on) { var dd0 = new Date(); dd0.setHours(+dg.h || 8, 0, 0, 0); var dat = dd0.getTime(); if (dat <= now) dat = addDays(dat, 1); out["d:digest"] = { id: "d:digest", at: dat, text: digestText(sod(dat)), rrule: "R|d|1|||" + new Date().getTimezoneOffset(), task: "" }; }
     habits().forEach(function (h) {
       if (h.arch || !/^\d\d:\d\d$/.test(h.time || "")) return;
       var d = new Date(); d.setHours(+h.time.slice(0, 2), +h.time.slice(3, 5), 0, 0);
       for (var i = 0; i < 8; i++) { var c = addDays(d.getTime(), i); if (c > now && hDue(h, c) && hCount(h, dKey(c)) < (h.goal || 1)) { out["h:" + h.id] = { id: "h:" + h.id, at: c, text: (h.ic || "🔁") + " Привычка: " + h.n, rrule: (h.days || []).length ? "R|w|1|" + h.days.join(",") + "||" + new Date().getTimezoneOffset() : "R|d|1|||" + new Date().getTimezoneOffset(), task: "" }; break; } }
     });
     return out;
+  }
+  // текст утренней сводки на день: задачи, просроченное, привычки, сделано вчера (по данным на момент отправки на сервер)
+  function digestText(d0) {
+    var end = d0 + DAY, l = tasks().filter(function (t) { return !t.done && !isSome(t) && ((t.at && t.at < end) || (t.due && t.due < end)); });
+    var late = l.filter(function (t) { return (t.at && sod(t.at) < d0) || (t.due && t.due < d0); }), day = l.filter(function (t) { return late.indexOf(t) < 0; }).sort(cmpBy("date"));
+    var hb = habits().filter(function (h) { return !h.arch && hDue(h, d0); }).length, yd = doneEvents().filter(function (e) { return e.d >= d0 - DAY && e.d < d0; }).length;
+    var lines = ["☀ План на " + dayName(d0).toLowerCase() + ": " + day.length + " " + plural(day.length, ["задача", "задачи", "задач"])];
+    day.slice(0, 12).forEach(function (t) { lines.push("• " + (t.at && !t.allday && sod(t.at) === d0 ? hm(t.at) + " " : "") + t.t.slice(0, 70) + (t.prio === 1 ? " ❗" : "")); });
+    if (day.length > 12) lines.push("… и ещё " + (day.length - 12));
+    if (late.length) lines.push("⚠ Просрочено: " + late.length);
+    if (hb) lines.push("🔁 Привычки на день: " + hb);
+    lines.push("✓ Вчера сделано: " + yd);
+    return lines.join("\n").slice(0, 980);
   }
   var REMO = [0, 5, 15, 30, 60, 1440], REMN = { 0: "в момент", 5: "5 мин", 15: "15 мин", 30: "30 мин", 60: "1 ч", 1440: "1 день" };
   function remOffs(t) { var a = (t.remOff || []).filter(function (x) { return REMO.indexOf(x) >= 0; }); return a.length ? a : [0]; }
@@ -1817,6 +1874,7 @@ CREATE TABLE inbox (
   function parse() {
     var h = decodeURIComponent((location.hash || "").slice(1)), m;
     if ((m = h.match(/^task-(.+)$/))) return { v: "task", a: m[1] };
+    if ((m = h.match(/^share-(.+)$/))) return { v: "share", a: m[1] };
     if ((m = h.match(/^(proj|tag|filter|sprint|flag)-(.+)$/))) return { v: m[1], a: m[2] };
     if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
     if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday"].indexOf(h) >= 0) return { v: h, a: "" };
@@ -1880,6 +1938,7 @@ CREATE TABLE inbox (
     gantt: '<path d="M4 4v16"/><rect x="7" y="5.5" width="8" height="3" rx="1.5"/><rect x="10" y="10.5" width="10" height="3" rx="1.5"/><rect x="7" y="15.5" width="6" height="3" rx="1.5"/>',
     archive: '<rect x="3.5" y="4.5" width="17" height="4" rx="1"/><path d="M5 8.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5M10 12.5h4"/>',
     tpl: '<rect x="4" y="4" width="11" height="13" rx="2"/><path d="M9 20h9a2 2 0 0 0 2-2V8M7.5 8.5h4M7.5 12h4"/>',
+    watch: '<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4.2l2.6 1.6M9.5 2.5h5M12 2.5V6"/>',
     help: '<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5v.6M12 16.8v.2"/>'
   };
   function ic(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICO[n] + "</svg>"; }
@@ -2114,6 +2173,7 @@ CREATE TABLE inbox (
     if (t.src === "tg") meta.push("из Telegram");
     if (t.fav) meta.push('<span style="color:var(--star)">★</span>');
     if (t.pomo) meta.push("🍅 " + t.pomo);
+    if (t.ttOn) meta.push('<span class="ttrun">⏲ идёт</span>'); else if (t.tt) meta.push("⏲ " + ttFmt(t.tt));
     meta = meta.filter(function (x) { return x && x !== '<span class="when"></span>'; });
     var ftd = o.dnblock && !t.done && t.ftd === dKey(Date.now());
     if (t.pin && !t.done) meta.unshift('<span class="when" title="Закреплена наверху">📌</span>');
@@ -2341,9 +2401,56 @@ CREATE TABLE inbox (
   }
   function std(title, sub, list, o) { return head(title, sub) + (o && o.pre ? o.pre : "") + addBox() + toolbar(o) + listOrBoard(list, vopt(), o); }
   function vInbox() { return std("Входящие", "Без даты и без проекта: всё, что ещё не разобрано. Сюда же попадают сообщения боту в Telegram.", inboxList(), { empty: "Пусто — всё разобрано 🎉", scope: function (t) { return !t.pid && !t.at && !t.parent; } }); }
+  // ссылка на список: задачи упаковываются прямо в адрес (сжато), сервер не нужен; по ссылке — только просмотр
+  function b64u(u8) { var s2 = ""; for (var i = 0; i < u8.length; i += 0x8000) s2 += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s2).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+  function unb64u(s2) { s2 = s2.replace(/-/g, "+").replace(/_/g, "/"); while (s2.length % 4) s2 += "="; var b = atob(s2), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+  function shareList() {
+    var rows = [].slice.call(document.querySelectorAll("#view li.task")).filter(function (li) { return !li.closest(".dnblk"); }), items = [];
+    rows.forEach(function (li) { var t = task(li.dataset.id); if (!t) return; var d = Math.max(0, Math.round(((parseFloat(li.style.paddingLeft) || 4) - 4) / 26)); items.push({ t: t.t, a: t.at || 0, ad: t.allday ? 1 : 0, du: t.due || 0, x: t.done ? 1 : 0, p: t.prio || 0, d: d }); });
+    if (!items.length) { toast("В этом списке нечего отправлять"); return; }
+    var title = V === "proj" && proj(ARG) ? proj(ARG).n : V === "tag" ? "#" + ARG : V === "filter" && filt(ARG) ? filt(ARG).n : V === "plans" && PDAY ? "Планы на " + dayName(PDAY).toLowerCase() : LISTN[V] || "Список";
+    var st = new Blob([JSON.stringify({ n: title, at: Date.now(), i: items.slice(0, 400) })]).stream().pipeThrough(new CompressionStream("deflate"));
+    new Response(st).arrayBuffer().then(function (ab) { var url = APPURL + "#share-" + b64u(new Uint8Array(ab)); copyText(url, "Ссылка скопирована — отправьте её. По ней список можно посмотреть и скопировать к себе"); });
+  }
+  var SHARE = { k: "", d: null, err: "" };
+  function shareLoad() {
+    if (SHARE.k === ARG) return; SHARE = { k: ARG, d: null, err: "" };
+    try { var st = new Blob([unb64u(ARG)]).stream().pipeThrough(new DecompressionStream("deflate")); new Response(st).text().then(function (txt) { if (SHARE.k !== ARG) return; SHARE.d = JSON.parse(txt); render(); }).catch(function () { SHARE.err = "Ссылка повреждена или обрезана"; render(); }); }
+    catch (e) { SHARE.err = "Ссылка повреждена или обрезана"; }
+  }
+  function vShare() {
+    shareLoad();
+    if (SHARE.err) return head("Список по ссылке", esc(SHARE.err));
+    if (!SHARE.d) return head("Список по ссылке", "Открываю…");
+    var d = SHARE.d, h = head(esc(d.n), "Список по ссылке · только просмотр · отправлен " + new Date(d.at).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }));
+    h += '<div class="r" style="margin:6px 0 14px"><button type="button" class="btn pri sm" data-a="share-import">＋ Скопировать к себе новым проектом</button></div><ul class="list shl">';
+    (d.i || []).forEach(function (x) { h += '<li class="task' + (x.x ? " done" : "") + '" style="padding-left:' + (4 + (x.d || 0) * 26) + 'px"><span class="ck' + (x.p ? " p" + x.p : "") + '"></span><div class="bd"><div class="tt">' + esc(x.t) + '</div><div class="mt">' + (x.a ? '<span class="when">' + esc(dayName(x.a) + (x.ad ? "" : ", " + hm(x.a))) + "</span>" : "") + (x.du ? "<span>⏰ до " + esc(dayName(x.du).toLowerCase()) + "</span>" : "") + "</div></div></li>"; });
+    return h + "</ul>";
+  }
+  function shareImport() {
+    var d = SHARE.d; if (!d) return; var p = newProject(d.n || "Из ссылки", ""), stack = [], now = Date.now();
+    (d.i || []).forEach(function (x, i) { var t = touch({ id: uid(), t: String(x.t || "").slice(0, 1000), at: +x.a || 0, allday: !!x.ad, due: +x.du || 0, prio: +x.p || 0, done: !!x.x, dt: x.x ? now : 0, pid: p.id, parent: "", tags: [], created: now - i, ord: i }); stack.length = Math.min(stack.length, x.d || 0); if (x.d && stack[x.d - 1]) t.parent = stack[x.d - 1]; stack[x.d || 0] = t.id; S.tasks.push(t); });
+    save(); toast("Скопировано в проект «" + p.n + "»"); go("proj-" + p.id);
+  }
   function vSomeday() { return std("Когда-нибудь", "Идеи и дела «не сейчас». Они не попадают во «Входящие» и «Сегодня», пока вы не назначите им дату.", somedayList(), { empty: "Пусто. Отправить задачу сюда — меню задачи → «Установить дату» → «Когда-нибудь» (Alt+O).", scope: isSome }); }
-  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: aiBox() + '<div class="r" style="margin-top:10px"><button class="btn sm aibtn" type="button" data-a="aiday" title="ИИ расставит задачи на сегодня по времени">✨ Спланировать день</button></div>' + habitsToday(), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
-  function vPlans() { return std("Планы", "Задачи по датам: просроченные, две недели вперёд и дальше.", tasks().filter(function (t) { return !t.done && (t.at || t.due); }), { plans: true, scope: function (t) { return !!(t.at || t.due); } }); }
+  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: aiBox() + '<div class="r" style="margin-top:10px"><button class="btn sm aibtn" type="button" data-a="aiday" title="ИИ расставит задачи на сегодня по времени">✨ Спланировать день</button><button class="btn sm" type="button" data-a="print" title="Распечатать план на сегодня">🖨 Распечатать</button><button class="btn sm" type="button" data-a="share" title="Ссылка на этот список для другого человека — только просмотр">🔗 Поделиться</button></div>' + habitsToday(), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
+  var PDAY = 0, PFROM = 0;
+  function pFrom() { if (!PFROM) PFROM = monday(Date.now()); return PFROM; }
+  function onDay(t, d0) { return (t.at && sod(t.at) === d0) || (t.due && sod(t.due) === d0); }
+  function vPlans() {
+    var mode = LS.get("zd-plansmode") === "days" ? "days" : "sections";
+    var sw = '<div class="r pmode"><div class="seg"><button type="button" data-a="pmode" data-v="sections" class="' + (mode === "sections" ? "on" : "") + '">Разделы</button><button type="button" data-a="pmode" data-v="days" class="' + (mode === "days" ? "on" : "") + '">По дням</button></div>' + (mode === "days" ? '<button type="button" class="btn sm" data-a="print" title="Распечатать план на выбранный день">🖨 Распечатать</button>' : "") + "</div>";
+    if (mode === "sections") return std("Планы", "Задачи по датам: просроченные, две недели вперёд и дальше.", tasks().filter(function (t) { return !t.done && (t.at || t.due); }), { pre: sw, plans: true, scope: function (t) { return !!(t.at || t.due); } });
+    var t0 = today0(); if (!PDAY) PDAY = t0;
+    var open = tasks().filter(function (t) { return !t.done; }), f0 = pFrom(), tabs = "";
+    for (var i = 0; i < 14; i++) {
+      var d0 = addDays(f0, i), dt = new Date(d0), n = open.filter(function (t) { return onDay(t, d0); }).length;
+      tabs += '<button type="button" class="ptab' + (d0 === PDAY ? " on" : "") + (d0 === t0 ? " td" : "") + (dt.getDay() === 0 || dt.getDay() === 6 ? " we" : "") + '" data-a="pday" data-v="' + d0 + '" data-col="day:' + dKey(d0) + '" title="' + esc(dayName(d0)) + '"><span>' + WDS[dt.getDay()] + "</span><b>" + dt.getDate() + "</b>" + (n ? "<i>" + n + "</i>" : "<i></i>") + "</button>";
+    }
+    var strip = '<div class="pstrip"><button type="button" class="btn sm" data-a="pweek" data-v="-1" title="Раньше">‹</button><div class="ptabs">' + tabs + '</div><button type="button" class="btn sm" data-a="pweek" data-v="1" title="Позже">›</button><button type="button" class="btn sm" data-a="ptoday">Сегодня</button></div>';
+    var isT = PDAY === t0, l = open.filter(function (t) { return onDay(t, PDAY) || (isT && isPastDay(t)); });
+    return std("Планы", (function () { var ds = new Date(PDAY).toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); ds = ds.charAt(0).toUpperCase() + ds.slice(1); return PDAY === today0() ? "Сегодня · " + ds : PDAY === today0() + DAY ? "Завтра · " + ds : ds; })(), l, { pre: sw + strip, empty: "На этот день задач нет — добавьте новую выше или перетащите задачу на вкладку дня.", scope: function (t) { return onDay(t, PDAY); } });
+  }
   function vFlag() {
     var fo = flagObj(ARG), all = flagList();
     var bar = '<div class="chips flchips"><a class="chip' + (!fo ? " on" : "") + '" href="#flag">Все <span class="muted">' + all.length + "</span></a>" + flags().map(function (f) { return '<a class="chip' + (fo === f ? " on" : "") + '" href="#flag-' + f.id + '">' + flagIc(f) + esc(f.n) + ' <span class="muted">' + all.filter(function (t) { return flagOf(t) === f; }).length + "</span></a>"; }).join("") + '<a class="chip" href="#settings-flags" title="Названия и цвета флажков">⚙ Настроить</a></div>';
@@ -2375,7 +2482,7 @@ CREATE TABLE inbox (
     if (k === "proj") {
       var ex = {}; pdesc(obj.id).forEach(function (x) { ex[x] = 1; });
       h += '<div class="r"><label class="f">Вложить в проект <select class="inp" id="pparent"><option value="">— верхний уровень —</option>' + ptree().filter(function (x) { return !ex[x.p.id]; }).map(function (x) { return '<option value="' + x.p.id + '"' + (obj.parent === x.p.id ? " selected" : "") + ">" + "  ".repeat(x.d).replace(/ /g, "&nbsp;") + esc(x.p.n) + "</option>"; }).join("") + "</select></label></div>" +
-        '<div class="r"><button class="btn sm" type="button" data-a="' + (FOCUS === obj.id ? "focus-off" : "focus-on") + '">' + (FOCUS === obj.id ? "🎯 Выйти из фокуса" : "🎯 Фокус на проекте") + '</button><button class="btn sm" type="button" data-a="subproj">＋ Подпроект</button><button class="btn sm" type="button" data-a="tplsave-p">⧉ Сохранить как шаблон</button><button class="btn sm" type="button" data-a="parch">' + (obj.arch ? "↺ Вернуть из архива" : "🗄 В архив") + '</button><button class="btn sm warn" type="button" data-a="pdel">🗑 Удалить в корзину</button></div>';
+        '<div class="r"><button class="btn sm" type="button" data-a="' + (FOCUS === obj.id ? "focus-off" : "focus-on") + '">' + (FOCUS === obj.id ? "🎯 Выйти из фокуса" : "🎯 Фокус на проекте") + '</button><button class="btn sm" type="button" data-a="subproj">＋ Подпроект</button><button class="btn sm" type="button" data-a="share">🔗 Поделиться списком</button><button class="btn sm" type="button" data-a="tplsave-p">⧉ Сохранить как шаблон</button><button class="btn sm" type="button" data-a="parch">' + (obj.arch ? "↺ Вернуть из архива" : "🗄 В архив") + '</button><button class="btn sm warn" type="button" data-a="pdel">🗑 Удалить в корзину</button></div>';
     }
     if (k === "tag") h += '<div class="r"><button class="btn sm warn" type="button" data-a="tdel">🗑 Удалить тег в корзину</button></div>';
     if (k === "filter") h += '<div class="r"><button class="btn sm warn" type="button" data-a="fdel">🗑 Удалить фильтр в корзину</button></div>';
@@ -2931,10 +3038,12 @@ CREATE TABLE inbox (
     var pr = Object.keys(byP).map(function (k) { var p = proj(k); return { l: p ? picon(p) + " " + p.n : "📥 Входящие", v: byP[k], c: p ? col(p.c) : "var(--muted)" }; }).sort(function (a, b) { return b.v - a.v; }).slice(0, 8);
     var wd = [0, 0, 0, 0, 0, 0, 0]; ev.forEach(function (e) { wd[(new Date(e.d).getDay() + 6) % 7]++; });
     var hl = habits().filter(function (h) { return !h.arch; }), hr = hl.length ? Math.round(hl.reduce(function (a, h) { return a + hRate(h, days); }, 0) / hl.length) : null;
+    var trk = live(S.acts).filter(function (a) { return a.k === "time" && a.d >= from; }).reduce(function (a, x) { return a + (+x.m || 0); }, 0);
     var h = head("Статистика", "Сколько вы успеваете: выполненные задачи (и повторяющиеся тоже), помидоры, привычки.");
     h += '<div class="tbar"><div class="seg">' + [7, 30, 90].map(function (n) { return '<button type="button" data-a="stdays" data-x="' + n + '" class="' + (days === n ? "on" : "") + '">' + n + " дней</button>"; }).join("") + "</div></div>";
     function card(v, l, s2) { return '<div class="stc"><b>' + v + "</b><span>" + l + "</span>" + (s2 ? '<small>' + s2 + "</small>" : "") + "</div>"; }
     h += '<div class="stgrid">' + card(ev.length, "выполнено", "в среднем " + String(Math.round(ev.length / days * 10) / 10).replace(".", ",") + " в день") + card(created, "создано", "за " + days + " дней") + card(cs + " " + plural(cs, ["день", "дня", "дней"]), "серия подряд", "лучшая: " + best) + card(pom.length, "помидоров", Math.round(pom.length * 25 / 60 * 10) / 10 + " ч фокуса") + card(open, "открыто сейчас", late ? '<span class="warnc">просрочено: ' + late + "</span>" : "просроченных нет") + (hr !== null ? card(hr + " %", "привычки выполнены", hl.length + " " + plural(hl.length, ["привычка", "привычки", "привычек"])) : "") + "</div>";
+    if (trk) h += '<p class="muted" style="margin:6px 0 0">⏲ Учтено времени по задачам за период: <b>' + ttFmt(trk * 60000) + "</b></p>";
     h += "<h2>Выполнено по дням</h2>" + barsSVG(per);
     h += '<div class="st2"><div><h2>По проектам</h2>' + (pr.length ? pr.map(function (x) { return '<div class="hbar"><span>' + esc(x.l) + '</span><i style="width:' + Math.round(x.v / pr[0].v * 100) + "%;background:" + x.c + '"></i><b>' + x.v + "</b></div>"; }).join("") : '<p class="muted">Пока нет выполненных задач.</p>') + "</div>" +
       "<div><h2>По дням недели</h2>" + barsSVG([1, 2, 3, 4, 5, 6, 0].map(function (w, i) { return { l: WDS[w], v: wd[i] }; }), { w: 340, h: 150 }) + "</div></div>";
@@ -2972,6 +3081,8 @@ CREATE TABLE inbox (
     if (SRV.st.err) h += '<p class="warnc">' + esc(SRV.st.err) + "</p>";
     h += '<div class="r"><label class="f"><span><input type="checkbox" id="opt-autorem"' + (S.opt.autoRem ? " checked" : "") + "> Ставить напоминание автоматически, если у задачи указано время</span></label></div>" +
       '<div class="r"><label class="f">Напоминание для задач на весь день <select class="inp" id="opt-hour">' + [7, 8, 9, 10, 11, 12].map(function (x) { return '<option value="' + x + '"' + ((S.opt.allDayHour || 9) === x ? " selected" : "") + ">в " + x + ":00</option>"; }).join("") + "</select></label></div></section>";
+    var dgs = S.opt.digest || { on: false, h: 8 };
+    h += '<section class="card" id="s-digest"><h2>Утренняя сводка в Telegram</h2><p class="muted" style="margin:0">Каждое утро бот пришлёт план на день: задачи со временем, просроченное, привычки и сколько сделано вчера. Нужен подключённый сервер. Сводка собирается по задачам на момент последнего открытия приложения — откройте его хотя бы раз в день.</p><div class="r"><button type="button" class="lt' + (dgs.on ? " on" : "") + '" data-a="dg-on"><span class="lbox"></span><span>Присылать сводку</span></button><div class="seg">' + [6, 7, 8, 9, 10].map(function (x) { return '<button type="button" data-a="dg-h" data-v="' + x + '" class="' + ((+dgs.h || 8) === x ? "on" : "") + '">' + x + ":00</button>"; }).join("") + "</div></div></section>";
     var ac = AI.cfg(), op = OAI[ac.prov];
     h += '<section class="card" id="s-ai"><h2>ИИ-помощник</h2><p class="muted" style="margin:0">Разбивает задачи на подзадачи, пишет чек-листы, оценивает время, планирует день и подбирает задачи в спринт. Настройки общие с «Электронным универом» в этом браузере; ключ хранится только здесь и уходит только в выбранный сервис. Запросы платные — по тарифам сервиса (обычно копейки за запрос).</p>' +
       '<div class="r"><label class="f">Сервис<select class="inp" id="ai-prov">' + [["", "не подключён"], ["openai", "ChatGPT (OpenAI) — ключ API"], ["openrouter", "OpenRouter — ChatGPT, Claude, Gemini"], ["deepseek", "DeepSeek — ключ API"], ["yandex", "YandexGPT — через облачную функцию"]].map(function (x) { return '<option value="' + x[0] + '"' + ((ac.prov || "") === x[0] ? " selected" : "") + ">" + x[1] + "</option>"; }).join("") + "</select></label>" +
@@ -3007,13 +3118,13 @@ CREATE TABLE inbox (
   function vSettingsTabs() {
     var cur = stabOf(ARG), parts = vSettings().split('<section'), by = {};
     parts.slice(1).forEach(function (x) {
-      var k = /id="s-srv"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-(sync|backup|wipe|diag)"/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
+      var k = /id="s-(srv|digest)"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-(sync|backup|wipe|diag)"/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
       by[k] = (by[k] || "") + "<section" + x;
     });
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
   }
   // справка по вкладкам, как настройки; поиск ищет по всем разделам сразу
-  var HTABS = [["start", "help", "С чего начать", ["start", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "menu", "multi", "chat", "trash"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["sprint", "habits", "pomo", "stats"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "settings", "diag", "data"]]];
+  var HTABS = [["start", "help", "С чего начать", ["start", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "track", "files", "share", "menu", "multi", "chat", "trash"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["sprint", "habits", "pomo", "stats"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "settings", "diag", "data"]]];
   var HQ = "";
   function htabOf(a) { if (HTABS.some(function (x) { return x[0] === a; })) return a; var f = HTABS.filter(function (x) { return x[3].indexOf(a) >= 0; })[0]; return f ? f[0] : "start"; }
   function vHelpTabs() {
@@ -3087,7 +3198,20 @@ CREATE TABLE inbox (
       "<b>Дедлайн</b> (⏰) — крайний срок; задача видна в «Сегодня» в день дедлайна, даже если начало раньше.",
       "<b>Повтор</b>: каждый день, по будням, каждую неделю, месяц, год — или «Настроить…»: каждые N дней/недель/месяцев/лет, нужные дни недели, число месяца или последний день, «после выполнения».",
       "Отметка «готово» у повторяющейся задачи переносит её на следующий раз (в истории и статистике выполнение засчитывается). «Завершить и больше не повторять» — в меню «Завершить задачу».",
+      "<b>Сложные повторы</b> (в «Настроить…» для месячного повтора): «по дню недели» — 1-й, 2-й, 3-й, 4-й или последний понедельник…воскресенье месяца; «по числам» — основное число и дополнительные через запятую (например, 15, 30, «посл» — последний день).",
+      "<b>Окончание повтора</b>: «закончить после N раз» (виден счётчик сделанного) или «закончить в дату». Когда повторы закончились, последняя отметка «готово» закрывает задачу насовсем.",
       "<b>Просрочка</b>: дата просроченной задачи окрашивается по давности — 1–2 дня серым, 3–4 жёлтым, 5 и больше красным."]));
+    h += sec("track", "Учёт времени", ul([
+      "⏲ в карточке задачи, «▶ Засечь время» в строке «Учёт времени» или в меню задачи — время пошло. Внизу слева виден идущий таймер (клик — открыть задачу, ■ — остановить). Одновременно идёт один таймер: запуск на другой задаче останавливает предыдущий.",
+      "После остановки время прибавляется к задаче (в строке задачи — «⏲ 1 ч 20 мин»). Учтённое можно поправить вручную в карточке, в часах.",
+      "В «Статистике» — сколько времени учтено за выбранный период."]));
+    h += sec("files", "Вложения", ul([
+      "В карточке задачи — блок «Вложения»: «📎 Прикрепить файл» или перетащите файлы мышью. Файлы загружаются на ваш Яндекс Диск в папку приложения (нужен вход через Яндекс), в задаче хранится только ссылка — поэтому вложения видны на всех устройствах.",
+      "Картинки показываются прямо в карточке, остальные файлы открываются в новой вкладке по нажатию на имя.",
+      "× удаляет вложение — файл уходит в корзину Яндекс Диска, откуда его можно вернуть."]));
+    h += sec("share", "Поделиться списком и печать", ul([
+      "<b>🔗 Поделиться</b> — в меню проекта, в «Сегодня» или Ctrl+K → «Поделиться открытым списком». Ссылка скопируется: задачи упакованы прямо в неё, сервер не нужен. Получатель видит список только для просмотра и может нажать «＋ Скопировать к себе новым проектом». Ссылка — снимок на момент отправки, она не обновляется.",
+      "<b>🖨 Распечатать</b> — в «Сегодня», в «Планах» (вид «По дням») или Ctrl+K → «Распечатать открытый список». Печатаются только задачи — без панелей и кнопок; у каждой — квадратик для галочки ручкой."]));
     h += sec("status", "Статусы: выполнено, отменено, «на сегодня»; закрепление", ul([
       "<b>Выполнено</b> — кружок слева или Shift+Пробел. Незавершённые подзадачи закрываются вместе с задачей.",
       "<b>Отменить</b> (меню «Завершить задачу» → «Завершить как отменённую» или Alt+−) — задача закрыта, но не считается сделанной; в «Сделано» она с крестиком. У повторяющейся отменяется только этот раз.",
@@ -3121,7 +3245,7 @@ CREATE TABLE inbox (
       "<b>Входящие</b> — задачи без даты, без проекта и не «когда-нибудь»: всё, что ещё не разобрано, и сообщения боту в Telegram.",
       "<b>Сегодня</b> — просроченное, задачи и дедлайны на сегодня; задачи после 18:00 — в блоке «Вечер». Сверху — привычки на сегодня и «✨ Спланировать день». Внизу — «Выполнено сегодня».",
       "<b>Календарь</b> и <b>Таймлайн</b> — см. ниже. <b>Матрица</b> — важное/срочное. <b>Привычки</b>, <b>Спринт</b>, <b>Статистика</b> — во вкладке «Планирование».",
-      "<b>Планы</b> — просроченное, каждый день на две недели вперёд (пустые дни тоже видны), «Позже» и «Без срока».",
+      "<b>Планы</b> — два вида. «Разделы»: просроченное, каждый день на две недели вперёд, «Позже», «Без срока». «По дням»: вкладки дней на две недели (число задач под датой; ‹ › — листать, «Сегодня» — вернуться); выберите день — видны его задачи, новая задача создаётся на этот день; перетащите задачу на вкладку — перенесётся на тот день.",
       "<b>Когда-нибудь</b> — идеи и дела «не сейчас» (Alt+O). Они не мешают во «Входящих» и «Сегодня», пока у них нет даты.",
       "<b>С флажком</b> — задачи с любым флажком; вверху отбор по каждому флажку.",
       "<b>Все задачи</b> — всё открытое; <b>Сделано</b> — история выполненного."]));
@@ -3198,6 +3322,7 @@ CREATE TABLE inbox (
     h += sec("stats", "Статистика", "<p>За 7, 30 или 90 дней: выполнено (вместе с повторяющимися задачами), создано, серия дней подряд, помидоры и часы фокуса, просроченные, привычки; графики по дням, по проектам, по дням недели и по спринтам.</p>");
 
     /* ================= Напоминания и Telegram ================= */
+    h += sec("digest", "Утренняя сводка", "<p>«Настройки» → «Напоминания и Telegram» → «Утренняя сводка»: включите и выберите час. Каждое утро бот пришлёт план на день — задачи (со временем), просроченное, привычки и сколько сделано вчера. Нужен подключённый сервер. Сводка собирается по задачам на момент последнего открытия приложения, поэтому заглядывайте в него хотя бы раз в день.</p>");
     h += sec("rem", "Напоминания", ul([
       "В карточке задачи включите «в Telegram» и отметьте, когда напомнить: в момент начала, за 5, 15, 30 минут, за час, за день — можно несколько сразу. Для задач на весь день напоминание приходит в выбранный час (по умолчанию 9:00).",
       "«Настройки» → «Напоминания и Telegram»: ставить напоминание автоматически, когда у задачи указано время, и час для задач на весь день.",
@@ -3391,7 +3516,7 @@ CREATE TABLE inbox (
   function renderInner() {
     CC = null;
     $("side").innerHTML = sideHTML();
-    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, flag: vFlag, all: vAll, done: vDone, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
+    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, flag: vFlag, all: vAll, done: vDone, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
     var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
     $("view").classList.toggle("narrow", V === "trash" || V === "habits" || V === "archive" || V === "templates");
     $("view").innerHTML = (V === "settings" || V === "help" ? "" : focusBar() + revBar()) + f();
@@ -3418,6 +3543,7 @@ CREATE TABLE inbox (
     (ctx.tags || []).forEach(function (g) { if (t.tags.indexOf(g) < 0) t.tags.push(g); });
     if (ctx.flag) t.flag = ctx.flag === true ? defFlag() : ctx.flag;
     if (ctx.some && !t.at && !t.due) t.some = true;
+    if (ctx.day && !t.at && !t.due) { t.at = ctx.day; t.allday = true; }
     if (ctx.sprint) t.sprint = ctx.sprint;
     if (ctx.today && !t.at) { t.at = today0(); t.allday = true; }
     t.tags.forEach(ensureTag);
@@ -3431,6 +3557,7 @@ CREATE TABLE inbox (
     if (V === "tag") c.tags = [ARG];
     if (V === "flag") c.flag = flagObj(ARG) ? ARG : defFlag();
     if (V === "someday") c.some = true;
+    if (V === "plans" && LS.get("zd-plansmode") === "days" && PDAY) c.day = PDAY;
     if (V === "sprint") c.sprint = ARG || curSprintId();
     if (V === "today") c.today = true;
     if (V === "filter") { var f = filt(ARG), q = f && f.q; if (q) { var ps = q.pids.filter(function (x) { return x !== "_none"; }); if (ps.length === 1) c.pid = ps[0]; if (q.tags.length) c.tags = q.tags.slice(); if (q.flag === "yes") c.flag = defFlag(); else if (flagObj(q.flag)) c.flag = q.flag; if (q.due === "today") c.today = true; } }
@@ -3447,6 +3574,54 @@ CREATE TABLE inbox (
   }
   function logAct(k, tid, extra) { var a = { id: uid(), k: k, t: tid, d: Date.now() }; for (var x in (extra || {})) a[x] = extra[x]; S.acts.push(touch(a)); }
   // отменить: задача закрыта, но не «сделана» (в статистику не идёт); у повторяющейся отменяется только этот раз
+  // учёт времени: ⏲ старт/стоп; одновременно идёт только один таймер
+  // вложения: файл лежит в папке приложения на Диске, в задаче — только имя и путь
+  var ATTUP = "", ATTH = {};
+  function attPath(t, f) { return "app:/tasks/files/" + t.id + "/" + f.id + "_" + f.n.replace(/[\\/:*?"<>|]+/g, "_").slice(0, 80); }
+  function attHref(path) { var c = ATTH[path]; if (c && c.exp > Date.now()) return Promise.resolve(c.h); return YD.api("/resources/download?path=" + encodeURIComponent(path)).then(function (j) { ATTH[path] = { h: j.href, exp: Date.now() + 20 * 60000 }; return j.href; }); }
+  function attUpload(t, files) {
+    if (!YD.on || !YD.token()) { toast("Сначала войдите через Яндекс в настройках"); return; }
+    var list = [].slice.call(files || []).filter(function (f) { if (f.size > 200 * 1048576) { toast("«" + f.name + "» больше 200 МБ — не загружаю"); return false; } return true; }); if (!list.length) return;
+    var chain = YD.folder("app:/tasks").then(function () { return YD.folder("app:/tasks/files"); }).then(function () { return YD.folder("app:/tasks/files/" + t.id); });
+    list.forEach(function (file) {
+      chain = chain.then(function () {
+        ATTUP = file.name; if (OPEN === t.id) renderPanel();
+        var meta = { id: uid(), n: file.name.slice(0, 120), sz: file.size, ty: file.type || "" }; meta.p = attPath(t, meta);
+        return YD.api("/resources/upload?overwrite=true&path=" + encodeURIComponent(meta.p)).then(function (j) { return fetch(j.href, { method: "PUT", body: file }); }).then(function (r) {
+          if (!r.ok && r.status !== 201 && r.status !== 202) throw { msg: "ошибка " + r.status };
+          var tt = task(t.id); if (tt) { tt.files = (tt.files || []).concat(meta); touch(tt); save(); }
+        });
+      });
+    });
+    chain.then(function () { ATTUP = ""; if (OPEN === t.id) renderPanel(); render(); toast(list.length > 1 ? "Прикреплено файлов: " + list.length : "Файл прикреплён"); })
+      .catch(function (e) { ATTUP = ""; if (OPEN === t.id) renderPanel(); toast("Не удалось загрузить: " + ((e && e.msg) || "нет связи с Диском")); });
+  }
+  function attOpen(t, id) {
+    var f = (t.files || []).filter(function (x) { return x.id === id; })[0]; if (!f) return;
+    if (!YD.token()) { toast("Войдите через Яндекс, чтобы открыть файл"); return; }
+    var w = window.open("", "_blank");
+    attHref(f.p).then(function (h) { if (w) w.location = h; else location.href = h; }).catch(function (e) { if (w) w.close(); toast("Не удалось открыть: " + ((e && e.msg) || "файл не найден на Диске")); });
+  }
+  function attDel(t, id) {
+    var f = (t.files || []).filter(function (x) { return x.id === id; })[0]; if (!f) return;
+    t.files = t.files.filter(function (x) { return x.id !== id; }); touch(t); save(); renderPanel(); render();
+    if (YD.token()) YD.api("/resources?path=" + encodeURIComponent(f.p), { method: "DELETE", ok: [202, 204, 404] }).catch(function () { /* файл мог быть уже удалён */ });
+    toast("Вложение удалено (файл — в корзине Яндекс Диска)");
+  }
+  // картинки во вложениях подгружаются по временной ссылке Диска
+  function attImgs() { if (!YD.token()) return; [].forEach.call(document.querySelectorAll("img[data-ydimg]:not([src])"), function (im) { attHref(im.dataset.ydimg).then(function (h) { im.src = h; }).catch(function () { im.replaceWith(document.createTextNode("🖼")); }); }); }
+  function ttFmt(ms) { var m = Math.round(ms / 60000); if (m < 60) return m + " мин"; return Math.floor(m / 60) + " ч" + (m % 60 ? " " + (m % 60) + " мин" : ""); }
+  function ttStop(t, quiet) { if (!t || !t.ttOn) return; var ms = Math.max(0, Date.now() - t.ttOn); t.tt = (t.tt || 0) + ms; t.ttOn = 0; touch(t); if (ms >= 30000) logAct("time", t.id, { m: Math.round(ms / 60000) }); if (!quiet) { save(); render(); if (OPEN === t.id) renderPanel(); toast("⏲ Учтено: " + ttFmt(ms) + " · всего " + ttFmt(t.tt)); } ttRender(); }
+  function ttStart(t) { live(S.tasks).forEach(function (x) { if (x.ttOn && x !== t) ttStop(x, true); }); t.ttOn = Date.now(); touch(t); save(); render(); if (OPEN === t.id) renderPanel(); ttRender(); toast("⏲ Время пошло: «" + t.t.slice(0, 40) + "»"); }
+  function ttRunning() { return live(S.tasks).filter(function (x) { return x.ttOn; })[0] || null; }
+  function ttRender() {
+    var t = ttRunning(), el = $("ttw");
+    if (!t) { if (el) el.hidden = true; return; }
+    if (!el) { el = document.createElement("div"); el.id = "ttw"; document.body.appendChild(el); el.addEventListener("click", function (e) { var r = ttRunning(); if (!r) return; if (e.target.closest("[data-tt=stop]")) ttStop(r); else openTask(r.id); }); }
+    var ms = Date.now() - t.ttOn, sec = Math.floor(ms / 1000);
+    el.hidden = false; el.innerHTML = '<span class="tp">⏲ ' + Math.floor(sec / 3600) + ":" + p2(Math.floor(sec % 3600 / 60)) + ":" + p2(sec % 60) + '</span><span class="tn" title="Открыть задачу">' + esc(t.t) + '</span><button type="button" data-tt="stop" title="Остановить и учесть время">■</button>';
+  }
+  setInterval(ttRender, 1000);
   function cancelTask(t) {
     if (t.rep && t.at) { var nx = nextAfterDone(t); if (nx) { if (t.allday) nx = sod(nx); if (t.due) t.due = sod(t.due + (nx - t.at)); t.at = nx; touch(t); save(); render(); if (OPEN === t.id) renderPanel(); toast("Этот раз отменён · следующий: " + whenTxt(t)); return; } }
     var now = Date.now(), ch = [t].concat(tdesc(t.id)).filter(function (k) { return !k.done; });
@@ -3465,7 +3640,10 @@ CREATE TABLE inbox (
     if (!t.done && t.ftd === dKey(Date.now()) && t.ftdPrev) { t.at = t.ftdPrev.at; t.allday = t.ftdPrev.allday; delete t.ftd; delete t.ftdPrev; touch(t); save(); render(); toast("Снова в работе сегодня"); return; }
     if (!t.done && t.rep && t.at) {
       logAct("done", t.id);
-      var nx = nextAfterDone(t);
+      var nx = nextAfterDone(t), rr0 = ruleOf(t);
+      // повторы закончились (после N раз или после даты) — задача закрывается насовсем
+      t.repN = (t.repN || 0) + 1;
+      if (!nx || (rr0 && rr0.endN && t.repN >= +rr0.endN)) { t.done = true; t.dt = Date.now(); touch(t); save(); render(); toast("Готово ✓ Это был последний повтор"); return; }
       if (t.allday) nx = sod(nx);
       if (t.due) t.due = sod(t.due + (nx - t.at));
       t.at = nx; touch(t); save(); render(); toast("Следующий раз: " + whenTxt(t)); return;
@@ -3775,6 +3953,15 @@ CREATE TABLE inbox (
         var blob = new Blob([JSON.stringify({ format: "zadachi-backup", v: 2, at: new Date().toISOString(), tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, opt: S.opt })], { type: "application/json" });
         var ln = document.createElement("a"); ln.href = URL.createObjectURL(blob); ln.download = "Задачи — копия " + dKey(Date.now()) + ".json"; document.body.appendChild(ln); ln.click(); ln.remove(); setTimeout(function () { URL.revokeObjectURL(ln.href); }, 60000); return;
       case "wipe": CONF = "wipe"; render(); return;
+      case "dg-on": var dg1 = S.opt.digest || { on: false, h: 8 }; dg1.on = !dg1.on; S.opt.digest = dg1; optTouch(); save(); render(); toast(dg1.on ? (SRV.ready() ? "Сводка будет приходить в " + dg1.h + ":00" : "Сводка включена — подключите сервер, чтобы она приходила") : "Сводка выключена"); return;
+      case "dg-h": var dg2 = S.opt.digest || { on: true, h: 8 }; dg2.h = +el.dataset.v; S.opt.digest = dg2; optTouch(); save(); render(); return;
+      case "pmode": LS.set("zd-plansmode", el.dataset.v); render(); return;
+      case "pday": PDAY = +el.dataset.v; render(); return;
+      case "pweek": PFROM = addDays(pFrom(), +el.dataset.v * 7); render(); return;
+      case "ptoday": PDAY = today0(); PFROM = 0; render(); return;
+      case "print": window.print(); return;
+      case "share": shareList(); return;
+      case "share-import": shareImport(); return;
       case "vsel": var vk2 = el.dataset.k, cur2 = vopt(), rv2 = el.getBoundingClientRect(), opts = vk2 === "group" ? Object.keys(GROUPN).filter(function (k) { return V === "proj" || (k !== "section" && k !== "kcol"); }).map(function (k) { return { c: k, i: "", l: GROUPN[k], k: cur2.group === k ? "✓" : "" }; }) : Object.keys(SORTN).map(function (k) { return { c: k, i: "", l: SORTN[k], k: cur2.sort.replace(/^-/, "") === k ? "✓" : "" }; }); ctxShow(rv2.left, rv2.bottom + 4, opts, { k: "vsel", id: vk2 }); return;
       case "vsub": setVopt("sub", !vopt().sub); render(); return;
       case "focus-on": setFocus(el.dataset.id || ARG); return;
@@ -3891,7 +4078,7 @@ CREATE TABLE inbox (
     var h = '<div class="pn-top"><div class="crumbs">' + crumbs + "</div>" +
       pb("full", full ? "shrink" : "expand", full ? "Свернуть в панель" : "Развернуть на весь экран", ' class="pw-btn"') +
       pb("fav", "star", t.fav ? "Убрать из избранного" : "В избранное", t.fav ? ' class="onstar"' : "") +
-      pb("ai", "spark", "ИИ-помощник: подзадачи, чек-лист, оценка") + pb("pomo", "timer", "Помодоро 25 минут") + pb("link", "link", "Скопировать ссылку на задачу") +
+      pb("ai", "spark", "ИИ-помощник: подзадачи, чек-лист, оценка") + pb("pomo", "timer", "Помодоро 25 минут") + pb("track", "watch", t.ttOn ? "Остановить учёт времени" : "Засечь время", t.ttOn ? ' class="on ttb"' : "") + pb("link", "link", "Скопировать ссылку на задачу") +
       pb("pin", "pin", t.pin ? "Открепить" : "Закрепить наверху списка (Alt+P)", t.pin ? ' class="on"' : "") + pb("flag", "flag", flagOf(t) ? "Флажок: " + flagOf(t).n : "Флажок", flagOf(t) ? ' class="on" style="color:' + col(flagOf(t).c) + '"' : "") + pb("del", "trash", "Удалить задачу в корзину") + pb("close", "close", "Закрыть (Esc)") + "</div>";
     if (anc.length) h += '<div class="pn-par">↑ Родительская задача: ' + anc.map(function (a) { return '<a data-p="open" data-id="' + a.id + '" title="Открыть «' + esc(a.t) + '»">' + esc(a.t.slice(0, 60)) + "</a>"; }).join(" › ") + "</div>";
     h += '<div class="pn-title"><button class="ck' + (t.prio ? " p" + t.prio : "") + (t.done ? " dn" : "") + '" type="button" data-p="toggle" aria-label="' + (t.done ? "Вернуть в работу" : "Готово") + '"></button><textarea id="pn-t" rows="1" aria-label="Название задачи" placeholder="Название задачи">' + esc(t.t) + "</textarea></div>";
@@ -3906,6 +4093,7 @@ CREATE TABLE inbox (
       '<span>Приоритет</span><div class="v"><div class="seg">' + [[1, "1"], [2, "2"], [3, "3"], [0, "—"]].map(function (x) { return '<button type="button" data-p="prio" data-v="' + x[0] + '" class="' + ((t.prio || 0) === x[0] ? "on" : "") + '" title="' + ["обычный", "срочно", "важно", "желательно"][x[0]] + '">' + x[1] + "</button>"; }).join("") + "</div></div>" +
       '<span>Флажок</span><div class="v"><button type="button" class="ddb" data-p="flagdd">' + (flagOf(t) ? flagIc(flagOf(t)) + esc(flagOf(t).n) : '<span class="muted">Без флажка</span>') + '<span class="dda">▾</span></button></div>' +
       '<span>Теги</span><div class="v">' + tags().map(function (g) { return '<button type="button" class="chip' + (tg.indexOf(g.n) >= 0 ? " on" : "") + '" data-p="tag" data-tag="' + esc(g.n) + '"><i style="background:' + col(g.c) + '"></i>#' + esc(g.n) + "</button>"; }).join("") + '<input type="text" data-pf="newtag" placeholder="+ тег" size="9"></div>' +
+      '<span>Учёт времени</span><div class="v"><button type="button" class="btn sm' + (t.ttOn ? " pri" : "") + '" data-p="track">' + (t.ttOn ? "■ Остановить" : "▶ Засечь время") + '</button><span class="muted">учтено</span><input type="number" min="0" step="0.25" data-pf="tth" value="' + (t.tt ? Math.round(t.tt / 36e5 * 100) / 100 : "") + '" placeholder="0" style="width:70px"> ч</div>' +
       '<span>Входит в</span><div class="v"><select data-pf="parent"><option value="">— это главная задача —</option>' + cand.map(function (x) { return '<option value="' + x.id + '"' + (t.parent === x.id ? " selected" : "") + ">" + esc(x.t.slice(0, 60)) + "</option>"; }).join("") + "</select></div>" +
       '<span>Напоминание</span><div class="v"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-pf="rem"' + (t.rem ? " checked" : "") + (t.at ? "" : " disabled") + "> в Telegram" + (t.at && t.allday ? " в " + (S.opt.allDayHour || 9) + ":00" : "") + "</label>" + (t.rem && t.at ? '<span class="remo">' + REMO.map(function (o) { return '<button type="button" class="chip' + (remOffs(t).indexOf(o) >= 0 ? " on" : "") + '" data-p="remoff" data-v="' + o + '" title="' + (o ? "Напомнить за " + REMN[o] : "Напомнить в момент начала") + '">' + (o ? "за " : "") + REMN[o] + "</button>"; }).join("") + "</span>" : "") + (!t.at ? '<span class="muted">сначала укажите срок</span>' : SRV.ready() ? "" : '<span class="muted">— нужен <a href="#settings-srv">сервер</a></span>') + "</div></div>";
     if (!t.body && t.note) t.body = noteToBody(t.note);
@@ -3913,6 +4101,9 @@ CREATE TABLE inbox (
     h += '<div class="pn-sec pn-subs"><h3>Подзадачи' + (kids.length ? " · " + kids.filter(function (k) { return k.done; }).length + "/" + kids.length : "") + "</h3>" +
       kids.sort(cmpBy("manual")).map(function (k) { return '<div class="sr' + (k.done ? " done" : "") + '"><button class="ck' + (k.prio ? " p" + k.prio : "") + (k.done ? " dn" : "") + '" type="button" data-p="subtoggle" data-id="' + k.id + '" aria-label="Готово"></button><a data-p="open" data-id="' + k.id + '">' + esc(k.t) + (tkids(k.id).length ? ' <span class="muted">· ' + tkids(k.id).length + "</span>" : "") + (k.at ? ' <span class="muted">· ' + esc(whenTxt(k)) + "</span>" : "") + "</a></div>"; }).join("") +
       '<input id="pn-sub" placeholder="+ Подзадача — Enter (можно: завтра, #тег, !1)"></div>';
+    var fl = t.files || [], canUp = YD.on && !!YD.token();
+    h += '<div class="pn-sec pn-files"><h3>Вложения' + (fl.length ? " · " + fl.length : "") + "</h3>" + (fl.length ? '<div class="flist">' + fl.map(function (f) { var img = /^image\//.test(f.ty || ""); return '<div class="fitem">' + (img ? '<img data-ydimg="' + esc(f.p) + '" alt="" loading="lazy">' : '<span class="fic">📄</span>') + '<a data-p="fopen" data-id="' + f.id + '" title="Открыть в новой вкладке">' + esc(f.n) + '</a><span class="muted">' + (f.sz > 1048576 ? (Math.round(f.sz / 104857.6) / 10) + " МБ" : Math.max(1, Math.round((f.sz || 0) / 1024)) + " КБ") + '</span><button type="button" class="ibtn" data-p="fdel" data-id="' + f.id + '" title="Удалить вложение (файл уйдёт в корзину Диска)">×</button></div>'; }).join("") + "</div>" : "") +
+      (canUp ? '<label class="btn sm fpick">📎 Прикрепить файл<input type="file" id="pn-file" multiple hidden></label><span class="muted"> или перетащите файлы сюда · хранятся на вашем Яндекс Диске (папка приложения)</span>' + (ATTUP ? '<div class="muted">Загружаю: ' + esc(ATTUP) + "…</div>" : "") : '<p class="muted" style="margin:0">Чтобы прикреплять файлы, войдите через Яндекс: «Настройки» → «Данные и синхронизация». Файлы хранятся на вашем Диске.</p>') + "</div>";
     var cm = comments(t.id), lastDay = "";
     h += '<div class="pn-sec pn-chat"><h3>Комментарии' + (cm.length ? " · " + cm.length : "") + '</h3><div class="msgs">' + cm.map(function (c) {
       var dd = dayName(c.at), out = "";
@@ -3931,7 +4122,12 @@ CREATE TABLE inbox (
     var r = ruleOf(t) || { f: "w", n: 1 }, wd = r.wd || [];
     return '<span></span><div class="v rrbox">Каждые <input type="number" min="1" max="99" data-rr="n" value="' + (r.n || 1) + '" style="width:58px"><select data-rr="f">' + [["d", "дн."], ["w", "нед."], ["m", "мес."], ["y", "г."]].map(function (x) { return '<option value="' + x[0] + '"' + (r.f === x[0] ? " selected" : "") + ">" + x[1] + "</option>"; }).join("") + "</select>" +
       (r.f === "w" ? '<div class="seg">' + [1, 2, 3, 4, 5, 6, 0].map(function (i) { return '<button type="button" data-p="rrwd" data-v="' + i + '" class="' + (wd.indexOf(i) >= 0 ? "on" : "") + '">' + WDS[i] + "</button>"; }).join("") + "</div>" : "") +
-      (r.f === "m" ? '<select data-rr="md"><option value="' + new Date(t.at).getDate() + '"' + (+r.md !== -1 ? " selected" : "") + ">" + new Date(t.at).getDate() + '-го числа</option><option value="-1"' + (+r.md === -1 ? " selected" : "") + ">в последний день</option></select>" : "") +
+      (r.f === "m" ? '<select data-rr="mw"><option value="date"' + (r.nth ? "" : " selected") + '>по числам</option><option value="nth"' + (r.nth ? " selected" : "") + ">по дню недели</option></select>" +
+        (r.nth ? '<select data-rr="nth">' + [[1, "1-й"], [2, "2-й"], [3, "3-й"], [4, "4-й"], [-1, "последний"]].map(function (x) { return '<option value="' + x[0] + '"' + (+r.nth === x[0] ? " selected" : "") + ">" + x[1] + "</option>"; }).join("") + '</select><select data-rr="nwd">' + [1, 2, 3, 4, 5, 6, 0].map(function (i) { return '<option value="' + i + '"' + ((+r.nwd || 0) === i ? " selected" : "") + ">" + ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"][i] + "</option>"; }).join("") + "</select>"
+          : '<select data-rr="md"><option value="' + new Date(t.at).getDate() + '"' + (+r.md !== -1 ? " selected" : "") + ">" + new Date(t.at).getDate() + '-го числа</option><option value="-1"' + (+r.md === -1 ? " selected" : "") + '>в последний день</option></select><input type="text" data-rr="mdl" size="9" placeholder="и ещё: 15, 30" value="' + esc((r.mds || []).slice(1).map(function (x) { return +x === -1 ? "посл" : x; }).join(", ")) + '" title="Дополнительные числа месяца через запятую; «посл» — последний день">') : "") +
+      '<select data-rr="end"><option value="none"' + (!r.endN && !r.endD ? " selected" : "") + '>без окончания</option><option value="n"' + (r.endN ? " selected" : "") + '>закончить после…</option><option value="d"' + (r.endD ? " selected" : "") + ">закончить в дату…</option></select>" +
+      (r.endN ? '<input type="number" min="1" max="999" data-rr="endN" value="' + r.endN + '" style="width:62px"> ' + plural(+r.endN, ["раз", "раза", "раз"]) + (t.repN ? ' <span class="muted">(сделано ' + t.repN + ")</span>" : "") : "") +
+      (r.endD ? '<input type="date" data-rr="endD" value="' + dKey(+r.endD) + '">' : "") +
       '<label style="display:flex;gap:5px;align-items:center"><input type="checkbox" data-rr="after"' + (r.after ? " checked" : "") + "> от даты выполнения</label></div>";
   }
   function spOptions(t) {
@@ -3970,6 +4166,9 @@ CREATE TABLE inbox (
     if (a === "del") { flushBody(); del(t); return; }
     if (a === "flag") { var rpf = el.getBoundingClientRect(); ctxShow(rpf.left - 170, rpf.bottom + 4, flagMenu(t), { k: "task", id: t.id }); return; }
     if (a === "pin") { setTask(function (x) { x.pin = !x.pin; }); return; }
+    if (a === "track") { if (t.ttOn) ttStop(t); else ttStart(t); return; }
+    if (a === "fopen") { attOpen(t, el.dataset.id); return; }
+    if (a === "fdel") { attDel(t, el.dataset.id); return; }
     if (a === "flagdd") { var rdd = el.getBoundingClientRect(); ctxShow(rdd.left, rdd.bottom + 4, flagMenu(t), { k: "task", id: t.id }); return; }
     if (a === "flagset") { var fsv = el.dataset.v; setTask(function (x) { x.flag = (flagOf(x) || {}).id === fsv ? "" : fsv; }); return; }
     if (a === "fav") { setTask(function (x) { x.fav = !x.fav; }); return; }
@@ -3991,9 +4190,20 @@ CREATE TABLE inbox (
     if (a === "subtoggle") { var k = task(el.dataset.id); if (k) { toggle(k); renderPanel(); } return; }
     if (a === "open") { openTask(el.dataset.id); return; }
   });
+  $("panel").addEventListener("change", function (e) { if (e.target.id === "pn-file") { var tf = task(OPEN); if (tf) attUpload(tf, e.target.files); e.target.value = ""; } });
+  $("panel").addEventListener("dragover", function (e) { if (e.target.closest && e.target.closest(".pn-files") && e.dataTransfer && [].indexOf.call(e.dataTransfer.types || [], "Files") >= 0) { e.preventDefault(); e.target.closest(".pn-files").classList.add("dropin"); } });
+  $("panel").addEventListener("dragleave", function (e) { var z = e.target.closest && e.target.closest(".pn-files"); if (z) z.classList.remove("dropin"); });
+  $("panel").addEventListener("drop", function (e) { var z = e.target.closest && e.target.closest(".pn-files"); if (!z || !e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); e.stopPropagation(); z.classList.remove("dropin"); var tf = task(OPEN); if (tf) attUpload(tf, e.dataTransfer.files); });
+  new MutationObserver(function () { attImgs(); }).observe($("panel"), { childList: true });
   $("panel").addEventListener("change", function (e) {
     var rk = e.target.dataset && e.target.dataset.rr;
-    if (rk) { setTask(function (x) { var r = JSON.parse(JSON.stringify(x.rr || ruleOf(x) || { f: "w", n: 1 })); if (rk === "n") r.n = Math.max(1, Math.min(99, +e.target.value || 1)); else if (rk === "f") { r.f = e.target.value; if (r.f === "w" && !(r.wd || []).length) r.wd = [new Date(x.at).getDay()]; if (r.f === "m" && !r.md) r.md = new Date(x.at).getDate(); } else if (rk === "md") r.md = +e.target.value; else if (rk === "after") r.after = e.target.checked ? 1 : 0; x.rr = r; x.rep = "custom"; }); return; }
+    if (rk) { setTask(function (x) { var r = JSON.parse(JSON.stringify(x.rr || ruleOf(x) || { f: "w", n: 1 })); if (rk === "n") r.n = Math.max(1, Math.min(99, +e.target.value || 1)); else if (rk === "f") { r.f = e.target.value; if (r.f === "w" && !(r.wd || []).length) r.wd = [new Date(x.at).getDay()]; if (r.f === "m" && !r.md) r.md = new Date(x.at).getDate(); } else if (rk === "md") { r.md = +e.target.value; if (r.mds && r.mds.length) r.mds[0] = r.md; } else if (rk === "after") r.after = e.target.checked ? 1 : 0;
+      else if (rk === "mw") { if (e.target.value === "nth") { var ad = new Date(x.at); r.nth = Math.min(4, Math.ceil(ad.getDate() / 7)); r.nwd = ad.getDay(); } else { delete r.nth; delete r.nwd; } }
+      else if (rk === "nth") r.nth = +e.target.value; else if (rk === "nwd") r.nwd = +e.target.value;
+      else if (rk === "mdl") { var extra = String(e.target.value).split(/[\s,;]+/).map(function (v) { return /^посл/i.test(v) ? -1 : Math.round(+v); }).filter(function (v) { return v === -1 || (v >= 1 && v <= 31); }); var base = +r.md || new Date(x.at).getDate(); r.mds = extra.length ? [base].concat(extra.filter(function (v) { return v !== base; })).filter(function (v, i, a) { return a.indexOf(v) === i; }) : undefined; if (!r.mds) delete r.mds; }
+      else if (rk === "end") { delete r.endN; delete r.endD; if (e.target.value === "n") r.endN = 5; if (e.target.value === "d") r.endD = sod(x.at) + 30 * DAY; }
+      else if (rk === "endN") r.endN = Math.max(1, Math.min(999, +e.target.value || 1)); else if (rk === "endD") { if (e.target.value) r.endD = new Date(e.target.value + "T00:00").getTime(); }
+      x.rr = r; x.rep = "custom"; }); return; }
     var f = e.target.dataset && e.target.dataset.pf; if (!f || f === "newtag") return;
     var v = e.target.type === "checkbox" ? e.target.checked : e.target.value;
     setTask(function (t) {
@@ -4008,6 +4218,7 @@ CREATE TABLE inbox (
       else if (f === "est") t.est = Math.max(0, Math.round((parseFloat(String(v).replace(",", ".")) || 0) * 10) / 10);
       else if (f === "rem") t.rem = !!v && !!t.at;
       else if (f === "sec") t.sec = v;
+      else if (f === "tth") t.tt = Math.max(0, Math.round((parseFloat(String(v).replace(",", ".")) || 0) * 36e5));
       else if (f === "pid") { t.pid = v; tdesc(t.id).forEach(function (k) { k.pid = v; touch(k); }); var pt = task(t.parent); if (pt && (pt.pid || "") !== v) t.parent = ""; }
       else if (f === "parent") { t.parent = v; var pr = task(v); if (pr && (pr.pid || "") !== (t.pid || "")) { t.pid = pr.pid || ""; tdesc(t.id).forEach(function (k) { k.pid = t.pid; touch(k); }); } }
     });
@@ -4377,6 +4588,7 @@ CREATE TABLE inbox (
       { c: "open", i: "↗", l: "Открыть", k: "Enter" },
       { i: "📅", l: "Установить дату и время", sub: [{ c: "d:0", i: "☀", l: "Сегодня", k: "Alt+T" }, { c: "d:eve", i: "🌙", l: "Сегодня вечером", k: "Alt+V" }, { c: "d:1", i: "→", l: "Завтра", k: "Alt+K" }, { c: "d:2", i: "⇉", l: "Послезавтра" }, { c: "d:wknd", i: "🏖", l: "До выходных", k: "Alt+J" }, { c: "d:mon", i: "📆", l: "В понедельник" }, { c: "d:7", i: "⏭", l: "Через неделю" }, { c: "d:month", i: "🗓", l: "Через месяц", k: "Alt+U" }, { c: "d:some", i: "⏳", l: "Когда-нибудь", k: "Alt+O" }, { c: "d:pick", i: "🕑", l: "Выбрать дату и время…" }, "-", { c: "d:none", i: "∅", l: "Без срока", k: "Alt+R" }] },
       { c: "pomo", i: "⏱", l: POMO && POMO.tid === t.id ? "Остановить Помодоро" : "Запустить Помодоро" },
+      { c: "track", i: "⏲", l: t.ttOn ? "Остановить учёт времени" : "Засечь время" + (t.tt ? " (учтено " + ttFmt(t.tt) + ")" : "") },
       { i: "❗", l: "Приоритет", sub: [[1, "1 — срочно"], [2, "2 — важно"], [3, "3 — желательно"], [0, "обычный"]].map(function (x) { return { c: "p:" + x[0], i: ck((t.prio || 0) === x[0]), l: x[1], k: "Alt+" + x[0] }; }) },
       { i: "🏷", l: "Теги", k: "Ctrl+G", sub: tags().map(function (g) { return { c: "t:" + g.n, i: ck((t.tags || []).indexOf(g.n) >= 0), l: "#" + g.n }; }).concat(["-", { c: "t:+", i: "＋", l: "Новый тег…" }]) },
       { c: "check", i: "☑", l: "Чек-лист", k: "Ctrl+I" },
@@ -4414,6 +4626,7 @@ CREATE TABLE inbox (
       touch(t); save(); render(); if (OPEN === t.id) renderPanel(); toast(v === "some" ? "Отложено: когда-нибудь" : t.at ? "Срок: " + whenTxt(t) : "Срок убран"); return;
     }
     if (c === "pomo") { if (POMO && POMO.tid === t.id) pomoStop(); else pomoStart(t); return; }
+    if (c === "track") { if (t.ttOn) ttStop(t); else ttStart(t); return; }
     if (c.indexOf("p:") === 0) { t.prio = +c.slice(2); touch(t); save(); render(); if (OPEN === t.id) renderPanel(); return; }
     if (c === "t:+") { openTask(t.id); setTimeout(function () { var i = $("panel").querySelector('[data-pf="newtag"]'); if (i) i.focus(); }, 60); return; }
     if (c.indexOf("t:") === 0) { var n = c.slice(2), tg = t.tags || []; t.tags = tg.indexOf(n) >= 0 ? tg.filter(function (y) { return y !== n; }) : tg.concat(n); touch(t); save(); render(); if (OPEN === t.id) renderPanel(); return; }
@@ -4511,6 +4724,8 @@ CREATE TABLE inbox (
     tpls().forEach(function (x) { add("Шаблоны", x.kind === "proj" ? "📁" : "☐", "Создать из шаблона: " + x.n, x.kind === "proj" ? "проект" : "задача", function () { tplUse(x.id); }); });
     add("Действия", "🎯", FOCUS ? "Выйти из фокуса" : "Фокус на открытом проекте", "", function () { if (FOCUS) setFocus(""); else if (V === "proj") setFocus(ARG); else toast("Откройте проект, на котором сосредоточиться"); });
     add("Действия", "↻", "Проверка проектов", "пройтись по проектам, которые пора пересмотреть", function () { REV = true; LS.set("zd-review", "1"); if (revDue().length) revGo(1); else { render(); toast("✓ Все проекты проверены"); } });
+    add("Действия", "🔗", "Поделиться открытым списком", "ссылка только для просмотра", function () { shareList(); });
+    add("Действия", "🖨", "Распечатать открытый список", "", function () { setTimeout(function () { window.print(); }, 50); });
     add("Действия", "⛃", "Новый фильтр", "", function () { var b = document.querySelector('[data-a="newfilter"]'); if (b) b.click(); });
     add("Действия", "☁", "Синхронизировать с Яндекс Диском", "", function () { SYNC.run().then(function () { toast(SYNC.st === "ok" ? "Синхронизировано" : "Синхронизация недоступна"); }); });
     if (ws.length) {
