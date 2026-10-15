@@ -99,11 +99,13 @@ ol { padding-left: 1.3em } li { margin: 4px 0 }
       LS.set("yd-token", JSON.stringify({ t: h.get("access_token"), exp: Date.now() + (parseInt(h.get("expires_in"), 10) || 31536000) * 1000 }));
       history.replaceState(null, "", location.pathname);
       if (h.get("state") === "kurs") { location.replace("../kurs/#lib"); return; }
+      if (h.get("state") === "zadachi") { location.replace("../zadachi/#settings-sync"); return; }
       log("Вход выполнен, ключ доступа сохранён на этом устройстве.");
     } else if (h.get("error")) {
       log("Яндекс вернул ошибку входа: " + h.get("error") + " " + (h.get("error_description") || ""));
       history.replaceState(null, "", location.pathname);
       if (h.get("state") === "kurs") { location.replace("../kurs/#lib"); return; }
+      if (h.get("state") === "zadachi") { location.replace("../zadachi/#settings-sync"); return; }
     }
     try { var o = JSON.parse(LS.get("yd-token") || "null"); if (o && o.exp > Date.now()) TOKEN = o.t; } catch (e) { /* нет */ }
   })();

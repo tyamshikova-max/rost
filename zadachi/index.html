@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Задачи</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#1d6b5a">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #f4f5f1; --panel: #ffffff; --side: #eceee8; --fg: #1c211f; --muted: #67706b; --line: #dde1da; --hover: #e6e9e2;
+  --acc: #1d6b5a; --acc-soft: #dcefe8; --warn: #b5432f; --ok: #2b7351;
+  --p1: #d1453b; --p2: #df8a1c; --p3: #3b78d0;
+  --sans: "Onest", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", Consolas, monospace;
+  --shadow: 0 6px 24px rgba(20, 30, 25, .12);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141816; --panel: #1b201d; --side: #171c19; --fg: #e8ece8; --muted: #9aa49e; --line: #2c332f; --hover: #232a26;
+  --acc: #5fc4a6; --acc-soft: #1d3a31; --warn: #ff8a72; --ok: #6cc497; --p1: #ff6b5e; --p2: #f2a640; --p3: #6ea2f0;
+  --shadow: 0 6px 24px rgba(0, 0, 0, .45); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141816; --panel: #1b201d; --side: #171c19; --fg: #e8ece8; --muted: #9aa49e; --line: #2c332f; --hover: #232a26;
+  --acc: #5fc4a6; --acc-soft: #1d3a31; --warn: #ff8a72; --ok: #6cc497; --p1: #ff6b5e; --p2: #f2a640; --p3: #6ea2f0;
+  --shadow: 0 6px 24px rgba(0, 0, 0, .45); color-scheme: dark }
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+html, body { height: 100% }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--sans); -webkit-text-size-adjust: 100% }
+button, input, select, textarea { font: inherit; color: inherit }
+a { color: var(--acc) }
+.top { position: sticky; top: 0; z-index: 20; display: flex; gap: 10px; align-items: center; padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top, 0px)); background: var(--bg); border-bottom: 1px solid var(--line) }
+.top .brand { display: flex; gap: 8px; align-items: center; font-weight: 700; font-size: 17px; white-space: nowrap; text-decoration: none; color: var(--fg) }
+.top .brand i { width: 26px; height: 26px; border-radius: 7px; background: var(--acc); display: grid; place-items: center; color: #fff; font-style: normal; font-size: 15px }
+.top .q { flex: 1; min-width: 0; max-width: 420px; margin-left: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 11px }
+.ibtn { background: none; border: 1px solid transparent; border-radius: 8px; padding: 6px 8px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; color: var(--fg); font-size: 13px; white-space: nowrap }
+.ibtn:hover { background: var(--hover) }
+.ibtn.bad { color: var(--warn) }
+.ibtn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round }
+#menuBtn { display: none }
+.layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: calc(100% - 56px) }
+.side { background: var(--side); border-right: 1px solid var(--line); padding: 14px 10px 40px; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto }
+.nav a { display: flex; gap: 10px; align-items: center; padding: 7px 10px; border-radius: 8px; color: var(--fg); text-decoration: none; font-size: 14.5px }
+.nav a:hover { background: var(--hover) }
+.nav a.on { background: var(--acc-soft); color: var(--acc); font-weight: 600 }
+.nav a .n { margin-left: auto; font: 500 12px var(--mono); color: var(--muted) }
+.nav a.on .n { color: var(--acc) }
+.nav svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round }
+.nav .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; margin: 0 4px }
+.side .lab { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 18px 10px 6px; display: flex; align-items: center }
+.side .lab button { margin-left: auto; background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 4px }
+.main { padding: 20px 24px 80px; max-width: 860px; width: 100%; min-width: 0 }
+h1 { font-size: 26px; line-height: 1.2; margin: 0; text-wrap: balance }
+h2 { font-size: 15px; margin: 22px 0 6px; display: flex; gap: 8px; align-items: baseline }
+h2 .c { font: 500 12px var(--mono); color: var(--muted) }
+.sub { color: var(--muted); margin: 4px 0 0; font-size: 14px }
+.add { margin: 16px 0 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px }
+.add .r1 { display: flex; gap: 8px }
+.add input.t { flex: 1; min-width: 0; border: 0; background: none; padding: 7px 8px; outline: none; font-size: 15px }
+.add .hint { font-size: 12px; color: var(--muted); padding: 0 8px 2px }
+.add .hint code { font: 11.5px var(--mono); background: var(--hover); padding: 0 4px; border-radius: 4px }
+.add .pv { font-size: 12.5px; color: var(--acc); padding: 0 8px 4px }
+.btn { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 13px; cursor: pointer; font-size: 14px; font-weight: 500; white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; text-decoration: none; color: var(--fg) }
+.btn:hover { background: var(--hover) }
+.btn.pri { background: var(--acc); border-color: var(--acc); color: #fff }
+.btn.warn { color: var(--warn) }
+.btn.sm { padding: 3px 9px; font-size: 13px }
+.btn:disabled { opacity: .45; cursor: default }
+.list { list-style: none; margin: 0; padding: 0 }
+.task { display: flex; gap: 10px; align-items: flex-start; padding: 9px 4px; border-bottom: 1px solid var(--line) }
+.task:hover { background: color-mix(in srgb, var(--hover) 60%, transparent) }
+.ck { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--muted); background: none; flex: none; margin-top: 2px; cursor: pointer; display: grid; place-items: center; padding: 0 }
+.ck.p1 { border-color: var(--p1); background: color-mix(in srgb, var(--p1) 12%, transparent) }
+.ck.p2 { border-color: var(--p2); background: color-mix(in srgb, var(--p2) 12%, transparent) }
+.ck.p3 { border-color: var(--p3); background: color-mix(in srgb, var(--p3) 12%, transparent) }
+.ck:hover::after, .task.done .ck::after { content: ""; width: 9px; height: 5px; border: 2px solid currentColor; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); color: var(--muted) }
+.task.done .ck { background: var(--muted); border-color: var(--muted) } .task.done .ck::after { color: var(--panel) }
+.task .bd { flex: 1; min-width: 0; cursor: pointer }
+.task .tt { overflow-wrap: anywhere }
+.task.done .tt { text-decoration: line-through; color: var(--muted) }
+.task .mt { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; color: var(--muted); margin-top: 2px }
+.task .mt .late { color: var(--warn); font-weight: 500 }
+.task .mt .when { color: var(--acc) }
+.tag { font-size: 12px; color: var(--acc); text-decoration: none }
+.pdot { display: inline-flex; gap: 5px; align-items: center }
+.pdot i { width: 8px; height: 8px; border-radius: 50% }
+.task .x { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 18px; padding: 0 4px; opacity: 0 }
+.task:hover .x, .task .x:focus { opacity: 1 }
+.ed { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin: 6px 0 10px; box-shadow: var(--shadow); display: grid; gap: 10px }
+.ed input[type=text], .ed textarea, .ed select, .ed input[type=date], .ed input[type=time], .inp { background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 7px 10px; min-width: 0; max-width: 100% }
+.ed .full { width: 100% }
+.ed textarea { resize: vertical; min-height: 64px; width: 100% }
+.ed .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center }
+.ed label { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted) }
+.ed .row.end { justify-content: flex-end }
+.ed .row.end .sp { margin-right: auto }
+.empty { color: var(--muted); padding: 18px 4px; font-size: 14px }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 16px }
+.card h2 { margin-top: 0 }
+.card .r { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px }
+.card label.f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); max-width: 560px }
+.okc { color: var(--ok) } .warnc { color: var(--warn) } .muted { color: var(--muted); font-size: 13px }
+.confirm { border: 1px solid var(--warn); border-radius: 10px; padding: 12px; margin: 10px 0; display: grid; gap: 8px; background: color-mix(in srgb, var(--warn) 6%, var(--panel)) }
+.confirm.info { border-color: var(--acc); background: color-mix(in srgb, var(--acc) 6%, var(--panel)) }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden }
+.seg button { border: 0; background: var(--panel); padding: 6px 12px; cursor: pointer; font-size: 13.5px }
+.seg button.on { background: var(--acc); color: #fff }
+.phead { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
+.phead .dot { width: 14px; height: 14px; border-radius: 50% }
+.help h2 { font-size: 18px; margin-top: 26px }
+.help p, .help li, .help td { overflow-wrap: anywhere }
+.help table { border-collapse: collapse; width: 100%; font-size: 14px }
+.help td, .help th { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top }
+.help code, .card code { font: 12.5px var(--mono); background: var(--hover); padding: 1px 5px; border-radius: 4px }
+.tscroll { overflow-x: auto }
+.codebox { margin-top: 12px }
+.codebox .h { display: flex; gap: 10px; align-items: center; justify-content: space-between }
+.codebox pre { margin: 6px 0 0; background: var(--side); border: 1px solid var(--line); border-radius: 8px; padding: 10px; font: 12px/1.5 var(--mono); max-height: 320px; overflow: auto; white-space: pre }
+ol.steps li { margin: 6px 0 }
+#toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: 14px; z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
+.foot { color: var(--muted); font-size: 12px; margin-top: 40px }
+.scrim { display: none }
+@media (max-width: 860px) {
+  #menuBtn { display: inline-flex }
+  .layout { display: block }
+  .side { position: fixed; z-index: 40; top: 0; left: 0; bottom: 0; width: 280px; height: 100%; transform: translateX(-102%); transition: transform .2s; padding-top: calc(14px + env(safe-area-inset-top, 0px)); box-shadow: var(--shadow) }
+  body.menu .side { transform: none }
+  body.menu .scrim { display: block; position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .3) }
+  .main { padding: 16px 16px 80px }
+  .top .brand span { display: none }
+  .task .x { opacity: 1 }
+}
+@media (max-width: 480px) { .top .sync span { display: none } }
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="ibtn" id="menuBtn" type="button" aria-label="Меню"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <a class="brand" href="#today"><i>✓</i><span>Задачи</span></a>
+  <input class="q" id="q" type="search" placeholder="Поиск" aria-label="Поиск по задачам">
+  <button class="ibtn sync" id="syncBtn" type="button" hidden></button>
+  <button class="ibtn" id="themeBtn" type="button" aria-label="Тема"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
+</header>
+<div class="layout">
+  <aside class="side" id="side" aria-label="Списки"></aside>
+  <main class="main" id="view"></main>
+</div>
+<div class="scrim" id="scrim"></div>
+<div id="toast" hidden></div>
+<script type="text/plain" id="srv-index">// «Задачи» — сервер в Яндекс Облаке (одна облачная функция).
+// Обслуживает три входа:
+//   • приложение:  /api/...   (через API Gateway) — напоминания, «Входящие», привязка Telegram;
+//   • Telegram:    /tg/<секрет> (через API Gateway) — сообщения боту;
+//   • таймер:      раз в минуту — рассылка наступивших напоминаний.
+// Переменные окружения: YDB_ENDPOINT, YDB_DATABASE, APP_ORIGIN; из Lockbox: BOT_TOKEN, HOOK_SECRET.
+// Пользователь определяется по его токену Яндекс Диска (тот же вход, что для синхронизации).
+
+const ENV = process.env;
+const TG_API = ENV.TG_API || "https://api.telegram.org";
+const DISK_API = ENV.DISK_API || "https://cloud-api.yandex.net/v1/disk/";
+const CODE_TTL = 30 * 60 * 1000; // код привязки Telegram действует 30 минут
+const MAXLEN = 1000;
+
+/* ---------------- хранилище ---------------- */
+let DB = null; // для проверки без облака подставляется хранилище в памяти: module.exports._setDb(...)
+
+function ydbStore(token) {
+  const { Driver, TokenAuthService, TypedValues } = require("ydb-sdk");
+  let driver = null, drvToken = "";
+  async function drv() {
+    const t = token();
+    if (driver && drvToken === t) return driver;
+    if (driver) driver.destroy().catch(() => {});
+    driver = new Driver({ endpoint: ENV.YDB_ENDPOINT, database: ENV.YDB_DATABASE, authService: new TokenAuthService(t) });
+    drvToken = t;
+    if (!(await driver.ready(10000))) throw new Error("YDB: нет соединения с базой");
+    return driver;
+  }
+  // значения из ответа YDB → обычные JS-значения
+  // (у protobuf-сообщений значения по умолчанию лежат в прототипе — смотрим только реально заданные поля)
+  function val(v) {
+    if (!v) return null;
+    const has = (k) => Object.prototype.hasOwnProperty.call(v, k) && v[k] !== null && v[k] !== undefined;
+    if (has("nullFlagValue")) return null;
+    if (has("nestedValue")) return val(v.nestedValue);
+    if (has("textValue")) return v.textValue;
+    if (has("boolValue")) return v.boolValue;
+    for (const k of ["int64Value", "uint64Value", "int32Value", "uint32Value", "doubleValue", "floatValue"]) if (has(k)) return Number(String(v[k]));
+    if (has("bytesValue")) return Buffer.from(v.bytesValue).toString("utf8");
+    return null;
+  }
+  function rows(rs) {
+    if (!rs) return [];
+    const cols = rs.columns.map((c) => c.name);
+    return (rs.rows || []).map((r) => { const o = {}; r.items.forEach((it, i) => { o[cols[i]] = val(it); }); return o; });
+  }
+  async function q(text, params) {
+    const d = await drv();
+    return d.tableClient.withSession(async (s) => {
+      const res = await s.executeQuery(text, params || {});
+      return rows(res.resultSets && res.resultSets[0]);
+    }, 15000);
+  }
+  const U = (s) => TypedValues.utf8(String(s)), I = (n) => TypedValues.int64(Number(n)), TS = (ms) => TypedValues.timestamp(new Date(ms)), B = (b) => TypedValues.bool(!!b);
+  const tsMs = (us) => Math.round(Number(us) / 1000); // Timestamp приходит в микросекундах
+  return {
+    async setCode(uid, code) {
+      await q(`DECLARE $uid AS Utf8; DECLARE $code AS Utf8; DECLARE $now AS Timestamp;
+        UPSERT INTO users (uid, link_code, created) VALUES ($uid, $code, $now);`, { $uid: U(uid), $code: U(code), $now: TS(Date.now()) });
+    },
+    async getUser(uid) {
+      const r = await q(`DECLARE $uid AS Utf8; SELECT uid, tg_chat, link_code, created FROM users WHERE uid = $uid;`, { $uid: U(uid) });
+      return r[0] ? { uid: r[0].uid, chat: r[0].tg_chat, code: r[0].link_code, created: r[0].created ? tsMs(r[0].created) : 0 } : null;
+    },
+    async byCode(code) {
+      const r = await q(`DECLARE $code AS Utf8; SELECT uid, created FROM users VIEW by_code WHERE link_code = $code;`, { $code: U(code) });
+      return r[0] ? { uid: r[0].uid, created: r[0].created ? tsMs(r[0].created) : 0 } : null;
+    },
+    async byChat(chat) {
+      const r = await q(`DECLARE $c AS Int64; SELECT uid FROM users WHERE tg_chat = $c;`, { $c: I(chat) });
+      return r.map((x) => x.uid);
+    },
+    async link(uid, chat) {
+      await q(`DECLARE $uid AS Utf8; DECLARE $c AS Int64;
+        UPDATE users SET tg_chat = $c, link_code = NULL WHERE uid = $uid;`, { $uid: U(uid), $c: I(chat) });
+    },
+    async unlinkChat(chat) {
+      await q(`DECLARE $c AS Int64; UPDATE users SET tg_chat = NULL WHERE tg_chat = $c;`, { $c: I(chat) });
+    },
+    async putReminder(uid, r) {
+      await q(`DECLARE $uid AS Utf8; DECLARE $id AS Utf8; DECLARE $at AS Timestamp; DECLARE $text AS Utf8; DECLARE $task AS Utf8; DECLARE $rr AS Utf8;
+        UPSERT INTO reminders (uid, id, fire_at, text, task_id, rrule, sent) VALUES ($uid, $id, $at, $text, $task, $rr, false);`,
+        { $uid: U(uid), $id: U(r.id), $at: TS(r.at), $text: U(r.text), $task: U(r.task || ""), $rr: U(r.rrule || "") });
+    },
+    async delReminder(uid, id) {
+      await q(`DECLARE $uid AS Utf8; DECLARE $id AS Utf8; DELETE FROM reminders WHERE uid = $uid AND id = $id;`, { $uid: U(uid), $id: U(id) });
+    },
+    async listReminders(uid) {
+      const r = await q(`DECLARE $uid AS Utf8; SELECT id, fire_at, text, rrule FROM reminders WHERE uid = $uid;`, { $uid: U(uid) });
+      return r.map((x) => ({ id: x.id, at: tsMs(x.fire_at), text: x.text, rrule: x.rrule || "" }));
+    },
+    async due(now) {
+      const r = await q(`DECLARE $now AS Timestamp;
+        SELECT r.uid AS uid, r.id AS id, r.fire_at AS fire_at, r.text AS text, r.rrule AS rrule, u.tg_chat AS chat
+        FROM reminders AS r INNER JOIN users AS u ON r.uid = u.uid
+        WHERE r.fire_at <= $now AND r.sent = false LIMIT 200;`, { $now: TS(now) });
+      return r.map((x) => ({ uid: x.uid, id: x.id, at: tsMs(x.fire_at), text: x.text, rrule: x.rrule || "", chat: x.chat }));
+    },
+    async moveReminder(uid, id, at) {
+      await q(`DECLARE $uid AS Utf8; DECLARE $id AS Utf8; DECLARE $at AS Timestamp;
+        UPDATE reminders SET fire_at = $at, sent = false WHERE uid = $uid AND id = $id;`, { $uid: U(uid), $id: U(id), $at: TS(at) });
+    },
+    async addInbox(uid, id, text) {
+      await q(`DECLARE $uid AS Utf8; DECLARE $id AS Utf8; DECLARE $text AS Utf8; DECLARE $now AS Timestamp;
+        UPSERT INTO inbox (uid, id, text, created, taken) VALUES ($uid, $id, $text, $now, false);`, { $uid: U(uid), $id: U(id), $text: U(text), $now: TS(Date.now()) });
+    },
+    async listInbox(uid) {
+      const r = await q(`DECLARE $uid AS Utf8; SELECT id, text, created FROM inbox WHERE uid = $uid AND taken = false ORDER BY created LIMIT 200;`, { $uid: U(uid) });
+      return r.map((x) => ({ id: x.id, text: x.text, at: tsMs(x.created) }));
+    },
+    async ackInbox(uid, id) {
+      await q(`DECLARE $uid AS Utf8; DECLARE $id AS Utf8; DELETE FROM inbox WHERE uid = $uid AND id = $id;`, { $uid: U(uid), $id: U(id) });
+    }
+  };
+}
+
+/* ---------------- общее ---------------- */
+let IAM = ""; // токен сервисного аккаунта из контекста вызова
+function db() { if (!DB) DB = ydbStore(() => IAM); return DB; }
+
+function rid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function newCode() { const a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s = ""; for (let i = 0; i < 6; i++) s += a[Math.floor(Math.random() * a.length)]; return s; }
+function origins() { return String(ENV.APP_ORIGIN || "").split(",").map((s) => s.trim()).filter(Boolean); }
+function hdr(event, k) { const h = event.headers || {}; const key = Object.keys(h).find((x) => x.toLowerCase() === k.toLowerCase()); return key ? h[key] : ""; }
+function bodyOf(event) {
+  if (!event.body) return {};
+  const t = event.isBase64Encoded ? Buffer.from(event.body, "base64").toString("utf8") : event.body;
+  try { return JSON.parse(t); } catch (e) { return {}; }
+}
+function reply(event, status, obj) {
+  const o = hdr(event, "Origin"), ok = origins();
+  const h = { "Content-Type": "application/json; charset=utf-8", Vary: "Origin" };
+  if (o && ok.indexOf(o) >= 0) {
+    h["Access-Control-Allow-Origin"] = o;
+    h["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS";
+    h["Access-Control-Allow-Headers"] = "Authorization, Content-Type";
+    h["Access-Control-Max-Age"] = "600";
+  }
+  return { statusCode: status, headers: h, body: JSON.stringify(obj) };
+}
+
+// следующий срок повторяющегося напоминания: "daily", "weekly" или "weekdays|<смещение пояса в минутах, как getTimezoneOffset()>"
+function nextAt(at, rrule, now) {
+  const p = String(rrule || "").split("|"), kind = p[0], off = +p[1] || 0, DAY = 86400000;
+  if (kind !== "daily" && kind !== "weekdays" && kind !== "weekly") return 0;
+  const step = kind === "weekly" ? 7 * DAY : DAY;
+  let t = at;
+  for (let i = 0; i < 800; i++) {
+    t += step;
+    if (t <= now) continue;
+    if (kind === "weekdays") { const wd = new Date(t - off * 60000).getUTCDay(); if (wd === 0 || wd === 6) continue; }
+    return t;
+  }
+  return 0;
+}
+
+// кто это: по токену Яндекс Диска (кэш на время жизни функции)
+const WHO = new Map();
+async function whoAmI(event) {
+  const a = hdr(event, "Authorization"), m = /^OAuth\s+(\S+)$/i.exec(a || "");
+  if (!m) return null;
+  const c = WHO.get(m[1]);
+  if (c && c.exp > Date.now()) return c.uid;
+  const r = await fetch(DISK_API, { headers: { Authorization: "OAuth " + m[1], Accept: "application/json" } });
+  if (!r.ok) return null;
+  const j = await r.json().catch(() => ({}));
+  const uid = j && j.user && (j.user.uid || j.user.login);
+  if (!uid) return null;
+  WHO.set(m[1], { uid: String(uid), exp: Date.now() + 10 * 60 * 1000 });
+  return String(uid);
+}
+
+async function tg(method, payload) {
+  if (!ENV.BOT_TOKEN) throw new Error("нет BOT_TOKEN");
+  const r = await fetch(TG_API + "/bot" + ENV.BOT_TOKEN + "/" + method, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+  const j = await r.json().catch(() => ({}));
+  if (!j.ok) { const e = new Error("Telegram: " + (j.description || r.status)); e.code = j.error_code || r.status; throw e; }
+  return j.result;
+}
+let BOTNAME = "";
+async function botName() { if (!BOTNAME) { try { BOTNAME = (await tg("getMe", {})).username || ""; } catch (e) { BOTNAME = ""; } } return BOTNAME; }
+
+/* ---------------- приложение: /api/... ---------------- */
+async function api(event) {
+  const method = (event.httpMethod || "GET").toUpperCase();
+  if (method === "OPTIONS") return reply(event, 204, {});
+  const p = String((event.pathParams && event.pathParams.path) || (event.params && event.params.path) || (event.path || "").replace(/^\/?api\/?/, "")).replace(/^\/+|\/+$/g, "");
+  if (p === "ping") return reply(event, 200, { ok: true, v: 1 });
+
+  const uid = await whoAmI(event);
+  if (!uid) return reply(event, 401, { error: "auth", message: "Нет входа через Яндекс: подключите Яндекс Диск в приложении" });
+  const d = db(), b = bodyOf(event);
+
+  if (p === "me" && method === "GET") {
+    const u = await d.getUser(uid);
+    return reply(event, 200, { ok: true, linked: !!(u && u.chat), bot: await botName() });
+  }
+  if (p === "link" && method === "POST") {
+    const code = newCode();
+    await d.setCode(uid, code);
+    return reply(event, 200, { ok: true, code, bot: await botName() });
+  }
+  if (p === "reminders" && method === "GET") return reply(event, 200, { ok: true, items: await d.listReminders(uid) });
+  if (p === "reminders" && method === "PUT") {
+    // { put: [{id, at, text, rrule, task}], del: [id] }
+    const put = Array.isArray(b.put) ? b.put.slice(0, 200) : [], del = Array.isArray(b.del) ? b.del.slice(0, 200) : [];
+    for (const r of put) {
+      if (!r || !r.id || !(+r.at > 0)) continue;
+      await d.putReminder(uid, { id: String(r.id).slice(0, 80), at: +r.at, text: String(r.text || "Напоминание").slice(0, MAXLEN), task: String(r.task || "").slice(0, 80), rrule: String(r.rrule || "").slice(0, 40) });
+    }
+    for (const id of del) await d.delReminder(uid, String(id).slice(0, 80));
+    return reply(event, 200, { ok: true, put: put.length, del: del.length });
+  }
+  if (p === "inbox" && method === "GET") return reply(event, 200, { ok: true, items: await d.listInbox(uid) });
+  if (p === "inbox/ack" && method === "POST") {
+    const ids = Array.isArray(b.ids) ? b.ids.slice(0, 200) : [];
+    for (const id of ids) await d.ackInbox(uid, String(id));
+    return reply(event, 200, { ok: true });
+  }
+  return reply(event, 404, { error: "not_found" });
+}
+
+/* ---------------- Telegram: /tg/<секрет> ---------------- */
+async function bot(event) {
+  const sec = ENV.HOOK_SECRET || "";
+  const pathSec = (event.pathParams && event.pathParams.secret) || (event.params && event.params.secret) || String(event.path || "").split("/").pop();
+  if (!sec || pathSec !== sec || hdr(event, "X-Telegram-Bot-Api-Secret-Token") !== sec) return { statusCode: 403, body: "forbidden" };
+  const up = bodyOf(event), msg = up.message || up.edited_message;
+  if (!msg || !msg.chat) return { statusCode: 200, body: "ok" };
+  const chat = msg.chat.id, text = String(msg.text || msg.caption || "").trim(), d = db();
+  const say = (t) => tg("sendMessage", { chat_id: chat, text: t }).catch(() => {});
+
+  const st = /^\/start(?:@\w+)?\s*(\S*)/i.exec(text);
+  if (st) {
+    const code = st[1].toUpperCase();
+    if (!code) { await say("Здравствуйте! Это бот приложения «Задачи».\nЧтобы привязать его: в приложении «Задачи» откройте «Настройки» → «Сервер и Telegram» → «Привязать Telegram», и пришлите сюда код вида /start ABC123."); return { statusCode: 200, body: "ok" }; }
+    const u = await d.byCode(code);
+    if (!u || Date.now() - u.created > CODE_TTL) { await say("Код не подошёл или устарел. Получите новый в приложении: «Настройки» → «Сервер и Telegram» → «Привязать Telegram»."); return { statusCode: 200, body: "ok" }; }
+    await d.link(u.uid, chat);
+    await say("Готово ✓ Напоминания будут приходить сюда.\nНапишите любое сообщение — оно попадёт во «Входящие» приложения «Задачи».\n/stop — отвязать этот чат.");
+    return { statusCode: 200, body: "ok" };
+  }
+  const uids = await d.byChat(chat);
+  if (!uids.length) { await say("Этот чат ещё не привязан. В приложении: «Настройки» → «Сервер и Telegram» → «Привязать Telegram»."); return { statusCode: 200, body: "ok" }; }
+  if (/^\/stop\b/i.test(text)) { await d.unlinkChat(chat); await say("Чат отвязан. Напоминания сюда больше не придут."); return { statusCode: 200, body: "ok" }; }
+  if (/^\/help\b/i.test(text)) { await say("Пришлите текст — он станет задачей во «Входящих».\n/stop — отвязать чат."); return { statusCode: 200, body: "ok" }; }
+  if (!text) { await say("Пока понимаю только текст."); return { statusCode: 200, body: "ok" }; }
+  for (const u of uids) await d.addInbox(u, rid(), text.slice(0, MAXLEN));
+  await say("Добавил во «Входящие» ✓");
+  return { statusCode: 200, body: "ok" };
+}
+
+/* ---------------- таймер: рассылка напоминаний ---------------- */
+async function tick() {
+  const d = db(), now = Date.now(), list = await d.due(now);
+  let sent = 0;
+  for (const r of list) {
+    if (r.chat) {
+      try { await tg("sendMessage", { chat_id: r.chat, text: "⏰ " + r.text }); sent++; }
+      catch (e) { if (e.code === 403) await d.unlinkChat(r.chat).catch(() => {}); } // бот заблокирован — отвязываем
+    }
+    const n = nextAt(r.at, r.rrule, now);
+    if (n) await d.moveReminder(r.uid, r.id, n); else await d.delReminder(r.uid, r.id);
+  }
+  return { statusCode: 200, body: JSON.stringify({ due: list.length, sent }) };
+}
+
+/* ---------------- вход ---------------- */
+module.exports.handler = async function (event, context) {
+  IAM = (context && context.token && context.token.access_token) || IAM;
+  try {
+    if (event && Array.isArray(event.messages) && !event.httpMethod) return await tick();
+    const path = String((event && (event.path || event.url)) || "");
+    if (/^\/?tg\//.test(path)) return await bot(event);
+    return await api(event || {});
+  } catch (e) {
+    console.error(e && (e.stack || e.message || e));
+    if (event && event.httpMethod) return reply(event, 500, { error: "server", message: String((e && e.message) || e) });
+    return { statusCode: 500, body: "error" };
+  }
+};
+module.exports._setDb = function (x) { DB = x; };
+module.exports._nextAt = nextAt;
+</script>
+<script type="text/plain" id="srv-pkg">{
+  "name": "univer-server",
+  "version": "1.0.0",
+  "description": "Задачи — напоминания в Telegram и «Входящие» (Yandex Cloud Function)",
+  "main": "index.js",
+  "dependencies": {
+    "ydb-sdk": "^5.0.0"
+  }
+}
+</script>
+<script type="text/plain" id="srv-gw">openapi: 3.0.0
+info:
+  title: univer
+  version: 1.0.0
+paths:
+  /api/{path+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ID_ФУНКЦИИ
+        service_account_id: ID_СЕРВИСНОГО_АККАУНТА
+  /tg/{secret}:
+    post:
+      parameters:
+        - name: secret
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ID_ФУНКЦИИ
+        service_account_id: ID_СЕРВИСНОГО_АККАУНТА
+</script>
+<script type="text/plain" id="srv-sql">CREATE TABLE users (
+  uid Utf8,
+  tg_chat Int64,
+  link_code Utf8,
+  created Timestamp,
+  PRIMARY KEY (uid),
+  INDEX by_code GLOBAL ON (link_code)
+);
+
+CREATE TABLE reminders (
+  uid Utf8,
+  id Utf8,
+  fire_at Timestamp,
+  text Utf8,
+  task_id Utf8,
+  rrule Utf8,
+  sent Bool,
+  PRIMARY KEY (uid, id),
+  INDEX by_time GLOBAL ON (fire_at)
+);
+
+CREATE TABLE inbox (
+  uid Utf8,
+  id Utf8,
+  text Utf8,
+  created Timestamp,
+  taken Bool,
+  PRIMARY KEY (uid, id)
+);
+</script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function uid() { return Date.now().toString(36).slice(-6) + Math.random().toString(36).slice(2, 6); }
+  var LS = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* нет места или запрещено */ } },
+    del: function (k) { try { localStorage.removeItem(k); } catch (e) { /* нет */ } }
+  };
+  var tt = null;
+  function toast(t) { var el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(function () { el.hidden = true; }, 2600); }
+  function copyText(txt, ok) {
+    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { toast(ok || "Скопировано"); }).catch(function () { toast("Выделите и скопируйте вручную"); });
+    else toast("Выделите и скопируйте вручную");
+  }
+
+  /* ---------- состояние ---------- */
+  var COLORS = [["Зелёный", "#2f8f6f"], ["Синий", "#3b78d0"], ["Фиолетовый", "#8a5cc7"], ["Розовый", "#d0508a"], ["Красный", "#d1453b"], ["Оранжевый", "#df8a1c"], ["Жёлтый", "#c9a21a"], ["Серый", "#7d8783"]];
+  var S = (function () { try { return JSON.parse(LS.get("zd-state") || "null"); } catch (e) { return null; } })() || {};
+  S.v = 1; S.tasks = S.tasks || []; S.projects = S.projects || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
+  function save(quiet) { S.at = Date.now(); LS.set("zd-state", JSON.stringify(S)); if (!quiet) { SYNC.later(); SRV.later(); } }
+  function live(a) { return a.filter(function (x) { return !x.del; }); }
+  function tasks() { return live(S.tasks); }
+  function projects() { return live(S.projects).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0); }); }
+  function proj(id) { return id ? live(S.projects).filter(function (p) { return p.id === id; })[0] || null : null; }
+  function task(id) { return tasks().filter(function (t) { return t.id === id; })[0] || null; }
+  function touch(o) { o.upd = Date.now(); return o; }
+  function pcolor(p) { return (COLORS[p && p.c] || COLORS[0])[1]; }
+  // удалённые записи хранятся «надгробием» 60 дней, чтобы удаление дошло до других устройств
+  function prune() { var lim = Date.now() - 60 * 864e5; S.tasks = S.tasks.filter(function (x) { return !x.del || x.upd > lim; }); S.projects = S.projects.filter(function (x) { return !x.del || x.upd > lim; }); }
+
+  /* ---------- даты ---------- */
+  var DAY = 864e5;
+  function sod(ms) { var d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); }
+  function today0() { return sod(Date.now()); }
+  function p2(n) { return (n < 10 ? "0" : "") + n; }
+  function dKey(ms) { var d = new Date(ms); return d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate()); }
+  function hm(ms) { var d = new Date(ms); return p2(d.getHours()) + ":" + p2(d.getMinutes()); }
+  function dayName(ms) {
+    var dd = Math.round((sod(ms) - today0()) / DAY);
+    if (dd === 0) return "Сегодня"; if (dd === 1) return "Завтра"; if (dd === -1) return "Вчера"; if (dd === 2) return "Послезавтра";
+    var d = new Date(ms), s = d.toLocaleDateString("ru-RU", { weekday: "short", day: "numeric", month: "long" });
+    if (d.getFullYear() !== new Date().getFullYear()) s += " " + d.getFullYear();
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+  function whenTxt(t) { return dayName(t.at) + (t.allday ? "" : ", " + hm(t.at)); }
+  function isLate(t) { return !t.done && t.at && (t.allday ? t.at < today0() : t.at < Date.now()); }
+  var REPN = { "": "не повторять", daily: "каждый день", weekdays: "по будням", weekly: "каждую неделю", monthly: "каждый месяц" };
+  function rrOf(rep) { return rep === "daily" || rep === "weekly" ? rep : rep === "weekdays" ? "weekdays|" + new Date().getTimezoneOffset() : rep === "monthly" ? "monthly" : ""; }
+  function stepFrom(t, kind) { if (kind === "monthly") { var d = new Date(t); d.setMonth(d.getMonth() + 1); return d.getTime(); } return t + (kind === "weekly" ? 7 : 1) * DAY; }
+  // первый срок позже now по правилу повтора
+  function firstOcc(at, rr, now) {
+    if (!at) return 0;
+    var p = String(rr || "").split("|"), off = +p[1] || 0;
+    function okDay(t) { if (p[0] !== "weekdays") return true; var wd = new Date(t - off * 6e4).getUTCDay(); return wd !== 0 && wd !== 6; }
+    if (!p[0]) return at;
+    if (at > now && okDay(at)) return at;
+    for (var t = at, i = 0; i < 1200; i++) { t = stepFrom(t, p[0]); if (t > now && okDay(t)) return t; }
+    return 0;
+  }
+  function remAt(t) { return t.allday ? t.at + (S.opt.allDayHour || 9) * 3600e3 : t.at; }
+
+  /* ---------- быстрый ввод: «завтра 10:00 #работа +Дом !1 каждый день» ---------- */
+  var WD = [["вс", "воскресенье"], ["пн", "понедельник"], ["вт", "вторник"], ["ср", "среда", "среду"], ["чт", "четверг"], ["пт", "пятница", "пятницу"], ["сб", "суббота", "субботу"]];
+  function parseQuick(src) {
+    var s = " " + src + " ", out = { tags: [], prio: 0, rep: "", pid: "", day: null, time: null }, m;
+    function cut(re, f) { s = s.replace(re, function () { f.apply(null, arguments); return " "; }); }
+    cut(/\s#([0-9a-zа-яё_\-]+)(?=\s)/gi, function (a, t) { out.tags.push(t.toLowerCase()); });
+    cut(/\s!([1-3])(?=\s)/g, function (a, n) { out.prio = +n; });
+    cut(/\s\+([0-9a-zа-яё_\-]+)(?=\s)/gi, function (a, n) {
+      var k = n.toLowerCase().replace(/_/g, " "), p = projects().filter(function (x) { return x.n.toLowerCase() === k; })[0] || projects().filter(function (x) { return x.n.toLowerCase().indexOf(k) === 0; })[0];
+      if (p) out.pid = p.id; else out.newProj = n.replace(/_/g, " ");
+    });
+    cut(/\s(каждый день|ежедневно)(?=\s)/gi, function () { out.rep = "daily"; });
+    cut(/\s(по будням)(?=\s)/gi, function () { out.rep = "weekdays"; });
+    cut(/\s(каждую неделю|еженедельно)(?=\s)/gi, function () { out.rep = "weekly"; });
+    cut(/\s(каждый месяц|ежемесячно)(?=\s)/gi, function () { out.rep = "monthly"; });
+    var t0 = today0();
+    cut(/\s(сегодня)(?=\s)/gi, function () { out.day = t0; });
+    cut(/\s(послезавтра)(?=\s)/gi, function () { out.day = t0 + 2 * DAY; });
+    cut(/\s(завтра)(?=\s)/gi, function () { out.day = t0 + DAY; });
+    cut(/\s(\d{1,2})\.(\d{1,2})(?:\.(\d{2,4}))?(?=\s)/g, function (a, d, mo, y) {
+      var yy = y ? (+y < 100 ? 2000 + +y : +y) : new Date().getFullYear(), dt = new Date(yy, +mo - 1, +d).getTime();
+      if (!y && dt < t0) dt = new Date(yy + 1, +mo - 1, +d).getTime();
+      if (+mo >= 1 && +mo <= 12 && +d >= 1 && +d <= 31) out.day = dt;
+    });
+    WD.forEach(function (names, wd) {
+      var re = new RegExp("\\s(?:в|во)?\\s?(" + names.join("|") + ")(?=\\s)", "i");
+      if (out.day === null && re.test(s)) { s = s.replace(re, " "); var add = (wd - new Date().getDay() + 7) % 7; out.day = t0 + (add || 7) * DAY; }
+    });
+    cut(/\s(?:в\s)?(\d{1,2}):(\d{2})(?=\s)/g, function (a, h, mi) { if (+h < 24 && +mi < 60) out.time = [+h, +mi]; });
+    if (!out.time) cut(/\sв\s(\d{1,2})(?=\s)/g, function (a, h) { if (+h < 24) out.time = [+h, 0]; });
+    out.t = s.replace(/\s+/g, " ").trim();
+    if (out.time && out.day === null) { var d = new Date(); d.setHours(out.time[0], out.time[1], 0, 0); out.day = d.getTime() > Date.now() ? t0 : t0 + DAY; }
+    if (out.rep && out.day === null) out.day = t0;
+    if (out.day !== null) { if (out.time) { var dd = new Date(out.day); dd.setHours(out.time[0], out.time[1], 0, 0); out.at = dd.getTime(); out.allday = false; } else { out.at = out.day; out.allday = true; } }
+    return out;
+  }
+  function quickPreview(q) {
+    var bits = [];
+    if (q.at) bits.push("📅 " + (q.allday ? dayName(q.at) : dayName(q.at) + ", " + hm(q.at)));
+    if (q.rep) bits.push("🔁 " + REPN[q.rep]);
+    if (q.pid) bits.push("📁 " + proj(q.pid).n); else if (q.newProj) bits.push("📁 новый проект «" + q.newProj + "»");
+    q.tags.forEach(function (t) { bits.push("#" + t); });
+    if (q.prio) bits.push("⚑ приоритет " + q.prio);
+    return bits.join("  ·  ");
+  }
+
+  /* ---------- Яндекс Диск: вход и синхронизация ---------- */
+  var YD_CID = "6ed6ba861f5e4a2ab848e53e3cc474e1", YD_REDIRECT = "https://tyamshikova-max.github.io/rost/disk/", YD_API = "https://cloud-api.yandex.net/v1/disk";
+  var ONLINE_HOST = location.hostname === "tyamshikova-max.github.io";
+  var YD = {
+    on: ONLINE_HOST,
+    token: function () { try { var o = JSON.parse(LS.get("yd-token") || "null"); return o && o.exp > Date.now() ? o.t : null; } catch (e) { return null; } },
+    login: function () { location.href = "https://oauth.yandex.ru/authorize?response_type=token&client_id=" + YD_CID + "&redirect_uri=" + encodeURIComponent(YD_REDIRECT) + "&state=zadachi"; },
+    logout: function () { LS.del("yd-token"); },
+    api: function (path, opt) {
+      opt = opt || {};
+      var hd = { Authorization: "OAuth " + YD.token(), Accept: "application/json" };
+      if (opt.body) hd["Content-Type"] = "application/json";
+      return fetch(YD_API + path, { method: opt.method || "GET", headers: hd, body: opt.body ? JSON.stringify(opt.body) : undefined })
+        .catch(function () { throw { status: 0, msg: "нет связи с Яндекс Диском" }; })
+        .then(function (r) {
+          return r.text().then(function (t) {
+            var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) { /* не JSON */ }
+            if (!r.ok && !(opt.ok && opt.ok.indexOf(r.status) >= 0)) throw { status: r.status, msg: (j && (j.message || j.description)) || r.statusText };
+            return j || {};
+          });
+        });
+    },
+    folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
+  };
+  // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
+  var CHUNK = 900, ROOT = "app:/tasks/state";
+  function z64(u8) { var s = ""; for (var i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); }
+  function unz64(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+  function zpack(obj) { var st = new Blob([JSON.stringify(obj)]).stream().pipeThrough(new CompressionStream("deflate")); return new Response(st).arrayBuffer().then(function (ab) { return z64(new Uint8Array(ab)); }); }
+  function zunpack(z) { var st = new Blob([unz64(z)]).stream().pipeThrough(new DecompressionStream("deflate")); return new Response(st).text().then(function (t) { return JSON.parse(t); }); }
+  function cname(i) { return ROOT + "/c" + ("00" + i).slice(-3); }
+  // слияние: по каждой задаче и проекту побеждает более свежая правка
+  function mergeList(a, b) {
+    var m = {}; (a || []).forEach(function (x) { m[x.id] = x; });
+    (b || []).forEach(function (x) { var y = m[x.id]; if (!y || (x.upd || 0) > (y.upd || 0)) m[x.id] = x; });
+    return Object.keys(m).map(function (k) { return m[k]; });
+  }
+  function snapshot() { return { v: 1, tasks: S.tasks, projects: S.projects, opt: S.opt }; }
+  var SYNC = {
+    st: "off", at: 0, msg: "", parts: null, last: "", t: null, busy: false,
+    enabled: function () { return YD.on && !!YD.token(); },
+    later: function () { if (!SYNC.enabled()) return; clearTimeout(SYNC.t); SYNC.t = setTimeout(SYNC.run, 2500); },
+    show: function () {
+      var b = $("syncBtn"); b.hidden = !YD.on;
+      if (!YD.on) return;
+      var txt = !YD.token() ? "Войти" : SYNC.st === "busy" ? "Синхронизирую…" : SYNC.st === "err" ? "Нет связи" : SYNC.at ? "Диск · " + hm(SYNC.at) : "Яндекс Диск";
+      b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M7 18h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.6-1.6A4.8 4.8 0 0 0 7 18z"/></svg><span>' + esc(txt) + "</span>";
+      b.classList.toggle("bad", SYNC.st === "err" || !YD.token());
+      b.title = SYNC.st === "err" ? SYNC.msg : "Синхронизация через Яндекс Диск";
+    },
+    fail: function (e) {
+      SYNC.busy = false;
+      if (e && e.status === 401) { YD.logout(); SYNC.st = "off"; toast("Вход в Яндекс истёк — войдите снова"); }
+      else { SYNC.st = "err"; SYNC.msg = (e && e.msg) || "ошибка"; }
+      SYNC.show();
+    },
+    read: function () {
+      return YD.api("/resources?limit=1000&fields=" + encodeURIComponent("_embedded.items.name,_embedded.items.custom_properties") + "&path=" + encodeURIComponent(ROOT), { ok: [404] }).then(function (j) {
+        var items = ((j._embedded && j._embedded.items) || []).filter(function (i) { return /^c\d{3}$/.test(i.name); }).sort(function (a, b) { return a.name < b.name ? -1 : 1; });
+        SYNC.parts = items.map(function (i) { return (i.custom_properties && i.custom_properties.d) || ""; });
+        var cp = items[0] && items[0].custom_properties;
+        if (!cp || !cp.n) return null;
+        return zunpack(SYNC.parts.slice(0, cp.n).join(""));
+      });
+    },
+    write: function (snap) {
+      return zpack(snap).then(function (z) {
+        var parts = [], prev = SYNC.parts || [], k = 0;
+        for (var i = 0; i < z.length; i += CHUNK) parts.push(z.slice(i, i + CHUNK));
+        function next() {
+          if (k >= parts.length) return;
+          var i2 = k++, body = i2 === 0 ? { n: parts.length, d: parts[0] } : { d: parts[i2] };
+          if (i2 > 0 && prev[i2] === parts[i2]) return next();
+          if (i2 === 0 && prev[0] === parts[0] && prev.length >= parts.length) return next();
+          var mk = i2 < prev.length ? Promise.resolve() : YD.folder(cname(i2));
+          return mk.then(function () { return YD.api("/resources?path=" + encodeURIComponent(cname(i2)), { method: "PATCH", body: { custom_properties: body } }); }).then(next);
+        }
+        var start = prev.length ? Promise.resolve() : YD.folder("app:/tasks").then(function () { return YD.folder(ROOT); });
+        return start.then(next).then(function () { SYNC.parts = parts.concat(prev.slice(parts.length)); });
+      });
+    },
+    // забрать, слить, отправить, если есть что
+    run: function () {
+      if (!SYNC.enabled()) { SYNC.show(); return Promise.resolve(); }
+      if (SYNC.busy) { SYNC.later(); return Promise.resolve(); }
+      SYNC.busy = true; SYNC.st = "busy"; SYNC.show();
+      return SYNC.read().then(function (remote) {
+        var before = JSON.stringify([S.tasks, S.projects]);
+        if (remote) {
+          S.tasks = mergeList(S.tasks, remote.tasks); S.projects = mergeList(S.projects, remote.projects);
+          if (remote.opt && (!S.opt.upd || (remote.opt.upd || 0) > S.opt.upd)) S.opt = remote.opt;
+        }
+        prune();
+        var changed = JSON.stringify([S.tasks, S.projects]) !== before;
+        if (changed) { LS.set("zd-state", JSON.stringify(S)); render(); SRV.later(); }
+        var snap = snapshot(), js = JSON.stringify(snap);
+        var rjs = remote ? JSON.stringify({ v: 1, tasks: mergeList([], remote.tasks), projects: mergeList([], remote.projects), opt: remote.opt }) : "";
+        if (js === SYNC.last || (remote && js === rjs)) { SYNC.last = js; return; }
+        return SYNC.write(snap).then(function () { SYNC.last = js; });
+      }).then(function () { SYNC.busy = false; SYNC.st = "ok"; SYNC.at = Date.now(); SYNC.show(); }).catch(SYNC.fail);
+    }
+  };
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") { SYNC.run(); SRV.pull(); } else if (SYNC.enabled()) SYNC.run(); });
+
+  /* ---------- свой сервер в Яндекс Облаке: напоминания в Telegram и «Входящие» ---------- */
+  var APPURL = "https://tyamshikova-max.github.io/rost/zadachi/";
+  function remWanted() {
+    var out = {}, now = Date.now();
+    tasks().forEach(function (t) {
+      if (t.done || !t.rem || !t.at) return;
+      var rr = rrOf(t.rep), base = remAt(t), at = firstOcc(base, rr, now);
+      if (at > now) out["t:" + t.id] = { id: "t:" + t.id, at: at, text: t.t, rrule: rr, task: t.id };
+    });
+    return out;
+  }
+  var SRV = {
+    st: { ok: null, msg: "", linked: null, bot: "", code: "", err: "" },
+    url: function () { return String(LS.get("zd-srv") || "").trim().replace(/\/+$/, ""); },
+    usable: function () { return !!SRV.url(); },
+    ready: function () { return SRV.usable() && !!YD.token(); },
+    call: function (path, opt) {
+      opt = opt || {};
+      var hd = { Accept: "application/json" };
+      if (YD.token()) hd.Authorization = "OAuth " + YD.token();
+      if (opt.body) hd["Content-Type"] = "application/json";
+      return fetch(SRV.url() + "/api/" + path, { method: opt.method || "GET", headers: hd, body: opt.body ? JSON.stringify(opt.body) : undefined })
+        .catch(function () { throw { status: 0, msg: "нет связи с сервером — проверьте адрес и интернет" }; })
+        .then(function (r) {
+          return r.text().then(function (t) {
+            var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) { /* не JSON */ }
+            if (!r.ok) throw { status: r.status, msg: (j && (j.message || j.error)) || (r.status === 403 ? "доступ запрещён (403) — проверьте сервисный аккаунт в API-шлюзе" : r.status === 404 ? "адрес не найден (404) — проверьте адрес и спецификацию шлюза" : "ошибка " + r.status) };
+            return j || {};
+          });
+        });
+    },
+    sent: function () { try { return JSON.parse(LS.get("zd-srv-sent") || "{}") || {}; } catch (e) { return {}; } },
+    t: null, pushing: false,
+    later: function () { if (!SRV.ready()) return; clearTimeout(SRV.t); SRV.t = setTimeout(SRV.push, 1500); },
+    push: function () {
+      if (!SRV.ready() || SRV.pushing) return Promise.resolve();
+      var want = remWanted(), had = SRV.sent(), put = [], del = [], sig = {};
+      Object.keys(want).forEach(function (id) { var r = want[id], sg = r.at + "|" + r.text + "|" + r.rrule; sig[id] = sg; if (had[id] !== sg) put.push(r); });
+      Object.keys(had).forEach(function (id) { if (!want[id]) del.push(id); });
+      if (!put.length && !del.length) return Promise.resolve();
+      SRV.pushing = true;
+      return SRV.call("reminders", { method: "PUT", body: { put: put, del: del } })
+        .then(function () { LS.set("zd-srv-sent", JSON.stringify(sig)); SRV.st.err = ""; })
+        .catch(function (e) { SRV.st.err = "Напоминания не отправлены на сервер: " + e.msg; })
+        .then(function () { SRV.pushing = false; });
+    },
+    pull: function () {
+      if (!SRV.ready()) return Promise.resolve(0);
+      return SRV.call("inbox").then(function (j) {
+        var items = j.items || [], have = {}, n = 0;
+        S.tasks.forEach(function (t) { if (t.sid) have[t.sid] = 1; });
+        items.forEach(function (it) {
+          if (have[it.id]) return;
+          var q = parseQuick(String(it.text || "").slice(0, 1000));
+          S.tasks.unshift(touch({ id: uid(), t: q.t || String(it.text || "").slice(0, 1000), at: q.at || 0, allday: !!q.allday, rep: q.rep || "", rem: !!(q.at && !q.allday && S.opt.autoRem), prio: q.prio, tags: q.tags, pid: q.pid || "", done: false, src: "tg", sid: it.id, created: it.at || Date.now() }));
+          n++;
+        });
+        if (n) { save(); render(); toast("Из Telegram: " + n + " " + (n === 1 ? "задача" : "задачи")); }
+        if (!items.length) return n;
+        return SRV.call("inbox/ack", { method: "POST", body: { ids: items.map(function (x) { return x.id; }) } }).then(function () { return n; });
+      }).catch(function (e) { SRV.st.err = "Сообщения из Telegram не загружены: " + e.msg; return 0; });
+    },
+    check: function () {
+      if (!SRV.usable()) return Promise.resolve();
+      SRV.st.ok = "…"; SRV.st.msg = "Проверяю…";
+      return SRV.call("ping").then(function () {
+        SRV.st.ok = true; SRV.st.msg = "✓ Сервер отвечает";
+        if (!YD.token()) return;
+        return SRV.call("me").then(function (j) { SRV.st.linked = !!j.linked; SRV.st.bot = j.bot || SRV.st.bot; if (j.linked) SRV.st.code = ""; });
+      }).catch(function (e) { SRV.st.ok = false; SRV.st.msg = "✗ " + e.msg; });
+    },
+    started: false,
+    start: function () {
+      if (SRV.started || !SRV.ready()) return; SRV.started = true;
+      setTimeout(function () { SRV.pull(); SRV.push(); }, 2000);
+      setInterval(function () { if (!document.hidden) SRV.pull(); }, 120000);
+    }
+  };
+
+  /* ---------- маршруты и вид ---------- */
+  var V = "today", ARG = "", ED = null, CONF = null, QPV = "";
+  function parse() {
+    var h = decodeURIComponent((location.hash || "").slice(1)), m;
+    if ((m = h.match(/^(proj|tag)-(.+)$/))) return { v: m[1], a: m[2] };
+    if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
+    if (["inbox", "today", "plans", "all", "done", "search"].indexOf(h) >= 0) return { v: h, a: "" };
+    return { v: "today", a: "" };
+  }
+  function go(h) { if (location.hash.slice(1) === h) route(); else location.hash = h; }
+  function route() {
+    var r = parse(), same = r.v === V && r.a === ARG;
+    V = r.v; ARG = r.a; if (!same) { ED = null; CONF = null; }
+    document.body.classList.remove("menu");
+    render();
+    if (ARG && (V === "help" || V === "settings")) { var el = $((V === "help" ? "h-" : "s-") + ARG); if (el) el.scrollIntoView({ block: "start" }); }
+    else if (!same) window.scrollTo(0, 0);
+    LS.set("zd-last", location.hash.slice(1));
+  }
+  window.addEventListener("hashchange", route);
+
+  var ICO = {
+    inbox: '<path d="M4 13l2.5-7h11L20 13v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 13h4.5l1 2h5l1-2H20"/>',
+    today: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/><text x="12" y="17.5" font-size="7" text-anchor="middle" stroke="none" fill="currentColor" font-family="sans-serif">' + new Date().getDate() + "</text>",
+    plans: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h2M12 14h2M16 14h0M8 17h2M12 17h2"/>',
+    all: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01" stroke-width="3"/>',
+    done: '<circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.3l2.4 2.4 4.8-5"/>',
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6L18 18M6 18l1.4-1.4M16.6 7.4L18 6"/>',
+    help: '<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5v.6M12 16.8v.2"/>',
+    tag: '<path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1.4 1.4 0 0 1 0 2l-5.8 5.8a1.4 1.4 0 0 1-2 0z"/><circle cx="8" cy="8" r="1.3"/>'
+  };
+  function ic(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICO[n] + "</svg>"; }
+  function inboxList() { return tasks().filter(function (t) { return !t.done && !t.pid && !t.at; }); }
+  function todayList() { var end = today0() + DAY; return tasks().filter(function (t) { return !t.done && t.at && t.at < end; }); }
+  function allTags() { var m = {}; tasks().forEach(function (t) { if (!t.done) (t.tags || []).forEach(function (g) { m[g] = (m[g] || 0) + 1; }); }); return Object.keys(m).sort().map(function (k) { return [k, m[k]]; }); }
+  function sideHTML() {
+    function a(h, icn, label, n) { return '<a href="#' + h + '" class="' + ((V + (ARG ? "-" + ARG : "")) === h || (V === h && !ARG) ? "on" : "") + '">' + icn + "<span>" + label + "</span>" + (n ? '<span class="n">' + n + "</span>" : "") + "</a>"; }
+    var lt = todayList().length, li = inboxList().length;
+    var h = '<nav class="nav">' + a("inbox", ic("inbox"), "Входящие", li) + a("today", ic("today"), "Сегодня", lt) + a("plans", ic("plans"), "Планы", 0) + a("all", ic("all"), "Все задачи", 0) + a("done", ic("done"), "Сделано", 0) + "</nav>";
+    h += '<div class="lab">Проекты<button type="button" data-a="newproj" title="Новый проект" aria-label="Новый проект">+</button></div><nav class="nav">';
+    var ps = projects();
+    h += ps.length ? ps.map(function (p) { var n = tasks().filter(function (t) { return t.pid === p.id && !t.done; }).length; return a("proj-" + p.id, '<span class="dot" style="background:' + pcolor(p) + '"></span>', esc(p.n), n); }).join("") : '<div class="muted" style="padding:2px 10px">Пока нет. «+» — создать</div>';
+    h += "</nav>";
+    var tg = allTags();
+    if (tg.length) h += '<div class="lab">Теги</div><nav class="nav">' + tg.map(function (x) { return a("tag-" + x[0], ic("tag"), "#" + esc(x[0]), x[1]); }).join("") + "</nav>";
+    h += '<div class="lab">&nbsp;</div><nav class="nav">' + a("settings", ic("settings"), "Настройки", 0) + a("help", ic("help"), "Справка", 0) + "</nav>";
+    return h;
+  }
+
+  /* ---------- строки задач ---------- */
+  function sortTasks(list) {
+    return list.slice().sort(function (a, b) {
+      var aa = a.at || 9e15, bb = b.at || 9e15;
+      if (sod(aa) !== sod(bb)) return aa - bb;
+      if (!!a.allday !== !!b.allday) return a.allday ? -1 : 1;
+      if (aa !== bb) return aa - bb;
+      return (a.prio || 4) - (b.prio || 4) || (b.created || 0) - (a.created || 0);
+    });
+  }
+  function taskRow(t, o) {
+    o = o || {};
+    var late = isLate(t), meta = [];
+    if (t.at && !o.noDate) meta.push('<span class="' + (late ? "late" : "when") + '">' + esc(o.timeOnly && !t.allday ? hm(t.at) : whenTxt(t)) + "</span>");
+    else if (t.at && o.noDate && !t.allday) meta.push('<span class="when">' + hm(t.at) + "</span>");
+    if (t.rep) meta.push("🔁 " + REPN[t.rep]);
+    if (t.rem && t.at) meta.push(SRV.ready() ? "🔔" : '<span title="Подключите сервер в настройках">🔕</span>');
+    var p = proj(t.pid);
+    if (p && !o.noProj) meta.push('<span class="pdot"><i style="background:' + pcolor(p) + '"></i>' + esc(p.n) + "</span>");
+    (t.tags || []).forEach(function (g) { meta.push('<a class="tag" href="#tag-' + esc(g) + '">#' + esc(g) + "</a>"); });
+    if (t.note) meta.push("📝");
+    if (t.src === "tg") meta.push("из Telegram");
+    var h = '<li class="task' + (t.done ? " done" : "") + '" data-id="' + t.id + '"><button class="ck' + (t.prio ? " p" + t.prio : "") + '" type="button" data-a="toggle" aria-label="' + (t.done ? "Вернуть в работу" : "Готово") + '"></button>' +
+      '<div class="bd" data-a="edit"><div class="tt">' + esc(t.t) + "</div>" + (meta.length ? '<div class="mt">' + meta.join("") + "</div>" : "") + "</div>" +
+      '<button class="x" type="button" data-a="del" aria-label="Удалить">×</button></li>';
+    if (ED === t.id) h += "<li>" + editor(t) + "</li>";
+    return h;
+  }
+  function list(arr, o) { return arr.length ? '<ul class="list">' + arr.map(function (t) { return taskRow(t, o); }).join("") + "</ul>" : ""; }
+  function editor(t) {
+    var ps = projects(), date = t.at ? dKey(t.at) : "", time = t.at && !t.allday ? hm(t.at) : "";
+    return '<div class="ed" data-ed="' + t.id + '">' +
+      '<input type="text" class="full" data-f="t" value="' + esc(t.t) + '" aria-label="Задача">' +
+      '<textarea data-f="note" placeholder="Заметка, ссылки, подробности">' + esc(t.note || "") + "</textarea>" +
+      '<div class="row"><label>Дата <input type="date" data-f="date" value="' + date + '"></label><label>Время <input type="time" data-f="time" value="' + time + '"></label>' +
+      '<label>Повтор <select data-f="rep">' + Object.keys(REPN).map(function (k) { return '<option value="' + k + '"' + ((t.rep || "") === k ? " selected" : "") + ">" + REPN[k] + "</option>"; }).join("") + "</select></label></div>" +
+      '<div class="row"><label>Проект <select data-f="pid"><option value="">— без проекта —</option>' + ps.map(function (p) { return '<option value="' + p.id + '"' + (t.pid === p.id ? " selected" : "") + ">" + esc(p.n) + "</option>"; }).join("") + "</select></label>" +
+      '<label>Приоритет <select data-f="prio">' + [[0, "обычный"], [1, "1 — срочно"], [2, "2 — важно"], [3, "3 — желательно"]].map(function (x) { return '<option value="' + x[0] + '"' + ((t.prio || 0) === x[0] ? " selected" : "") + ">" + x[1] + "</option>"; }).join("") + "</select></label>" +
+      '<label>Теги <input type="text" data-f="tags" value="' + esc((t.tags || []).join(" ")) + '" placeholder="работа дом" size="14"></label></div>' +
+      '<div class="row"><label><input type="checkbox" data-f="rem"' + (t.rem ? " checked" : "") + "> Напомнить в Telegram" + (t.allday || !time ? " (для задачи без времени — в " + (S.opt.allDayHour || 9) + ":00)" : "") + "</label>" + (SRV.ready() ? "" : '<span class="muted">— заработает, когда подключите <a href="#settings-srv">сервер</a></span>') + "</div>" +
+      '<div class="row end"><button class="btn warn sp" type="button" data-a="del">Удалить</button><button class="btn" type="button" data-a="close">Закрыть</button><button class="btn pri" type="button" data-a="save">Сохранить</button></div></div>';
+  }
+  function addBox(ctx) {
+    return '<div class="add"><div class="r1"><input class="t" id="qa" type="text" autocomplete="off" placeholder="Новая задача — например: завтра 10:00 позвонить в банк #дела" value="' + esc(QPV) + '"><button class="btn pri" type="button" data-a="add">Добавить</button></div>' +
+      '<div class="pv" id="qpv"></div><div class="hint">Можно сразу: <code>сегодня</code> <code>завтра</code> <code>пт</code> <code>20.10</code> <code>в 18:30</code> · <code>#тег</code> · <code>+Проект</code> · <code>!1</code> приоритет · <code>каждый день</code> <code>по будням</code></div></div>';
+  }
+
+  /* ---------- страницы ---------- */
+  function head(title, sub) { return "<h1>" + title + "</h1>" + (sub ? '<p class="sub">' + sub + "</p>" : ""); }
+  function vInbox() {
+    var l = sortTasks(inboxList());
+    return head("Входящие", "Всё, что ещё не разобрано: без даты и без проекта. Сюда же попадают сообщения боту в Telegram.") + addBox() + (l.length ? list(l) : '<p class="empty">Пусто — всё разобрано 🎉</p>');
+  }
+  function vToday() {
+    var t0 = today0(), l = sortTasks(todayList()), late = l.filter(function (t) { return t.at < t0; }), td = l.filter(function (t) { return t.at >= t0; });
+    var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" });
+    var h = head("Сегодня", d.charAt(0).toUpperCase() + d.slice(1)) + addBox();
+    if (late.length) h += '<h2 class="warnc">Просрочено <span class="c">' + late.length + "</span></h2>" + list(late);
+    h += "<h2>Сегодня <span class=\"c\">" + td.length + "</span></h2>" + (td.length ? list(td, { noDate: true }) : '<p class="empty">На сегодня задач нет. Добавьте новую или загляните в «Планы».</p>');
+    return h;
+  }
+  function vPlans() {
+    var t0 = today0(), l = sortTasks(tasks().filter(function (t) { return !t.done && t.at; })), h = head("Планы", "Задачи по датам: просроченные, на ближайшие две недели и дальше.") + addBox();
+    var late = l.filter(function (t) { return t.at < t0; });
+    if (late.length) h += '<h2 class="warnc">Просрочено <span class="c">' + late.length + "</span></h2>" + list(late);
+    for (var i = 0; i < 14; i++) {
+      var d0 = t0 + i * DAY, dl = l.filter(function (t) { return t.at >= d0 && t.at < d0 + DAY; });
+      h += "<h2>" + dayName(d0) + (i > 1 ? ' <span class="c">' + new Date(d0).toLocaleDateString("ru-RU", { weekday: "long" }) + "</span>" : "") + (dl.length ? ' <span class="c">' + dl.length + "</span>" : "") + "</h2>" + (dl.length ? list(dl, { noDate: true }) : '<p class="muted" style="margin:0 4px">—</p>');
+    }
+    var later = l.filter(function (t) { return t.at >= t0 + 14 * DAY; });
+    if (later.length) h += "<h2>Позже <span class=\"c\">" + later.length + "</span></h2>" + list(later);
+    return h;
+  }
+  function vAll() {
+    var l = tasks().filter(function (t) { return !t.done; }), h = head("Все задачи", "Все невыполненные задачи по проектам.") + addBox();
+    var none = sortTasks(l.filter(function (t) { return !t.pid; }));
+    if (none.length) h += "<h2>Без проекта <span class=\"c\">" + none.length + "</span></h2>" + list(none);
+    projects().forEach(function (p) { var pl = sortTasks(l.filter(function (t) { return t.pid === p.id; })); if (pl.length) h += '<h2><span class="pdot"><i style="background:' + pcolor(p) + '"></i></span><a href="#proj-' + p.id + '" style="color:inherit">' + esc(p.n) + '</a> <span class="c">' + pl.length + "</span></h2>" + list(pl, { noProj: true }); });
+    if (!l.length) h += '<p class="empty">Задач нет.</p>';
+    return h;
+  }
+  function vDone() {
+    var l = tasks().filter(function (t) { return t.done; }).sort(function (a, b) { return (b.dt || 0) - (a.dt || 0); });
+    var h = head("Сделано", "Выполненные задачи. Чтобы вернуть задачу в работу, снимите отметку.");
+    if (CONF === "clear") h += '<div class="confirm"><b>Удалить все выполненные задачи (' + l.length + ')?</b><span>Это нельзя отменить.</span><div class="r"><button class="btn warn" type="button" data-a="clear-yes">Удалить</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>';
+    else if (l.length) h += '<div style="margin:12px 0"><button class="btn sm" type="button" data-a="clear">Удалить выполненные</button></div>';
+    var by = {}, keys = [];
+    l.slice(0, 300).forEach(function (t) { var k = sod(t.dt || t.upd || 0); if (!by[k]) { by[k] = []; keys.push(k); } by[k].push(t); });
+    keys.forEach(function (k) { h += "<h2>" + dayName(k) + ' <span class="c">' + by[k].length + "</span></h2>" + list(by[k]); });
+    return h + (l.length ? "" : '<p class="empty">Пока ничего не сделано.</p>');
+  }
+  function vProj() {
+    var p = proj(ARG);
+    if (!p) return head("Проект не найден", '<a href="#today">К задачам на сегодня</a>');
+    var l = tasks().filter(function (t) { return t.pid === p.id && !t.done; }), dn = tasks().filter(function (t) { return t.pid === p.id && t.done; }).length;
+    var h = '<div class="phead"><span class="dot" style="background:' + pcolor(p) + '"></span><h1>' + esc(p.n) + '</h1><button class="btn sm" type="button" data-a="projedit">Изменить</button></div><p class="sub">Задач: ' + l.length + (dn ? " · сделано: " + dn : "") + "</p>";
+    if (CONF === "projedit") {
+      h += '<div class="confirm info"><label class="f">Название <input type="text" class="inp" id="pn" value="' + esc(p.n) + '"></label><label class="f">Цвет <select class="inp" id="pc">' + COLORS.map(function (c, i) { return '<option value="' + i + '"' + ((p.c || 0) === i ? " selected" : "") + ">" + c[0] + "</option>"; }).join("") + '</select></label><div class="r"><button class="btn pri" type="button" data-a="projsave">Сохранить</button><button class="btn" type="button" data-a="cancel">Отмена</button><button class="btn warn" type="button" data-a="projdel" style="margin-left:auto">Удалить проект…</button></div></div>';
+    }
+    if (CONF === "projdel") h += '<div class="confirm"><b>Удалить проект «' + esc(p.n) + '»?</b><span>Его задачи не удалятся — они перейдут во «Входящие» (или останутся в «Планах», если у них есть дата).</span><div class="r"><button class="btn warn" type="button" data-a="projdel-yes">Удалить проект</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>';
+    h += addBox();
+    var nod = sortTasks(l.filter(function (t) { return !t.at; })), wd = sortTasks(l.filter(function (t) { return t.at; }));
+    if (wd.length) h += "<h2>Со сроком <span class=\"c\">" + wd.length + "</span></h2>" + list(wd, { noProj: true });
+    if (nod.length) h += "<h2>Без срока <span class=\"c\">" + nod.length + "</span></h2>" + list(nod, { noProj: true });
+    if (!l.length) h += '<p class="empty">В проекте пока нет задач.</p>';
+    return h;
+  }
+  function vTag() {
+    var g = ARG.toLowerCase(), l = sortTasks(tasks().filter(function (t) { return !t.done && (t.tags || []).indexOf(g) >= 0; }));
+    return head("#" + esc(g), "Задачи с этим тегом") + addBox() + (l.length ? list(l) : '<p class="empty">Нет задач с этим тегом.</p>');
+  }
+  function vSearch() {
+    var q = ($("q").value || "").trim().toLowerCase(), ws = q.split(/\s+/).filter(Boolean);
+    var l = !ws.length ? [] : tasks().filter(function (t) { var hay = (t.t + " " + (t.note || "") + " " + (t.tags || []).map(function (x) { return "#" + x; }).join(" ") + " " + ((proj(t.pid) || {}).n || "")).toLowerCase(); return ws.every(function (w) { return hay.indexOf(w) >= 0; }); });
+    var open = sortTasks(l.filter(function (t) { return !t.done; })), dn = l.filter(function (t) { return t.done; });
+    return head("Поиск", ws.length ? "Найдено: " + l.length : "Введите слова в поле поиска вверху") + list(open) + (dn.length ? "<h2>Сделано <span class=\"c\">" + dn.length + "</span></h2>" + list(dn) : "");
+  }
+  function vSettings() {
+    var h = head("Настройки", "");
+    // сервер
+    h += '<section class="card" id="s-srv"><h2>Сервер и Telegram</h2><p class="muted" style="margin:0">Ваш собственный сервер в Яндекс Облаке присылает напоминания в Telegram, даже когда приложение закрыто, а сообщения боту складывает во «Входящие». Как его создать — <a href="#help-srv">Справка → Сервер</a>.</p>';
+    var su = SRV.url();
+    if (su && SRV.st.ok === null) SRV.check().then(render);
+    h += '<div class="r"><label class="f" style="flex:1 1 340px">Адрес сервера (служебный домен API-шлюза)<input type="url" class="inp" id="srv-url" placeholder="https://d5d….apigw.yandexcloud.net" value="' + esc(su) + '" spellcheck="false"></label></div>' +
+      '<div class="r"><button class="btn pri" type="button" data-a="srv-save">Сохранить и проверить</button>' + (su ? '<button class="btn" type="button" data-a="srv-check">Проверить снова</button>' : "") +
+      '<span class="' + (SRV.st.ok === true ? "okc" : SRV.st.ok === false ? "warnc" : "muted") + '">' + esc(SRV.st.msg || "") + "</span></div>";
+    if (su && SRV.st.ok === true) {
+      if (!YD.token()) h += '<p class="warnc">Нужен вход через Яндекс — по нему сервер узнаёт, что это вы. ' + (YD.on ? '<button class="btn" type="button" data-a="yd-login">Войти через Яндекс</button>' : "") + "</p>";
+      else {
+        if (SRV.st.linked) h += '<p class="okc">✓ Telegram привязан' + (SRV.st.bot ? " — бот @" + esc(SRV.st.bot) : "") + ". Отвязать — отправьте боту /stop.</p>";
+        else h += '<div class="r"><button class="btn" type="button" data-a="srv-link">Привязать Telegram</button><span class="muted">напоминания будут приходить в ваш чат с ботом</span></div>';
+        if (SRV.st.code && !SRV.st.linked) {
+          var bl = SRV.st.bot ? "https://t.me/" + SRV.st.bot + "?start=" + SRV.st.code : "";
+          h += '<div class="confirm info"><b>Отправьте боту код: <code>/start ' + esc(SRV.st.code) + "</code></b><span>" + (bl ? 'Проще всего: откройте <a href="' + esc(bl) + '" target="_blank" rel="noopener">t.me/' + esc(SRV.st.bot) + "</a> и нажмите «Запустить» — код подставится сам. " : "") + "Или найдите бота в Telegram и отправьте ему код вручную. Код действует 30 минут.</span>" +
+            '<div class="r"><button class="btn" type="button" data-a="srv-copy">Скопировать код</button><button class="btn pri" type="button" data-a="srv-check">Готово — проверить</button></div></div>';
+        }
+      }
+    }
+    if (SRV.st.err) h += '<p class="warnc">' + esc(SRV.st.err) + "</p>";
+    h += '<div class="r"><label class="f"><span><input type="checkbox" id="opt-autorem"' + (S.opt.autoRem ? " checked" : "") + "> Ставить напоминание автоматически, если у задачи указано время</span></label></div>" +
+      '<div class="r"><label class="f">Напоминание для задач на весь день <select class="inp" id="opt-hour">' + [7, 8, 9, 10, 11, 12].map(function (x) { return '<option value="' + x + '"' + ((S.opt.allDayHour || 9) === x ? " selected" : "") + ">в " + x + ":00</option>"; }).join("") + "</select></label></div></section>";
+    // Диск
+    h += '<section class="card" id="s-sync"><h2>Синхронизация через Яндекс Диск</h2>';
+    if (!YD.on) h += '<p class="muted" style="margin:0">Работает в приложении по адресу <a href="' + APPURL + '">' + APPURL + "</a>.</p>";
+    else if (!YD.token()) h += '<p class="muted" style="margin:0">Задачи и проекты будут одинаковыми на компьютере и телефоне. Приложение видит только свою папку в «Приложениях» на Диске.</p><div class="r"><button class="btn pri" type="button" data-a="yd-login">Войти через Яндекс</button></div>';
+    else h += '<p class="muted" style="margin:0">' + (SYNC.st === "err" ? '<span class="warnc">Нет связи с Диском: ' + esc(SYNC.msg) + "</span>" : SYNC.at ? "Последняя синхронизация: " + new Date(SYNC.at).toLocaleString("ru-RU") : "Синхронизация включена.") + '</p><div class="r"><button class="btn" type="button" data-a="sync-now">Синхронизировать сейчас</button><button class="btn" type="button" data-a="yd-logout">Выйти из Яндекса на этом устройстве</button></div>';
+    h += "</section>";
+    // тема
+    var th = LS.get("zd-theme") || "system";
+    h += '<section class="card"><h2>Оформление</h2><div class="seg" role="radiogroup" aria-label="Тема">' + [["system", "Как в системе"], ["light", "Светлая"], ["dark", "Тёмная"]].map(function (o) { return '<button type="button" data-theme="' + o[0] + '" class="' + (th === o[0] ? "on" : "") + '" role="radio" aria-checked="' + (th === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div></section>";
+    // данные
+    h += '<section class="card"><h2>Резервная копия</h2><p class="muted" style="margin:0">Все задачи и проекты одним файлом — на всякий случай или для переноса.</p><div class="r"><button class="btn" type="button" data-a="export">Скачать копию (.json)</button><label class="btn" style="cursor:pointer">Загрузить копию…<input type="file" id="imp" hidden accept=".json,application/json"></label></div>' +
+      (CONF === "import" ? '<div class="confirm"><b>Загрузить задачи из файла?</b><span>Задачи и проекты из файла объединятся с текущими: совпадающие заменятся более свежими версиями, остальные добавятся.</span><div class="r"><button class="btn pri" type="button" data-a="imp-yes">Загрузить</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : "") + "</section>";
+    return h;
+  }
+  function codeBox(id, title) { return '<div class="codebox"><div class="h"><b>' + title + '</b><button class="btn sm" type="button" data-copy="' + id + '">Скопировать</button></div><pre>' + esc(($(id) || {}).textContent ? $(id).textContent.trim() : "") + "</pre></div>"; }
+  function vHelp() {
+    var h = '<div class="help">' + head("Справка", "Как пользоваться «Задачами» и как подключить напоминания в Telegram.");
+    h += '<h2 id="h-start">Списки</h2><ul><li><b>Входящие</b> — задачи без даты и без проекта: всё, что ещё не разобрано, и сообщения боту в Telegram.</li><li><b>Сегодня</b> — просроченное и задачи на сегодня.</li><li><b>Планы</b> — по дням на две недели вперёд и «Позже».</li><li><b>Проекты</b> — свои списки («Дом», «Работа», «Учёба»); «+» рядом с заголовком создаёт проект.</li><li><b>Теги</b> появляются сами, когда у задач есть #теги.</li><li><b>Сделано</b> — выполненное; снимите отметку, чтобы вернуть задачу.</li></ul>';
+    h += '<h2 id="h-quick">Быстрый ввод</h2><p>Пишите задачу одной строкой — дата, время, тег, проект и приоритет распознаются сами, а строка под полем показывает, что поняло приложение.</p><div class="tscroll"><table><tr><th>Пишете</th><th>Получается</th></tr>' +
+      [["сегодня, завтра, послезавтра", "дата"], ["пн, вт … вс (или «в пятницу»)", "ближайший такой день"], ["20.10 или 20.10.2027", "дата"], ["в 18:30, 9:00, в 10", "время (без даты — сегодня, а если время прошло — завтра)"], ["#дела", "тег"], ["+Дом", "проект (если такого нет — будет создан)"], ["!1, !2, !3", "приоритет: срочно, важно, желательно"], ["каждый день, по будням, каждую неделю, каждый месяц", "повтор"]].map(function (r) { return "<tr><td><code>" + esc(r[0]) + "</code></td><td>" + esc(r[1]) + "</td></tr>"; }).join("") + "</table></div>" +
+      "<p>Пример: <code>завтра в 10 позвонить в банк #дела +Дом !1</code>. Нажмите на задачу, чтобы открыть подробности: заметка, дата, время, повтор, проект, приоритет, теги, напоминание. У повторяющейся задачи отметка «готово» переносит её на следующий раз.</p>";
+    h += '<h2 id="h-sync">Синхронизация</h2><p>В «Настройках» войдите через Яндекс — задачи и проекты станут одинаковыми на всех устройствах. Правки сливаются по каждой задаче: если на телефоне вы поменяли одну задачу, а на компьютере другую, сохранятся обе. Данные лежат в папке приложения на вашем Яндекс Диске («Приложения»).</p>';
+    h += '<h2 id="h-srv">Сервер: напоминания в Telegram</h2><p>Свой сервер в вашем Яндекс Облаке делает две вещи: <b>присылает напоминания в Telegram</b>, даже когда приложение закрыто, и <b>складывает во «Входящие» всё, что вы напишете боту</b> (там тоже работает быстрый ввод: «завтра 10:00 купить хлеб #дом»). Для одного человека он укладывается в бесплатные лимиты Яндекс Облака. Вход — тот же, что для синхронизации через Яндекс Диск; пароли на сервере не хранятся.</p>' +
+      '<p>Подробная пошаговая инструкция — в файле «Инструкция_Яндекс_Облако.pdf». Коротко:</p><ol class="steps"><li><b>console.yandex.cloud</b> → платёжный аккаунт → каталог <b>univer</b>.</li><li>Сервисный аккаунт <b>univer-sa</b> с ролями <b>ydb.editor</b>, <b>lockbox.payloadViewer</b>, <b>functions.functionInvoker</b>.</li><li>База <b>YDB Serverless</b> «univer-db»; во вкладке «Навигация» выполните запрос «Таблицы» ниже.</li><li>Бот у <b>@BotFather</b> (/newbot) и секрет <b>Lockbox</b> «univer-secrets» с ключами <b>BOT_TOKEN</b> (токен бота) и <b>HOOK_SECRET</b> (придуманное слово из 20+ латинских букв и цифр).</li>' +
+      "<li><b>Cloud Functions → Создать функцию</b> «univer»: Node.js 22, файлы <b>index.js</b> и <b>package.json</b> (ниже), точка входа <b>index.handler</b>, таймаут 30 с, память 128 МБ, сервисный аккаунт univer-sa; переменные <b>YDB_ENDPOINT</b> (эндпоинт базы до знака ?), <b>YDB_DATABASE</b> (путь базы), <b>APP_ORIGIN</b> = https://tyamshikova-max.github.io; секреты Lockbox: BOT_TOKEN и HOOK_SECRET.</li>" +
+      "<li><b>API Gateway → Создать</b> «univer-gw»: спецификация ниже, замените в ней ID_ФУНКЦИИ и ID_СЕРВИСНОГО_АККАУНТА.</li><li><b>Триггер</b> «Таймер», cron <code>* * ? * * *</code> → функция univer, сервисный аккаунт univer-sa.</li>" +
+      "<li>Привязка бота к серверу: откройте в браузере https://api.telegram.org/bot<i>ТОКЕН</i>/setWebhook?url=<i>АДРЕС_ШЛЮЗА</i>/tg/<i>СЛОВО</i>&amp;secret_token=<i>СЛОВО</i> — должно ответить «Webhook was set».</li>" +
+      '<li>Здесь: <a href="#settings-srv">«Настройки» → «Сервер и Telegram»</a> → адрес шлюза → «Сохранить и проверить» → «Привязать Telegram».</li></ol>' +
+      codeBox("srv-index", "index.js — код функции") + codeBox("srv-pkg", "package.json") + codeBox("srv-gw", "Спецификация API-шлюза") + codeBox("srv-sql", "Таблицы (запрос для YDB)");
+    h += '<h2 id="h-data">Где хранятся задачи</h2><p>В браузере этого устройства, а после входа через Яндекс — ещё и в папке приложения на вашем Яндекс Диске. На сервер попадают только тексты и время напоминаний и сообщения боту (пока приложение их не заберёт). Резервная копия — «Настройки» → «Скачать копию».</p>';
+    return h + '<p class="foot">© ' + new Date().getFullYear() + " ytv · Задачи</p></div>";
+  }
+  function render() {
+    $("side").innerHTML = sideHTML();
+    var f = { inbox: vInbox, today: vToday, plans: vPlans, all: vAll, done: vDone, proj: vProj, tag: vTag, search: vSearch, settings: vSettings, help: vHelp }[V] || vToday;
+    $("view").innerHTML = f();
+    var n = todayList().length; document.title = (n ? "(" + n + ") " : "") + "Задачи";
+    updPreview();
+  }
+  function updPreview() { var i = $("qa"), pv = $("qpv"); if (!i || !pv) return; pv.textContent = i.value.trim() ? quickPreview(parseQuick(i.value)) : ""; }
+
+  /* ---------- действия ---------- */
+  function addQuick() {
+    var i = $("qa"); if (!i) return;
+    var raw = i.value.trim(); if (!raw) { i.focus(); return; }
+    var q = parseQuick(raw);
+    if (!q.t) { toast("Напишите, что сделать"); return; }
+    if (q.newProj) { var np = touch({ id: uid(), n: q.newProj.slice(0, 60), c: projects().length % COLORS.length, ord: projects().length }); S.projects.push(np); q.pid = np.id; }
+    var t = { id: uid(), t: q.t.slice(0, 1000), note: "", at: q.at || 0, allday: !!q.allday, rep: q.rep, prio: q.prio, tags: q.tags, pid: q.pid || "", done: false, created: Date.now() };
+    // контекст страницы
+    if (V === "proj" && !t.pid && proj(ARG)) t.pid = ARG;
+    if (V === "tag" && t.tags.indexOf(ARG.toLowerCase()) < 0) t.tags.push(ARG.toLowerCase());
+    if (V === "today" && !t.at) { t.at = today0(); t.allday = true; }
+    t.rem = !!(t.at && !t.allday && S.opt.autoRem);
+    S.tasks.unshift(touch(t)); QPV = ""; save(); render();
+    var ni = $("qa"); if (ni) ni.focus();
+    toast("Добавлено" + (t.at ? ": " + whenTxt(t) : V === "inbox" || (!t.pid && !t.at) ? " во «Входящие»" : ""));
+  }
+  function toggle(t) {
+    if (!t.done && t.rep && t.at) {
+      var rr = rrOf(t.rep), nx = firstOcc(t.at, rr, Math.max(Date.now(), t.at));
+      if (t.allday) nx = sod(nx);
+      t.at = nx; touch(t); save(); render(); toast("Следующий раз: " + whenTxt(t)); return;
+    }
+    t.done = !t.done; t.dt = t.done ? Date.now() : 0; touch(t); save(); render();
+    toast(t.done ? "Готово ✓" : "Задача возвращена в работу");
+  }
+  function del(t) { if (!t) return; var keep = JSON.parse(JSON.stringify(t)); t.del = 1; t.t = ""; t.note = ""; touch(t); if (ED === t.id) ED = null; save(); render(); UNDO = keep; toastUndo("Задача удалена"); }
+  var UNDO = null;
+  function toastUndo(msg) { var el = $("toast"); el.innerHTML = esc(msg) + ' · <a href="#" data-a="undo" style="color:inherit;font-weight:600">Вернуть</a>'; el.hidden = false; clearTimeout(tt); tt = setTimeout(function () { el.hidden = true; UNDO = null; }, 5000); }
+  function saveEditor(box) {
+    var t = task(box.dataset.ed); if (!t) return;
+    var g = function (n) { return box.querySelector('[data-f="' + n + '"]'); };
+    var title = g("t").value.trim(); if (!title) { toast("Название не может быть пустым"); return; }
+    var date = g("date").value, time = g("time").value;
+    if (!date && time) date = dKey(Date.now());
+    t.t = title.slice(0, 1000); t.note = g("note").value.slice(0, 20000);
+    t.at = date ? new Date(date + "T" + (time || "00:00")).getTime() : 0; t.allday = !!date && !time;
+    t.rep = date ? g("rep").value : ""; t.pid = g("pid").value; t.prio = +g("prio").value || 0;
+    t.tags = g("tags").value.toLowerCase().split(/[\s,#]+/).filter(Boolean).filter(function (x, i, a) { return a.indexOf(x) === i; }).slice(0, 20);
+    t.rem = g("rem").checked && !!t.at;
+    if (g("rep").value && !date) toast("Для повтора нужна дата");
+    touch(t); ED = null; save(); render(); toast("Сохранено");
+  }
+  var IMPF = null;
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-a],[data-copy],[data-theme]"); if (!el) { if (e.target.id === "scrim") document.body.classList.remove("menu"); return; }
+    if (el.dataset.copy) { copyText(($(el.dataset.copy) || {}).textContent.trim(), "Скопировано"); return; }
+    if (el.dataset.theme) { LS.set("zd-theme", el.dataset.theme); applyTheme(); render(); return; }
+    var a = el.dataset.a, li = el.closest("[data-id]"), t = li ? task(li.dataset.id) : null, edb = el.closest("[data-ed]");
+    if (!t && edb) t = task(edb.dataset.ed);
+    switch (a) {
+      case "add": addQuick(); return;
+      case "toggle": if (t) toggle(t); return;
+      case "edit": ED = ED === t.id ? null : t.id; render(); var f = document.querySelector('[data-ed] [data-f="t"]'); if (f) f.focus(); return;
+      case "close": ED = null; render(); return;
+      case "save": saveEditor(edb); return;
+      case "del": del(t); return;
+      case "undo": e.preventDefault(); if (UNDO) { var cur = S.tasks.filter(function (x) { return x.id === UNDO.id; })[0]; if (cur) { for (var k in UNDO) cur[k] = UNDO[k]; delete cur.del; touch(cur); } UNDO = null; save(); render(); $("toast").hidden = true; } return;
+      case "clear": CONF = "clear"; render(); return;
+      case "clear-yes": S.tasks.forEach(function (x) { if (x.done && !x.del) { x.del = 1; x.t = ""; x.note = ""; touch(x); } }); CONF = null; save(); render(); toast("Выполненные удалены"); return;
+      case "cancel": CONF = null; IMPF = null; render(); return;
+      case "newproj":
+        var np = touch({ id: uid(), n: "Новый проект", c: projects().length % COLORS.length, ord: projects().length });
+        S.projects.push(np); save(); CONF = "projedit"; go("proj-" + np.id); setTimeout(function () { var i = $("pn"); if (i) { i.focus(); i.select(); } }, 50); return;
+      case "projedit": CONF = CONF === "projedit" ? null : "projedit"; render(); return;
+      case "projsave": var p = proj(ARG); if (p) { p.n = ($("pn").value || "").trim().slice(0, 60) || p.n; p.c = +$("pc").value || 0; touch(p); save(); } CONF = null; render(); return;
+      case "projdel": CONF = "projdel"; render(); return;
+      case "projdel-yes": var pd = proj(ARG); if (pd) { tasks().forEach(function (x) { if (x.pid === pd.id) { x.pid = ""; touch(x); } }); pd.del = 1; touch(pd); save(); } CONF = null; go("inbox"); toast("Проект удалён"); return;
+      case "srv-save":
+        var v = ($("srv-url").value || "").trim().replace(/\/+$/, "");
+        if (v && !/^https:\/\/[^\s/]+/i.test(v) && !/^http:\/\/127\.0\.0\.1:/.test(v)) { toast("Адрес должен начинаться с https://"); return; }
+        LS.set("zd-srv", v); LS.del("zd-srv-sent"); SRV.st = { ok: null, msg: "", linked: null, bot: "", code: "", err: "" };
+        if (!v) { render(); toast("Сервер отключён на этом устройстве"); return; }
+        SRV.check().then(function () { render(); if (SRV.st.ok === true && SRV.ready()) { SRV.start(); SRV.push(); SRV.pull(); } }); render(); return;
+      case "srv-check": SRV.check().then(render); render(); return;
+      case "srv-link": SRV.call("link", { method: "POST" }).then(function (j) { SRV.st.code = j.code; SRV.st.bot = j.bot || SRV.st.bot; render(); }).catch(function (er) { toast("Не получилось: " + er.msg); }); return;
+      case "srv-copy": if (SRV.st.code) copyText("/start " + SRV.st.code, "Код скопирован"); return;
+      case "yd-login": YD.login(); return;
+      case "yd-logout": YD.logout(); SYNC.st = "off"; SYNC.show(); render(); toast("Вы вышли из Яндекса на этом устройстве"); return;
+      case "sync-now": SYNC.run().then(function () { render(); toast(SYNC.st === "ok" ? "Синхронизировано" : "Нет связи с Диском"); }); return;
+      case "export":
+        var blob = new Blob([JSON.stringify({ format: "zadachi-backup", v: 1, at: new Date().toISOString(), tasks: S.tasks, projects: S.projects, opt: S.opt })], { type: "application/json" });
+        var ln = document.createElement("a"); ln.href = URL.createObjectURL(blob); ln.download = "Задачи — копия " + dKey(Date.now()) + ".json"; document.body.appendChild(ln); ln.click(); ln.remove(); setTimeout(function () { URL.revokeObjectURL(ln.href); }, 60000); return;
+      case "imp-yes":
+        if (!IMPF) return;
+        IMPF.text().then(function (txt) {
+          var j = JSON.parse(txt); if (!j || j.format !== "zadachi-backup") throw new Error("не тот файл");
+          S.tasks = mergeList(S.tasks, j.tasks); S.projects = mergeList(S.projects, j.projects); IMPF = null; CONF = null; save(); render(); toast("Загружено");
+        }).catch(function (er) { toast("Не удалось: " + (er.message || "ошибка")); }); return;
+    }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.target.id === "qa" && e.key === "Enter") { e.preventDefault(); addQuick(); }
+    else if (e.key === "Enter" && e.target.closest && e.target.closest("[data-ed]") && e.target.tagName === "INPUT") { e.preventDefault(); saveEditor(e.target.closest("[data-ed]")); }
+    else if (e.key === "Escape" && ED) { ED = null; render(); }
+    else if (e.key === "n" && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) && !e.ctrlKey && !e.metaKey) { var i = $("qa"); if (i) { e.preventDefault(); i.focus(); } }
+  });
+  document.addEventListener("input", function (e) {
+    if (e.target.id === "qa") { QPV = e.target.value; updPreview(); }
+    if (e.target.id === "q") { if (V !== "search") go("search"); else render(); var q = $("q"); q.focus(); }
+  });
+  document.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.id === "opt-autorem") { S.opt.autoRem = t.checked; S.opt.upd = Date.now(); save(); return; }
+    if (t.id === "opt-hour") { S.opt.allDayHour = +t.value; S.opt.upd = Date.now(); save(); return; }
+    if (t.id === "imp") { if (t.files[0]) { IMPF = t.files[0]; CONF = "import"; render(); } t.value = ""; }
+  });
+  $("menuBtn").addEventListener("click", function () { document.body.classList.toggle("menu"); });
+  $("scrim").addEventListener("click", function () { document.body.classList.remove("menu"); });
+  $("syncBtn").addEventListener("click", function () { if (!YD.token()) YD.login(); else go("settings-sync"); });
+  function themePref() { return LS.get("zd-theme") || "system"; }
+  function applyTheme() { var p = themePref(); if (p === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", p); }
+  $("themeBtn").addEventListener("click", function () {
+    var dark = themePref() === "dark" || (themePref() === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    LS.set("zd-theme", dark ? "light" : "dark"); applyTheme(); if (V === "settings") render();
+  });
+
+  /* ---------- запуск ---------- */
+  applyTheme();
+  if (!location.hash) { var last = LS.get("zd-last"); if (last && !/^search/.test(last)) try { history.replaceState(null, "", "#" + last); } catch (e) { /* ok */ } }
+  if (!S.tasks.length && !LS.get("zd-started")) {
+    var t0 = today0();
+    S.tasks.push(touch({ id: uid(), t: "Нажмите на задачу, чтобы открыть подробности", at: t0, allday: true, rep: "", prio: 0, tags: [], pid: "", done: false, created: Date.now() }));
+    S.tasks.push(touch({ id: uid(), t: "Попробуйте быстрый ввод: «завтра в 10 позвонить #дела»", at: 0, rep: "", prio: 2, tags: [], pid: "", done: false, created: Date.now() - 1 }));
+    save(true);
+  }
+  LS.set("zd-started", "1");
+  route();
+  SYNC.show();
+  if (SYNC.enabled()) SYNC.run();
+  SRV.start();
+  setInterval(function () { if (!document.hidden && !ED && !/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || "")) render(); }, 60000);
+  window.ZD = { S: S, parseQuick: parseQuick, firstOcc: firstOcc, remWanted: remWanted, mergeList: mergeList, SRV: SRV };
+})();
+</script>
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
+
+</body>
+</html>
