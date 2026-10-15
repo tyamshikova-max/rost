@@ -528,6 +528,12 @@ ol.steps li { margin: 6px 0 }
 .qfr .chip { font-size: 12.5px; padding: 2px 9px } .qfr input.inp { flex: 1 1 200px; min-width: 0; max-width: 340px; padding: 4px 8px } .qfr .r { margin-left: auto; display: flex; gap: 6px }
 .side .lab button + button { margin-left: 0 }
 label.fn { display: flex; align-items: center; gap: 6px; margin-top: 6px } label.fn input { width: 80px }
+/* вложенные группы */
+.gsep { color: var(--muted); margin: 0 2px } .ibtn.gadd { padding: 3px 9px; font-size: 15px; border: 1px dashed var(--line); border-radius: 8px } .ibtn.gadd:hover { border-color: var(--acc); color: var(--acc) }
+.ngrp.d1 { margin-left: 18px } .ngrp.d2 { margin-left: 18px } .ngrp.d3 { margin-left: 18px }
+.ngh { display: flex; align-items: center; gap: 6px } .ngh.d1 { font-size: 15px; margin: 12px 0 4px } .ngh.d2 { font-size: 14px; margin: 10px 0 4px; color: var(--muted) } .ngh.d3 { font-size: 13px; margin: 8px 0 2px; color: var(--muted) }
+.ngh .gf { border: 0; background: none; color: var(--muted); cursor: pointer; padding: 0 2px; font-size: 11px }
+.bsub { font-size: 12px; font-weight: 600; color: var(--muted); margin: 8px 2px 4px; display: flex; align-items: center; gap: 5px }
 /* заметки */
 .nav .pic svg, .chip svg, .btn svg, .nm svg, .ddb svg, .side .lab button svg, .picb svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -3px }
 .ntg { font-size: 11px } .nav .hash.ntg { font-size: 11px }
@@ -2129,10 +2135,11 @@ CREATE TABLE inbox (
   function ordVal(t) { return t.ord !== undefined && t.ord !== null ? t.ord : t.parent ? (t.created || 0) / 1e3 : -(t.created || 0) / 1e3; }
   var VDEF = { inbox: { group: "none", sort: "created" }, today: { group: "date", sort: "date" }, plans: { group: "day", sort: "date" }, flag: { group: "flag", sort: "date" }, all: { group: "project", sort: "date" }, proj: { group: "none", sort: "date", sub: false }, tag: { group: "project", sort: "date" } };
   function vopt() {
-    if (V === "filter") { var f = filt(ARG); return { group: (f && f.group) || "project", sort: (f && f.sort) || "date" }; }
+    if (V === "filter") { var f = filt(ARG); return { group: (f && f.group) || "project", sort: (f && f.sort) || "date", groups: ((f && f.groups) || []).filter(function (g) { return GROUPN[g] && g !== "none"; }) }; }
     var d = VDEF[V] || { group: "none", sort: "date" }, o = VIEWS[curKey()] || {};
     if (V === "proj") { var pv = proj(ARG); if (pv && (pv.secs || []).length) d = { group: "section", sort: d.sort, sub: d.sub }; }
-    return { group: o.group || d.group, sort: o.sort || d.sort, sub: o.sub !== undefined ? o.sub : d.sub };
+    var g0 = o.group || d.group;
+    return { group: g0, sort: o.sort || d.sort, sub: o.sub !== undefined ? o.sub : d.sub, groups: g0 === "none" ? [] : (o.groups || []).filter(function (g) { return GROUPN[g] && g !== "none" && (V === "proj" || (g !== "section" && g !== "kcol")); }) };
   }
   function setVopt(k, v) {
     if (V === "filter") { var f = filt(ARG); if (f) { f[k] = v; touch(f); save(); } return; }
@@ -2260,13 +2267,26 @@ CREATE TABLE inbox (
       if (sx.id === "~" && !items.length && SECADD !== "~") return;
       h += secHead(p, sx.id, sx.n, roots.length, fold[sx.id]);
       if (SECADD === sx.id) h += '<div class="secin"><input id="secin" data-sec="' + sx.id + '" placeholder="Новая задача в «' + esc(sx.n) + '» — тоже с быстрым вводом" autocomplete="off"><button class="btn pri sm" type="button" data-a="secok">Добавить</button></div>';
-      if (!fold[sx.id]) h += renderTree(items, vo.sort, o) || (sx.id === "~" ? "" : '<p class="muted sempty">Пусто — перетащите сюда задачу или нажмите «＋».</p>');
+      if (!fold[sx.id]) h += (vo.groups && vo.groups.length ? renderNested(items, vo.groups, vo, o, 1, "sec:" + sx.id) : renderTree(items, vo.sort, o)) || (sx.id === "~" ? "" : '<p class="muted sempty">Пусто — перетащите сюда задачу или нажмите «＋».</p>');
+    });
+    return h;
+  }
+  // вложенные группы: заголовок каждого уровня сворачивается, задача перетаскивается на заголовок — свойство меняется
+  var GDROP = /^(date|day|project|prio|flag|status|sprint|kcol|section)$/;
+  function gHead(g, gr, depth, pk, folded, n) { var tag = "h" + Math.min(2 + depth, 5); return "<" + tag + ' class="ngh d' + depth + (gr.key === "a" && (g === "date" || g === "day") ? " warnc" : "") + '"' + (GDROP.test(g) ? ' data-col="' + esc(g + ":" + gr.key) + '"' : "") + '><button type="button" class="gf" data-a="gfold" data-k="' + esc(pk) + '">' + (folded ? "▸" : "▾") + "</button>" + (gr.ih ? '<span class="gico">' + gr.ih + "</span>" : gr.color ? '<span class="pdot"><i style="background:' + gr.color + '"></i></span>' : "") + esc(gr.title) + ' <span class="c">' + n + "</span></" + tag + ">"; }
+  function renderNested(list, levels, vo, o, depth, path) {
+    if (!levels.length) return renderTree(list, vo.sort, o);
+    var g = levels[0], rest = levels.slice(1), fold = (VIEWS[curKey()] || {}).gfold || {}, h = "";
+    groupsOf(list, g).forEach(function (gr) {
+      var pk = path + "/" + g + ":" + gr.key, f = !!fold[pk];
+      h += '<div class="ngrp d' + depth + '">' + gHead(g, gr, depth, pk, f, gr.items.length) + (f ? "" : renderNested(gr.items, rest, vo, Object.assign({}, o, { noProj: g === "project" || o.noProj, noDay: g === "day" || o.noDay }), depth + 1, pk)) + "</div>";
     });
     return h;
   }
   function renderGroups(list, vo, o) {
     o = o || {};
     if (vo.group === "section" && V === "proj") return renderSections(list, vo, o);
+    if (vo.groups && vo.groups.length && vo.group !== "none" && !(o.plans && vo.group === "day")) return renderNested(list, [vo.group].concat(vo.groups), vo, o, 0, "") || '<p class="empty">' + (o.empty || "Задач нет.") + "</p>";
     if (vo.group === "none") return renderTree(list, vo.sort, o) || '<p class="empty">' + (o.empty || "Задач нет.") + "</p>";
     var gs = groupsOf(list, vo.group), h = "";
     if (o.plans && vo.group === "day") {
@@ -2292,7 +2312,9 @@ CREATE TABLE inbox (
   function toolbar(o) {
     o = o || {}; var vo = vopt(), md = vmode();
     var qfb = '<button type="button" class="ibtn qfb' + (QFO[curKey()] || qfActive() ? " on" : "") + '" data-a="qf" title="Быстрый фильтр по приоритету, сроку, тегам и тексту">⛃ Фильтр' + (qfActive() ? " •" : "") + "</button>";
-    return '<div class="tbar">' + qfb + '<div class="seg" role="radiogroup" aria-label="Вид"><button type="button" data-a="vmode" data-x="list" class="' + (md === "list" ? "on" : "") + '" title="Списком">☰ Список</button><button type="button" data-a="vmode" data-x="board" class="' + (md === "board" ? "on" : "") + '" title="Канбан-доска: колонки по группировке">▦ Доска</button></div><span class="tlab">' + (md === "board" ? "Колонки" : "Группировка") + ' <button type="button" class="ddb sm" data-a="vsel" data-k="group">' + esc(GROUPN[vo.group] || vo.group) + '<span class="dda">▾</span></button></span>' +
+    return '<div class="tbar">' + qfb + '<div class="seg" role="radiogroup" aria-label="Вид"><button type="button" data-a="vmode" data-x="list" class="' + (md === "list" ? "on" : "") + '" title="Списком">☰ Список</button><button type="button" data-a="vmode" data-x="board" class="' + (md === "board" ? "on" : "") + '" title="Канбан-доска: колонки по группировке">▦ Доска</button></div><span class="tlab">' + (md === "board" ? "Колонки" : "Группировка") + ' <button type="button" class="ddb sm" data-a="vsel" data-k="group" data-lv="0">' + esc(GROUPN[vo.group] || vo.group) + '<span class="dda">▾</span></button>' +
+      vo.groups.map(function (g, i) { return '<span class="gsep">›</span><button type="button" class="ddb sm" data-a="vsel" data-k="group" data-lv="' + (i + 1) + '" title="Вложенная группировка, уровень ' + (i + 2) + '">' + esc(GROUPN[g] || g) + '<span class="dda">▾</span></button>'; }).join("") +
+      (vo.group !== "none" && vo.groups.length < 3 ? '<button type="button" class="ibtn gadd" data-a="vgadd" title="Добавить вложенную группировку (уровень ' + (vo.groups.length + 2) + ")" + (md === "board" ? " — на доске внутри колонок" : "") + '">＋</button>' : "") + "</span>" +
       '<span class="tlab">Сортировка <button type="button" class="ddb sm" data-a="vsel" data-k="sort">' + esc(SORTN[vo.sort.replace(/^-/, "")] || vo.sort) + '<span class="dda">▾</span></button></span><button type="button" class="ibtn rev' + (vo.sort.charAt(0) === "-" ? " on" : "") + '" data-a="vrev" title="Обратный порядок">⇅</button>' +
       (o.sub ? '<button type="button" class="lt' + (vo.sub ? " on" : "") + '" data-a="vsub" title="Показывать и задачи вложенных проектов"><span class="lbox"></span><span>с задачами подпроектов</span></button>' : "") + (o.secbtn ? '<button type="button" class="btn sm" data-a="addsec" title="Секция — этап или часть проекта">＋ Секция</button>' : "") + "</div>" + qfBar();
   }
@@ -2370,7 +2392,8 @@ CREATE TABLE inbox (
     return '<div class="board kb">' + cols.map(function (c) {
       var ids = {}; c[2].forEach(function (t) { ids[t.id] = 1; });
       var roots = c[2].filter(function (t) { return !t.parent || !ids[t.parent]; }).sort(cmpBy(vo.sort));
-      return '<div class="bcol' + (roots.length ? "" : " empty") + '" data-col="' + esc(c[0]) + '"><div class="bh">' + (c[4] ? '<span class="gico">' + c[4] + "</span>" : c[3] ? '<span class="pdot"><i style="background:' + c[3] + '"></i></span>' : "") + esc(c[1]) + ' <span class="c">' + roots.length + "</span></div>" + roots.map(kcard).join("") + "</div>";
+      var inner = vo.groups && vo.groups.length ? groupsOf(roots, vo.groups[0]).map(function (sg) { return '<div class="bsub">' + (sg.color ? '<span class="pdot"><i style="background:' + sg.color + '"></i></span>' : "") + esc(sg.title) + ' <span class="c">' + sg.items.length + "</span></div>" + sg.items.map(kcard).join(""); }).join("") : null;
+      return '<div class="bcol' + (roots.length ? "" : " empty") + '" data-col="' + esc(c[0]) + '"><div class="bh">' + (c[4] ? '<span class="gico">' + c[4] + "</span>" : c[3] ? '<span class="pdot"><i style="background:' + c[3] + '"></i></span>' : "") + esc(c[1]) + ' <span class="c">' + roots.length + "</span></div>" + (inner !== null ? inner : roots.map(kcard).join("")) + "</div>";
     }).join("") + "</div>";
   }
   // канбан проекта: свои колонки + «Готово»; в дорожке секции колонка ещё и ставит секцию
@@ -3348,6 +3371,7 @@ CREATE TABLE inbox (
     h += sec("views", "Группировка, сортировка, список и доска", ul([
       "Над каждым списком — <b>☰ Список / ▦ Доска</b>, <b>Группировка</b> и <b>Сортировка</b>. Выбор запоминается для каждого списка отдельно на этом устройстве.",
       "<b>Группировки</b>: без, по сроку (Просрочено, Сегодня, Вечер, Завтра, На этой неделе, Позже, Без срока), по дням, по проекту, по приоритету, по тегу, по флажку, по статусу, по спринту; в проекте — ещё по секциям и по колонкам проекта.",
+      "<b>Вложенная группировка</b>: «＋» справа от группировки добавляет ещё один уровень внутри — например, по проекту → внутри по тегу → внутри по флажку (до четырёх уровней). Каждый уровень меняется своим списком, «Убрать этот уровень» — в его списке. ▾ у заголовка группы сворачивает её. На доске второй уровень показан подзаголовками внутри колонок.",
       "<b>Сортировки</b>: умная (важное без даты → сегодня → просроченное → будущее → без даты → когда-нибудь), вручную, по сроку, по дедлайну, по приоритету, по названию, сначала новые. Кнопка ⇅ — обратный порядок. Закреплённые задачи всегда сверху.",
       "Заголовки групп принимают задачи: перетащите задачу на «Завтра», «Приоритет 1», имя проекта или секцию — свойство поменяется.",
       "<b>⛃ Фильтр</b> — быстрый отбор поверх списка (см. «Теги, флажки, фильтры»)."]));
@@ -3957,6 +3981,7 @@ CREATE TABLE inbox (
       case "subproj": var sp = newProject("Новый подпроект", ARG); var par = proj(ARG); if (par && par.fold) { par.fold = false; touch(par); } save(); POP = null; RN = { where: "page", k: "proj", id: sp.id }; go("proj-" + sp.id); return;
       case "pdel": trashEntity("proj", ARG); return;
       case "pdfold": var pf2 = proj(el.dataset.id); if (pf2) { if (BT) saveBody(); var fm = {}; try { fm = JSON.parse(LS.get("zd-pdfold") || "{}") || {}; } catch (er) { fm = {}; } fm[pf2.id] = !pdFold(pf2); LS.set("zd-pdfold", JSON.stringify(fm)); render(); } return;
+      case "gfold": var vkf = VIEWS[curKey()] = VIEWS[curKey()] || {}; vkf.gfold = vkf.gfold || {}; vkf.gfold[el.dataset.k] = !vkf.gfold[el.dataset.k]; LS.set("zd-views", JSON.stringify(VIEWS)); render(); return;
       case "dnfold": LS.set("zd-dnfold", LS.get("zd-dnfold") === "1" ? "0" : "1"); render(); return;
       case "addsec": var ap = proj(ARG); if (!ap) return; var ns = { id: uid(), n: "Новая секция" }; ap.secs = psecs(ap).concat(ns); touch(ap); save(); if (vopt().group !== "section" && vopt().group !== "kcol") setVopt("group", "section"); RNX = { k: "sec", id: ns.id }; render(); return;
       case "secfold": var sf = secFold(); sf[el.dataset.id] = !sf[el.dataset.id]; LS.set("zd-secfold", JSON.stringify(sf)); render(); return;
@@ -4081,7 +4106,8 @@ CREATE TABLE inbox (
       case "print": window.print(); return;
       case "share": shareList(); return;
       case "share-import": shareImport(); return;
-      case "vsel": var vk2 = el.dataset.k, cur2 = vopt(), rv2 = el.getBoundingClientRect(), opts = vk2 === "group" ? Object.keys(GROUPN).filter(function (k) { return V === "proj" || (k !== "section" && k !== "kcol"); }).map(function (k) { return { c: k, i: "", l: GROUPN[k], k: cur2.group === k ? "✓" : "" }; }) : Object.keys(SORTN).map(function (k) { return { c: k, i: "", l: SORTN[k], k: cur2.sort.replace(/^-/, "") === k ? "✓" : "" }; }); ctxShow(rv2.left, rv2.bottom + 4, opts, { k: "vsel", id: vk2 }); return;
+      case "vgadd": var cur3 = vopt(), used = [cur3.group].concat(cur3.groups), rv3 = el.getBoundingClientRect(); ctxShow(rv3.left, rv3.bottom + 4, Object.keys(GROUPN).filter(function (k) { return k !== "none" && used.indexOf(k) < 0 && (V === "proj" || (k !== "section" && k !== "kcol")); }).map(function (k) { return { c: k, i: "", l: "внутри — " + GROUPN[k] }; }), { k: "vsel", id: "add" }); return;
+      case "vsel": var vk2 = el.dataset.k, lv2 = +(el.dataset.lv || 0), cur2 = vopt(), rv2 = el.getBoundingClientRect(), curG = lv2 ? cur2.groups[lv2 - 1] : cur2.group, opts = vk2 === "group" ? Object.keys(GROUPN).filter(function (k) { return (V === "proj" || (k !== "section" && k !== "kcol")) && !(lv2 && k === "none"); }).map(function (k) { return { c: k, i: "", l: GROUPN[k], k: curG === k ? "✓" : "" }; }).concat(lv2 ? ["-", { c: "__del", i: "✕", l: "Убрать этот уровень" }] : []) : Object.keys(SORTN).map(function (k) { return { c: k, i: "", l: SORTN[k], k: cur2.sort.replace(/^-/, "") === k ? "✓" : "" }; }); ctxShow(rv2.left, rv2.bottom + 4, opts, { k: "vsel", id: vk2 === "group" ? "group:" + lv2 : vk2 }); return;
       case "vsub": setVopt("sub", !vopt().sub); render(); return;
       case "focus-on": setFocus(el.dataset.id || ARG); return;
       case "focus-off": setFocus(""); return;
@@ -4810,7 +4836,12 @@ CREATE TABLE inbox (
     if (k === "view") { if (c === "paste-here") pasteInto(null); return; }
     if (k === "bulk") { bulkCmd(c); return; }
     if (k === "sec" || k === "kcol") { secColCmd(k, id, c); return; }
-    if (k === "vsel") { if (id === "sort") { var rvs = vopt().sort.charAt(0) === "-"; setVopt("sort", (rvs ? "-" : "") + c); } else setVopt("group", c); render(); return; }
+    if (k === "vsel") {
+      if (id === "sort") { var rvs = vopt().sort.charAt(0) === "-"; setVopt("sort", (rvs ? "-" : "") + c); }
+      else if (id === "add") setVopt("groups", vopt().groups.concat(c));
+      else { var lvl = +(String(id).split(":")[1] || 0), gs2 = vopt().groups.slice(); if (!lvl) { setVopt("group", c); if (c === "none") setVopt("groups", []); else setVopt("groups", gs2.filter(function (x) { return x !== c; })); } else if (c === "__del") { gs2.splice(lvl - 1); setVopt("groups", gs2); } else { gs2[lvl - 1] = c; setVopt("groups", gs2.filter(function (x, i, a) { return a.indexOf(x) === i; })); } }
+      render(); return;
+    }
     if (k === "nsecpick") { var nsn = note(id); if (nsn) { nsn.sec = c.slice(3); touch(nsn); save(); render(); } return; }
     if (k === "flagcol") { var fcc = flagObj(id); if (fcc) { fcc.c = +c.slice(2); touch(fcc); save(); render(); } return; }
     if (k === "newp") { if (c === "blank") { var np2 = newProject("Новый проект", ""); save(); RN = { where: "page", k: "proj", id: np2.id }; go("proj-" + np2.id); } else tplUse(c.slice(4)); return; }
