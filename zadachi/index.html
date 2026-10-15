@@ -67,6 +67,12 @@ a { color: var(--acc) }
 .side .lab button { margin-left: auto; background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 6px; border-radius: 6px }
 .side .lab button:hover { background: var(--hover); color: var(--fg) }
 .side .lab.dropin { outline: 2px solid var(--acc) }
+.side .lab[draggable] { cursor: grab; user-select: none }
+.side .lab .gh { width: 0; overflow: hidden; opacity: 0; transition: opacity .15s, width .15s; color: var(--muted); font-size: 12px }
+.side .lab:hover .gh { width: 14px; opacity: 1 }
+.sblk { border-radius: 8px }
+.sblk.dropb { box-shadow: inset 0 3px 0 var(--acc) } .sblk.dropa { box-shadow: inset 0 -3px 0 var(--acc) }
+.sblk.dragging, .nav a.dragging { opacity: .45 }
 .side .none { color: var(--muted); font-size: 13px; padding: 2px 10px }
 .main { padding: 20px 24px 80px; max-width: 900px; width: 100%; min-width: 0 }
 h1 { font-size: 26px; line-height: 1.2; margin: 0; text-wrap: balance }
@@ -1163,37 +1169,41 @@ CREATE TABLE inbox (
     var chev = inFav ? "" : '<button type="button" class="chev' + (kids ? "" : " sp") + '" data-a="pfold" data-id="' + p.id + '" aria-label="' + (p.fold ? "Развернуть" : "Свернуть") + '">' + (p.fold ? "▸" : "▾") + "</button>";
     return itemHTML("proj", p.id, "proj-" + p.id, '<span class="dot" style="background:' + col(p.c) + '"></span><span class="pic">' + picon(p) + "</span>", inFav ? pname(p) : p.n, n, { drag: !inFav, pad: inFav ? 0 : d, chev: chev, fav: !!p.fav });
   }
+  // левая панель из блоков; порядок блоков и пунктов «Списков» меняется перетаскиванием и хранится в S.opt
+  var SIDE_DEF = ["fav", "lists", "projects", "filters", "tags", "service"], LISTS_DEF = ["inbox", "today", "sprint", "plans", "flag", "all", "done"];
+  function sideOrder() { var o = (S.opt.side || []).filter(function (x) { return SIDE_DEF.indexOf(x) >= 0; }); SIDE_DEF.forEach(function (x) { if (o.indexOf(x) < 0) o.push(x); }); return o; }
+  function listsOrder() { var o = (S.opt.lists || []).filter(function (x) { return LISTS_DEF.indexOf(x) >= 0; }); LISTS_DEF.forEach(function (x) { if (o.indexOf(x) < 0) o.push(x); }); return o; }
+  function blockHead(id, title, extra) { return '<div class="lab" draggable="true" data-bdrag="' + id + '"' + (id === "projects" ? ' data-droproot="1"' : "") + ' title="Перетащите, чтобы переставить блок"><span class="gh" aria-hidden="true">⠿</span>' + title + (extra || "") + "</div>"; }
   function sideHTML() {
     var mini = document.body.classList.contains("mini");
     var h = '<div class="sidetop"><button type="button" class="ibtn" data-a="mini" title="' + (mini ? "Развернуть панель" : "Свернуть панель до иконок") + '" aria-label="' + (mini ? "Развернуть панель" : "Свернуть панель до иконок") + '">' + (mini ? "»" : "«") + "</button></div>";
+    var B = {};
     var favs = [].concat(projects().filter(function (p) { return p.fav; }).map(function (p) { return projItem(p, 0, true); }),
       filters().filter(function (f) { return f.fav; }).map(function (f) { return itemHTML("filter", f.id, "filter-" + f.id, '<span class="dot" style="background:' + col(f.c) + '"></span>', f.n, filterRes(f).length, { fav: true }); }),
       tags().filter(function (g) { return g.fav; }).map(function (g) { return itemHTML("tag", g.n, "tag-" + g.n, '<span class="hash" style="color:' + col(g.c) + '">#</span>', g.n, tagCount(g.n), { fav: true }); }),
       tasks().filter(function (t) { return t.fav && !t.done; }).map(function (t) { return itemHTML("task", t.id, "task-" + t.id, '<span class="pic">📌</span>', t.t, 0, { fav: true }); }));
-    if (favs.length) h += '<div class="lab">Избранное</div><nav class="nav">' + favs.join("") + "</nav>";
-    h += '<nav class="nav"' + (favs.length ? ' style="margin-top:10px"' : "") + ">" +
-      itemHTML("smart", "inbox", "inbox", ic("inbox"), "Входящие", inboxList().length) +
-      itemHTML("smart", "today", "today", ic("today"), "Сегодня", todayList().length) +
-      itemHTML("smart", "sprint", "sprint", ic("sprint"), "Спринт", tasks().filter(function (t) { return !t.done && t.sprint === curSprintId(); }).length) +
-      itemHTML("smart", "plans", "plans", ic("plans"), "Планы", 0) +
-      itemHTML("smart", "flag", "flag", ic("flag"), "С флажком", flagList().length) +
-      itemHTML("smart", "all", "all", ic("all"), "Все задачи", 0) +
-      itemHTML("smart", "done", "done", ic("done"), "Сделано", 0) + "</nav>";
-    h += '<div class="lab" data-droproot="1">Проекты<button type="button" data-a="newproj" title="Новый проект" aria-label="Новый проект">+</button></div><nav class="nav">';
+    if (favs.length) B.fav = blockHead("fav", "Избранное") + '<nav class="nav">' + favs.join("") + "</nav>";
+    var L = {
+      inbox: function () { return itemHTML("smart", "inbox", "inbox", ic("inbox"), "Входящие", inboxList().length, { drag: true }); },
+      today: function () { return itemHTML("smart", "today", "today", ic("today"), "Сегодня", todayList().length, { drag: true }); },
+      sprint: function () { return itemHTML("smart", "sprint", "sprint", ic("sprint"), "Спринт", tasks().filter(function (t) { return !t.done && t.sprint === curSprintId(); }).length, { drag: true }); },
+      plans: function () { return itemHTML("smart", "plans", "plans", ic("plans"), "Планы", 0, { drag: true }); },
+      flag: function () { return itemHTML("smart", "flag", "flag", ic("flag"), "С флажком", flagList().length, { drag: true }); },
+      all: function () { return itemHTML("smart", "all", "all", ic("all"), "Все задачи", 0, { drag: true }); },
+      done: function () { return itemHTML("smart", "done", "done", ic("done"), "Сделано", 0, { drag: true }); }
+    };
+    B.lists = blockHead("lists", "Списки") + '<nav class="nav" data-lists="1">' + listsOrder().map(function (k) { return L[k](); }).join("") + "</nav>";
+    var ph = blockHead("projects", "Проекты", '<button type="button" data-a="newproj" title="Новый проект" aria-label="Новый проект">+</button>') + '<nav class="nav">';
     var tr = ptree(), hidden = {};
-    if (!tr.length) h += '<div class="none">Пока нет. «+» — создать</div>';
-    tr.forEach(function (x) {
-      var p = x.p; if (hidden[p.parent]) { hidden[p.id] = 1; return; }
-      if (p.fold) hidden[p.id] = 1;
-      h += projItem(p, x.d, false);
-    });
-    h += '</nav><div class="lab">Фильтры<button type="button" data-a="newfilter" title="Новый фильтр" aria-label="Новый фильтр">+</button></div><nav class="nav">';
+    if (!tr.length) ph += '<div class="none">Пока нет. «+» — создать</div>';
+    tr.forEach(function (x) { var p = x.p; if (hidden[p.parent]) { hidden[p.id] = 1; return; } if (p.fold) hidden[p.id] = 1; ph += projItem(p, x.d, false); });
+    B.projects = ph + "</nav>";
     var fs = filters();
-    h += fs.length ? fs.map(function (f) { return itemHTML("filter", f.id, "filter-" + f.id, '<span class="dot" style="background:' + col(f.c) + '"></span>', f.n, filterRes(f).length, { fav: !!f.fav }); }).join("") : '<div class="none">Свои подборки задач по условиям</div>';
-    h += '</nav><div class="lab">Теги<button type="button" data-a="newtag" title="Новый тег" aria-label="Новый тег">+</button></div><nav class="nav">';
+    B.filters = blockHead("filters", "Фильтры", '<button type="button" data-a="newfilter" title="Новый фильтр" aria-label="Новый фильтр">+</button>') + '<nav class="nav">' + (fs.length ? fs.map(function (f) { return itemHTML("filter", f.id, "filter-" + f.id, '<span class="dot" style="background:' + col(f.c) + '"></span>', f.n, filterRes(f).length, { fav: !!f.fav }); }).join("") : '<div class="none">Свои подборки задач по условиям</div>') + "</nav>";
     var tg = tags();
-    h += tg.length ? tg.map(function (g) { return itemHTML("tag", g.n, "tag-" + g.n, '<span class="hash" style="color:' + col(g.c) + '">#</span>', g.n, tagCount(g.n), { fav: !!g.fav }); }).join("") : '<div class="none">Появятся, когда напишете #тег</div>';
-    h += '</nav><nav class="nav" style="margin-top:18px">' + itemHTML("smart", "trash", "trash", ic("trash"), "Корзина", trashItems().length) + itemHTML("", "", "settings", ic("settings"), "Настройки", 0) + itemHTML("", "", "help", ic("help"), "Справка", 0) + "</nav>";
+    B.tags = blockHead("tags", "Теги", '<button type="button" data-a="newtag" title="Новый тег" aria-label="Новый тег">+</button>') + '<nav class="nav">' + (tg.length ? tg.map(function (g) { return itemHTML("tag", g.n, "tag-" + g.n, '<span class="hash" style="color:' + col(g.c) + '">#</span>', g.n, tagCount(g.n), { fav: !!g.fav }); }).join("") : '<div class="none">Появятся, когда напишете #тег</div>') + "</nav>";
+    B.service = blockHead("service", "Служебное") + '<nav class="nav">' + itemHTML("smart", "trash", "trash", ic("trash"), "Корзина", trashItems().length) + itemHTML("", "", "settings", ic("settings"), "Настройки", 0) + itemHTML("", "", "help", ic("help"), "Справка", 0) + "</nav>";
+    sideOrder().forEach(function (k) { if (B[k]) h += '<div class="sblk" data-blk="' + k + '">' + B[k] + "</div>"; });
     return h;
   }
 
@@ -1608,6 +1618,7 @@ CREATE TABLE inbox (
     else h += '<p class="muted" style="margin:0">' + (SYNC.st === "err" ? '<span class="warnc">Нет связи с Диском: ' + esc(SYNC.msg) + "</span>" : SYNC.at ? "Последняя синхронизация: " + new Date(SYNC.at).toLocaleString("ru-RU") : "Синхронизация включена.") + '</p><div class="r"><button class="btn" type="button" data-a="sync-now">Синхронизировать сейчас</button><button class="btn" type="button" data-a="yd-logout">Выйти из Яндекса на этом устройстве</button></div>';
     h += "</section>";
     var th = LS.get("zd-theme") || "system";
+    h += '<section class="card"><h2>Левая панель</h2><p class="muted" style="margin:0">Блоки («Избранное», «Списки», «Проекты», «Фильтры», «Теги», «Служебное») переставляются перетаскиванием за заголовок, пункты «Списков» — перетаскиванием самих пунктов. Порядок синхронизируется между устройствами.</p><div class="r"><button class="btn" type="button" data-a="side-reset">Вернуть исходный порядок</button><button class="btn" type="button" data-a="mini">' + (document.body.classList.contains("mini") ? "Развернуть панель" : "Свернуть панель до иконок") + "</button></div></section>";
     h += '<section class="card"><h2>Оформление</h2><div class="seg" role="radiogroup" aria-label="Тема">' + [["system", "Как в системе"], ["light", "Светлая"], ["dark", "Тёмная"]].map(function (o) { return '<button type="button" data-theme="' + o[0] + '" class="' + (th === o[0] ? "on" : "") + '" role="radio" aria-checked="' + (th === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div></section>";
     h += '<section class="card"><h2>Резервная копия</h2><p class="muted" style="margin:0">Все задачи, проекты, теги и фильтры одним файлом — на всякий случай или для переноса.</p><div class="r"><button class="btn" type="button" data-a="export">Скачать копию (.json)</button><label class="btn" style="cursor:pointer">Загрузить копию…<input type="file" id="imp" hidden accept=".json,application/json"></label></div>' +
       (CONF === "import" ? '<div class="confirm"><b>Загрузить задачи из файла?</b><span>Записи из файла объединятся с текущими: совпадающие заменятся более свежими версиями, остальные добавятся.</span><div class="r"><button class="btn pri" type="button" data-a="imp-yes">Загрузить</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : "") + "</section>";
@@ -1637,7 +1648,7 @@ CREATE TABLE inbox (
     h += '<h2 id="h-chat">Комментарии</h2><p>Внизу карточки задачи — лента комментариев, как в чате: Enter отправляет, Shift+Enter — новая строка, ссылки кликабельны. При наведении на сообщение — ✎ изменить и × удалить. Число комментариев видно в строке задачи (💬). Комментарии синхронизируются между устройствами отдельно от задачи, поэтому сообщения с телефона и компьютера не теряются.</p>';
     h += '<h2 id="h-trash">Удаление и корзина</h2><ul><li><b>Проект, тег или фильтр</b> удаляется кнопкой 🗑 рядом со звёздочкой в заголовке его страницы или значком 🗑 у пункта в левой панели (появляется при наведении). Задачи проекта при этом не пропадают — они перейдут во «Входящие», а при восстановлении проекта вернутся в него.</li><li>Задачу удалить можно кнопкой × у задачи (при наведении), 🗑 в карточке задачи, через меню правой кнопкой мыши (на телефоне — долгое нажатие) у задачи, проекта, тега или фильтра, в меню цветной точки проекта — или перетащив задачу на «Корзину» в левой панели.</li><li>Всё удалённое попадает в <b>Корзину</b> (внизу левой панели) и хранится там <b>30 дней</b>: «Восстановить» возвращает задачу вместе с подзадачами и комментариями, проект — вместе с его задачами и подпроектами, тег — на те задачи, где он был. «Удалить навсегда» и «Очистить корзину» стирают без возврата. Сразу после удаления внизу появляется «Вернуть».</li></ul>';
     h += '<h2 id="h-icons">Иконки проектов и родительские задачи</h2><p>У каждого проекта рядом с цветной точкой есть иконка: она подбирается по названию («Дом» — 🏠, «Работа» — 💼, «Учёба» — 🎓, «Финансы» — 💰…), а свою можно выбрать, нажав на точку или иконку у названия проекта. В карточке подзадачи вверху — «↑ Родительская задача»: клик открывает родителя (и всю цепочку выше); в списках ссылка «↳ …» у подзадачи тоже ведёт к родителю.</p>';
-    h += '<h2 id="h-mini">Узкая панель</h2><p>Кнопка «« вверху левой панели сворачивает её до полосы с иконками (проекты — цветные точки, теги — #); подписи — при наведении. »» — развернуть обратно. Режим запоминается на этом устройстве.</p>';
+    h += '<h2 id="h-mini">Левая панель</h2><p>Блоки панели — «Избранное», «Списки», «Проекты», «Фильтры», «Теги», «Служебное» (корзина, настройки, справка) — можно переставлять мышью: потяните блок за заголовок (при наведении появится ⠿) выше или ниже другого блока. Пункты в «Списках» (Входящие, Сегодня, Спринт…) тоже перетаскиваются. Исходный порядок — «Настройки» → «Левая панель» → «Вернуть исходный порядок». </p><p>Кнопка «« вверху левой панели сворачивает её до полосы с иконками (проекты — цветные точки, теги — #); подписи — при наведении. »» — развернуть обратно. Режим запоминается на этом устройстве.</p>';
     h += '<h2 id="h-fav">Теги, флажки, избранное</h2><ul><li><b>Теги</b>: пишите #тег при вводе или отмечайте в карточке задачи. У тега свой цвет и своя страница; «+» у заголовка «Теги» создаёт тег.</li><li><b>Флажок</b> 🚩 — кнопка ⚑ у задачи, галочка в карточке или «!!» при вводе. Все такие задачи — в списке «С флажком».</li><li><b>Избранное</b> — звёздочка ☆ у проекта, тега или фильтра (в заголовке или в левой панели при наведении). Избранное собирается наверху левой панели.</li></ul>';
     h += '<h2 id="h-views">Группировка, сортировка, фильтры</h2><ul><li>Над каждым списком — <b>Группировка</b> (без, по сроку, по дням, по проекту, по приоритету, по тегу, по флажку) и <b>Сортировка</b> (по сроку, приоритету, названию, сначала новые). Выбор запоминается для каждого списка отдельно. В проекте с подпроектами можно показать и их задачи.</li>' +
       "<li><b>Фильтры</b> — свои подборки: «+» у заголовка «Фильтры», затем «Условия»: проекты (с вложенными или без), теги (любой или все), приоритет, флажок, срок (просрочено, сегодня, 7 дней, без срока…), статус и текст. Фильтр обновляется сам; у него своя группировка и сортировка, его можно добавить в избранное.</li></ul>";
@@ -1899,6 +1910,7 @@ CREATE TABLE inbox (
       case "newfilter": var nf = touch({ id: uid(), n: "Новый фильтр", c: 2, ord: filters().length, q: fdef(), group: "project", sort: "date" }); S.filters.push(nf); save(); FE = nf.id; RN = { where: "page", k: "filter", id: nf.id }; go("filter-" + nf.id); return;
       case "fe": FE = FE === ARG ? null : ARG; render(); return;
       case "fe-close": FE = null; render(); return;
+      case "side-reset": delete S.opt.side; delete S.opt.lists; S.opt.upd = Date.now(); save(); render(); toast("Порядок панели сброшен"); return;
       case "vmode": var vk = VIEWS[curKey()] = VIEWS[curKey()] || {}; vk.mode = el.dataset.x; LS.set("zd-views", JSON.stringify(VIEWS)); render(); return;
       case "mini": document.body.classList.toggle("mini"); LS.set("zd-mini", document.body.classList.contains("mini") ? "1" : "0"); render(); return;
       case "kopen": openTask(el.dataset.id); return;
@@ -2584,13 +2596,25 @@ CREATE TABLE inbox (
   function clearDrop() { [].forEach.call(document.querySelectorAll(".dropin,.dropb,.dropa"), function (x) { x.classList.remove("dropin", "dropb", "dropa"); }); }
   document.addEventListener("dragstart", function (e) {
     if (e.target.closest && e.target.closest("#panel")) return;
+    var bh = e.target.closest && e.target.closest("[data-bdrag]");
+    if (bh) { DRAG = { k: "block", id: bh.dataset.bdrag }; var sb = bh.closest(".sblk"); if (sb) sb.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", DRAG.id); } catch (er) { /* ok */ } return; }
+    var sm = e.target.closest && e.target.closest('.nav[data-lists] a[data-k="smart"][draggable]');
+    if (sm) { DRAG = { k: "smart", id: sm.dataset.id }; sm.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", DRAG.id); } catch (er) { /* ok */ } return; }
     var a = e.target.closest && e.target.closest('.nav a[data-k="proj"][draggable]'), li = e.target.closest && (e.target.closest("li.task") || e.target.closest(".kcard"));
     if (a) DRAG = { k: "proj", id: a.dataset.id }; else if (li) DRAG = { k: "task", id: li.dataset.id }; else return;
     e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", DRAG.id); } catch (er) { /* ok */ }
   });
-  document.addEventListener("dragend", function () { DRAG = null; clearDrop(); });
+  document.addEventListener("dragend", function () { DRAG = null; clearDrop(); [].forEach.call(document.querySelectorAll(".dragging"), function (x) { x.classList.remove("dragging"); }); });
   function dropTarget(e) {
     if (!DRAG) return null;
+    if (DRAG.k === "block") {
+      var blk = e.target.closest(".sblk"); if (!blk || blk.dataset.blk === DRAG.id) return null;
+      var rb = blk.getBoundingClientRect(); return { el: blk, k: "block", id: blk.dataset.blk, pos: e.clientY < rb.top + rb.height / 2 ? "before" : "after" };
+    }
+    if (DRAG.k === "smart") {
+      var it = e.target.closest('.nav[data-lists] a[data-k="smart"]'); if (!it || it.dataset.id === DRAG.id) return null;
+      var ri = it.getBoundingClientRect(); return { el: it, k: "smart", id: it.dataset.id, pos: e.clientY < ri.top + ri.height / 2 ? "before" : "after" };
+    }
     var a = e.target.closest(".nav a[data-k]"), root = e.target.closest("[data-droproot]"), li = e.target.closest("li.task");
     if (DRAG.k === "proj") {
       if (root) return { el: root, k: "root" };
@@ -2609,6 +2633,10 @@ CREATE TABLE inbox (
   });
   document.addEventListener("drop", function (e) {
     var d = dropTarget(e); clearDrop(); if (!d) return; e.preventDefault();
+    if (DRAG.k === "block" || DRAG.k === "smart") {
+      var key = DRAG.k === "block" ? "side" : "lists", arr = (DRAG.k === "block" ? sideOrder() : listsOrder()).filter(function (x) { return x !== DRAG.id; }), at = arr.indexOf(d.id) + (d.pos === "after" ? 1 : 0);
+      arr.splice(at, 0, DRAG.id); S.opt[key] = arr; S.opt.upd = Date.now(); save(); render(); DRAG = null; return;
+    }
     if (DRAG.k === "proj") { if (d.k === "root") moveProj(DRAG.id, null, "in"); else moveProj(DRAG.id, d.id, d.pos); }
     else { var t = task(DRAG.id); if (t) moveTaskTo(t, d.k, d.id); }
     DRAG = null;
