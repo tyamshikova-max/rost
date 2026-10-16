@@ -708,6 +708,8 @@ html.nosheet .dptopbox { background: color-mix(in srgb, var(--star) 10%, transpa
 .pn-subs .sr a { flex: 1; min-width: 0; color: var(--fg); text-decoration: none; overflow-wrap: anywhere; cursor: pointer }
 .pn-subs .sr.done a { text-decoration: line-through; color: var(--muted) }
 .pn-subs input { width: 100%; margin-top: 6px; background: var(--bg); border: 1px dashed var(--line); border-radius: 7px; padding: 6px 10px }
+.setc { display: grid; gap: 8px; max-width: 760px; padding: 12px 14px; margin-top: 10px } .setch { display: flex; gap: 8px; align-items: center } .setch .setn { flex: 1; min-width: 0; font-weight: 600 }
+.setl { width: 100%; min-height: 84px; resize: vertical; font: inherit; line-height: 1.5 } .setd { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center } .setd .seg button { min-width: 34px } .setpre { font-size: calc(12.5px * var(--fs)) } .setsum { margin-left: auto; font-size: calc(12.5px * var(--fs)) }
 .tarbar, .tarsearch { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 12px 0 }
 .tarsearch .inp { flex: 1; min-width: 200px; max-width: 420px } .tarlink { margin: 10px 0 0 }
 .pn-sec h3.pntabs { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; text-transform: none; letter-spacing: 0; margin-bottom: 10px }
@@ -2077,7 +2079,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-48";
+  var APPV = "zd-app-2026-10-16-49";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -3633,8 +3635,47 @@ CREATE TABLE inbox (
     if (rootP) { toast("Проект создан из шаблона «" + x.n + "»"); go("proj-" + rootP.id); }
     else { render(); var r0 = (d.tasks || [])[0]; if (r0) openTask(tmap[r0.k]); toast("Задача создана из шаблона «" + x.n + "»"); }
   }
+  /* ---------- наборы задач на день и неделю: строки быстрого ввода + дни недели, когда набор добавляется сам ---------- */
+  // id задач набора одинаковые на всех устройствах (набор + день + строка) — два устройства не создадут дублей, удалённое не вернётся
+  var SETWD = [1, 2, 3, 4, 5, 6, 0], SETDAY = "";
+  function sets() { return tpls("set"); }
+  function setLines(x) { return String((x.data || {}).text || "").split(/\n/).map(cleanLine).filter(Boolean).slice(0, 60); }
+  function setTid(x, day, i) { return "set-" + x.id + "-" + dKey(day) + "-" + i; }
+  function setApply(x, day) {
+    var have = {}, n = 0; S.tasks.forEach(function (t) { have[t.id] = 1; });
+    setLines(x).forEach(function (ln, i) {
+      var id = setTid(x, day, i); if (have[id]) return;
+      var t = newTaskFrom(ln, { day: day });
+      // «в 7:00» после семи утра быстрый ввод переносит на завтра; в наборе время относится к его дню
+      if (t.at && !t.allday && sod(t.at) !== day && !/(завтра|послезавтра|через|\d{1,2}\.\d{1,2}|(^|\s)(пн|вт|ср|чт|пт|сб|вс)(?=\s|$)|понедельн|вторник|сред[уа]|четверг|пятниц|суббот|воскресен)/i.test(ln)) t.at = day + (t.at - sod(t.at));
+      t.id = id; t.set = x.id; t.created = Date.now() - i; touch(t); n++;
+    });
+    return n;
+  }
+  function setsAuto() {
+    var d = today0(), k = dKey(d); if (SETDAY === k || !S.tpls) return; SETDAY = k;
+    var wd = new Date(d).getDay(), n = 0, names = [];
+    sets().forEach(function (x) { if (((x.data || {}).days || []).indexOf(wd) < 0) return; var c = setApply(x, d); if (c) { n += c; names.push("«" + x.n + "»"); } });
+    if (n) { save(); setTimeout(function () { toast("Из наборов " + names.join(", ") + " добавлено в «Сегодня»: " + n + " " + plural(n, ["задача", "задачи", "задач"])); }, 600); }
+  }
+  function setDaysTxt(days) { days = days || []; if (!days.length) return "только вручную"; if (days.length === 7) return "каждый день"; if (days.slice().sort().join() === "1,2,3,4,5") return "по будням"; return SETWD.filter(function (d) { return days.indexOf(d) >= 0; }).map(function (d) { return WDS[d]; }).join(", "); }
+  function setCard(x) {
+    var d = x.data || {}, days = d.days || [], nl = setLines(x).length;
+    return '<div class="card setc"><div class="setch"><input class="inp setn" data-setn="' + x.id + '" value="' + esc(x.n) + '" aria-label="Название набора"><button type="button" class="btn sm pri" data-a="setrun" data-id="' + x.id + '" title="Добавить задачи набора в «Сегодня» сейчас">▶ На сегодня</button><button type="button" class="ibtn" data-a="setdel" data-id="' + x.id + '" title="Удалить набор">🗑</button></div>' +
+      '<textarea class="inp setl" data-setl="' + x.id + '" rows="' + Math.max(3, Math.min(10, nl + 1)) + '" placeholder="Каждая строка — задача: «Зарядка в 7:00 #здоровье», «Разобрать почту +Работа !2»">' + esc(d.text || "") + "</textarea>" +
+      '<div class="setd"><span class="muted">Добавлять сам:</span><div class="seg">' + SETWD.map(function (w) { return '<button type="button" data-a="setday" data-id="' + x.id + '" data-v="' + w + '" class="' + (days.indexOf(w) >= 0 ? "on" : "") + '">' + WDS[w] + "</button>"; }).join("") + "</div>" +
+      '<span class="setpre"><a href="#" data-a="setpre" data-id="' + x.id + '" data-v="all">каждый день</a> · <a href="#" data-a="setpre" data-id="' + x.id + '" data-v="work">по будням</a> · <a href="#" data-a="setpre" data-id="' + x.id + '" data-v="none">вручную</a></span>' +
+      '<span class="muted setsum">' + nl + " " + plural(nl, ["задача", "задачи", "задач"]) + " · " + esc(setDaysTxt(days)) + "</span></div></div>";
+  }
+  document.addEventListener("change", function (e) {
+    var ds = e.target.dataset || {}, id = ds.setl || ds.setn; if (!id) return; var x = tplObj(id); if (!x) return;
+    if (ds.setl) { x.data = Object.assign({}, x.data || {}, { text: e.target.value.slice(0, 6000) }); } else { var v = e.target.value.trim(); if (!v) return; x.n = v.slice(0, 80); }
+    touch(x); save(); var c = e.target.closest(".setc"), sm = c && c.querySelector(".setsum"); if (sm) sm.textContent = setLines(x).length + " " + plural(setLines(x).length, ["задача", "задачи", "задач"]) + " · " + setDaysTxt((x.data || {}).days);
+  });
   function vTpls() {
     var h = head("Шаблоны", "Сохраните проект или задачу как шаблон — меню проекта или правый клик по задаче → «Сохранить как шаблон». Сроки в шаблоне считаются от самой ранней даты: при создании она становится сегодняшним днём, остальные сдвигаются так же.");
+    h += '<h2 id="sets">Наборы задач на день и неделю</h2><p class="muted" style="margin:0 0 8px;max-width:760px">Утренний ритуал, вечерний разбор, обзор недели. Каждая строка — задача, работает быстрый ввод («в 7:00», #тег, +Проект, !1). Отметьте дни — в эти дни набор сам добавится в «Сегодня», когда вы откроете приложение. Или добавьте вручную: «▶ На сегодня» здесь или кнопка «▤ Набор» в «Сегодня».</p>' +
+      sets().map(setCard).join("") + '<div class="r" style="margin:10px 0 6px"><button type="button" class="btn sm" data-a="setnew">＋ Новый набор</button></div>';
     [["proj", "Проекты"], ["task", "Задачи"]].forEach(function (g) {
       var l = tpls(g[0]); h += "<h2>" + g[1] + "</h2>";
       if (!l.length) { h += '<div class="muted">' + (g[0] === "proj" ? "Пока нет шаблонов проектов." : "Пока нет шаблонов задач.") + "</div>"; return; }
@@ -4050,7 +4091,7 @@ CREATE TABLE inbox (
     var dr = dayRec(), top = dayTop(), late = new Date().getHours() >= 17;
     var h = "";
     if (top.length) h += '<div class="dptopbox"><b>★ Главное на сегодня</b>' + top.map(function (t) { return '<a class="' + (t.done ? "dn" : "") + '" href="#task-' + t.id + '">' + (t.done ? "✓ " : "") + esc(t.t) + "</a>"; }).join("") + "</div>";
-    h += '<div class="r dpcta">' + (!dr || !dr.planned ? '<a class="btn sm pri" href="#daily">☀ Спланировать день</a>' : '<a class="btn sm" href="#daily">☀ План дня</a>') + '<button type="button" class="btn sm" data-a="nowgo" title="Одна задача на весь экран, таймер и подзадачи">◉ Сейчас</button>' + (late || (dr && dr.planned) ? '<a class="btn sm" href="#daily-review">🌙 Итоги дня' + (dr && dr.review ? " ✓" : "") + "</a>" : "") + "</div>";
+    h += '<div class="r dpcta">' + (!dr || !dr.planned ? '<a class="btn sm pri" href="#daily">☀ Спланировать день</a>' : '<a class="btn sm" href="#daily">☀ План дня</a>') + '<button type="button" class="btn sm" data-a="nowgo" title="Одна задача на весь экран, таймер и подзадачи">◉ Сейчас</button><button type="button" class="btn sm" data-a="setpick" title="Добавить набор задач: утро, вечер, обзор недели">▤ Набор</button>' + (late || (dr && dr.planned) ? '<a class="btn sm" href="#daily-review">🌙 Итоги дня' + (dr && dr.review ? " ✓" : "") + "</a>" : "") + "</div>";
     return h;
   }
   document.addEventListener("change", function (e) {
@@ -4788,7 +4829,7 @@ CREATE TABLE inbox (
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
   }
   // справка по вкладкам, как настройки; поиск ищет по всем разделам сразу
-  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
+  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
   var HQ = "";
   function htabOf(a) { if (HTABS.some(function (x) { return x[0] === a; })) return a; var f = HTABS.filter(function (x) { return x[3].indexOf(a) >= 0; })[0]; return f ? f[0] : "start"; }
   function vHelpTabs() {
@@ -4816,6 +4857,7 @@ CREATE TABLE inbox (
       start: [["today", "«Сегодня» на компьютере: слева — доски, списки, проекты; в середине — задачи; сверху — главное дня, план, привычки"], ["mtoday", "На телефоне левая панель прячется за кнопку ☰", 1]],
       tarch: [["tarch", "«Архив задач»: выполненные по месяцам, поиск, срок архивации"]],
       chat: [["pntabs", "Закладки внизу карточки: комментарии, история, вложения и заметки"]],
+      sets: [["setstpl", "Наборы на странице «Шаблоны»: строки задач и дни, когда набор добавляется сам"], ["setspick", "Кнопка «▤ Набор» в «Сегодня»: добавить набор вручную"]],
       hist: [["hist", "Блок «История» в карточке: что и когда менялось; ↶ вернуть — прежнее значение"]],
       quick: [["quick", "Быстрый ввод: под полем видно, что поняло приложение — дата и время, проект, тег, приоритет"]],
       pal: [["pal", "Палитра Ctrl+K: поиск по проектам, задачам и командам; Enter без выбора создаёт задачу"]],
@@ -5092,6 +5134,13 @@ CREATE TABLE inbox (
       "Главное дня видно вверху «Сегодня» и в виджете доски «Главное на сегодня».",
       "<b>Итоги дня</b> — «🌙 Итоги дня» в «Сегодня» (появляется вечером или после плана): сколько сделано, что с главным, что не успели (сразу перенести на завтра, через неделю или когда-нибудь), настроение дня и пара строк о том, как прошёл день.",
       "План, главное и итоги каждого дня сохраняются и синхронизируются."]));
+    h += sec("sets", "Наборы задач на день и неделю", ul([
+      "Набор — список задач, которые повторяются вместе: утренний ритуал, вечерний разбор, «обзор недели» по пятницам. Наборы живут на странице «Шаблоны» (значок внизу левой панели) в разделе «Наборы задач на день и неделю».",
+      "<b>＋ Новый набор</b> — название и строки: каждая строка — задача, работает быстрый ввод («Зарядка в 7:00 #здоровье», «Разобрать почту +Работа !2»). Время относится ко дню, на который добавляется набор.",
+      "<b>Добавлять сам</b> — отметьте дни недели (или «каждый день», «по будням»): в эти дни набор сам появится в «Сегодня», когда вы откроете приложение. Без отмеченных дней — только вручную.",
+      "<b>Вручную</b> — «▶ На сегодня» в карточке набора, кнопка «▤ Набор» в «Сегодня» или Ctrl+K → «Набор … → в «Сегодня»».",
+      "Один набор добавляется в день один раз — даже если приложение открыто на телефоне и компьютере. Удалили задачу из набора — сегодня она не вернётся.",
+      "Это удобнее повторяющихся задач, когда дел много и они идут вместе: набор можно отредактировать одним текстом."]));
     h += sec("now", "Режим «Сейчас»", ul([
       "<b>Зачем</b>: когда задач много и глаза разбегаются — на экране остаётся одна задача, таймер и её подзадачи. Ничего лишнего.",
       "<b>Как открыть</b>: кнопка «◉ Сейчас» в «Сегодня» (очередь: сначала ★ главные задачи дня, потом остальные на сегодня) или меню задачи → «◉ Работать сейчас» (начнёт с этой задачи).",
@@ -5526,6 +5575,7 @@ CREATE TABLE inbox (
   var RTIMES = [], RWARN = false;
   function render() {
     try { histScan(); } catch (er) { /* история не мешает */ }
+    try { setsAuto(); } catch (er) { /* наборы не мешают */ }
     try { applyLook(); } catch (er) { /* оформление не мешает работе */ }
     // пока пишете в редакторе на странице (текст заметки, описание проекта) — страницу вокруг не перерисовываем, только левую панель; остальное обновится, когда выйдете из редактора
     var ae0 = document.activeElement;
@@ -6161,6 +6211,12 @@ CREATE TABLE inbox (
       case "rev-next": revGo(1); return;
       case "rev-prev": revGo(-1); return;
       case "rev-ok": var rp = proj(ARG); if (rp) { rp.revAt = Date.now(); touch(rp); save(); toast("✓ «" + rp.n + "» проверен"); if (revDue().length) revGo(1); else { render(); toast("✓ Все проекты проверены"); } } return;
+      case "setnew": var sx = touch({ id: uid(), kind: "set", n: sets().length ? "Новый набор" : "Утро", data: { text: sets().length ? "" : "Зарядка в 7:00 #здоровье\nСтакан воды\nРазобрать «Входящие»\nВыбрать три главные задачи дня", days: [] }, created: Date.now() }); S.tpls.push(sx); save(); render(); setTimeout(function () { var i = document.querySelector('[data-setn="' + sx.id + '"]'); if (i) { i.focus(); i.select(); } }, 50); return;
+      case "setrun": var sr = tplObj(el.dataset.id); if (!sr) return; if (!setLines(sr).length) { toast("В наборе пока нет строк"); return; } var nr = setApply(sr, today0()); save(); render(); toast(nr ? "«" + sr.n + "»: в «Сегодня» добавлено " + nr + " " + plural(nr, ["задача", "задачи", "задач"]) : "«" + sr.n + "» сегодня уже добавлен"); return;
+      case "setdel": var sd = tplObj(el.dataset.id); if (!sd) return; sd.del = 1; sd.delAt = Date.now(); touch(sd); save(); render(); toastUndo("Набор «" + sd.n + "» удалён", function () { delete sd.del; delete sd.delAt; touch(sd); save(); render(); }); return;
+      case "setday": var sy = tplObj(el.dataset.id); if (!sy) return; var dy = ((sy.data || {}).days || []).slice(), wv = +el.dataset.v, ix = dy.indexOf(wv); if (ix >= 0) dy.splice(ix, 1); else dy.push(wv); sy.data = Object.assign({}, sy.data || {}, { days: dy }); touch(sy); save(); render(); return;
+      case "setpre": e.preventDefault(); var sp2 = tplObj(el.dataset.id); if (!sp2) return; sp2.data = Object.assign({}, sp2.data || {}, { days: el.dataset.v === "all" ? [0, 1, 2, 3, 4, 5, 6] : el.dataset.v === "work" ? [1, 2, 3, 4, 5] : [] }); touch(sp2); save(); render(); return;
+      case "setpick": var spr = el.getBoundingClientRect(), sl = sets(); ctxShow(spr.left, spr.bottom + 4, sl.map(function (x) { var added = setLines(x).every(function (ln, i) { return !!S.tasks.filter(function (t) { return t.id === setTid(x, today0(), i); }).length; }); return { c: x.id, i: added ? "✓" : "▤", l: x.n + (added ? " — уже добавлен" : ""), k: String(setLines(x).length) }; }).concat(sl.length ? ["-"] : [], [{ c: "__cfg", i: "⚙", l: sl.length ? "Настроить наборы…" : "Создать набор…" }]), { k: "setpick" }); return;
       case "tarchset": S.opt.tarch = +el.dataset.v; optTouch(); save(); render(); toast(+el.dataset.v ? "В архив — выполненные больше " + tArchAge(+el.dataset.v) + " назад" : "Архив выключен: все выполненные — в «Сделано»"); return;
       case "tarmore": TARLIM += 300; render(); return;
       case "tarchclear": CONF = "tarchclear"; render(); return;
@@ -7141,6 +7197,7 @@ CREATE TABLE inbox (
     if (k === "startpick") { S.opt.start = c === "__last" ? "" : c; optTouch(); save(); render(); return; }
     if (k === "btplproj") { bFromTpl("proj", c); return; }
     if (k === "ctxsel") { ctxSet(c); return; }
+    if (k === "setpick") { if (c === "__cfg") { go("templates"); setTimeout(function () { var hx = $("sets"); if (hx) hx.scrollIntoView({ block: "start" }); }, 80); return; } var sk = tplObj(c); if (sk) { var nk = setApply(sk, today0()); save(); render(); toast(nk ? "«" + sk.n + "»: в «Сегодня» добавлено " + nk + " " + plural(nk, ["задача", "задачи", "задач"]) : "«" + sk.n + "» сегодня уже добавлен"); } return; }
     if (k === "dpest") { var te = task(id); if (te) { te.est = +c || 0; touch(te); save(); render(); } return; }
     if (k === "glink") { var pl = proj(c); if (pl) { if (pl.goal === id) delete pl.goal; else pl.goal = id; touch(pl); save(); render(); } return; }
     if (c && c.indexOf("pg:") === 0 && k === "proj") { var pg = proj(id), gv = c.slice(3); if (!pg) return; if (gv === "__new") { var ng = goalCreate("Новая цель"); pg.goal = ng.id; touch(pg); save(); go("goal-" + ng.id); return; } if (gv) pg.goal = gv; else delete pg.goal; touch(pg); save(); render(); toast(gv ? "Проект привязан к цели «" + goal(gv).n + "»" : "Проект отвязан от цели"); return; }
@@ -7201,6 +7258,7 @@ CREATE TABLE inbox (
     function add(g, i, l, h, fn) { if (!ws.length || hit(l + " " + (h || ""))) out.push({ g: g, i: i, l: l, h: h || "", fn: fn }); }
     if (q) out.push({ g: "Создать", i: "＋", l: "Создать задачу «" + q + "»", h: quickPreview(parseQuick(q)), fn: function () { var t = newTaskFrom(q, viewCtx()); save(); render(); toast("Добавлено" + (t.at ? ": " + whenTxt(t) : "")); } });
     [["inbox", "📥", "Входящие"], ["today", "☀", "Сегодня"], ["sprint", "🏃", "Спринт"], ["plans", "📅", "Планы"], ["someday", "⏳", "Когда-нибудь"], ["cal", "🗓", "Календарь"], ["flag", "🚩", "С флажком"], ["all", "☰", "Все задачи"], ["done", "✓", "Сделано"], ["tarch", "🗄", "Архив задач"], ["sprints", "📈", "Все спринты"], ["trash", "🗑", "Корзина"], ["gantt", "▤", "Таймлайн"], ["archive", "🗄", "Архив проектов"], ["templates", "⧉", "Шаблоны"], ["settings", "⚙", "Настройки"], ["help", "?", "Справка"]].forEach(function (x) { add("Перейти", x[1], x[2], "", function () { go(x[0]); }); });
+    sets().forEach(function (x) { add("Действия", "▤", "Набор «" + x.n + "» → в «Сегодня»", "", function () { var n = setApply(x, today0()); save(); render(); toast(n ? "Добавлено: " + n : "«" + x.n + "» сегодня уже добавлен"); }); });
     add("Действия", "📝", "Новая заметка", "", function () { var nn4 = newNote({}); save(); NFOCUS = true; go("note-" + nn4.id); });
     nsecs().forEach(function (x) { add("Разделы заметок", "📁", nsPath(x).map(function (y) { return y.n; }).join(" / "), "", function () { go("nsec-" + x.id); }); });
     if (ws.length) notes().forEach(function (n) { if (hit((n.t || "") + " " + noteText(n).slice(0, 400))) add("Заметки", "📝", n.t || "Без названия", noteText(n).slice(0, 60), function () { go("note-" + n.id); }); });
