@@ -447,6 +447,7 @@ html.glass .inp, html.glass input[type="text"], html.glass input[type="search"],
 .dpa { display: flex; gap: 4px; flex-wrap: wrap; align-items: center } .dpa .inp { padding: 3px 6px; font-size: calc(13px * var(--fs)) }
 .dpstar { border: 0; background: none; cursor: pointer; font-size: calc(20px * var(--fs)); color: var(--muted); width: 28px; padding: 0; text-align: center } .dpstar.on { color: var(--star) }
 .dpempty { color: var(--ok); margin: 8px 0 } .dpnav { max-width: 900px; margin-top: 12px; align-items: center } .dpgoals { margin-top: 14px; font-size: calc(13.5px * var(--fs)); color: var(--muted) }
+.dpcapin { width: 74px; padding: 3px 8px; text-align: center; font-weight: 600 }
 .dpcap { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 6px 0 10px } .dpbar { flex: 1 1 200px; height: 10px; border-radius: 5px; background: var(--hover); overflow: hidden } .dpbar i { display: block; height: 100%; background: var(--acc) } .dpcap.over .dpbar i { background: var(--warn) }
 .dpsum { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 12px 0; max-width: 900px } .dpsum > div { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid }
 .dpsum b { font: 700 calc(24px * var(--fs)) var(--mono) } .dpsum small { color: var(--muted) }
@@ -1886,7 +1887,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-32";
+  var APPV = "zd-app-2026-10-16-33";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -3585,6 +3586,8 @@ CREATE TABLE inbox (
   function dayId(ms) { return "d:" + dKey(ms || today0()); }
   function dayRec(create) { var id = dayId(), r = S.days.filter(function (x) { return x.id === id && !x.del; })[0] || null; if (!r && create) { r = touch({ id: id, top: [] }); S.days.push(r); } return r; }
   function dayTop() { var r = dayRec(); return r ? (r.top || []).map(task).filter(Boolean) : []; }
+  // сколько часов в день отдаётся задачам (настраивается, 1–24)
+  function dayCap() { var v = +S.opt.dayCap; return v >= 1 && v <= 24 ? v : 8; }
   function tHours(t) { return +t.est ? +t.est : t.dur ? t.dur / 60 : t.at && !t.allday ? .5 : 0; }
   function dpRow(t, acts) { var p = proj(t.pid); return '<div class="dprow' + (t.done ? " dn" : "") + '"><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + (p ? ' <small>' + esc(p.n) + "</small>" : "") + (t.at || t.due ? ' <small class="' + (isLate(t) ? "late" : "") + '">' + esc(t.at ? whenTxt(t) : "⏰ " + dayName(t.due)) + "</small>" : "") + '</a><span class="dpa">' + acts.map(function (a) { return '<button type="button" class="btn sm' + (a[2] ? " " + a[2] : "") + '" data-a="dpa" data-t="' + t.id + '" data-c="' + a[0] + '">' + a[1] + "</button>"; }).join("") + "</span></div>"; }
   function vDaily() {
@@ -3612,10 +3615,10 @@ CREATE TABLE inbox (
       var ag = goals().filter(function (g) { return (g.st || "active") === "active"; });
       if (ag.length) b += '<div class="dpgoals">🎯 Ваши цели: ' + ag.map(function (g) { return '<a href="#goal-' + g.id + '">' + esc(g.n) + " · " + goalProg(g).pct + "%</a>"; }).join(" · ") + "</div>";
     } else if (k === "time") {
-      var tt = todayList().filter(function (t) { return !t.parent; }).sort(cmpBy("date")), from = Math.max(+S.opt.dayFrom || 9, new Date().getHours() + (new Date().getMinutes() > 30 ? 1 : 0)), to = +S.opt.dayTo || 19, cap = Math.max(0, to - from), need = tt.reduce(function (a, t) { return a + tHours(t); }, 0), noEst = tt.filter(function (t) { return !tHours(t); }).length;
+      var tt = todayList().filter(function (t) { return !t.parent; }).sort(cmpBy("date")), cap = dayCap(), need = tt.reduce(function (a, t) { return a + tHours(t); }, 0), noEst = tt.filter(function (t) { return !tHours(t); }).length;
       var pct = cap ? Math.min(100, Math.round(need / cap * 100)) : 100, over = need > cap;
-      b = '<h2>Хватит ли времени?</h2><p class="muted">Рабочее время сегодня: с ' + from + ":00 до " + to + ":00 (меняется в «Настройки» → «Общие»). Задачам без оценки поставьте время или оценку в часах.</p>" +
-        '<div class="dpcap' + (over ? " over" : "") + '"><div class="dpbar"><i style="width:' + pct + '%"></i></div><b>' + fmtH(need) + " ч из " + cap + " ч</b>" + (over ? '<span class="late"> — перегруз на ' + fmtH(need - cap) + " ч: перенесите что-то на завтра</span>" : need ? '<span class="muted"> — запас ' + fmtH(cap - need) + " ч</span>" : "") + (noEst ? '<span class="muted"> · без оценки: ' + noEst + "</span>" : "") + "</div>" +
+      b = '<h2>Хватит ли времени?</h2><p class="muted">Сколько часов в день вы отдаёте задачам: <input type="number" class="inp dpcapin" data-dpcap="1" min="1" max="24" step="0.5" value="' + cap + '" aria-label="Часов на задачи в день"> ч (от 1 до 24, запоминается; то же — в «Настройки» → «Общие» → «План дня»). Задачам без оценки поставьте время или оценку в часах.</p>' +
+        '<div class="dpcap' + (over ? " over" : "") + '"><div class="dpbar"><i style="width:' + pct + '%"></i></div><b>' + fmtH(need) + " ч из " + fmtH(cap) + " ч</b>" + (over ? '<span class="late"> — перегруз на ' + fmtH(need - cap) + " ч: перенесите что-то на завтра</span>" : need ? '<span class="muted"> — запас ' + fmtH(cap - need) + " ч</span>" : "") + (noEst ? '<span class="muted"> · без оценки: ' + noEst + "</span>" : "") + "</div>" +
         tt.map(function (t) { return '<div class="dprow"><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + '</a><span class="dpa"><input type="time" class="inp" data-dptime="' + t.id + '" value="' + (t.at && !t.allday ? hm(t.at) : "") + '" title="Во сколько"><button type="button" class="ddb sm" data-a="dpest" data-t="' + t.id + '" title="Сколько займёт">' + (+t.est ? "⏱ " + fmtH(t.est) + " ч" : t.dur ? "⏱ " + t.dur + " мин" : "оценка") + '<span class="dda">▾</span></button><button type="button" class="btn sm" data-a="dpa" data-t="' + t.id + '" data-c="d:1">Завтра</button></span></div>'; }).join("") +
         (AI.ready() ? '<div class="r" style="margin-top:10px"><button type="button" class="btn sm aibtn" data-a="aiday">✨ ИИ расставит задачи по времени</button></div>' : "");
     } else {
@@ -3653,6 +3656,7 @@ CREATE TABLE inbox (
     if (ds.dptime) { var t = task(ds.dptime); if (!t) return; if (tg.value) { var p = tg.value.split(":"), d = new Date(today0()); d.setHours(+p[0], +p[1], 0, 0); t.at = d.getTime(); t.allday = false; if (!t.dur && !+t.est) t.dur = 30; if (S.opt.autoRem) t.rem = true; } else { t.at = today0(); t.allday = true; } touch(t); save(); render(); return; }
     if (ds.dpest) { var t2 = task(ds.dpest); if (!t2) return; t2.est = +tg.value || 0; touch(t2); save(); render(); return; }
     if (ds.drnote) { DRV.note = tg.value; }
+    if (ds.dpcap) { var v = Math.round((+String(tg.value).replace(",", ".") || 0) * 2) / 2; if (!(v >= 1)) v = 1; if (v > 24) v = 24; S.opt.dayCap = v; optTouch(); save(); render(); if (+tg.value > 24 || +tg.value < 1) toast("Можно от 1 до 24 часов"); return; }
   });
 
   /* ---------- доски (дашборды): сетка из виджетов, каждый — окно в раздел приложения ---------- */
@@ -4279,6 +4283,7 @@ CREATE TABLE inbox (
     var rd = S.opt.revDays !== undefined ? +S.opt.revDays : 7;
     var stv = S.opt.start || "", stn = !stv ? "где остановились в прошлый раз" : /^board-/.test(stv) ? (board(stv.slice(6)) ? "доска «" + board(stv.slice(6)).n + "»" : "где остановились в прошлый раз") : (LISTN[stv] || stv);
     h += '<section class="card" id="s-start"><h2>Стартовый экран</h2><p class="muted" style="margin:0">Что открывается, когда вы запускаете приложение (при обновлении страницы остаётся текущее место). Удобно сделать стартовой доску — например, «Мой день».</p><div class="r"><button type="button" class="ddb" data-a="startpick">' + esc(stn.charAt(0).toUpperCase() + stn.slice(1)) + '<span class="dda">▾</span></button></div></section>';
+    h += '<section class="card" id="s-day"><h2>План дня</h2><p class="muted" style="margin:0">Сколько часов в день вы готовы отдавать задачам — с этим числом шаг «Время» в плане дня сравнивает оценки задач и предупреждает о перегрузе.</p><div class="r" style="align-items:center"><input type="number" class="inp dpcapin" data-dpcap="1" min="1" max="24" step="0.5" value="' + dayCap() + '" aria-label="Часов на задачи в день"><span>ч в день</span><span class="muted">от 1 до 24</span></div></section>';
     h += '<section class="card" id="s-review"><h2>Проверка проектов</h2><p class="muted" style="margin:0">Как часто напоминать пересмотреть проект (кнопка ↻ у заголовка «Проекты»). Для отдельного проекта интервал меняется правым кликом по нему → «Интервал проверки».</p><div class="seg" style="margin-top:10px">' + [[7, "неделя"], [14, "2 недели"], [30, "месяц"], [182, "полгода"], [0, "не проверять"]].map(function (x) { return '<button type="button" data-a="revdef" data-v="' + x[0] + '" class="' + (rd === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></section>";
     h += lookSection();
     h += '<section class="card" id="s-flags"><h2>Флажки</h2><p class="muted" style="margin:0">У задачи может стоять один из этих флажков. Название и цвет меняются здесь, порядок — стрелкой ↑. Задачи с флажками собраны в списке «С флажком».</p><div class="fled">' +
@@ -4526,7 +4531,7 @@ CREATE TABLE inbox (
       "Привычки на сегодня видны и в «Сегодня» — клик по ним отмечает так же. Из напоминания в Telegram привычку можно отметить кнопкой «✓ Отметить». В «Статистике» есть средний процент выполнения привычек."]));
     h += sec("pomo", "Помодоро", "<p>⏱ в карточке или в меню задачи: 25 минут работы над задачей, затем 5 минут перерыва. Таймер виден в левом нижнем углу (пауза ⏸, стоп ■, клик по названию открывает задачу); по окончании — звук и уведомление, в задаче копится счётчик 🍅, а в статистике — часы фокуса.</p>");
     h += sec("daily", "План дня и итоги дня", ul([
-      "<b>План дня</b> — кнопка «☀ Спланировать день» в «Сегодня» (или адрес #daily). Пять коротких шагов: <b>Входящие</b> (для каждой задачи — сегодня, завтра, через неделю, когда-нибудь, в проект, готово или удалить), <b>Просроченное</b> (взять сегодня, перенести, отменить), <b>Главное</b> (★ до трёх задач, которые сделают день удачным; ниже — предложения: следующие шаги ваших целей, близкие дедлайны, задачи спринта и с флажком), <b>Время</b> (хватит ли рабочих часов: время начала и оценка для каждой задачи, предупреждение о перегрузе; рабочие часы — в настройках) и <b>Готово</b>.",
+      "<b>План дня</b> — кнопка «☀ Спланировать день» в «Сегодня» (или адрес #daily). Пять коротких шагов: <b>Входящие</b> (для каждой задачи — сегодня, завтра, через неделю, когда-нибудь, в проект, готово или удалить), <b>Просроченное</b> (взять сегодня, перенести, отменить), <b>Главное</b> (★ до трёх задач, которые сделают день удачным; ниже — предложения: следующие шаги ваших целей, близкие дедлайны, задачи спринта и с флажком), <b>Время</b> (хватит ли часов: сумма оценок задач сравнивается с тем, сколько часов в день вы отдаёте задачам — число от 1 до 24 меняется прямо в шаге или в «Настройки» → «Общие» → «План дня»; у каждой задачи — время начала и оценка, предупреждение о перегрузе) и <b>Готово</b>.",
       "Главное дня видно вверху «Сегодня» и в виджете доски «Главное на сегодня».",
       "<b>Итоги дня</b> — «🌙 Итоги дня» в «Сегодня» (появляется вечером или после плана): сколько сделано, что с главным, что не успели (сразу перенести на завтра, через неделю или когда-нибудь), настроение дня и пара строк о том, как прошёл день.",
       "План, главное и итоги каждого дня сохраняются и синхронизируются."]));
