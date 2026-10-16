@@ -115,6 +115,13 @@ h2 .c { font: 500 12px var(--mono); color: var(--muted) }
 .tbar { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 12px 0 0; font-size: 13px; color: var(--muted) }
 .tbar label { display: inline-flex; gap: 6px; align-items: center }
 .tbar select { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; font-size: 13px }
+#fab { position: fixed; z-index: 46; right: 24px; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); width: 54px; height: 54px; border-radius: 50%; border: 0; background: var(--acc); color: #fff; font-size: 28px; line-height: 1; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.22); display: grid; place-items: center }
+#fab:hover { filter: brightness(1.08); transform: translateY(-1px) } #fab[hidden] { display: none }
+#view::after { content: ""; display: block; height: 80px }
+@media (min-width: 861px) { body.pnopen:not(.pnfull) #fab { right: calc(var(--pw, 440px) + 24px) } }
+.add.qfloat { position: fixed; z-index: 47; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); width: min(720px, calc(100vw - 32px)); margin: 0; box-shadow: 0 10px 30px rgba(0,0,0,.22); padding: 10px 12px 8px; border-color: var(--acc) }
+@media (min-width: 861px) { body.pnopen:not(.pnfull) .add.qfloat { left: calc((100vw - var(--pw, 440px)) / 2 + 120px) } }
+.add .qx { position: absolute; top: -12px; right: -10px; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer; font-size: 12px }
 .add { margin: 14px 0 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px }
 .add .r1 { display: flex; gap: 8px }
 .add input.t { flex: 1; min-width: 0; border: 0; background: none; padding: 7px 8px; outline: none; font-size: 15px }
@@ -2318,8 +2325,11 @@ CREATE TABLE inbox (
       '<span class="tlab">Сортировка <button type="button" class="ddb sm" data-a="vsel" data-k="sort">' + esc(SORTN[vo.sort.replace(/^-/, "")] || vo.sort) + '<span class="dda">▾</span></button></span><button type="button" class="ibtn rev' + (vo.sort.charAt(0) === "-" ? " on" : "") + '" data-a="vrev" title="Обратный порядок">⇅</button>' +
       (o.sub ? '<button type="button" class="lt' + (vo.sub ? " on" : "") + '" data-a="vsub" title="Показывать и задачи вложенных проектов"><span class="lbox"></span><span>с задачами подпроектов</span></button>' : "") + (o.secbtn ? '<button type="button" class="btn sm" data-a="addsec" title="Секция — этап или часть проекта">＋ Секция</button>' : "") + "</div>" + qfBar();
   }
+  // в списках — только круглая «＋» внизу справа; поле ввода всплывает по нажатию (или клавишей n)
+  var QOPEN = false, ADDOK = false;
   function addBox() {
-    return '<div class="add"><div class="r1"><input class="t" id="qa" type="text" autocomplete="off" placeholder="Новая задача — например: завтра 10:00 позвонить в банк #дела" value="' + esc(QPV) + '"><button class="btn mic" type="button" data-a="mic" data-for="qa" title="Сказать задачу голосом">🎤</button><button class="btn pri" type="button" data-a="add">Добавить</button></div>' +
+    ADDOK = true; if (!QOPEN) return "";
+    return '<div class="add qfloat"><button type="button" class="qx" data-a="qclose" title="Закрыть (Esc)" aria-label="Закрыть">✕</button><div class="r1"><input class="t" id="qa" type="text" autocomplete="off" placeholder="Новая задача — например: завтра 10:00 позвонить в банк #дела" value="' + esc(QPV) + '"><button class="btn mic" type="button" data-a="mic" data-for="qa" title="Сказать задачу голосом">🎤</button><button class="btn pri" type="button" data-a="add">Добавить</button></div>' +
       '<div class="pv" id="qpv"></div><div class="hint">Можно сразу: <code>сегодня</code> <code>завтра</code> <code>пт</code> <code>20.10</code> <code>в 18:30</code> · <code>#тег</code> · <code>+Проект</code> · <code>!1</code> приоритет · <code>!!</code> флажок · <code>каждый день</code></div></div>';
   }
 
@@ -3280,7 +3290,7 @@ CREATE TABLE inbox (
       tip("Любую страницу можно открыть с клавиатуры: Ctrl+K и начните печатать название."));
     h += sec("quick", "Быстрый ввод", "<p>Пишите задачу одной строкой — дата, время, тег, проект, приоритет, флажок и повтор распознаются сами, а строка под полем показывает, что поняло приложение. Задача попадает в открытый список: в проекте — в этот проект, на странице тега — с этим тегом, в «Сегодня» — на сегодня, в «Когда-нибудь» — туда же.</p>" +
       tbl(["Пишете", "Получается"], [["сегодня, завтра, послезавтра", "дата"], ["пн, вт … вс, в пятницу", "ближайший такой день"], ["20.10 или 20.10.2027", "дата"], ["в 18:30, 9:00, в 10", "время (если время сегодня уже прошло — завтра)"], ["через 30 минут, через 2 часа, через 3 дня, через неделю", "срок от текущего момента"], ["до пятницы, до 20.10, дедлайн завтра", "дедлайн — крайний срок отдельно от даты начала"], ["#дела", "тег (новый создастся сам)"], ["+Дом", "проект (если такого нет — будет создан)"], ["!1, !2, !3", "приоритет: срочно, важно, желательно"], ["!!", "первый флажок из вашего набора"], ["!!жёлтый", "флажок по названию"], ["каждый день, по будням, каждую неделю, каждый месяц, каждый год", "повтор"], ["каждые 3 дня, каждые 2 недели, каждый вторник, по пн и чт, каждое 15 число, в последний день месяца", "гибкий повтор"], ["… после выполнения", "следующий раз считается от дня, когда задача выполнена"]]) +
-      "<p>Пример: <code>завтра в 10 позвонить в банк #дела +Дом !1</code>. Клавиша <code>n</code> (без Ctrl) — сразу в поле новой задачи. 🎤 рядом с полем — сказать задачу голосом.</p>");
+      "<p>Пример: <code>завтра в 10 позвонить в банк #дела +Дом !1</code>. Новая задача — круглая кнопка <b>＋</b> в правом нижнем углу любого списка (или клавиша <code>n</code>): внизу появится поле ввода; Enter — добавить (поле остаётся для следующей задачи), Esc или ✕ — закрыть. 🎤 в поле — сказать задачу голосом.</p>");
     h += sec("mini", "Левая панель", ul([
       "<b>Свернуть блок</b> — нажмите на заголовок «Списки», «Проекты», «Фильтры», «Теги» или «Избранное»: блок свернётся в одну строку (▸), повторный клик — развернёт (▾). Запоминается на этом устройстве.",
       "<b>Переставить блоки</b> — потяните блок за заголовок выше или ниже другого. Пункты «Списков» тоже перетаскиваются. Исходный порядок — «Настройки» → «Общие» → «Вернуть исходный порядок».",
@@ -3641,7 +3651,11 @@ CREATE TABLE inbox (
       }
     }
   }
+  document.addEventListener("mousedown", function (e) { if (!QOPEN || !e.target.closest) return; if (e.target.closest(".qfloat, #fab, #ctx")) return; var i = $("qa"); if (i && !i.value.trim()) { QOPEN = false; setTimeout(render, 0); } });
+  function qOpen() { QOPEN = true; render(); var i = $("qa"); if (i) i.focus(); }
+  function qClose() { QOPEN = false; render(); }
   function renderInner() {
+    ADDOK = false;
     CC = null;
     $("side").innerHTML = sideHTML();
     var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
@@ -3650,6 +3664,8 @@ CREATE TABLE inbox (
     $("view").innerHTML = (V === "settings" || V === "help" ? "" : focusBar() + revBar()) + f();
     if (keepScroll !== null && $("cbody")) $("cbody").scrollTop = keepScroll; else calAfterRender();
     if (V === "gantt") gAfter();
+    var fab = $("fab"); if (!fab) { fab = document.createElement("button"); fab.id = "fab"; fab.type = "button"; fab.title = "Новая задача (клавиша n)"; fab.setAttribute("aria-label", "Новая задача"); fab.textContent = "＋"; fab.addEventListener("click", qOpen); document.body.appendChild(fab); }
+    fab.hidden = !ADDOK || QOPEN;
     bulkBar();
     var n = todayList().length; document.title = (n ? "(" + n + ") " : "") + "Задачи";
     updPreview();
@@ -3947,6 +3963,7 @@ CREATE TABLE inbox (
     if (el.closest(".nav") && a) e.preventDefault();
     switch (a) {
       case "add": addQuick(); return;
+      case "qclose": qClose(); return;
       case "toggle": if (t) toggle(t); return;
       case "edit": if (selClick(e, t.id)) return; if (OPEN === t.id) closeTask(); else openTask(t.id); return;
       case "del": del(t); return;
@@ -4150,6 +4167,7 @@ CREATE TABLE inbox (
     var tg = e.target;
     if (tg.matches && tg.matches("input.rn")) { if (e.key === "Enter") { e.preventDefault(); commitRename(tg); } else if (e.key === "Escape") { RN = null; render(); } return; }
     if (tg.id === "qa" && e.key === "Enter") { e.preventDefault(); addQuick(); return; }
+    if (tg.id === "qa" && e.key === "Escape") { e.preventDefault(); QPV = ""; qClose(); return; }
     if (tg.id === "subin") { if (e.key === "Enter") { e.preventDefault(); if (tg.value.trim()) { newTaskFrom(tg.value.trim(), { parent: tg.dataset.sub }); save(); render(); } } else if (e.key === "Escape") { SUB = null; render(); } return; }
     if (e.key === "Escape" && !SL && OPEN && (!tg.closest || !tg.closest("#fmt"))) { closeTask(); return; }
     if (e.key === "Escape" && (POP || SUB)) { POP = null; SUB = null; render(); return; }
@@ -4157,7 +4175,7 @@ CREATE TABLE inbox (
     if (e.key === "Escape" && selClear()) return;
     if ((e.ctrlKey || e.metaKey) && e.code === "KeyA" && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName) && !tg.isContentEditable && document.querySelector("#view li.task, #view .kcard")) { e.preventDefault(); [].forEach.call(document.querySelectorAll("#view li.task, #view .kcard"), function (x) { SELS[x.dataset.id] = 1; }); render(); return; }
     if ((e.key === "Delete" || e.key === "Backspace") && selIds().length > 1 && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName) && !tg.isContentEditable) { e.preventDefault(); var db = $("bulk").querySelector('[data-bk="del"]'); if (db) db.click(); return; }
-    if (e.key === "n" && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName) && !tg.isContentEditable && !e.ctrlKey && !e.metaKey && !e.altKey) { var i = $("qa"); if (i) { e.preventDefault(); i.focus(); } }
+    if (e.key === "n" && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName) && !tg.isContentEditable && !e.ctrlKey && !e.metaKey && !e.altKey && ADDOK) { e.preventDefault(); qOpen(); }
   });
   document.addEventListener("focusout", function (e) { if (e.target.matches && e.target.matches("input.rn") && RN) commitRename(e.target); });
   document.addEventListener("input", function (e) {
