@@ -4567,7 +4567,7 @@ CREATE TABLE inbox (
     FMTR = s.getRangeAt(0).cloneRange();
     if (f.hidden || !f.querySelector("input")) f.innerHTML = [["bold", "<b>Ж</b>", "Жирный (Ctrl+B)"], ["italic", "<i>К</i>", "Курсив (Ctrl+I)"], ["underline", "<u>Ч</u>", "Подчёркнутый (Ctrl+U)"], ["strikeThrough", "<s>З</s>", "Зачёркнутый"], ["code", "&lt;/&gt;", "Код"], ["mark", '<mark style="background:#fff0a3;padding:0 3px">М</mark>', "Маркер"], ["link", "🔗", "Ссылка (Ctrl+K)"], ["clear", "⌫", "Убрать оформление"]].map(function (b) { return '<button type="button" data-fmt="' + b[0] + '" title="' + b[2] + '">' + b[1] + "</button>"; }).join("");
     f.hidden = false;
-    var rc = FMTR.getBoundingClientRect(), top = rc.top - f.offsetHeight - 8; if (top < 60) top = rc.bottom + 8;
+    var rc = FMTR.getBoundingClientRect(), top = rc.bottom + 10; if (top + f.offsetHeight > innerHeight - 8) top = Math.max(60, rc.top - f.offsetHeight - 8); // под выделением: сверху браузеры (например, Яндекс) показывают свои кнопки
     f.style.top = top + "px"; f.style.left = Math.max(8, Math.min(rc.left + rc.width / 2 - f.offsetWidth / 2, innerWidth - f.offsetWidth - 8)) + "px";
   }
   function wrapInline(tag) {
