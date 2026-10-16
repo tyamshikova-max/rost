@@ -4841,6 +4841,14 @@ CREATE TABLE inbox (
   }
   function noteToBody(s) { return String(s || "").split(/\n\s*\n/).filter(function (x) { return x.trim(); }).map(function (x) { return "<p>" + esc(x).replace(/\n/g, "<br>") + "</p>"; }).join(""); }
   function openTask(id) { flushBody(); CED = null; OPEN = id; SUB = null; renderPanel(); render(); var pt = $("pn-t"); if (pt && !task(id).t) pt.focus(); }
+  // клик мимо открытой карточки задачи закрывает её (если этим кликом не открыли другую задачу)
+  var OCL = null;
+  var OCL_KEEP = "#panel, #ctx, #ctx2, #slash, #fmt, #pal, #toast, #errbar, #bulk, #pomo, #tagdd, #bh, #diagbox, #fab, #gtip, #ttw, .pop, .add.qfloat, .top, #syncBtn";
+  document.addEventListener("pointerdown", function (e) { OCL = OPEN && !$("panel").hidden && !(e.target.closest && e.target.closest(OCL_KEEP)) && e.button === 0 ? OPEN : null; }, true);
+  document.addEventListener("click", function (e) {
+    var was = OCL; OCL = null; if (!was || (e.target.closest && e.target.closest(OCL_KEEP))) return;
+    setTimeout(function () { if (OPEN === was && !$("panel").hidden && !document.body.classList.contains("pnfull") && $("ctx").hidden && $("pal").hidden) closeTask(); }, 0);
+  });
   function closeTask() { if (/^#task-/.test(location.hash)) try { history.replaceState(null, "", "#" + V + (ARG ? "-" + ARG : "")); } catch (er) { /* ok */ } flushBody(); OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); slashClose(); fmtHide(); render(); }
   // ширина панели задачи: тянуть за левый край; запоминается на устройстве
   function setPW(w) { w = Math.round(Math.max(380, Math.min(w, innerWidth - 80))); document.documentElement.style.setProperty("--pw", w + "px"); return w; }
