@@ -804,10 +804,10 @@ html.nosheet .dptopbox { background: color-mix(in srgb, var(--star) 10%, transpa
 .gico { display: inline-flex; margin-right: 6px; vertical-align: -2px } .gico .mico { width: 16px; height: 16px }
 .arn .mico, .glab .mico { width: 16px; height: 16px }
 /* справка по вкладкам */
-.stnav .hq { margin-bottom: 8px; width: 100% }
+.stnav .hsrch { margin-bottom: 8px; width: 100%; height: auto; border-radius: 8px }
 .stbody.help { display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px 22px 16px; max-width: 860px }
 .stbody.help > h2:first-child { margin-top: 14px }
-@media (max-width: 760px) { .stnav .hq { flex: 0 0 180px; margin: 0 } .stbody.help { padding: 2px 14px 12px } }
+@media (max-width: 760px) { .stnav .hsrch { flex: 0 0 180px; margin: 0 } .stbody.help { padding: 2px 14px 12px } }
 /* фокус, проверка, быстрый фильтр */
 .modebar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 8px 12px; border-radius: 10px; margin: 0 0 12px; font-size: calc(13.5px * var(--fs)) }
 .modebar .r { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap }
@@ -911,6 +911,8 @@ body.mini .side .lab .lq { display: none }
 .tbar .lt { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; font: inherit; font-size: calc(13px * var(--fs)); color: var(--fg); cursor: pointer; padding: 3px 4px; border-radius: 6px } .tbar .lt:hover { background: var(--hover) }
 .tbar .lbox { width: 15px; height: 15px; border: 2px solid var(--muted); border-radius: 4px; display: grid; place-items: center; box-sizing: border-box } .tbar .lt.on .lbox { background: var(--acc); border-color: var(--acc) } .tbar .lt.on .lbox::after { content: ""; width: 6px; height: 3px; border: 2px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px) }
 .htoc { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 4px } .htoc a { font-size: calc(13px * var(--fs)); padding: 3px 10px; border-radius: 14px; background: var(--side); color: var(--fg); text-decoration: none } .htoc a:hover { background: var(--acc-soft); color: var(--acc) }
+.hcourse { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 0 0 14px; border: 1px solid color-mix(in srgb, var(--acc) 35%, var(--line)); border-radius: 12px; background: var(--acc-soft); color: var(--fg); text-decoration: none; max-width: 760px }
+.hcourse:hover { border-color: var(--acc) } .hcourse .hci { font-size: calc(26px * var(--fs)) } .hcourse b { display: block } .hcourse small { color: var(--muted); font-size: calc(12.5px * var(--fs)) } .hcourse .hcd { margin-left: auto; flex: none; background: var(--acc); color: #fff; border-radius: 8px; padding: 6px 14px; font-weight: 600; font-size: calc(13px * var(--fs)) }
 .htip { background: var(--acc-soft); border-radius: 8px; padding: 8px 12px; font-size: calc(14px * var(--fs)) }
 /* пункты «Списков» — переключатели */
 .lchk .lt { display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 5px 4px; border-radius: 6px; font: inherit; font-size: calc(14px * var(--fs)); color: var(--fg); cursor: pointer; text-align: left }
@@ -2084,7 +2086,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-51";
+  var APPV = "zd-app-2026-10-16-53";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -4909,9 +4911,9 @@ CREATE TABLE inbox (
       // разделы, которые ещё не разложены по вкладкам, — в «С чего начать»
       if (cur === "start") order.forEach(function (id) { if (!HTABS.some(function (x) { return x[3].indexOf(id) >= 0; })) html += by[id]; });
     }
-    return auxHead("Справка") + '<div class="stabs"><nav class="stnav" aria-label="Разделы справки"><input type="search" id="helpq" class="inp hq" placeholder="Поиск по справке" value="' + esc(HQ) + '" autocomplete="off">' +
+    return auxHead("Справка") + '<div class="stabs"><nav class="stnav" aria-label="Разделы справки"><input type="search" id="helpq" class="inp hsrch" placeholder="Поиск по справке" value="' + esc(HQ) + '" autocomplete="off">' +
       HTABS.map(function (x) { return '<a href="#help-' + x[0] + '" class="' + (!q && cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") +
-      '</nav><div class="stbody help">' + html + '<p class="foot">© ' + new Date().getFullYear() + " ytv · Задачи</p></div></div>";
+      '</nav><div class="stbody help"><a class="hcourse" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf"><span class="hci">📘</span><span><b>Учебный курс «Задачи»</b><small>18 уроков с картинками, практикой и вопросами · PDF, 65 страниц, 6 МБ</small></span><span class="hcd">Скачать</span></a>' + html + '<p class="foot">© ' + new Date().getFullYear() + " ytv · Задачи</p></div></div>";
   }
   function codeBox(id, title) { var el = $(id); return '<div class="codebox"><div class="h"><b>' + title + '</b><button class="btn sm" type="button" data-copy="' + id + '">Скопировать</button></div><pre>' + esc(el ? el.textContent.trim() : "") + "</pre></div>"; }
   function vHelp() {
