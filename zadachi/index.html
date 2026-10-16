@@ -1798,6 +1798,7 @@ CREATE TABLE inbox (
     run: function () {
       if (!SYNC.enabled()) { SYNC.show(); return Promise.resolve(); }
       if (SYNC.busy) { SYNC.later(); return Promise.resolve(); }
+      if (typeof DecompressionStream === "undefined" || typeof CompressionStream === "undefined") { SYNC.fail({ msg: "этот браузер слишком старый для синхронизации — обновите его (нужен Chrome 80+, Яндекс Браузер последней версии или Safari 16.4+)" }); return Promise.resolve(); }
       SYNC.busy = true; SYNC.st = "busy"; SYNC.show();
       return SYNC.read().then(function (remote) {
         var before = JSON.stringify(LISTS.map(function (k) { return S[k]; }));
