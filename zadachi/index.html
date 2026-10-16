@@ -418,6 +418,12 @@ html.glass .inp, html.glass input[type="text"], html.glass input[type="search"],
 .lkcr { display: flex; align-items: center; gap: 12px; flex-wrap: wrap } .lkcr .lbl { min-width: 190px; margin: 0; display: grid } .lkcr .lbl small { color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; font-size: calc(11.5px * var(--fs)) }
 .lkcol { width: 44px; height: 32px; border: 1px solid var(--line); border-radius: 8px; padding: 2px; background: var(--solid, var(--panel)); cursor: pointer }
 .lkacc .lkauto { display: grid; place-items: center; font-size: calc(15px * var(--fs)); color: var(--muted); background: var(--hover) !important }
+/* аналитика времени */
+.sttabs { margin-right: 10px } .esttbl td a { color: var(--fg); text-decoration: none } .esttbl td a:hover { color: var(--acc) } .okc { color: var(--ok) } td.late { color: var(--warn) }
+.heatw { display: grid; gap: 2px; min-width: 520px; max-width: 900px } .heatw i { height: 18px; border-radius: 3px; background: var(--acc) } .heatw .hx, .heatw .hy { font-size: calc(11px * var(--fs)); color: var(--muted) } .heatw .hx { text-align: center }
+.heatw i.z { background: var(--hover) }
+.hbar a { color: var(--fg); text-decoration: none } .hbar a:hover { color: var(--acc) }
+.hbar.wide { grid-template-columns: minmax(0, 170px) minmax(0, 1fr) auto } .hbar.wide b { white-space: nowrap }
 /* групповой выбор */
 .selbox { width: 20px; height: 20px; flex: none; border: 2px solid var(--muted); border-radius: 5px; background: var(--panel); cursor: pointer; padding: 0; display: grid; place-items: center; color: #fff; font-size: 12px; font-weight: 700; margin: 0 2px }
 .selbox.on { background: var(--acc); border-color: var(--acc) } body.selmode li.task.sel > .bd { background: var(--acc-soft); border-radius: 8px }
@@ -1938,7 +1944,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-37";
+  var APPV = "zd-app-2026-10-16-38";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -3887,6 +3893,7 @@ CREATE TABLE inbox (
     count: { n: "Число", i: "#", sec: "Статистика", sz: "s", d: "Сколько задач: открытых, просроченных, на сегодня или выполненных за 7/30 дней." },
     chart: { n: "График выполненного", i: "📊", sec: "Статистика", sz: "w", d: "Выполненные задачи по дням." },
     quick: { n: "Быстрый ввод", i: "＋", sec: "Инструменты", sz: "m", d: "Поле для новой задачи — сразу в нужный список или проект." },
+    time: { n: "Время по проектам", i: "⏱", sec: "Статистика", sz: "m", d: "Сколько часов фокуса ушло на каждый проект за 7 или 30 дней." },
     goals: { n: "Цели", i: "🎯", sec: "Цели", sz: "m", d: "Прогресс целей: все активные или одна выбранная." },
     daytop: { n: "Главное на сегодня", i: "★", sec: "Задачи", sz: "m", d: "Три главные задачи дня из плана и кнопки «План дня» и «Итоги»." },
     sticky: { n: "Стикер", i: "🗒", sec: "Инструменты", sz: "s", d: "Свободный текст: цель недели, мысль, напоминание себе." },
@@ -3960,6 +3967,7 @@ CREATE TABLE inbox (
     if (w.type === "sprint") return "Спринт · " + spName({ start: monday(Date.now()) });
     if (w.type === "countdown") return c.label || "Обратный отсчёт";
     if (w.type === "goals") return c.gid && goal(c.gid) ? goal(c.gid).n : "Цели";
+    if (w.type === "time") return "Время за " + (c.days || 7) + " дн.";
     if (w.type === "daytop") return "Главное на сегодня";
     return (WT[w.type] || {}).n || "Виджет";
   }
@@ -3969,7 +3977,7 @@ CREATE TABLE inbox (
     if (w.type === "proj" && proj(c.pid)) return "proj-" + c.pid;
     if (w.type === "note" && note(c.nid)) return "note-" + c.nid;
     if (w.type === "habits") return "habits"; if (w.type === "chart") return "stats"; if (w.type === "dead") return "plans";
-    if (w.type === "cal") return "cal"; if (w.type === "sprint") return "sprint"; if (w.type === "goals") return c.gid ? "goal-" + c.gid : "goals"; if (w.type === "daytop") return "daily"; if (w.type === "kanban" && c.src && c.src !== "list:all") return wsrcHref(c.src);
+    if (w.type === "cal") return "cal"; if (w.type === "sprint") return "sprint"; if (w.type === "goals") return c.gid ? "goal-" + c.gid : "goals"; if (w.type === "time") return "stats"; if (w.type === "daytop") return "daily"; if (w.type === "kanban" && c.src && c.src !== "list:all") return wsrcHref(c.src);
     return "";
   }
   function dleft(ms) { var d = Math.round((sod(ms) - today0()) / DAY); return d < 0 ? { t: "просрочено " + -d + " дн.", c: "late" } : d === 0 ? { t: "сегодня", c: "late" } : d === 1 ? { t: "завтра", c: "soon" } : { t: "через " + d + " " + plural(d, ["день", "дня", "дней"]), c: d <= 3 ? "soon" : "" }; }
@@ -4058,6 +4066,12 @@ CREATE TABLE inbox (
         if (POMO) { var ptk = task(POMO.tid); return '<div class="wpo ' + POMO.phase + '"><div class="wpt">' + pomoTxt() + '</div><div class="wpn">' + (POMO.phase === "work" ? (ptk ? '<a href="#task-' + ptk.id + '">' + esc(ptk.t) + "</a>" : "Задача") : "Перерыв ☕") + '</div><div class="r"><button type="button" class="btn sm" data-a="wpomo" data-x="pause">' + (POMO.paused ? "▶ Продолжить" : "⏸ Пауза") + '</button><button type="button" class="btn sm" data-a="wpomo" data-x="stop">■ Стоп</button></div></div>' + pstat; }
         var ptl = todayList().filter(function (t) { return !t.parent; }).sort(cmpBy("smart")).slice(0, 6);
         return pstat + (ptl.length ? '<div class="wpl">' + ptl.map(function (t) { return '<button type="button" data-a="wpomo" data-x="start" data-t="' + t.id + '" title="25 минут на эту задачу"><span>▶</span>' + esc(t.t) + "</button>"; }).join("") + "</div>" : '<p class="wempty">На сегодня задач нет — помидор запускается и из карточки задачи (⏱)</p>');
+      case "time":
+        var tdd = +c.days || 7, tss = focusSessions(addDays(today0(), -tdd + 1), today0() + DAY), ttot = tss.reduce(function (a, x) { return a + x.m; }, 0), tbp = {};
+        tss.forEach(function (x) { var tt2 = taskAnyId(x.t), rp = tt2 && tt2.pid ? rootProj(tt2.pid) : null, kk = rp ? rp.id : ""; tbp[kk] = (tbp[kk] || 0) + x.m; });
+        if (!ttot) return '<p class="wempty">Засечённого времени за ' + tdd + " дн. нет — засекайте ⏲ или 🍅</p>";
+        var tl3 = Object.keys(tbp).map(function (k) { var p = proj(k); return { l: p ? picon(p) + " " + p.n : "📥 Без проекта", v: tbp[k], c: p ? col(p.c) : "var(--muted)" }; }).sort(function (a, b) { return b.v - a.v; }).slice(0, 6);
+        return '<div class="wnum" style="font-size:calc(30px * var(--fs))">' + hfmt(ttot) + '</div><div class="wsub">фокуса за ' + tdd + " дн. · в среднем " + hfmt(ttot / tdd) + " в день</div>" + tl3.map(function (x) { return '<div class="hbar wide"><span>' + esc(x.l) + '</span><i style="width:' + Math.round(x.v / tl3[0].v * 100) + "%;background:" + x.c + '"></i><b>' + hfmt(x.v) + "</b></div>"; }).join("");
       case "goals":
         var gl2 = c.gid ? [goal(c.gid)].filter(Boolean) : goals().filter(function (g) { return (g.st || "active") === "active"; });
         if (!gl2.length) return '<p class="wempty">Целей пока нет — <a href="#goals">поставить цель</a></p>';
@@ -4090,6 +4104,7 @@ CREATE TABLE inbox (
     if (w.type === "quick") h += row("Куда добавлять", dd("wsrc", sl("list:inbox")));
     if (w.type === "cal") h += row("Откуда", dd("wsrc", sl("list:all"))) + row("Дней вперёд", seg("days", [[3, "3"], [7, "7"], [14, "14"]], c.days || 7));
     if (w.type === "kanban") h += row("Откуда", dd("wsrc", sl("list:all")));
+    if (w.type === "time") h += row("Период", seg("days", [[7, "7 дн."], [30, "30 дн."]], c.days || 7));
     if (w.type === "goals") h += row("Какие цели", dd("wgoal", c.gid && goal(c.gid) ? goal(c.gid).n : "все активные"));
     if (w.type === "countdown") h += row("До чего", '<input type="text" class="inp" data-wf2="label" data-w="' + w.id + '" value="' + esc(c.label || "") + '" placeholder="Отпуск, экзамен, сдача проекта">') + row("Дата", '<input type="date" class="inp" data-wf2="date" data-w="' + w.id + '" value="' + esc(c.date || "") + '">');
     if (w.type === "links") h += row("Ссылки", '<textarea class="inp" rows="5" data-wf2="links" data-w="' + w.id + '" placeholder="Курс Харина | https://example.ru/kurs&#10;Яндекс Диск | disk.yandex.ru">' + esc(c.links || "") + '</textarea><div class="wsub">По одной в строке: «Название | адрес» или просто адрес.</div>');
@@ -4393,6 +4408,68 @@ CREATE TABLE inbox (
     touch(x); save(); render();
   });
 
+  /* ---------- аналитика времени: куда уходят часы, точность оценок, продуктивные часы ---------- */
+  var STTAB = LS.get("zd-sttab") || "ov";
+  function hfmt(min) { var h = min / 60; return h >= 10 ? Math.round(h) + " ч" : fmtH(Math.round(h * 10) / 10) + " ч"; }
+  function taskAnyId(id) { return S.tasks.filter(function (x) { return x.id === id; })[0] || null; }
+  // сессии фокуса за период: засечённое время и помидоры; у каждой — начало, минуты, задача
+  function focusSessions(from, to) {
+    return live(S.acts).filter(function (a) { return (a.k === "time" || a.k === "pomo") && a.d >= from && a.d < to; }).map(function (a) { var m = +a.m || (a.k === "pomo" ? 25 : 0); return { k: a.k, end: a.d, start: a.d - m * 60000, m: m, t: a.t }; });
+  }
+  function rootProj(pid) { var p = proj(pid); if (!p) return null; var pa = ppath(p); return pa[0] || p; }
+  // фактическое время задачи: засечённое, а если не засекали — помидоры
+  function taskActual(t) { return t.tt ? t.tt / 3600000 : t.pomo ? t.pomo * 25 / 60 : 0; }
+  function vTime(days) {
+    var t0 = today0(), from = addDays(t0, -days + 1), to = t0 + DAY, ss = focusSessions(from, to);
+    var tot = ss.reduce(function (a, x) { return a + x.m; }, 0), trk = ss.filter(function (x) { return x.k === "time"; }).reduce(function (a, x) { return a + x.m; }, 0), pom = tot - trk;
+    var byDay = {}; ss.forEach(function (x) { var k = dKey(x.end); byDay[k] = (byDay[k] || 0) + x.m; });
+    var bestK = Object.keys(byDay).sort(function (a, b) { return byDay[b] - byDay[a]; })[0], workDays = Object.keys(byDay).length;
+    var h = "";
+    function card(v, l, s2) { return '<div class="stc"><b>' + v + "</b><span>" + l + "</span>" + (s2 ? "<small>" + s2 + "</small>" : "") + "</div>"; }
+    h += '<div class="stgrid">' + card(hfmt(tot), "фокуса за " + days + " дн.", "засечено " + hfmt(trk) + " · помидоры " + hfmt(pom)) + card(hfmt(tot / days), "в среднем в день", workDays ? "в дни с работой — " + hfmt(tot / workDays) : "") + card(workDays, plural(workDays, ["день", "дня", "дней"]) + " с фокусом", "из " + days) + card(bestK ? hfmt(byDay[bestK]) : "—", "самый долгий день", bestK ? dayName(new Date(bestK + "T00:00").getTime()) : "") + "</div>";
+    if (!tot) h += '<p class="htip">💡 Пока нет засечённого времени за этот период. Засекайте время ⏲ в карточке задачи или запускайте помидоры 🍅 — и здесь появится, куда уходят часы.</p>';
+    // по дням
+    var per = []; for (var i = 0; i < days; i++) { var d = addDays(from, i), k2 = dKey(d); per.push({ l: days <= 14 ? WDS[new Date(d).getDay()] : String(new Date(d).getDate()), title: dayName(d) + " — " + hfmt(byDay[k2] || 0), v: Math.round((byDay[k2] || 0) / 6) / 10 }); }
+    h += "<h2>Часы фокуса по дням</h2>" + barsSVG(per);
+    // по проектам (верхнего уровня) и целям
+    var byP = {}, byG = {}; ss.forEach(function (x) { var t = taskAnyId(x.t), rp = t && t.pid ? rootProj(t.pid) : null, k = rp ? rp.id : ""; byP[k] = (byP[k] || 0) + x.m; if (t) { goals().forEach(function (g) { if (t.goal === g.id || (t.pid && goalPids(g).indexOf(t.pid) >= 0)) byG[g.id] = (byG[g.id] || 0) + x.m; }); } });
+    var pr = Object.keys(byP).map(function (k) { var p = proj(k); return { l: p ? picon(p) + " " + p.n : "📥 Без проекта", v: byP[k], c: p ? col(p.c) : "var(--muted)", href: p ? "#proj-" + p.id : "" }; }).sort(function (a, b) { return b.v - a.v; });
+    var gr = Object.keys(byG).map(function (k) { var g = goal(k); return { l: (g.ic || "🎯") + " " + g.n, v: byG[k], c: col(g.c || 0), href: "#goal-" + g.id }; }).sort(function (a, b) { return b.v - a.v; });
+    var bars = function (l) { var mx = l.length ? l[0].v : 1; return l.map(function (x) { return '<div class="hbar wide"><span>' + (x.href ? '<a href="' + x.href + '">' + esc(x.l) + "</a>" : esc(x.l)) + '</span><i style="width:' + Math.round(x.v / mx * 100) + "%;background:" + x.c + '"></i><b>' + hfmt(x.v) + " · " + Math.round(x.v / tot * 100) + "%</b></div>"; }).join(""); };
+    h += '<div class="st2"><div><h2>По проектам</h2>' + (pr.length ? bars(pr) : '<p class="muted">Нет данных.</p>') + '</div><div><h2>По целям</h2>' + (gr.length ? bars(gr) : '<p class="muted">Время по задачам целей появится здесь.</p>') + "</div></div>";
+    // точность оценок: задачи с оценкой и фактическим временем
+    var est = live(S.tasks).filter(function (t) { return +t.est > 0 && taskActual(t) > 0 && t.done && !t.canc && (t.dt || 0) >= from; }).map(function (t) { var a = taskActual(t); return { t: t, e: +t.est, a: a, r: a / +t.est }; });
+    h += "<h2>Точность оценок</h2>";
+    if (est.length) {
+      var se = est.reduce(function (a, x) { return a + x.e; }, 0), sa = est.reduce(function (a, x) { return a + x.a; }, 0), k = sa / se;
+      var ok = est.filter(function (x) { return x.r >= .8 && x.r <= 1.2; }).length, longer = est.filter(function (x) { return x.r > 1.2; }).length, faster = est.filter(function (x) { return x.r < .8; }).length;
+      h += '<div class="stgrid">' + card("×" + fmtN(Math.round(k * 100) / 100), "факт к оценке", k > 1.15 ? "задачи занимают больше, чем кажется" : k < .85 ? "вы обычно управляетесь быстрее" : "оценки точные") + card(ok, "в пределах ±20 %", "из " + est.length) + card(longer, "дольше оценки", "") + card(faster, "быстрее оценки", "") + "</div>";
+      h += '<p class="htip">💡 ' + (k > 1.15 ? "Совет: умножайте свои оценки примерно на " + fmtN(Math.round(k * 10) / 10) + " — так план дня и спринта будут реалистичнее." : k < .85 ? "Можно смело закладывать меньше времени — вы стабильно укладываетесь быстрее." : "Оценки близки к реальности — так держать.") + "</p>";
+      h += '<div class="tscroll"><table class="esttbl"><tr><th>Задача</th><th>Оценка</th><th>Ушло</th><th>Разница</th></tr>' + est.sort(function (a, b) { return Math.abs(Math.log(b.r)) - Math.abs(Math.log(a.r)); }).slice(0, 12).map(function (x) { var d = Math.round((x.r - 1) * 100); return '<tr><td><a href="#task-' + x.t.id + '">' + esc(x.t.t) + "</a></td><td>" + fmtH(x.e) + " ч</td><td>" + fmtH(Math.round(x.a * 10) / 10) + ' ч</td><td class="' + (d > 20 ? "late" : d < -20 ? "okc" : "") + '">' + (d > 0 ? "+" : "") + d + " %</td></tr>"; }).join("") + "</table></div>";
+    } else h += '<p class="muted">Нужны выполненные за период задачи, у которых есть и оценка в часах, и засечённое время (или помидоры). Поставьте оценку в карточке задачи или в плане дня, засекайте время — и после выполнения задачи здесь появится сравнение.</p>';
+    // продуктивные часы: неделя × часы суток
+    var grid = []; for (var w = 0; w < 7; w++) { grid.push([]); for (var hh = 0; hh < 24; hh++) grid[w].push(0); }
+    ss.forEach(function (x) { var c = x.start; while (c < x.end) { var dt = new Date(c), nx = Math.min(x.end, new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), dt.getHours() + 1).getTime()); grid[(dt.getDay() + 6) % 7][dt.getHours()] += (nx - c) / 60000; c = nx; } });
+    var ev = doneEvents().filter(function (e) { return e.d >= from; }), dn = []; for (var w2 = 0; w2 < 7; w2++) { dn.push([]); for (var h2 = 0; h2 < 24; h2++) dn[w2].push(0); }
+    ev.forEach(function (e) { var dt = new Date(e.d); dn[(dt.getDay() + 6) % 7][dt.getHours()]++; });
+    var score = grid.map(function (row, w) { return row.map(function (m, hh) { return m + dn[w][hh] * 20; }); }), mx = 0; score.forEach(function (r) { r.forEach(function (v) { if (v > mx) mx = v; }); });
+    var hFrom = 6, hTo = 23; score.forEach(function (r) { r.forEach(function (v, hh) { if (v && hh < hFrom) hFrom = hh; if (v && hh > hTo) hTo = hh; }); });
+    h += '<h2>Когда вы продуктивнее</h2><p class="muted" style="margin:0 0 6px">Чем темнее клетка — тем больше минут фокуса и выполненных задач в этот час этого дня недели.</p>';
+    if (mx) {
+      h += '<div class="tscroll"><div class="heatw" style="grid-template-columns: 34px repeat(' + (hTo - hFrom + 1) + ', minmax(16px, 1fr))"><span></span>';
+      for (var x2 = hFrom; x2 <= hTo; x2++) h += '<span class="hx">' + (x2 % 3 === 0 ? x2 : "") + "</span>";
+      ["пн", "вт", "ср", "чт", "пт", "сб", "вс"].forEach(function (wn, w) { h += '<span class="hy">' + wn + "</span>"; for (var x3 = hFrom; x3 <= hTo; x3++) { var v = score[w][x3]; h += '<i' + (v ? ' style="opacity:' + (.15 + .85 * v / mx).toFixed(2) + '"' : ' class="z"') + ' title="' + wn + ", " + x3 + ":00–" + (x3 + 1) + ":00 · фокус " + Math.round(grid[w][x3]) + " мин, выполнено " + dn[w][x3] + '"></i>'; } });
+      h += "</div></div>";
+      var bw = score.map(function (r) { return r.reduce(function (a, v) { return a + v; }, 0); }), bh = []; for (var x4 = 0; x4 < 24; x4++) bh.push(score.reduce(function (a, r) { return a + r[x4]; }, 0));
+      var wBest = bw.indexOf(Math.max.apply(null, bw)), hBest = bh.indexOf(Math.max.apply(null, bh)), wn2 = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"];
+      var h2s = 0, h2b = 0; for (var x5 = 0; x5 < 23; x5++) if (bh[x5] + bh[x5 + 1] > h2s) { h2s = bh[x5] + bh[x5 + 1]; h2b = x5; }
+      h += '<p class="htip">💡 Самое продуктивное время — <b>' + h2b + ":00–" + (h2b + 2) + ":00</b>, самый продуктивный день — <b>" + wn2[wBest] + "</b>. Ставьте на это время самые трудные задачи (★ главное в плане дня).</p>";
+    } else h += '<p class="muted">Появится, когда будет засечённое время или выполненные задачи за период.</p>';
+    var doneP = ev.map(function (e) { return taskAnyId(e.t); }).filter(Boolean), noT = doneP.filter(function (t) { return !t.tt && !t.pomo; }).length;
+    if (doneP.length && noT) h += '<p class="muted">Из ' + doneP.length + " выполненных за период задач у " + noT + " время не засекалось — засекайте ⏲ или 🍅, чтобы аналитика была точнее.</p>";
+    return h;
+  }
+
   /* ---------- статистика ---------- */
   function doneEvents() {
     var ev = live(S.acts).filter(function (a) { return a.k === "done"; }).map(function (a) { return { t: a.t, d: a.d }; }), seen = {};
@@ -4421,7 +4498,8 @@ CREATE TABLE inbox (
     var hl = habits().filter(function (h) { return !h.arch; }), hr = hl.length ? Math.round(hl.reduce(function (a, h) { return a + hRate(h, days); }, 0) / hl.length) : null;
     var trk = live(S.acts).filter(function (a) { return a.k === "time" && a.d >= from; }).reduce(function (a, x) { return a + (+x.m || 0); }, 0);
     var h = head("Статистика", "Сколько вы успеваете: выполненные задачи (и повторяющиеся тоже), помидоры, привычки.");
-    h += '<div class="tbar"><div class="seg">' + [7, 30, 90].map(function (n) { return '<button type="button" data-a="stdays" data-x="' + n + '" class="' + (days === n ? "on" : "") + '">' + n + " дней</button>"; }).join("") + "</div></div>";
+    h += '<div class="tbar"><div class="seg sttabs"><button type="button" data-a="sttab" data-x="ov" class="' + (STTAB !== "time" ? "on" : "") + '">📊 Обзор</button><button type="button" data-a="sttab" data-x="time" class="' + (STTAB === "time" ? "on" : "") + '">⏱ Время</button></div><div class="seg">' + [7, 30, 90].map(function (n) { return '<button type="button" data-a="stdays" data-x="' + n + '" class="' + (days === n ? "on" : "") + '">' + n + " дней</button>"; }).join("") + "</div></div>";
+    if (STTAB === "time") return h + vTime(days);
     function card(v, l, s2) { return '<div class="stc"><b>' + v + "</b><span>" + l + "</span>" + (s2 ? '<small>' + s2 + "</small>" : "") + "</div>"; }
     h += '<div class="stgrid">' + card(ev.length, "выполнено", "в среднем " + String(Math.round(ev.length / days * 10) / 10).replace(".", ",") + " в день") + card(created, "создано", "за " + days + " дней") + card(cs + " " + plural(cs, ["день", "дня", "дней"]), "серия подряд", "лучшая: " + best) + card(pom.length, "помидоров", Math.round(pom.length * 25 / 60 * 10) / 10 + " ч фокуса") + card(open, "открыто сейчас", late ? '<span class="warnc">просрочено: ' + late + "</span>" : "просроченных нет") + (hr !== null ? card(hr + " %", "привычки выполнены", hl.length + " " + plural(hl.length, ["привычка", "привычки", "привычек"])) : "") + "</div>";
     if (trk) h += '<p class="muted" style="margin:6px 0 0">⏲ Учтено времени по задачам за период: <b>' + ttFmt(trk * 60000) + "</b></p>";
@@ -4513,7 +4591,7 @@ CREATE TABLE inbox (
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
   }
   // справка по вкладкам, как настройки; поиск ищет по всем разделам сразу
-  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "trash"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "now", "journal", "goals", "sprint", "habits", "pomo", "stats"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
+  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "trash"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
   var HQ = "";
   function htabOf(a) { if (HTABS.some(function (x) { return x[0] === a; })) return a; var f = HTABS.filter(function (x) { return x[3].indexOf(a) >= 0; })[0]; return f ? f[0] : "start"; }
   function vHelpTabs() {
@@ -4558,6 +4636,7 @@ CREATE TABLE inbox (
       habits: [["habits", "Привычки: неделя кружками, серии 🔥, итоги за 30 дней"], ["habitctx", "Правая кнопка по кружку — выбрать состояние, в том числе паузу"], ["habitcard", "Карточка привычки: серии, проценты, календарь месяца"]],
       dash: [["board", "Доска «Мой день»"], ["boardproj", "Доска проекта: общий источник «Ремонт кухни», прогресс, мини-канбан"], ["boardedit", "Режим «Изменить доску» и каталог виджетов"], ["widgetcfg", "Настройка виджета (⚙): откуда брать задачи, порядок, сколько показывать, размер"], ["mboard", "На телефоне виджеты встают в одну колонку", 1]],
       stats: [["stats", "Статистика за 30 дней"]],
+      time: [["timeanal", "Аналитика времени: сводка, часы по дням, по проектам и целям"], ["timeest", "Точность оценок: факт к оценке и задачи с самым большим расхождением"], ["timeheat", "Когда вы продуктивнее: дни недели × часы суток"]],
       now: [["nowmode", "Режим «Сейчас»: одна задача, таймер, подзадачи, «Готово» — и сразу следующая"]],
       journal: [["journal", "Дневник: сегодняшняя запись с настроением, полоска настроения за 30 дней и прошлые дни"]],
       ctx: [["ctxsel", "📍 Где я сейчас: выбор контекста вверху справа"]],
@@ -4831,11 +4910,16 @@ CREATE TABLE inbox (
       "<b>Источник доски</b>: кнопка «Источник: …» в шапке доски — выберите проект, тег, фильтр или список, и все виджеты без своего источника (список задач, сроки, числа, график, календарь, канбан, быстрый ввод, прогресс проекта) покажут его. Так одна доска легко переключается с проекта на проект. Своё значение у виджета (⚙ → «Откуда») главнее; «Как у доски» возвращает общее. Доска по шаблону «Проект» сразу создаётся с источником.",
       "<b>Заметка на доске</b>: ✎ в заголовке виджета заметки или двойной клик по тексту — правите прямо на доске тем же редактором, что и в заметке («/» — блоки, выделение — форматирование). ✓ — готово, всё сохраняется само."]));
     h += sec("stats", "Статистика", ul([
-      "Пункт «Статистика» в «Списках». Период — 7, 30 или 90 дней (кнопки вверху).",
-      "<b>Карточки</b>: выполнено задач (вместе с выполнениями повторяющихся) и в среднем в день, создано, серия дней подряд с выполненными задачами и лучшая серия, помидоры и часы фокуса, открыто сейчас и сколько просрочено, средний процент выполнения привычек.",
-      "<b>Графики</b>: выполненное по дням, по проектам, по дням недели (в какие дни вы продуктивнее), по спринтам.",
-      "<b>Учёт времени</b>: сколько часов засечено по задачам за период.",
+      "Пункт «Статистика» в «Списках». Две вкладки — <b>📊 Обзор</b> и <b>⏱ Время</b>; период — 7, 30 или 90 дней.",
+      "<b>Обзор</b>: выполнено задач (вместе с выполнениями повторяющихся) и в среднем в день, создано, серия дней подряд с выполненными задачами и лучшая серия, помидоры и часы фокуса, открыто сейчас и сколько просрочено, средний процент выполнения привычек; графики по дням, по проектам, по дням недели, по спринтам.",
       "Отменённые задачи в «выполненное» не входят. Для итогов по конкретному проекту или тегу удобнее фильтр со статусом «выполненные» и сроком «последние N дней» (см. «Фильтры»)."]));
+    h += sec("time", "Аналитика времени", ul([
+      "«Статистика» → вкладка <b>⏱ Время</b>. Считает <b>часы фокуса</b> — засечённое время (⏲ в карточке задачи) и помидоры (🍅 по 25 минут).",
+      "<b>Сводка</b>: сколько часов за период (отдельно засечено и помидоры), в среднем в день, сколько дней с работой, самый долгий день. <b>Часы по дням</b> — график.",
+      "<b>По проектам и по целям</b>: сколько часов и какая доля ушли на каждый проект (подпроекты суммируются в проект верхнего уровня) и на каждую цель. Клик по названию открывает проект или цель.",
+      "<b>Точность оценок</b>: для выполненных за период задач, у которых есть оценка в часах и фактическое время, — сколько вышло на самом деле. «×1,4» значит, что задачи в среднем занимают в 1,4 раза больше, чем вы закладываете; приложение подскажет, на сколько умножать оценки. Таблица — задачи с самым большим расхождением.",
+      "<b>Когда вы продуктивнее</b>: карта «дни недели × часы суток» — чем темнее клетка, тем больше минут фокуса и выполненных задач. Внизу — ваш самый продуктивный двухчасовой отрезок и день недели: на это время удобно ставить ★ главные задачи.",
+      "Чтобы аналитика была точной, засекайте время ⏲ или запускайте 🍅 и ставьте оценки (в карточке, в плане дня или массово через «☑ Выбрать» → «⋯ Ещё» → «Оценка»). На досках есть виджет «Время по проектам»."]));
 
     /* ================= Напоминания и Telegram ================= */
     h += sec("digest", "Утренняя сводка", "<p>«Настройки» → «Напоминания и Telegram» → «Утренняя сводка»: включите и выберите час. Каждое утро бот пришлёт план на день — задачи (со временем), просроченное, привычки и сколько сделано вчера. Нужен подключённый сервер. Сводка собирается по задачам на момент последнего открытия приложения, поэтому заглядывайте в него хотя бы раз в день.</p>");
@@ -5707,6 +5791,7 @@ CREATE TABLE inbox (
       case "calmode": CAL.mode = el.dataset.x; LS.set("zd-calmode", CAL.mode); CAL.scrolled = false; render(); return;
       case "calnav": var dx = +el.dataset.x, base = CAL.d || today0(); if (!dx) CAL.d = today0(); else if (CAL.mode === "day") CAL.d = addDays(base, dx); else if (CAL.mode === "week") CAL.d = addDays(base, 7 * dx); else { var mm = new Date(base); mm.setDate(1); mm.setMonth(mm.getMonth() + dx); CAL.d = mm.getTime(); } render(); return;
       case "calday": CAL.d = +el.dataset.x; CAL.mode = "day"; LS.set("zd-calmode", "day"); CAL.scrolled = false; render(); return;
+      case "sttab": STTAB = el.dataset.x; LS.set("zd-sttab", STTAB); render(); return;
       case "stdays": LS.set("zd-stdays", el.dataset.x); render(); return;
       case "hmark": var hh = hab(el.dataset.h); if (hh) { hMark(hh, el.dataset.d); render(); var hst = hSt(hh, el.dataset.d); if (hst === "done" && el.dataset.d === dKey(today0())) toast((hh.ic ? hh.ic + " " : "") + hh.n + " ✓ · серия 🔥 " + fmtN(hStreak(hh))); } return;
       case "nowgo": nowStart(); return;
