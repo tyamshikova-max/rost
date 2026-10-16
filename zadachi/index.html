@@ -402,7 +402,7 @@ body { background: var(--wall, none) fixed, var(--bg) }
 .top { background: var(--topbg, var(--bg)) }
 html.glass .top { backdrop-filter: blur(var(--blur)) saturate(1.6); -webkit-backdrop-filter: blur(var(--blur)) saturate(1.6); border-bottom-color: var(--line) }
 html.glass .side { backdrop-filter: blur(var(--blur)) saturate(1.4); -webkit-backdrop-filter: blur(var(--blur)) saturate(1.4) }
-html.glass #panel, html.glass #ctx, html.glass #ctx2, html.glass #slash, html.glass #fmt, html.glass .tagdd, html.glass #pomo, html.glass .add.qfloat, html.glass #pal .box {
+html.glass #ctx, html.glass #ctx2, html.glass #slash, html.glass #fmt, html.glass .tagdd, html.glass #pomo, html.glass .add.qfloat, html.glass #pal .box {
   background: var(--pop); backdrop-filter: blur(calc(var(--blur) + 8px)) saturate(1.7); -webkit-backdrop-filter: blur(calc(var(--blur) + 8px)) saturate(1.7) }
 html.glass #pal input { background: transparent }
 html.glass #pal { background: rgba(0, 0, 0, .18); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px) }
@@ -674,7 +674,7 @@ html.nosheet .dptopbox { background: color-mix(in srgb, var(--star) 10%, transpa
 .aibtn { border: 1px solid var(--acc); color: var(--acc); background: var(--panel) }
 /* --- панель задачи --- */
 .task.open { background: var(--acc-soft) }
-#panel { position: fixed; z-index: 35; top: 56px; right: 0; bottom: 0; width: var(--pw, 620px); max-width: calc(100vw - 80px); background: var(--panel); border-left: 1px solid var(--line); box-shadow: var(--shadow); display: flex }
+#panel { position: fixed; z-index: 35; top: 56px; right: 0; bottom: 0; width: var(--pw, 620px); max-width: calc(100vw - 80px); background: color-mix(in srgb, var(--solid, #fff) var(--card, 100%), transparent); backdrop-filter: blur(calc(var(--blur, 16px) + 8px)) saturate(1.5); -webkit-backdrop-filter: blur(calc(var(--blur, 16px) + 8px)) saturate(1.5); border-left: 1px solid var(--line); box-shadow: var(--shadow); display: flex }
 #panel .grip { flex: none; width: 7px; margin-left: -4px; cursor: col-resize; position: relative; z-index: 3; touch-action: none }
 #panel .grip::after { content: ""; position: absolute; left: 3px; top: 0; bottom: 0; width: 1px; background: transparent; transition: background .15s }
 #panel .grip:hover::after, #panel.drag .grip::after { background: var(--acc); width: 3px; left: 2px }
@@ -685,7 +685,7 @@ html.nosheet .dptopbox { background: color-mix(in srgb, var(--star) 10%, transpa
 #panel.full .pn-sc { padding-inline: 32px }
 #panel.drag, #panel.drag * { user-select: none; cursor: col-resize }
 @media (min-width: 1180px) { body.pnopen .layout { margin-right: min(var(--pw, 620px), calc(100vw - 80px)) } body.pnopen.pnfull .layout { margin-right: 0 } }
-.pn-top { position: sticky; top: 0; z-index: 2; background: var(--panel); display: flex; gap: 6px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); margin-bottom: 12px }
+.pn-top { position: sticky; top: 0; z-index: 2; background: color-mix(in srgb, var(--solid, #fff) var(--card, 100%), transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); display: flex; gap: 6px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); margin-bottom: 12px }
 .pn-top .crumbs { margin: 0; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .pn-top button { background: none; border: 0; border-radius: 6px; padding: 4px 8px; cursor: pointer; color: var(--muted); font-size: calc(15px * var(--fs)) }
 .pn-top button:hover { background: var(--hover); color: var(--fg) }
@@ -2077,7 +2077,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-47";
+  var APPV = "zd-app-2026-10-16-48";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -5190,6 +5190,7 @@ CREATE TABLE inbox (
       "<b>Акцентный цвет</b> — поверх любой схемы; ◐ — как в схеме.",
       "<b>Прозрачность окон</b> («стекло»): нет, лёгкая, сильная — боковая панель, верхняя строка, карточка задачи и меню становятся полупрозрачными с размытием того, что под ними.",
       "<b>Подложка под задачами</b> — ползунок плотности фона под списками задач и заголовками групп: 0 — подложки нет, 100 — сплошная. Чем пестрее обои, тем плотнее ставьте подложку.",
+      "<b>Карточка задачи</b> — ползунок плотности фона карточки, которая открывается справа (от 30 до 100). Пока его не трогали, карточка повторяет подложку под задачами; «Как подложка» — вернуть эту связь.",
       "<b>Фон</b>: однотонный, градиент, «аврора» (мягкие цветные пятна в цветах схемы) или <b>обои</b>: горы, волны, холмы, звёздное небо, лучи, клетка — рисуются в цветах схемы; или своя картинка (＋ Своя картинка) — она хранится на вашем Яндекс Диске и появляется на всех устройствах. «Ярко / Приглушить / Едва заметно» — чтобы текст поверх читался.",
       "<b>Шрифт</b>: 12 вариантов, в том числе с засечками (Lora, PT Serif), и «Системный»; каждый показан своим начертанием. <b>Размер текста</b>: мелкий, обычный, крупнее, крупный, очень крупный — меняется весь текст, расположение остаётся прежним.",
       "«Вернуть как было» — исходный вид. Всё оформление, кроме режима, одинаково на всех устройствах."]));
@@ -7510,7 +7511,7 @@ CREATE TABLE inbox (
     return ["Своя", L, D];
   }
   function schemeOf(L) { return L.scheme === "custom" ? customScheme((S.opt.look || {}).custom) : SCHEMES[L.scheme]; }
-  function lookCfg() { var l = S.opt.look || {}; return { scheme: SCHEMES[l.scheme] || l.scheme === "custom" ? l.scheme : "sage", acc: l.acc || "", glass: GLASS[l.glass] ? l.glass : "soft", wall: WALLS[l.wall] ? l.wall : "aurora", pic: WPICS[l.pic] ? l.pic : "mountains", dim: WDIM[l.dim] !== undefined ? +l.dim : 1, font: FONTS[l.font] ? l.font : "onest", fs: FSIZES[l.fs] ? l.fs : "1", sheet: l.sheet !== undefined && isFinite(+l.sheet) ? Math.max(0, Math.min(100, Math.round(+l.sheet))) : 86 }; }
+  function lookCfg() { var l = S.opt.look || {}; return { scheme: SCHEMES[l.scheme] || l.scheme === "custom" ? l.scheme : "sage", acc: l.acc || "", glass: GLASS[l.glass] ? l.glass : "soft", wall: WALLS[l.wall] ? l.wall : "aurora", pic: WPICS[l.pic] ? l.pic : "mountains", dim: WDIM[l.dim] !== undefined ? +l.dim : 1, font: FONTS[l.font] ? l.font : "onest", fs: FSIZES[l.fs] ? l.fs : "1", sheet: l.sheet !== undefined && isFinite(+l.sheet) ? Math.max(0, Math.min(100, Math.round(+l.sheet))) : 86, card: l.card !== undefined && l.card !== null && isFinite(+l.card) ? Math.max(30, Math.min(100, Math.round(+l.card))) : null }; }
   function isDark() { var p = themePref(); return p === "dark" || (p === "system" && !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)); }
   function rgba(hex, a) { var n = parseInt(String(hex).slice(1), 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
   var LOOKKEY = "";
@@ -7531,7 +7532,7 @@ CREATE TABLE inbox (
       var da = [0, dk ? .45 : .4, dk ? .72 : .68][L.dim];
       v["--wall"] = pic ? "linear-gradient(" + rgba(c[0], da) + ", " + rgba(c[0], da) + "), " + pic : "none";
     }
-    v["--fs"] = L.fs; v["--sheet"] = L.sheet + "%";
+    v["--fs"] = L.fs; v["--sheet"] = L.sheet + "%"; v["--card"] = cardDen(L) + "%";
     var F = FONTS[L.font]; v["--sans"] = F[1] ? '"' + F[1] + '", "Onest", "Segoe UI", system-ui, sans-serif' : 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
     if (F[1] && L.font !== "onest") fontLink("family=" + F[1].replace(/ /g, "+") + ":wght@400;500;600;700", "fontlink");
     Object.keys(v).forEach(function (x) { st.setProperty(x, v[x]); });
@@ -7541,6 +7542,9 @@ CREATE TABLE inbox (
   if (lookCfg().wall === "img" && lookCfg().pic === "custom") wpLoad();
   if (window.matchMedia) try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { applyLook(); }); } catch (e) { /* старый браузер */ }
   // выбор своей схемы впервые — стартует от текущих цветов
+  function cardDen(L) { return L.card !== null ? L.card : Math.max(40, L.sheet); }
+  document.addEventListener("input", function (e) { if (!e.target.dataset || !e.target.dataset.lkcard) return; var lk = S.opt.look = Object.assign({}, S.opt.look || {}); lk.card = +e.target.value; applyLook(true); var o = document.getElementById("lkcardv"); if (o) o.textContent = e.target.value + " %"; });
+  document.addEventListener("change", function (e) { if (!e.target.dataset || !e.target.dataset.lkcard) return; optTouch(); save(); });
   function sheetTxt(n) { return n ? n + " %" + (n === 100 ? " · сплошная" : "") : "нет"; }
   document.addEventListener("input", function (e) { if (!e.target.dataset || !e.target.dataset.lksheet) return; var lk = S.opt.look = Object.assign({}, S.opt.look || {}); lk.sheet = +e.target.value; applyLook(true); var o = document.getElementById("lksheetv"); if (o) o.textContent = sheetTxt(+e.target.value); });
   document.addEventListener("change", function (e) { if (!e.target.dataset || !e.target.dataset.lksheet) return; optTouch(); save(); });
@@ -7571,7 +7575,9 @@ CREATE TABLE inbox (
     h += '<div class="lbl" style="margin-top:14px">Акцентный цвет</div><div class="sw lkacc"><button type="button" data-a="look" data-k="acc" data-v="" class="lkauto' + (!L.acc ? " on" : "") + '" title="Как в схеме">◐</button>' + ACCENTS.map(function (x) { return '<button type="button" data-a="look" data-k="acc" data-v="' + x + '" class="' + (L.acc === x ? "on" : "") + '" style="background:' + x + '" title="' + x + '"></button>'; }).join("") + "</div>";
     h += '<div class="lkrow"><span class="lbl">Прозрачность окон</span>' + seg("glass", GLASS, L.glass) + "</div>";
     h += '<div class="lkrow"><span class="lbl">Подложка под задачами</span><input type="range" class="lkrange" min="0" max="100" step="5" value="' + L.sheet + '" data-lksheet="1" aria-label="Плотность подложки под списками задач"><span class="lkval" id="lksheetv">' + sheetTxt(L.sheet) + '</span><button type="button" class="btn sm" data-a="look" data-k="sheet" data-v="">Как было</button></div>' +
-      '<p class="muted" style="margin:4px 0 0">Фон под списками и заголовками групп: 0 — без подложки, 100 — сплошная. Помогает читать задачи поверх обоев.</p>';
+      '<p class="muted" style="margin:4px 0 0">Фон под списками и заголовками групп: 0 — без подложки, 100 — сплошная. Помогает читать задачи поверх обоев.</p>' +
+      '<div class="lkrow"><span class="lbl">Карточка задачи</span><input type="range" class="lkrange" min="30" max="100" step="5" value="' + cardDen(L) + '" data-lkcard="1" aria-label="Плотность фона карточки задачи"><span class="lkval" id="lkcardv">' + cardDen(L) + " %" + (L.card === null ? " · как подложка" : "") + "</span>" + (L.card === null ? "" : '<button type="button" class="btn sm" data-a="look" data-k="card" data-v="">Как подложка</button>') + "</div>" +
+      '<p class="muted" style="margin:4px 0 0">Насколько плотный фон у карточки задачи, которая открывается справа: 100 — сплошной, меньше — сквозь карточку видны список и обои (с размытием). Пока ползунок не трогали, карточка повторяет подложку под задачами.</p>';
     h += '<div class="lkrow"><span class="lbl">Фон</span>' + seg("wall", WALLS, L.wall) + "</div>";
     if (L.wall === "img") {
       var c0 = schemeOf(L)[dk ? 2 : 1];
