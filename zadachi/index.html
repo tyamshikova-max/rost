@@ -385,6 +385,9 @@ ol.steps li { margin: 6px 0 }
 .btitle { font: inherit; font-size: inherit; font-weight: inherit; border: 0; background: none; color: var(--fg); min-width: 0; flex: 1; padding: 2px 4px; border-radius: 6px; outline: none } .btitle:hover { background: var(--hover) } .btitle:focus { background: var(--panel); box-shadow: 0 0 0 2px var(--acc-soft) }
 .bbar { gap: 6px; align-items: center } .btn.on { background: var(--acc-soft); border-color: var(--acc) }
 .bhint { margin: 8px 0 0 }
+.bsrcb { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .bstartb { font-size: 12px; color: var(--muted); white-space: nowrap }
+.wdg #nrte { min-height: 100%; max-width: none; border: 0; border-radius: 0; background: none; padding: 2px 2px 8px 30px; box-sizing: border-box; font-size: 14px } .wdg #nrte.empty::before { left: 30px; top: 2px }
+.wbtn button.on { color: var(--acc); background: var(--acc-soft) } .wnote { cursor: text }
 .bgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 190px; grid-auto-flow: dense; gap: 14px; margin-top: 16px; max-width: 1400px }
 .wdg { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; position: relative }
 .wdg.c1 { grid-column: span 1 } .wdg.c2 { grid-column: span 2 } .wdg.c4 { grid-column: 1 / -1 } .wdg.r2 { grid-row: span 2 }
@@ -899,7 +902,7 @@ h2[data-col].dropin { outline: 2px dashed var(--acc); outline-offset: 2px; borde
 <body>
 <header class="top">
   <button class="ibtn" id="menuBtn" type="button" aria-label="Меню"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-  <a class="brand" href="#today"><i>✓</i><span>Задачи</span></a>
+  <a class="brand" href="#today" id="brand"><i>✓</i><span>Задачи</span></a>
   <input class="q" id="q" type="search" placeholder="Поиск · Ctrl+K — команды" aria-label="Поиск по задачам">
   <button class="ibtn sync" id="syncBtn" type="button" hidden></button>
   <button class="ibtn" id="themeBtn" type="button" aria-label="Тема"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
@@ -2165,6 +2168,7 @@ CREATE TABLE inbox (
     LS.set("zd-last", location.hash.slice(1));
   }
   window.addEventListener("hashchange", route);
+  document.addEventListener("click", function (e) { var a = e.target.closest && e.target.closest("#brand"); if (!a) return; var st = S.opt.start; if (st && (!/^board-/.test(st) || board(st.slice(6)))) { e.preventDefault(); go(st); } });
   function curKey() { return V === "proj" || V === "tag" || V === "filter" ? V + ":" + ARG : V; }
 
   /* ---------- боковая панель ---------- */
@@ -2286,7 +2290,7 @@ CREATE TABLE inbox (
     ntags().forEach(function (g) { nh += itemHTML("ntag", g.n, "ntag-" + g.n, '<span class="hash ntg" style="color:' + col(g.c) + '">◆</span>', g.n, notes().filter(function (n) { return (n.tags || []).indexOf(g.n) >= 0; }).length, {}); });
     B.notes = nh + "</nav>";
     var bl = boards();
-    B.boards = blockHead("boards", "Доски", '<button type="button" data-a="bnew" title="Новая доска" aria-label="Новая доска">+</button>') + '<nav class="nav">' + (bl.length ? bl.map(function (b) { return itemHTML("board", b.id, "board-" + b.id, '<span class="pic">' + ic("board") + "</span>", b.n, 0, {}); }).join("") : '<div class="none">Свои экраны из виджетов. «+» — создать</div>') + "</nav>";
+    B.boards = blockHead("boards", "Доски", '<button type="button" data-a="bnew" title="Новая доска" aria-label="Новая доска">+</button>') + '<nav class="nav">' + (bl.length ? bl.map(function (b) { return itemHTML("board", b.id, "board-" + b.id, '<span class="pic">' + ic("board") + "</span>", b.n, S.opt.start === "board-" + b.id ? '<span title="Стартовая доска">🏠</span>' : 0, {}); }).join("") : '<div class="none">Свои экраны из виджетов. «+» — создать</div>') + "</nav>";
     var fs = filters();
     B.filters = blockHead("filters", "Фильтры", '<button type="button" data-a="newfilter" title="Новый фильтр" aria-label="Новый фильтр">+</button>') + '<nav class="nav">' + (fs.length ? fs.map(function (f) { return itemHTML("filter", f.id, "filter-" + f.id, '<span class="pic" style="color:' + col(f.c) + '">' + ic("filter") + "</span>", f.n, filterRes(f).length, { fav: !!f.fav }); }).join("") : '<div class="none">Свои подборки задач по условиям</div>') + "</nav>";
     var tg = tags();
@@ -3300,7 +3304,15 @@ CREATE TABLE inbox (
   document.addEventListener("pointercancel", function () { if (GDR) { GDR = null; gTip(null, ""); render(); } });
 
   /* ---------- доски (дашборды): сетка из виджетов, каждый — окно в раздел приложения ---------- */
-  var BEDIT = false, WADD = false, WCFG = null, BCUR = "", WDR = null;
+  var BEDIT = false, WADD = false, WCFG = null, BCUR = "", WDR = null, WNED = null;
+  var WSRCT = { tasks: "list:today", dead: "list:all", count: "", chart: "list:all", quick: "list:inbox", cal: "list:all", kanban: "list:all" };
+  // виджет с учётом доски: если у виджета нет своего источника, берётся источник доски
+  function wEff(b, w) {
+    var c = Object.assign({}, w.cfg || {});
+    if (b && b.src && !c.src && WSRCT.hasOwnProperty(w.type)) { c.src = b.src; c._inh = 1; }
+    if (b && w.type === "proj" && !c.pid && /^proj:/.test(b.src || "")) { c.pid = b.src.slice(5); c._inh = 1; }
+    return { id: w.id, type: w.type, sz: w.sz, cfg: c };
+  }
   function boards() { return live(S.boards).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0) || (a.created || 0) - (b.created || 0); }); }
   function board(id) { return id ? live(S.boards).filter(function (b) { return b.id === id; })[0] || null : null; }
   function wOf(b, wid) { return b ? (b.w || []).filter(function (w) { return w.id === wid; })[0] || null : null; }
@@ -3449,7 +3461,8 @@ CREATE TABLE inbox (
         return '<div class="whab">' + hl.map(function (x) { return '<div class="whr" style="--hc:' + col(x.c || 0) + '"><span class="whn">' + hMarkIco(x) + esc(x.n) + "</span>" + ds.map(function (d) { return hCell(x, d); }).join("") + '<span class="whs">🔥' + fmtN(hStreak(x)) + "</span></div>"; }).join("") + "</div>";
       case "note":
         var nt = note(c.nid); if (!nt) return '<p class="wempty">Выберите заметку — ⚙ вверху виджета</p>';
-        return '<div class="wnote">' + (clean(nt.body || "") || '<p class="muted">Заметка пустая</p>') + "</div>";
+        if (WNED === w.id) return '<div id="nrte" class="rte wnrte' + (nt.body ? "" : " empty") + '" data-note="' + nt.id + '" contenteditable="true" spellcheck="true" data-ph="Текст заметки… «/» — заголовок, чек-лист, таблица">' + (clean(nt.body || "") || "<p><br></p>") + "</div>";
+        return '<div class="wnote" title="Двойной клик — править">' + (clean(nt.body || "") || '<p class="muted">Заметка пустая — двойной клик, чтобы написать</p>') + "</div>";
       case "quick":
         return '<div class="wquick"><input type="text" data-wqa="' + w.id + '" data-src="' + esc(c.src || "list:inbox") + '" placeholder="Что сделать? Можно: завтра 10:00 #тег !1" autocomplete="off"><div class="wsub">Enter — добавить в «' + esc(wsrcName(c.src || "list:inbox")) + "»</div></div>";
       case "cal":
@@ -3499,26 +3512,27 @@ CREATE TABLE inbox (
     var seg = function (k, opts, cur) { return '<div class="seg">' + opts.map(function (o) { return '<button type="button" data-a="wset" data-k="' + k + '" data-v="' + o[0] + '" class="' + (String(cur) === String(o[0]) ? "on" : "") + '">' + o[1] + "</button>"; }).join("") + "</div>"; };
     var dd = function (a, label) { return '<button type="button" class="ddb sm" data-a="' + a + '">' + esc(label) + '<span class="dda">▾</span></button>'; };
     var h = row("Заголовок", '<input type="text" class="inp" data-wf="t" data-w="' + w.id + '" value="' + esc(c.t || "") + '" placeholder="' + esc(wDefTitle(w)) + '">');
-    if (w.type === "tasks") h += row("Откуда", dd("wsrc", wsrcName(c.src || "list:today"))) + row("Порядок", dd("wsort", SORTN[c.sort || "smart"])) + row("Показывать", seg("lim", [[5, "5"], [10, "10"], [20, "20"], [0, "все"]], c.lim === undefined ? 0 : c.lim)) + row("Поле «новая задача»", seg("add", [[1, "есть"], [0, "нет"]], c.add === 0 ? 0 : 1));
-    if (w.type === "dead") h += row("Откуда", dd("wsrc", wsrcName(c.src || "list:all"))) + row("На сколько дней", seg("days", [[7, "7"], [14, "14"], [30, "30"], [90, "90"]], c.days || 14));
-    if (w.type === "count") h += row("Откуда", dd("wsrc", wsrcName(c.src || "list:all"))) + row("Что считать", seg("m", Object.keys(WCNT).map(function (k) { return [k, WCNT[k]]; }), c.m || "open"));
-    if (w.type === "chart") h += row("Откуда", dd("wsrc", wsrcName(c.src || "list:all"))) + row("Период", seg("days", [[7, "7 дн."], [14, "14 дн."], [30, "30 дн."]], c.days || 14));
-    if (w.type === "quick") h += row("Куда добавлять", dd("wsrc", wsrcName(c.src || "list:inbox")));
-    if (w.type === "cal") h += row("Откуда", dd("wsrc", wsrcName(c.src || "list:all"))) + row("Дней вперёд", seg("days", [[3, "3"], [7, "7"], [14, "14"]], c.days || 7));
-    if (w.type === "kanban") h += row("Откуда", dd("wsrc", wsrcName(c.src || "list:all")));
+    var sl = function (def) { return c._inh ? "как у доски · " + wsrcName(c.src) : wsrcName(c.src || def); };
+    if (w.type === "tasks") h += row("Откуда", dd("wsrc", sl("list:today"))) + row("Порядок", dd("wsort", SORTN[c.sort || "smart"])) + row("Показывать", seg("lim", [[5, "5"], [10, "10"], [20, "20"], [0, "все"]], c.lim === undefined ? 0 : c.lim)) + row("Поле «новая задача»", seg("add", [[1, "есть"], [0, "нет"]], c.add === 0 ? 0 : 1));
+    if (w.type === "dead") h += row("Откуда", dd("wsrc", sl("list:all"))) + row("На сколько дней", seg("days", [[7, "7"], [14, "14"], [30, "30"], [90, "90"]], c.days || 14));
+    if (w.type === "count") h += row("Откуда", dd("wsrc", sl("list:all"))) + row("Что считать", seg("m", Object.keys(WCNT).map(function (k) { return [k, WCNT[k]]; }), c.m || "open"));
+    if (w.type === "chart") h += row("Откуда", dd("wsrc", sl("list:all"))) + row("Период", seg("days", [[7, "7 дн."], [14, "14 дн."], [30, "30 дн."]], c.days || 14));
+    if (w.type === "quick") h += row("Куда добавлять", dd("wsrc", sl("list:inbox")));
+    if (w.type === "cal") h += row("Откуда", dd("wsrc", sl("list:all"))) + row("Дней вперёд", seg("days", [[3, "3"], [7, "7"], [14, "14"]], c.days || 7));
+    if (w.type === "kanban") h += row("Откуда", dd("wsrc", sl("list:all")));
     if (w.type === "countdown") h += row("До чего", '<input type="text" class="inp" data-wf2="label" data-w="' + w.id + '" value="' + esc(c.label || "") + '" placeholder="Отпуск, экзамен, сдача проекта">') + row("Дата", '<input type="date" class="inp" data-wf2="date" data-w="' + w.id + '" value="' + esc(c.date || "") + '">');
     if (w.type === "links") h += row("Ссылки", '<textarea class="inp" rows="5" data-wf2="links" data-w="' + w.id + '" placeholder="Курс Харина | https://example.ru/kurs&#10;Яндекс Диск | disk.yandex.ru">' + esc(c.links || "") + '</textarea><div class="wsub">По одной в строке: «Название | адрес» или просто адрес.</div>');
-    if (w.type === "proj") h += row("Проект", dd("wproj", proj(c.pid) ? proj(c.pid).n : "выбрать…"));
+    if (w.type === "proj") h += row("Проект", dd("wproj", proj(c.pid) ? (c._inh ? "как у доски · " : "") + proj(c.pid).n : "выбрать…"));
     if (w.type === "note") h += row("Заметка", dd("wnote", note(c.nid) ? note(c.nid).t || "Без названия" : "выбрать…"));
     if (w.type === "sticky" || w.type === "chart") h += row("Цвет", '<div class="sw">' + COLORS.map(function (cc, i) { return '<button type="button" data-a="wset" data-k="c" data-v="' + i + '" class="' + ((c.c !== undefined ? +c.c : w.type === "sticky" ? 6 : 0) === i ? "on" : "") + '" style="background:' + cc[1] + '" title="' + cc[0] + '"></button>'; }).join("") + "</div>");
     return '<div class="wcfg">' + h + '<div class="r"><button type="button" class="btn pri sm" data-a="wcfg">Готово</button><button type="button" class="btn sm" data-a="wsize">Размер: ' + WSZ[w.sz || "m"][2] + '</button><button type="button" class="btn sm warn" data-a="wdel" style="margin-left:auto">Убрать виджет</button></div></div>';
   }
-  function wHTML(b, w) {
-    var sz = WSZ[w.sz] || WSZ.m, c = w.cfg || {}, href = wHref(w), ttl = c.t || wDefTitle(w), cfg = WCFG === w.id;
+  function wHTML(b, w0) {
+    var w = wEff(b, w0), sz = WSZ[w.sz] || WSZ.m, c = w.cfg || {}, href = wHref(w), ttl = c.t || wDefTitle(w), cfg = WCFG === w.id;
     var st = w.type === "sticky" ? ' style="--wc:' + col(c.c !== undefined ? +c.c : 6) + '"' : "";
     return '<section class="wdg w-' + w.type + " c" + sz[0] + " r" + sz[1] + (cfg ? " cfgon" : "") + '" data-w="' + w.id + '"' + st + '><header class="wh">' + (BEDIT ? '<span class="wgrip" title="Перетащите, чтобы переставить">⠿</span>' : "") + '<span class="wi">' + (WT[w.type] || {}).i + "</span>" +
       (href ? '<a class="wt" href="#' + esc(href) + '" title="Открыть раздел">' + esc(ttl) + "</a>" : '<span class="wt">' + esc(ttl) + "</span>") +
-      '<span class="wbtn">' + (BEDIT ? '<button type="button" data-a="wsize" title="Размер">⤡</button><button type="button" data-a="wdel" title="Убрать с доски">×</button>' : "") + '<button type="button" data-a="wcfg" title="Настроить виджет" aria-label="Настроить виджет">⚙</button></span></header>' +
+      '<span class="wbtn">' + (w.type === "note" && note(c.nid) && !BEDIT ? '<button type="button" data-a="wnedit" class="' + (WNED === w.id ? "on" : "") + '" title="' + (WNED === w.id ? "Готово" : "Править заметку здесь") + '">' + (WNED === w.id ? "✓" : "✎") + "</button>" : "") + (BEDIT ? '<button type="button" data-a="wsize" title="Размер">⤡</button><button type="button" data-a="wdel" title="Убрать с доски">×</button>' : "") + '<button type="button" data-a="wcfg" title="Настроить виджет" aria-label="Настроить виджет">⚙</button></span></header>' +
       '<div class="wb">' + (cfg ? wCfgHTML(b, w) : wBody(b, w)) + "</div></section>";
   }
   var BTPL = {
@@ -3527,7 +3541,7 @@ CREATE TABLE inbox (
     week: { n: "Обзор недели", i: "📅", d: "Итоги недели в цифрах, график, спринт, просроченное, «Входящие», планы на 7 дней и место для выводов.",
       w: function () { return [{ type: "count", sz: "s", cfg: { m: "done7", t: "Сделано за неделю" } }, { type: "count", sz: "s", cfg: { m: "late", t: "Просрочено" } }, { type: "count", sz: "s", cfg: { m: "open", src: "list:inbox", t: "Во «Входящих»" } }, { type: "count", sz: "s", cfg: { m: "open", src: "list:sprint", t: "Осталось в спринте" } }, { type: "chart", sz: "m", cfg: { days: 14 } }, { type: "sprint", sz: "m" }, { type: "tasks", sz: "m", cfg: { src: "list:late", lim: 10, add: 0 } }, { type: "tasks", sz: "m", cfg: { src: "list:inbox", lim: 10 } }, { type: "tasks", sz: "m", cfg: { src: "list:week", lim: 10, add: 0 } }, { type: "sticky", sz: "m", cfg: { t: "Итоги недели", c: 1, text: "Что получилось:\n\nЧто мешало:\n\nГлавное на следующую неделю:" } }]; } },
     proj: { n: "Проект", i: "📁", d: "Всё по одному проекту: прогресс, задачи, канбан, сроки, просроченное, заметки и ссылки на материалы.", needs: "proj",
-      w: function (pid) { var s2 = "proj:" + pid; return [{ type: "proj", sz: "m", cfg: { pid: pid } }, { type: "quick", sz: "m", cfg: { src: s2 } }, { type: "tasks", sz: "l", cfg: { src: s2, t: "Задачи", add: 0 } }, { type: "dead", sz: "m", cfg: { src: s2, days: 30 } }, { type: "count", sz: "s", cfg: { m: "late", src: s2, t: "Просрочено" } }, { type: "count", sz: "s", cfg: { m: "done7", src: s2, t: "Сделано за неделю" } }, { type: "kanban", sz: "x", cfg: { src: s2 } }, { type: "sticky", sz: "m", cfg: { t: "Заметки по проекту", c: 7 } }, { type: "links", sz: "m", cfg: { t: "Материалы проекта" } }]; } },
+      w: function () { return [{ type: "proj", sz: "m" }, { type: "quick", sz: "m" }, { type: "tasks", sz: "l", cfg: { t: "Задачи", add: 0 } }, { type: "dead", sz: "m", cfg: { days: 30 } }, { type: "count", sz: "s", cfg: { m: "late", t: "Просрочено" } }, { type: "count", sz: "s", cfg: { m: "done7", t: "Сделано за неделю" } }, { type: "kanban", sz: "x" }, { type: "sticky", sz: "m", cfg: { t: "Заметки по проекту", c: 7 } }, { type: "links", sz: "m", cfg: { t: "Материалы проекта" } }]; } },
     empty: { n: "Пустая доска", i: "▦", d: "Чистый лист — добавляйте виджеты сами.", w: function () { return []; } }
   };
   function bCreate(n, ws, extra) {
@@ -3535,7 +3549,7 @@ CREATE TABLE inbox (
     var b = touch(Object.assign({ id: uid(), n: n, ord: mx + 1, created: Date.now(), w: ws.map(function (w) { return { id: uid(), type: w.type, sz: w.sz || WT[w.type].sz, cfg: Object.assign({}, w.cfg || {}) }; }) }, extra || {}));
     S.boards.push(b); save(); return b;
   }
-  function bFromTpl(k, pid) { var t = BTPL[k]; if (!t) return null; if (t.needs === "proj" && !proj(pid)) return null; var b = bCreate(t.needs === "proj" ? proj(pid).n : t.n, t.w(pid), t.needs === "proj" ? { pid: pid } : {}); BEDIT = false; WADD = false; WCFG = null; go("board-" + b.id); toast("Доска «" + b.n + "» создана"); return b; }
+  function bFromTpl(k, pid) { var t = BTPL[k]; if (!t) return null; if (t.needs === "proj" && !proj(pid)) return null; var b = bCreate(t.needs === "proj" ? proj(pid).n : t.n, t.w(pid), t.needs === "proj" ? { pid: pid, src: "proj:" + pid } : {}); BEDIT = false; WADD = false; WCFG = null; go("board-" + b.id); toast("Доска «" + b.n + "» создана"); return b; }
   function bSave(b) { touch(b); save(); render(); }
   function wAdd(b, type, cfg, sz) { var w = { id: uid(), type: type, sz: sz || WT[type].sz, cfg: cfg || {} }; b.w = (b.w || []).concat(w); touch(b); save(); return w; }
   function vBoardNew() {
@@ -3546,9 +3560,10 @@ CREATE TABLE inbox (
   function vBoard() {
     if (ARG === "new") return vBoardNew();
     var b = board(ARG); if (!b) return head("Доска не найдена", "Возможно, её удалили. <a href=\"#board-new\">Создать новую</a>");
-    if (BCUR !== b.id) { BCUR = b.id; BEDIT = false; WADD = false; WCFG = null; }
+    if (BCUR !== b.id) { BCUR = b.id; BEDIT = false; WADD = false; WCFG = null; WNED = null; }
+    if (BT && BTE && BTE.id === "nrte") saveBody();
     var h = '<div class="bhd"><h1 class="bh1"><span class="bic">' + ic("board") + '</span><input class="btitle" data-board="' + b.id + '" value="' + esc(b.n) + '" aria-label="Название доски" autocomplete="off"></h1>' +
-      '<span class="r bbar"><button type="button" class="btn sm' + (WADD ? " on" : "") + '" data-a="wadd">＋ Виджет</button><button type="button" class="btn sm' + (BEDIT ? " pri" : "") + '" data-a="bedit">' + (BEDIT ? "✓ Готово" : "✎ Изменить доску") + '</button><button type="button" class="ibtn" data-a="bmenu" title="Ещё" aria-label="Ещё">⋯</button></span></div>';
+      '<span class="r bbar"><button type="button" class="ddb sm bsrcb" data-a="bsrc" title="Общий источник: виджеты без своего источника показывают его">' + (b.src ? "Источник: " + esc(wsrcName(b.src)) : "Источник: свой у виджетов") + '<span class="dda">▾</span></button>' + (S.opt.start === "board-" + b.id ? '<span class="bstartb" title="Открывается при запуске приложения">🏠 стартовая</span>' : "") + '<button type="button" class="btn sm' + (WADD ? " on" : "") + '" data-a="wadd">＋ Виджет</button><button type="button" class="btn sm' + (BEDIT ? " pri" : "") + '" data-a="bedit">' + (BEDIT ? "✓ Готово" : "✎ Изменить доску") + '</button><button type="button" class="ibtn" data-a="bmenu" title="Ещё" aria-label="Ещё">⋯</button></span></div>';
     if (BEDIT) h += '<p class="muted bhint">Тяните виджеты за ⠿, ⤡ — размер, × — убрать с доски, ⚙ — настройки. Изменения сохраняются сразу.</p>';
     if (WADD) {
       var secs = {}; Object.keys(WT).forEach(function (k) { (secs[WT[k].sec] = secs[WT[k].sec] || []).push(k); });
@@ -3559,13 +3574,18 @@ CREATE TABLE inbox (
     h += '<div class="bgrid' + (BEDIT ? " edit" : "") + '" data-board="' + b.id + '">' + ws.map(function (w) { return wHTML(b, w); }).join("") + "</div>";
     return h;
   }
-  function bMenu(b) { return [{ c: "bdup", i: "⧉", l: "Дублировать доску" }, { c: "bup", i: "↑", l: "Выше в панели" }, { c: "bdown", i: "↓", l: "Ниже в панели" }, "-", { c: "bdel", i: "🗑", l: "Удалить доску", warn: 1 }, "-", { c: "help:dash", i: "?", l: "Справка о досках" }]; }
+  function bMenu(b) { return [{ c: "bstart", i: "🏠", l: "Открывать при запуске приложения", k: S.opt.start === "board-" + b.id ? "✓" : "" }, { c: "bdup", i: "⧉", l: "Дублировать доску" }, { c: "bup", i: "↑", l: "Выше в панели" }, { c: "bdown", i: "↓", l: "Ниже в панели" }, "-", { c: "bdel", i: "🗑", l: "Удалить доску", warn: 1 }, "-", { c: "help:dash", i: "?", l: "Справка о досках" }]; }
   function bCmd(b, c) {
     if (c === "open") { go("board-" + b.id); return; }
-    if (c === "bdup") { var nb = bCreate(b.n + " (копия)", (b.w || []).map(function (w) { return { type: w.type, sz: w.sz, cfg: JSON.parse(JSON.stringify(w.cfg || {})) }; }), b.pid ? { pid: b.pid } : {}); go("board-" + nb.id); toast("Копия создана"); return; }
+    if (c === "bstart") { S.opt.start = S.opt.start === "board-" + b.id ? "" : "board-" + b.id; optTouch(); save(); render(); toast(S.opt.start ? "«" + b.n + "» будет открываться при запуске" : "При запуске — где остановились в прошлый раз"); return; }
+    if (c === "bdup") { var nb = bCreate(b.n + " (копия)", (b.w || []).map(function (w) { return { type: w.type, sz: w.sz, cfg: JSON.parse(JSON.stringify(w.cfg || {})) }; }), Object.assign(b.pid ? { pid: b.pid } : {}, b.src ? { src: b.src } : {})); go("board-" + nb.id); toast("Копия создана"); return; }
     if (c === "bup" || c === "bdown") { var l = boards(), i = l.indexOf(b), j = c === "bup" ? i - 1 : i + 1; if (j < 0 || j >= l.length) return; l.splice(i, 1); l.splice(j, 0, b); l.forEach(function (x, k) { if (x.ord !== k) { x.ord = k; touch(x); } }); save(); render(); return; }
-    if (c === "bdel") { b.del = 1; b.delAt = Date.now(); touch(b); save(); if (V === "board" && ARG === b.id) go(boards()[0] ? "board-" + boards()[0].id : "today"); else render(); toastUndo("Доска «" + b.n + "» удалена", function () { delete b.del; delete b.delAt; touch(b); save(); render(); }); }
+    if (c === "bdel") { if (S.opt.start === "board-" + b.id) { S.opt.start = ""; optTouch(); } b.del = 1; b.delAt = Date.now(); touch(b); save(); if (V === "board" && ARG === b.id) go(boards()[0] ? "board-" + boards()[0].id : "today"); else render(); toastUndo("Доска «" + b.n + "» удалена", function () { delete b.del; delete b.delAt; touch(b); save(); render(); }); }
   }
+  document.addEventListener("dblclick", function (e) {
+    var nw = e.target.closest && e.target.closest(".bgrid .w-note .wnote"); if (!nw || BEDIT) return;
+    if (e.target.closest("a")) return; WNED = nw.closest(".wdg").dataset.w; render(); setTimeout(function () { var r = $("nrte"); if (r) { r.focus(); caretEnd(r); } }, 30);
+  });
   // «📌 На доску» из меню раздела
   function pinMenu(kind) { return { i: "📌", l: kind === "progress" ? "Прогресс — на доску" : "На доску", sub: boards().map(function (b) { return { c: (kind === "progress" ? "pinp:" : "pin:") + b.id, i: "▦", l: b.n }; }).concat(boards().length ? ["-"] : [], [{ c: (kind === "progress" ? "pinp:" : "pin:") + "new", i: "＋", l: "Новая доска" }]) }; }
   function pinFrom(k, id, bid, progress) {
@@ -3891,6 +3911,8 @@ CREATE TABLE inbox (
       listsAll().map(function (k) { var on = k === "inbox" || hid.indexOf(k) < 0; return '<button type="button" class="lt' + (on ? " on" : "") + '" data-a="lhide" data-id="' + k + '" role="switch" aria-checked="' + on + '"' + (k === "inbox" ? " disabled" : "") + '><span class="lbox"></span>' + ic(k) + "<span>" + LISTN[k] + "</span></button>"; }).join("") + "</div></section>";
     h += '<section class="card"><h2>Левая панель</h2><p class="muted" style="margin:0">Блоки («Избранное», «Списки», «Проекты», «Фильтры», «Теги», «Служебное») переставляются перетаскиванием за заголовок, пункты «Списков» — перетаскиванием самих пунктов. Порядок синхронизируется между устройствами.</p><div class="r"><button class="btn" type="button" data-a="side-reset">Вернуть исходный порядок</button><button class="btn" type="button" data-a="mini">' + (document.body.classList.contains("mini") ? "Развернуть панель" : "Свернуть панель до иконок") + "</button></div></section>";
     var rd = S.opt.revDays !== undefined ? +S.opt.revDays : 7;
+    var stv = S.opt.start || "", stn = !stv ? "где остановились в прошлый раз" : /^board-/.test(stv) ? (board(stv.slice(6)) ? "доска «" + board(stv.slice(6)).n + "»" : "где остановились в прошлый раз") : (LISTN[stv] || stv);
+    h += '<section class="card" id="s-start"><h2>Стартовый экран</h2><p class="muted" style="margin:0">Что открывается, когда вы запускаете приложение (при обновлении страницы остаётся текущее место). Удобно сделать стартовой доску — например, «Мой день».</p><div class="r"><button type="button" class="ddb" data-a="startpick">' + esc(stn.charAt(0).toUpperCase() + stn.slice(1)) + '<span class="dda">▾</span></button></div></section>';
     h += '<section class="card" id="s-review"><h2>Проверка проектов</h2><p class="muted" style="margin:0">Как часто напоминать пересмотреть проект (кнопка ↻ у заголовка «Проекты»). Для отдельного проекта интервал меняется правым кликом по нему → «Интервал проверки».</p><div class="seg" style="margin-top:10px">' + [[7, "неделя"], [14, "2 недели"], [30, "месяц"], [182, "полгода"], [0, "не проверять"]].map(function (x) { return '<button type="button" data-a="revdef" data-v="' + x[0] + '" class="' + (rd === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></section>";
     h += '<section class="card"><h2>Оформление</h2><div class="seg" role="radiogroup" aria-label="Тема">' + [["system", "Как в системе"], ["light", "Светлая"], ["dark", "Тёмная"]].map(function (o) { return '<button type="button" data-theme="' + o[0] + '" class="' + (th === o[0] ? "on" : "") + '" role="radio" aria-checked="' + (th === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div></section>";
     h += '<section class="card" id="s-flags"><h2>Флажки</h2><p class="muted" style="margin:0">У задачи может стоять один из этих флажков. Название и цвет меняются здесь, порядок — стрелкой ↑. Задачи с флажками собраны в списке «С флажком».</p><div class="fled">' +
@@ -4147,7 +4169,10 @@ CREATE TABLE inbox (
       "<b>Настройка виджета</b> — ⚙ в его заголовке: заголовок, откуда брать задачи, порядок, сколько показывать, период, цвет, размер. Клик по заголовку виджета открывает сам раздел.",
       "<b>Расстановка</b>: «✎ Изменить доску» — тяните виджет за ⠿ на новое место, ⤡ — размер (маленький, высокий, средний, большой, широкий, огромный), × — убрать с доски (можно вернуть из сообщения внизу). «✓ Готово» — выйти из режима.",
       "<b>На доску из раздела</b>: правая кнопка мыши по проекту, тегу, фильтру или пункту «Списков» в левой панели → «📌 На доску» → выберите доску (или «Новая доска»). У проекта есть ещё «Прогресс — на доску» и «Доска проекта» — готовая доска по шаблону. Заметку можно закрепить кнопкой «📌 На доску» внизу заметки.",
-      "<b>Меню доски</b> (⋯ справа вверху или правая кнопка по доске в панели): дублировать, переставить выше или ниже, удалить. На телефоне виджеты встают в одну колонку."]));
+      "<b>Меню доски</b> (⋯ справа вверху или правая кнопка по доске в панели): открывать при запуске, дублировать, переставить выше или ниже, удалить. На телефоне виджеты встают в одну колонку.",
+      "<b>Стартовая доска</b>: ⋯ → «🏠 Открывать при запуске приложения» — эта доска будет встречать вас при каждом открытии (при обновлении страницы остаётся текущее место). Выбрать стартовый экран можно и в «Настройки» → «Общие» → «Стартовый экран». Логотип «Задачи» вверху тоже ведёт на стартовый экран.",
+      "<b>Источник доски</b>: кнопка «Источник: …» в шапке доски — выберите проект, тег, фильтр или список, и все виджеты без своего источника (список задач, сроки, числа, график, календарь, канбан, быстрый ввод, прогресс проекта) покажут его. Так одна доска легко переключается с проекта на проект. Своё значение у виджета (⚙ → «Откуда») главнее; «Как у доски» возвращает общее. Доска по шаблону «Проект» сразу создаётся с источником.",
+      "<b>Заметка на доске</b>: ✎ в заголовке виджета заметки или двойной клик по тексту — правите прямо на доске тем же редактором, что и в заметке («/» — блоки, выделение — форматирование). ✓ — готово, всё сохраняется само."]));
     h += sec("stats", "Статистика", "<p>За 7, 30 или 90 дней: выполнено (вместе с повторяющимися задачами), создано, серия дней подряд, помидоры и часы фокуса, просроченные, привычки; графики по дням, по проектам, по дням недели и по спринтам.</p>");
 
     /* ================= Напоминания и Telegram ================= */
@@ -4791,12 +4816,16 @@ CREATE TABLE inbox (
       case "bedit": BEDIT = !BEDIT; WCFG = null; render(); return;
       case "wadd": WADD = !WADD; render(); return;
       case "bmenu": var bbm = board(ARG), rbm = el.getBoundingClientRect(); if (bbm) ctxShow(rbm.right - 220, rbm.bottom + 4, bMenu(bbm), { k: "board", id: bbm.id }); return;
-      case "waddt": var bwa = board(ARG); if (!bwa) return; var nk = el.dataset.k, nw = wAdd(bwa, nk, nk === "tasks" ? { src: bwa.pid ? "proj:" + bwa.pid : "list:today" } : nk === "quick" ? { src: bwa.pid ? "proj:" + bwa.pid : "list:inbox" } : nk === "proj" && bwa.pid ? { pid: bwa.pid } : {}); WADD = false; if (/^(proj|note)$/.test(nk) && !(nk === "proj" && bwa.pid)) WCFG = nw.id; render(); setTimeout(function () { var x = document.querySelector('.wdg[data-w="' + nw.id + '"]'); if (x) x.scrollIntoView({ block: "nearest", behavior: "smooth" }); }, 30); return;
+      case "waddt": var bwa = board(ARG); if (!bwa) return; var nk = el.dataset.k, nw = wAdd(bwa, nk, bwa.src ? {} : nk === "tasks" ? { src: bwa.pid ? "proj:" + bwa.pid : "list:today" } : nk === "quick" ? { src: bwa.pid ? "proj:" + bwa.pid : "list:inbox" } : nk === "proj" && bwa.pid ? { pid: bwa.pid } : {}); WADD = false; if (/^(proj|note|countdown|links)$/.test(nk) && !(nk === "proj" && (bwa.pid || /^proj:/.test(bwa.src || "")))) WCFG = nw.id; render(); setTimeout(function () { var x = document.querySelector('.wdg[data-w="' + nw.id + '"]'); if (x) x.scrollIntoView({ block: "nearest", behavior: "smooth" }); }, 30); return;
       case "wcfg": var wcw = el.closest(".wdg"); if (wcw) { WCFG = WCFG === wcw.dataset.w ? null : wcw.dataset.w; render(); } return;
       case "wdel": var bwd = board(ARG), wdw = el.closest(".wdg"); if (bwd && wdw) { var wi = bwd.w.map(function (w) { return w.id; }).indexOf(wdw.dataset.w), wrm = bwd.w[wi]; if (wi < 0) return; bwd.w.splice(wi, 1); WCFG = null; bSave(bwd); toastUndo("Виджет убран", function () { bwd.w.splice(Math.min(wi, bwd.w.length), 0, wrm); touch(bwd); save(); render(); }); } return;
       case "wsize": var wsw = el.closest(".wdg"), rws = el.getBoundingClientRect(), wsb = board(ARG), wso = wOf(wsb, wsw && wsw.dataset.w); if (wso) ctxShow(rws.left, rws.bottom + 4, Object.keys(WSZ).map(function (k) { return { c: k, i: "", l: WSZ[k][2], k: (wso.sz || "m") === k ? "✓" : "" }; }), { k: "wsz", id: wso.id }); return;
       case "wset": var bws = board(ARG), wsx = wOf(bws, el.closest(".wdg").dataset.w); if (wsx) { wsx.cfg = wsx.cfg || {}; var wv = el.dataset.v; wsx.cfg[el.dataset.k] = /^-?\d+$/.test(wv) ? +wv : wv; bSave(bws); } return;
-      case "wsrc": var rsr = el.getBoundingClientRect(); ctxShow(rsr.left, rsr.bottom + 4, wsrcMenu(), { k: "wsrc", id: el.closest(".wdg").dataset.w }); return;
+      case "wsrc": var rsr = el.getBoundingClientRect(), bsr = board(ARG); ctxShow(rsr.left, rsr.bottom + 4, [{ c: "__inh", i: "↺", l: bsr && bsr.src ? "Как у доски (" + wsrcName(bsr.src) + ")" : "По умолчанию" }, "-"].concat(wsrcMenu()), { k: "wsrc", id: el.closest(".wdg").dataset.w }); return;
+      case "bsrc": var rbs = el.getBoundingClientRect(); ctxShow(rbs.left, rbs.bottom + 4, [{ c: "__none", i: "", l: "— у каждого виджета свой —" }, "-"].concat(wsrcMenu()), { k: "bsrc", id: ARG }); return;
+      case "wnedit": var wne = el.closest(".wdg"); if (wne) { WNED = WNED === wne.dataset.w ? null : wne.dataset.w; if (!WNED) { flushBody(); var ae = document.activeElement; if (ae && ae.closest && ae.closest(".rte")) ae.blur(); fmtHide(); slashClose(); } render(); if (WNED) setTimeout(function () { var r = $("nrte"); if (r) { r.focus(); caretEnd(r); } }, 30); } return;
+      case "startpick": var rsp = el.getBoundingClientRect(), cur = S.opt.start || ""; ctxShow(rsp.left, rsp.bottom + 4, [{ c: "__last", i: "↺", l: "Где остановились в прошлый раз", k: cur ? "" : "✓" }, { c: "today", i: "", l: "Сегодня", k: cur === "today" ? "✓" : "" }, { c: "inbox", i: "", l: "Входящие", k: cur === "inbox" ? "✓" : "" }].concat(boards().length ? ["-"].concat(boards().map(function (b) { return { c: "board-" + b.id, i: "▦", l: "Доска «" + b.n + "»", k: cur === "board-" + b.id ? "✓" : "" }; })) : []), { k: "startpick" }); return;
+      case "bstart": var bst = board(ARG); if (bst) { S.opt.start = S.opt.start === "board-" + bst.id ? "" : "board-" + bst.id; optTouch(); save(); render(); toast(S.opt.start ? "«" + bst.n + "» будет открываться при запуске" : "При запуске — где остановились в прошлый раз"); } return;
       case "wsort": var rso = el.getBoundingClientRect(); ctxShow(rso.left, rso.bottom + 4, Object.keys(SORTN).filter(function (k) { return k !== "manual"; }).map(function (k) { return { c: k, i: "", l: SORTN[k] }; }), { k: "wsort", id: el.closest(".wdg").dataset.w }); return;
       case "wproj": var rpj = el.getBoundingClientRect(); ctxShow(rpj.left, rpj.bottom + 4, ptree().map(function (x) { return { c: x.p.id, i: piconH(x.p), l: x.p.n, pad: x.d }; }), { k: "wproj", id: el.closest(".wdg").dataset.w }); return;
       case "wnote": var rnt = el.getBoundingClientRect(), nl = notes().sort(function (a, b4) { return (b4.upd || 0) - (a.upd || 0); }).slice(0, 60); if (!nl.length) { toast("Заметок пока нет"); return; } ctxShow(rnt.left, rnt.bottom + 4, nl.map(function (n) { return { c: n.id, i: "📝", l: n.t || "Без названия" }; }), { k: "wnote", id: el.closest(".wdg").dataset.w }); return;
@@ -5840,10 +5869,12 @@ CREATE TABLE inbox (
     if (c && c.indexOf("help:") === 0) { go("help-" + c.slice(5)); return; }
     if (c && /^pinp?:/.test(c)) { pinFrom(k, id, c.replace(/^pinp?:/, ""), c.indexOf("pinp:") === 0); return; }
     if (k === "board") { var bx = board(id); if (bx) bCmd(bx, c); return; }
+    if (k === "bsrc") { var bs = board(id); if (!bs) return; if (c === "__none") delete bs.src; else bs.src = c; bSave(bs); toast(bs.src ? "Источник доски: " + wsrcName(bs.src) + " — виджеты без своего источника берут его" : "У каждого виджета теперь свой источник"); return; }
+    if (k === "startpick") { S.opt.start = c === "__last" ? "" : c; optTouch(); save(); render(); return; }
     if (k === "btplproj") { bFromTpl("proj", c); return; }
     if (k === "wsz" || k === "wsrc" || k === "wsort" || k === "wproj" || k === "wnote") {
       var bb = board(ARG), ww = wOf(bb, id); if (!ww) return; ww.cfg = ww.cfg || {};
-      if (k === "wsz") ww.sz = c; else if (k === "wsrc") ww.cfg.src = c; else if (k === "wsort") ww.cfg.sort = c; else if (k === "wproj") ww.cfg.pid = c; else ww.cfg.nid = c;
+      if (k === "wsz") ww.sz = c; else if (k === "wsrc") { if (c === "__inh") delete ww.cfg.src; else ww.cfg.src = c; } else if (k === "wsort") ww.cfg.sort = c; else if (k === "wproj") ww.cfg.pid = c; else ww.cfg.nid = c;
       bSave(bb); return;
     }
     if (k === "proj" && c === "pboard") { bFromTpl("proj", id); return; }
@@ -6096,7 +6127,13 @@ CREATE TABLE inbox (
   /* ---------- запуск ---------- */
   applyTheme();
   if (LS.get("zd-mini") === "1") document.body.classList.add("mini");
-  if (!location.hash) { var last = LS.get("zd-last"); if (last && !/^search/.test(last)) try { history.replaceState(null, "", "#" + last); } catch (e) { /* ok */ } }
+  // стартовый экран: выбранная доска или список при открытии приложения (не при обновлении страницы)
+  (function () {
+    var st = S.opt.start || "", nav = (performance.getEntriesByType && performance.getEntriesByType("navigation")[0]) || {};
+    var okSt = st && (/^board-/.test(st) ? !!board(st.slice(6)) : LISTN[st] || st === "inbox");
+    if (okSt && nav.type !== "reload" && (!location.hash || location.hash === "#today")) { try { history.replaceState(null, "", "#" + st); } catch (e) { /* ok */ } return; }
+    if (!location.hash) { var last = LS.get("zd-last"); if (last && !/^search/.test(last)) try { history.replaceState(null, "", "#" + last); } catch (e) { /* ok */ } }
+  })();
   if (!S.tasks.length && !LS.get("zd-started")) {
     var t0 = today0();
     S.tasks.push(touch({ id: uid(), t: "Нажмите на задачу, чтобы открыть подробности", at: t0, allday: true, rep: "", prio: 0, tags: [], pid: "", done: false, created: Date.now() }));
