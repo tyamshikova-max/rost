@@ -122,9 +122,10 @@ h2 .c { font: 500 calc(12px * var(--fs)) var(--mono); color: var(--muted) }
 #fab { position: fixed; z-index: 46; right: 24px; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); width: 54px; height: 54px; border-radius: 50%; border: 0; background: var(--acc); color: #fff; font-size: calc(28px * var(--fs)); line-height: 1; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.22); display: grid; place-items: center }
 #fab:hover { filter: brightness(1.08); transform: translateY(-1px) } #fab[hidden] { display: none }
 #view::after { content: ""; display: block; height: 80px }
-@media (min-width: 861px) { body.pnopen:not(.pnfull) #fab { right: calc(var(--pw, 440px) + 24px) } }
+@media (min-width: 861px) { body.pnopen:not(.pnfull) #fab { right: calc(min(var(--pw, 620px), 100vw - 80px) + 24px) } body.pnfull #fab { display: none } }
+@media (max-width: 860px) { body.pnopen #fab { display: none } }
 .add.qfloat { position: fixed; z-index: 47; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); width: min(720px, calc(100vw - 32px)); margin: 0; box-shadow: 0 10px 30px rgba(0,0,0,.22); padding: 10px 12px 8px; border-color: var(--acc) }
-@media (min-width: 861px) { body.pnopen:not(.pnfull) .add.qfloat { left: calc((100vw - var(--pw, 440px)) / 2 + 120px) } }
+@media (min-width: 861px) { body.pnopen:not(.pnfull) .add.qfloat { left: calc((100vw - min(var(--pw, 620px), 100vw - 80px)) / 2 + 120px); width: min(720px, calc(100vw - min(var(--pw, 620px), 100vw - 80px) - 300px)) } }
 .add .qx { position: absolute; top: -12px; right: -10px; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer; font-size: calc(12px * var(--fs)) }
 .add { margin: 14px 0 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px }
 .add .r1 { display: flex; gap: 8px }
@@ -715,6 +716,40 @@ html.nosheet .dptopbox { background: color-mix(in srgb, var(--star) 10%, transpa
 @media print { .rpbar, .rp .hq, .rphead .hq { display: none !important } .rp { max-width: none } .rpblk, .stc { break-inside: avoid } .rp h2, .rp h3 { break-after: avoid } .stc { border: 1px solid #ccc !important; background: #fff !important } .rptbl td, .rptbl th, .rplist li { border-color: #ddd !important } .chart { -webkit-print-color-adjust: exact; print-color-adjust: exact } @page { margin: 14mm } }
 .setc { display: grid; gap: 8px; max-width: 760px; padding: 12px 14px; margin-top: 10px } .setch { display: flex; gap: 8px; align-items: center } .setch .setn { flex: 1; min-width: 0; font-weight: 600 }
 .setl { width: 100%; min-height: 84px; resize: vertical; font: inherit; line-height: 1.5 } .setd { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center } .setd .seg button { min-width: 34px } .setpre { font-size: calc(12.5px * var(--fs)) } .setsum { margin-left: auto; font-size: calc(12.5px * var(--fs)) }
+.vtog .vsum { max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: bottom } .tbar:not(.vopen) .vctl { display: none } .vctl { display: contents }
+.subx { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: calc(11px * var(--fs)); padding: 0 4px; opacity: .6 } .subx:hover { opacity: 1; color: var(--fg) }
+html.nohq .hq:not(.hsrch) { display: none !important }
+.qdates { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px } .qdates .chip { font-size: calc(12px * var(--fs)) }
+.pnm { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: calc(18px * var(--fs)); line-height: 1; padding: 4px 8px; border-radius: 6px } .pnm:hover { background: var(--hover); color: var(--fg) }
+.props.pcol .prow.pmore { display: none } .pmoreb { grid-column: 1 / -1; justify-self: start; border: 0; background: none; color: var(--acc); cursor: pointer; font: inherit; font-size: calc(13px * var(--fs)); padding: 4px 0 }
+.calnav { display: inline-flex; gap: 6px; align-items: center }
+.welcome { position: relative; background: var(--acc-soft); border-color: color-mix(in srgb, var(--acc) 30%, var(--line)); max-width: 900px } .welcome .wx { position: absolute; top: 8px; right: 8px } .welcome .r { margin-top: 8px; flex-wrap: wrap; gap: 6px }
+.lcfg { display: block; margin: 2px 0 6px 10px; font-size: calc(12.5px * var(--fs)); color: var(--muted); text-decoration: none } .lcfg:hover { color: var(--acc) }
+.syncbar { margin: 0 0 12px; padding: 9px 14px; border-radius: 10px; background: color-mix(in srgb, var(--warn) 14%, var(--solid, #fff)); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); color: var(--fg); cursor: pointer; font-size: calc(13.5px * var(--fs)) }
+#bnav { display: none }
+li.task.swp { transition: none; position: relative; background: var(--solid, #fff); overflow: visible }
+li.task.swp::before, li.task.swp::after { position: absolute; top: 0; bottom: 0; width: 140px; display: flex; align-items: center; font-weight: 600; font-size: calc(13px * var(--fs)); color: #fff; opacity: .35; transition: opacity .1s }
+li.task.swp::before { content: "✓ Готово"; right: 100%; justify-content: flex-end; padding-right: 14px; background: var(--ok); border-radius: 10px 0 0 10px }
+li.task.swp::after { content: "📅 Срок…"; left: 100%; justify-content: flex-start; padding-left: 14px; background: var(--acc); border-radius: 0 10px 10px 0 }
+li.task.swr::before, li.task.swl::after { opacity: 1 }
+.main .list:has(li.swp) { overflow: hidden }
+li.task { transition: transform .15s }
+@media (max-width: 860px) {
+  #bnav { display: flex; position: fixed; z-index: 34; left: 0; right: 0; bottom: 0; padding: 4px 4px env(safe-area-inset-bottom, 0px); background: color-mix(in srgb, var(--solid, #fff) 92%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line) }
+  #bnav a, #bnav button { flex: 1; display: grid; justify-items: center; gap: 1px; padding: 6px 2px 5px; border: 0; background: none; color: var(--muted); text-decoration: none; font: 500 calc(10.5px * var(--fs)) var(--sans); position: relative; min-height: 48px; cursor: pointer }
+  #bnav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round } #bnav .on { color: var(--acc) }
+  #bnav i { position: absolute; top: 3px; left: calc(50% + 6px); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--muted); color: #fff; font: 600 10px/16px var(--sans); font-style: normal }
+  #bnav i.bad { background: var(--warn) }
+  .main { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)) }
+  #fab { bottom: calc(72px + env(safe-area-inset-bottom, 0px)) } .add.qfloat { bottom: calc(66px + env(safe-area-inset-bottom, 0px)) } #toast { bottom: calc(72px + env(safe-area-inset-bottom, 0px)) } #bulk { bottom: calc(64px + env(safe-area-inset-bottom, 0px)) } #pomo { bottom: calc(66px + env(safe-area-inset-bottom, 0px)) }
+  .htoday, .r.dpcta { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px } .htoday::-webkit-scrollbar, .r.dpcta::-webkit-scrollbar { display: none } .htoday > *, .r.dpcta > * { flex: none }
+  #panel .props { grid-template-columns: minmax(0, 1fr); gap: 2px 0 } #panel .props > .prow > span:first-child, #panel .props > span:first-of-type { font-size: calc(12px * var(--fs)); color: var(--muted); margin-top: 8px }
+  .vtog .vsum { max-width: 38vw }
+}
+@media (max-width: 480px) { .ctxb span { display: inline !important; max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } #themeBtn { display: none } }
+@media (hover: none) {
+  .task .acts button[data-a="flag"], .task .acts button[data-a="addsub"], .task .acts button[data-a="del"] { display: none } .pn-top > button:not(.hq), .pn-top > a:not(.hq) { min-width: 40px; min-height: 40px } .rgrip, .psg { display: none } .ibtn, .btn.sm { min-height: 36px } .chip { min-height: 32px } .task .ck { margin: 0 4px }
+}
 .tarbar, .tarsearch { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 12px 0 }
 .tarsearch .inp { flex: 1; min-width: 200px; max-width: 420px } .tarlink { margin: 10px 0 0 }
 .pn-sec h3.pntabs { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; text-transform: none; letter-spacing: 0; margin-bottom: 10px }
@@ -1083,6 +1118,7 @@ h2[data-col].dropin { outline: 2px dashed var(--acc); outline-offset: 2px; borde
   <aside class="side" id="side" aria-label="Списки"></aside>
   <main class="main" id="view"></main>
 </div>
+<nav id="bnav" aria-label="Быстрые переходы"></nav>
 <div class="scrim" id="scrim"></div>
 <aside id="panel" hidden aria-label="Задача"></aside>
 <div id="slash" hidden role="listbox" aria-label="Блоки"></div>
@@ -2086,7 +2122,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-54";
+  var APPV = "zd-app-2026-10-16-55";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -2137,7 +2173,7 @@ CREATE TABLE inbox (
     fail: function (e) {
       SYNC.busy = false;
       if (e && e.status === 401) { YD.logout(); SYNC.st = "off"; toast("Вход в Яндекс истёк — войдите снова"); }
-      else { var hint = { 0: "нет интернета или Диск недоступен из этого браузера", 403: "Диск не дал доступа — выйдите и войдите снова", 429: "Диск перегружен запросами, повторите через минуту", 507: "на Яндекс Диске закончилось место" }[e && e.status]; SYNC.st = "err"; SYNC.msg = (hint || (e && (e.msg || e.message)) || "неизвестная ошибка") + (e && e.status ? " (код " + e.status + ")" : ""); }
+      else { var hint = { 0: "нет интернета или Диск недоступен из этого браузера", 403: "Диск не дал доступа — выйдите и войдите снова", 429: "Диск перегружен запросами, повторите через минуту", 507: "на Яндекс Диске закончилось место" }[e && e.status]; SYNC.st = "err"; if (!SYNC.errAt) SYNC.errAt = Date.now(); SYNC.msg = (hint || (e && (e.msg || e.message)) || "неизвестная ошибка") + (e && e.status ? " (код " + e.status + ")" : ""); }
       try { console.warn("Синхронизация:", e); } catch (er) { /* ok */ }
       SYNC.show();
     },
@@ -2211,7 +2247,7 @@ CREATE TABLE inbox (
         return SYNC.push(remote);
       }).then(function () {
         if (SYNC.legacyNew) { LS.set("zd-legacy-h", SYNC.legacyNew); SYNC.legacyNew = ""; }
-        SYNC.busy = false; SYNC.bad = 0; SYNC.st = "ok"; SYNC.at = Date.now(); SYNC.show(); var wm = wpMeta(); if (wm && !wm.p && typeof wpUpload === "function") wpUpload();
+        SYNC.busy = false; SYNC.bad = 0; SYNC.st = "ok"; SYNC.at = Date.now(); if (SYNC.errAt) { SYNC.errAt = 0; render(); } SYNC.show(); var wm = wpMeta(); if (wm && !wm.p && typeof wpUpload === "function") wpUpload();
       }).catch(function (e) {
         if (!(e && e.bad)) return SYNC.fail(e);
         SYNC.busy = false; SYNC.bad = (SYNC.bad || 0) + 1;
@@ -2653,7 +2689,8 @@ CREATE TABLE inbox (
   var SIDE_DEF = ["fav", "boards", "lists", "projects", "notes", "filters", "tags", "service"], LISTS_DEF = ["inbox", "today", "goals", "waiting", "journal", "cal", "gantt", "matrix", "habits", "sprint", "plans", "someday", "flag", "all", "stats"];
   function sideOrder() { var o = (S.opt.side || []).filter(function (x) { return SIDE_DEF.indexOf(x) >= 0; }); SIDE_DEF.forEach(function (x) { if (o.indexOf(x) < 0) { var si = o.indexOf("service"); if (si >= 0) o.splice(si, 0, x); else o.push(x); } }); return o; }
   function listsAll() { var o = (S.opt.lists || []).filter(function (x) { return LISTS_DEF.indexOf(x) >= 0; }); LISTS_DEF.forEach(function (x) { if (o.indexOf(x) < 0) o.push(x); }); return o; }
-  function hiddenLists() { var l = LS.get("zd-hide"); if (l) { try { var a = JSON.parse(l); if (Array.isArray(a)) return a; } catch (e) { /* старый формат */ } } return S.opt.hideLists || []; }
+  var NEWHIDE = ["gantt", "matrix", "sprint", "journal", "waiting", "someday", "flag"];
+  function hiddenLists() { var l = LS.get("zd-hide"); if (l) { try { var a = JSON.parse(l); if (Array.isArray(a)) return a; } catch (e) { /* старый формат */ } } return S.opt.hideLists || (LS.get("zd-newdef") === "1" ? NEWHIDE : []); }
   function listsOrder() { var hid = hiddenLists(); return listsAll().filter(function (x) { return x === "inbox" || hid.indexOf(x) < 0; }); }
   var LISTN = { journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
   function setListHidden(id, hide) { if (id === "inbox") return; var h = hiddenLists().filter(function (x) { return x !== id; }); if (hide) h.push(id); S.opt.hideLists = h; LS.set("zd-hide", JSON.stringify(h)); optTouch(); save(); render(); }
@@ -2688,7 +2725,8 @@ CREATE TABLE inbox (
       all: function () { return itemHTML("smart", "all", "all", ic("all"), "Все задачи", 0, { drag: true }); },
       done: function () { return itemHTML("smart", "done", "done", ic("done"), "Сделано", 0, { drag: true }); }
     };
-    B.lists = blockHead("lists", "Списки") + '<nav class="nav" data-lists="1">' + listsOrder().map(function (k) { return L[k](); }).join("") + "</nav>";
+    var nhid = hiddenLists().filter(function (x) { return LISTS_DEF.indexOf(x) >= 0; }).length;
+    B.lists = blockHead("lists", "Списки") + '<nav class="nav" data-lists="1">' + listsOrder().map(function (k) { return L[k](); }).join("") + "</nav>" + '<a href="#" class="lcfg" data-a="lists-cfg">' + (nhid ? "＋ ещё " + nhid + " " + plural(nhid, ["пункт", "пункта", "пунктов"]) + " — показать…" : "Настроить пункты…") + "</a>";
     var ph = blockHead("projects", "Проекты", '<button type="button" data-a="rev-on" title="Проверка проектов: пройтись по проектам, которые пора пересмотреть" aria-label="Проверка проектов">↻</button><button type="button" data-a="newproj" title="Новый проект" aria-label="Новый проект">+</button>') + '<nav class="nav">';
     var tr = ptree(), hidden = {};
     if (!tr.length) ph += '<div class="none">Пока нет. «+» — создать</div>';
@@ -2958,11 +2996,12 @@ CREATE TABLE inbox (
   function toolbar(o) {
     o = o || {}; var vo = vopt(), md = vmode();
     var qfb = '<button type="button" class="ibtn qfb' + (QFO[curKey()] || qfActive() ? " on" : "") + '" data-a="qf" title="Быстрый фильтр по приоритету, сроку, тегам и тексту">⛃ Фильтр' + (qfActive() ? " •" : "") + "</button>";
-    return '<div class="tbar">' + qfb + '<button type="button" class="ibtn selb' + (SELMODE ? " on" : "") + '" data-a="selmode" title="Выбрать несколько задач и изменить их разом">☑ Выбрать</button><div class="seg" role="radiogroup" aria-label="Вид"><button type="button" data-a="vmode" data-x="list" class="' + (md === "list" ? "on" : "") + '" title="Списком">☰ Список</button><button type="button" data-a="vmode" data-x="board" class="' + (md === "board" ? "on" : "") + '" title="Канбан-доска: колонки по группировке">▦ Доска</button></div><span class="tlab">' + (md === "board" ? "Колонки" : "Группировка") + ' <button type="button" class="ddb sm" data-a="vsel" data-k="group" data-lv="0">' + esc(GROUPN[vo.group] || vo.group) + '<span class="dda">▾</span></button>' +
+    var vopen = LS.get("zd-vopen") === "1", vsum = (md === "board" ? "▦ Доска" : "☰ Список") + (vo.group !== "none" ? " · группы " + (GROUPN[vo.group] || vo.group) : "") + " · ↕ " + (SORTN[vo.sort.replace(/^-/, "")] || vo.sort);
+    return '<div class="tbar' + (vopen ? " vopen" : "") + '">' + qfb + '<button type="button" class="ibtn selb' + (SELMODE ? " on" : "") + '" data-a="selmode" title="Выбрать несколько задач и изменить их разом">☑ Выбрать</button><button type="button" class="ibtn vtog' + (vopen ? " on" : "") + '" data-a="vtog" title="' + (vopen ? "Свернуть настройки вида" : "Вид: список или доска, группировка, сортировка") + '" aria-expanded="' + vopen + '"><span class="vsum">' + esc(vsum) + '</span> ' + (vopen ? "▴" : "▾") + '</button><span class="vctl"><div class="seg" role="radiogroup" aria-label="Вид"><button type="button" data-a="vmode" data-x="list" class="' + (md === "list" ? "on" : "") + '" title="Списком">☰ Список</button><button type="button" data-a="vmode" data-x="board" class="' + (md === "board" ? "on" : "") + '" title="Канбан-доска: колонки по группировке">▦ Доска</button></div><span class="tlab">' + (md === "board" ? "Колонки" : "Группировка") + ' <button type="button" class="ddb sm" data-a="vsel" data-k="group" data-lv="0">' + esc(GROUPN[vo.group] || vo.group) + '<span class="dda">▾</span></button>' +
       vo.groups.map(function (g, i) { return '<span class="gsep">›</span><button type="button" class="ddb sm" data-a="vsel" data-k="group" data-lv="' + (i + 1) + '" title="Вложенная группировка, уровень ' + (i + 2) + '">' + esc(GROUPN[g] || g) + '<span class="dda">▾</span></button>'; }).join("") +
       (vo.group !== "none" && vo.groups.length < 3 ? '<button type="button" class="ibtn gadd" data-a="vgadd" title="Добавить вложенную группировку (уровень ' + (vo.groups.length + 2) + ")" + (md === "board" ? " — на доске внутри колонок" : "") + '">＋</button>' : "") + "</span>" +
       '<span class="tlab">Сортировка <button type="button" class="ddb sm" data-a="vsel" data-k="sort">' + esc(SORTN[vo.sort.replace(/^-/, "")] || vo.sort) + '<span class="dda">▾</span></button></span><button type="button" class="ibtn rev' + (vo.sort.charAt(0) === "-" ? " on" : "") + '" data-a="vrev" title="Обратный порядок">⇅</button>' +
-      (o.sub ? '<button type="button" class="lt' + (vo.sub ? " on" : "") + '" data-a="vsub" title="Показывать и задачи вложенных проектов"><span class="lbox"></span><span>с задачами подпроектов</span></button>' : "") + (o.secbtn ? '<button type="button" class="btn sm" data-a="addsec" title="Секция — этап или часть проекта">＋ Секция</button>' : "") + "</div>" + qfBar();
+      (o.sub ? '<button type="button" class="lt' + (vo.sub ? " on" : "") + '" data-a="vsub" title="Показывать и задачи вложенных проектов"><span class="lbox"></span><span>с задачами подпроектов</span></button>' : "") + "</span>" + (o.secbtn ? '<button type="button" class="btn sm" data-a="addsec" title="Секция — этап или часть проекта">＋ Секция</button>' : "") + "</div>" + qfBar();
   }
   // в списках — только круглая «＋» внизу справа; поле ввода всплывает по нажатию (или клавишей n)
   var QOPEN = false, ADDOK = false;
@@ -2973,7 +3012,12 @@ CREATE TABLE inbox (
   }
 
   /* ---------- страницы ---------- */
-  function head(title, sub) { return "<h1>" + title + "</h1>" + (sub ? '<p class="sub">' + sub + "</p>" : ""); }
+  function subHidden() { try { var a = JSON.parse(LS.get("zd-subhide") || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function head(title, sub) {
+    var long = sub && sub.replace(/<[^>]+>/g, "").length > 45;
+    if (long && subHidden().indexOf(V) >= 0) sub = "";
+    return "<h1>" + title + "</h1>" + (sub ? '<p class="sub">' + sub + (long ? ' <button type="button" class="subx" data-a="subhide" title="Скрыть это пояснение">✕</button>' : "") + "</p>" : "");
+  }
   // список или канбан-доска; колонки доски — по текущей группировке (без группировки — по статусу)
   function listOrBoard(list, vo, o) { list = qfApply(list); return vmode() === "board" ? boardHTML(list, vo, o || {}) : renderGroups(list, vo, o) + doneTodayHTML(o); }
   // быстрый фильтр (воронка): живёт до перезагрузки страницы, можно сохранить как обычный фильтр
@@ -3205,7 +3249,7 @@ CREATE TABLE inbox (
   function noteDel(n) { n.del = 1; n.delAt = Date.now(); touch(n); save(); var back = n.sec && nsec(n.sec) ? "nsec-" + n.sec : "notes"; go(back); toastUndo("Заметка удалена", function () { delete n.del; delete n.delAt; touch(n); save(); render(); }); }
   function vWaiting() { return std("Жду ответа", "Задачи, переданные кому-то. В день «спросить» задача появится в «Сегодня» — напомнить о себе. Пометить задачу: меню задачи → «⏳ Жду ответа…» или строка «Жду ответа» в карточке.", waitList(), { empty: "Ничего не ждёте — хорошо. Когда отдадите задачу кому-то, отметьте её «⏳ Жду ответа».", scope: function (t) { return !!t.wait; } }); }
   function vSomeday() { return std("Когда-нибудь", "Идеи и дела «не сейчас». Они не попадают во «Входящие» и «Сегодня», пока вы не назначите им дату.", somedayList(), { empty: "Пусто. Отправить задачу сюда — меню задачи → «Установить дату» → «Когда-нибудь» (Alt+O).", scope: isSome }); }
-  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: aiBox() + todayPlanBox() + '<div class="r" style="margin-top:10px">' + (AI.ready() ? '<button class="btn sm aibtn" type="button" data-a="aiday" title="ИИ расставит задачи на сегодня по времени">✨ ИИ: по времени</button>' : "") + '<button class="btn sm" type="button" data-a="print" title="Распечатать план на сегодня">🖨 Распечатать</button><button class="btn sm" type="button" data-a="share" title="Ссылка на этот список для другого человека — только просмотр">🔗 Поделиться</button></div>' + habitsToday(), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
+  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: aiBox() + todayPlanBox() + habitsToday(), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
   var PDAY = 0, PFROM = 0;
   function pFrom() { if (!PFROM) PFROM = monday(Date.now()); return PFROM; }
   function onDay(t, d0) { return (t.at && sod(t.at) === d0) || (t.due && sod(t.due) === d0); }
@@ -3249,6 +3293,14 @@ CREATE TABLE inbox (
     }).join("") + "</div>";
     if (l.length > lim) h += '<div style="margin:12px 0"><button class="btn sm" type="button" data-a="tarmore">Показать ещё (' + (l.length - lim) + ")</button></div>";
     return h;
+  }
+  function bnavHTML() {
+    var ni = inboxList().length, tl = todayList(), nt = tl.length, late = tl.filter(isPastDay).length;
+    var it = function (v, href, icon, label, badge, bad) { return '<a href="#' + href + '" class="' + (V === v ? "on" : "") + '">' + icon + "<span>" + label + "</span>" + (badge ? '<i class="' + (bad ? "bad" : "") + '">' + badge + "</i>" : "") + "</a>"; };
+    var sv2 = function (d) { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '"/></svg>'; };
+    return it("today", "today", ic("today"), "Сегодня", late || nt || "", !!late) + it("inbox", "inbox", ic("inbox"), "Входящие", ni || "") + it("cal", "cal", ic("cal"), "Календарь") +
+      '<button type="button" data-a="bnsearch">' + sv2("M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15zM16 16l5 5") + "<span>Поиск</span></button>" +
+      '<button type="button" data-a="bnmenu">' + sv2("M4 7h16M4 12h16M4 17h16") + "<span>Меню</span></button>";
   }
   function vTArch() {
     var d = tArchDays(), l = tArchList().sort(function (a, b) { return (b.dt || b.upd || 0) - (a.dt || a.upd || 0); });
@@ -3307,6 +3359,10 @@ CREATE TABLE inbox (
   function revState(p) { var n = revInt(p); if (!n) return "never"; if (p.revAt && sod(p.revAt) === today0()) return "ok"; if (!p.revAt || p.revAt + n * DAY <= Date.now()) return "due"; return "wait"; }
   function revDue() { return ptree().map(function (x) { return x.p; }).filter(function (p) { return revState(p) === "due"; }); }
   function revGo(dir) { var all = ptree().map(function (x) { return x.p; }), due = all.filter(function (p) { return revState(p) === "due"; }); if (!due.length) { toast("✓ Все проекты проверены"); return; } var cur = V === "proj" ? all.map(function (p) { return p.id; }).indexOf(ARG) : -1, list = dir < 0 ? due.slice().reverse() : due; var nx = list.filter(function (p) { var i = all.indexOf(p); return dir < 0 ? i < cur : i > cur; })[0] || list[0]; go("proj-" + nx.id); }
+  function syncBar() {
+    if (!SYNC.errAt || SYNC.st !== "err" || Date.now() - SYNC.errAt < 15 * 60000) return "";
+    return '<div class="syncbar" data-a="syncnow" role="button" tabindex="0">⚠ Синхронизация с Яндекс Диском не проходит' + (SYNC.at ? " с " + hm(SYNC.at) : "") + ": " + esc(SYNC.msg || "нет связи") + ". Изменения сохранены на этом устройстве. <b>Нажмите, чтобы повторить</b></div>";
+  }
   function revBar() {
     if (!REV) return "";
     var due = revDue(), p = V === "proj" ? proj(ARG) : null;
@@ -3458,6 +3514,7 @@ CREATE TABLE inbox (
     return h;
   }
   /* ---------- календарь: день, неделя, месяц; перетаскивание задач по дням и часам ---------- */
+  if (window.innerWidth < 700 && LS.get("zd-calmode") === "week" && !LS.get("zd-calnarrow")) { LS.set("zd-calmode", "day"); LS.set("zd-calnarrow", "1"); }
   var HOUR = 48, CAL = { mode: LS.get("zd-calmode") || (window.innerWidth < 700 ? "day" : "week"), d: 0, scrolled: false };
   function durOf(t) { return Math.max(15, +t.dur || 30); }
   function pcol(t) { var p = proj(t.pid); return p ? col(p.c) : t.prio ? ["", "var(--p1)", "var(--p2)", "var(--p3)"][t.prio] : "var(--acc)"; }
@@ -3489,7 +3546,7 @@ CREATE TABLE inbox (
     var r = calRange(), from = r[0], to = r[1], all = tasks().filter(function (t) { return t.at || t.due; }), occ = [], dls = [];
     all.forEach(function (t) { occ = occ.concat(occIn(t, from, to)); if (t.due && !t.done && t.due >= from && t.due < to) dls.push({ t: t, at: t.due }); });
     var h = head("Календарь", "Перетаскивайте задачи между днями и часами, нижний край задачи тянется — меняется длительность. Двойной клик по пустому месту — новая задача.");
-    h += '<div class="calbar"><div class="seg">' + [["day", "День"], ["week", "Неделя"], ["month", "Месяц"]].map(function (x) { return '<button type="button" data-a="calmode" data-x="' + x[0] + '" class="' + (CAL.mode === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + '</div><button class="btn sm" type="button" data-a="calnav" data-x="-1" title="Назад">‹</button><button class="btn sm" type="button" data-a="calnav" data-x="0">Сегодня</button><button class="btn sm" type="button" data-a="calnav" data-x="1" title="Вперёд">›</button><span class="rt">' + esc(calTitle()) + "</span></div>";
+    h += '<div class="calbar"><div class="seg">' + [["day", "День"], ["week", "Неделя"], ["month", "Месяц"]].map(function (x) { return '<button type="button" data-a="calmode" data-x="' + x[0] + '" class="' + (CAL.mode === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + '</div><span class="calnav"><button class="btn sm" type="button" data-a="calnav" data-x="-1" title="Назад">‹</button><button class="btn sm" type="button" data-a="calnav" data-x="0">Сегодня</button><button class="btn sm" type="button" data-a="calnav" data-x="1" title="Вперёд">›</button></span><span class="rt">' + esc(calTitle()) + "</span></div>";
     var main = CAL.mode === "month" ? calMonth(from, occ, dls) : calWeek(from, CAL.mode === "day" ? 1 : 7, occ, dls);
     var un = tasks().filter(function (t) { return !t.done && !t.at; }).sort(cmpBy("prio")).slice(0, 80);
     var side = '<aside class="calside"><h3>Без срока · ' + un.length + "</h3>" + (un.length ? un.map(function (t) { return '<div class="cun" draggable="true" data-id="' + t.id + '" data-a="kopen" style="--pc:' + pcol(t) + '">' + esc(t.t) + "</div>"; }).join("") : '<p class="muted">Все задачи запланированы.</p>') + '<p class="muted">Перетащите задачу в календарь, чтобы назначить день и время.</p></aside>';
@@ -4098,8 +4155,9 @@ CREATE TABLE inbox (
   function todayPlanBox() {
     var dr = dayRec(), top = dayTop(), late = new Date().getHours() >= 17;
     var h = "";
+    if (LS.get("zd-welcome") !== "off" && !live(S.projects).length && live(S.tasks).length <= 3 && !tstCount()) h += '<div class="card welcome"><button type="button" class="ibtn wx" data-a="welcome-off" title="Скрыть" aria-label="Скрыть">✕</button><b>👋 Добро пожаловать в «Задачи»!</b><p class="muted">С чего начать — выберите удобное:</p><div class="r"><button type="button" class="btn sm pri" data-a="tstload">🧪 Загрузить тестовые данные</button><a class="btn sm" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf">📘 Скачать учебный курс</a><a class="btn sm" href="#settings-sync">☁ Войти через Яндекс</a></div><p class="muted" style="margin:8px 0 0">Тестовые данные — готовые примеры для упражнений курса; удаляются одной кнопкой. Вход через Яндекс нужен, чтобы задачи были и на телефоне, и на компьютере.</p></div>';
     if (top.length) h += '<div class="dptopbox"><b>★ Главное на сегодня</b>' + top.map(function (t) { return '<a class="' + (t.done ? "dn" : "") + '" href="#task-' + t.id + '">' + (t.done ? "✓ " : "") + esc(t.t) + "</a>"; }).join("") + "</div>";
-    h += '<div class="r dpcta">' + (!dr || !dr.planned ? '<a class="btn sm pri" href="#daily">☀ Спланировать день</a>' : '<a class="btn sm" href="#daily">☀ План дня</a>') + '<button type="button" class="btn sm" data-a="nowgo" title="Одна задача на весь экран, таймер и подзадачи">◉ Сейчас</button><button type="button" class="btn sm" data-a="setpick" title="Добавить набор задач: утро, вечер, обзор недели">▤ Набор</button>' + (late || (dr && dr.planned) ? '<a class="btn sm" href="#daily-review">🌙 Итоги дня' + (dr && dr.review ? " ✓" : "") + "</a>" : "") + "</div>";
+    h += '<div class="r dpcta">' + (!dr || !dr.planned ? '<a class="btn sm pri" href="#daily">☀ Спланировать день</a>' : '<a class="btn sm" href="#daily">☀ План дня</a>') + '<button type="button" class="btn sm" data-a="nowgo" title="Одна задача на весь экран, таймер и подзадачи">◉ Сейчас</button><button type="button" class="btn sm" data-a="setpick" title="Добавить набор задач: утро, вечер, обзор недели">▤ Набор</button>' + (late || (dr && dr.planned) ? '<a class="btn sm" href="#daily-review">🌙 Итоги дня' + (dr && dr.review ? " ✓" : "") + "</a>" : "") + '<button type="button" class="btn sm" data-a="todaymore" title="Ещё: распечатать, поделиться' + (AI.ready() ? ", ИИ" : "") + '" aria-label="Ещё">⋯</button></div>';
     return h;
   }
   document.addEventListener("change", function (e) {
@@ -4866,6 +4924,8 @@ CREATE TABLE inbox (
     var stv = S.opt.start || "", stn = !stv ? "где остановились в прошлый раз" : /^board-/.test(stv) ? (board(stv.slice(6)) ? "доска «" + board(stv.slice(6)).n + "»" : "где остановились в прошлый раз") : (LISTN[stv] || stv);
     h += '<section class="card" id="s-start"><h2>Стартовый экран</h2><p class="muted" style="margin:0">Что открывается, когда вы запускаете приложение (при обновлении страницы остаётся текущее место). Удобно сделать стартовой доску — например, «Мой день».</p><div class="r"><button type="button" class="ddb" data-a="startpick">' + esc(stn.charAt(0).toUpperCase() + stn.slice(1)) + '<span class="dda">▾</span></button></div></section>';
     h += '<section class="card" id="s-day"><h2>План дня</h2><p class="muted" style="margin:0">Сколько часов в день вы готовы отдавать задачам — с этим числом шаг «Время» в плане дня сравнивает оценки задач и предупреждает о перегрузе.</p><div class="r" style="align-items:center"><input type="number" class="inp dpcapin" data-dpcap="1" min="1" max="24" step="0.5" value="' + dayCap() + '" aria-label="Часов на задачи в день"><span>ч в день</span><span class="muted">от 1 до 24</span></div></section>';
+    var nsh = subHidden().length;
+    h += '<section class="card" id="s-hints"><h2>Подсказки</h2><p class="muted" style="margin:0">Значки «?» у блоков ведут в справку по этому месту. Когда приложение освоено, их можно спрятать — справка останется в «?» внизу левой панели.</p><div class="r" style="margin-top:10px;align-items:center"><button type="button" class="lt' + (S.opt.noHq ? "" : " on") + '" data-a="hqtog"><span class="lbox"></span><span>Показывать значки «?»</span></button>' + (nsh ? '<button type="button" class="btn sm" data-a="subreset">Вернуть скрытые пояснения (' + nsh + ")</button>" : '<span class="muted">Пояснения под заголовками можно скрыть крестиком ✕ рядом с ними.</span>') + "</div></section>";
     var tad = tArchDays();
     h += '<section class="card" id="s-tarch"><h2>Архив выполненных задач</h2><p class="muted" style="margin:0">Выполненные задачи старше этого срока уходят из «Сделано» на страницу <a href="#tarch">«Архив задач»</a>. Ничего не удаляется: они остаются в статистике, целях, проектах и поиске; вернуть в работу — снять отметку.</p><div class="seg" style="margin-top:10px">' + TARCHO.map(function (x) { return '<button type="button" data-a="tarchset" data-v="' + x[0] + '" class="' + (tad === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></section>";
     h += '<section class="card" id="s-review"><h2>Проверка проектов</h2><p class="muted" style="margin:0">Как часто напоминать пересмотреть проект (кнопка ↻ у заголовка «Проекты»). Для отдельного проекта интервал меняется правым кликом по нему → «Интервал проверки».</p><div class="seg" style="margin-top:10px">' + [[7, "неделя"], [14, "2 недели"], [30, "месяц"], [182, "полгода"], [0, "не проверять"]].map(function (x) { return '<button type="button" data-a="revdef" data-v="' + x[0] + '" class="' + (rd === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></section>";
@@ -4895,7 +4955,7 @@ CREATE TABLE inbox (
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
   }
   // справка по вкладкам, как настройки; поиск ищет по всем разделам сразу
-  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
+  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "phone", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
   var HQ = "";
   function htabOf(a) { if (HTABS.some(function (x) { return x[0] === a; })) return a; var f = HTABS.filter(function (x) { return x[3].indexOf(a) >= 0; })[0]; return f ? f[0] : "start"; }
   function vHelpTabs() {
@@ -4978,6 +5038,13 @@ CREATE TABLE inbox (
         ["Раз в неделю", "Обзор недели (доска «Обзор недели»), завершить и спланировать спринт, пройти проверку проектов ↻, записать шаг в дневник цели, посмотреть итоги привычек", "доска, «Спринт», «Проекты» ↻, «Цели», «Привычки»"],
         ["Раз в месяц", "Статистика за 30 дней, убрать в архив законченные проекты, пересмотреть цели", "«Статистика», меню проекта, «Цели»"]], true) +
       tip("Главное правило: всё, что пришло в голову, — сразу во «Входящие» быстрым вводом, а разбирать — утром в плане дня. Так ничего не теряется и не держится в памяти."));
+    h += sec("phone", "На телефоне", ul([
+      "<b>Нижняя панель</b>: Сегодня, Входящие, Календарь, Поиск и Меню (левая панель со всеми списками). Красная цифра у «Сегодня» — просроченные задачи.",
+      "<b>Смахните задачу вправо</b> — она отмечается выполненной; <b>влево</b> — откроется меню переноса срока: сегодня, завтра, в понедельник, через неделю, когда-нибудь…",
+      "<b>Долгое нажатие</b> на задачу — режим выбора: можно отметить несколько задач и удалить, перенести или изменить их разом.",
+      "<b>Карточка задачи</b> открывается на весь экран; пустые поля спрятаны под «Ещё поля ▾». Под сроком — быстрые кнопки «Сегодня · Завтра · Пн · +неделя · Когда-нибудь». Редкие действия — в «⋯» вверху карточки.",
+      "<b>Вид ▾</b> над списком — список или доска, группировка и сортировка; свёрнуто, чтобы задачам доставалось больше места.",
+      "Календарь на телефоне открывается видом «День»."]));
     h += sec("quick", "Быстрый ввод", "<p>Пишите задачу одной строкой — дата, время, тег, проект, приоритет, флажок и повтор распознаются сами, а строка под полем показывает, что поняло приложение. Задача попадает в открытый список: в проекте — в этот проект, на странице тега — с этим тегом, в «Сегодня» — на сегодня, в «Когда-нибудь» — туда же.</p>" +
       tbl(["Пишете", "Получается"], [["сегодня, завтра, послезавтра", "дата"], ["пн, вт … вс, в пятницу", "ближайший такой день"], ["20.10 или 20.10.2027", "дата"], ["в 18:30, 9:00, в 10", "время (если время сегодня уже прошло — завтра)"], ["через 30 минут, через 2 часа, через 3 дня, через неделю", "срок от текущего момента"], ["до пятницы, до 20.10, дедлайн завтра", "дедлайн — крайний срок отдельно от даты начала"], ["#дела", "тег (новый создастся сам)"], ["+Дом", "проект (если такого нет — будет создан)"], ["!1, !2, !3", "приоритет: срочно, важно, желательно"], ["!!", "первый флажок из вашего набора"], ["!!жёлтый", "флажок по названию"], ["каждый день, по будням, каждую неделю, каждый месяц, каждый год", "повтор"], ["каждые 3 дня, каждые 2 недели, каждый вторник, по пн и чт, каждое 15 число, в последний день месяца", "гибкий повтор"], ["… после выполнения", "следующий раз считается от дня, когда задача выполнена"]]) +
       "<p>Пример: <code>завтра в 10 позвонить в банк #дела +Дом !1</code>. Новая задача — круглая кнопка <b>＋</b> в правом нижнем углу любого списка (или клавиша <code>n</code>): внизу появится поле ввода; Enter — добавить (поле остаётся для следующей задачи), Esc или ✕ — закрыть. 🎤 в поле — сказать задачу голосом.</p>");
@@ -5104,7 +5171,7 @@ CREATE TABLE inbox (
       "<b>⛃ Фильтр</b> — быстрый отбор поверх списка (см. «Теги, флажки, фильтры»)."]));
     h += sec("board", "Доска (канбан)", "<p>На доске колонки строятся по выбранной группировке: без группировки или «по статусу» — «Нужно сделать / В работе / Готово (за 7 дней)»; по проекту, приоритету, сроку, дням, тегу, флажку, спринту — соответствующие колонки (пустые тоже видны, чтобы было куда перетащить). Перетащите карточку в другую колонку — поменяется статус, проект, приоритет, срок, флажок или спринт; в колонку тега — тег добавится; в «Готово» — задача выполнена. Клик по карточке открывает задачу. У проекта есть свой канбан с собственными колонками — см. «Проекты».</p>");
     h += sec("cal", "Календарь", ul([
-      "Виды <b>День</b>, <b>Неделя</b>, <b>Месяц</b>; стрелки ‹ › и «Сегодня». Клик по числу открывает этот день.",
+      "Виды <b>День</b>, <b>Неделя</b>, <b>Месяц</b>; стрелки ‹ › и «Сегодня». Клик по числу открывает этот день. На телефоне календарь открывается видом «День» — неделя на узком экране плохо читается.",
       "Задачи со временем стоят на шкале часов, задачи на весь день и дедлайны (⏰) — в строке «весь день». Повторы показаны пунктиром. Красная линия — текущее время.",
       "Перетащите задачу на другой день или час (шаг 15 минут); потяните нижний край — изменится длительность.",
       "Справа — задачи <b>без срока</b>: перетащите любую в календарь, чтобы запланировать.",
@@ -5358,7 +5425,24 @@ CREATE TABLE inbox (
     return false;
   }
   /* ---------- групповые действия: режим выбора, умный выбор, массовые правки с одной отменой ---------- */
-  var SELMODE = false, LPT = null, LPSUP = false, BED = null;
+  var SELMODE = false, LPT = null, LPSUP = false, BED = null, SWP = null;
+  document.addEventListener("touchstart", function (e) {
+    var li = e.target.closest && e.target.closest("#view li.task"); if (!li || SELMODE || e.touches.length !== 1 || e.target.closest("input, textarea, select, .acts")) { SWP = null; return; }
+    SWP = { li: li, x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, on: false };
+  }, { passive: true });
+  document.addEventListener("touchmove", function (e) {
+    if (!SWP) return; var dx = e.touches[0].clientX - SWP.x, dy = e.touches[0].clientY - SWP.y;
+    if (!SWP.on) { if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { SWP = null; return; } if (Math.abs(dx) < 14) return; SWP.on = true; clearTimeout(LPT); LPT = null; SWP.li.classList.add("swp"); }
+    SWP.dx = Math.max(-140, Math.min(140, dx)); SWP.li.style.transform = "translateX(" + SWP.dx + "px)";
+    SWP.li.classList.toggle("swr", SWP.dx > 70); SWP.li.classList.toggle("swl", SWP.dx < -70);
+  }, { passive: true });
+  document.addEventListener("touchend", function () {
+    if (!SWP) return; var s0 = SWP; SWP = null; if (!s0.on) return;
+    s0.li.style.transform = ""; s0.li.classList.remove("swp", "swr", "swl"); LPSUP = true; setTimeout(function () { LPSUP = false; }, 350);
+    var t = task(s0.li.dataset.id); if (!t) return;
+    if (s0.dx > 70) { toggle(t); try { navigator.vibrate && navigator.vibrate(15); } catch (er) { /* ok */ } }
+    else if (s0.dx < -70) { var r = s0.li.getBoundingClientRect(); ctxShow(Math.max(8, r.right - 260), r.top + 8, taskMenu(t)[1].sub, { k: "task", id: t.id }); }
+  });
   function selModeSet(on) { SELMODE = !!on; if (!SELMODE) { SELS = {}; LASTSEL = null; } render(); }
   function visIds() { return [].slice.call(document.querySelectorAll("#view li.task, #view .kcard")).map(function (x) { return x.dataset.id; }).filter(function (v, i, a) { return v && a.indexOf(v) === i; }); }
   // выбранные задачи в порядке, в котором они видны в списке
@@ -5705,10 +5789,11 @@ CREATE TABLE inbox (
     CC = null; DV++;
     try { ctxShowBtn(); if (NOW) renderNow(); } catch (er) { /* не мешает */ }
     $("side").innerHTML = sideHTML();
+    try { $("bnav").innerHTML = bnavHTML(); document.documentElement.classList.toggle("nohq", !!S.opt.noHq); } catch (er) { /* не мешает */ }
     var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
     var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
     $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "templates");
-    $("view").innerHTML = (V === "settings" || V === "help" ? "" : focusBar() + revBar()) + f();
+    $("view").innerHTML = (V === "settings" || V === "help" ? "" : syncBar() + focusBar() + revBar()) + f();
     if (keepScroll !== null && $("cbody")) $("cbody").scrollTop = keepScroll; else calAfterRender();
     if (V === "gantt") gAfter();
     try { helpMarks(); } catch (er) { /* справочные значки не обязательны */ }
@@ -6020,6 +6105,7 @@ CREATE TABLE inbox (
   }
   // тестовый набор: свои записи пользователя главнее; тестовые (в т. ч. удалённые раньше) берутся из файла заново
   function tstMerge(j) {
+    if (LS.get("zd-newdef") === "1") LS.del("zd-newdef"); // для упражнений курса нужны все пункты «Списков»
     var now = Date.now();
     LISTS.forEach(function (k) {
       var m = {}, inFile = {}; S[k].forEach(function (x) { m[x.id] = x; });
@@ -6303,6 +6389,16 @@ CREATE TABLE inbox (
       case "bnon": bnEnable(); return;
       case "bnoff": LS.del("zd-bnotif"); bnStart(); render(); toast("Напоминания в браузере выключены на этом устройстве"); return;
       case "bntest": bnShow("test-" + Date.now(), "🔔 Проверка напоминаний", "Если вы это видите — всё работает", ""); return;
+      case "todaymore": var tmr = el.getBoundingClientRect(); ctxShow(tmr.left, tmr.bottom + 4, (AI.ready() ? [{ c: "aiday", i: "✨", l: "ИИ: расставить по времени" }] : []).concat([{ c: "print", i: "🖨", l: "Распечатать план на сегодня" }, { c: "share", i: "🔗", l: "Поделиться списком (только просмотр)" }]), { k: "fire" }); return;
+      case "vtog": var vop = LS.get("zd-vopen") !== "1"; LS.set("zd-vopen", vop ? "1" : "0"); render(); return;
+      case "subhide": var sh = subHidden(); if (sh.indexOf(V) < 0) sh.push(V); LS.set("zd-subhide", JSON.stringify(sh)); render(); toast("Пояснение скрыто — вернуть: «Настройки» → «Общие» → «Подсказки»"); return;
+      case "subreset": LS.del("zd-subhide"); render(); toast("Пояснения под заголовками снова видны"); return;
+      case "hqtog": S.opt.noHq = !S.opt.noHq; optTouch(); save(); render(); return;
+      case "bnmenu": document.body.classList.toggle("menu"); return;
+      case "bnsearch": palOpen(); return;
+      case "welcome-off": LS.set("zd-welcome", "off"); render(); return;
+      case "lists-cfg": go("settings-general"); setTimeout(function () { var lx = document.querySelector(".lchk"); if (lx) lx.scrollIntoView({ block: "center" }); }, 120); return;
+      case "syncnow": if (SYNC.enabled()) { SYNC.run(); toast("Синхронизирую…"); } return;
       case "tarchset": S.opt.tarch = +el.dataset.v; optTouch(); save(); render(); toast(+el.dataset.v ? "В архив — выполненные больше " + tArchAge(+el.dataset.v) + " назад" : "Архив выключен: все выполненные — в «Сделано»"); return;
       case "tarmore": TARLIM += 300; render(); return;
       case "tarchclear": CONF = "tarchclear"; render(); return;
@@ -6439,14 +6535,14 @@ CREATE TABLE inbox (
     var full = LS.get("zd-pfull") === "1";
     var pb = function (p, icon, title, extra) { return '<button type="button" data-p="' + p + '" title="' + esc(title) + '" aria-label="' + esc(title) + '"' + (extra || "") + ">" + ic(icon) + "</button>"; };
     var h = '<div class="pn-top"><div class="crumbs">' + crumbs + "</div>" +
-      pb("full", full ? "shrink" : "expand", full ? "Свернуть в панель" : "Развернуть на весь экран", ' class="pw-btn"') +
-      pb("fav", "star", t.fav ? "Убрать из избранного" : "В избранное", t.fav ? ' class="onstar"' : "") +
-      pb("ai", "spark", "ИИ-помощник: подзадачи, чек-лист, оценка") + pb("pomo", "tomato", "Помодоро 25 минут", ' class="pomob"') + pb("track", "watch", t.ttOn ? "Остановить учёт времени" : "Засечь время", t.ttOn ? ' class="on ttb"' : "") + pb("link", "link", "Скопировать ссылку на задачу") +
-      pb("pin", "pin", t.pin ? "Открепить" : "Закрепить наверху списка (Alt+P)", t.pin ? ' class="on"' : "") + pb("flag", "flag", flagOf(t) ? "Флажок: " + flagOf(t).n : "Флажок", flagOf(t) ? ' class="on" style="color:' + col(flagOf(t).c) + '"' : "") + pb("del", "trash", "Удалить задачу в корзину") + pb("close", "close", "Закрыть (Esc)") + "</div>";
+      (t.fav ? pb("fav", "star", "Убрать из избранного", ' class="onstar"') : "") + (t.pin ? pb("pin", "pin", "Открепить", ' class="on"') : "") +
+      pb("pomo", "tomato", "Помодоро 25 минут", ' class="pomob"') + pb("track", "watch", t.ttOn ? "Остановить учёт времени" : "Засечь время", t.ttOn ? ' class="on ttb"' : "") +
+      pb("flag", "flag", flagOf(t) ? "Флажок: " + flagOf(t).n : "Флажок", flagOf(t) ? ' class="on" style="color:' + col(flagOf(t).c) + '"' : "") +
+      '<button type="button" class="pnm" data-p="pnmore" title="Ещё: на весь экран, избранное, ИИ, ссылка, закрепить, удалить" aria-label="Ещё">⋯</button>' + pb("close", "close", "Закрыть (Esc)") + "</div>";
     if (anc.length) h += '<div class="pn-par">↑ Родительская задача: ' + anc.map(function (a) { return '<a data-p="open" data-id="' + a.id + '" title="Открыть «' + esc(a.t) + '»">' + esc(a.t.slice(0, 60)) + "</a>"; }).join(" › ") + "</div>";
     h += '<div class="pn-title"><button class="ck' + (t.prio ? " p" + t.prio : "") + (t.done ? " dn" : "") + '" type="button" data-p="toggle" aria-label="' + (t.done ? "Вернуть в работу" : "Готово") + '"></button><textarea id="pn-t" rows="1" aria-label="Название задачи" placeholder="Название задачи">' + esc(t.t) + "</textarea></div>";
     h += '<div class="props">' +
-      '<span>Срок</span><div class="v"><input type="date" data-pf="date" value="' + date + '"><input type="time" data-pf="time" value="' + time + '"' + (date ? "" : " disabled") + '>' + (time ? '<input type="number" min="5" max="1440" step="5" data-pf="dur" value="' + (+t.dur || 30) + '" style="width:66px" title="Длительность, минут"><span class="muted">мин</span>' : "") + '<select data-pf="rep"' + (date ? "" : " disabled") + ">" + Object.keys(REPN).map(function (k) { return '<option value="' + k + '"' + ((t.rep || "") === k ? " selected" : "") + ">" + (k === "custom" && t.rep === "custom" ? "🔁 " + ruleText(t) : REPN[k]) + "</option>"; }).join("") + "</select>" + (date ? '<button class="btn sm" type="button" data-p="nodate" title="Убрать срок">✕</button>' : "") + "</div>" +
+      '<span>Срок</span><div class="v"><input type="date" data-pf="date" value="' + date + '"><input type="time" data-pf="time" value="' + time + '"' + (date ? "" : " disabled") + '>' + (time ? '<input type="number" min="5" max="1440" step="5" data-pf="dur" value="' + (+t.dur || 30) + '" style="width:66px" title="Длительность, минут"><span class="muted">мин</span>' : "") + '<select data-pf="rep"' + (date ? "" : " disabled") + ">" + Object.keys(REPN).map(function (k) { return '<option value="' + k + '"' + ((t.rep || "") === k ? " selected" : "") + ">" + (k === "custom" && t.rep === "custom" ? "🔁 " + ruleText(t) : REPN[k]) + "</option>"; }).join("") + "</select>" + (date ? '<button class="btn sm" type="button" data-p="nodate" title="Убрать срок">✕</button>' : "") + '<div class="qdates">' + [["0", "Сегодня"], ["1", "Завтра"], ["mon", "Пн"], ["7", "+неделя"], ["some", "Когда-нибудь"]].map(function (q) { return '<button type="button" class="chip" data-p="qdate" data-v="' + q[0] + '">' + q[1] + "</button>"; }).join("") + "</div></div>" +
       (t.rep === "custom" && t.at ? rrBox(t) : "") +
       '<span>Дедлайн</span><div class="v"><input type="date" data-pf="due" value="' + (t.due ? dKey(t.due) : "") + '">' + (t.due ? '<button class="btn sm" type="button" data-p="nodue" title="Убрать дедлайн">✕</button>' + (t.due < today0() && !t.done ? '<span class="warnc">просрочен</span>' : "") : '<span class="muted">крайний срок, если он отличается от даты начала</span>') + "</div>" +
       (psecs(proj(t.pid)).length ? '<span>Секция</span><div class="v"><select data-pf="sec"><option value="">— без секции —</option>' + psecs(proj(t.pid)).map(function (x) { return '<option value="' + x.id + '"' + (t.sec === x.id ? " selected" : "") + ">" + esc(x.n) + "</option>"; }).join("") + "</select></div>" : "") +
@@ -6502,6 +6598,9 @@ CREATE TABLE inbox (
   function pnOrder(keys, saved, def) { var out = saved.filter(function (k) { return keys.indexOf(k) >= 0; }); keys.forEach(function (k) { if (out.indexOf(k) >= 0) return; var di = def.indexOf(k), at = 0; for (var j = di - 1; j >= 0; j--) { var pi = out.indexOf(def[j]); if (pi >= 0) { at = pi + 1; break; } } out.splice(at, 0, k); }); return out; }
   // сохранить новый порядок видимых полей, не теряя места скрытых (например, «Статус» у выполненной задачи)
   function pnMerge(domKeys, saved, def) { var full = pnOrder(def.slice(), saved, def), i = 0; return full.map(function (k) { return domKeys.indexOf(k) >= 0 ? domKeys[i++] : k; }); }
+  function pmoreTxt(pr) { var n = pr ? pr.querySelectorAll(".prow.pmore").length : 0; return pr && pr.classList.contains("pcol") ? "Ещё поля (" + n + ") ▾" : "Скрыть пустые поля ▴"; }
+  function pnFire(a) { var b = document.createElement("button"); b.type = "button"; b.hidden = true; b.dataset.p = a; var P = $("panel"); P.appendChild(b); b.click(); b.remove(); }
+  function fireA(a) { var b = document.createElement("button"); b.type = "button"; b.hidden = true; b.dataset.a = a; document.body.appendChild(b); b.click(); b.remove(); }
   function pnLayout(P) {
     var pr = P.querySelector(".props"), inn = P.querySelector(".pn-in"); if (!inn) return;
     if (pr) {
@@ -6511,6 +6610,9 @@ CREATE TABLE inbox (
       var defR = Object.keys(PNROW).map(function (x) { return PNROW[x]; });
       pnOrder(rows.map(function (r) { return r.k; }), S.opt.pnRows || [], defR).forEach(function (k) { var r = rows.filter(function (x) { return x.k === k; })[0]; if (r) pr.appendChild(r.w); });
       pr.dataset.sec = "props"; pr.insertAdjacentHTML("afterbegin", '<span class="sgrip psg" title="Перетащите, чтобы переставить блок свойств">⋮⋮</span>');
+      var tq = task(OPEN), emp = tq ? { deadline: !tq.due, sec: !tq.sec, sprint: !tq.sprint && !tq.est, status: tq.st !== "doing", track: !tq.tt && !tq.ttOn, parent: !tq.parent, rem: !tq.rem, after: !(tq.after || []).length, wait: !tq.wait } : {}, nm = 0;
+      rows.forEach(function (r) { if (emp[r.k]) { r.w.classList.add("pmore"); nm++; } });
+      if (nm) { var pmo = LS.get("zd-pnmore"); if (pmo === "0" || (pmo !== "1" && innerWidth <= 860)) pr.classList.add("pcol"); pr.insertAdjacentHTML("beforeend", '<button type="button" class="pmoreb" data-p="pmore">' + pmoreTxt(pr) + "</button>"); }
     }
     var secs = pr ? [pr] : [];
     [].forEach.call(inn.querySelectorAll(":scope > .pn-sec"), function (x) { var k = x.classList.contains("pn-subs") ? "subs" : x.classList.contains("pn-files") ? "files" : x.classList.contains("pn-notes") ? "notes" : x.classList.contains("pn-chat") ? "chat" : "desc"; x.dataset.sec = k; secs.push(x); var h3 = x.querySelector("h3"); if (h3) h3.insertAdjacentHTML("afterbegin", '<span class="sgrip" title="Перетащите, чтобы переставить блок">⋮⋮</span>'); });
@@ -6632,6 +6734,9 @@ CREATE TABLE inbox (
     if (a === "del") { flushBody(); del(t); return; }
     if (a === "flag") { var rpf = el.getBoundingClientRect(); ctxShow(rpf.left - 170, rpf.bottom + 4, flagMenu(t), { k: "task", id: t.id }); return; }
     if (a === "pin") { setTask(function (x) { x.pin = !x.pin; }); return; }
+    if (a === "pnmore") { var pmr = el.getBoundingClientRect(), fl0 = document.body.classList.contains("pnfull"); ctxShow(pmr.right - 250, pmr.bottom + 4, (innerWidth > 860 ? [{ c: "full", i: fl0 ? "⤡" : "⤢", l: fl0 ? "Свернуть в панель" : "Развернуть на весь экран" }] : []).concat([{ c: "fav", i: t.fav ? "★" : "☆", l: t.fav ? "Убрать из избранного" : "В избранное" }, { c: "pin", i: "📌", l: t.pin ? "Открепить" : "Закрепить наверху списка" }, { c: "ai", i: "✨", l: "ИИ-помощник" }, { c: "link", i: "🔗", l: "Скопировать ссылку на задачу" }, "-", { c: "del", i: "🗑", l: "Удалить в корзину", warn: 1 }]), { k: "pnmore", id: t.id }); return; }
+    if (a === "qdate") { taskCmd(t, "d:" + el.dataset.v); return; }
+    if (a === "pmore") { LS.set("zd-pnmore", LS.get("zd-pnmore") === "1" ? "0" : "1"); var pr0 = $("panel").querySelector(".props"); if (pr0) pr0.classList.toggle("pcol"); var bm = $("panel").querySelector(".pmoreb"); if (bm) bm.innerHTML = pmoreTxt(pr0); return; }
     if (a === "pntab") { var v = /^(chat|hist|files|notes)$/.test(el.dataset.v) ? el.dataset.v : "chat"; pnTabSet(el.closest(".pn-tabs"), v); if (v === "chat") { var ci2 = $("pn-c"); if (ci2) ci2.focus(); } return; }
     if (a === "hall") { e.preventDefault(); HALL = HALL === OPEN ? null : OPEN; renderPanel(); return; }
     if (a === "hrev") { var ht = task(OPEN), he = ht && (ht.h || [])[+el.dataset.i]; if (he) { hiSet(ht, he.k, he.o); touch(ht); save(); render(); renderPanel(); toast((HLAB[he.k] || "Поле") + ": вернула прежнее значение"); } return; }
@@ -7332,6 +7437,8 @@ CREATE TABLE inbox (
     if (k === "bsrc") { var bs = board(id); if (!bs) return; if (c === "__none") delete bs.src; else bs.src = c; bSave(bs); toast(bs.src ? "Источник доски: " + wsrcName(bs.src) + " — виджеты без своего источника берут его" : "У каждого виджета теперь свой источник"); return; }
     if (k === "startpick") { S.opt.start = c === "__last" ? "" : c; optTouch(); save(); render(); return; }
     if (k === "btplproj") { bFromTpl("proj", c); return; }
+    if (k === "fire") { fireA(c); return; }
+    if (k === "pnmore") { pnFire(c); return; }
     if (k === "ctxsel") { ctxSet(c); return; }
     if (k === "setpick") { if (c === "__cfg") { go("templates"); setTimeout(function () { var hx = $("sets"); if (hx) hx.scrollIntoView({ block: "start" }); }, 80); return; } var sk = tplObj(c); if (sk) { var nk = setApply(sk, today0()); save(); render(); toast(nk ? "«" + sk.n + "»: в «Сегодня» добавлено " + nk + " " + plural(nk, ["задача", "задачи", "задач"]) : "«" + sk.n + "» сегодня уже добавлен"); } return; }
     if (k === "dpest") { var te = task(id); if (te) { te.est = +c || 0; touch(te); save(); render(); } return; }
@@ -7576,6 +7683,8 @@ CREATE TABLE inbox (
   });
 
   $("menuBtn").addEventListener("click", function () { document.body.classList.toggle("menu"); });
+  function qPh() { var q = $("q"); if (q) q.placeholder = innerWidth < 600 ? "Поиск" : "Поиск · Ctrl+K — команды"; }
+  qPh(); window.addEventListener("resize", qPh);
   $("scrim").addEventListener("click", function () { document.body.classList.remove("menu"); });
   // клик по облачку — синхронизировать сейчас (подробности и выход — в «Настройках»)
   $("syncBtn").addEventListener("click", function () {
@@ -7806,6 +7915,7 @@ CREATE TABLE inbox (
     if (!location.hash) { var last = LS.get("zd-last"); if (last && !/^search/.test(last)) try { history.replaceState(null, "", "#" + last); } catch (e) { /* ok */ } }
   })();
   if (!S.tasks.length && !LS.get("zd-started")) {
+    LS.set("zd-newdef", "1");
     var t0 = today0();
     S.tasks.push(touch({ id: uid(), t: "Нажмите на задачу, чтобы открыть подробности", at: t0, allday: true, rep: "", prio: 0, tags: [], pid: "", done: false, created: Date.now() }));
     S.tasks.push(touch({ id: uid(), t: "Попробуйте быстрый ввод: «завтра в 10 позвонить #дела»", at: 0, rep: "", prio: 2, tags: [], pid: "", done: false, created: Date.now() - 1 }));
