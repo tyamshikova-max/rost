@@ -411,6 +411,10 @@ html.glass .inp, html.glass input[type="text"], html.glass input[type="search"],
 .lkfonts { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; margin-top: 6px }
 .lkfont { border: 2px solid var(--line); border-radius: 10px; background: none; padding: 8px 10px; cursor: pointer; text-align: left; color: var(--fg); display: grid; gap: 2px }
 .lkfont b { font-weight: 600; font-size: calc(15px * var(--fs)) } .lkfont small { color: var(--muted); font-size: calc(12px * var(--fs)) } .lkfont.on { border-color: var(--acc); box-shadow: 0 0 0 3px var(--acc-soft) }
+.lkcus .lkn { color: var(--acc) } .lkcus-ed { border: 1px dashed var(--line); border-radius: 12px; padding: 12px 14px; margin-top: 12px; display: grid; gap: 10px }
+.lkcush { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap } .lkcush .muted { font-size: calc(12.5px * var(--fs)) }
+.lkcr { display: flex; align-items: center; gap: 12px; flex-wrap: wrap } .lkcr .lbl { min-width: 190px; margin: 0; display: grid } .lkcr .lbl small { color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; font-size: calc(11.5px * var(--fs)) }
+.lkcol { width: 44px; height: 32px; border: 1px solid var(--line); border-radius: 8px; padding: 2px; background: var(--solid, var(--panel)); cursor: pointer }
 .lkacc .lkauto { display: grid; place-items: center; font-size: calc(15px * var(--fs)); color: var(--muted); background: var(--hover) !important }
 /* доски */
 .bhd { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; max-width: 1400px }
@@ -4245,7 +4249,7 @@ CREATE TABLE inbox (
       "<b>📂 Восстановить из файла</b> → <b>«Заменить всё данными из файла»</b> — всё станет точно как в копии (лишнее удалится и на других устройствах) или <b>«Объединить с текущими»</b> — записи из файла добавятся.",
       "<b>🗑 Очистить всю базу</b> — удаляет задачи, проекты, теги, фильтры, спринты, комментарии, привычки, историю и шаблоны без корзины (сначала предлагает сохранить копию). Флажки и настройки остаются."]));
     h += sec("settings", "Настройки", ul([
-      "<b>Оформление</b> («Настройки» → «Оформление»): режим (как в системе, светлый, тёмный), 8 цветовых схем — Шалфей, Океан, Лаванда, Песок, Вишня, Закат, Графит, Полночь (у каждой светлый и тёмный вариант, в превью видны оба), акцентный цвет поверх схемы, прозрачность окон («стекло»: нет, лёгкая, сильная — панели и меню становятся полупрозрачными с размытием) фон (однотонный, градиент, «аврора» — мягкие цветные пятна, или обои: горы, волны, холмы, звёздное небо, лучи, клетка — они рисуются в цветах схемы; или своя картинка с компьютера или телефона, её можно приглушить, чтобы текст читался), шрифт (12 вариантов, в том числе с засечками) и размер текста. Всё это одинаково на всех устройствах, кроме светлого или тёмного режима и своей картинки — они у каждого устройства свои. «Вернуть как было» — исходный вид.",
+      "<b>Оформление</b> («Настройки» → «Оформление»): режим (как в системе, светлый, тёмный), 8 цветовых схем — Шалфей, Океан, Лаванда, Песок, Вишня, Закат, Графит, Полночь (у каждой светлый и тёмный вариант, в превью видны оба) и «🎨 Своя схема»: выберите основной цвет, цвет фона, второй цвет (для обоев и «авроры») и насыщенность фона — оттенки панелей, линий, текста и тёмный вариант приложение рассчитает само, цвета можно брать из палитры или любые через пипетку, акцентный цвет поверх схемы, прозрачность окон («стекло»: нет, лёгкая, сильная — панели и меню становятся полупрозрачными с размытием) фон (однотонный, градиент, «аврора» — мягкие цветные пятна, или обои: горы, волны, холмы, звёздное небо, лучи, клетка — они рисуются в цветах схемы; или своя картинка с компьютера или телефона, её можно приглушить, чтобы текст читался), шрифт (12 вариантов, в том числе с засечками) и размер текста. Всё это одинаково на всех устройствах, кроме светлого или тёмного режима и своей картинки — они у каждого устройства свои. «Вернуть как было» — исходный вид.",
       "<b>Общие</b>: пункты «Списков», порядок левой панели, проверка проектов, оформление (как в системе / светлая / тёмная).",
       "<b>Флажки</b>: свой набор флажков.",
       "<b>Напоминания и Telegram</b>: адрес сервера, привязка бота, автоматические напоминания, час для задач на весь день.",
@@ -4992,6 +4996,8 @@ CREATE TABLE inbox (
       case "tstwipe-yes": var tn = wipeTest(); CONF = null; if (V === "board" && !board(ARG)) go("settings"); render(); toast("Тестовые данные удалены" + (tn ? " · задач: " + tn : "")); return;
       case "look": setLook(el.dataset.k, el.dataset.v); return;
       case "wpup": wpPick(); return;
+      case "lkc": var lk = S.opt.look = Object.assign({}, S.opt.look || {}); lk.custom = Object.assign({}, CUSTOM0, lk.custom || {}); lk.custom[el.dataset.k] = el.dataset.k === "t" ? +el.dataset.v : el.dataset.v; optTouch(); save(); applyLook(true); render(); return;
+      case "lkcreset": e.preventDefault(); var lk2 = S.opt.look = Object.assign({}, S.opt.look || {}); delete lk2.custom; optTouch(); save(); applyLook(true); render(); return;
       case "lookreset": e.preventDefault(); delete S.opt.look; optTouch(); save(); applyLook(true); render(); toast("Оформление — как было"); return;
       case "wipe-yes": var wn = wipeAll(); go("inbox"); render(); toast("База очищена" + (wn ? " · удалено задач: " + wn : "")); return;
       case "imp-replace":
@@ -6217,14 +6223,30 @@ CREATE TABLE inbox (
   }
   // шрифты Google — подгружаются по мере выбора
   function fontLink(fam, id, extra) { if (!fam) return; var l = $(id); if (!l) { l = document.createElement("link"); l.rel = "stylesheet"; l.id = id; document.head.appendChild(l); } var href = "https://fonts.googleapis.com/css2?" + fam + (extra || "") + "&display=swap"; if (l.getAttribute("href") !== href) l.setAttribute("href", href); }
-  function lookCfg() { var l = S.opt.look || {}; return { scheme: SCHEMES[l.scheme] ? l.scheme : "sage", acc: l.acc || "", glass: GLASS[l.glass] ? l.glass : "soft", wall: WALLS[l.wall] ? l.wall : "aurora", pic: WPICS[l.pic] ? l.pic : "mountains", dim: WDIM[l.dim] !== undefined ? +l.dim : 1, font: FONTS[l.font] ? l.font : "onest", fs: FSIZES[l.fs] ? l.fs : "1" }; }
+  function hexMix(x, y, t) { var p = parseInt(x.slice(1), 16), q = parseInt(y.slice(1), 16), r = function (sh) { return Math.round(((p >> sh) & 255) * (1 - t) + ((q >> sh) & 255) * t); }; return "#" + ((1 << 24) + (r(16) << 16) + (r(8) << 8) + r(0)).toString(16).slice(1); }
+  function hexLum(x) { var n = parseInt(x.slice(1), 16), f = function (v) { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(n >> 16 & 255) + .7152 * f(n >> 8 & 255) + .0722 * f(n & 255); }
+  var CUSTOM0 = { a: "#1f6fc5", b: "#1f6fc5", c: "#d06aa8", t: 1 };
+  var CTINT = { 0: "Почти белый", 1: "Оттенок", 2: "Цветной" };
+  function customScheme(cu) {
+    cu = Object.assign({}, CUSTOM0, cu || {}); var a = cu.a, b = cu.b, c2 = cu.c, t = +cu.t || 0, k = [[.035, .07, .015, .1, .09], [.09, .15, .03, .18, .15], [.2, .3, .08, .32, .27]][t] || [.09, .15, .03, .18, .15];
+    // светлый: акцент не должен быть слишком светлым, чтобы читался на белом
+    var al = a; while (hexLum(al) > .32) al = hexMix(al, "#000000", .15);
+    var L = [hexMix("#ffffff", b, k[0]), hexMix("#ffffff", b, k[2]), hexMix("#ffffff", b, k[1]), hexMix("#16181b", b, .18), hexMix("#6a6f76", b, .22), hexMix("#ffffff", b, k[3]), hexMix("#ffffff", b, k[4]), al, hexMix("#ffffff", al, .14), c2, hexMix(c2, a, .5)];
+    // тёмный: акцент посветлее
+    var ad = a; while (hexLum(ad) < .22) ad = hexMix(ad, "#ffffff", .15);
+    var dt = [.05, .1, .17][t] || .1, bgD = hexMix("#0f1012", b, dt);
+    var D = [bgD, hexMix("#17181b", b, dt + .02), hexMix("#131416", b, dt), hexMix("#eceef0", b, .06), hexMix("#9a9ea6", b, .15), hexMix("#2a2c31", b, dt + .05), hexMix("#212327", b, dt + .03), ad, hexMix(bgD, ad, .24), c2, hexMix(c2, a, .5)];
+    return ["Своя", L, D];
+  }
+  function schemeOf(L) { return L.scheme === "custom" ? customScheme((S.opt.look || {}).custom) : SCHEMES[L.scheme]; }
+  function lookCfg() { var l = S.opt.look || {}; return { scheme: SCHEMES[l.scheme] || l.scheme === "custom" ? l.scheme : "sage", acc: l.acc || "", glass: GLASS[l.glass] ? l.glass : "soft", wall: WALLS[l.wall] ? l.wall : "aurora", pic: WPICS[l.pic] ? l.pic : "mountains", dim: WDIM[l.dim] !== undefined ? +l.dim : 1, font: FONTS[l.font] ? l.font : "onest", fs: FSIZES[l.fs] ? l.fs : "1" }; }
   function isDark() { var p = themePref(); return p === "dark" || (p === "system" && !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)); }
   function rgba(hex, a) { var n = parseInt(String(hex).slice(1), 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
   var LOOKKEY = "";
   function applyLook(force) {
-    var L = lookCfg(), dk = isDark(), key = JSON.stringify(L) + dk + WPURL; if (key === LOOKKEY && !force) return; LOOKKEY = key;
+    var L = lookCfg(), dk = isDark(), key = JSON.stringify(L) + JSON.stringify((S.opt.look || {}).custom || "") + dk + WPURL; if (key === LOOKKEY && !force) return; LOOKKEY = key;
     if (L.wall === "img" && L.pic === "custom" && !WPLOADED) { wpLoad(); }
-    var c = SCHEMES[L.scheme][dk ? 2 : 1], st = document.documentElement.style, acc = c[7], soft = c[8];
+    var c = schemeOf(L)[dk ? 2 : 1], st = document.documentElement.style, acc = c[7], soft = c[8];
     if (L.acc) { acc = dk ? "color-mix(in srgb, " + L.acc + " 72%, #ffffff)" : L.acc; soft = "color-mix(in srgb, " + L.acc + " " + (dk ? 26 : 15) + "%, " + c[1] + ")"; }
     var g = L.glass, ga = g === "strong" ? (dk ? .5 : .52) : g === "soft" ? (dk ? .72 : .7) : 1;
     var v = { "--bg": c[0], "--fg": c[3], "--muted": c[4], "--line": g === "off" ? c[5] : rgba(c[5], dk ? .9 : .85), "--hover": g === "off" ? c[6] : rgba(c[6], .8), "--acc": acc, "--acc-soft": soft,
@@ -6247,22 +6269,36 @@ CREATE TABLE inbox (
   }
   if (lookCfg().wall === "img" && lookCfg().pic === "custom") wpLoad();
   if (window.matchMedia) try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { applyLook(); }); } catch (e) { /* старый браузер */ }
-  function setLook(k, v) { var L = S.opt.look = Object.assign({}, S.opt.look || {}); if (v === "" || v === null) delete L[k]; else L[k] = v; optTouch(); save(); applyLook(true); render(); }
+  // выбор своей схемы впервые — стартует от текущих цветов
+  function lookInitCustom() { var lk = S.opt.look = Object.assign({}, S.opt.look || {}); if (lk.custom) return; var cur = lookCfg(), sc = schemeOf(cur)[1]; lk.custom = { a: cur.acc || sc[7], b: cur.acc || sc[7], c: sc[9], t: 1 }; }
+  document.addEventListener("input", function (e) { var k = e.target.dataset && e.target.dataset.lkc; if (!k) return; var lk = S.opt.look = Object.assign({}, S.opt.look || {}); lk.custom = Object.assign({}, CUSTOM0, lk.custom || {}); lk.custom[k] = e.target.value; applyLook(true); });
+  document.addEventListener("change", function (e) { var k = e.target.dataset && e.target.dataset.lkc; if (!k) return; optTouch(); save(); render(); });
+  function setLook(k, v) {
+    if (k === "scheme" && v === "custom") lookInitCustom(); var L = S.opt.look = Object.assign({}, S.opt.look || {}); if (v === "" || v === null) delete L[k]; else L[k] = v; optTouch(); save(); applyLook(true); render(); }
   function lookSection() {
     var L = lookCfg(), dk = isDark(), th = themePref();
     var seg = function (k, map, cur, order) { return '<div class="seg">' + (order || Object.keys(map)).map(function (x) { return '<button type="button" data-a="look" data-k="' + k + '" data-v="' + x + '" class="' + (cur === x ? "on" : "") + '">' + map[x] + "</button>"; }).join("") + "</div>"; };
     var h = '<section class="card" id="s-look"><h2>Оформление</h2>';
     h += '<div class="lkrow"><span class="lbl">Режим</span><div class="seg" role="radiogroup" aria-label="Тема">' + [["system", "Как в системе"], ["light", "Светлый"], ["dark", "Тёмный"]].map(function (o) { return '<button type="button" data-theme="' + o[0] + '" class="' + (th === o[0] ? "on" : "") + '" role="radio" aria-checked="' + (th === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div></div>";
-    h += '<div class="lbl" style="margin-top:14px">Цветовая схема</div><div class="lkgrid">' + Object.keys(SCHEMES).map(function (k) {
-      var sc = SCHEMES[k], a = sc[dk ? 2 : 1], b = sc[dk ? 1 : 2];
+    h += '<div class="lbl" style="margin-top:14px">Цветовая схема</div><div class="lkgrid">' + Object.keys(SCHEMES).concat(["custom"]).map(function (k) {
+      var sc = k === "custom" ? customScheme((S.opt.look || {}).custom) : SCHEMES[k], a = sc[dk ? 2 : 1], b = sc[dk ? 1 : 2];
       var mini = function (c) { return '<span class="lkmini" style="background:' + c[0] + ';border-color:' + c[5] + '"><i class="s" style="background:' + c[2] + '"><b style="background:' + c[8] + '"></b><b></b><b></b></i><i class="m" style="background:' + c[1] + ';border-color:' + c[5] + '"><u style="background:' + c[3] + '"></u><u style="background:' + c[4] + '"></u><u style="background:' + c[4] + '"></u><em style="background:' + c[7] + '"></em></i></span>'; };
-      return '<button type="button" class="lkcard' + (L.scheme === k ? " on" : "") + '" data-a="look" data-k="scheme" data-v="' + k + '"><span class="lkpair">' + mini(a) + mini(b) + '</span><span class="lkn">' + sc[0] + "</span></button>";
+      return '<button type="button" class="lkcard' + (L.scheme === k ? " on" : "") + (k === "custom" ? " lkcus" : "") + '" data-a="look" data-k="scheme" data-v="' + k + '"><span class="lkpair">' + mini(a) + mini(b) + '</span><span class="lkn">' + (k === "custom" ? "🎨 Своя схема" : sc[0]) + "</span></button>";
     }).join("") + "</div>";
+    if (L.scheme === "custom") {
+      var cu = Object.assign({}, CUSTOM0, (S.opt.look || {}).custom || {});
+      var cpick = function (key, label, hint, sw) { return '<div class="lkcr"><span class="lbl">' + label + '<small>' + hint + '</small></span><input type="color" class="lkcol" data-lkc="' + key + '" value="' + cu[key] + '" aria-label="' + label + '"><div class="sw">' + sw.map(function (x) { return '<button type="button" data-a="lkc" data-k="' + key + '" data-v="' + x + '" class="' + (cu[key] === x ? "on" : "") + '" style="background:' + x + '"></button>'; }).join("") + "</div></div>"; };
+      h += '<div class="lkcus-ed"><div class="lkcush"><b>🎨 Своя схема</b><span class="muted">меняйте цвета — приложение перекрашивается сразу; тёмный вариант рассчитывается сам</span></div>' +
+        cpick("a", "Основной цвет", "кнопки, выделение, флажок в списке", ["#1f6fc5", "#3355ff", "#6d4fc2", "#c03a5b", "#e0601f", "#2f8f3f", "#1b9aaa", "#3f4a5a"]) +
+        cpick("b", "Цвет фона", "в какой оттенок окрасить фон и панели", ["#1f6fc5", "#6d4fc2", "#c03a5b", "#e0a21f", "#2f8f6f", "#8d6748", "#7d8783", "#d06aa8"]) +
+        cpick("c", "Второй цвет", "для обоев и фона «аврора»", ["#d06aa8", "#e0a21f", "#22a3b8", "#7a6ad8", "#e0601f", "#5b8fc9", "#97c459", "#f09595"]) +
+        '<div class="lkrow"><span class="lbl">Насыщенность фона</span><div class="seg">' + [0, 1, 2].map(function (x) { return '<button type="button" data-a="lkc" data-k="t" data-v="' + x + '" class="' + (+cu.t === x ? "on" : "") + '">' + CTINT[x] + "</button>"; }).join("") + '</div></div><p class="muted" style="margin:8px 0 0"><a href="#" data-a="lkcreset">Начать заново</a></p></div>';
+    }
     h += '<div class="lbl" style="margin-top:14px">Акцентный цвет</div><div class="sw lkacc"><button type="button" data-a="look" data-k="acc" data-v="" class="lkauto' + (!L.acc ? " on" : "") + '" title="Как в схеме">◐</button>' + ACCENTS.map(function (x) { return '<button type="button" data-a="look" data-k="acc" data-v="' + x + '" class="' + (L.acc === x ? "on" : "") + '" style="background:' + x + '" title="' + x + '"></button>'; }).join("") + "</div>";
     h += '<div class="lkrow"><span class="lbl">Прозрачность окон</span>' + seg("glass", GLASS, L.glass) + "</div>";
     h += '<div class="lkrow"><span class="lbl">Фон</span>' + seg("wall", WALLS, L.wall) + "</div>";
     if (L.wall === "img") {
-      var c0 = SCHEMES[L.scheme][dk ? 2 : 1];
+      var c0 = schemeOf(L)[dk ? 2 : 1];
       h += '<div class="lkwp">' + Object.keys(WPICS).map(function (k) {
         var bgc = k === "custom" ? (WPURL ? 'url("' + WPURL + '") center / cover no-repeat' : "var(--hover)") : wpSVG(k, c0, dk);
         return '<button type="button" class="lkwc' + (L.pic === k ? " on" : "") + '" data-a="' + (k === "custom" && !WPURL ? "wpup" : "look") + '" data-k="pic" data-v="' + k + '"><span class="lkwi" style="background:' + esc(bgc) + '">' + (k === "custom" && !WPURL ? "＋" : "") + '</span><span>' + WPICS[k] + "</span></button>";
