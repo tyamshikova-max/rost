@@ -378,6 +378,59 @@ ol.steps li { margin: 6px 0 }
 .mxgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px }
 .mxq { border-top: 4px solid var(--qc); min-height: 220px }
 @media (max-width: 760px) { .mxgrid { grid-template-columns: 1fr } }
+/* доски */
+.bhd { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; max-width: 1400px }
+.bh1 { display: flex; align-items: center; gap: 8px; margin: 0; flex: 1 1 260px; min-width: 0 }
+.bh1 .bic svg { width: 22px; height: 22px; fill: none; stroke: var(--acc); stroke-width: 1.8; stroke-linejoin: round }
+.btitle { font: inherit; font-size: inherit; font-weight: inherit; border: 0; background: none; color: var(--fg); min-width: 0; flex: 1; padding: 2px 4px; border-radius: 6px; outline: none } .btitle:hover { background: var(--hover) } .btitle:focus { background: var(--panel); box-shadow: 0 0 0 2px var(--acc-soft) }
+.bbar { gap: 6px; align-items: center } .btn.on { background: var(--acc-soft); border-color: var(--acc) }
+.bhint { margin: 8px 0 0 }
+.bgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 190px; grid-auto-flow: dense; gap: 14px; margin-top: 16px; max-width: 1400px }
+.wdg { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; position: relative }
+.wdg.c1 { grid-column: span 1 } .wdg.c2 { grid-column: span 2 } .wdg.c4 { grid-column: 1 / -1 } .wdg.r2 { grid-row: span 2 }
+.wdg.cfgon { grid-row: span 2; box-shadow: 0 0 0 2px var(--acc-soft); border-color: var(--acc) }
+.wh { display: flex; align-items: center; gap: 6px; padding: 9px 10px 6px 12px; font-size: 13px; color: var(--muted); flex: none }
+.wh .wi { width: 18px; text-align: center; flex: none }
+.wh .wt { font-weight: 600; color: var(--fg); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 } .wh a.wt:hover { color: var(--acc) }
+.wbtn { margin-left: auto; display: flex; gap: 2px; flex: none } .wbtn button { border: 0; background: none; color: var(--muted); cursor: pointer; width: 24px; height: 24px; border-radius: 6px; font-size: 14px; padding: 0 }
+.wbtn button:hover { background: var(--hover); color: var(--fg) } .wdg:not(:hover) .wbtn [data-a="wcfg"] { opacity: 0 } .bgrid.edit .wbtn [data-a="wcfg"], .wdg.cfgon .wbtn button { opacity: 1 }
+@media (hover: none) { .wdg .wbtn [data-a="wcfg"] { opacity: .6 } }
+.wgrip { cursor: grab; touch-action: none; user-select: none; font-size: 14px; color: var(--muted); padding: 0 2px }
+.bgrid.edit .wdg { border-style: dashed } .wdg.wdrag { opacity: .4 } .wdg.wtb { box-shadow: -4px 0 0 var(--acc) } .wdg.wta { box-shadow: 4px 0 0 var(--acc) }
+.wb { flex: 1; min-height: 0; overflow: auto; padding: 0 12px 10px }
+.wb .list { margin: 0 } .wb li.task { padding-top: 3px; padding-bottom: 3px; min-height: 0 } .wb li.task .acts { display: none } .wb li.task .fold.sp { width: 4px }
+.wb li.task .tt { font-size: 14px; line-height: 1.35 } .wb li.task .mt { font-size: 11.5px; margin-top: 1px } .wb li.task .ck { transform: scale(.88) }
+.wempty { color: var(--muted); font-size: 13px; margin: 6px 0 }
+.wmore { display: block; font-size: 12.5px; color: var(--muted); margin: 4px 0 0 30px; text-decoration: none } .wmore:hover { color: var(--acc) }
+.wqa { display: flex; align-items: center; gap: 8px; margin: 6px 0 0 6px; color: var(--muted) } .wqa input { flex: 1; min-width: 0; border: 0; border-bottom: 1px dashed var(--line); background: none; font: inherit; font-size: 13.5px; color: var(--fg); padding: 4px 2px; outline: none } .wqa input:focus { border-bottom-color: var(--acc) }
+.wnum { font: 700 44px/1.1 var(--mono); font-variant-numeric: tabular-nums; color: var(--fg); margin-top: 6px } .wnum.late { color: var(--warn) }
+.wsub { color: var(--muted); font-size: 12.5px }
+.wdl { list-style: none; margin: 0; padding: 0 } .wdl li { display: flex; gap: 8px; align-items: baseline; padding: 4px 0; border-bottom: 1px solid var(--line); font-size: 13.5px }
+.wdl li:last-child { border-bottom: 0 } .wdl a { color: var(--fg); text-decoration: none; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .wdl a:hover { color: var(--acc) }
+.wdl span { font-size: 12px; color: var(--muted); white-space: nowrap } .wdl span.late { color: var(--warn); font-weight: 600 } .wdl span.soon { color: var(--acc) }
+.wpj { display: flex; gap: 14px; align-items: center; font-size: 13.5px; margin-top: 2px } .wring { width: 70px; height: 70px; flex: none }
+.wring circle { fill: none; stroke-width: 7; stroke-linecap: round } .wring text { font: 700 14px var(--mono); fill: var(--fg) }
+.whab { display: grid; gap: 4px } .whr { display: grid; grid-template-columns: minmax(0, 1fr) repeat(5, 28px) 46px; align-items: center; gap: 2px; font-size: 13.5px }
+.whn { display: flex; align-items: center; gap: 7px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis } .whs { font: 600 12px var(--mono); text-align: right; color: var(--muted) }
+.whr .hc { width: 24px; height: 24px } .whr .hc.part:empty::after { width: 7px; height: 7px }
+.wnote { font-size: 13.5px; line-height: 1.55 } .wnote > :first-child { margin-top: 0 } .wnote h1, .wnote h2, .wnote h3 { font-size: 15px; margin: 8px 0 4px }
+.wquick input { width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: inherit; background: var(--bg, var(--panel)); color: var(--fg); outline: none; margin: 4px 0 6px } .wquick input:focus { border-color: var(--acc) }
+.w-sticky { background: color-mix(in srgb, var(--wc) 13%, var(--panel)); border-color: color-mix(in srgb, var(--wc) 40%, var(--line)) }
+.wst { width: 100%; height: 100%; min-height: 60px; box-sizing: border-box; border: 0; background: none; resize: none; font: inherit; font-size: 14px; line-height: 1.5; color: var(--fg); outline: none; padding: 0 }
+.w-chart .chart { width: 100%; height: auto; margin-top: 4px }
+.wcfg { display: grid; gap: 8px; font-size: 13px; padding-top: 2px } .wcr { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 8px; align-items: center } .wcr > span { color: var(--muted) }
+.wcr .inp { width: 100%; box-sizing: border-box } .wcfg .seg { flex-wrap: wrap } .wcfg .r { flex-wrap: wrap; gap: 6px; margin-top: 4px }
+.wcat { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 12px 14px; margin-top: 14px; max-width: 1400px }
+.wcath { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px }
+.wcs { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; margin-top: 8px } .wcs > .lbl { grid-column: 1 / -1; margin: 4px 0 0 }
+.wcc { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 2px 8px; text-align: left; border: 1px solid var(--line); border-radius: 10px; background: none; padding: 9px 10px; cursor: pointer; font: inherit; color: var(--fg) }
+.wcc:hover { border-color: var(--acc); background: var(--acc-soft) } .wcc .wi { grid-row: span 2; font-size: 18px; text-align: center } .wcc small { color: var(--muted); font-size: 12px; line-height: 1.35 }
+.bempty { text-align: center; padding: 30px 16px; border: 1px dashed var(--line); border-radius: 12px; margin-top: 16px; max-width: 1400px }
+.btpl { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin-top: 18px; max-width: 1100px }
+.btc { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start }
+.btc .bti { font-size: 26px } .btc p { margin: 0; font-size: 13px; flex: 1 } .btw { display: flex; gap: 4px; flex-wrap: wrap; margin: 4px 0 6px } .btw span { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; background: var(--hover); font-size: 13px }
+@media (max-width: 900px) { .bgrid { grid-template-columns: repeat(2, minmax(0, 1fr)) } .wdg.c4 { grid-column: 1 / -1 } }
+@media (max-width: 600px) { .bgrid { grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto } .wdg.c1, .wdg.c2, .wdg.c4 { grid-column: 1 / -1 } .wdg.r2, .wdg.cfgon { grid-row: auto } .wdg { min-height: 150px; max-height: 460px } .wcr { grid-template-columns: minmax(0, 1fr) } }
 /* привычки */
 .hwrap { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; max-width: 1160px }
 .hmain { flex: 1 1 540px; min-width: 0 } .hwrap > .hdet { flex: 1 1 300px; max-width: 420px }
@@ -1285,7 +1338,7 @@ CREATE TABLE inbox (
   /* ---------- состояние ---------- */
   var COLORS = [["Зелёный", "#2f8f6f"], ["Синий", "#3b78d0"], ["Фиолетовый", "#8a5cc7"], ["Розовый", "#d0508a"], ["Красный", "#d1453b"], ["Оранжевый", "#df8a1c"], ["Жёлтый", "#c9a21a"], ["Бирюзовый", "#1b9aaa"], ["Коричневый", "#8d6748"], ["Серый", "#7d8783"]];
   var S = (function () { try { return JSON.parse(LS.get("zd-state") || "null"); } catch (e) { return null; } })() || {};
-  S.v = 2; S.tasks = S.tasks || []; S.projects = S.projects || []; S.tags = S.tags || []; S.filters = S.filters || []; S.sprints = S.sprints || []; S.comments = S.comments || []; S.habits = S.habits || []; S.hlog = S.hlog || []; S.acts = S.acts || []; S.tpls = S.tpls || []; S.flags = S.flags || []; S.notes = S.notes || []; S.nsecs = S.nsecs || []; S.ntags = S.ntags || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
+  S.v = 2; S.tasks = S.tasks || []; S.projects = S.projects || []; S.tags = S.tags || []; S.filters = S.filters || []; S.sprints = S.sprints || []; S.comments = S.comments || []; S.habits = S.habits || []; S.hlog = S.hlog || []; S.acts = S.acts || []; S.tpls = S.tpls || []; S.flags = S.flags || []; S.notes = S.notes || []; S.nsecs = S.nsecs || []; S.ntags = S.ntags || []; S.boards = S.boards || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
   var VIEWS = (function () { try { return JSON.parse(LS.get("zd-views") || "{}") || {}; } catch (e) { return {}; } })();
   function save(quiet) { if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); LS.set("zd-state", JSON.stringify(S)); if (!quiet) { SYNC.later(); SRV.later(); } }
   function live(a) { return a.filter(function (x) { return !x.del; }); }
@@ -1313,7 +1366,7 @@ CREATE TABLE inbox (
     var tl = Date.now() - 30 * 864e5;
     ["tasks", "projects", "tags", "filters", "notes"].forEach(function (k) { S[k].forEach(function (x) { if (x.del && !x.purged && (x.delAt || x.upd || 0) < tl) { x.purged = 1; x.t = ""; x.note = ""; x.body = ""; if (k !== "tasks") x.n = ""; } }); });
     var al = Date.now() - 400 * 864e5; S.acts = S.acts.filter(function (x) { return (x.d || 0) > al; });
-    var lim = Date.now() - 60 * 864e5; ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "tpls", "flags", "notes", "nsecs", "ntags"].forEach(function (k) { S[k] = S[k].filter(function (x) { return !x.del || x.upd > lim; }); }); }
+    var lim = Date.now() - 60 * 864e5; ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "tpls", "flags", "notes", "nsecs", "ntags", "boards"].forEach(function (k) { S[k] = S[k].filter(function (x) { return !x.del || x.upd > lim; }); }); }
 
   /* --- проекты: дерево любой глубины --- */
   function projects() { return live(S.projects); }
@@ -1697,8 +1750,8 @@ CREATE TABLE inbox (
     (b || []).forEach(function (x) { var y = m[x.id]; if (!y || (x.upd || 0) > (y.upd || 0)) m[x.id] = x; });
     return Object.keys(m).map(function (k) { return m[k]; });
   }
-  var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "flags", "notes", "nsecs", "ntags"];
-  function snapshot() { return { v: 2, tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, notes: S.notes, nsecs: S.nsecs, ntags: S.ntags, opt: S.opt }; }
+  var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "flags", "notes", "nsecs", "ntags", "boards"];
+  function snapshot() { return { v: 2, tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, notes: S.notes, nsecs: S.nsecs, ntags: S.ntags, boards: S.boards, opt: S.opt }; }
   var SYNC = {
     st: "off", at: 0, msg: "", parts: null, last: "", t: null, busy: false,
     enabled: function () { return YD.on && !!YD.token(); },
@@ -2016,7 +2069,7 @@ CREATE TABLE inbox (
     var h = decodeURIComponent((location.hash || "").slice(1)), m;
     if ((m = h.match(/^task-(.+)$/))) return { v: "task", a: m[1] };
     if ((m = h.match(/^share-(.+)$/))) return { v: "share", a: m[1] };
-    if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note)-(.+)$/))) return { v: m[1], a: m[2] };
+    if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board)-(.+)$/))) return { v: m[1], a: m[2] };
     if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
     if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes"].indexOf(h) >= 0) return { v: h, a: "" };
     return { v: "today", a: "" };
@@ -2027,8 +2080,8 @@ CREATE TABLE inbox (
   var CURH = "", BACK = null;
   function closeAux() { go(BACK ? BACK.h : LASTH && !/^(settings|help)/.test(LASTH) ? LASTH : "today"); }
   function placeName(h) {
-    var m = /^(proj|tag|filter|sprint|nsec|note|flag)-(.+)$/.exec(h || ""), o;
-    if (m) { o = m[1] === "proj" ? proj(m[2]) : m[1] === "filter" ? filt(m[2]) : m[1] === "sprint" ? sprint(m[2]) : m[1] === "nsec" ? nsec(m[2]) : m[1] === "note" ? note(m[2]) : null; if (m[1] === "tag") return "#" + m[2]; if (o) return o.t || o.n || "предыдущему разделу"; }
+    var m = /^(proj|tag|filter|sprint|nsec|note|flag|board)-(.+)$/.exec(h || ""), o;
+    if (m) { o = m[1] === "board" ? board(m[2]) : m[1] === "proj" ? proj(m[2]) : m[1] === "filter" ? filt(m[2]) : m[1] === "sprint" ? sprint(m[2]) : m[1] === "nsec" ? nsec(m[2]) : m[1] === "note" ? note(m[2]) : null; if (m[1] === "tag") return "#" + m[2]; if (o) return o.t || o.n || "предыдущему разделу"; }
     if (/^settings/.test(h)) return "настройкам"; if (/^help/.test(h)) return "справке";
     return LISTN[h] || "предыдущему разделу";
   }
@@ -2075,6 +2128,7 @@ CREATE TABLE inbox (
 
   /* ---------- боковая панель ---------- */
   var ICO = {
+    board: '<rect x="3.5" y="3.5" width="7.5" height="9" rx="1.5"/><rect x="13" y="3.5" width="7.5" height="5.5" rx="1.5"/><rect x="13" y="11" width="7.5" height="9.5" rx="1.5"/><rect x="3.5" y="14.5" width="7.5" height="6" rx="1.5"/>',
     inbox: '<path d="M4 13l2.5-7h11L20 13v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 13h4.5l1 2h5l1-2H20"/>',
     today: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/><path d="M10 15h4"/>',
     plans: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h2M12 14h2M8 17h2M12 17h2"/>',
@@ -2144,7 +2198,7 @@ CREATE TABLE inbox (
     return itemHTML("proj", p.id, "proj-" + p.id, '<span class="pic">' + piconH(p) + "</span>", inFav ? pname(p) : p.n, n, { drag: !inFav, pad: inFav ? 0 : d, chev: chev, fav: !!p.fav });
   }
   // левая панель из блоков; порядок блоков и пунктов «Списков» меняется перетаскиванием и хранится в S.opt
-  var SIDE_DEF = ["fav", "lists", "projects", "notes", "filters", "tags", "service"], LISTS_DEF = ["inbox", "today", "cal", "gantt", "matrix", "habits", "sprint", "plans", "someday", "flag", "all", "stats"];
+  var SIDE_DEF = ["fav", "boards", "lists", "projects", "notes", "filters", "tags", "service"], LISTS_DEF = ["inbox", "today", "cal", "gantt", "matrix", "habits", "sprint", "plans", "someday", "flag", "all", "stats"];
   function sideOrder() { var o = (S.opt.side || []).filter(function (x) { return SIDE_DEF.indexOf(x) >= 0; }); SIDE_DEF.forEach(function (x) { if (o.indexOf(x) < 0) { var si = o.indexOf("service"); if (si >= 0) o.splice(si, 0, x); else o.push(x); } }); return o; }
   function listsAll() { var o = (S.opt.lists || []).filter(function (x) { return LISTS_DEF.indexOf(x) >= 0; }); LISTS_DEF.forEach(function (x) { if (o.indexOf(x) < 0) o.push(x); }); return o; }
   function hiddenLists() { var l = LS.get("zd-hide"); if (l) { try { var a = JSON.parse(l); if (Array.isArray(a)) return a; } catch (e) { /* старый формат */ } } return S.opt.hideLists || []; }
@@ -2153,7 +2207,7 @@ CREATE TABLE inbox (
   function setListHidden(id, hide) { if (id === "inbox") return; var h = hiddenLists().filter(function (x) { return x !== id; }); if (hide) h.push(id); S.opt.hideLists = h; LS.set("zd-hide", JSON.stringify(h)); optTouch(); save(); render(); }
   // блоки левой панели сворачиваются кликом по заголовку (запоминается на этом устройстве)
   function sideFold() { try { return JSON.parse(LS.get("zd-sfold") || "{}") || {}; } catch (e) { return {}; } }
-  var BHELP = { fav: "fav", lists: "lists", projects: "tree", notes: "notes", filters: "filters", tags: "tags" };
+  var BHELP = { fav: "fav", boards: "dash", lists: "lists", projects: "tree", notes: "notes", filters: "filters", tags: "tags" };
   function blockHead(id, title, extra) { extra = (BHELP[id] ? '<a class="hq lq" href="#help-' + BHELP[id] + '" title="Справка" aria-label="Справка">?</a>' : "") + (extra || ""); var f = sideFold()[id]; return '<div class="lab" draggable="true" data-bdrag="' + id + '"' + (id === "projects" ? ' data-droproot="1"' : "") + ' data-a="sfold" data-id="' + id + '" title="' + (f ? "Развернуть" : "Свернуть") + ' (перетащите, чтобы переставить блок)"><span class="gh" aria-hidden="true">⠿</span><span class="sfch" aria-hidden="true">' + (f ? "▸" : "▾") + "</span>" + title + (extra || "") + "</div>"; }
   function sideHTML() {
     var mini = document.body.classList.contains("mini");
@@ -2190,6 +2244,8 @@ CREATE TABLE inbox (
       nh += itemHTML("nsec", sx.id, "nsec-" + sx.id, '<span class="pic">' + ic("folder") + "</span>", sx.n, cnt, { drag: true, pad: x.d, chev: '<button type="button" class="chev' + (hasK ? "" : " sp") + '" data-a="nsfold" data-id="' + sx.id + '">' + (sx.fold ? "▸" : "▾") + "</button>" }); });
     ntags().forEach(function (g) { nh += itemHTML("ntag", g.n, "ntag-" + g.n, '<span class="hash ntg" style="color:' + col(g.c) + '">◆</span>', g.n, notes().filter(function (n) { return (n.tags || []).indexOf(g.n) >= 0; }).length, {}); });
     B.notes = nh + "</nav>";
+    var bl = boards();
+    B.boards = blockHead("boards", "Доски", '<button type="button" data-a="bnew" title="Новая доска" aria-label="Новая доска">+</button>') + '<nav class="nav">' + (bl.length ? bl.map(function (b) { return itemHTML("board", b.id, "board-" + b.id, '<span class="pic">' + ic("board") + "</span>", b.n, 0, {}); }).join("") : '<div class="none">Свои экраны из виджетов. «+» — создать</div>') + "</nav>";
     var fs = filters();
     B.filters = blockHead("filters", "Фильтры", '<button type="button" data-a="newfilter" title="Новый фильтр" aria-label="Новый фильтр">+</button>') + '<nav class="nav">' + (fs.length ? fs.map(function (f) { return itemHTML("filter", f.id, "filter-" + f.id, '<span class="pic" style="color:' + col(f.c) + '">' + ic("filter") + "</span>", f.n, filterRes(f).length, { fav: !!f.fav }); }).join("") : '<div class="none">Свои подборки задач по условиям</div>') + "</nav>";
     var tg = tags();
@@ -2681,7 +2737,7 @@ CREATE TABLE inbox (
       '<span>Задачи</span><div class="v">' + tl.map(function (t) { return '<span class="chip ntk' + (t.done ? " dn" : "") + '"><a href="#task-' + t.id + '">' + (t.done ? "✓ " : "☐ ") + esc(t.t.slice(0, 60)) + '</a><button type="button" data-a="nunlink" data-v="' + t.id + '" title="Отвязать">×</button></span>'; }).join("") +
       '<button type="button" class="btn sm" data-a="ntpick">' + (TPICK ? "Готово" : "＋ Привязать к задаче") + "</button>" + (TPICK ? '<div class="npick"><input type="search" id="tpq" placeholder="Найти задачу" autocomplete="off"><div id="tpres">' + noteTaskPick(n, "") + "</div></div>" : "") + "</div></div>";
     h += '<div id="nrte" class="rte' + (n.body ? "" : " empty") + '" data-note="' + n.id + '" contenteditable="true" spellcheck="true" data-ph="Текст заметки… «/» — заголовок, чек-лист, спойлер, таблица, код">' + (clean(n.body || "") || "<p><br></p>") + "</div>";
-    h += '<p class="muted nfoot">Создана ' + new Date(n.created || n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) + (n.upd ? " · изменена " + new Date(n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : "") + ' · <button type="button" class="btn sm warn" data-a="note-del">🗑 Удалить заметку</button></p>';
+    h += '<p class="muted nfoot"><button type="button" class="btn sm" data-a="notepin">📌 На доску</button> · Создана ' + new Date(n.created || n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) + (n.upd ? " · изменена " + new Date(n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : "") + ' · <button type="button" class="btn sm warn" data-a="note-del">🗑 Удалить заметку</button></p>';
     return h;
   }
   function noteDel(n) { n.del = 1; n.delAt = Date.now(); touch(n); save(); var back = n.sec && nsec(n.sec) ? "nsec-" + n.sec : "notes"; go(back); toastUndo("Заметка удалена", function () { delete n.del; delete n.delAt; touch(n); save(); render(); }); }
@@ -3202,6 +3258,262 @@ CREATE TABLE inbox (
   document.addEventListener("pointerup", function () { if (GDR) gDrop(); });
   document.addEventListener("pointercancel", function () { if (GDR) { GDR = null; gTip(null, ""); render(); } });
 
+  /* ---------- доски (дашборды): сетка из виджетов, каждый — окно в раздел приложения ---------- */
+  var BEDIT = false, WADD = false, WCFG = null, BCUR = "", WDR = null;
+  function boards() { return live(S.boards).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0) || (a.created || 0) - (b.created || 0); }); }
+  function board(id) { return id ? live(S.boards).filter(function (b) { return b.id === id; })[0] || null : null; }
+  function wOf(b, wid) { return b ? (b.w || []).filter(function (w) { return w.id === wid; })[0] || null : null; }
+  var WT = {
+    tasks: { n: "Список задач", i: "☑", sec: "Задачи", sz: "l", d: "Задачи из списка, проекта, тега, фильтра или флажка: отмечайте, открывайте, добавляйте." },
+    dead: { n: "Сроки и дедлайны", i: "⏰", sec: "Задачи", sz: "m", d: "Что наступает в ближайшие дни, с обратным отсчётом." },
+    proj: { n: "Прогресс проекта", i: "◔", sec: "Проекты", sz: "m", d: "Сколько сделано в проекте и подпроектах, что дальше." },
+    habits: { n: "Привычки", i: "🔁", sec: "Привычки", sz: "m", d: "Привычки на сегодня с отметками за неделю." },
+    note: { n: "Заметка", i: "📝", sec: "Заметки", sz: "m", d: "Текст выбранной заметки прямо на доске." },
+    count: { n: "Число", i: "#", sec: "Статистика", sz: "s", d: "Сколько задач: открытых, просроченных, на сегодня или выполненных за 7/30 дней." },
+    chart: { n: "График выполненного", i: "📊", sec: "Статистика", sz: "w", d: "Выполненные задачи по дням." },
+    quick: { n: "Быстрый ввод", i: "＋", sec: "Инструменты", sz: "m", d: "Поле для новой задачи — сразу в нужный список или проект." },
+    sticky: { n: "Стикер", i: "🗒", sec: "Инструменты", sz: "s", d: "Свободный текст: цель недели, мысль, напоминание себе." }
+  };
+  var WSZ = { s: [1, 1, "Маленький · 1×1"], t: [1, 2, "Высокий · 1×2"], m: [2, 1, "Средний · 2×1"], l: [2, 2, "Большой · 2×2"], w: [4, 1, "Широкий · 4×1"], x: [4, 2, "Огромный · 4×2"] };
+  var WSRC_L = { today: "Сегодня", inbox: "Входящие", late: "Просроченные", week: "Ближайшие 7 дней", flag: "С флажком", someday: "Когда-нибудь", sprint: "Текущий спринт", all: "Все задачи" };
+  var WCNT = { open: "открытых", late: "просроченных", today: "на сегодня", done7: "сделано за 7 дней", done30: "сделано за 30 дней" };
+  function wsrcParse(src) { var m = /^(\w+):(.*)$/.exec(src || "") || [0, "list", "today"]; return { k: m[1], v: m[2] }; }
+  // условие «задача относится к источнику» без учёта выполненности (для «сделано за N дней»)
+  function wsrcPred(src) {
+    var x = wsrcParse(src);
+    if (x.k === "proj") { var ids = pdesc(x.v); return function (t) { return ids.indexOf(t.pid) >= 0; }; }
+    if (x.k === "tag") return function (t) { return hasTagDeep(t, x.v); };
+    if (x.k === "flag") return function (t) { var f = flagOf(t); return !!f && f.id === x.v; };
+    if (x.k === "filter") { var f = filt(x.v), q = f && (f.q || fdef()); return function (t) { return !!q && matchQ(t, q); }; }
+    if (x.k === "list" && x.v === "sprint") { var cs = curSprintId(); return function (t) { return t.sprint === cs; }; }
+    if (x.k === "list" && x.v === "flag") return hasFlag;
+    return function () { return true; };
+  }
+  function wsrcList(src) {
+    var x = wsrcParse(src), end = today0() + DAY;
+    if (x.k === "list") {
+      if (x.v === "today") return todayList(); if (x.v === "inbox") return inboxList(); if (x.v === "someday") return somedayList(); if (x.v === "flag") return flagList();
+      if (x.v === "late") return tasks().filter(isLate);
+      if (x.v === "week") { var e7 = today0() + 7 * DAY; return tasks().filter(function (t) { return !t.done && ((t.at && t.at < e7) || (t.due && t.due < e7)); }); }
+      if (x.v === "sprint") { var cs = curSprintId(); return tasks().filter(function (t) { return !t.done && t.sprint === cs; }); }
+      return tasks().filter(function (t) { return !t.done; });
+    }
+    if (x.k === "filter") { var f = filt(x.v); return f ? filterRes(f).filter(function (t) { return !t.done; }) : []; }
+    var pr = wsrcPred(src); return tasks().filter(function (t) { return !t.done && pr(t); });
+  }
+  function wsrcName(src) {
+    var x = wsrcParse(src), o;
+    if (x.k === "list") return WSRC_L[x.v] || "Все задачи";
+    if (x.k === "proj") return (o = proj(x.v)) ? o.n : "проект удалён";
+    if (x.k === "tag") return "#" + x.v;
+    if (x.k === "filter") return (o = filt(x.v)) ? o.n : "фильтр удалён";
+    if (x.k === "flag") return (o = flagObj(x.v)) ? o.n : "флажок удалён";
+    return "—";
+  }
+  function wsrcHref(src) { var x = wsrcParse(src); if (x.k === "list") return { late: "plans", week: "plans" }[x.v] || x.v; return x.k + "-" + x.v; }
+  function wsrcCtx(src) {
+    var x = wsrcParse(src), c = {};
+    if (x.k === "proj" && proj(x.v)) c.pid = x.v; else if (x.k === "tag") c.tags = [x.v]; else if (x.k === "flag" && flagObj(x.v)) c.flag = x.v;
+    else if (x.k === "list") { if (x.v === "today") c.today = true; else if (x.v === "someday") c.some = true; else if (x.v === "sprint") c.sprint = curSprintId(); else if (x.v === "flag") c.flag = true; }
+    return c;
+  }
+  function wsrcMenu() {
+    var it = Object.keys(WSRC_L).map(function (k) { return { c: "list:" + k, i: "", l: WSRC_L[k] }; });
+    it.push("-");
+    var pt = ptree(); if (pt.length) it.push({ i: "📁", l: "Проект", sub: pt.map(function (x) { return { c: "proj:" + x.p.id, i: piconH(x.p), l: x.p.n, pad: x.d }; }) });
+    var tg = tags(); if (tg.length) it.push({ i: "#", l: "Тег", sub: tg.map(function (g) { return { c: "tag:" + g.n, i: "#", l: g.n }; }) });
+    var fs = filters(); if (fs.length) it.push({ i: "⚲", l: "Фильтр", sub: fs.map(function (f) { return { c: "filter:" + f.id, i: "", l: f.n }; }) });
+    var fl = flags(); if (fl.length) it.push({ i: "⚑", l: "Флажок", sub: fl.map(function (f) { return { c: "flag:" + f.id, i: flagIc(f), l: f.n }; }) });
+    return it;
+  }
+  function wDefTitle(w) {
+    var c = w.cfg || {};
+    if (w.type === "tasks") return wsrcName(c.src || "list:today");
+    if (w.type === "count") return c.src ? wsrcName(c.src) : "Все задачи";
+    if (w.type === "proj") { var pp = proj(c.pid); return pp ? pp.n : "Прогресс проекта"; }
+    if (w.type === "note") { var nn = note(c.nid); return nn ? nn.t || "Заметка" : "Заметка"; }
+    if (w.type === "quick") return "Новая задача → " + wsrcName(c.src || "list:inbox");
+    if (w.type === "dead") return "Сроки на " + (c.days || 14) + " дн." + (c.src && c.src !== "list:all" ? " · " + wsrcName(c.src) : "");
+    if (w.type === "chart") return "Сделано за " + (c.days || 14) + " дн." + (c.src && c.src !== "list:all" ? " · " + wsrcName(c.src) : "");
+    return (WT[w.type] || {}).n || "Виджет";
+  }
+  function wHref(w) {
+    var c = w.cfg || {};
+    if (w.type === "tasks" || (w.type === "count" && c.src) || (w.type === "dead" && c.src && c.src !== "list:all")) return wsrcHref(c.src || "list:today");
+    if (w.type === "proj" && proj(c.pid)) return "proj-" + c.pid;
+    if (w.type === "note" && note(c.nid)) return "note-" + c.nid;
+    if (w.type === "habits") return "habits"; if (w.type === "chart") return "stats"; if (w.type === "dead") return "plans";
+    return "";
+  }
+  function dleft(ms) { var d = Math.round((sod(ms) - today0()) / DAY); return d < 0 ? { t: "просрочено " + -d + " дн.", c: "late" } : d === 0 ? { t: "сегодня", c: "late" } : d === 1 ? { t: "завтра", c: "soon" } : { t: "через " + d + " " + plural(d, ["день", "дня", "дней"]), c: d <= 3 ? "soon" : "" }; }
+  function wqa(src, wid) { return '<div class="wqa"><span>＋</span><input type="text" data-wqa="' + wid + '" data-src="' + esc(src) + '" placeholder="Новая задача — Enter" autocomplete="off"></div>'; }
+  function wBody(b, w) {
+    var c = w.cfg || {}, h = "";
+    switch (w.type) {
+      case "tasks":
+        var src = c.src || "list:today", all = wsrcList(src), inSet = {}; all.forEach(function (t) { inSet[t.id] = 1; });
+        var roots = all.filter(function (t) { return !t.parent || !inSet[t.parent]; }).sort(cmpBy(c.sort || "smart")), lim = +c.lim || 0, shown = lim ? roots.slice(0, lim) : roots;
+        h = (renderTree(shown, c.sort || "smart", { noProj: wsrcParse(src).k === "proj" }) || '<p class="wempty">Пусто — всё сделано 🎉</p>').replace(/ draggable="true"/g, "");
+        if (shown.length < roots.length) h += '<a class="wmore" href="#' + esc(wsrcHref(src)) + '">ещё ' + (roots.length - shown.length) + " →</a>";
+        if (c.add !== 0) h += wqa(src, w.id);
+        return h;
+      case "dead":
+        var hz = today0() + (+c.days || 14) * DAY, pr = wsrcPred(c.src || "list:all");
+        var l = tasks().filter(function (t) { var d = t.due || t.at; return !t.done && d && d < hz && pr(t); }).sort(function (a, b2) { return (a.due || a.at) - (b2.due || b2.at); });
+        if (!l.length) return '<p class="wempty">Ничего не горит</p>';
+        return '<ul class="wdl">' + l.slice(0, 30).map(function (t) { var dl = dleft(t.due || t.at); return '<li><a href="#task-' + t.id + '">' + (t.due ? "⏰ " : "") + esc(t.t) + '</a><span class="' + dl.c + '">' + dl.t + "</span></li>"; }).join("") + "</ul>";
+      case "count":
+        var m = c.m || "open", pc = wsrcPred(c.src || "list:all"), n = 0;
+        if (m === "done7" || m === "done30") { var from = today0() - ((m === "done7" ? 7 : 30) - 1) * DAY; n = doneEvents().filter(function (e) { var t = task(e.t); return e.d >= from && (!c.src || (t && pc(t))); }).length; }
+        else { var base = c.src ? wsrcList(c.src) : tasks().filter(function (t) { return !t.done; }); n = m === "late" ? base.filter(isLate).length : m === "today" ? base.filter(function (t) { var e = today0() + DAY; return (t.at && t.at < e) || (t.due && t.due < e); }).length : base.length; }
+        return '<div class="wnum' + (m === "late" && n ? " late" : "") + '">' + n + '</div><div class="wsub">' + esc(WCNT[m]) + "</div>";
+      case "chart":
+        var dd = +c.days || 14, pch = wsrcPred(c.src || "list:all"), cnt = {}, ev = doneEvents();
+        ev.forEach(function (e) { var t = task(e.t); if (c.src && c.src !== "list:all" && !(t && pch(t))) return; var k = dKey(e.d); cnt[k] = (cnt[k] || 0) + 1; });
+        var data = []; for (var i = dd - 1; i >= 0; i--) { var d0 = addDays(today0(), -i), k2 = dKey(d0); data.push({ v: cnt[k2] || 0, l: String(new Date(d0).getDate()), title: dayName(d0), c: d0 === today0() ? "var(--acc)" : col(c.c !== undefined ? c.c : 0) }); }
+        var tot = data.reduce(function (a, x) { return a + x.v; }, 0);
+        return '<div class="wsub">Всего ' + tot + " · в среднем " + fmtN(Math.round(tot / dd * 10) / 10) + " в день</div>" + barsSVG(data, { w: 680, h: 130 });
+      case "proj":
+        var pj = proj(c.pid); if (!pj) return '<p class="wempty">Выберите проект — ⚙ вверху виджета</p>';
+        var ids = pdesc(pj.id), pl = live(S.tasks).filter(function (t) { return ids.indexOf(t.pid) >= 0 && !t.canc; }), dn = pl.filter(function (t) { return t.done; }).length, op = pl.filter(function (t) { return !t.done; }), pct = pl.length ? Math.round(dn / pl.length * 100) : 0, lt = op.filter(isLate).length;
+        var R2 = 26, C = 2 * Math.PI * R2;
+        h = '<div class="wpj"><svg viewBox="0 0 64 64" class="wring"><circle cx="32" cy="32" r="' + R2 + '" style="stroke:var(--hover)"/>' + (pct ? '<circle cx="32" cy="32" r="' + R2 + '" style="stroke:' + col(pj.c || 0) + '" stroke-dasharray="' + (C * pct / 100).toFixed(1) + " " + C.toFixed(1) + '" transform="rotate(-90 32 32)"/>' : "") + '<text x="32" y="37" text-anchor="middle">' + pct + '%</text></svg><div><b>' + dn + " из " + pl.length + '</b> сделано<br><span class="muted">открыто ' + op.length + (lt ? ' · <span class="late">просрочено ' + lt + "</span>" : "") + "</span></div></div>";
+        var nx = op.filter(function (t) { return !t.parent; }).sort(cmpBy("smart")).slice(0, 3);
+        if (nx.length) h += '<div class="wsub" style="margin-top:6px">Дальше:</div>' + renderTree(nx, "smart", { noProj: true }).replace(/ draggable="true"/g, "");
+        return h;
+      case "habits":
+        var hl = habits().filter(function (x) { return !x.arch; }); if (!hl.length) return '<p class="wempty">Привычек пока нет — <a href="#habits">добавить</a></p>';
+        var ds = []; for (var j = 4; j >= 0; j--) ds.push(addDays(today0(), -j));
+        return '<div class="whab">' + hl.map(function (x) { return '<div class="whr" style="--hc:' + col(x.c || 0) + '"><span class="whn">' + hMarkIco(x) + esc(x.n) + "</span>" + ds.map(function (d) { return hCell(x, d); }).join("") + '<span class="whs">🔥' + fmtN(hStreak(x)) + "</span></div>"; }).join("") + "</div>";
+      case "note":
+        var nt = note(c.nid); if (!nt) return '<p class="wempty">Выберите заметку — ⚙ вверху виджета</p>';
+        return '<div class="wnote">' + (clean(nt.body || "") || '<p class="muted">Заметка пустая</p>') + "</div>";
+      case "quick":
+        return '<div class="wquick"><input type="text" data-wqa="' + w.id + '" data-src="' + esc(c.src || "list:inbox") + '" placeholder="Что сделать? Можно: завтра 10:00 #тег !1" autocomplete="off"><div class="wsub">Enter — добавить в «' + esc(wsrcName(c.src || "list:inbox")) + "»</div></div>";
+      case "sticky":
+        return '<textarea class="wst" data-wst="' + w.id + '" placeholder="Напишите что-нибудь…">' + esc(c.text || "") + "</textarea>";
+    }
+    return "";
+  }
+  function wCfgHTML(b, w) {
+    var c = w.cfg || {}, row = function (lab, inner) { return '<div class="wcr"><span>' + lab + "</span><div>" + inner + "</div></div>"; };
+    var seg = function (k, opts, cur) { return '<div class="seg">' + opts.map(function (o) { return '<button type="button" data-a="wset" data-k="' + k + '" data-v="' + o[0] + '" class="' + (String(cur) === String(o[0]) ? "on" : "") + '">' + o[1] + "</button>"; }).join("") + "</div>"; };
+    var dd = function (a, label) { return '<button type="button" class="ddb sm" data-a="' + a + '">' + esc(label) + '<span class="dda">▾</span></button>'; };
+    var h = row("Заголовок", '<input type="text" class="inp" data-wf="t" data-w="' + w.id + '" value="' + esc(c.t || "") + '" placeholder="' + esc(wDefTitle(w)) + '">');
+    if (w.type === "tasks") h += row("Откуда", dd("wsrc", wsrcName(c.src || "list:today"))) + row("Порядок", dd("wsort", SORTN[c.sort || "smart"])) + row("Показывать", seg("lim", [[5, "5"], [10, "10"], [20, "20"], [0, "все"]], c.lim === undefined ? 0 : c.lim)) + row("Поле «новая задача»", seg("add", [[1, "есть"], [0, "нет"]], c.add === 0 ? 0 : 1));
+    if (w.type === "dead") h += row("Откуда", dd("wsrc", wsrcName(c.src || "list:all"))) + row("На сколько дней", seg("days", [[7, "7"], [14, "14"], [30, "30"], [90, "90"]], c.days || 14));
+    if (w.type === "count") h += row("Откуда", dd("wsrc", wsrcName(c.src || "list:all"))) + row("Что считать", seg("m", Object.keys(WCNT).map(function (k) { return [k, WCNT[k]]; }), c.m || "open"));
+    if (w.type === "chart") h += row("Откуда", dd("wsrc", wsrcName(c.src || "list:all"))) + row("Период", seg("days", [[7, "7 дн."], [14, "14 дн."], [30, "30 дн."]], c.days || 14));
+    if (w.type === "quick") h += row("Куда добавлять", dd("wsrc", wsrcName(c.src || "list:inbox")));
+    if (w.type === "proj") h += row("Проект", dd("wproj", proj(c.pid) ? proj(c.pid).n : "выбрать…"));
+    if (w.type === "note") h += row("Заметка", dd("wnote", note(c.nid) ? note(c.nid).t || "Без названия" : "выбрать…"));
+    if (w.type === "sticky" || w.type === "chart") h += row("Цвет", '<div class="sw">' + COLORS.map(function (cc, i) { return '<button type="button" data-a="wset" data-k="c" data-v="' + i + '" class="' + ((c.c !== undefined ? +c.c : w.type === "sticky" ? 6 : 0) === i ? "on" : "") + '" style="background:' + cc[1] + '" title="' + cc[0] + '"></button>'; }).join("") + "</div>");
+    return '<div class="wcfg">' + h + '<div class="r"><button type="button" class="btn pri sm" data-a="wcfg">Готово</button><button type="button" class="btn sm" data-a="wsize">Размер: ' + WSZ[w.sz || "m"][2] + '</button><button type="button" class="btn sm warn" data-a="wdel" style="margin-left:auto">Убрать виджет</button></div></div>';
+  }
+  function wHTML(b, w) {
+    var sz = WSZ[w.sz] || WSZ.m, c = w.cfg || {}, href = wHref(w), ttl = c.t || wDefTitle(w), cfg = WCFG === w.id;
+    var st = w.type === "sticky" ? ' style="--wc:' + col(c.c !== undefined ? +c.c : 6) + '"' : "";
+    return '<section class="wdg w-' + w.type + " c" + sz[0] + " r" + sz[1] + (cfg ? " cfgon" : "") + '" data-w="' + w.id + '"' + st + '><header class="wh">' + (BEDIT ? '<span class="wgrip" title="Перетащите, чтобы переставить">⠿</span>' : "") + '<span class="wi">' + (WT[w.type] || {}).i + "</span>" +
+      (href ? '<a class="wt" href="#' + esc(href) + '" title="Открыть раздел">' + esc(ttl) + "</a>" : '<span class="wt">' + esc(ttl) + "</span>") +
+      '<span class="wbtn">' + (BEDIT ? '<button type="button" data-a="wsize" title="Размер">⤡</button><button type="button" data-a="wdel" title="Убрать с доски">×</button>' : "") + '<button type="button" data-a="wcfg" title="Настроить виджет" aria-label="Настроить виджет">⚙</button></span></header>' +
+      '<div class="wb">' + (cfg ? wCfgHTML(b, w) : wBody(b, w)) + "</div></section>";
+  }
+  var BTPL = {
+    day: { n: "Мой день", i: "☀", d: "Задачи на сегодня, привычки, ближайшие сроки, быстрый ввод и главное на день.",
+      w: function () { return [{ type: "tasks", sz: "l", cfg: { src: "list:today", t: "Сегодня" } }, { type: "habits", sz: "m" }, { type: "dead", sz: "m", cfg: { days: 7 } }, { type: "quick", sz: "m", cfg: { src: "list:today" } }, { type: "sticky", sz: "m", cfg: { t: "Главное на сегодня", c: 6 } }]; } },
+    week: { n: "Обзор недели", i: "📅", d: "Итоги недели в цифрах, график, просроченное, «Входящие», планы на 7 дней и место для выводов.",
+      w: function () { return [{ type: "count", sz: "s", cfg: { m: "done7", t: "Сделано за неделю" } }, { type: "count", sz: "s", cfg: { m: "late", t: "Просрочено" } }, { type: "count", sz: "s", cfg: { m: "open", src: "list:inbox", t: "Во «Входящих»" } }, { type: "count", sz: "s", cfg: { m: "open", src: "list:sprint", t: "Осталось в спринте" } }, { type: "chart", sz: "w", cfg: { days: 14 } }, { type: "tasks", sz: "m", cfg: { src: "list:late", lim: 10, add: 0 } }, { type: "tasks", sz: "m", cfg: { src: "list:inbox", lim: 10 } }, { type: "tasks", sz: "m", cfg: { src: "list:week", lim: 10, add: 0 } }, { type: "sticky", sz: "m", cfg: { t: "Итоги недели", c: 1, text: "Что получилось:\n\nЧто мешало:\n\nГлавное на следующую неделю:" } }]; } },
+    proj: { n: "Проект", i: "📁", d: "Всё по одному проекту: прогресс, задачи, сроки, просроченное и заметки.", needs: "proj",
+      w: function (pid) { var s2 = "proj:" + pid; return [{ type: "proj", sz: "m", cfg: { pid: pid } }, { type: "quick", sz: "m", cfg: { src: s2 } }, { type: "tasks", sz: "l", cfg: { src: s2, t: "Задачи", add: 0 } }, { type: "dead", sz: "m", cfg: { src: s2, days: 30 } }, { type: "count", sz: "s", cfg: { m: "late", src: s2, t: "Просрочено" } }, { type: "count", sz: "s", cfg: { m: "done7", src: s2, t: "Сделано за неделю" } }, { type: "sticky", sz: "w", cfg: { t: "Заметки по проекту", c: 7 } }]; } },
+    empty: { n: "Пустая доска", i: "▦", d: "Чистый лист — добавляйте виджеты сами.", w: function () { return []; } }
+  };
+  function bCreate(n, ws, extra) {
+    var mx = boards().reduce(function (a, x) { return Math.max(a, x.ord || 0); }, -1);
+    var b = touch(Object.assign({ id: uid(), n: n, ord: mx + 1, created: Date.now(), w: ws.map(function (w) { return { id: uid(), type: w.type, sz: w.sz || WT[w.type].sz, cfg: Object.assign({}, w.cfg || {}) }; }) }, extra || {}));
+    S.boards.push(b); save(); return b;
+  }
+  function bFromTpl(k, pid) { var t = BTPL[k]; if (!t) return null; if (t.needs === "proj" && !proj(pid)) return null; var b = bCreate(t.needs === "proj" ? proj(pid).n : t.n, t.w(pid), t.needs === "proj" ? { pid: pid } : {}); BEDIT = false; WADD = false; WCFG = null; go("board-" + b.id); toast("Доска «" + b.n + "» создана"); return b; }
+  function bSave(b) { touch(b); save(); render(); }
+  function wAdd(b, type, cfg, sz) { var w = { id: uid(), type: type, sz: sz || WT[type].sz, cfg: cfg || {} }; b.w = (b.w || []).concat(w); touch(b); save(); return w; }
+  function vBoardNew() {
+    var h = head("Новая доска", "Выберите основу — потом всё можно поменять: добавить и убрать виджеты, переставить, изменить размер.");
+    h += '<div class="btpl">' + Object.keys(BTPL).map(function (k) { var t = BTPL[k]; var ws = t.w(t.needs ? "" : undefined); return '<div class="btc"><div class="bti">' + t.i + '</div><b>' + esc(t.n) + '</b><p class="muted">' + esc(t.d) + "</p>" + (ws.length ? '<div class="btw">' + ws.map(function (w) { return '<span title="' + esc(WT[w.type].n) + '">' + WT[w.type].i + "</span>"; }).join("") + "</div>" : "") + (t.needs === "proj" ? (projects().length ? '<button type="button" class="btn pri sm" data-a="btplproj">Выбрать проект…</button>' : '<p class="muted">Сначала создайте проект</p>') : '<button type="button" class="btn pri sm" data-a="btpl" data-k="' + k + '">Создать</button>') + "</div>"; }).join("") + "</div>";
+    return h;
+  }
+  function vBoard() {
+    if (ARG === "new") return vBoardNew();
+    var b = board(ARG); if (!b) return head("Доска не найдена", "Возможно, её удалили. <a href=\"#board-new\">Создать новую</a>");
+    if (BCUR !== b.id) { BCUR = b.id; BEDIT = false; WADD = false; WCFG = null; }
+    var h = '<div class="bhd"><h1 class="bh1"><span class="bic">' + ic("board") + '</span><input class="btitle" data-board="' + b.id + '" value="' + esc(b.n) + '" aria-label="Название доски" autocomplete="off"></h1>' +
+      '<span class="r bbar"><button type="button" class="btn sm' + (WADD ? " on" : "") + '" data-a="wadd">＋ Виджет</button><button type="button" class="btn sm' + (BEDIT ? " pri" : "") + '" data-a="bedit">' + (BEDIT ? "✓ Готово" : "✎ Изменить доску") + '</button><button type="button" class="ibtn" data-a="bmenu" title="Ещё" aria-label="Ещё">⋯</button></span></div>';
+    if (BEDIT) h += '<p class="muted bhint">Тяните виджеты за ⠿, ⤡ — размер, × — убрать с доски, ⚙ — настройки. Изменения сохраняются сразу.</p>';
+    if (WADD) {
+      var secs = {}; Object.keys(WT).forEach(function (k) { (secs[WT[k].sec] = secs[WT[k].sec] || []).push(k); });
+      h += '<div class="wcat"><div class="wcath"><b>Добавить виджет</b><button type="button" class="ibtn" data-a="wadd" aria-label="Закрыть">✕</button></div>' + Object.keys(secs).map(function (sc) { return '<div class="wcs"><div class="lbl">' + sc + "</div>" + secs[sc].map(function (k) { return '<button type="button" class="wcc" data-a="waddt" data-k="' + k + '"><span class="wi">' + WT[k].i + "</span><b>" + WT[k].n + "</b><small>" + WT[k].d + "</small></button>"; }).join("") + "</div>"; }).join("") + "</div>";
+    }
+    var ws = b.w || [];
+    if (!ws.length) h += '<div class="bempty"><p>На доске пока пусто.</p><button type="button" class="btn pri" data-a="wadd">＋ Добавить виджет</button><p class="muted">Ещё способ: в меню проекта, тега, фильтра или списка (правая кнопка мыши в левой панели) — «📌 На доску».</p></div>';
+    h += '<div class="bgrid' + (BEDIT ? " edit" : "") + '" data-board="' + b.id + '">' + ws.map(function (w) { return wHTML(b, w); }).join("") + "</div>";
+    return h;
+  }
+  function bMenu(b) { return [{ c: "bdup", i: "⧉", l: "Дублировать доску" }, { c: "bup", i: "↑", l: "Выше в панели" }, { c: "bdown", i: "↓", l: "Ниже в панели" }, "-", { c: "bdel", i: "🗑", l: "Удалить доску", warn: 1 }, "-", { c: "help:dash", i: "?", l: "Справка о досках" }]; }
+  function bCmd(b, c) {
+    if (c === "open") { go("board-" + b.id); return; }
+    if (c === "bdup") { var nb = bCreate(b.n + " (копия)", (b.w || []).map(function (w) { return { type: w.type, sz: w.sz, cfg: JSON.parse(JSON.stringify(w.cfg || {})) }; }), b.pid ? { pid: b.pid } : {}); go("board-" + nb.id); toast("Копия создана"); return; }
+    if (c === "bup" || c === "bdown") { var l = boards(), i = l.indexOf(b), j = c === "bup" ? i - 1 : i + 1; if (j < 0 || j >= l.length) return; l.splice(i, 1); l.splice(j, 0, b); l.forEach(function (x, k) { if (x.ord !== k) { x.ord = k; touch(x); } }); save(); render(); return; }
+    if (c === "bdel") { b.del = 1; b.delAt = Date.now(); touch(b); save(); if (V === "board" && ARG === b.id) go(boards()[0] ? "board-" + boards()[0].id : "today"); else render(); toastUndo("Доска «" + b.n + "» удалена", function () { delete b.del; delete b.delAt; touch(b); save(); render(); }); }
+  }
+  // «📌 На доску» из меню раздела
+  function pinMenu(kind) { return { i: "📌", l: kind === "progress" ? "Прогресс — на доску" : "На доску", sub: boards().map(function (b) { return { c: (kind === "progress" ? "pinp:" : "pin:") + b.id, i: "▦", l: b.n }; }).concat(boards().length ? ["-"] : [], [{ c: (kind === "progress" ? "pinp:" : "pin:") + "new", i: "＋", l: "Новая доска" }]) }; }
+  function pinFrom(k, id, bid, progress) {
+    var w;
+    if (progress && k === "proj") w = { type: "proj", cfg: { pid: id } };
+    else if (k === "proj") w = { type: "tasks", cfg: { src: "proj:" + id } };
+    else if (k === "tag") w = { type: "tasks", cfg: { src: "tag:" + id } };
+    else if (k === "filter") w = { type: "tasks", cfg: { src: "filter:" + id } };
+    else if (k === "note") w = { type: "note", cfg: { nid: id } };
+    else if (k === "list") w = id === "habits" ? { type: "habits" } : id === "stats" ? { type: "chart", cfg: { days: 14 } } : { type: "tasks", cfg: { src: "list:" + (WSRC_L[id] ? id : /^(plans|cal|gantt)$/.test(id) ? "week" : "all") } };
+    if (!w) return;
+    var b = bid === "new" ? bCreate("Новая доска", []) : board(bid); if (!b) return;
+    wAdd(b, w.type, w.cfg || {}); render();
+    toast("Добавлено на доску «" + b.n + "»");
+  }
+  // перетаскивание виджетов в режиме «Изменить доску»
+  document.addEventListener("pointerdown", function (e) {
+    var g = e.target.closest && e.target.closest(".bgrid .wgrip"); if (!g) return;
+    e.preventDefault(); WDR = { el: g.closest(".wdg"), x0: e.clientX, y0: e.clientY, moved: false, t: null, before: true }; try { g.setPointerCapture(e.pointerId); } catch (er) { /* ok */ }
+  }, true);
+  document.addEventListener("pointermove", function (e) {
+    if (!WDR) return; if (Math.abs(e.clientX - WDR.x0) + Math.abs(e.clientY - WDR.y0) > 6) WDR.moved = true; if (!WDR.moved) return;
+    WDR.el.classList.add("wdrag"); var t = null;
+    [].forEach.call(document.querySelectorAll(".bgrid > .wdg"), function (x) { x.classList.remove("wtb", "wta"); var r = x.getBoundingClientRect(); if (x !== WDR.el && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) { t = x; WDR.before = e.clientX < r.left + r.width / 2; } });
+    WDR.t = t; if (t) t.classList.add(WDR.before ? "wtb" : "wta");
+  });
+  document.addEventListener("pointerup", function () {
+    var g = WDR; WDR = null; if (!g) return; g.el.classList.remove("wdrag"); [].forEach.call(document.querySelectorAll(".bgrid > .wdg"), function (x) { x.classList.remove("wtb", "wta"); });
+    if (!g.moved || !g.t) return;
+    var b = board(ARG); if (!b) return; var a = b.w.filter(function (w) { return w.id === g.el.dataset.w; })[0]; if (!a) return;
+    var rest = b.w.filter(function (w) { return w !== a; }), ti = rest.map(function (w) { return w.id; }).indexOf(g.t.dataset.w); if (ti < 0) return;
+    rest.splice(g.before ? ti : ti + 1, 0, a); b.w = rest; bSave(b);
+  });
+  document.addEventListener("keydown", function (e) {
+    var tg = e.target, ds = tg.dataset || {};
+    if (ds.wqa && e.key === "Enter") {
+      e.preventDefault(); var raw = tg.value.trim(); if (!raw) return; if (!parseQuick(raw).t) { toast("Напишите, что сделать"); return; }
+      var t = newTaskFrom(raw, wsrcCtx(ds.src)); tg.value = ""; save(); render(); var wid = ds.wqa;
+      setTimeout(function () { var i = document.querySelector('[data-wqa="' + wid + '"]'); if (i) i.focus(); }, 0);
+      toast("Добавлено" + (t.at ? ": " + whenTxt(t) : t.pid && proj(t.pid) ? " в «" + proj(t.pid).n + "»" : " во «Входящие»")); return;
+    }
+    if (ds.board && tg.classList.contains("btitle") && e.key === "Enter") { e.preventDefault(); tg.blur(); }
+    if (e.key === "Escape" && V === "board" && (WCFG || WADD) && $("ctx").hidden && !OPEN) { WCFG = null; WADD = false; render(); }
+  });
+  document.addEventListener("change", function (e) {
+    var tg = e.target, ds = tg.dataset || {};
+    if (ds.board && tg.classList.contains("btitle")) { var b = board(ds.board), v = tg.value.trim(); if (!b) return; if (!v) { tg.value = b.n; return; } b.n = v.slice(0, 60); bSave(b); return; }
+    if (ds.wst) { var b2 = board(ARG), w2 = wOf(b2, ds.wst); if (w2) { w2.cfg = w2.cfg || {}; w2.cfg.text = tg.value.slice(0, 5000); touch(b2); save(); } return; }
+    if (ds.wf && ds.w) { var b3 = board(ARG), w3 = wOf(b3, ds.w); if (w3) { w3.cfg = w3.cfg || {}; if (tg.value.trim()) w3.cfg.t = tg.value.trim().slice(0, 80); else delete w3.cfg.t; bSave(b3); } }
+  });
+
   /* ---------- привычки (как в Singularity: день — кружок с тремя состояниями) ---------- */
   var HICONS = ["💧", "🏃", "🧘", "📖", "✍️", "🥗", "😴", "💪", "🚶", "🦷", "💊", "🧠", "🎸", "🗣️", "📵", "🌅", "🧹", "💰", "🙏", "☕"];
   var HED = null, HDEL = null, HV = { tab: "act", wk: 0, mon: 0 }, HDR = null;
@@ -3481,7 +3793,7 @@ CREATE TABLE inbox (
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
   }
   // справка по вкладкам, как настройки; поиск ищет по всем разделам сразу
-  var HTABS = [["start", "help", "С чего начать", ["start", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "track", "files", "share", "menu", "multi", "chat", "trash"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["sprint", "habits", "pomo", "stats"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "settings", "diag", "data"]]];
+  var HTABS = [["start", "help", "С чего начать", ["start", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "track", "files", "share", "menu", "multi", "chat", "trash"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["sprint", "habits", "pomo", "stats"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "settings", "diag", "data"]]];
   var HQ = "";
   function htabOf(a) { if (HTABS.some(function (x) { return x[0] === a; })) return a; var f = HTABS.filter(function (x) { return x[3].indexOf(a) >= 0; })[0]; return f ? f[0] : "start"; }
   function vHelpTabs() {
@@ -3700,6 +4012,14 @@ CREATE TABLE inbox (
       "<b>Архив</b>: «🗄 В архив» в карточке убирает привычку из списка, сохраняя отметки и статистику, — она появится на вкладке «Архив». «↩ Восстановить» возвращает её со всем прогрессом. «🗑 Удалить» стирает привычку и её отметки безвозвратно (после подтверждения).",
       "Привычки на сегодня видны и в «Сегодня» — клик по ним отмечает так же. Из напоминания в Telegram привычку можно отметить кнопкой «✓ Отметить». В «Статистике» есть средний процент выполнения привычек."]));
     h += sec("pomo", "Помодоро", "<p>⏱ в карточке или в меню задачи: 25 минут работы над задачей, затем 5 минут перерыва. Таймер виден в левом нижнем углу (пауза ⏸, стоп ■, клик по названию открывает задачу); по окончании — звук и уведомление, в задаче копится счётчик 🍅, а в статистике — часы фокуса.</p>");
+    h += sec("dash", "Доски (дашборды)", ul([
+      "<b>Доска</b> — свой экран из виджетов: например, «Мой день», «Обзор недели», доска проекта или учёбы. Досок может быть сколько угодно, они в блоке «Доски» левой панели и синхронизируются вместе с задачами.",
+      "<b>Новая доска</b>: «+» у заголовка «Доски». Выберите шаблон — «Мой день», «Обзор недели», «Проект» (выберите проект) — или пустую доску. Название меняется прямо в заголовке доски.",
+      "<b>Виджеты</b> («＋ Виджет»): список задач (из любого списка, проекта, тега, фильтра или флажка — задачи можно отмечать, открывать и добавлять), сроки и дедлайны с обратным отсчётом, прогресс проекта, привычки (отметки прямо на доске), заметка, число (открытые, просроченные, на сегодня, сделано за 7 или 30 дней), график выполненного, быстрый ввод, стикер со свободным текстом.",
+      "<b>Настройка виджета</b> — ⚙ в его заголовке: заголовок, откуда брать задачи, порядок, сколько показывать, период, цвет, размер. Клик по заголовку виджета открывает сам раздел.",
+      "<b>Расстановка</b>: «✎ Изменить доску» — тяните виджет за ⠿ на новое место, ⤡ — размер (маленький, высокий, средний, большой, широкий, огромный), × — убрать с доски (можно вернуть из сообщения внизу). «✓ Готово» — выйти из режима.",
+      "<b>На доску из раздела</b>: правая кнопка мыши по проекту, тегу, фильтру или пункту «Списков» в левой панели → «📌 На доску» → выберите доску (или «Новая доска»). У проекта есть ещё «Прогресс — на доску» и «Доска проекта» — готовая доска по шаблону. Заметку можно закрепить кнопкой «📌 На доску» внизу заметки.",
+      "<b>Меню доски</b> (⋯ справа вверху или правая кнопка по доске в панели): дублировать, переставить выше или ниже, удалить. На телефоне виджеты встают в одну колонку."]));
     h += sec("stats", "Статистика", "<p>За 7, 30 или 90 дней: выполнено (вместе с повторяющимися задачами), создано, серия дней подряд, помидоры и часы фокуса, просроченные, привычки; графики по дням, по проектам, по дням недели и по спринтам.</p>");
 
     /* ================= Напоминания и Telegram ================= */
@@ -3903,7 +4223,7 @@ CREATE TABLE inbox (
   document.addEventListener("mousedown", function (e) { if (!POP || !e.target.closest) return; if (e.target.closest(".pop, [data-a=pop], #ctx, #ctx2")) return; POP = null; setTimeout(render, 0); });
   // где какая страница справки
   function hq(id, title) { return '<a class="hq" href="#help-' + id + '" title="' + esc(title || "Справка по этому разделу") + '" aria-label="Справка">?</a>'; }
-  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", search: "pal", share: "share" };
+  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", search: "pal", share: "share" };
   var SHELP = { "s-lists": "mini", "s-review": "focus", "s-flags": "flags", "s-srv": "srv", "s-digest": "digest", "s-ai": "ai", "s-sync": "sync", "s-backup": "backup", "s-diag": "diag", "s-wipe": "backup" };
   function helpMarks() {
     var v = $("view");
@@ -3919,7 +4239,7 @@ CREATE TABLE inbox (
     ADDOK = false;
     CC = null;
     $("side").innerHTML = sideHTML();
-    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
+    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
     var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
     $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "templates");
     $("view").innerHTML = (V === "settings" || V === "help" ? "" : focusBar() + revBar()) + f();
@@ -4198,7 +4518,7 @@ CREATE TABLE inbox (
 
   var IMPF = null;
   function wipeRec(x, now) { x.del = 1; x.delAt = now; x.purged = 1; ["t", "body", "note", "text", "n", "goal", "retro"].forEach(function (f) { if (typeof x[f] === "string") x[f] = ""; }); x.upd = now; }
-  var WIPE_LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "notes", "nsecs", "ntags"];
+  var WIPE_LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "notes", "nsecs", "ntags", "boards"];
   function resetUI() { if (OPEN) { OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); } SELS = {}; CLIP = null; POP = null; CONF = null; RN = null; }
   function wipeAll() { var now = Date.now(), n = 0; WIPE_LISTS.forEach(function (k) { S[k].forEach(function (x) { if (!x.purged) { if (!x.del && k === "tasks") n++; wipeRec(x, now); } }); }); resetUI(); save(); return n; }
   function restoreAll(j) {
@@ -4305,6 +4625,22 @@ CREATE TABLE inbox (
       case "calday": CAL.d = +el.dataset.x; CAL.mode = "day"; LS.set("zd-calmode", "day"); CAL.scrolled = false; render(); return;
       case "stdays": LS.set("zd-stdays", el.dataset.x); render(); return;
       case "hmark": var hh = hab(el.dataset.h); if (hh) { hMark(hh, el.dataset.d); render(); var hst = hSt(hh, el.dataset.d); if (hst === "done" && el.dataset.d === dKey(today0())) toast((hh.ic ? hh.ic + " " : "") + hh.n + " ✓ · серия 🔥 " + fmtN(hStreak(hh))); } return;
+      case "bnew": go("board-new"); return;
+      case "btpl": bFromTpl(el.dataset.k); return;
+      case "btplproj": var rbp = el.getBoundingClientRect(); ctxShow(rbp.left, rbp.bottom + 4, ptree().map(function (x) { return { c: x.p.id, i: piconH(x.p), l: x.p.n, pad: x.d }; }), { k: "btplproj" }); return;
+      case "bedit": BEDIT = !BEDIT; WCFG = null; render(); return;
+      case "wadd": WADD = !WADD; render(); return;
+      case "bmenu": var bbm = board(ARG), rbm = el.getBoundingClientRect(); if (bbm) ctxShow(rbm.right - 220, rbm.bottom + 4, bMenu(bbm), { k: "board", id: bbm.id }); return;
+      case "waddt": var bwa = board(ARG); if (!bwa) return; var nk = el.dataset.k, nw = wAdd(bwa, nk, nk === "tasks" ? { src: bwa.pid ? "proj:" + bwa.pid : "list:today" } : nk === "quick" ? { src: bwa.pid ? "proj:" + bwa.pid : "list:inbox" } : nk === "proj" && bwa.pid ? { pid: bwa.pid } : {}); WADD = false; if (/^(proj|note)$/.test(nk) && !(nk === "proj" && bwa.pid)) WCFG = nw.id; render(); setTimeout(function () { var x = document.querySelector('.wdg[data-w="' + nw.id + '"]'); if (x) x.scrollIntoView({ block: "nearest", behavior: "smooth" }); }, 30); return;
+      case "wcfg": var wcw = el.closest(".wdg"); if (wcw) { WCFG = WCFG === wcw.dataset.w ? null : wcw.dataset.w; render(); } return;
+      case "wdel": var bwd = board(ARG), wdw = el.closest(".wdg"); if (bwd && wdw) { var wi = bwd.w.map(function (w) { return w.id; }).indexOf(wdw.dataset.w), wrm = bwd.w[wi]; if (wi < 0) return; bwd.w.splice(wi, 1); WCFG = null; bSave(bwd); toastUndo("Виджет убран", function () { bwd.w.splice(Math.min(wi, bwd.w.length), 0, wrm); touch(bwd); save(); render(); }); } return;
+      case "wsize": var wsw = el.closest(".wdg"), rws = el.getBoundingClientRect(), wsb = board(ARG), wso = wOf(wsb, wsw && wsw.dataset.w); if (wso) ctxShow(rws.left, rws.bottom + 4, Object.keys(WSZ).map(function (k) { return { c: k, i: "", l: WSZ[k][2], k: (wso.sz || "m") === k ? "✓" : "" }; }), { k: "wsz", id: wso.id }); return;
+      case "wset": var bws = board(ARG), wsx = wOf(bws, el.closest(".wdg").dataset.w); if (wsx) { wsx.cfg = wsx.cfg || {}; var wv = el.dataset.v; wsx.cfg[el.dataset.k] = /^-?\d+$/.test(wv) ? +wv : wv; bSave(bws); } return;
+      case "wsrc": var rsr = el.getBoundingClientRect(); ctxShow(rsr.left, rsr.bottom + 4, wsrcMenu(), { k: "wsrc", id: el.closest(".wdg").dataset.w }); return;
+      case "wsort": var rso = el.getBoundingClientRect(); ctxShow(rso.left, rso.bottom + 4, Object.keys(SORTN).filter(function (k) { return k !== "manual"; }).map(function (k) { return { c: k, i: "", l: SORTN[k] }; }), { k: "wsort", id: el.closest(".wdg").dataset.w }); return;
+      case "wproj": var rpj = el.getBoundingClientRect(); ctxShow(rpj.left, rpj.bottom + 4, ptree().map(function (x) { return { c: x.p.id, i: piconH(x.p), l: x.p.n, pad: x.d }; }), { k: "wproj", id: el.closest(".wdg").dataset.w }); return;
+      case "wnote": var rnt = el.getBoundingClientRect(), nl = notes().sort(function (a, b4) { return (b4.upd || 0) - (a.upd || 0); }).slice(0, 60); if (!nl.length) { toast("Заметок пока нет"); return; } ctxShow(rnt.left, rnt.bottom + 4, nl.map(function (n) { return { c: n.id, i: "📝", l: n.t || "Без названия" }; }), { k: "wnote", id: el.closest(".wdg").dataset.w }); return;
+      case "notepin": var rnp = el.getBoundingClientRect(); ctxShow(rnp.left, rnp.bottom + 4, [pinMenu()], { k: "note", id: ARG }); return;
       case "hopen": HED = HED === el.dataset.h ? null : el.dataset.h; HDEL = null; HV.mon = 0; render(); setTimeout(function () { var dd = document.querySelector(".hdet"); if (dd && dd.getBoundingClientRect().top > innerHeight - 80) dd.scrollIntoView({ block: "start", behavior: "smooth" }); }, 30); return;
       case "hclose": HED = null; HDEL = null; render(); return;
       case "htab": HV.tab = el.dataset.x; HED = null; HDEL = null; render(); return;
@@ -4364,7 +4700,7 @@ CREATE TABLE inbox (
       case "yd-logout": YD.logout(); SYNC.st = "off"; SYNC.show(); render(); toast("Вы вышли из Яндекса на этом устройстве"); return;
       case "sync-now": SYNC.run().then(function () { render(); toast(SYNC.st === "ok" ? "Синхронизировано" : "Нет связи с Диском"); }); return;
       case "export":
-        var blob = new Blob([JSON.stringify({ format: "zadachi-backup", v: 2, at: new Date().toISOString(), tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, notes: S.notes, nsecs: S.nsecs, ntags: S.ntags, opt: S.opt })], { type: "application/json" });
+        var blob = new Blob([JSON.stringify({ format: "zadachi-backup", v: 2, at: new Date().toISOString(), tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, notes: S.notes, nsecs: S.nsecs, ntags: S.ntags, boards: S.boards, opt: S.opt })], { type: "application/json" });
         var ln = document.createElement("a"); ln.href = URL.createObjectURL(blob); ln.download = "Задачи — копия " + dKey(Date.now()) + ".json"; document.body.appendChild(ln); ln.click(); ln.remove(); setTimeout(function () { URL.revokeObjectURL(ln.href); }, 60000); return;
       case "wipe": CONF = "wipe"; render(); return;
       case "popclose": POP = null; render(); return;
@@ -5300,13 +5636,15 @@ CREATE TABLE inbox (
     if (hcx && !hcx.disabled) { e.preventDefault(); var hcs = hSt(hab(hcx.dataset.h) || {}, hcx.dataset.d); ctxShow(e.clientX, e.clientY, [{ c: "done", i: "●", l: "Выполнено", k: hcs === "done" ? "✓" : "" }, { c: "part", i: "◐", l: "Частично — 50 %", k: hcs === "part" ? "✓" : "" }, { c: "skip", i: "‖", l: "Пауза — не прерывает серию", k: hcs === "skip" ? "✓" : "" }, { c: "none", i: "○", l: "Не выполнено", k: hcs ? "" : "✓" }, "-", { c: "help:habits", i: "?", l: "Справка о привычках" }], { k: "hst", id: hcx.dataset.h + "|" + hcx.dataset.d }); return; }
     var li = e.target.closest("li.task") || e.target.closest(".kcard"), a = e.target.closest(".nav a[data-k]");
     if (li) { var t = task(li.dataset.id); if (!t) return; e.preventDefault(); ctxShow(e.clientX, e.clientY, taskMenu(t), { k: "task", id: t.id }); return; }
-    if (a && a.dataset.k === "smart" && LISTN[a.dataset.id] && a.dataset.id !== "inbox") { e.preventDefault(); ctxShow(e.clientX, e.clientY, [{ c: "open", i: "↗", l: "Открыть" }, { c: "hide", i: ic("eyeoff"), l: "Скрыть из панели" }, { c: "cfg", i: "⚙", l: "Настроить пункты…" }, { c: "help:lists", i: "?", l: "Справка о списках" }], { k: "list", id: a.dataset.id }); return; }
+    if (a && a.dataset.k === "smart" && LISTN[a.dataset.id] && a.dataset.id !== "inbox") { e.preventDefault(); ctxShow(e.clientX, e.clientY, [{ c: "open", i: "↗", l: "Открыть" }, { c: "hide", i: ic("eyeoff"), l: "Скрыть из панели" }, { c: "cfg", i: "⚙", l: "Настроить пункты…" }, pinMenu(), { c: "help:lists", i: "?", l: "Справка о списках" }], { k: "list", id: a.dataset.id }); return; }
+    if (a && a.dataset.k === "board") { var bcm = board(a.dataset.id); if (bcm) { e.preventDefault(); ctxShow(e.clientX, e.clientY, [{ c: "open", i: "↗", l: "Открыть" }].concat(bMenu(bcm)), { k: "board", id: bcm.id }); } return; }
     if (a && /^(proj|tag|filter)$/.test(a.dataset.k)) {
       var k = a.dataset.k, id = a.dataset.id, o = entityOf(k, id); if (!o) return; e.preventDefault();
       var items = [["open", "Открыть"], ["rename", "✎ Переименовать"]];
       if (k === "proj") items.push(["subproj", "＋ Подпроект"], { c: "focus", i: "🎯", l: FOCUS === id ? "Выйти из фокуса" : "Фокус на проекте" }, { i: "↻", l: "Интервал проверки", sub: [[-1, "по умолчанию (" + (S.opt.revDays !== undefined ? +S.opt.revDays : 7) + " дн.)"], [7, "каждую неделю"], [14, "раз в 2 недели"], [30, "раз в месяц"], [182, "раз в полгода"], [0, "никогда"]].map(function (x) { var cur = o.rev === undefined || o.rev === null ? -1 : +o.rev; return { c: "rv:" + x[0], i: cur === x[0] ? "✓" : "", l: x[1] }; }) }, ["tplsave", "⧉ Сохранить как шаблон"], ["arch", "🗄 В архив"]);
       if (k === "tag") items.push({ i: "↳", l: "Вложить в тег", sub: [{ c: "tp:", i: o.par ? "" : "✓", l: "— верхний уровень —" }].concat(tags().filter(function (x) { return tagDesc(o.n).indexOf(x.n) < 0; }).map(function (x) { return { c: "tp:" + x.n, i: o.par === x.n ? "✓" : "", l: "#" + x.n }; })) });
       if (k === "proj" && CLIP && task(CLIP.id)) items.push(["pasteproj", "📋 Вставить задачу сюда"]);
+      items.push(pinMenu()); if (k === "proj") items.push(pinMenu("progress"), { c: "pboard", i: "▦", l: "Доска проекта (по шаблону)" });
       items.push(["fav", o.fav ? "☆ Убрать из избранного" : "★ В избранное"], "-", ["del", "🗑 Удалить в корзину", 1], "-", { c: "help:" + (k === "proj" ? "tree" : k === "tag" ? "tags" : "filters"), i: "?", l: "Справка" });
       ctxShow(e.clientX, e.clientY, items, { k: k, id: id });
       return;
@@ -5318,6 +5656,15 @@ CREATE TABLE inbox (
     var b = e.target.closest("[data-c]"); if (!b || !CTX) return;
     var c = b.dataset.c, k = CTX.k, id = CTX.id; ctxHide();
     if (c && c.indexOf("help:") === 0) { go("help-" + c.slice(5)); return; }
+    if (c && /^pinp?:/.test(c)) { pinFrom(k, id, c.replace(/^pinp?:/, ""), c.indexOf("pinp:") === 0); return; }
+    if (k === "board") { var bx = board(id); if (bx) bCmd(bx, c); return; }
+    if (k === "btplproj") { bFromTpl("proj", c); return; }
+    if (k === "wsz" || k === "wsrc" || k === "wsort" || k === "wproj" || k === "wnote") {
+      var bb = board(ARG), ww = wOf(bb, id); if (!ww) return; ww.cfg = ww.cfg || {};
+      if (k === "wsz") ww.sz = c; else if (k === "wsrc") ww.cfg.src = c; else if (k === "wsort") ww.cfg.sort = c; else if (k === "wproj") ww.cfg.pid = c; else ww.cfg.nid = c;
+      bSave(bb); return;
+    }
+    if (k === "proj" && c === "pboard") { bFromTpl("proj", id); return; }
     if (k === "task") { var t = task(id); if (t) taskCmd(t, c); return; }
     if (k === "view") { if (c === "paste-here") pasteInto(null); return; }
     if (k === "hst") { var hp = String(id).split("|"), hx2 = hab(hp[0]); if (hx2) { hSet(hx2, hp[1], c === "none" ? "" : c); render(); } return; }
