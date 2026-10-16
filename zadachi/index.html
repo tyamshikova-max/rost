@@ -3635,6 +3635,9 @@ CREATE TABLE inbox (
   }
   var RTIMES = [], RWARN = false;
   function render() {
+    // пока пишете в редакторе на странице (текст заметки, описание проекта) — страницу вокруг не перерисовываем, только левую панель; остальное обновится, когда выйдете из редактора
+    var ae0 = document.activeElement;
+    if (ae0 && ae0.classList && ae0.classList.contains("rte") && $("view").contains(ae0)) { if (BT) { BTE = ae0; saveBody(); } try { $("side").innerHTML = sideHTML(); } catch (er) { /* панель обновится позже */ } PEND = true; if (DIAG && DIAG.on) dlog("перерисовка отложена: идёт ввод в редакторе"); return; }
     // курсор и набранный текст не теряются, если страница перерисовалась, пока вы печатали
     var ae = document.activeElement, keep = null;
     if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && ($("view").contains(ae) || $("side").contains(ae)) && !ae.classList.contains("rn")) {
