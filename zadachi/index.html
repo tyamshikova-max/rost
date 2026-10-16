@@ -1885,7 +1885,7 @@ CREATE TABLE inbox (
         if (js === SYNC.last) return;
         if (remote) { var r2 = { v: 2, opt: remote.opt }; LISTS.forEach(function (k) { r2[k] = mergeList([], remote[k]); }); if (JSON.stringify(r2) === js) { SYNC.last = js; return; } }
         return SYNC.write(snap).then(function () { SYNC.last = js; });
-      }).then(function () { SYNC.busy = false; SYNC.bad = 0; SYNC.st = "ok"; SYNC.at = Date.now(); SYNC.show(); }).catch(function (e) {
+      }).then(function () { SYNC.busy = false; SYNC.bad = 0; SYNC.st = "ok"; SYNC.at = Date.now(); SYNC.show(); var wm = wpMeta(); if (wm && !wm.p && typeof wpUpload === "function") wpUpload(); }).catch(function (e) {
         if (!(e && e.bad)) return SYNC.fail(e);
         SYNC.busy = false; SYNC.bad = (SYNC.bad || 0) + 1;
         // возможно, другое устройство как раз пишет — подождать и перечитать
@@ -4249,7 +4249,7 @@ CREATE TABLE inbox (
       "<b>📂 Восстановить из файла</b> → <b>«Заменить всё данными из файла»</b> — всё станет точно как в копии (лишнее удалится и на других устройствах) или <b>«Объединить с текущими»</b> — записи из файла добавятся.",
       "<b>🗑 Очистить всю базу</b> — удаляет задачи, проекты, теги, фильтры, спринты, комментарии, привычки, историю и шаблоны без корзины (сначала предлагает сохранить копию). Флажки и настройки остаются."]));
     h += sec("settings", "Настройки", ul([
-      "<b>Оформление</b> («Настройки» → «Оформление»): режим (как в системе, светлый, тёмный), 8 цветовых схем — Шалфей, Океан, Лаванда, Песок, Вишня, Закат, Графит, Полночь (у каждой светлый и тёмный вариант, в превью видны оба) и «🎨 Своя схема»: выберите основной цвет, цвет фона, второй цвет (для обоев и «авроры») и насыщенность фона — оттенки панелей, линий, текста и тёмный вариант приложение рассчитает само, цвета можно брать из палитры или любые через пипетку, акцентный цвет поверх схемы, прозрачность окон («стекло»: нет, лёгкая, сильная — панели и меню становятся полупрозрачными с размытием) фон (однотонный, градиент, «аврора» — мягкие цветные пятна, или обои: горы, волны, холмы, звёздное небо, лучи, клетка — они рисуются в цветах схемы; или своя картинка с компьютера или телефона, её можно приглушить, чтобы текст читался), шрифт (12 вариантов, в том числе с засечками) и размер текста. Всё это одинаково на всех устройствах, кроме светлого или тёмного режима и своей картинки — они у каждого устройства свои. «Вернуть как было» — исходный вид.",
+      "<b>Оформление</b> («Настройки» → «Оформление»): режим (как в системе, светлый, тёмный), 8 цветовых схем — Шалфей, Океан, Лаванда, Песок, Вишня, Закат, Графит, Полночь (у каждой светлый и тёмный вариант, в превью видны оба) и «🎨 Своя схема»: выберите основной цвет, цвет фона, второй цвет (для обоев и «авроры») и насыщенность фона — оттенки панелей, линий, текста и тёмный вариант приложение рассчитает само, цвета можно брать из палитры или любые через пипетку, акцентный цвет поверх схемы, прозрачность окон («стекло»: нет, лёгкая, сильная — панели и меню становятся полупрозрачными с размытием) фон (однотонный, градиент, «аврора» — мягкие цветные пятна, или обои: горы, волны, холмы, звёздное небо, лучи, клетка — они рисуются в цветах схемы; или своя картинка с компьютера или телефона, её можно приглушить, чтобы текст читался), шрифт (12 вариантов, в том числе с засечками) и размер текста. Всё это одинаково на всех устройствах, кроме светлого или тёмного режима — он у каждого устройства свой. Своя картинка-обои хранится на вашем Яндекс Диске (папка приложения) и появляется на всех устройствах, где вы вошли через Яндекс. «Вернуть как было» — исходный вид.",
       "<b>Общие</b>: пункты «Списков», порядок левой панели, проверка проектов, оформление (как в системе / светлая / тёмная).",
       "<b>Флажки</b>: свой набор флажков.",
       "<b>Напоминания и Telegram</b>: адрес сервера, привязка бота, автоматические напоминания, час для задач на весь день.",
@@ -6200,12 +6200,48 @@ CREATE TABLE inbox (
     else if (k === "paper") { var ln = mix(bg, a, dk ? .22 : .16); return 'url("data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><rect width="28" height="28" fill="' + bg + '"/><path d="M28 0H0V28" fill="none" stroke="' + ln + '" stroke-width="1"/></svg>') + '") repeat'; }
     return 'url("data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMidYMid slice">' + svg + "</svg>") + '") center / cover no-repeat';
   }
-  // своя картинка — в IndexedDB этого устройства
-  var WPURL = "", WPLOADED = false;
+  // своя картинка: копия в IndexedDB этого устройства + файл на Яндекс Диске (app:/tasks/files/wall/…), ссылка на него — в S.opt.look.wp и синхронизируется
+  var WPURL = "", WPLOADED = false, WPID = null, WPST = "";
   function wpDB() { return new Promise(function (ok, no) { var r = indexedDB.open("zd-wall", 1); r.onupgradeneeded = function () { r.result.createObjectStore("img"); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); }; }); }
-  function wpGet() { return wpDB().then(function (db) { return new Promise(function (ok) { var q = db.transaction("img").objectStore("img").get("bg"); q.onsuccess = function () { ok(q.result || null); }; q.onerror = function () { ok(null); }; }); }).catch(function () { return null; }); }
-  function wpPut(blob) { return wpDB().then(function (db) { return new Promise(function (ok, no) { var tx = db.transaction("img", "readwrite"); tx.objectStore("img").put(blob, "bg"); tx.oncomplete = function () { ok(); }; tx.onerror = function () { no(tx.error); }; }); }); }
-  function wpLoad() { WPLOADED = true; return wpGet().then(function (b) { if (WPURL) URL.revokeObjectURL(WPURL); WPURL = b ? URL.createObjectURL(b) : ""; applyLook(true); }); }
+  function wpGetK(k) { return wpDB().then(function (db) { return new Promise(function (ok) { var q = db.transaction("img").objectStore("img").get(k); q.onsuccess = function () { ok(q.result || null); }; q.onerror = function () { ok(null); }; }); }).catch(function () { return null; }); }
+  function wpGet() { return wpGetK("bg"); }
+  function wpPut(blob, id) { return wpDB().then(function (db) { return new Promise(function (ok, no) { var tx = db.transaction("img", "readwrite"), st = tx.objectStore("img"); st.put(blob, "bg"); st.put(id || "", "bgid"); tx.oncomplete = function () { ok(); }; tx.onerror = function () { no(tx.error); }; }); }); }
+  function wpMeta() { return (S.opt.look || {}).wp || null; }
+  function wpSetMeta(m) { var lk = S.opt.look = Object.assign({}, S.opt.look || {}); if (m) lk.wp = m; else delete lk.wp; optTouch(); save(); SYNC.later(); }
+  function wpLoad(noUp) {
+    WPLOADED = true; var m = wpMeta(); WPID = m ? m.id : "";
+    return Promise.all([wpGet(), wpGetK("bgid")]).then(function (r) {
+      var b = r[0], lid = r[1] || "";
+      if (WPURL && /^blob:/.test(WPURL)) URL.revokeObjectURL(WPURL);
+      // своя копия совпадает с той, что на Диске (или Диска ещё нет) — показываем её
+      if (b && (!m || lid === m.id)) { WPURL = URL.createObjectURL(b); WPST = m && m.p ? "disk" : "local"; applyLook(true); if (!noUp && (!m || !m.p)) wpUpload(); return; }
+      // картинку поставили на другом устройстве — берём ссылку на файл с Диска
+      if (m && m.p && SYNC.enabled()) return YD.api("/resources/download?path=" + encodeURIComponent(m.p)).then(function (j) { WPURL = j.href || ""; WPST = "remote"; applyLook(true); if (V === "settings") render(); }).catch(function () { WPURL = b ? URL.createObjectURL(b) : ""; WPST = "err"; applyLook(true); if (V === "settings") render(); });
+      WPURL = ""; WPST = m && m.p ? "nologin" : ""; applyLook(true);
+    });
+  }
+  // отправить свою картинку на Диск (если вошли через Яндекс); прежний файл уходит в корзину Диска
+  var WPUPB = false;
+  function wpUpload() {
+    if (WPUPB || !SYNC.enabled()) return Promise.resolve(false);
+    WPUPB = true;
+    return Promise.all([wpGet(), wpGetK("bgid")]).then(function (r) {
+      var m = wpMeta() || {}, b = r[0], id = r[1] || m.id || uid(); if (!b) return false;
+      if (m.p && m.id === id) return false;
+      var path = "app:/tasks/files/wall/" + id + ".jpg", old = m.old || (m.p && m.p !== path ? m.p : "");
+      return YD.folder("app:/tasks").then(function () { return YD.folder("app:/tasks/files"); }).then(function () { return YD.folder("app:/tasks/files/wall"); })
+        .then(function () { return YD.api("/resources/upload?overwrite=true&path=" + encodeURIComponent(path)); })
+        .then(function (j) { return fetch(j.href, { method: "PUT", body: b }); })
+        .then(function (res) {
+          if (!res.ok && res.status !== 201 && res.status !== 202) throw { msg: "ошибка " + res.status };
+          return wpPut(b, id).then(function () {
+            wpSetMeta({ id: id, p: path, at: Date.now() }); WPID = id; WPST = "disk";
+            if (old && old !== path) YD.api("/resources?path=" + encodeURIComponent(old), { method: "DELETE", ok: [404] }).catch(function () { /* прежний файл не важен */ });
+            if (V === "settings") render(); return true;
+          });
+        });
+    }).catch(function () { WPST = "uperr"; if (V === "settings") render(); return false; }).then(function (x) { WPUPB = false; return x; });
+  }
   function wpPick() {
     var fi = document.createElement("input"); fi.type = "file"; fi.accept = "image/*"; fi.style.display = "none"; document.body.appendChild(fi);
     fi.addEventListener("change", function () {
@@ -6214,7 +6250,16 @@ CREATE TABLE inbox (
       im.onload = function () {
         var k = Math.min(1, 2200 / Math.max(im.width, im.height)), cv = document.createElement("canvas"); cv.width = Math.round(im.width * k); cv.height = Math.round(im.height * k);
         cv.getContext("2d").drawImage(im, 0, 0, cv.width, cv.height); URL.revokeObjectURL(u);
-        cv.toBlob(function (bl) { if (!bl) { toast("Не удалось прочитать картинку"); return; } wpPut(bl).then(function () { return wpLoad(); }).then(function () { setLook("wall", "img"); setLook("pic", "custom"); toast("Обои установлены (хранятся на этом устройстве)"); }).catch(function () { toast("Не удалось сохранить картинку — мало места в браузере"); }); }, "image/jpeg", .86);
+        cv.toBlob(function (bl) {
+          if (!bl) { toast("Не удалось прочитать картинку"); return; }
+          var id = uid(), m0 = wpMeta();
+          wpPut(bl, id).then(function () { wpSetMeta({ id: id, p: "", at: Date.now(), old: m0 && m0.p ? m0.p : "" }); return wpLoad(true); }).then(function () {
+            setLook("wall", "img"); setLook("pic", "custom");
+            if (!SYNC.enabled()) { toast("Обои установлены. Чтобы они появились и на других устройствах, войдите через Яндекс"); return; }
+            toast("Обои установлены, отправляю на Яндекс Диск…");
+            setTimeout(function () { wpUpload().then(function (ok) { toast(ok ? "Обои на Яндекс Диске — появятся на всех устройствах" : "Не удалось отправить обои на Диск — попробую ещё раз при следующей синхронизации"); }); }, 300);
+          }).catch(function () { toast("Не удалось сохранить картинку — мало места в браузере"); });
+        }, "image/jpeg", .86);
       };
       im.onerror = function () { URL.revokeObjectURL(u); toast("Не удалось открыть картинку"); };
       im.src = u;
@@ -6244,8 +6289,8 @@ CREATE TABLE inbox (
   function rgba(hex, a) { var n = parseInt(String(hex).slice(1), 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
   var LOOKKEY = "";
   function applyLook(force) {
-    var L = lookCfg(), dk = isDark(), key = JSON.stringify(L) + JSON.stringify((S.opt.look || {}).custom || "") + dk + WPURL; if (key === LOOKKEY && !force) return; LOOKKEY = key;
-    if (L.wall === "img" && L.pic === "custom" && !WPLOADED) { wpLoad(); }
+    var L = lookCfg(), dk = isDark(), key = JSON.stringify(L) + JSON.stringify((S.opt.look || {}).custom || "") + JSON.stringify(wpMeta() || "") + dk + WPURL; if (key === LOOKKEY && !force) return; LOOKKEY = key;
+    if (L.wall === "img" && L.pic === "custom" && !WPUPB && (!WPLOADED || ((wpMeta() || {}).id || "") !== (WPID || ""))) { WPID = (wpMeta() || {}).id || ""; wpLoad(); }
     var c = schemeOf(L)[dk ? 2 : 1], st = document.documentElement.style, acc = c[7], soft = c[8];
     if (L.acc) { acc = dk ? "color-mix(in srgb, " + L.acc + " 72%, #ffffff)" : L.acc; soft = "color-mix(in srgb, " + L.acc + " " + (dk ? 26 : 15) + "%, " + c[1] + ")"; }
     var g = L.glass, ga = g === "strong" ? (dk ? .5 : .52) : g === "soft" ? (dk ? .72 : .7) : 1;
@@ -6304,12 +6349,12 @@ CREATE TABLE inbox (
         return '<button type="button" class="lkwc' + (L.pic === k ? " on" : "") + '" data-a="' + (k === "custom" && !WPURL ? "wpup" : "look") + '" data-k="pic" data-v="' + k + '"><span class="lkwi" style="background:' + esc(bgc) + '">' + (k === "custom" && !WPURL ? "＋" : "") + '</span><span>' + WPICS[k] + "</span></button>";
       }).join("") + "</div>";
       h += '<div class="lkrow"><span class="lbl">Картинка</span>' + seg("dim", WDIM, String(L.dim)) + (L.pic === "custom" ? '<button type="button" class="btn sm" data-a="wpup">Загрузить другую…</button>' : "") + "</div>";
-      if (L.pic === "custom") h += '<p class="muted" style="margin:6px 0 0">Своя картинка хранится только на этом устройстве (на телефоне загрузите её отдельно или выберите готовые обои — они одинаковы везде).</p>';
+      if (L.pic === "custom") { var wst = { disk: "☁ Хранится на вашем Яндекс Диске и появляется на всех устройствах.", remote: "☁ Загружена с вашего Яндекс Диска (её поставили на другом устройстве).", local: "Пока только на этом устройстве — уйдёт на Яндекс Диск при синхронизации.", nologin: "Картинка лежит на вашем Яндекс Диске — войдите через Яндекс («Данные и синхронизация»), чтобы она появилась здесь.", err: "Не удалось получить картинку с Яндекс Диска — проверьте связь.", uperr: "Не удалось отправить картинку на Яндекс Диск — попробую ещё раз при следующей синхронизации." }[WPST] || (SYNC.enabled() ? "" : "Без входа через Яндекс картинка хранится только на этом устройстве."); if (wst) h += '<p class="muted" style="margin:6px 0 0">' + wst + "</p>"; }
     }
     fontLink(Object.keys(FONTS).filter(function (k) { return FONTS[k][1]; }).map(function (k) { return "family=" + FONTS[k][1].replace(/ /g, "+"); }).join("&"), "fontprev", "&text=" + encodeURIComponent("Съешь же ещё этих мягких французских булок АаБбВв OnestInterManropeGolosTextIBMPlexSansNunitoPTSansRobotoMontserratLoraSerif0123456789"));
     h += '<div class="lbl" style="margin-top:14px">Шрифт</div><div class="lkfonts">' + Object.keys(FONTS).map(function (k) { var F = FONTS[k]; return '<button type="button" class="lkfont' + (L.font === k ? " on" : "") + '" data-a="look" data-k="font" data-v="' + k + '" style="font-family:' + (F[1] ? "'" + F[1] + "'," : "") + 'system-ui"><b>' + esc(F[0]) + "</b><small>Съешь ещё этих мягких булок</small></button>"; }).join("") + "</div>";
     h += '<div class="lkrow"><span class="lbl">Размер текста</span>' + seg("fs", FSIZES, L.fs, ["0.9", "1", "1.07", "1.14", "1.22"]) + "</div>";
-    h += '<p class="muted" style="margin:10px 0 0">Всё оформление одинаково на всех устройствах, кроме светлого или тёмного режима (☾ вверху справа) и своей картинки — они у каждого устройства свои. <a href="#" data-a="lookreset">Вернуть как было</a></p></section>';
+    h += '<p class="muted" style="margin:10px 0 0">Всё оформление одинаково на всех устройствах, кроме светлого или тёмного режима (☾ вверху справа). Своя картинка-обои хранится на вашем Яндекс Диске. <a href="#" data-a="lookreset">Вернуть как было</a></p></section>';
     return h;
   }
   function themePref() { return LS.get("zd-theme") || "system"; }
