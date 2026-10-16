@@ -733,6 +733,16 @@ h2[data-col].dropin { outline: 2px dashed var(--acc); outline-offset: 2px; borde
 .flrow .r { margin-left: auto; display: flex; gap: 6px }
 .sw.sm { display: flex; flex-wrap: wrap; gap: 4px } .sw.sm button { width: 20px; height: 20px }
 /* настройки по вкладкам */
+/* теги в карточке: чипы + подсказка */
+.tagv { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.tchip { display: inline-flex; align-items: center; gap: 2px; border-radius: 999px; padding: 2px 4px 2px 10px; font-size: 13px; background: color-mix(in srgb, var(--tc) 14%, var(--panel)); border: 1px solid color-mix(in srgb, var(--tc) 45%, transparent) }
+.tchip a { color: var(--fg); text-decoration: none } .tchip a:hover { color: var(--tc) }
+.tchip .tx { border: 0; background: none; color: var(--muted); cursor: pointer; width: 18px; height: 18px; border-radius: 50%; padding: 0; font-size: 14px; line-height: 1 } .tchip .tx:hover { background: var(--hover); color: var(--warn) }
+.tagin { border: 1px dashed var(--line); background: transparent; border-radius: 999px; padding: 4px 10px; font: inherit; font-size: 13px; color: var(--fg); min-width: 0; outline: none } .tagin:focus { border-style: solid; border-color: var(--acc); background: var(--panel) }
+.tagdd { position: fixed; z-index: 70; width: 260px; max-height: 260px; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, .16); padding: 4px }
+.tagdd button { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; text-align: left; padding: 6px 10px; border-radius: 6px; font: inherit; font-size: 13.5px; color: var(--fg); cursor: pointer }
+.tagdd button i { width: 9px; height: 9px; border-radius: 50%; flex: none } .tagdd button.on, .tagdd button:hover { background: var(--hover) } .tagdd button.add { color: var(--acc); font-weight: 600 }
+.tagdd .tde { padding: 8px 10px; color: var(--muted); font-size: 13px }
 .backbar { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 10px; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--acc); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .backbar:hover { background: var(--acc-soft); border-color: var(--acc) }
 .auxh { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 1100px }
@@ -2667,7 +2677,7 @@ CREATE TABLE inbox (
     var h = '<div class="crumbs"><a href="#notes">Заметки</a> / ' + (sx ? nsPath(sx).map(function (y) { return '<a href="#nsec-' + y.id + '">' + esc(y.n) + "</a> / "; }).join("") : "") + "</div>";
     h += '<input id="ntitle" class="ntitle" data-note="' + n.id + '" value="' + esc(n.t || "") + '" placeholder="Название заметки" autocomplete="off">';
     h += '<div class="props nprops"><span>Раздел</span><div class="v"><button type="button" class="ddb" data-a="nsecpick">' + ic("folder") + esc(sx ? nsPath(sx).map(function (y) { return y.n; }).join(" / ") : "— без раздела —") + '<span class="dda">▾</span></button></div>' +
-      '<span>Теги</span><div class="v">' + ntags().map(function (g) { var on = (n.tags || []).indexOf(g.n) >= 0; return '<button type="button" class="chip' + (on ? " on" : "") + '" data-a="ntagt" data-v="' + esc(g.n) + '"><span class="ntg" style="color:' + col(g.c) + '">◆</span>' + esc(g.n) + "</button>"; }).join("") + '<input type="text" id="ntagin" placeholder="+ тег" size="9" autocomplete="off"></div>' +
+      '<span>Теги</span><div class="v tagv">' + (n.tags || []).filter(function (x) { return ntagObj(x); }).map(function (x) { return '<span class="tchip nt" style="--tc:' + col(ntagObj(x).c) + '"><a href="#ntag-' + esc(x) + '" title="Открыть тег">◆ ' + esc(x) + '</a><button type="button" class="tx" data-a="ntagt" data-v="' + esc(x) + '" title="Убрать тег" aria-label="Убрать тег">×</button></span>'; }).join("") + '<input type="text" id="ntagin" class="tagin" placeholder="' + ((n.tags || []).length ? "+ тег" : "Добавить тег…") + '" size="12" autocomplete="off" spellcheck="false"></div>' +
       '<span>Задачи</span><div class="v">' + tl.map(function (t) { return '<span class="chip ntk' + (t.done ? " dn" : "") + '"><a href="#task-' + t.id + '">' + (t.done ? "✓ " : "☐ ") + esc(t.t.slice(0, 60)) + '</a><button type="button" data-a="nunlink" data-v="' + t.id + '" title="Отвязать">×</button></span>'; }).join("") +
       '<button type="button" class="btn sm" data-a="ntpick">' + (TPICK ? "Готово" : "＋ Привязать к задаче") + "</button>" + (TPICK ? '<div class="npick"><input type="search" id="tpq" placeholder="Найти задачу" autocomplete="off"><div id="tpres">' + noteTaskPick(n, "") + "</div></div>" : "") + "</div></div>";
     h += '<div id="nrte" class="rte' + (n.body ? "" : " empty") + '" data-note="' + n.id + '" contenteditable="true" spellcheck="true" data-ph="Текст заметки… «/» — заголовок, чек-лист, спойлер, таблица, код">' + (clean(n.body || "") || "<p><br></p>") + "</div>";
@@ -3528,7 +3538,7 @@ CREATE TABLE inbox (
       ul(["<b>Название</b> — меняется прямо в заголовке; Enter переходит к описанию.",
         "<b>Срок</b> — дата и время начала, длительность и повтор; ✕ — убрать срок. <b>Дедлайн</b> — крайний срок, если он отличается от даты начала.",
         "<b>Проект</b> (＋ рядом — создать новый проект и сразу перенести туда задачу), <b>Секция</b> (если в проекте есть секции), <b>Спринт</b> и <b>оценка в часах</b>.",
-        "<b>Статус</b> — «Нужно сделать» / «В работе». <b>Приоритет</b> 1–3. <b>Теги</b> — отметьте или впишите новый. Флажок — кнопкой ⚑ вверху карточки.",
+        "<b>Статус</b> — «Нужно сделать» / «В работе». <b>Приоритет</b> 1–3. <b>Теги</b> — в карточке видны только теги этой задачи (× убирает); начните печатать в поле «Добавить тег…» — появится список подходящих тегов (↑↓ и Enter или клик), а если такого нет — «Создать тег». Backspace в пустом поле снимает последний тег. Флажок — кнопкой ⚑ вверху карточки.",
         "<b>Свой порядок</b>: наведите мышь на название поля (срок, дедлайн, проект…) — слева появится ⋮⋮; потяните вверх или вниз. Так же переставляются большие блоки — свойства, описание, подзадачи, вложения, заметки, комментарии (⋮⋮ у заголовка блока). Порядок запоминается для всех задач и синхронизируется; «порядок полей по умолчанию» — внизу карточки.",
         "<b>Входит в</b> — родительская задача (сделать подзадачей).",
         "<b>Напоминание</b> — в Telegram, в момент начала и/или заранее (за 5, 15, 30 минут, за час, за день).",
@@ -4517,7 +4527,7 @@ CREATE TABLE inbox (
       '<span>Спринт</span><div class="v"><select data-pf="sprint">' + spOptions(t) + '</select><span class="muted">оценка</span><input type="number" min="0" step="0.5" data-pf="est" value="' + (+t.est || "") + '" placeholder="ч" style="width:70px"><span class="muted">ч</span></div>' +
       (t.done ? "" : '<span>Статус</span><div class="v"><div class="seg"><button type="button" data-p="st" data-v="" class="' + (t.st !== "doing" ? "on" : "") + '">Нужно сделать</button><button type="button" data-p="st" data-v="doing" class="' + (t.st === "doing" ? "on" : "") + '">В работе</button></div></div>') +
       '<span>Приоритет</span><div class="v"><div class="seg">' + [[1, "1"], [2, "2"], [3, "3"], [0, "—"]].map(function (x) { return '<button type="button" data-p="prio" data-v="' + x[0] + '" class="' + ((t.prio || 0) === x[0] ? "on" : "") + '" title="' + ["обычный", "срочно", "важно", "желательно"][x[0]] + '">' + x[1] + "</button>"; }).join("") + "</div></div>" +
-      '<span>Теги</span><div class="v">' + tags().map(function (g) { return '<button type="button" class="chip' + (tg.indexOf(g.n) >= 0 ? " on" : "") + '" data-p="tag" data-tag="' + esc(g.n) + '"><i style="background:' + col(g.c) + '"></i>#' + esc(g.n) + "</button>"; }).join("") + '<input type="text" data-pf="newtag" placeholder="+ тег" size="9"></div>' +
+      '<span>Теги</span><div class="v tagv">' + tg.map(function (n) { return '<span class="tchip" style="--tc:' + tcolor(n) + '"><a href="#tag-' + esc(n) + '" title="Открыть тег">#' + esc(n) + '</a><button type="button" class="tx" data-p="tag" data-tag="' + esc(n) + '" title="Убрать тег" aria-label="Убрать тег">×</button></span>'; }).join("") + '<input type="text" data-pf="newtag" class="tagin" placeholder="' + (tg.length ? "+ тег" : "Добавить тег…") + '" size="12" autocomplete="off" spellcheck="false"></div>' +
       '<span>Учёт времени</span><div class="v"><button type="button" class="btn sm' + (t.ttOn ? " pri" : "") + '" data-p="track">' + (t.ttOn ? "■ Остановить" : "▶ Засечь время") + '</button><span class="muted">учтено</span><input type="number" min="0" step="0.25" data-pf="tth" value="' + (t.tt ? Math.round(t.tt / 36e5 * 100) / 100 : "") + '" placeholder="0" style="width:70px"> ч</div>' +
       '<span>Входит в</span><div class="v"><select data-pf="parent"><option value="">— это главная задача —</option>' + cand.map(function (x) { return '<option value="' + x.id + '"' + (t.parent === x.id ? " selected" : "") + ">" + esc(x.t.slice(0, 60)) + "</option>"; }).join("") + "</select></div>" +
       '<span>Напоминание</span><div class="v"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-pf="rem"' + (t.rem ? " checked" : "") + (t.at ? "" : " disabled") + "> в Telegram" + (t.at && t.allday ? " в " + (S.opt.allDayHour || 9) + ":00" : "") + "</label>" + (t.rem && t.at ? '<span class="remo">' + REMO.map(function (o) { return '<button type="button" class="chip' + (remOffs(t).indexOf(o) >= 0 ? " on" : "") + '" data-p="remoff" data-v="' + o + '" title="' + (o ? "Напомнить за " + REMN[o] : "Напомнить в момент начала") + '">' + (o ? "за " : "") + REMN[o] + "</button>"; }).join("") + "</span>" : "") + (!t.at ? '<span class="muted">сначала укажите срок</span>' : SRV.ready() ? "" : '<span class="muted">— нужен <a href="#settings-srv">сервер</a></span>') + "</div></div>";
@@ -4627,6 +4637,43 @@ CREATE TABLE inbox (
     save(); render(); renderPanel();
     var ni = $("pn-c"); if (ni) { ni.focus(); var ms = document.querySelector(".pn-chat .msgs"); if (ms && ms.lastElementChild) ms.lastElementChild.scrollIntoView({ block: "nearest" }); }
   }
+  /* ---------- выбор тега: свои теги — чипами, остальные — в подсказке при вводе (как в Singularity) ---------- */
+  var TDD = null;
+  function tddKind(el) { return el && el.classList && el.classList.contains("tagin") ? (el.id === "ntagin" ? "note" : el.dataset.pf === "newtag" ? "task" : null) : null; }
+  function tddHave(kind) { var o = kind === "note" ? note(ARG) : task(OPEN); return (o && o.tags) || []; }
+  function tddEl() { var d = $("tagdd"); if (!d) { d = document.createElement("div"); d.id = "tagdd"; d.className = "tagdd"; d.hidden = true; d.setAttribute("role", "listbox"); document.body.appendChild(d); d.addEventListener("mousedown", function (e) { e.preventDefault(); }); d.addEventListener("click", function (e) { var b = e.target.closest("[data-tn]"); if (b) tddPick(b.dataset.tn); }); } return d; }
+  function tddShow(inp) {
+    var kind = tddKind(inp); if (!kind) return;
+    var q = normTag(inp.value), have = tddHave(kind), all = (kind === "note" ? ntags() : tags()).filter(function (g) { return have.indexOf(g.n) < 0; });
+    var list = all.filter(function (g) { return !q || g.n.indexOf(q) >= 0; }).sort(function (a, b) { return (b.n.indexOf(q) === 0) - (a.n.indexOf(q) === 0) || (a.n < b.n ? -1 : 1); }).slice(0, 40);
+    var exact = q && (kind === "note" ? ntagObj(q) : tagObj(q)), items = list.map(function (g) { return { n: g.n, c: col(g.c) }; });
+    if (q && !exact && have.indexOf(q) < 0) items.push({ n: q, add: 1 });
+    var d = tddEl(); TDD = { inp: inp, kind: kind, items: items, i: Math.min(TDD && TDD.inp === inp ? TDD.i : 0, Math.max(0, items.length - 1)) };
+    if (!items.length) { d.innerHTML = '<div class="tde">' + (all.length ? "Нет совпадений" : "Напишите название нового тега") + "</div>"; }
+    else d.innerHTML = items.map(function (x, i) { return '<button type="button" role="option" data-tn="' + esc(x.n) + '" class="' + (i === TDD.i ? "on" : "") + (x.add ? " add" : "") + '">' + (x.add ? "＋ Создать тег «" + esc(x.n) + "»" : '<i style="background:' + x.c + '"></i>' + (kind === "note" ? "◆ " : "#") + esc(x.n)) + "</button>"; }).join("");
+    var r = inp.getBoundingClientRect(); d.hidden = false; d.style.left = Math.max(8, Math.min(r.left, innerWidth - 268)) + "px";
+    var below = innerHeight - r.bottom > 220 || r.top < 240; d.style.top = below ? r.bottom + 4 + "px" : ""; d.style.bottom = below ? "" : innerHeight - r.top + 4 + "px";
+  }
+  function tddHide() { TDD = null; var d = $("tagdd"); if (d) d.hidden = true; }
+  function tddRefocus(kind) { setTimeout(function () { var i = kind === "note" ? $("ntagin") : $("panel").querySelector('[data-pf="newtag"]'); if (i) { i.focus(); tddShow(i); } }, 0); }
+  function tddPick(n) {
+    if (!TDD) return; var kind = TDD.kind;
+    if (kind === "task") { var g = ensureTag(n); if (g) setTask(function (t) { if ((t.tags || []).indexOf(g.n) < 0) t.tags = (t.tags || []).concat(g.n); }); }
+    else { var ng = ensureNTag(n), nn = note(ARG); if (ng && nn) { nn.tags = nn.tags || []; if (nn.tags.indexOf(ng.n) < 0) nn.tags.push(ng.n); touch(nn); save(); render(); } }
+    tddRefocus(kind);
+  }
+  document.addEventListener("focusin", function (e) { if (tddKind(e.target)) tddShow(e.target); });
+  document.addEventListener("input", function (e) { if (tddKind(e.target)) tddShow(e.target); });
+  document.addEventListener("focusout", function (e) { if (tddKind(e.target)) setTimeout(function () { if (!tddKind(document.activeElement)) tddHide(); }, 120); });
+  window.addEventListener("scroll", function () { if (TDD && TDD.inp.isConnected) tddShow(TDD.inp); }, true);
+  document.addEventListener("keydown", function (e) {
+    var inp = e.target, kind = tddKind(inp); if (!kind) return;
+    if (!TDD || TDD.inp !== inp) tddShow(inp); var it = TDD.items;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); if (it.length) { TDD.i = (TDD.i + (e.key === "ArrowDown" ? 1 : -1) + it.length) % it.length; tddShow(inp); var on = $("tagdd").querySelector(".on"); if (on) on.scrollIntoView({ block: "nearest" }); } return; }
+    if (e.key === "Enter") { e.preventDefault(); e.stopImmediatePropagation(); var x = it[TDD.i]; if (x) tddPick(x.n); else if (normTag(inp.value)) tddPick(inp.value); return; }
+    if (e.key === "Escape") { e.stopImmediatePropagation(); e.preventDefault(); if (inp.value) { inp.value = ""; tddShow(inp); } else { tddHide(); inp.blur(); } return; }
+    if (e.key === "Backspace" && !inp.value) { var have = tddHave(kind); if (have.length) { e.preventDefault(); var last = have[have.length - 1]; if (kind === "task") setTask(function (t) { t.tags = (t.tags || []).filter(function (y) { return y !== last; }); }); else { var nn = note(ARG); nn.tags = nn.tags.filter(function (y) { return y !== last; }); touch(nn); save(); render(); } tddRefocus(kind); } }
+  }, true);
   function setTask(f) { var t = task(OPEN); if (!t) return; f(t); touch(t); save(); render(); renderPanel(); }
   var BT = null, TT = null;
   function bodyEmpty(r) { return !r.textContent.trim() && !r.querySelector("hr,table,ul.todo li,img"); }
@@ -4678,7 +4725,7 @@ CREATE TABLE inbox (
     if (a === "nodate") { setTask(function (x) { x.at = 0; x.allday = false; x.rep = ""; x.rem = false; }); return; }
     if (a === "nodue") { setTask(function (x) { x.due = 0; }); return; }
     if (a === "rrwd") { setTask(function (x) { var r = x.rr || ruleOf(x) || { f: "w", n: 1 }, v = +el.dataset.v; r.wd = (r.wd || []).slice(); var k = r.wd.indexOf(v); if (k >= 0) { if (r.wd.length > 1) r.wd.splice(k, 1); } else r.wd.push(v); x.rr = r; x.rep = "custom"; }); return; }
-    if (a === "tag") { var n = el.dataset.tag; setTask(function (x) { var tg = x.tags || []; x.tags = tg.indexOf(n) >= 0 ? tg.filter(function (y) { return y !== n; }) : tg.concat(n); }); return; }
+    if (a === "tag") { tddHide(); var n = el.dataset.tag; setTask(function (x) { var tg = x.tags || []; x.tags = tg.indexOf(n) >= 0 ? tg.filter(function (y) { return y !== n; }) : tg.concat(n); }); return; }
     if (a === "subtoggle") { var k = task(el.dataset.id); if (k) { toggle(k); renderPanel(); } return; }
     if (a === "open") { openTask(el.dataset.id); return; }
   });
