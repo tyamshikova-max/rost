@@ -708,6 +708,8 @@ html.nosheet .dptopbox { background: color-mix(in srgb, var(--star) 10%, transpa
 .pn-subs .sr a { flex: 1; min-width: 0; color: var(--fg); text-decoration: none; overflow-wrap: anywhere; cursor: pointer }
 .pn-subs .sr.done a { text-decoration: line-through; color: var(--muted) }
 .pn-subs input { width: 100%; margin-top: 6px; background: var(--bg); border: 1px dashed var(--line); border-radius: 7px; padding: 6px 10px }
+.tarbar, .tarsearch { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 12px 0 }
+.tarsearch .inp { flex: 1; min-width: 200px; max-width: 420px } .tarlink { margin: 10px 0 0 }
 .pn-hist .hxl { display: grid; gap: 2px }
 .pn-hist .hxr { display: flex; gap: 10px; align-items: baseline; padding: 4px 6px; border-radius: 6px; font-size: calc(13px * var(--fs)) } .pn-hist .hxr:hover { background: var(--hover) }
 .pn-hist .hxd { flex: none; width: 128px; color: var(--muted); font-size: calc(12px * var(--fs)); font-variant-numeric: tabular-nums }
@@ -2064,7 +2066,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-43";
+  var APPV = "zd-app-2026-10-16-44";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -2494,7 +2496,7 @@ CREATE TABLE inbox (
     if ((m = h.match(/^share-(.+)$/))) return { v: "share", a: m[1] };
     if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board|goal)-(.+)$/))) return { v: m[1], a: m[2] };
     if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
-    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal"].indexOf(h) >= 0) return { v: h, a: "" };
+    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch"].indexOf(h) >= 0) return { v: h, a: "" };
     if ((m = h.match(/^daily-?(.*)$/))) return { v: "daily", a: m[1] };
     return { v: "today", a: "" };
   }
@@ -3207,9 +3209,42 @@ CREATE TABLE inbox (
     return std(fo ? fo.n : "С флажком", fo ? "Задачи с флажком «" + esc(fo.n) + "»." : "Задачи с любым флажком. Флажок выбирается кнопкой ⚑ у задачи, в карточке или «!!» при вводе (например, «!!жёлтый»).", l, { pre: bar, empty: fo ? "Нет задач с этим флажком." : "Нет задач с флажком.", scope: fo ? function (t) { return flagOf(t) === fo; } : hasFlag });
   }
   function vAll() { return std("Все задачи", "Все невыполненные задачи.", tasks().filter(function (t) { return !t.done; }), { scope: function () { return true; } }); }
+  /* ---------- архив задач: выполненные раньше срока из настроек (по умолчанию 3 месяца) — не в «Сделано», а на своей странице ---------- */
+  var TARCHO = [[30, "месяц"], [90, "3 месяца"], [182, "полгода"], [365, "год"], [0, "не убирать"]], TARQ = "", TARLIM = 300;
+  function tArchDays() { return S.opt.tarch === undefined || S.opt.tarch === null ? 90 : Math.max(0, +S.opt.tarch || 0); }
+  function tArchCut() { var d = tArchDays(); return d ? today0() - d * DAY : 0; }
+  function tArchAge(d) { return { 30: "месяца", 90: "3 месяцев", 182: "полугода", 365: "года" }[d] || d + " " + plural(d, ["дня", "дней", "дней"]); }
+  function isTArch(t, cut) { if (cut === undefined) cut = tArchCut(); return !!cut && !!t.done && !t.del && (t.dt || t.upd || 0) < cut; }
+  function tArchList() { var cut = tArchCut(); return cut ? tasks().filter(function (t) { return isTArch(t, cut); }) : []; }
+  function tArchListHTML(l) {
+    var q = TARQ.trim().toLowerCase();
+    if (q) l = l.filter(function (t) { return (t.t + " " + (t.tags || []).join(" ") + " " + ((proj(t.pid) || {}).n || "")).toLowerCase().indexOf(q) >= 0; });
+    if (!l.length) return '<p class="empty">' + (q ? "Ничего не нашлось." : "Пусто.") + "</p>";
+    var lim = q ? 1000 : TARLIM, by = {}, keys = [];
+    l.slice(0, lim).forEach(function (t) { var d = new Date(t.dt || t.upd || 0), k = d.getFullYear() * 100 + d.getMonth(); if (!by[k]) { by[k] = []; keys.push(k); } by[k].push(t); });
+    var h = '<div class="gsheet">' + keys.map(function (k) {
+      var nm = new Date(Math.floor(k / 100), k % 100, 1).toLocaleDateString("ru-RU", { month: "long", year: "numeric" }).replace(/\s*г\.?$/, "");
+      return "<h2>" + esc(nm.charAt(0).toUpperCase() + nm.slice(1)) + ' <span class="c">' + by[k].length + "</span></h2>" + renderTree(by[k], "date", {});
+    }).join("") + "</div>";
+    if (l.length > lim) h += '<div style="margin:12px 0"><button class="btn sm" type="button" data-a="tarmore">Показать ещё (' + (l.length - lim) + ")</button></div>";
+    return h;
+  }
+  function vTArch() {
+    var d = tArchDays(), l = tArchList().sort(function (a, b) { return (b.dt || b.upd || 0) - (a.dt || a.upd || 0); });
+    var h = head("Архив задач", "Выполненные задачи старше срока из настроек — здесь, чтобы не мешали в «Сделано». Они остаются в статистике, целях, проектах и поиске. Чтобы вернуть задачу в работу, снимите отметку.");
+    h += '<div class="tarbar"><span class="muted">Убирать в архив выполненные старше:</span><div class="seg">' + TARCHO.map(function (x) { return '<button type="button" data-a="tarchset" data-v="' + x[0] + '" class="' + (d === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></div>";
+    if (!d) return h + '<p class="empty">Архив выключен — все выполненные задачи видны в «Сделано».</p>';
+    if (!l.length) return h + '<p class="empty">В архиве пока пусто. Сюда попадут задачи, выполненные больше ' + tArchAge(d) + " назад.</p>";
+    h += '<div class="tarsearch"><input class="inp" id="tarq" type="search" placeholder="Поиск в архиве: название, тег, проект" value="' + esc(TARQ) + '" autocomplete="off"><span class="muted">' + l.length + " " + plural(l.length, ["задача", "задачи", "задач"]) + "</span>" +
+      (CONF === "tarchclear" ? "" : '<button class="btn sm" type="button" data-a="tarchclear">Убрать архив в корзину…</button>') + "</div>";
+    if (CONF === "tarchclear") h += '<div class="confirm"><b>Перенести все задачи архива (' + l.length + ") в корзину?</b><span>В корзине они хранятся " + TRASH_DAYS + ' дней — за это время их можно восстановить. Статистика по ним останется.</span><div class="r"><button class="btn warn" type="button" data-a="tarchclear-yes">В корзину</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>';
+    return h + '<div id="tarlist">' + tArchListHTML(l) + "</div>";
+  }
+  document.addEventListener("input", function (e) { if (!e.target || e.target.id !== "tarq") return; TARQ = e.target.value; var b = $("tarlist"); if (b) b.innerHTML = tArchListHTML(tArchList().sort(function (a, c) { return (c.dt || c.upd || 0) - (a.dt || a.upd || 0); })); });
   function vDone() {
-    var l = tasks().filter(function (t) { return t.done; }).sort(function (a, b) { return (b.dt || 0) - (a.dt || 0); });
+    var cut = tArchCut(), l = tasks().filter(function (t) { return t.done && !isTArch(t, cut); }).sort(function (a, b) { return (b.dt || 0) - (a.dt || 0); }), na = cut ? tArchList().length : 0;
     var h = head("Сделано", "Выполненные задачи. Чтобы вернуть задачу в работу, снимите отметку.");
+    if (na) h += '<p class="tarlink"><a href="#tarch">🗄 Архив задач · ' + na + "</a> <span class=\"muted\">— выполненные больше " + tArchAge(tArchDays()) + " назад</span></p>";
     if (CONF === "clear") h += '<div class="confirm"><b>Удалить все выполненные задачи (' + l.length + ')?</b><span>Это нельзя отменить.</span><div class="r"><button class="btn warn" type="button" data-a="clear-yes">Удалить</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>';
     else if (l.length) h += '<div style="margin:12px 0"><button class="btn sm" type="button" data-a="clear">Удалить выполненные</button></div>';
     var by = {}, keys = [];
@@ -4685,6 +4720,8 @@ CREATE TABLE inbox (
     var stv = S.opt.start || "", stn = !stv ? "где остановились в прошлый раз" : /^board-/.test(stv) ? (board(stv.slice(6)) ? "доска «" + board(stv.slice(6)).n + "»" : "где остановились в прошлый раз") : (LISTN[stv] || stv);
     h += '<section class="card" id="s-start"><h2>Стартовый экран</h2><p class="muted" style="margin:0">Что открывается, когда вы запускаете приложение (при обновлении страницы остаётся текущее место). Удобно сделать стартовой доску — например, «Мой день».</p><div class="r"><button type="button" class="ddb" data-a="startpick">' + esc(stn.charAt(0).toUpperCase() + stn.slice(1)) + '<span class="dda">▾</span></button></div></section>';
     h += '<section class="card" id="s-day"><h2>План дня</h2><p class="muted" style="margin:0">Сколько часов в день вы готовы отдавать задачам — с этим числом шаг «Время» в плане дня сравнивает оценки задач и предупреждает о перегрузе.</p><div class="r" style="align-items:center"><input type="number" class="inp dpcapin" data-dpcap="1" min="1" max="24" step="0.5" value="' + dayCap() + '" aria-label="Часов на задачи в день"><span>ч в день</span><span class="muted">от 1 до 24</span></div></section>';
+    var tad = tArchDays();
+    h += '<section class="card" id="s-tarch"><h2>Архив выполненных задач</h2><p class="muted" style="margin:0">Выполненные задачи старше этого срока уходят из «Сделано» на страницу <a href="#tarch">«Архив задач»</a>. Ничего не удаляется: они остаются в статистике, целях, проектах и поиске; вернуть в работу — снять отметку.</p><div class="seg" style="margin-top:10px">' + TARCHO.map(function (x) { return '<button type="button" data-a="tarchset" data-v="' + x[0] + '" class="' + (tad === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></section>";
     h += '<section class="card" id="s-review"><h2>Проверка проектов</h2><p class="muted" style="margin:0">Как часто напоминать пересмотреть проект (кнопка ↻ у заголовка «Проекты»). Для отдельного проекта интервал меняется правым кликом по нему → «Интервал проверки».</p><div class="seg" style="margin-top:10px">' + [[7, "неделя"], [14, "2 недели"], [30, "месяц"], [182, "полгода"], [0, "не проверять"]].map(function (x) { return '<button type="button" data-a="revdef" data-v="' + x[0] + '" class="' + (rd === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></section>";
     h += lookSection();
     h += '<section class="card" id="s-flags"><h2>Флажки</h2><p class="muted" style="margin:0">У задачи может стоять один из этих флажков. Название и цвет меняются здесь, порядок — стрелкой ↑. Задачи с флажками собраны в списке «С флажком».</p><div class="fled">' +
@@ -4712,7 +4749,7 @@ CREATE TABLE inbox (
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
   }
   // справка по вкладкам, как настройки; поиск ищет по всем разделам сразу
-  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
+  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
   var HQ = "";
   function htabOf(a) { if (HTABS.some(function (x) { return x[0] === a; })) return a; var f = HTABS.filter(function (x) { return x[3].indexOf(a) >= 0; })[0]; return f ? f[0] : "start"; }
   function vHelpTabs() {
@@ -4738,6 +4775,7 @@ CREATE TABLE inbox (
     // снимки экрана к разделам (лежат рядом с приложением в папке help/); клик открывает крупно
     var FIG = {
       start: [["today", "«Сегодня» на компьютере: слева — доски, списки, проекты; в середине — задачи; сверху — главное дня, план, привычки"], ["mtoday", "На телефоне левая панель прячется за кнопку ☰", 1]],
+      tarch: [["tarch", "«Архив задач»: выполненные по месяцам, поиск, срок архивации"]],
       hist: [["hist", "Блок «История» в карточке: что и когда менялось; ↶ вернуть — прежнее значение"]],
       quick: [["quick", "Быстрый ввод: под полем видно, что поняло приложение — дата и время, проект, тег, приоритет"]],
       pal: [["pal", "Палитра Ctrl+K: поиск по проектам, задачам и командам; Enter без выбора создаёт задачу"]],
@@ -4883,6 +4921,13 @@ CREATE TABLE inbox (
       "<b>Одна отмена на всю пачку</b>: после любого группового действия внизу появляется «Вернуть» — оно возвращает все задачи, как было до действия (и убирает созданные).",
       "<b>Много задач из списка</b>: скопируйте список строк (из заметки, письма, документа) и вставьте в поле новой задачи — приложение создаст по задаче на каждую строку, убрав маркеры «-», «•», «1.», «[ ]». Быстрый ввод работает в каждой строке (даты, #теги, @контексты, !1). В поле подзадачи — так же создаются подзадачи. Одна кнопка «Вернуть» убирает их все."]));
     h += sec("chat", "Комментарии", "<p>Внизу карточки задачи — лента комментариев, как в чате: Enter отправляет, Shift+Enter — новая строка, ссылки кликабельны, 🎤 — надиктовать. При наведении на сообщение — ✎ изменить и × удалить. Число комментариев видно в строке задачи (💬). Комментарии синхронизируются отдельно от задачи, поэтому записи с телефона и компьютера не теряются.</p>");
+    h += sec("tarch", "Архив задач", ul([
+      "Выполненные задачи старше выбранного срока (по умолчанию — 3 месяца) уходят из «Сделано» на страницу <b>«Архив задач»</b>: ссылка «🗄 Архив задач · N» вверху «Сделано», или Ctrl+K → «Архив задач».",
+      "Срок — «Настройки» → «Общие» → «Архив выполненных задач» или кнопками прямо на странице архива: месяц, 3 месяца, полгода, год, «не убирать».",
+      "Ничего не удаляется: задачи из архива по-прежнему считаются в статистике, аналитике времени, прогрессе целей и проектов и находятся поиском.",
+      "В архиве задачи сгруппированы по месяцам выполнения; строка поиска ищет по названию, тегам и проекту. Нажмите на задачу — откроется карточка с историей; снимите отметку — задача вернётся в работу.",
+      "«Убрать архив в корзину…» — перенести все задачи архива в корзину (30 дней их можно восстановить). «Удалить выполненные» на странице «Сделано» задачи архива не трогает.",
+      "На скорость синхронизации архив не влияет: выполненные задачи и так хранятся на Диске по месяцам, и старые месяцы не пересылаются заново."]));
     h += sec("trash", "Удаление и корзина", ul([
       "<b>Задачу</b> удалить: × у задачи при наведении, 🗑 в карточке, Delete, меню задачи или перетащить на «Корзину».",
       "<b>Проект, тег, фильтр</b>: 🗑 рядом со звёздочкой в заголовке его страницы, значок 🗑 у пункта в левой панели (при наведении) или правый клик. Задачи удалённого проекта переходят во «Входящие» и вернутся в проект, если его восстановить.",
@@ -5469,7 +5514,7 @@ CREATE TABLE inbox (
   document.addEventListener("mousedown", function (e) { if (!POP || !e.target.closest) return; if (e.target.closest(".pop, [data-a=pop], #ctx, #ctx2")) return; POP = null; setTimeout(render, 0); });
   // где какая страница справки
   function hq(id, title) { return '<a class="hq" href="#help-' + id + '" title="' + esc(title || "Справка по этому разделу") + '" aria-label="Справка">?</a>'; }
-  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
+  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", tarch: "tarch", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
   var SHELP = { "s-lists": "mini", "s-review": "focus", "s-flags": "flags", "s-srv": "srv", "s-digest": "digest", "s-ai": "ai", "s-sync": "sync", "s-backup": "backup", "s-diag": "diag", "s-wipe": "backup", "s-test": "backup" };
   function helpMarks() {
     var v = $("view");
@@ -5486,7 +5531,7 @@ CREATE TABLE inbox (
     CC = null; DV++;
     try { ctxShowBtn(); if (NOW) renderNow(); } catch (er) { /* не мешает */ }
     $("side").innerHTML = sideHTML();
-    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
+    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
     var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
     $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "templates");
     $("view").innerHTML = (V === "settings" || V === "help" ? "" : focusBar() + revBar()) + f();
@@ -5865,7 +5910,7 @@ CREATE TABLE inbox (
       case "trashclear": CONF = "trashclear"; render(); return;
       case "trashclear-yes": trashItems().forEach(function (x) { purge(x.k, x.o); }); CONF = null; save(); render(); toast("Корзина очищена"); return;
       case "clear": CONF = "clear"; render(); return;
-      case "clear-yes": var nowc = Date.now(), cl = 0; S.tasks.forEach(function (x) { if (x.done && !x.del) { x.del = 1; x.delAt = nowc; x.delBy = x.id; touch(x); cl++; } }); CONF = null; save(); render(); toast("Выполненные (" + cl + ") перенесены в корзину"); return;
+      case "clear-yes": var nowc = Date.now(), cl = 0, cutc = tArchCut(); S.tasks.forEach(function (x) { if (x.done && !x.del && !isTArch(x, cutc)) { x.del = 1; x.delAt = nowc; x.delBy = x.id; touch(x); cl++; } }); CONF = null; save(); render(); toast("Выполненные (" + cl + ") перенесены в корзину"); return;
       case "cancel": CONF = null; IMPF = null; render(); return;
       case "impopen": impPick(); return;
       case "rename": RN = { where: "page", k: el.dataset.k, id: el.dataset.id }; render(); return;
@@ -6073,6 +6118,10 @@ CREATE TABLE inbox (
       case "rev-next": revGo(1); return;
       case "rev-prev": revGo(-1); return;
       case "rev-ok": var rp = proj(ARG); if (rp) { rp.revAt = Date.now(); touch(rp); save(); toast("✓ «" + rp.n + "» проверен"); if (revDue().length) revGo(1); else { render(); toast("✓ Все проекты проверены"); } } return;
+      case "tarchset": S.opt.tarch = +el.dataset.v; optTouch(); save(); render(); toast(+el.dataset.v ? "В архив — выполненные больше " + tArchAge(+el.dataset.v) + " назад" : "Архив выключен: все выполненные — в «Сделано»"); return;
+      case "tarmore": TARLIM += 300; render(); return;
+      case "tarchclear": CONF = "tarchclear"; render(); return;
+      case "tarchclear-yes": var nowa = Date.now(), cla = tArchList(); cla.forEach(function (x) { x.del = 1; x.delAt = nowa; x.delBy = x.id; touch(x); }); CONF = null; save(); render(); toastUndo("Архив (" + cla.length + ") перенесён в корзину", function () { cla.forEach(function (x) { delete x.del; delete x.delAt; delete x.delBy; touch(x); }); save(); render(); }); return;
       case "revdef": S.opt.revDays = +el.dataset.v; optTouch(); save(); render(); return;
       case "qf": QFO[curKey()] = !QFO[curKey()]; render(); return;
       case "qfp": var qp = qfGet(), pv = +el.dataset.v, pi2 = qp.prio.indexOf(pv); if (pi2 >= 0) qp.prio.splice(pi2, 1); else qp.prio.push(pv); render(); return;
@@ -7099,7 +7148,7 @@ CREATE TABLE inbox (
     function hit(text) { var t = text.toLowerCase(); return ws.every(function (w) { return t.indexOf(w) >= 0; }); }
     function add(g, i, l, h, fn) { if (!ws.length || hit(l + " " + (h || ""))) out.push({ g: g, i: i, l: l, h: h || "", fn: fn }); }
     if (q) out.push({ g: "Создать", i: "＋", l: "Создать задачу «" + q + "»", h: quickPreview(parseQuick(q)), fn: function () { var t = newTaskFrom(q, viewCtx()); save(); render(); toast("Добавлено" + (t.at ? ": " + whenTxt(t) : "")); } });
-    [["inbox", "📥", "Входящие"], ["today", "☀", "Сегодня"], ["sprint", "🏃", "Спринт"], ["plans", "📅", "Планы"], ["someday", "⏳", "Когда-нибудь"], ["cal", "🗓", "Календарь"], ["flag", "🚩", "С флажком"], ["all", "☰", "Все задачи"], ["done", "✓", "Сделано"], ["sprints", "📈", "Все спринты"], ["trash", "🗑", "Корзина"], ["gantt", "▤", "Таймлайн"], ["archive", "🗄", "Архив проектов"], ["templates", "⧉", "Шаблоны"], ["settings", "⚙", "Настройки"], ["help", "?", "Справка"]].forEach(function (x) { add("Перейти", x[1], x[2], "", function () { go(x[0]); }); });
+    [["inbox", "📥", "Входящие"], ["today", "☀", "Сегодня"], ["sprint", "🏃", "Спринт"], ["plans", "📅", "Планы"], ["someday", "⏳", "Когда-нибудь"], ["cal", "🗓", "Календарь"], ["flag", "🚩", "С флажком"], ["all", "☰", "Все задачи"], ["done", "✓", "Сделано"], ["tarch", "🗄", "Архив задач"], ["sprints", "📈", "Все спринты"], ["trash", "🗑", "Корзина"], ["gantt", "▤", "Таймлайн"], ["archive", "🗄", "Архив проектов"], ["templates", "⧉", "Шаблоны"], ["settings", "⚙", "Настройки"], ["help", "?", "Справка"]].forEach(function (x) { add("Перейти", x[1], x[2], "", function () { go(x[0]); }); });
     add("Действия", "📝", "Новая заметка", "", function () { var nn4 = newNote({}); save(); NFOCUS = true; go("note-" + nn4.id); });
     nsecs().forEach(function (x) { add("Разделы заметок", "📁", nsPath(x).map(function (y) { return y.n; }).join(" / "), "", function () { go("nsec-" + x.id); }); });
     if (ws.length) notes().forEach(function (n) { if (hit((n.t || "") + " " + noteText(n).slice(0, 400))) add("Заметки", "📝", n.t || "Без названия", noteText(n).slice(0, 60), function () { go("note-" + n.id); }); });
