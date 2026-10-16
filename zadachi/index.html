@@ -2158,7 +2158,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-63";
+  var APPV = "zd-app-2026-10-16-64";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -5460,7 +5460,7 @@ CREATE TABLE inbox (
     }
     return auxHead("Справка") + '<div class="stabs"><nav class="stnav" aria-label="Разделы справки"><input type="search" id="helpq" class="inp hsrch" placeholder="Поиск по справке" value="' + esc(HQ) + '" autocomplete="off">' +
       HTABS.map(function (x) { return '<a href="#help-' + x[0] + '" class="' + (!q && cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") +
-      '</nav><div class="stbody help"><a class="hcourse" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf"><span class="hci">📘</span><span><b>Учебный курс «Задачи»</b><small>18 уроков с картинками, практикой и вопросами · PDF, 71 страница, 7 МБ</small></span><span class="hcd">Скачать</span></a>' +
+      '</nav><div class="stbody help"><a class="hcourse" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf"><span class="hci">📘</span><span><b>Учебный курс «Задачи»</b><small>19 уроков с картинками, практикой и вопросами · PDF, 78 страниц, 8 МБ</small></span><span class="hcd">Скачать</span></a>' +
       '<a class="hcourse htest" href="testdata.json" download="Тестовые данные для Задач.json"><span class="hci">🧪</span><span><b>Тестовые данные для упражнений</b><small>Проекты, задачи, привычки, заметки, цели и доски · JSON, 55 КБ. Загрузить в программу: «Настройки» → «Данные и синхронизация» → «📂 Восстановить из файла» — файл добавится к вашим данным, ничего не заменяя; удалить потом можно одной кнопкой там же.</small></span><span class="hcd">Скачать</span></a>' + html + '<p class="foot">© ' + new Date().getFullYear() + " ytv · Задачи</p></div></div>";
   }
   function codeBox(id, title) { var el = $(id); return '<div class="codebox"><div class="h"><b>' + title + '</b><button class="btn sm" type="button" data-copy="' + id + '">Скопировать</button></div><pre>' + esc(el ? el.textContent.trim() : "") + "</pre></div>"; }
