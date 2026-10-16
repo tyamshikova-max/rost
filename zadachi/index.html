@@ -3898,6 +3898,9 @@ CREATE TABLE inbox (
       (flags().length ? "" : '<p class="muted">Флажков нет — добавьте хотя бы один.</p>') + '</div><div class="r"><button class="btn sm" type="button" data-a="fladd">＋ Добавить флажок</button></div></section>';
     h += '<section class="card" id="s-backup"><h2>Резервная копия</h2><p class="muted" style="margin:0">Все данные одним файлом: задачи, проекты, теги, фильтры, флажки, спринты, комментарии, привычки, шаблоны и настройки. Файл сохраняется на этот компьютер или телефон — храните его где удобно.</p><div class="r"><button class="btn pri" type="button" data-a="export">💾 Сохранить всё в файл</button><label class="btn" style="cursor:pointer">📂 Восстановить из файла…<input type="file" id="imp" hidden accept=".json,application/json"></label></div>' +
       (CONF === "import" ? '<div class="confirm"><b>Восстановить данные из файла «' + esc(IMPF ? IMPF.name : "") + '»?</b><span><b>Заменить</b> — всё станет точно как в файле: то, чего в файле нет, удалится (и на других устройствах после синхронизации). <b>Объединить</b> — записи из файла добавятся к текущим, совпадающие заменятся более свежими версиями.</span><div class="r"><button class="btn pri" type="button" data-a="imp-replace">Заменить всё данными из файла</button><button class="btn" type="button" data-a="imp-yes">Объединить с текущими</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : "") + "</section>";
+    var tstN = tstCount();
+    if (tstN) h += '<section class="card" id="s-test"><h2>🧪 Тестовые данные</h2><p class="muted" style="margin:0">Загружено тестовых записей: ' + tstN + ' (проекты, задачи, теги, фильтры, привычки, заметки, доски). Кнопка ниже удалит только их — ваши собственные задачи и проекты останутся. Если вы положили свою задачу в тестовый проект, она останется, но без проекта.</p>' +
+      (CONF === "tstwipe" ? '<div class="confirm"><b>Удалить все тестовые данные?</b><div class="r"><button class="btn warn" type="button" data-a="tstwipe-yes">Удалить тестовые</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : '<div class="r"><button class="btn warn" type="button" data-a="tstwipe">🧪 Удалить тестовые данные…</button></div>') + "</section>";
     h += '<section class="card" id="s-diag"><h2>Диагностика</h2><p class="muted" style="margin:0">Если что-то работает странно (теряется курсор, не нажимается галочка), включите диагностику, повторите действие и нажмите «Скопировать отчёт» в окошке справа внизу — пришлите текст разработчику. В отчёте нет текста задач, только служебные сведения.</p><div class="r"><button class="btn" type="button" data-a="diag">' + (DIAG.on ? "Выключить диагностику" : "🔍 Включить диагностику") + "</button></div></section>";
     h += '<section class="card" id="s-wipe"><h2>Очистка базы</h2><p class="muted" style="margin:0">Удаляет все задачи, проекты, теги, фильтры, спринты, комментарии, привычки, историю и шаблоны — здесь и, после синхронизации, на других устройствах. Корзина тоже очищается. Флажки и настройки остаются.</p>' +
       (CONF === "wipe" ? '<div class="confirm"><b>Удалить все данные без возможности вернуть?</b><span>Если они могут пригодиться, сначала сохраните копию в файл — из неё всё можно будет восстановить.</span><div class="r"><button class="btn" type="button" data-a="export">💾 Сначала сохранить копию</button><button class="btn warn" type="button" data-a="wipe-yes">Удалить всё</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : '<div class="r"><button class="btn warn" type="button" data-a="wipe">🗑 Очистить всю базу…</button></div>') + "</section>";
@@ -3908,7 +3911,7 @@ CREATE TABLE inbox (
   function vSettingsTabs() {
     var cur = stabOf(ARG), parts = vSettings().split('<section'), by = {};
     parts.slice(1).forEach(function (x) {
-      var k = /id="s-(srv|digest)"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-(sync|backup|wipe|diag)"/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
+      var k = /id="s-(srv|digest)"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-(sync|backup|wipe|diag|test)"/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
       by[k] = (by[k] || "") + "<section" + x;
     });
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
@@ -4348,7 +4351,7 @@ CREATE TABLE inbox (
   // где какая страница справки
   function hq(id, title) { return '<a class="hq" href="#help-' + id + '" title="' + esc(title || "Справка по этому разделу") + '" aria-label="Справка">?</a>'; }
   var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", search: "pal", share: "share" };
-  var SHELP = { "s-lists": "mini", "s-review": "focus", "s-flags": "flags", "s-srv": "srv", "s-digest": "digest", "s-ai": "ai", "s-sync": "sync", "s-backup": "backup", "s-diag": "diag", "s-wipe": "backup" };
+  var SHELP = { "s-lists": "mini", "s-review": "focus", "s-flags": "flags", "s-srv": "srv", "s-digest": "digest", "s-ai": "ai", "s-sync": "sync", "s-backup": "backup", "s-diag": "diag", "s-wipe": "backup", "s-test": "backup" };
   function helpMarks() {
     var v = $("view");
     if (VHELP[V]) { var h1 = v.querySelector("h1"); if (h1 && !h1.querySelector(".hq") && !(h1.parentNode && h1.parentNode.querySelector(":scope > .hq"))) { if (h1.classList.contains("ttl") || h1.parentNode.classList.contains("phead")) h1.insertAdjacentHTML("afterend", hq(VHELP[V])); else h1.insertAdjacentHTML("beforeend", " " + hq(VHELP[V])); } }
@@ -4641,6 +4644,8 @@ CREATE TABLE inbox (
   }
 
   var IMPF = null;
+  function tstCount() { var n = 0; LISTS.forEach(function (k) { S[k].forEach(function (x) { if (x.tst && !x.del) n++; }); }); return n; }
+  function wipeTest() { var now = Date.now(), n = 0; LISTS.forEach(function (k) { S[k].forEach(function (x) { if (x.tst && !x.purged) { if (!x.del && k === "tasks") n++; wipeRec(x, now); } }); }); save(); SYNC.later(); return n; }
   function wipeRec(x, now) { x.del = 1; x.delAt = now; x.purged = 1; ["t", "body", "note", "text", "n", "goal", "retro"].forEach(function (f) { if (typeof x[f] === "string") x[f] = ""; }); x.upd = now; }
   var WIPE_LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "notes", "nsecs", "ntags", "boards"];
   function resetUI() { if (OPEN) { OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); } SELS = {}; CLIP = null; POP = null; CONF = null; RN = null; }
@@ -4877,18 +4882,21 @@ CREATE TABLE inbox (
       case "sfold": var sfm = sideFold(); sfm[el.dataset.id] = !sfm[el.dataset.id]; LS.set("zd-sfold", JSON.stringify(sfm)); render(); return;
       case "lhide": var lh = el.dataset.id, wasHid = hiddenLists().indexOf(lh) >= 0; setListHidden(lh, !wasHid); toast(wasHid ? "«" + LISTN[lh] + "» снова в панели" : "«" + LISTN[lh] + "» скрыто из панели"); return;
       case "diag": if (DIAG.on) { LS.del("zd-diag"); toast("Диагностика выключится после обновления страницы"); } else { LS.set("zd-diag", "1"); toast("Диагностика включится после обновления страницы — обновите её (F5)"); } setTimeout(function () { location.reload(); }, 900); return;
+      case "tstwipe": CONF = "tstwipe"; render(); return;
+      case "tstwipe-yes": var tn = wipeTest(); CONF = null; if (V === "board" && !board(ARG)) go("settings"); render(); toast("Тестовые данные удалены" + (tn ? " · задач: " + tn : "")); return;
       case "wipe-yes": var wn = wipeAll(); go("inbox"); render(); toast("База очищена" + (wn ? " · удалено задач: " + wn : "")); return;
       case "imp-replace":
         if (!IMPF) return;
         IMPF.text().then(function (txt) {
           var j = JSON.parse(txt); if (!j || j.format !== "zadachi-backup") throw new Error("это не копия «Задач»");
+          if (j.test) { LISTS.forEach(function (k) { S[k] = mergeList(S[k], j[k] || []); }); IMPF = null; CONF = null; save(); SYNC.later(); render(); toast("Это тестовый файл — он не заменяет ваши данные, а добавлен к ним"); return; }
           restoreAll(j); IMPF = null; render(); toast("Данные восстановлены из файла");
         }).catch(function (er) { toast("Не удалось: " + (er.message || "ошибка")); }); return;
       case "imp-yes":
         if (!IMPF) return;
         IMPF.text().then(function (txt) {
           var j = JSON.parse(txt); if (!j || j.format !== "zadachi-backup") throw new Error("не тот файл");
-          LISTS.forEach(function (k) { S[k] = mergeList(S[k], j[k] || []); }); IMPF = null; CONF = null; save(); render(); toast("Загружено");
+          LISTS.forEach(function (k) { S[k] = mergeList(S[k], j[k] || []); }); IMPF = null; CONF = null; save(); SYNC.later(); render(); toast(j.test ? "Тестовые данные добавлены · убрать их — «Настройки» → «Тестовые данные»" : "Загружено");
         }).catch(function (er) { toast("Не удалось: " + (er.message || "ошибка")); }); return;
     }
   });
