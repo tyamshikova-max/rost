@@ -595,6 +595,7 @@ ol.steps li { margin: 6px 0 }
   .sidetop { display: none }
 }
 @media (max-width: 480px) { .top .sync span { display: none } }
+@keyframes zdspin { 50% { opacity: .35 } } .top .sync.spin svg { animation: zdspin 1s ease-in-out infinite }
 /* служебная строка: два ряда по четыре значка */
 .svcbar { display: grid; grid-template-columns: repeat(4, 1fr); justify-items: center; row-gap: 2px }
 .svcbar a, .svcbar button { width: 40px; max-width: none; flex: none }
@@ -1766,7 +1767,8 @@ CREATE TABLE inbox (
       var txt = !YD.token() ? "Войти" : SYNC.st === "busy" ? "Синхронизирую…" : SYNC.st === "err" ? "Нет связи" : SYNC.at ? "Диск · " + hm(SYNC.at) : "Яндекс Диск";
       b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M7 18h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.6-1.6A4.8 4.8 0 0 0 7 18z"/></svg><span>' + esc(txt) + "</span>";
       b.classList.toggle("bad", SYNC.st === "err" || !YD.token());
-      b.title = SYNC.st === "err" ? SYNC.msg : "Синхронизация через Яндекс Диск";
+      b.title = !YD.token() ? "Войти через Яндекс для синхронизации" : (SYNC.st === "err" ? "Нет связи: " + SYNC.msg + ". " : "") + "Клик — синхронизировать сейчас";
+      b.classList.toggle("spin", SYNC.st === "busy");
     },
     fail: function (e) {
       SYNC.busy = false;
@@ -4067,7 +4069,7 @@ CREATE TABLE inbox (
       "<b>Подключение</b>: «Настройки» → «ИИ-помощник». ChatGPT — ключ на platform.openai.com (API keys, нужен пополненный баланс); OpenRouter — openrouter.ai → Keys (там же Claude и Gemini); DeepSeek — platform.deepseek.com; YandexGPT — через облачную функцию. Ключ хранится только в этом браузере и уходит только в выбранный сервис. Запросы платные по тарифам сервиса (обычно копейки)."]));
 
     /* ================= Данные и настройки ================= */
-    h += sec("sync", "Синхронизация между устройствами", "<p>«Настройки» → «Данные и синхронизация» → «Войти через Яндекс» — задачи, проекты, теги, фильтры, флажки, шаблоны, привычки и комментарии станут одинаковыми на всех устройствах. Данные лежат в папке приложения на вашем Яндекс Диске («Приложения»), приложение видит только её. Правки сливаются по каждой записи: если на телефоне поменять одну задачу, а на компьютере другую, сохранятся обе. Синхронизация идёт сама через пару секунд после изменений и при открытии; ☁ в нижней строке панели — синхронизировать сейчас. Вид списков, свёрнутые блоки и скрытые пункты запоминаются на каждом устройстве свои.</p>");
+    h += sec("sync", "Синхронизация между устройствами", "<p><b>Облачко вверху</b> («Диск · 07:31» — время последнего обмена): клик запускает синхронизацию сразу, внизу появится «Синхронизировано» или причина ошибки. Пока идёт обмен, облачко мигает. «Нет связи» — последний обмен не удался; данные не теряются и уйдут при следующей удачной попытке. </p><p>«Настройки» → «Данные и синхронизация» → «Войти через Яндекс» — задачи, проекты, теги, фильтры, флажки, шаблоны, привычки и комментарии станут одинаковыми на всех устройствах. Данные лежат в папке приложения на вашем Яндекс Диске («Приложения»), приложение видит только её. Правки сливаются по каждой записи: если на телефоне поменять одну задачу, а на компьютере другую, сохранятся обе. Синхронизация идёт сама через пару секунд после изменений и при открытии; ☁ в нижней строке панели — синхронизировать сейчас. Вид списков, свёрнутые блоки и скрытые пункты запоминаются на каждом устройстве свои.</p>");
     h += sec("backup", "Резервная копия, восстановление, очистка", ul([
       "<b>💾 Сохранить всё в файл</b> — все данные одним файлом на этот компьютер или телефон.",
       "<b>📂 Восстановить из файла</b> → <b>«Заменить всё данными из файла»</b> — всё станет точно как в копии (лишнее удалится и на других устройствах) или <b>«Объединить с текущими»</b> — записи из файла добавятся.",
@@ -5910,7 +5912,16 @@ CREATE TABLE inbox (
 
   $("menuBtn").addEventListener("click", function () { document.body.classList.toggle("menu"); });
   $("scrim").addEventListener("click", function () { document.body.classList.remove("menu"); });
-  $("syncBtn").addEventListener("click", function () { if (!YD.token()) YD.login(); else go("settings-sync"); });
+  // клик по облачку — синхронизировать сейчас (подробности и выход — в «Настройках»)
+  $("syncBtn").addEventListener("click", function () {
+    if (!YD.token()) { YD.login(); return; }
+    if (SYNC.busy) { toast("Уже синхронизирую…"); return; }
+    SYNC.run().then(function () {
+      if (V === "settings") render();
+      if (SYNC.st === "ok") toast("Синхронизировано · " + hm(SYNC.at));
+      else if (SYNC.st === "err") toast("Нет связи с Диском: " + SYNC.msg + " · подробности — «Настройки» → «Синхронизация»");
+    });
+  });
   function themePref() { return LS.get("zd-theme") || "system"; }
   function applyTheme() { var p = themePref(); if (p === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", p); }
   $("themeBtn").addEventListener("click", function () {
