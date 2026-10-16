@@ -3896,7 +3896,7 @@ CREATE TABLE inbox (
     h += '<section class="card" id="s-flags"><h2>Флажки</h2><p class="muted" style="margin:0">У задачи может стоять один из этих флажков. Название и цвет меняются здесь, порядок — стрелкой ↑. Задачи с флажками собраны в списке «С флажком».</p><div class="fled">' +
       flags().map(function (f, i) { return '<div class="flrow">' + flagIc(f, "big") + '<input class="inp" data-fln="' + f.id + '" value="' + esc(f.n) + '" maxlength="30" aria-label="Название флажка"><button type="button" class="ddb" data-a="flcdd" data-id="' + f.id + '" title="Цвет флажка"><i class="swc" style="background:' + col(f.c) + '"></i>' + COLORS[f.c || 0][0] + '<span class="dda">▾</span></button><span class="r">' + (i ? '<button class="btn sm" type="button" data-a="flup" data-id="' + f.id + '" title="Выше">↑</button>' : "") + '<button class="btn sm warn" type="button" data-a="fldel" data-id="' + f.id + '" title="Удалить флажок">🗑</button></span></div>'; }).join("") +
       (flags().length ? "" : '<p class="muted">Флажков нет — добавьте хотя бы один.</p>') + '</div><div class="r"><button class="btn sm" type="button" data-a="fladd">＋ Добавить флажок</button></div></section>';
-    h += '<section class="card" id="s-backup"><h2>Резервная копия</h2><p class="muted" style="margin:0">Все данные одним файлом: задачи, проекты, теги, фильтры, флажки, спринты, комментарии, привычки, шаблоны и настройки. Файл сохраняется на этот компьютер или телефон — храните его где удобно.</p><div class="r"><button class="btn pri" type="button" data-a="export">💾 Сохранить всё в файл</button><label class="btn" style="cursor:pointer">📂 Восстановить из файла…<input type="file" id="imp" hidden accept=".json,application/json"></label></div>' +
+    h += '<section class="card" id="s-backup"><h2>Резервная копия</h2><p class="muted" style="margin:0">Все данные одним файлом: задачи, проекты, теги, фильтры, флажки, спринты, комментарии, привычки, шаблоны и настройки. Файл сохраняется на этот компьютер или телефон — храните его где удобно.</p><div class="r"><button class="btn pri" type="button" data-a="export">💾 Сохранить всё в файл</button><button class="btn" type="button" data-a="impopen">📂 Восстановить из файла…</button></div>' +
       (CONF === "import" ? '<div class="confirm"><b>Восстановить данные из файла «' + esc(IMPF ? IMPF.name : "") + '»?</b><span><b>Заменить</b> — всё станет точно как в файле: то, чего в файле нет, удалится (и на других устройствах после синхронизации). <b>Объединить</b> — записи из файла добавятся к текущим, совпадающие заменятся более свежими версиями.</span><div class="r"><button class="btn pri" type="button" data-a="imp-replace">Заменить всё данными из файла</button><button class="btn" type="button" data-a="imp-yes">Объединить с текущими</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : "") + "</section>";
     var tstN = tstCount();
     if (!tstN) h += '<section class="card" id="s-test"><h2>🧪 Тестовые данные</h2><p class="muted" style="margin:0">Готовый набор для проверки возможностей: 10 проектов, 53 задачи (сроки, повторы, подзадачи, спринт, выполненные), теги, фильтры, привычки с отметками, заметки и 3 доски. Добавляется к вашим данным, ничего не заменяя, и удаляется отсюда же одной кнопкой — ваши записи при этом останутся.</p><div class="r"><button class="btn" type="button" data-a="tstload">🧪 Загрузить тестовые данные</button></div></section>';
@@ -4645,6 +4645,25 @@ CREATE TABLE inbox (
   }
 
   var IMPF = null;
+  // выбор файла копии: поле создаётся на лету и не зависит от перерисовки страницы, пока открыто окно выбора
+  function impPick() {
+    var fi = document.createElement("input"); fi.type = "file"; fi.style.display = "none"; document.body.appendChild(fi);
+    fi.addEventListener("change", function () { var f = fi.files && fi.files[0]; fi.remove(); if (f) impRead(f); });
+    fi.click();
+  }
+  function impParse(f) {
+    return f.text().then(function (txt) {
+      var j; try { j = JSON.parse(String(txt).replace(/^\uFEFF/, "")); } catch (e) { throw new Error("файл «" + f.name + "» повреждён или это не копия «Задач»"); }
+      if (!j || j.format !== "zadachi-backup") throw new Error("файл «" + f.name + "» — не копия «Задач»");
+      return j;
+    });
+  }
+  function impRead(f) {
+    impParse(f).then(function (j) {
+      if (j.test) { tstMerge(j); CONF = null; IMPF = null; render(); toast("Тестовые данные добавлены: " + (j.tasks || []).length + " задач, " + (j.projects || []).length + " проектов · убрать — «Настройки» → «Тестовые данные»"); return; }
+      IMPF = f; CONF = "import"; render(); var c = document.querySelector("#s-backup .confirm"); if (c) c.scrollIntoView({ block: "center" });
+    }).catch(function (er) { toast("Не удалось: " + (er.message || "ошибка чтения файла")); });
+  }
   // тестовый набор: свои записи пользователя главнее; тестовые (в т. ч. удалённые раньше) берутся из файла заново
   function tstMerge(j) {
     var now = Date.now();
@@ -4710,6 +4729,7 @@ CREATE TABLE inbox (
       case "clear": CONF = "clear"; render(); return;
       case "clear-yes": var nowc = Date.now(), cl = 0; S.tasks.forEach(function (x) { if (x.done && !x.del) { x.del = 1; x.delAt = nowc; x.delBy = x.id; touch(x); cl++; } }); CONF = null; save(); render(); toast("Выполненные (" + cl + ") перенесены в корзину"); return;
       case "cancel": CONF = null; IMPF = null; render(); return;
+      case "impopen": impPick(); return;
       case "rename": RN = { where: "page", k: el.dataset.k, id: el.dataset.id }; render(); return;
       case "fav": setFav(el.dataset.k, el.dataset.id); return;
       case "xdel": trashEntity(el.dataset.k, el.dataset.id); return;
@@ -4904,15 +4924,13 @@ CREATE TABLE inbox (
       case "wipe-yes": var wn = wipeAll(); go("inbox"); render(); toast("База очищена" + (wn ? " · удалено задач: " + wn : "")); return;
       case "imp-replace":
         if (!IMPF) return;
-        IMPF.text().then(function (txt) {
-          var j = JSON.parse(txt); if (!j || j.format !== "zadachi-backup") throw new Error("это не копия «Задач»");
+        impParse(IMPF).then(function (j) {
           if (j.test) { tstMerge(j); IMPF = null; CONF = null; render(); toast("Это тестовый файл — он не заменяет ваши данные, а добавлен к ним"); return; }
           restoreAll(j); IMPF = null; render(); toast("Данные восстановлены из файла");
         }).catch(function (er) { toast("Не удалось: " + (er.message || "ошибка")); }); return;
       case "imp-yes":
         if (!IMPF) return;
-        IMPF.text().then(function (txt) {
-          var j = JSON.parse(txt); if (!j || j.format !== "zadachi-backup") throw new Error("не тот файл");
+        impParse(IMPF).then(function (j) {
           if (j.test) tstMerge(j); else LISTS.forEach(function (k) { S[k] = mergeList(S[k], j[k] || []); }); IMPF = null; CONF = null; save(); SYNC.later(); render(); toast(j.test ? "Тестовые данные добавлены · убрать их — «Настройки» → «Тестовые данные»" : "Загружено");
         }).catch(function (er) { toast("Не удалось: " + (er.message || "ошибка")); }); return;
     }
