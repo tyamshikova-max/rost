@@ -708,6 +708,14 @@ html.nosheet .dptopbox { background: color-mix(in srgb, var(--star) 10%, transpa
 .pn-subs .sr a { flex: 1; min-width: 0; color: var(--fg); text-decoration: none; overflow-wrap: anywhere; cursor: pointer }
 .pn-subs .sr.done a { text-decoration: line-through; color: var(--muted) }
 .pn-subs input { width: 100%; margin-top: 6px; background: var(--bg); border: 1px dashed var(--line); border-radius: 7px; padding: 6px 10px }
+.pn-hist .hxl { display: grid; gap: 2px }
+.pn-hist .hxr { display: flex; gap: 10px; align-items: baseline; padding: 4px 6px; border-radius: 6px; font-size: calc(13px * var(--fs)) } .pn-hist .hxr:hover { background: var(--hover) }
+.pn-hist .hxd { flex: none; width: 128px; color: var(--muted); font-size: calc(12px * var(--fs)); font-variant-numeric: tabular-nums }
+.pn-hist .hxt { flex: 1; min-width: 0; overflow-wrap: anywhere } .pn-hist .hxt b { font-weight: 600 }
+.pn-hist .hxrev { flex: none; border: 0; background: none; color: var(--acc); cursor: pointer; font: inherit; font-size: calc(12px * var(--fs)); opacity: 0; padding: 0 4px } .pn-hist .hxr:hover .hxrev, .pn-hist .hxrev:focus { opacity: 1 }
+@media (hover: none) { .pn-hist .hxrev { opacity: 1 } }
+.pn-hist .hxmore { display: inline-block; margin: 6px 6px 2px; font-size: calc(13px * var(--fs)) } .pn-hist .hxcr { color: var(--muted) } .pn-hist .hxempty { margin: 0 6px 4px }
+@media (max-width: 560px) { .pn-hist .hxr { flex-wrap: wrap; gap: 0 8px } .pn-hist .hxd { width: auto } }
 .pn-foot { margin-top: 24px; color: var(--muted); font-size: calc(12px * var(--fs)) }
 /* --- редактор тела задачи --- */
 .rte { position: relative; min-height: 160px; outline: none; font-size: calc(15px * var(--fs)); line-height: 1.6; padding: 6px 2px; overflow-wrap: anywhere }
@@ -1542,7 +1550,7 @@ CREATE TABLE inbox (
   var S = (function () { try { var raw = LS.get("zd-state") || "null"; if (raw.charCodeAt(0) === 1) raw = lzUnpack(raw); return JSON.parse(raw); } catch (e) { return null; } })() || {};
   S.v = 2; S.tasks = S.tasks || []; S.projects = S.projects || []; S.tags = S.tags || []; S.filters = S.filters || []; S.sprints = S.sprints || []; S.comments = S.comments || []; S.habits = S.habits || []; S.hlog = S.hlog || []; S.acts = S.acts || []; S.tpls = S.tpls || []; S.flags = S.flags || []; S.notes = S.notes || []; S.nsecs = S.nsecs || []; S.ntags = S.ntags || []; S.boards = S.boards || []; S.goals = S.goals || []; S.days = S.days || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
   var VIEWS = (function () { try { return JSON.parse(LS.get("zd-views") || "{}") || {}; } catch (e) { return {}; } })();
-  function save(quiet) { if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); DV++; saveLocal(); if (!quiet) { SYNC.later(); SRV.later(); } }
+  function save(quiet) { try { histScan(); } catch (er) { /* история не мешает сохранению */ } if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); DV++; saveLocal(); if (!quiet) { SYNC.later(); SRV.later(); } }
   function live(a) { return a.filter(function (x) { return !x.del; }); }
   // если часы другого устройства спешат, его настройки «новее» навсегда — поэтому метка только растёт
   function optTouch() { S.opt.upd = Math.max(Date.now(), (S.opt.upd || 0) + 1); }
@@ -1697,6 +1705,101 @@ CREATE TABLE inbox (
   // стандартные флажки с постоянными id и «старой» меткой времени: любая правка на любом устройстве их перекрывает
   if (!S.flags.length) [["f1", "Красный", 4], ["f2", "Жёлтый", 6], ["f3", "Зелёный", 0], ["f4", "Синий", 1]].forEach(function (x, i) { S.flags.push({ id: x[0], n: x[1], c: x[2], ord: i, upd: 1 }); });
   function flags() { return live(S.flags).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0); }); }
+  /* ---------- история изменений задачи: t.h = [{d, k, o, n}] — хранится в самой задаче и синхронизируется вместе с ней ---------- */
+  // правки на этом устройстве ловим сравнением с «тенью»: тот же объект + новое upd = правка здесь; новый объект (синхронизация, отмена, загрузка) — просто запоминаем
+  var HKEYS = ["t", "done", "canc", "at", "due", "rep", "prio", "tags", "pid", "sec", "flag", "st", "est", "dur", "sprint", "parent", "after", "wait", "goal", "pin", "rem", "del", "body"];
+  var HLAB = { t: "Название", done: "Выполнена", canc: "Отменена", at: "Срок", due: "Дедлайн", rep: "Повтор", prio: "Приоритет", tags: "Теги", pid: "Проект", sec: "Секция", flag: "Флажок", st: "Статус", est: "Оценка", dur: "Длительность", sprint: "Спринт", parent: "Входит в", after: "Сначала сделать", wait: "Жду ответа", goal: "Цель", pin: "Закреплена", rem: "Напоминание", del: "В корзине", body: "Описание" };
+  var HSH = null, HMAX = 40, HJOIN = 3 * 60 * 1000;
+  function hiGet(t, k) {
+    var v;
+    if (k === "at") v = t.at ? [t.at, !!t.allday] : null;
+    else if (k === "rep") v = t.rep ? [t.rep, t.rr || null] : null;
+    else if (k === "body") { var b = String(t.body || ""), x = 0; for (var i = 0; i < b.length; i++) x = (x * 31 + b.charCodeAt(i)) | 0; return b ? b.length + ":" + x : null; }
+    else if (k === "t") v = String(t.t || "").slice(0, 300);
+    else v = t[k];
+    if (v === undefined || v === "" || v === false || v === 0 || (Array.isArray(v) && !v.length)) return null;
+    return v;
+  }
+  function hiSet(t, k, v) {
+    if (k === "at") { if (v) { t.at = v[0]; t.allday = !!v[1]; } else t.at = 0; return; }
+    if (k === "rep") { t.rep = v ? v[0] : ""; t.rr = v ? v[1] : null; return; }
+    if (v === null || v === undefined) { var c = t[k]; if (typeof c === "number") t[k] = 0; else if (typeof c === "string") t[k] = ""; else if (typeof c === "boolean") t[k] = false; else delete t[k]; return; }
+    t[k] = JSON.parse(JSON.stringify(v));
+  }
+  function hiSnap(t) { var o = {}; HKEYS.forEach(function (k) { o[k] = JSON.stringify(hiGet(t, k)); }); return o; }
+  function histScan() {
+    if (!S || !S.tasks) return;
+    var first = !HSH; if (first) HSH = {};
+    var now = Date.now();
+    for (var i = 0; i < S.tasks.length; i++) {
+      var t = S.tasks[i]; if (!t || !t.id) continue;
+      var sh = HSH[t.id];
+      if (!sh || sh.r !== t || first) { HSH[t.id] = { r: t, u: t.upd, v: hiSnap(t) }; continue; }
+      if (sh.u === t.upd) continue;
+      var nv = hiSnap(t), h = null;
+      HKEYS.forEach(function (k) {
+        if (nv[k] === sh.v[k]) return;
+        h = h || (t.h = Array.isArray(t.h) ? t.h : []);
+        var o = JSON.parse(sh.v[k]), n = JSON.parse(nv[k]), last = h[h.length - 1];
+        if (k === "body") { o = null; n = null; }
+        // быстрые правки одного поля подряд (набор названия, перетаскивание) — одной записью
+        if (last && last.k === k && now - last.d < HJOIN && k !== "done" && k !== "del") {
+          last.n = n; last.d = now;
+          if (k !== "body" && JSON.stringify(last.o) === JSON.stringify(last.n)) h.pop();
+          return;
+        }
+        h.push({ d: now, k: k, o: o, n: n });
+      });
+      if (h && h.length > HMAX) t.h = h.slice(h.length - HMAX);
+      if (h && !h.length) delete t.h;
+      sh.u = t.upd; sh.v = nv;
+    }
+  }
+  function hiVal(t, k, v) {
+    if (v === null || v === undefined) return { at: "без срока", due: "нет", rep: "не повторять", prio: "нет", tags: "без тегов", pid: "без проекта", sec: "без секции", flag: "нет", st: "нужно сделать", est: "нет", dur: "нет", sprint: "нет", parent: "главная задача", after: "нет", wait: "нет", goal: "нет", rem: "нет" }[k] || "—";
+    if (k === "at") return dayName(v[0]) + (v[1] ? "" : ", " + hm(v[0]));
+    if (k === "due") return dayName(v);
+    if (k === "rep") return ruleText({ rep: v[0], rr: v[1], at: t.at || Date.now() }) || REPN[v[0]] || v[0];
+    if (k === "prio") return ["нет", "1 — срочно", "2 — важно", "3 — желательно"][v] || String(v);
+    if (k === "tags") return v.map(function (x) { return "#" + x; }).join(" ");
+    if (k === "pid") { var pp = proj(v); return pp ? pp.n : "удалённый проект"; }
+    if (k === "sec") { var sx = psecs(proj(t.pid)).filter(function (x) { return x.id === v; })[0]; return sx ? sx.n : "другая секция"; }
+    if (k === "flag") { var fo = v === true ? flagObj("f1") : flagObj(v); return fo ? fo.n : "флажок"; }
+    if (k === "st") return v === "doing" ? "в работе" : String(v);
+    if (k === "est") return fmtH(v) + " ч";
+    if (k === "dur") return v + " мин";
+    if (k === "sprint") { var m = /^s:(\d+)-(\d+)-(\d+)$/.exec(v); return m ? "неделя с " + m[3] + "." + m[2] : String(v); }
+    if (k === "parent") { var pt = task(v); return pt ? "«" + pt.t + "»" : "удалённая задача"; }
+    if (k === "after") return v.map(function (id) { var x = task(id); return x ? "«" + x.t + "»" : "удалённая задача"; }).join(", ");
+    if (k === "wait") return "жду" + (v.who ? ": " + v.who : "");
+    if (k === "goal") { var g = typeof goal === "function" ? goal(v) : null; return g ? g.t || g.n || "цель" : "удалённая цель"; }
+    if (k === "rem") return "включено";
+    if (k === "t") return "«" + v + "»";
+    return String(v);
+  }
+  function hiLine(t, e) {
+    var on = e.n !== null && e.n !== undefined;
+    if (e.k === "done") return on ? "✓ отмечена выполненной" : "↺ возвращена в работу";
+    if (e.k === "canc") return on ? "✕ отменена" : "отмена снята";
+    if (e.k === "del") return on ? "🗑 удалена в корзину" : "♻ восстановлена из корзины";
+    if (e.k === "pin") return on ? "📌 закреплена" : "откреплена";
+    if (e.k === "body") return "✎ изменено описание";
+    if (e.k === "rem") return on ? "🔔 напоминание включено" : "напоминание выключено";
+    return "<b>" + esc(HLAB[e.k] || e.k) + "</b>: " + esc(hiVal(t, e.k, e.o)) + " → " + esc(hiVal(t, e.k, e.n));
+  }
+  function hiWhen(d) { return dayName(d) + ", " + hm(d); }
+  var HALL = null;
+  function histHTML(t) {
+    var h = Array.isArray(t.h) ? t.h : [], all = HALL === t.id, list = h.slice().reverse(), shown = all ? list : list.slice(0, 6);
+    var out = '<div class="pn-sec pn-hist"><h3>История' + (h.length ? " · " + h.length : "") + "</h3>";
+    if (!h.length) out += '<p class="muted hxempty">Изменений пока нет — здесь появятся сроки, приоритет, проект, статус и другие правки этой задачи.</p>';
+    else out += '<div class="hxl">' + shown.map(function (e) {
+      var i = h.indexOf(e), can = e.k !== "body" && e.k !== "done" && e.k !== "del" && JSON.stringify(hiGet(t, e.k)) === JSON.stringify(e.n) && JSON.stringify(e.o) !== JSON.stringify(e.n);
+      return '<div class="hxr"><span class="hxd">' + esc(hiWhen(e.d)) + '</span><span class="hxt">' + hiLine(t, e) + "</span>" + (can ? '<button type="button" class="hxrev" data-p="hrev" data-i="' + i + '" title="Вернуть прежнее значение: ' + esc(hiVal(t, e.k, e.o)) + '">↶ вернуть</button>' : "") + "</div>";
+    }).join("") + "</div>" + (list.length > 6 ? '<a href="#" class="hxmore" data-p="hall">' + (all ? "Свернуть" : "Показать всю историю (" + list.length + ")") + "</a>" : "");
+    out += '<div class="hxr hxcr"><span class="hxd">' + esc(hiWhen(t.created || t.upd || Date.now())) + '</span><span class="hxt">✦ задача создана' + (t.src === "tg" ? " из Telegram" : "") + "</span></div>";
+    return out + "</div>";
+  }
   function flagObj(id) { return id ? live(S.flags).filter(function (f) { return f.id === id; })[0] || null : null; }
   function defFlag() { var f = flags()[0]; return f ? f.id : ""; }
   // старые задачи хранили флажок как true — это первый флажок
@@ -1961,7 +2064,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-42";
+  var APPV = "zd-app-2026-10-16-43";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -4609,7 +4712,7 @@ CREATE TABLE inbox (
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
   }
   // справка по вкладкам, как настройки; поиск ищет по всем разделам сразу
-  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "trash"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
+  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
   var HQ = "";
   function htabOf(a) { if (HTABS.some(function (x) { return x[0] === a; })) return a; var f = HTABS.filter(function (x) { return x[3].indexOf(a) >= 0; })[0]; return f ? f[0] : "start"; }
   function vHelpTabs() {
@@ -4635,6 +4738,7 @@ CREATE TABLE inbox (
     // снимки экрана к разделам (лежат рядом с приложением в папке help/); клик открывает крупно
     var FIG = {
       start: [["today", "«Сегодня» на компьютере: слева — доски, списки, проекты; в середине — задачи; сверху — главное дня, план, привычки"], ["mtoday", "На телефоне левая панель прячется за кнопку ☰", 1]],
+      hist: [["hist", "Блок «История» в карточке: что и когда менялось; ↶ вернуть — прежнее значение"]],
       quick: [["quick", "Быстрый ввод: под полем видно, что поняло приложение — дата и время, проект, тег, приоритет"]],
       pal: [["pal", "Палитра Ctrl+K: поиск по проектам, задачам и командам; Enter без выбора создаёт задачу"]],
       card: [["card", "Карточка задачи: срок, проект, спринт и оценка, статус, приоритет, теги, связи, описание с чек-листом"]],
@@ -4713,6 +4817,12 @@ CREATE TABLE inbox (
         "<b>Напоминание</b> — в Telegram, в момент начала и/или заранее (за 5, 15, 30 минут, за час, за день).",
         "Ниже — <b>описание</b> (полноценный редактор), <b>подзадачи</b> и <b>комментарии</b>.",
         "У подзадачи вверху — «↑ Родительская задача»."]));
+    h += sec("hist", "История изменений", "<p>Внизу карточки задачи — блок <b>«История»</b>: что и когда менялось. Записываются название, срок и дедлайн, повтор, приоритет, теги, проект и секция, флажок, статус, оценка, спринт, «входит в», «сначала сделать», «жду ответа», цель, закрепление, выполнение и отмена, удаление в корзину и восстановление, изменения описания.</p>" +
+      "<ul><li>Новые записи — сверху; видны последние 6, «Показать всю историю» — все (хранятся последние 40 изменений задачи).</li>" +
+      "<li><b>↶ вернуть</b> — у записи, если значение с тех пор не менялось: вернёт прежнее (например, срок или проект). Само возвращение тоже попадёт в историю.</li>" +
+      "<li>Быстрые правки одного поля подряд (пока печатаете название, двигаете задачу в календаре) собираются в одну запись.</li>" +
+      "<li>История хранится в самой задаче и синхронизируется: правки с телефона видны на компьютере.</li>" +
+      "<li>Блок можно перетащить выше или ниже, как другие блоки карточки.</li></ul>");
     h += sec("editor", "Редактор описания (в задаче и в проекте)", "<p>Описание задачи и описание проекта — полноценный редактор. Нажмите <code>/</code> и выберите блок (можно сразу печатать название для поиска, ↑ ↓ и Enter):</p>" +
       tbl(["Блок", "Клавиши", "Быстро"].slice(0, 3), [["Текст", "<code>Ctrl+Shift+0</code>", ""], ["Чек-лист (галочки — клик по квадратику)", "<code>Ctrl+Shift+4</code>", "<code>[] пробел</code>"], ["Заголовок 1 / 2 / 3", "<code>Ctrl+Shift+1 / 2 / 3</code>", "<code># / ## / ### пробел</code>"], ["Маркированный список", "<code>Ctrl+Shift+5</code>", "<code>- пробел</code>"], ["Нумерованный список", "<code>Ctrl+Shift+6</code>", "<code>1. пробел</code>"], ["Спойлер (сворачивается кликом по ▸)", "<code>Ctrl+Shift+7</code>", ""], ["Цитата", "<code>Ctrl+Shift+8</code>", "<code>&gt; пробел</code>"], ["Код", "<code>Ctrl+Shift+9</code>", "<code>``` пробел</code>"], ["Выноска 💡, таблица, разделитель", "через /", "<code>--- пробел</code> — разделитель"]], true) +
       ul(["Выделите текст — появится панель: жирный, курсив, подчёркнутый, зачёркнутый, код, маркер, ссылка (Ctrl+K), «убрать оформление».",
@@ -5328,6 +5438,7 @@ CREATE TABLE inbox (
   }
   var RTIMES = [], RWARN = false;
   function render() {
+    try { histScan(); } catch (er) { /* история не мешает */ }
     try { applyLook(); } catch (er) { /* оформление не мешает работе */ }
     // пока пишете в редакторе на странице (текст заметки, описание проекта) — страницу вокруг не перерисовываем, только левую панель; остальное обновится, когда выйдете из редактора
     var ae0 = document.activeElement;
@@ -6131,11 +6242,12 @@ CREATE TABLE inbox (
       return out + '<div class="msg" data-cid="' + c.id + '"><div class="mh"><b>' + (c.src === "tg" ? "Telegram" : "Я") + "</b><span>" + hm(c.at) + (c.edited ? " · изменено" : "") + '</span><button type="button" data-p="cedit" title="Изменить">✎</button><button type="button" data-p="cdel" title="Удалить">×</button></div><div class="mb">' + linkify(c.text) + "</div></div>";
     }).join("") + "</div>" + (CED ? '<div class="editing">Редактирование комментария · <a href="#" data-p="ccancel">отмена</a></div>' : "") +
       '<div class="cin"><textarea id="pn-c" rows="1" placeholder="Комментарий… Enter — отправить, Shift+Enter — новая строка">' + esc(CED ? (live(S.comments).filter(function (c) { return c.id === CED; })[0] || {}).text || "" : "") + '</textarea><button class="btn mic sm" type="button" data-a="mic" data-for="pn-c" title="Надиктовать комментарий">🎤</button><button class="btn pri sm" type="button" data-p="csend">' + (CED ? "Сохранить" : "Отправить") + "</button></div></div>";
+    h += histHTML(t);
     h += '<p class="pn-foot">Создана: ' + new Date(t.created || t.upd || Date.now()).toLocaleString("ru-RU") + (t.upd ? " · изменена: " + new Date(t.upd).toLocaleString("ru-RU") : "") + (t.src === "tg" ? " · из Telegram" : "") + "</p>";
     P.innerHTML = '<div class="grip" title="Потяните, чтобы изменить ширину; двойной клик — ширина по умолчанию"></div><div class="pn-sc"><div class="pn-in">' + h + "</div></div>";
     P.hidden = false; P.classList.toggle("full", full); document.body.classList.add("pnopen"); document.body.classList.toggle("pnfull", full);
     pnLayout(P);
-    var SECH = { desc: "editor", subs: "sub", files: "files", notes: "notes", chat: "chat" };
+    var SECH = { desc: "editor", subs: "sub", files: "files", notes: "notes", chat: "chat", hist: "hist" };
     [].forEach.call(P.querySelectorAll(".pn-in > .pn-sec[data-sec]"), function (x) { var h3 = x.querySelector("h3"); if (h3 && SECH[x.dataset.sec] && !h3.querySelector(".hq")) h3.insertAdjacentHTML("beforeend", hq(SECH[x.dataset.sec])); });
     var pt = P.querySelector(".pn-top"); if (pt && !pt.querySelector(".hq")) { var cl = pt.querySelector('[data-p="close"]'); if (cl) cl.insertAdjacentHTML("beforebegin", hq("card", "Справка: карточка задачи")); }
     autoH($("pn-t"));
@@ -6143,7 +6255,7 @@ CREATE TABLE inbox (
   }
   /* ---------- карточка задачи: поля и блоки переставляются мышью (порядок — в настройках, синхронизируется) ---------- */
   var PNROW = { "Срок": "due", "Дедлайн": "deadline", "Секция": "sec", "Проект": "proj", "Спринт": "sprint", "Статус": "status", "Приоритет": "prio", "Теги": "tags", "Учёт времени": "track", "Входит в": "parent", "Напоминание": "rem", "Сначала сделать": "after", "Ждут эту задачу": "blocks", "Жду ответа": "wait" };
-  var PNSEC = ["props", "desc", "subs", "files", "notes", "chat"], PDR = null;
+  var PNSEC = ["props", "desc", "subs", "files", "notes", "chat", "hist"], PDR = null;
   // порядок: сохранённый; недостающие поля встают после своего соседа из порядка по умолчанию
   function pnOrder(keys, saved, def) { var out = saved.filter(function (k) { return keys.indexOf(k) >= 0; }); keys.forEach(function (k) { if (out.indexOf(k) >= 0) return; var di = def.indexOf(k), at = 0; for (var j = di - 1; j >= 0; j--) { var pi = out.indexOf(def[j]); if (pi >= 0) { at = pi + 1; break; } } out.splice(at, 0, k); }); return out; }
   // сохранить новый порядок видимых полей, не теряя места скрытых (например, «Статус» у выполненной задачи)
@@ -6159,7 +6271,7 @@ CREATE TABLE inbox (
       pr.dataset.sec = "props"; pr.insertAdjacentHTML("afterbegin", '<span class="sgrip psg" title="Перетащите, чтобы переставить блок свойств">⋮⋮</span>');
     }
     var secs = pr ? [pr] : [];
-    [].forEach.call(inn.querySelectorAll(":scope > .pn-sec"), function (x) { var k = x.classList.contains("pn-subs") ? "subs" : x.classList.contains("pn-files") ? "files" : x.classList.contains("pn-notes") ? "notes" : x.classList.contains("pn-chat") ? "chat" : "desc"; x.dataset.sec = k; secs.push(x); var h3 = x.querySelector("h3"); if (h3) h3.insertAdjacentHTML("afterbegin", '<span class="sgrip" title="Перетащите, чтобы переставить блок">⋮⋮</span>'); });
+    [].forEach.call(inn.querySelectorAll(":scope > .pn-sec"), function (x) { var k = x.classList.contains("pn-subs") ? "subs" : x.classList.contains("pn-files") ? "files" : x.classList.contains("pn-notes") ? "notes" : x.classList.contains("pn-chat") ? "chat" : x.classList.contains("pn-hist") ? "hist" : "desc"; x.dataset.sec = k; secs.push(x); var h3 = x.querySelector("h3"); if (h3) h3.insertAdjacentHTML("afterbegin", '<span class="sgrip" title="Перетащите, чтобы переставить блок">⋮⋮</span>'); });
     var foot = inn.querySelector(".pn-foot");
     pnOrder(secs.map(function (x) { return x.dataset.sec; }), S.opt.pnSecs || [], PNSEC).forEach(function (k) { var x = secs.filter(function (y) { return y.dataset.sec === k; })[0]; if (x) inn.insertBefore(x, foot); });
     if (foot && ((S.opt.pnRows || []).length || (S.opt.pnSecs || []).length) && !foot.querySelector("[data-p=pnreset]")) foot.insertAdjacentHTML("beforeend", ' · <a href="#" data-p="pnreset">порядок полей по умолчанию</a>');
@@ -6278,6 +6390,8 @@ CREATE TABLE inbox (
     if (a === "del") { flushBody(); del(t); return; }
     if (a === "flag") { var rpf = el.getBoundingClientRect(); ctxShow(rpf.left - 170, rpf.bottom + 4, flagMenu(t), { k: "task", id: t.id }); return; }
     if (a === "pin") { setTask(function (x) { x.pin = !x.pin; }); return; }
+    if (a === "hall") { e.preventDefault(); HALL = HALL === OPEN ? null : OPEN; renderPanel(); return; }
+    if (a === "hrev") { var ht = task(OPEN), he = ht && (ht.h || [])[+el.dataset.i]; if (he) { hiSet(ht, he.k, he.o); touch(ht); save(); render(); renderPanel(); toast((HLAB[he.k] || "Поле") + ": вернула прежнее значение"); } return; }
     if (a === "pnreset") { e.preventDefault(); delete S.opt.pnRows; delete S.opt.pnSecs; optTouch(); save(); renderPanel(); toast("Порядок полей и блоков — по умолчанию"); return; }
     if (a === "pnew") { PNP = !PNP; renderPanel(); var pi = $("pn-np"); if (pi) pi.focus(); return; }
     if (a === "pnewok") { pnewCreate(t); return; }
@@ -7404,7 +7518,7 @@ CREATE TABLE inbox (
   SRV.start();
   pomoTick();
   setInterval(function () { if (!document.hidden) softRender(); }, 60000);
-  window.ZD = { AI: AI, aiApply: aiApply, setAIP: function (x) { AIP = x; render(); }, habits: habits, hMark: hMark, hStreak: hStreak, doneEvents: doneEvents, CAL: CAL, occIn: occIn, reorderTask: reorderTask, palBuild: function (q) { palBuild(q); return PAL.items; }, SELS: function () { return selIds(); }, taskCmd: taskCmd, pasteInto: pasteInto, taskMenu: taskMenu, ensureSprint: ensureSprint, monday: monday, setCol: setCol, S: S, parseQuick: parseQuick, nextOcc: nextOcc, ruleText: ruleText, ruleOf: ruleOf, nextAfterDone: nextAfterDone, remWanted: remWanted, mergeList: mergeList, SRV: SRV, filterRes: filterRes, moveProj: moveProj, moveTaskTo: moveTaskTo, task: task };
+  window.ZD = { touch: touch, save: save, AI: AI, aiApply: aiApply, setAIP: function (x) { AIP = x; render(); }, habits: habits, hMark: hMark, hStreak: hStreak, doneEvents: doneEvents, CAL: CAL, occIn: occIn, reorderTask: reorderTask, palBuild: function (q) { palBuild(q); return PAL.items; }, SELS: function () { return selIds(); }, taskCmd: taskCmd, pasteInto: pasteInto, taskMenu: taskMenu, ensureSprint: ensureSprint, monday: monday, setCol: setCol, S: S, parseQuick: parseQuick, nextOcc: nextOcc, ruleText: ruleText, ruleOf: ruleOf, nextAfterDone: nextAfterDone, remWanted: remWanted, mergeList: mergeList, SRV: SRV, filterRes: filterRes, moveProj: moveProj, moveTaskTo: moveTaskTo, task: task };
 })();
 </script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
