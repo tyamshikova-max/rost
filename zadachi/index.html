@@ -2084,7 +2084,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-50";
+  var APPV = "zd-app-2026-10-16-51";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -4815,6 +4815,10 @@ CREATE TABLE inbox (
   }
   function vSettings() {
     var h = "";
+    var bnSup = !!window.Notification, bnPerm = bnSup ? Notification.permission : "", bnEn = LS.get("zd-bnotif") === "1";
+    h += '<section class="card" id="s-bnotif"><h2>🔔 Напоминания в браузере</h2><p class="muted" style="margin:0">Без сервера и Telegram: приложение само показывает уведомление о задаче с напоминанием (в момент начала или заранее — как выбрано в карточке задачи) и о привычках со временем. В уведомлении — «✓ Готово» и «+15 мин». Работает, <b>пока приложение открыто</b> — во вкладке, в отдельном окне или свёрнутым; когда браузер закрыт, напоминания не придут (для этого есть Telegram). Включается на каждом устройстве отдельно.</p><div class="r" style="margin-top:10px;align-items:center">' +
+      (!bnSup ? '<span class="warnc">Этот браузер не поддерживает уведомления.</span>' : bnEn && bnPerm === "granted" ? '<span class="okc">✓ Включены на этом устройстве</span><button type="button" class="btn sm" data-a="bntest">Проверить</button><button type="button" class="btn sm" data-a="bnoff">Выключить</button>' : bnPerm === "denied" ? '<span class="warnc">Браузер запретил уведомления для сайта.</span><span class="muted">Разрешите их: значок замка слева от адреса → «Уведомления» → «Разрешить», затем нажмите «Включить».</span><button type="button" class="btn sm" data-a="bnon">Включить</button>' : '<button type="button" class="btn sm pri" data-a="bnon">🔔 Включить на этом устройстве</button>') +
+      "</div>" + (bnEn ? '<p class="muted" style="margin:8px 0 0">На телефоне: держите приложение открытым или свёрнутым, не закрывайте его из списка запущенных. На iPhone уведомления работают только у приложения, установленного на экран «Домой» (iOS 16.4 и новее).</p>' : "") + "</section>";
     h += '<section class="card" id="s-srv"><h2>Сервер и Telegram</h2><p class="muted" style="margin:0">Ваш собственный сервер в Яндекс Облаке присылает напоминания в Telegram, даже когда приложение закрыто, а сообщения боту складывает во «Входящие». Как его создать — <a href="#help-srv">Справка → Сервер</a>.</p>';
     var su = SRV.url();
     if (su && SRV.st.ok === null) SRV.check().then(render);
@@ -4879,17 +4883,17 @@ CREATE TABLE inbox (
     return h;
   }
   var STABS = [["general", "settings", "Общие"], ["look", "palette", "Оформление"], ["flags", "flag", "Флажки"], ["srv", "timer", "Напоминания и Telegram"], ["sync", "cloud", "Данные и синхронизация"], ["ai", "spark", "ИИ-помощник"]];
-  function stabOf(a) { a = { lists: "general", "": "general", side: "general", theme: "general", backup: "sync", data: "sync", wipe: "sync" }[a] || a; return STABS.some(function (x) { return x[0] === a; }) ? a : "general"; }
+  function stabOf(a) { a = { bnotif: "srv", lists: "general", "": "general", side: "general", theme: "general", backup: "sync", data: "sync", wipe: "sync" }[a] || a; return STABS.some(function (x) { return x[0] === a; }) ? a : "general"; }
   function vSettingsTabs() {
     var cur = stabOf(ARG), parts = vSettings().split('<section'), by = {};
     parts.slice(1).forEach(function (x) {
-      var k = /id="s-look"/.test(x) ? "look" : /id="s-(srv|digest)"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-(sync|backup|wipe|diag|test)"/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
+      var k = /id="s-look"/.test(x) ? "look" : /id="s-(srv|digest|bnotif)"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-(sync|backup|wipe|diag|test)"/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
       by[k] = (by[k] || "") + "<section" + x;
     });
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
   }
   // справка по вкладкам, как настройки; поиск ищет по всем разделам сразу
-  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
+  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
   var HQ = "";
   function htabOf(a) { if (HTABS.some(function (x) { return x[0] === a; })) return a; var f = HTABS.filter(function (x) { return x[3].indexOf(a) >= 0; })[0]; return f ? f[0] : "start"; }
   function vHelpTabs() {
@@ -4919,6 +4923,7 @@ CREATE TABLE inbox (
       chat: [["pntabs", "Закладки внизу карточки: комментарии, история, вложения и заметки"]],
       sets: [["setstpl", "Наборы на странице «Шаблоны»: строки задач и дни, когда набор добавляется сам"], ["setspick", "Кнопка «▤ Набор» в «Сегодня»: добавить набор вручную"]],
       report: [["report", "Отчёт за неделю: итоги, графики по дням, проекты, цели, привычки; «Сохранить в PDF»"]],
+      bnotif: [["bnset", "«Напоминания в браузере» в настройках: включаются на каждом устройстве отдельно"]],
       hist: [["hist", "Блок «История» в карточке: что и когда менялось; ↶ вернуть — прежнее значение"]],
       quick: [["quick", "Быстрый ввод: под полем видно, что поняло приложение — дата и время, проект, тег, приоритет"]],
       pal: [["pal", "Палитра Ctrl+K: поиск по проектам, задачам и командам; Enter без выбора создаёт задачу"]],
@@ -5252,6 +5257,13 @@ CREATE TABLE inbox (
       "Чтобы аналитика была точной, засекайте время ⏲ или запускайте 🍅 и ставьте оценки (в карточке, в плане дня или массово через «☑ Выбрать» → «⋯ Ещё» → «Оценка»). На досках есть виджет «Время по проектам»."]));
 
     /* ================= Напоминания и Telegram ================= */
+    h += sec("bnotif", "Напоминания в браузере (без сервера)", ul([
+      "«Настройки» → «Напоминания и Telegram» → <b>«🔔 Напоминания в браузере»</b> → «Включить на этом устройстве» и разрешите уведомления, когда браузер спросит.",
+      "Приходят напоминания о задачах, у которых в карточке включено «Напоминание» (в момент начала и/или заранее: за 5, 15, 30 минут, за час, за день), и о привычках с указанным временем.",
+      "В уведомлении — «✓ Готово» (задача отметится выполненной) и «+15 мин» (перенос на 15 минут с новым напоминанием); клик по уведомлению открывает задачу.",
+      "<b>Важно:</b> напоминания работают, пока приложение открыто — во вкладке, отдельным окном или свёрнутым. Если браузер полностью закрыт, напоминаний не будет: для надёжных напоминаний на телефоне подключите Telegram.",
+      "Если приложение открыли позже времени напоминания (но не позже 15 минут) — напоминание всё равно придёт. Одно и то же напоминание дважды не приходит.",
+      "Настройка своя на каждом устройстве: на компьютере можно включить браузерные, а на телефоне пользоваться Telegram."]));
     h += sec("digest", "Утренняя сводка", "<p>«Настройки» → «Напоминания и Telegram» → «Утренняя сводка»: включите и выберите час. Каждое утро бот пришлёт план на день — задачи (со временем), просроченное, привычки и сколько сделано вчера. Нужен подключённый сервер. Сводка собирается по задачам на момент последнего открытия приложения, поэтому заглядывайте в него хотя бы раз в день.</p>");
     h += sec("rem", "Напоминания", ul([
       "В карточке задачи включите «в Telegram» и отметьте, когда напомнить: в момент начала, за 5, 15, 30 минут, за час, за день — можно несколько сразу. Для задач на весь день напоминание приходит в выбранный час (по умолчанию 9:00).",
@@ -6285,6 +6297,9 @@ CREATE TABLE inbox (
       case "setpre": e.preventDefault(); var sp2 = tplObj(el.dataset.id); if (!sp2) return; sp2.data = Object.assign({}, sp2.data || {}, { days: el.dataset.v === "all" ? [0, 1, 2, 3, 4, 5, 6] : el.dataset.v === "work" ? [1, 2, 3, 4, 5] : [] }); touch(sp2); save(); render(); return;
       case "setpick": var spr = el.getBoundingClientRect(), sl = sets(); ctxShow(spr.left, spr.bottom + 4, sl.map(function (x) { var added = setLines(x).every(function (ln, i) { return !!S.tasks.filter(function (t) { return t.id === setTid(x, today0(), i); }).length; }); return { c: x.id, i: added ? "✓" : "▤", l: x.n + (added ? " — уже добавлен" : ""), k: String(setLines(x).length) }; }).concat(sl.length ? ["-"] : [], [{ c: "__cfg", i: "⚙", l: sl.length ? "Настроить наборы…" : "Создать набор…" }]), { k: "setpick" }); return;
       case "rpprint": var ot = document.title; document.title = "Отчёт «Задачи» — " + rpTitle(rpRange(ARG)); setTimeout(function () { window.print(); setTimeout(function () { document.title = ot; }, 800); }, 50); return;
+      case "bnon": bnEnable(); return;
+      case "bnoff": LS.del("zd-bnotif"); bnStart(); render(); toast("Напоминания в браузере выключены на этом устройстве"); return;
+      case "bntest": bnShow("test-" + Date.now(), "🔔 Проверка напоминаний", "Если вы это видите — всё работает", ""); return;
       case "tarchset": S.opt.tarch = +el.dataset.v; optTouch(); save(); render(); toast(+el.dataset.v ? "В архив — выполненные больше " + tArchAge(+el.dataset.v) + " назад" : "Архив выключен: все выполненные — в «Сделано»"); return;
       case "tarmore": TARLIM += 300; render(); return;
       case "tarchclear": CONF = "tarchclear"; render(); return;
@@ -6439,7 +6454,7 @@ CREATE TABLE inbox (
       '<span>Теги</span><div class="v tagv">' + tg.map(function (n) { return '<span class="tchip" style="--tc:' + tcolor(n) + '"><a href="#tag-' + esc(n) + '" title="Открыть тег">' + esc(tlab(n)) + '</a><button type="button" class="tx" data-p="tag" data-tag="' + esc(n) + '" title="Убрать тег" aria-label="Убрать тег">×</button></span>'; }).join("") + '<input type="text" data-pf="newtag" class="tagin" placeholder="' + (tg.length ? "+ тег" : "Добавить тег…") + '" size="12" autocomplete="off" spellcheck="false"></div>' +
       '<span>Учёт времени</span><div class="v"><button type="button" class="btn sm' + (t.ttOn ? " pri" : "") + '" data-p="track">' + (t.ttOn ? "■ Остановить" : "▶ Засечь время") + '</button><span class="muted">учтено</span><input type="number" min="0" step="0.25" data-pf="tth" value="' + (t.tt ? Math.round(t.tt / 36e5 * 100) / 100 : "") + '" placeholder="0" style="width:70px"> ч</div>' +
       '<span>Входит в</span><div class="v"><select data-pf="parent"><option value="">— это главная задача —</option>' + cand.map(function (x) { return '<option value="' + x.id + '"' + (t.parent === x.id ? " selected" : "") + ">" + esc(x.t.slice(0, 60)) + "</option>"; }).join("") + "</select></div>" +
-      '<span>Напоминание</span><div class="v"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-pf="rem"' + (t.rem ? " checked" : "") + (t.at ? "" : " disabled") + "> в Telegram" + (t.at && t.allday ? " в " + (S.opt.allDayHour || 9) + ":00" : "") + "</label>" + (t.rem && t.at ? '<span class="remo">' + REMO.map(function (o) { return '<button type="button" class="chip' + (remOffs(t).indexOf(o) >= 0 ? " on" : "") + '" data-p="remoff" data-v="' + o + '" title="' + (o ? "Напомнить за " + REMN[o] : "Напомнить в момент начала") + '">' + (o ? "за " : "") + REMN[o] + "</button>"; }).join("") + "</span>" : "") + (!t.at ? '<span class="muted">сначала укажите срок</span>' : SRV.ready() ? "" : '<span class="muted">— нужен <a href="#settings-srv">сервер</a></span>') + "</div>" + depRows(t) + "</div>";
+      '<span>Напоминание</span><div class="v"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-pf="rem"' + (t.rem ? " checked" : "") + (t.at ? "" : " disabled") + "> " + (SRV.ready() && bnOn() ? "в Telegram и в браузере" : bnOn() ? "в браузере" : "в Telegram") + (t.at && t.allday ? " в " + (S.opt.allDayHour || 9) + ":00" : "") + "</label>" + (t.rem && t.at ? '<span class="remo">' + REMO.map(function (o) { return '<button type="button" class="chip' + (remOffs(t).indexOf(o) >= 0 ? " on" : "") + '" data-p="remoff" data-v="' + o + '" title="' + (o ? "Напомнить за " + REMN[o] : "Напомнить в момент начала") + '">' + (o ? "за " : "") + REMN[o] + "</button>"; }).join("") + "</span>" : "") + (!t.at ? '<span class="muted">сначала укажите срок</span>' : SRV.ready() || bnOn() ? "" : '<span class="muted">— включите <a href="#settings-bnotif">напоминания в браузере</a> или подключите <a href="#settings-srv">сервер</a></span>') + "</div>" + depRows(t) + "</div>";
     if (!t.body && t.note) t.body = noteToBody(t.note);
     h += '<div class="pn-sec"><h3>Описание</h3><div id="rte" class="rte' + (t.body ? "" : " empty") + '" contenteditable="true" spellcheck="true" data-ph="Опишите задачу… «/» — заголовок, чек-лист, спойлер, таблица">' + (clean(t.body || "") || "<p><br></p>") + "</div></div>";
     h += '<div class="pn-sec pn-subs"><h3>Подзадачи' + (kids.length ? " · " + kids.filter(function (k) { return k.done; }).length + "/" + kids.length : "") + "</h3>" +
@@ -7060,6 +7075,56 @@ CREATE TABLE inbox (
   function pomoStop() { POMO = null; pomoSave(); pomoRender(); }
   function pomoLeft() { return POMO.paused ? POMO.left : POMO.end - Date.now(); }
   function beep() { try { var A = window.AudioContext || window.webkitAudioContext, a = new A(), o = a.createOscillator(), g = a.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(.15, a.currentTime); g.gain.exponentialRampToValueAtTime(.001, a.currentTime + .8); o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + .8); } catch (e) { /* без звука */ } }
+  var BN = { t: null };
+  function bnOn() { return LS.get("zd-bnotif") === "1" && !!window.Notification && Notification.permission === "granted"; }
+  function bnFired() { try { return JSON.parse(LS.get("zd-bnfired") || "{}") || {}; } catch (e) { return {}; } }
+  function bnShow(key, title, body, id) {
+    var opt = { body: body, tag: key, icon: "icon-192.png", badge: "icon-192.png", data: { id: id || "" }, requireInteraction: false };
+    if (id) opt.actions = [{ action: "done", title: "✓ Готово" }, { action: "snooze", title: "+15 мин" }];
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.ready.then(function (reg) { reg.showNotification(title, opt); }).catch(function () { new Notification(title, { body: body, tag: key }); });
+      else { var n = new Notification(title, { body: body, tag: key }); n.onclick = function () { window.focus(); if (id) bnAct("open", id); n.close(); }; }
+    } catch (e) { /* уведомления недоступны */ }
+  }
+  // раз в 20 секунд: задачи с напоминанием (время и «заранее» — как для Telegram) и привычки со временем
+  function bnTick() {
+    if (!bnOn()) return;
+    var now = Date.now(), win = 15 * 60000, fired = bnFired(), add = 0, t0 = today0();
+    live(S.tasks).forEach(function (t) {
+      if (t.done || !t.rem || !t.at) return;
+      var base = t.allday ? sod(t.at) + (+S.opt.allDayHour || 9) * 3600000 : t.at;
+      remOffs(t).forEach(function (off) {
+        var at = base - off * 60000, key = t.id + "@" + at; if (at > now || now - at > win || fired[key]) return;
+        fired[key] = now; add++;
+        bnShow(key, (off ? "⏰ Через " + REMN[off] + ": " : "⏰ ") + t.t, whenTxt(t) + (t.pid && proj(t.pid) ? " · " + proj(t.pid).n : ""), t.id);
+      });
+    });
+    habits().forEach(function (h) {
+      if (h.arch || !/^\d\d:\d\d$/.test(h.time || "") || !hDue(h, t0) || hSt(h, dKey(t0))) return;
+      var at = t0 + (+h.time.slice(0, 2) * 60 + +h.time.slice(3)) * 60000, key = "h:" + h.id + "@" + dKey(t0);
+      if (at > now || now - at > win || fired[key]) return;
+      fired[key] = now; add++; bnShow(key, "🔁 " + (h.ic ? h.ic + " " : "") + h.n, "Привычка на сегодня, " + h.time, "");
+    });
+    if (add) { Object.keys(fired).forEach(function (k) { if (now - fired[k] > 3 * DAY) delete fired[k]; }); LS.set("zd-bnfired", JSON.stringify(fired)); }
+  }
+  function bnStart() { clearInterval(BN.t); if (LS.get("zd-bnotif") === "1") { BN.t = setInterval(bnTick, 20000); setTimeout(bnTick, 1500); } }
+  // действие из уведомления: открыть задачу, «Готово», «+15 мин»
+  function bnAct(act, id) {
+    var t = task(id); if (!t) return;
+    if (act === "done") { if (!t.done) toggle(t); toast("✓ «" + t.t.slice(0, 40) + "» — готово"); return; }
+    if (act === "snooze") { var base = Math.max(Date.now(), t.at || 0); t.at = Math.ceil((base + 15 * 60000) / 60000) * 60000; t.allday = false; t.rem = true; touch(t); save(); render(); toast("⏰ Напомню в " + hm(t.at)); return; }
+    go("all"); setTimeout(function () { openTask(id); }, 60);
+  }
+  if (navigator.serviceWorker) navigator.serviceWorker.addEventListener("message", function (e) { var d = e.data || {}; if (d.zd === "notif" && d.id) bnAct(d.act || "open", d.id); });
+  (function () { try { var q = new URLSearchParams(location.search), a = q.get("nact"), id = q.get("nid"); if (id) { history.replaceState(null, "", location.pathname + location.hash); setTimeout(function () { bnAct(a || "open", id); }, 800); } } catch (e) { /* старый браузер */ } })();
+  function bnEnable() {
+    if (!window.Notification) { toast("Этот браузер не умеет показывать уведомления"); return; }
+    Notification.requestPermission().then(function (p) {
+      if (p === "granted") { LS.set("zd-bnotif", "1"); bnStart(); render(); toast("🔔 Напоминания в браузере включены на этом устройстве"); bnShow("test-" + Date.now(), "🔔 Напоминания включены", "Так будут выглядеть напоминания о задачах и привычках", ""); }
+      else { render(); toast(p === "denied" ? "Браузер запретил уведомления — разрешите их в настройках сайта (значок замка в адресной строке)" : "Уведомления не разрешены"); }
+    });
+  }
+  bnStart();
   function pomoNotify(title, body) { beep(); toast(title + " · " + body); try { if (window.Notification && Notification.permission === "granted") new Notification(title, { body: body }); } catch (e) { /* нет */ } }
   function pomoRender() {
     [].forEach.call(document.querySelectorAll(".wpt"), function (x) { x.textContent = pomoTxt(); });
@@ -7750,7 +7815,7 @@ CREATE TABLE inbox (
   SRV.start();
   pomoTick();
   setInterval(function () { if (!document.hidden) softRender(); }, 60000);
-  window.ZD = { touch: touch, save: save, AI: AI, aiApply: aiApply, setAIP: function (x) { AIP = x; render(); }, habits: habits, hMark: hMark, hStreak: hStreak, doneEvents: doneEvents, CAL: CAL, occIn: occIn, reorderTask: reorderTask, palBuild: function (q) { palBuild(q); return PAL.items; }, SELS: function () { return selIds(); }, taskCmd: taskCmd, pasteInto: pasteInto, taskMenu: taskMenu, ensureSprint: ensureSprint, monday: monday, setCol: setCol, S: S, parseQuick: parseQuick, nextOcc: nextOcc, ruleText: ruleText, ruleOf: ruleOf, nextAfterDone: nextAfterDone, remWanted: remWanted, mergeList: mergeList, SRV: SRV, filterRes: filterRes, moveProj: moveProj, moveTaskTo: moveTaskTo, task: task };
+  window.ZD = { touch: touch, save: save, bnTick: bnTick, bnAct: bnAct, AI: AI, aiApply: aiApply, setAIP: function (x) { AIP = x; render(); }, habits: habits, hMark: hMark, hStreak: hStreak, doneEvents: doneEvents, CAL: CAL, occIn: occIn, reorderTask: reorderTask, palBuild: function (q) { palBuild(q); return PAL.items; }, SELS: function () { return selIds(); }, taskCmd: taskCmd, pasteInto: pasteInto, taskMenu: taskMenu, ensureSprint: ensureSprint, monday: monday, setCol: setCol, S: S, parseQuick: parseQuick, nextOcc: nextOcc, ruleText: ruleText, ruleOf: ruleOf, nextAfterDone: nextAfterDone, remWanted: remWanted, mergeList: mergeList, SRV: SRV, filterRes: filterRes, moveProj: moveProj, moveTaskTo: moveTaskTo, task: task };
 })();
 </script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>

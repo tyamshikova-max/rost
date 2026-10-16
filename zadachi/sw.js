@@ -1,5 +1,5 @@
 // Офлайн-кэш приложения «Задачи»
-const CACHE = 'zd-app-2026-10-16-50';
+const CACHE = 'zd-app-2026-10-16-51';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
@@ -16,4 +16,15 @@ self.addEventListener('fetch', e => {
   } else if (/fonts\.(googleapis|gstatic)\.com$/.test(url.hostname)) {
     e.respondWith(caches.match(req).then(r => r || fetch(req).then(n => { const cp = n.clone(); caches.open(CACHE).then(c => c.put(req, cp)); return n; })));
   }
+});
+// напоминания в браузере: клик по уведомлению или кнопки «Готово» / «+15 мин»
+self.addEventListener('notificationclick', e => {
+  const id = (e.notification.data || {}).id || '', act = e.action || 'open';
+  e.notification.close();
+  if (!id) { e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => cs.length ? cs[0].focus() : self.clients.openWindow('./'))); return; }
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
+    const c = cs[0];
+    if (c) { c.postMessage({ zd: 'notif', act: act, id: id }); return act === 'open' ? c.focus() : undefined; }
+    return self.clients.openWindow('./?nact=' + encodeURIComponent(act) + '&nid=' + encodeURIComponent(id));
+  }));
 });
