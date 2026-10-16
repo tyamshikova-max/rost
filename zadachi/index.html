@@ -1721,8 +1721,8 @@ CREATE TABLE inbox (
     token: function () { try { var o = JSON.parse(LS.get("yd-token") || "null"); return o && o.exp > Date.now() ? o.t : null; } catch (e) { return null; } },
     login: function () { location.href = "https://oauth.yandex.ru/authorize?response_type=token&client_id=" + YD_CID + "&redirect_uri=" + encodeURIComponent(YD_REDIRECT) + "&state=zadachi"; },
     logout: function () { LS.del("yd-token"); },
-    api: function (path, opt) {
-      opt = opt || {};
+    api: function (path, opt, tries) {
+      opt = opt || {}; tries = tries || 0;
       var hd = { Authorization: "OAuth " + YD.token(), Accept: "application/json" };
       if (opt.body) hd["Content-Type"] = "application/json";
       return fetch(YD_API + path, { method: opt.method || "GET", headers: hd, body: opt.body ? JSON.stringify(opt.body) : undefined })
@@ -1730,9 +1730,13 @@ CREATE TABLE inbox (
         .then(function (r) {
           return r.text().then(function (t) {
             var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) { /* не JSON */ }
-            if (!r.ok && !(opt.ok && opt.ok.indexOf(r.status) >= 0)) throw { status: r.status, msg: (j && (j.message || j.description)) || r.statusText };
+            if (!r.ok && !(opt.ok && opt.ok.indexOf(r.status) >= 0)) throw { status: r.status, msg: (j && (j.message || j.description)) || r.statusText || "ошибка " + r.status };
             return j || {};
           });
+        }).catch(function (e) {
+          // Диск попросил притормозить или временно сбоит — подождать и повторить
+          if (tries < 3 && e && (e.status === 429 || e.status >= 500 || e.status === 0)) return new Promise(function (ok) { setTimeout(ok, 1500 * (tries + 1)); }).then(function () { return YD.api(path, opt, tries + 1); });
+          throw e;
         });
     },
     folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
@@ -1767,7 +1771,8 @@ CREATE TABLE inbox (
     fail: function (e) {
       SYNC.busy = false;
       if (e && e.status === 401) { YD.logout(); SYNC.st = "off"; toast("Вход в Яндекс истёк — войдите снова"); }
-      else { SYNC.st = "err"; SYNC.msg = (e && e.msg) || "ошибка"; }
+      else { var hint = { 0: "нет интернета или Диск недоступен из этого браузера", 403: "Диск не дал доступа — выйдите и войдите снова", 429: "Диск перегружен запросами, повторите через минуту", 507: "на Яндекс Диске закончилось место" }[e && e.status]; SYNC.st = "err"; SYNC.msg = (hint || (e && (e.msg || e.message)) || "неизвестная ошибка") + (e && e.status ? " (код " + e.status + ")" : ""); }
+      try { console.warn("Синхронизация:", e); } catch (er) { /* ok */ }
       SYNC.show();
     },
     read: function () {
@@ -1776,16 +1781,18 @@ CREATE TABLE inbox (
         SYNC.parts = items.map(function (i) { return (i.custom_properties && i.custom_properties.d) || ""; });
         var cp = items[0] && items[0].custom_properties;
         if (!cp || !cp.n) return null;
-        return zunpack(SYNC.parts.slice(0, cp.n).join(""));
+        if (SYNC.parts.length < cp.n) throw { bad: true, msg: "на Диске не хватает частей данных" };
+        return zunpack(SYNC.parts.slice(0, cp.n).join("")).catch(function () { throw { bad: true, msg: "данные на Диске не читаются" }; });
       });
     },
     write: function (snap) {
       return zpack(snap).then(function (z) {
         var parts = [], prev = SYNC.parts || [], k = 0;
         for (var i = 0; i < z.length; i += CHUNK) parts.push(z.slice(i, i + CHUNK));
+        var order = []; for (var q = 1; q < parts.length; q++) order.push(q); order.push(0);
         function next() {
-          if (k >= parts.length) return;
-          var i2 = k++, body = i2 === 0 ? { n: parts.length, d: parts[0] } : { d: parts[i2] };
+          if (k >= order.length) return;
+          var i2 = order[k++], body = i2 === 0 ? { n: parts.length, d: parts[0] } : { d: parts[i2] };
           if (i2 > 0 && prev[i2] === parts[i2]) return next();
           if (i2 === 0 && prev[0] === parts[0] && prev.length >= parts.length) return next();
           var mk = i2 < prev.length ? Promise.resolve() : YD.folder(cname(i2));
@@ -1812,7 +1819,15 @@ CREATE TABLE inbox (
         if (js === SYNC.last) return;
         if (remote) { var r2 = { v: 2, opt: remote.opt }; LISTS.forEach(function (k) { r2[k] = mergeList([], remote[k]); }); if (JSON.stringify(r2) === js) { SYNC.last = js; return; } }
         return SYNC.write(snap).then(function () { SYNC.last = js; });
-      }).then(function () { SYNC.busy = false; SYNC.st = "ok"; SYNC.at = Date.now(); SYNC.show(); }).catch(SYNC.fail);
+      }).then(function () { SYNC.busy = false; SYNC.bad = 0; SYNC.st = "ok"; SYNC.at = Date.now(); SYNC.show(); }).catch(function (e) {
+        if (!(e && e.bad)) return SYNC.fail(e);
+        SYNC.busy = false; SYNC.bad = (SYNC.bad || 0) + 1;
+        // возможно, другое устройство как раз пишет — подождать и перечитать
+        if (SYNC.bad < 3) { SYNC.st = "busy"; SYNC.show(); return new Promise(function (ok) { setTimeout(ok, 4000); }).then(SYNC.run); }
+        // данные на Диске испорчены: устройство со своими данными перезаписывает их целиком (слияние потом добавит изменения других устройств)
+        if (live(S.tasks).length || live(S.projects).length || live(S.notes).length) { SYNC.parts = []; SYNC.last = ""; SYNC.busy = true; var sn = snapshot(), js2 = JSON.stringify(sn); return SYNC.write(sn).then(function () { SYNC.last = js2; SYNC.busy = false; SYNC.bad = 0; SYNC.st = "ok"; SYNC.at = Date.now(); SYNC.show(); toast("Данные на Диске восстановлены с этого устройства"); }).catch(SYNC.fail); }
+        SYNC.fail({ msg: e.msg + ". Откройте приложение на компьютере, где есть задачи, — оно перезапишет данные на Диске, затем обновите эту страницу" });
+      });
     }
   };
   document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") { SYNC.run(); SRV.pull(); } else if (SYNC.enabled()) SYNC.run(); });
