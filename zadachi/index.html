@@ -103,7 +103,8 @@ h2 .c { font: 500 12px var(--mono); color: var(--muted) }
 .phead input.rn { font: 700 26px/1.2 var(--sans); border: 1px solid var(--acc); border-radius: 8px; padding: 0 6px; background: var(--panel); min-width: 0; flex: 1 1 260px; max-width: 100% }
 .starb { border: 0; background: none; cursor: pointer; font-size: 22px; color: var(--muted); padding: 0 4px; line-height: 1 }
 .starb.on { color: var(--star) }
-.pop { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin: 10px 0; box-shadow: var(--shadow); display: grid; gap: 10px }
+.pop { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin: 10px 0; box-shadow: var(--shadow); display: grid; gap: 10px; position: relative }
+.popx { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer; font-size: 13px; z-index: 2 } .popx:hover { color: var(--fg); border-color: var(--muted) }
 .sw { display: flex; flex-wrap: wrap; gap: 8px }
 .sw button { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0 }
 .sw button.on { border-color: var(--fg) }
@@ -2613,7 +2614,7 @@ CREATE TABLE inbox (
   }
   function popHTML(k, obj) {
     var cur = obj.c || 0;
-    var h = '<div class="pop">' + (k === "proj" ? '<div class="lbl">Значок <span class="muted">— в цвет проекта</span></div><div class="icg mono"><button type="button" data-a="pic" data-v="auto" class="auto' + (!obj.ic ? " on" : "") + '" title="Подбирать по названию">авто</button>' + Object.keys(MICO).map(function (k) { return '<button type="button" data-a="pic" data-v="i:' + k + '" class="' + (obj.ic === "i:" + k ? "on" : "") + '" title="' + MICO[k][2] + '">' + micoSVG(k, col(obj.c)) + "</button>"; }).join("") + '</div><div class="lbl">Эмодзи</div><div class="icg">' + PICONS.map(function (ic) { return '<button type="button" data-a="pic" data-v="' + ic + '" class="' + (obj.ic === ic ? "on" : "") + '">' + ic + "</button>"; }).join("") + '</div><div class="lbl">Цвет</div>' : "") + '<div class="sw">' + COLORS.map(function (c, i) { return '<button type="button" data-a="color" data-c="' + i + '" class="' + (cur === i ? "on" : "") + '" style="background:' + c[1] + '" title="' + c[0] + '"></button>'; }).join("") + "</div>";
+    var h = '<div class="pop"><button type="button" class="popx" data-a="popclose" title="Закрыть (Esc)" aria-label="Закрыть">✕</button>' + (k === "proj" ? '<div class="lbl">Значок <span class="muted">— в цвет проекта</span></div><div class="icg mono"><button type="button" data-a="pic" data-v="auto" class="auto' + (!obj.ic ? " on" : "") + '" title="Подбирать по названию">авто</button>' + Object.keys(MICO).map(function (k) { return '<button type="button" data-a="pic" data-v="i:' + k + '" class="' + (obj.ic === "i:" + k ? "on" : "") + '" title="' + MICO[k][2] + '">' + micoSVG(k, col(obj.c)) + "</button>"; }).join("") + '</div><div class="lbl">Эмодзи</div><div class="icg">' + PICONS.map(function (ic) { return '<button type="button" data-a="pic" data-v="' + ic + '" class="' + (obj.ic === ic ? "on" : "") + '">' + ic + "</button>"; }).join("") + '</div><div class="lbl">Цвет</div>' : "") + '<div class="sw">' + COLORS.map(function (c, i) { return '<button type="button" data-a="color" data-c="' + i + '" class="' + (cur === i ? "on" : "") + '" style="background:' + c[1] + '" title="' + c[0] + '"></button>'; }).join("") + "</div>";
     if (k === "proj") {
       var ex = {}; pdesc(obj.id).forEach(function (x) { ex[x] = 1; });
       h += '<div class="r"><label class="f">Вложить в проект <select class="inp" id="pparent"><option value="">— верхний уровень —</option>' + ptree().filter(function (x) { return !ex[x.p.id]; }).map(function (x) { return '<option value="' + x.p.id + '"' + (obj.parent === x.p.id ? " selected" : "") + ">" + "  ".repeat(x.d).replace(/ /g, "&nbsp;") + esc(x.p.n) + "</option>"; }).join("") + "</select></label></div>" +
@@ -3661,6 +3662,7 @@ CREATE TABLE inbox (
     }
   }
   document.addEventListener("mousedown", function (e) { if (!QOPEN || !e.target.closest) return; if (e.target.closest(".qfloat, #fab, #ctx")) return; var i = $("qa"); if (i && !i.value.trim()) { QOPEN = false; setTimeout(render, 0); } });
+  document.addEventListener("mousedown", function (e) { if (!POP || !e.target.closest) return; if (e.target.closest(".pop, [data-a=pop], #ctx, #ctx2")) return; POP = null; setTimeout(render, 0); });
   function qOpen() { QOPEN = true; render(); var i = $("qa"); if (i) i.focus(); }
   function qClose() { QOPEN = false; render(); }
   function renderInner() {
@@ -4110,6 +4112,7 @@ CREATE TABLE inbox (
         var blob = new Blob([JSON.stringify({ format: "zadachi-backup", v: 2, at: new Date().toISOString(), tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, notes: S.notes, nsecs: S.nsecs, ntags: S.ntags, opt: S.opt })], { type: "application/json" });
         var ln = document.createElement("a"); ln.href = URL.createObjectURL(blob); ln.download = "Задачи — копия " + dKey(Date.now()) + ".json"; document.body.appendChild(ln); ln.click(); ln.remove(); setTimeout(function () { URL.revokeObjectURL(ln.href); }, 60000); return;
       case "wipe": CONF = "wipe"; render(); return;
+      case "popclose": POP = null; render(); return;
       case "note-new": var nn = newNote({ sec: V === "nsec" ? ARG : V === "note" && note(ARG) ? note(ARG).sec : "", tags: V === "ntag" ? [ARG] : [] }); save(); NFOCUS = true; TPICK = false; go("note-" + nn.id); return;
       case "nopen": go("note-" + el.dataset.id); return;
       case "nsec-new": var nsx = touch({ id: uid(), n: "Новый раздел", parent: V === "nsec" ? ARG : "", ord: nsKids(V === "nsec" ? ARG : "").length }); S.nsecs.push(nsx); save(); RNX = { k: "nsec", id: nsx.id }; go("nsec-" + nsx.id); return;
@@ -4178,8 +4181,8 @@ CREATE TABLE inbox (
     if (tg.id === "qa" && e.key === "Enter") { e.preventDefault(); addQuick(); return; }
     if (tg.id === "qa" && e.key === "Escape") { e.preventDefault(); QPV = ""; qClose(); return; }
     if (tg.id === "subin") { if (e.key === "Enter") { e.preventDefault(); if (tg.value.trim()) { newTaskFrom(tg.value.trim(), { parent: tg.dataset.sub }); save(); render(); } } else if (e.key === "Escape") { SUB = null; render(); } return; }
-    if (e.key === "Escape" && !SL && OPEN && (!tg.closest || !tg.closest("#fmt"))) { closeTask(); return; }
     if (e.key === "Escape" && (POP || SUB)) { POP = null; SUB = null; render(); return; }
+    if (e.key === "Escape" && !SL && OPEN && (!tg.closest || !tg.closest("#fmt"))) { closeTask(); return; }
     if (e.key === "Escape" && (V === "settings" || V === "help") && !OPEN && $("ctx").hidden && $("pal").hidden && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName)) { closeAux(); return; }
     if (e.key === "Escape" && selClear()) return;
     if ((e.ctrlKey || e.metaKey) && e.code === "KeyA" && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName) && !tg.isContentEditable && document.querySelector("#view li.task, #view .kcard")) { e.preventDefault(); [].forEach.call(document.querySelectorAll("#view li.task, #view .kcard"), function (x) { SELS[x.dataset.id] = 1; }); render(); return; }
