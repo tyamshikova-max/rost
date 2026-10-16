@@ -378,6 +378,32 @@ ol.steps li { margin: 6px 0 }
 .mxgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px }
 .mxq { border-top: 4px solid var(--qc); min-height: 220px }
 @media (max-width: 760px) { .mxgrid { grid-template-columns: 1fr } }
+/* ---------- оформление: стекло, фон, мягкие формы ---------- */
+body { background: var(--wall, none) fixed, var(--bg) }
+.top { background: var(--topbg, var(--bg)) }
+html.glass .top { backdrop-filter: blur(var(--blur)) saturate(1.6); -webkit-backdrop-filter: blur(var(--blur)) saturate(1.6); border-bottom-color: var(--line) }
+html.glass .side { backdrop-filter: blur(var(--blur)) saturate(1.4); -webkit-backdrop-filter: blur(var(--blur)) saturate(1.4) }
+html.glass #panel, html.glass #ctx, html.glass #ctx2, html.glass #slash, html.glass #fmt, html.glass .tagdd, html.glass #pomo, html.glass .add.qfloat, html.glass #pal .box {
+  background: var(--pop); backdrop-filter: blur(calc(var(--blur) + 8px)) saturate(1.7); -webkit-backdrop-filter: blur(calc(var(--blur) + 8px)) saturate(1.7) }
+html.glass #pal input { background: transparent }
+html.glass #pal { background: rgba(0, 0, 0, .18); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px) }
+html.glass .card, html.glass .wdg, html.glass .hdet, html.glass .btc { box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 6px 22px rgba(0, 0, 0, .05) }
+html.glass .inp, html.glass input[type="text"], html.glass input[type="search"], html.glass textarea { background-color: color-mix(in srgb, var(--solid) 55%, transparent) }
+.card { border-radius: 14px } .wdg { border-radius: 14px } .nav a { border-radius: 9px } .btn { border-radius: 9px }
+#ctx, #ctx2, #slash { border-radius: 12px } #pal .box { border-radius: 16px }
+.nav a.on { box-shadow: 0 1px 0 rgba(255, 255, 255, .25) inset }
+/* настройки оформления */
+.lkrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px } .lkrow .lbl { min-width: 150px; margin: 0 }
+.lkgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 6px }
+.lkcard { border: 2px solid var(--line); border-radius: 12px; background: none; padding: 8px; cursor: pointer; display: grid; gap: 6px; color: var(--fg); font: inherit; text-align: left }
+.lkcard:hover { border-color: color-mix(in srgb, var(--acc) 50%, var(--line)) } .lkcard.on { border-color: var(--acc); box-shadow: 0 0 0 3px var(--acc-soft) }
+.lkpair { display: grid; grid-template-columns: 1fr 1fr; gap: 4px } .lkn { font-size: 13px; font-weight: 600 }
+.lkmini { display: flex; height: 54px; border-radius: 7px; border: 1px solid; overflow: hidden }
+.lkmini .s { width: 30%; display: flex; flex-direction: column; gap: 4px; padding: 6px 4px } .lkmini .s b { display: block; height: 4px; border-radius: 2px; background: rgba(128, 128, 128, .35) } .lkmini .s b:first-child { height: 6px }
+.lkmini .m { flex: 1; margin: 5px; border-radius: 4px; border: 1px solid; padding: 5px; display: flex; flex-direction: column; gap: 4px; position: relative }
+.lkmini .m u { display: block; height: 3px; border-radius: 2px; width: 70% } .lkmini .m u:first-child { width: 50%; height: 4px } .lkmini .m u:nth-child(3) { width: 85%; opacity: .6 }
+.lkmini .m em { position: absolute; right: 5px; bottom: 5px; width: 14px; height: 8px; border-radius: 3px }
+.lkacc .lkauto { display: grid; place-items: center; font-size: 15px; color: var(--muted); background: var(--hover) !important }
 /* доски */
 .bhd { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; max-width: 1400px }
 .bh1 { display: flex; align-items: center; gap: 8px; margin: 0; flex: 1 1 260px; min-width: 0 }
@@ -2173,6 +2199,7 @@ CREATE TABLE inbox (
 
   /* ---------- боковая панель ---------- */
   var ICO = {
+    palette: '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.9-.6-1.3-.6-2.1 0-1 .8-1.6 1.8-1.6H17a4 4 0 0 0 4-4C21 6.7 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7.2" r="1.2"/><circle cx="15" cy="7.6" r="1.2"/>',
     board: '<rect x="3.5" y="3.5" width="7.5" height="9" rx="1.5"/><rect x="13" y="3.5" width="7.5" height="5.5" rx="1.5"/><rect x="13" y="11" width="7.5" height="9.5" rx="1.5"/><rect x="3.5" y="14.5" width="7.5" height="6" rx="1.5"/>',
     inbox: '<path d="M4 13l2.5-7h11L20 13v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 13h4.5l1 2h5l1-2H20"/>',
     today: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/><path d="M10 15h4"/>',
@@ -3914,7 +3941,7 @@ CREATE TABLE inbox (
     var stv = S.opt.start || "", stn = !stv ? "где остановились в прошлый раз" : /^board-/.test(stv) ? (board(stv.slice(6)) ? "доска «" + board(stv.slice(6)).n + "»" : "где остановились в прошлый раз") : (LISTN[stv] || stv);
     h += '<section class="card" id="s-start"><h2>Стартовый экран</h2><p class="muted" style="margin:0">Что открывается, когда вы запускаете приложение (при обновлении страницы остаётся текущее место). Удобно сделать стартовой доску — например, «Мой день».</p><div class="r"><button type="button" class="ddb" data-a="startpick">' + esc(stn.charAt(0).toUpperCase() + stn.slice(1)) + '<span class="dda">▾</span></button></div></section>';
     h += '<section class="card" id="s-review"><h2>Проверка проектов</h2><p class="muted" style="margin:0">Как часто напоминать пересмотреть проект (кнопка ↻ у заголовка «Проекты»). Для отдельного проекта интервал меняется правым кликом по нему → «Интервал проверки».</p><div class="seg" style="margin-top:10px">' + [[7, "неделя"], [14, "2 недели"], [30, "месяц"], [182, "полгода"], [0, "не проверять"]].map(function (x) { return '<button type="button" data-a="revdef" data-v="' + x[0] + '" class="' + (rd === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></section>";
-    h += '<section class="card"><h2>Оформление</h2><div class="seg" role="radiogroup" aria-label="Тема">' + [["system", "Как в системе"], ["light", "Светлая"], ["dark", "Тёмная"]].map(function (o) { return '<button type="button" data-theme="' + o[0] + '" class="' + (th === o[0] ? "on" : "") + '" role="radio" aria-checked="' + (th === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div></section>";
+    h += lookSection();
     h += '<section class="card" id="s-flags"><h2>Флажки</h2><p class="muted" style="margin:0">У задачи может стоять один из этих флажков. Название и цвет меняются здесь, порядок — стрелкой ↑. Задачи с флажками собраны в списке «С флажком».</p><div class="fled">' +
       flags().map(function (f, i) { return '<div class="flrow">' + flagIc(f, "big") + '<input class="inp" data-fln="' + f.id + '" value="' + esc(f.n) + '" maxlength="30" aria-label="Название флажка"><button type="button" class="ddb" data-a="flcdd" data-id="' + f.id + '" title="Цвет флажка"><i class="swc" style="background:' + col(f.c) + '"></i>' + COLORS[f.c || 0][0] + '<span class="dda">▾</span></button><span class="r">' + (i ? '<button class="btn sm" type="button" data-a="flup" data-id="' + f.id + '" title="Выше">↑</button>' : "") + '<button class="btn sm warn" type="button" data-a="fldel" data-id="' + f.id + '" title="Удалить флажок">🗑</button></span></div>'; }).join("") +
       (flags().length ? "" : '<p class="muted">Флажков нет — добавьте хотя бы один.</p>') + '</div><div class="r"><button class="btn sm" type="button" data-a="fladd">＋ Добавить флажок</button></div></section>';
@@ -3929,12 +3956,12 @@ CREATE TABLE inbox (
       (CONF === "wipe" ? '<div class="confirm"><b>Удалить все данные без возможности вернуть?</b><span>Если они могут пригодиться, сначала сохраните копию в файл — из неё всё можно будет восстановить.</span><div class="r"><button class="btn" type="button" data-a="export">💾 Сначала сохранить копию</button><button class="btn warn" type="button" data-a="wipe-yes">Удалить всё</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : '<div class="r"><button class="btn warn" type="button" data-a="wipe">🗑 Очистить всю базу…</button></div>') + "</section>";
     return h;
   }
-  var STABS = [["general", "settings", "Общие"], ["flags", "flag", "Флажки"], ["srv", "timer", "Напоминания и Telegram"], ["sync", "cloud", "Данные и синхронизация"], ["ai", "spark", "ИИ-помощник"]];
+  var STABS = [["general", "settings", "Общие"], ["look", "palette", "Оформление"], ["flags", "flag", "Флажки"], ["srv", "timer", "Напоминания и Telegram"], ["sync", "cloud", "Данные и синхронизация"], ["ai", "spark", "ИИ-помощник"]];
   function stabOf(a) { a = { lists: "general", "": "general", side: "general", theme: "general", backup: "sync", data: "sync", wipe: "sync" }[a] || a; return STABS.some(function (x) { return x[0] === a; }) ? a : "general"; }
   function vSettingsTabs() {
     var cur = stabOf(ARG), parts = vSettings().split('<section'), by = {};
     parts.slice(1).forEach(function (x) {
-      var k = /id="s-(srv|digest)"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-(sync|backup|wipe|diag|test)"/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
+      var k = /id="s-look"/.test(x) ? "look" : /id="s-(srv|digest)"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-(sync|backup|wipe|diag|test)"/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
       by[k] = (by[k] || "") + "<section" + x;
     });
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
@@ -4210,6 +4237,7 @@ CREATE TABLE inbox (
       "<b>📂 Восстановить из файла</b> → <b>«Заменить всё данными из файла»</b> — всё станет точно как в копии (лишнее удалится и на других устройствах) или <b>«Объединить с текущими»</b> — записи из файла добавятся.",
       "<b>🗑 Очистить всю базу</b> — удаляет задачи, проекты, теги, фильтры, спринты, комментарии, привычки, историю и шаблоны без корзины (сначала предлагает сохранить копию). Флажки и настройки остаются."]));
     h += sec("settings", "Настройки", ul([
+      "<b>Оформление</b> («Настройки» → «Оформление»): режим (как в системе, светлый, тёмный), 8 цветовых схем — Шалфей, Океан, Лаванда, Песок, Вишня, Закат, Графит, Полночь (у каждой светлый и тёмный вариант, в превью видны оба), акцентный цвет поверх схемы, прозрачность окон («стекло»: нет, лёгкая, сильная — панели и меню становятся полупрозрачными с размытием) и фон (однотонный, градиент, «аврора» — мягкие цветные пятна, сквозь стекло они видны лучше всего). Схема, акцент, прозрачность и фон одинаковы на всех устройствах; светлый или тёмный режим у каждого устройства свой. «Вернуть как было» — исходный вид.",
       "<b>Общие</b>: пункты «Списков», порядок левой панели, проверка проектов, оформление (как в системе / светлая / тёмная).",
       "<b>Флажки</b>: свой набор флажков.",
       "<b>Напоминания и Telegram</b>: адрес сервера, привязка бота, автоматические напоминания, час для задач на весь день.",
@@ -4347,6 +4375,7 @@ CREATE TABLE inbox (
   }
   var RTIMES = [], RWARN = false;
   function render() {
+    try { applyLook(); } catch (er) { /* оформление не мешает работе */ }
     // пока пишете в редакторе на странице (текст заметки, описание проекта) — страницу вокруг не перерисовываем, только левую панель; остальное обновится, когда выйдете из редактора
     var ae0 = document.activeElement;
     if (ae0 && ae0.classList && ae0.classList.contains("rte") && $("view").contains(ae0)) { if (BT) { BTE = ae0; saveBody(); } try { $("side").innerHTML = sideHTML(); } catch (er) { /* панель обновится позже */ } PEND = true; if (DIAG && DIAG.on) dlog("перерисовка отложена: идёт ввод в редакторе"); return; }
@@ -4953,6 +4982,8 @@ CREATE TABLE inbox (
           tstMerge(j); render(); toast("Тестовые данные добавлены: " + (j.tasks || []).length + " задач, " + (j.projects || []).length + " проектов, " + (j.boards || []).length + " доски");
         }).catch(function (er) { render(); toast("Не удалось загрузить: " + (er.message || "нет связи")); }); return;
       case "tstwipe-yes": var tn = wipeTest(); CONF = null; if (V === "board" && !board(ARG)) go("settings"); render(); toast("Тестовые данные удалены" + (tn ? " · задач: " + tn : "")); return;
+      case "look": setLook(el.dataset.k, el.dataset.v); return;
+      case "lookreset": e.preventDefault(); delete S.opt.look; optTouch(); save(); applyLook(true); render(); toast("Оформление — как было"); return;
       case "wipe-yes": var wn = wipeAll(); go("inbox"); render(); toast("База очищена" + (wn ? " · удалено задач: " + wn : "")); return;
       case "imp-replace":
         if (!IMPF) return;
@@ -6120,8 +6151,59 @@ CREATE TABLE inbox (
       else if (SYNC.st === "err") toast("Нет связи с Диском: " + SYNC.msg + " · подробности — «Настройки» → «Синхронизация»");
     });
   });
+  /* ---------- оформление: цветовые схемы, акцент, прозрачность («стекло»), фон ---------- */
+  // схема: [светлая, тёмная]; в каждой — фон, поверхность, боковая панель, текст, приглушённый, линии, наведение, акцент, мягкий акцент, два цвета для фона-«авроры»
+  var SCHEMES = {
+    sage: ["Шалфей", ["#f4f5f1", "#ffffff", "#eceee8", "#1c211f", "#67706b", "#dde1da", "#e6e9e2", "#1d6b5a", "#dcefe8", "#c9a24a", "#5b8fc9"], ["#141816", "#1b201d", "#171c19", "#e8ece8", "#9aa49e", "#2c332f", "#232a26", "#5fc4a6", "#1d3a31", "#c9a24a", "#4f7fb8"]],
+    ocean: ["Океан", ["#f2f6fa", "#ffffff", "#e8eff6", "#15202b", "#5f6f80", "#d8e2ec", "#e3ebf3", "#1f6fc5", "#dbe9f8", "#22a3b8", "#7a6ad8"], ["#0f1620", "#16202c", "#121b26", "#e6edf5", "#8fa1b5", "#253244", "#1d2937", "#5aa7f0", "#17304a", "#1f9bb0", "#6f5fd0"]],
+    lavender: ["Лаванда", ["#f6f4fa", "#ffffff", "#eeeaf6", "#1f1a2b", "#6e6681", "#e2dcec", "#ebe6f3", "#6d4fc2", "#e8e0fa", "#d06aa8", "#5b8fd9"], ["#15121d", "#1d1828", "#191522", "#ece8f5", "#a49cb8", "#2e2740", "#252036", "#a68cf5", "#2e2552", "#c45d9c", "#4f7fd0"]],
+    sand: ["Песок", ["#f7f3ec", "#fffdf9", "#efe8dc", "#2a221a", "#7a6c5c", "#e6dccd", "#efe6d8", "#b5562f", "#f6e1d4", "#d6a23a", "#7c9a6a"], ["#1a1612", "#221d18", "#1d1915", "#f0e9df", "#ad9f8d", "#352d25", "#2b241e", "#e88a5c", "#3e2a1f", "#c8932e", "#6d8a5c"]],
+    rose: ["Вишня", ["#faf4f5", "#ffffff", "#f3e9eb", "#2a1a1e", "#80646b", "#ecdce0", "#f3e5e8", "#c03a5b", "#f8dde4", "#e08a3c", "#8a5cc7"], ["#1b1214", "#241a1d", "#1f1618", "#f4e8ea", "#b3979d", "#3a2a2e", "#2d2124", "#f07893", "#47222c", "#d47e32", "#8058c0"]],
+    sunset: ["Закат", ["#fbf5ef", "#ffffff", "#f5ebe0", "#2b1d14", "#7d6656", "#efdfd0", "#f6e7d9", "#e0601f", "#fde3d2", "#e0a21f", "#c0446a"], ["#1a120d", "#231912", "#1e150f", "#f6ebe2", "#b39d8c", "#3a2a1f", "#2c2017", "#ff8a4c", "#4a2615", "#e0a21f", "#c0446a"]],
+    graphite: ["Графит", ["#f4f4f5", "#ffffff", "#ebebed", "#18181b", "#66666e", "#dcdce0", "#e5e5e8", "#3f4a5a", "#e2e6ec", "#8a94a6", "#a3a3ad"], ["#111113", "#19191c", "#151517", "#ececee", "#9a9aa3", "#2a2a2f", "#222226", "#9fb0c8", "#262c36", "#6b7486", "#55555e"]],
+    midnight: ["Полночь", ["#ffffff", "#ffffff", "#f5f6f8", "#111216", "#666b73", "#e4e6ea", "#eef0f3", "#3355ff", "#e3e8ff", "#00b3c7", "#a14dff"], ["#000000", "#0b0b0d", "#050506", "#f2f2f2", "#8b8b93", "#1f1f24", "#16161a", "#7b8cff", "#1a1f45", "#00a5b8", "#8f45ee"]]
+  };
+  var ACCENTS = ["#1d6b5a", "#2f8f3f", "#1b9aaa", "#1f6fc5", "#3355ff", "#6d4fc2", "#c03a5b", "#d1453b", "#e0601f", "#c9a21a", "#3f4a5a"];
+  var GLASS = { off: "Нет", soft: "Лёгкая", strong: "Сильная" }, WALLS = { plain: "Однотонный", grad: "Градиент", aurora: "Аврора" };
+  function lookCfg() { var l = S.opt.look || {}; return { scheme: SCHEMES[l.scheme] ? l.scheme : "sage", acc: l.acc || "", glass: GLASS[l.glass] ? l.glass : "soft", wall: WALLS[l.wall] ? l.wall : "aurora" }; }
+  function isDark() { var p = themePref(); return p === "dark" || (p === "system" && !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)); }
+  function rgba(hex, a) { var n = parseInt(String(hex).slice(1), 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
+  var LOOKKEY = "";
+  function applyLook(force) {
+    var L = lookCfg(), dk = isDark(), key = JSON.stringify(L) + dk; if (key === LOOKKEY && !force) return; LOOKKEY = key;
+    var c = SCHEMES[L.scheme][dk ? 2 : 1], st = document.documentElement.style, acc = c[7], soft = c[8];
+    if (L.acc) { acc = dk ? "color-mix(in srgb, " + L.acc + " 72%, #ffffff)" : L.acc; soft = "color-mix(in srgb, " + L.acc + " " + (dk ? 26 : 15) + "%, " + c[1] + ")"; }
+    var g = L.glass, ga = g === "strong" ? (dk ? .5 : .52) : g === "soft" ? (dk ? .72 : .7) : 1;
+    var v = { "--bg": c[0], "--fg": c[3], "--muted": c[4], "--line": g === "off" ? c[5] : rgba(c[5], dk ? .9 : .85), "--hover": g === "off" ? c[6] : rgba(c[6], .8), "--acc": acc, "--acc-soft": soft,
+      "--panel": g === "off" ? c[1] : rgba(c[1], ga), "--side": g === "off" ? c[2] : rgba(c[2], g === "strong" ? .42 : .6), "--pop": g === "off" ? c[1] : rgba(c[1], g === "strong" ? .8 : .88), "--topbg": g === "off" ? c[0] : rgba(c[0], g === "strong" ? .45 : .62),
+      "--blur": g === "strong" ? "26px" : "16px", "--solid": c[1] };
+    var w1 = L.acc || c[7], k = dk ? 1 : 1.25;
+    v["--wall"] = L.wall === "aurora" ? "radial-gradient(48vw 42vw at 6% 4%, " + rgba(w1.charAt(0) === "#" ? w1 : c[7], .26 * k) + ", transparent 70%), radial-gradient(40vw 40vw at 96% 12%, " + rgba(c[9], .2 * k) + ", transparent 70%), radial-gradient(55vw 45vw at 55% 104%, " + rgba(c[10], .2 * k) + ", transparent 72%)"
+      : L.wall === "grad" ? "linear-gradient(150deg, " + rgba(w1.charAt(0) === "#" ? w1 : c[7], dk ? .16 : .12) + " 0%, transparent 45%, " + rgba(c[10], dk ? .14 : .1) + " 100%)" : "none";
+    Object.keys(v).forEach(function (x) { st.setProperty(x, v[x]); });
+    document.documentElement.classList.toggle("glass", g !== "off");
+    var mt = document.querySelector('meta[name="theme-color"]'); if (mt) mt.setAttribute("content", c[0]);
+  }
+  if (window.matchMedia) try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { applyLook(); }); } catch (e) { /* старый браузер */ }
+  function setLook(k, v) { var L = S.opt.look = Object.assign({}, S.opt.look || {}); if (v === "" || v === null) delete L[k]; else L[k] = v; optTouch(); save(); applyLook(true); render(); }
+  function lookSection() {
+    var L = lookCfg(), dk = isDark(), th = themePref();
+    var seg = function (k, map, cur) { return '<div class="seg">' + Object.keys(map).map(function (x) { return '<button type="button" data-a="look" data-k="' + k + '" data-v="' + x + '" class="' + (cur === x ? "on" : "") + '">' + map[x] + "</button>"; }).join("") + "</div>"; };
+    var h = '<section class="card" id="s-look"><h2>Оформление</h2>';
+    h += '<div class="lkrow"><span class="lbl">Режим</span><div class="seg" role="radiogroup" aria-label="Тема">' + [["system", "Как в системе"], ["light", "Светлый"], ["dark", "Тёмный"]].map(function (o) { return '<button type="button" data-theme="' + o[0] + '" class="' + (th === o[0] ? "on" : "") + '" role="radio" aria-checked="' + (th === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div></div>";
+    h += '<div class="lbl" style="margin-top:14px">Цветовая схема</div><div class="lkgrid">' + Object.keys(SCHEMES).map(function (k) {
+      var sc = SCHEMES[k], a = sc[dk ? 2 : 1], b = sc[dk ? 1 : 2];
+      var mini = function (c) { return '<span class="lkmini" style="background:' + c[0] + ';border-color:' + c[5] + '"><i class="s" style="background:' + c[2] + '"><b style="background:' + c[8] + '"></b><b></b><b></b></i><i class="m" style="background:' + c[1] + ';border-color:' + c[5] + '"><u style="background:' + c[3] + '"></u><u style="background:' + c[4] + '"></u><u style="background:' + c[4] + '"></u><em style="background:' + c[7] + '"></em></i></span>'; };
+      return '<button type="button" class="lkcard' + (L.scheme === k ? " on" : "") + '" data-a="look" data-k="scheme" data-v="' + k + '"><span class="lkpair">' + mini(a) + mini(b) + '</span><span class="lkn">' + sc[0] + "</span></button>";
+    }).join("") + "</div>";
+    h += '<div class="lbl" style="margin-top:14px">Акцентный цвет</div><div class="sw lkacc"><button type="button" data-a="look" data-k="acc" data-v="" class="lkauto' + (!L.acc ? " on" : "") + '" title="Как в схеме">◐</button>' + ACCENTS.map(function (x) { return '<button type="button" data-a="look" data-k="acc" data-v="' + x + '" class="' + (L.acc === x ? "on" : "") + '" style="background:' + x + '" title="' + x + '"></button>'; }).join("") + "</div>";
+    h += '<div class="lkrow"><span class="lbl">Прозрачность окон</span>' + seg("glass", GLASS, L.glass) + "</div>";
+    h += '<div class="lkrow"><span class="lbl">Фон</span>' + seg("wall", WALLS, L.wall) + "</div>";
+    h += '<p class="muted" style="margin:10px 0 0">Схема, акцент, прозрачность и фон синхронизируются между устройствами; светлый или тёмный режим — у каждого устройства свой (☾ вверху справа). <a href="#" data-a="lookreset">Вернуть как было</a></p></section>';
+    return h;
+  }
   function themePref() { return LS.get("zd-theme") || "system"; }
-  function applyTheme() { var p = themePref(); if (p === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", p); }
+  function applyTheme() { var p = themePref(); if (p === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", p); applyLook(); }
   $("themeBtn").addEventListener("click", function () {
     var dark = themePref() === "dark" || (themePref() === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
     LS.set("zd-theme", dark ? "light" : "dark"); applyTheme(); if (V === "settings") render();
