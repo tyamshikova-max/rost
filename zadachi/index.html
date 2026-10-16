@@ -1800,7 +1800,8 @@ CREATE TABLE inbox (
   }
   function hiWhen(d) { return dayName(d) + ", " + hm(d); }
   var HALL = null;
-  function pnTab() { return LS.get("zd-pntab") === "hist" ? "hist" : "chat"; }
+  function pnTab() { var v = LS.get("zd-pntab"); return v === "hist" || v === "files" || v === "notes" ? v : "chat"; }
+  function pnTabSet(box, v) { LS.set("zd-pntab", v); [].forEach.call(box.querySelectorAll("[data-p=pntab]"), function (b) { var on = b.dataset.v === v; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); }); [].forEach.call(box.querySelectorAll(".pntb"), function (b) { b.hidden = b.dataset.tb !== v; }); }
   function histBody(t) {
     var h = Array.isArray(t.h) ? t.h : [], all = HALL === t.id, list = h.slice().reverse(), shown = all ? list : list.slice(0, 6);
     var out = "";
@@ -2076,7 +2077,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-46";
+  var APPV = "zd-app-2026-10-16-47";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -4814,6 +4815,7 @@ CREATE TABLE inbox (
     var FIG = {
       start: [["today", "«Сегодня» на компьютере: слева — доски, списки, проекты; в середине — задачи; сверху — главное дня, план, привычки"], ["mtoday", "На телефоне левая панель прячется за кнопку ☰", 1]],
       tarch: [["tarch", "«Архив задач»: выполненные по месяцам, поиск, срок архивации"]],
+      chat: [["pntabs", "Закладки внизу карточки: комментарии, история, вложения и заметки"]],
       hist: [["hist", "Блок «История» в карточке: что и когда менялось; ↶ вернуть — прежнее значение"]],
       quick: [["quick", "Быстрый ввод: под полем видно, что поняло приложение — дата и время, проект, тег, приоритет"]],
       pal: [["pal", "Палитра Ctrl+K: поиск по проектам, задачам и командам; Enter без выбора создаёт задачу"]],
@@ -4893,7 +4895,7 @@ CREATE TABLE inbox (
         "<b>Напоминание</b> — в Telegram, в момент начала и/или заранее (за 5, 15, 30 минут, за час, за день).",
         "Ниже — <b>описание</b> (полноценный редактор), <b>подзадачи</b> и <b>комментарии</b>.",
         "У подзадачи вверху — «↑ Родительская задача»."]));
-    h += sec("hist", "История изменений", "<p>Внизу карточки задачи — блок с закладками <b>«💬 Комментарии»</b> и <b>«🕘 История»</b> (выбранная закладка запоминается). История — что и когда менялось. Записываются название, срок и дедлайн, повтор, приоритет, теги, проект и секция, флажок, статус, оценка, спринт, «входит в», «сначала сделать», «жду ответа», цель, закрепление, выполнение и отмена, удаление в корзину и восстановление, изменения описания.</p>" +
+    h += sec("hist", "История изменений", "<p>Внизу карточки задачи — блок с закладками <b>«💬 Комментарии»</b>, <b>«🕘 История»</b>, <b>«📎 Вложения»</b> и <b>«📝 Заметки»</b>; число на закладке — сколько там записей, выбранная закладка запоминается. Файлы можно бросить мышью на любую закладку — откроются «Вложения». История — что и когда менялось. Записываются название, срок и дедлайн, повтор, приоритет, теги, проект и секция, флажок, статус, оценка, спринт, «входит в», «сначала сделать», «жду ответа», цель, закрепление, выполнение и отмена, удаление в корзину и восстановление, изменения описания.</p>" +
       "<ul><li>Новые записи — сверху; видны последние 6, «Показать всю историю» — все (хранятся последние 40 изменений задачи).</li>" +
       "<li><b>↶ вернуть</b> — у записи, если значение с тех пор не менялось: вернёт прежнее (например, срок или проект). Само возвращение тоже попадёт в историю.</li>" +
       "<li>Быстрые правки одного поля подряд (пока печатаете название, двигаете задачу в календаре) собираются в одну запись.</li>" +
@@ -6319,24 +6321,28 @@ CREATE TABLE inbox (
       kids.sort(cmpBy("manual")).map(function (k) { return '<div class="sr' + (k.done ? " done" : "") + '"><button class="ck' + (k.prio ? " p" + k.prio : "") + (k.done ? " dn" : "") + '" type="button" data-p="subtoggle" data-id="' + k.id + '" aria-label="Готово"></button><a data-p="open" data-id="' + k.id + '">' + esc(k.t) + (tkids(k.id).length ? ' <span class="muted">· ' + tkids(k.id).length + "</span>" : "") + (k.at ? ' <span class="muted">· ' + esc(whenTxt(k)) + "</span>" : "") + "</a></div>"; }).join("") +
       '<input id="pn-sub" placeholder="+ Подзадача — Enter (можно: завтра, #тег, !1)"></div>';
     var fl = t.files || [], canUp = YD.on && !!YD.token();
-    h += '<div class="pn-sec pn-files"><h3>Вложения' + (fl.length ? " · " + fl.length : "") + "</h3>" + (fl.length ? '<div class="flist">' + fl.map(function (f) { var img = /^image\//.test(f.ty || ""); return '<div class="fitem">' + (img ? '<img data-ydimg="' + esc(f.p) + '" alt="" loading="lazy">' : '<span class="fic">📄</span>') + '<a data-p="fopen" data-id="' + f.id + '" title="Открыть в новой вкладке">' + esc(f.n) + '</a><span class="muted">' + (f.sz > 1048576 ? (Math.round(f.sz / 104857.6) / 10) + " МБ" : Math.max(1, Math.round((f.sz || 0) / 1024)) + " КБ") + '</span><button type="button" class="ibtn" data-p="fdel" data-id="' + f.id + '" title="Удалить вложение (файл уйдёт в корзину Диска)">×</button></div>'; }).join("") + "</div>" : "") +
-      (canUp ? '<label class="btn sm fpick">📎 Прикрепить файл<input type="file" id="pn-file" multiple hidden></label><span class="muted"> или перетащите файлы сюда · хранятся на вашем Яндекс Диске (папка приложения)</span>' + (ATTUP ? '<div class="muted">Загружаю: ' + esc(ATTUP) + "…</div>" : "") : '<p class="muted" style="margin:0">Чтобы прикреплять файлы, войдите через Яндекс: «Настройки» → «Данные и синхронизация». Файлы хранятся на вашем Диске.</p>') + "</div>";
+    var filesB = (fl.length ? '<div class="flist">' + fl.map(function (f) { var img = /^image\//.test(f.ty || ""); return '<div class="fitem">' + (img ? '<img data-ydimg="' + esc(f.p) + '" alt="" loading="lazy">' : '<span class="fic">📄</span>') + '<a data-p="fopen" data-id="' + f.id + '" title="Открыть в новой вкладке">' + esc(f.n) + '</a><span class="muted">' + (f.sz > 1048576 ? (Math.round(f.sz / 104857.6) / 10) + " МБ" : Math.max(1, Math.round((f.sz || 0) / 1024)) + " КБ") + '</span><button type="button" class="ibtn" data-p="fdel" data-id="' + f.id + '" title="Удалить вложение (файл уйдёт в корзину Диска)">×</button></div>'; }).join("") + "</div>" : "") +
+      (canUp ? '<label class="btn sm fpick">📎 Прикрепить файл<input type="file" id="pn-file" multiple hidden></label><span class="muted"> или перетащите файлы сюда · хранятся на вашем Яндекс Диске (папка приложения)</span>' + (ATTUP ? '<div class="muted">Загружаю: ' + esc(ATTUP) + "…</div>" : "") : '<p class="muted" style="margin:0">Чтобы прикреплять файлы, войдите через Яндекс: «Настройки» → «Данные и синхронизация». Файлы хранятся на вашем Диске.</p>');
     var tn = notesOfTask(t.id);
-    h += '<div class="pn-sec pn-notes"><h3>Заметки' + (tn.length ? " · " + tn.length : "") + "</h3>" + tn.map(function (n) { return '<div class="nrow"><a data-p="nopen" data-id="' + n.id + '">📝 ' + (n.t ? esc(n.t) : "Без названия") + "</a>" + (noteText(n) ? '<span class="muted">' + esc(noteText(n).slice(0, 70)) + "</span>" : "") + '<button type="button" class="ibtn" data-p="nunl" data-id="' + n.id + '" title="Отвязать заметку от задачи">×</button></div>'; }).join("") +
-      '<div class="r"><button type="button" class="btn sm" data-p="nnew">＋ Новая заметка</button><button type="button" class="btn sm" data-p="npick">' + (NPICK ? "Готово" : "📎 Привязать заметку") + "</button></div>" + (NPICK ? '<div class="npick"><input type="search" id="npq" placeholder="Найти заметку" autocomplete="off"><div id="npres">' + taskNotePick(t, "") + "</div></div>" : "") + "</div>";
+    var notesB = (tn.length ? "" : '<p class="muted" style="margin:0 0 6px">К задаче пока не привязано заметок — создайте новую или привяжите готовую (конспект, инструкцию, протокол встречи).</p>') + tn.map(function (n) { return '<div class="nrow"><a data-p="nopen" data-id="' + n.id + '">📝 ' + (n.t ? esc(n.t) : "Без названия") + "</a>" + (noteText(n) ? '<span class="muted">' + esc(noteText(n).slice(0, 70)) + "</span>" : "") + '<button type="button" class="ibtn" data-p="nunl" data-id="' + n.id + '" title="Отвязать заметку от задачи">×</button></div>'; }).join("") +
+      '<div class="r"><button type="button" class="btn sm" data-p="nnew">＋ Новая заметка</button><button type="button" class="btn sm" data-p="npick">' + (NPICK ? "Готово" : "📎 Привязать заметку") + "</button></div>" + (NPICK ? '<div class="npick"><input type="search" id="npq" placeholder="Найти заметку" autocomplete="off"><div id="npres">' + taskNotePick(t, "") + "</div></div>" : "");
     var cm = comments(t.id), lastDay = "";
     var ptab = pnTab(), hn = (t.h || []).length;
     h += '<div class="pn-sec pn-chat pn-tabs"><h3 class="pntabs" role="tablist">' +
       '<button type="button" role="tab" data-p="pntab" data-v="chat" class="' + (ptab === "chat" ? "on" : "") + '" aria-selected="' + (ptab === "chat") + '">💬 Комментарии' + (cm.length ? ' <span class="c">' + cm.length + "</span>" : "") + "</button>" +
-      '<button type="button" role="tab" data-p="pntab" data-v="hist" class="' + (ptab === "hist" ? "on" : "") + '" aria-selected="' + (ptab === "hist") + '">🕘 История' + (hn ? ' <span class="c">' + hn + "</span>" : "") + "</button></h3>" +
+      '<button type="button" role="tab" data-p="pntab" data-v="hist" class="' + (ptab === "hist" ? "on" : "") + '" aria-selected="' + (ptab === "hist") + '">🕘 История' + (hn ? ' <span class="c">' + hn + "</span>" : "") + "</button>" +
+      '<button type="button" role="tab" data-p="pntab" data-v="files" class="' + (ptab === "files" ? "on" : "") + '" aria-selected="' + (ptab === "files") + '">📎 Вложения' + (fl.length ? ' <span class="c">' + fl.length + "</span>" : "") + "</button>" +
+      '<button type="button" role="tab" data-p="pntab" data-v="notes" class="' + (ptab === "notes" ? "on" : "") + '" aria-selected="' + (ptab === "notes") + '">📝 Заметки' + (tn.length ? ' <span class="c">' + tn.length + "</span>" : "") + "</button></h3>" +
       '<div class="pntb" data-tb="chat"' + (ptab === "chat" ? "" : " hidden") + '><div class="msgs">' + cm.map(function (c) {
       var dd = dayName(c.at), out = "";
       if (dd !== lastDay) { out += '<div class="day">' + esc(dd) + "</div>"; lastDay = dd; }
       return out + '<div class="msg" data-cid="' + c.id + '"><div class="mh"><b>' + (c.src === "tg" ? "Telegram" : "Я") + "</b><span>" + hm(c.at) + (c.edited ? " · изменено" : "") + '</span><button type="button" data-p="cedit" title="Изменить">✎</button><button type="button" data-p="cdel" title="Удалить">×</button></div><div class="mb">' + linkify(c.text) + "</div></div>";
     }).join("") + "</div>" + (CED ? '<div class="editing">Редактирование комментария · <a href="#" data-p="ccancel">отмена</a></div>' : "") +
       '<div class="cin"><textarea id="pn-c" rows="1" placeholder="Комментарий… Enter — отправить, Shift+Enter — новая строка">' + esc(CED ? (live(S.comments).filter(function (c) { return c.id === CED; })[0] || {}).text || "" : "") + '</textarea><button class="btn mic sm" type="button" data-a="mic" data-for="pn-c" title="Надиктовать комментарий">🎤</button><button class="btn pri sm" type="button" data-p="csend">' + (CED ? "Сохранить" : "Отправить") + "</button></div></div>" +
-      '<div class="pntb pn-hist" data-tb="hist"' + (ptab === "hist" ? "" : " hidden") + ">" + histBody(t) + "</div></div>";
-    h += '<p class="pn-foot">Создана: ' + new Date(t.created || t.upd || Date.now()).toLocaleString("ru-RU") + (t.upd ? " · изменена: " + new Date(t.upd).toLocaleString("ru-RU") : "") + (t.src === "tg" ? " · из Telegram" : "") + "</p>";
+      '<div class="pntb pn-hist" data-tb="hist"' + (ptab === "hist" ? "" : " hidden") + ">" + histBody(t) + "</div>" +
+      '<div class="pntb pn-files" data-tb="files"' + (ptab === "files" ? "" : " hidden") + ">" + filesB + "</div>" +
+      '<div class="pntb pn-notes" data-tb="notes"' + (ptab === "notes" ? "" : " hidden") + ">" + notesB + "</div></div>";
+    h += '<p class="pn-foot">Создана: ' + new Date(t.created || t.upd || Date.now()).toLocaleString("ru-RU") + (t.upd > 1e11 ? " · изменена: " + new Date(t.upd).toLocaleString("ru-RU") : "") + (t.src === "tg" ? " · из Telegram" : "") + "</p>";
     P.innerHTML = '<div class="grip" title="Потяните, чтобы изменить ширину; двойной клик — ширина по умолчанию"></div><div class="pn-sc"><div class="pn-in">' + h + "</div></div>";
     P.hidden = false; P.classList.toggle("full", full); document.body.classList.add("pnopen"); document.body.classList.toggle("pnfull", full);
     pnLayout(P);
@@ -6348,7 +6354,7 @@ CREATE TABLE inbox (
   }
   /* ---------- карточка задачи: поля и блоки переставляются мышью (порядок — в настройках, синхронизируется) ---------- */
   var PNROW = { "Срок": "due", "Дедлайн": "deadline", "Секция": "sec", "Проект": "proj", "Спринт": "sprint", "Статус": "status", "Приоритет": "prio", "Теги": "tags", "Учёт времени": "track", "Входит в": "parent", "Напоминание": "rem", "Сначала сделать": "after", "Ждут эту задачу": "blocks", "Жду ответа": "wait" };
-  var PNSEC = ["props", "desc", "subs", "files", "notes", "chat"], PDR = null;
+  var PNSEC = ["props", "desc", "subs", "chat"], PDR = null;
   // порядок: сохранённый; недостающие поля встают после своего соседа из порядка по умолчанию
   function pnOrder(keys, saved, def) { var out = saved.filter(function (k) { return keys.indexOf(k) >= 0; }); keys.forEach(function (k) { if (out.indexOf(k) >= 0) return; var di = def.indexOf(k), at = 0; for (var j = di - 1; j >= 0; j--) { var pi = out.indexOf(def[j]); if (pi >= 0) { at = pi + 1; break; } } out.splice(at, 0, k); }); return out; }
   // сохранить новый порядок видимых полей, не теряя места скрытых (например, «Статус» у выполненной задачи)
@@ -6483,7 +6489,7 @@ CREATE TABLE inbox (
     if (a === "del") { flushBody(); del(t); return; }
     if (a === "flag") { var rpf = el.getBoundingClientRect(); ctxShow(rpf.left - 170, rpf.bottom + 4, flagMenu(t), { k: "task", id: t.id }); return; }
     if (a === "pin") { setTask(function (x) { x.pin = !x.pin; }); return; }
-    if (a === "pntab") { var v = el.dataset.v === "hist" ? "hist" : "chat"; LS.set("zd-pntab", v); var box = el.closest(".pn-tabs"); [].forEach.call(box.querySelectorAll("[data-p=pntab]"), function (b) { var on = b.dataset.v === v; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); }); [].forEach.call(box.querySelectorAll(".pntb"), function (b) { b.hidden = b.dataset.tb !== v; }); if (v === "chat") { var ci2 = $("pn-c"); if (ci2) ci2.focus(); } return; }
+    if (a === "pntab") { var v = /^(chat|hist|files|notes)$/.test(el.dataset.v) ? el.dataset.v : "chat"; pnTabSet(el.closest(".pn-tabs"), v); if (v === "chat") { var ci2 = $("pn-c"); if (ci2) ci2.focus(); } return; }
     if (a === "hall") { e.preventDefault(); HALL = HALL === OPEN ? null : OPEN; renderPanel(); return; }
     if (a === "hrev") { var ht = task(OPEN), he = ht && (ht.h || [])[+el.dataset.i]; if (he) { hiSet(ht, he.k, he.o); touch(ht); save(); render(); renderPanel(); toast((HLAB[he.k] || "Поле") + ": вернула прежнее значение"); } return; }
     if (a === "pnreset") { e.preventDefault(); delete S.opt.pnRows; delete S.opt.pnSecs; optTouch(); save(); renderPanel(); toast("Порядок полей и блоков — по умолчанию"); return; }
@@ -6527,9 +6533,9 @@ CREATE TABLE inbox (
   });
   $("panel").addEventListener("change", function (e) { if (e.target.dataset && e.target.dataset.pw === "who") { var tw = task(OPEN); if (tw && tw.wait) { tw.wait.who = e.target.value.trim().slice(0, 60); touch(tw); save(); render(); } } });
   $("panel").addEventListener("change", function (e) { if (e.target.id === "pn-file") { var tf = task(OPEN); if (tf) attUpload(tf, e.target.files); e.target.value = ""; } });
-  $("panel").addEventListener("dragover", function (e) { if (e.target.closest && e.target.closest(".pn-files") && e.dataTransfer && [].indexOf.call(e.dataTransfer.types || [], "Files") >= 0) { e.preventDefault(); e.target.closest(".pn-files").classList.add("dropin"); } });
-  $("panel").addEventListener("dragleave", function (e) { var z = e.target.closest && e.target.closest(".pn-files"); if (z) z.classList.remove("dropin"); });
-  $("panel").addEventListener("drop", function (e) { var z = e.target.closest && e.target.closest(".pn-files"); if (!z || !e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); e.stopPropagation(); z.classList.remove("dropin"); var tf = task(OPEN); if (tf) attUpload(tf, e.dataTransfer.files); });
+  $("panel").addEventListener("dragover", function (e) { var tb0 = e.target.closest && e.target.closest(".pn-tabs"); if (tb0 && e.dataTransfer && [].indexOf.call(e.dataTransfer.types || [], "Files") >= 0) { var fz = tb0.querySelector(".pn-files"); if (fz && fz.hidden) pnTabSet(tb0, "files"); } if (e.target.closest && e.target.closest(".pn-files, .pn-tabs") && e.dataTransfer && [].indexOf.call(e.dataTransfer.types || [], "Files") >= 0) { e.preventDefault(); var fz2 = e.target.closest(".pn-files") || (e.target.closest(".pn-tabs") && e.target.closest(".pn-tabs").querySelector(".pn-files")); if (fz2) fz2.classList.add("dropin"); } });
+  $("panel").addEventListener("dragleave", function (e) { var tz = e.target.closest && e.target.closest(".pn-tabs"); if (tz && !tz.contains(e.relatedTarget)) { var z = tz.querySelector(".pn-files"); if (z) z.classList.remove("dropin"); } });
+  $("panel").addEventListener("drop", function (e) { var z = e.target.closest && (e.target.closest(".pn-files") || (e.target.closest(".pn-tabs") || { querySelector: function () { return null; } }).querySelector(".pn-files")); if (!z || !e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); e.stopPropagation(); z.classList.remove("dropin"); var tf = task(OPEN); if (tf) attUpload(tf, e.dataTransfer.files); });
   new MutationObserver(function () { attImgs(); }).observe($("panel"), { childList: true });
   $("panel").addEventListener("change", function (e) {
     var rk = e.target.dataset && e.target.dataset.rr;
