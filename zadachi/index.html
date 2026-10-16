@@ -6,8 +6,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Задачи</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-192.png?i=2">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?i=2">
+<link rel="icon" href="icon-192.png?i=3">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?i=3">
 <meta name="theme-color" content="#1d6b5a">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +38,7 @@ button, input, select, textarea { font: inherit; color: inherit }
 a { color: var(--acc) }
 .top { position: sticky; top: 0; z-index: 20; display: flex; gap: 10px; align-items: center; padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top, 0px)); background: var(--bg); border-bottom: 1px solid var(--line) }
 .top .brand { display: flex; gap: 8px; align-items: center; font-weight: 700; font-size: calc(17px * var(--fs)); white-space: nowrap; text-decoration: none; color: var(--fg) }
-.top .brand i { width: 28px; height: 28px; background: url(brand-64.png?i=2) center / contain no-repeat; display: grid; place-items: center; color: transparent; font-style: normal; font-size: 0 }
+.top .brand i { width: 28px; height: 28px; border-radius: 7px; background: url(brand-64.png?i=3) center / contain no-repeat; display: grid; place-items: center; color: transparent; font-style: normal; font-size: 0 }
 .top .q { flex: 1; min-width: 0; max-width: 420px; margin-left: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 11px }
 .ibtn { background: none; border: 1px solid transparent; border-radius: 8px; padding: 6px 8px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; color: var(--fg); font-size: calc(13px * var(--fs)); white-space: nowrap }
 .ibtn:hover { background: var(--hover) }
@@ -2122,7 +2122,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-60";
+  var APPV = "zd-app-2026-10-16-61";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
