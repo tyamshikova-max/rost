@@ -3602,8 +3602,10 @@ CREATE TABLE inbox (
     ["mousedown", "click", "change"].forEach(function (ev) { document.addEventListener(ev, function (e) { if (e.target.closest && e.target.closest("#diagbox")) return; dlog(ev, delDesc(e.target) + (ev === "change" && "checked" in e.target && e.target.type === "checkbox" ? " → " + (e.target.checked ? "вкл" : "выкл") : "")); }, true); });
     document.addEventListener("focusin", function (e) { if (!e.target.closest || !e.target.closest("#diagbox")) dlog("фокус →", delDesc(e.target)); }, true);
     document.addEventListener("focusout", function (e) { if (!e.target.closest || !e.target.closest("#diagbox")) dlog("фокус ушёл с", delDesc(e.target)); }, true);
-    document.addEventListener("pointerup", function (e) { if (!e.target.closest || !e.target.closest("#diagbox")) dlog("pointerup", delDesc(e.target)); }, true);
     window.addEventListener("error", function (e) { dlog("ОШИБКА", (e.message || "") + " :" + e.lineno); });
+    // кто программно забирает или снимает фокус — со стеком вызова
+    (function () { var f0 = HTMLElement.prototype.focus, b0 = HTMLElement.prototype.blur; HTMLElement.prototype.focus = function () { if (!this.closest || !this.closest("#diagbox")) dlog("focus() у", delDesc(this) + " ← " + dstack()); return f0.apply(this, arguments); }; HTMLElement.prototype.blur = function () { dlog("blur() у", delDesc(this) + " ← " + dstack()); return b0.apply(this, arguments); }; })();
+    ["mouseup", "pointerup"].forEach(function (ev) { document.addEventListener(ev, function (e) { if (!e.target.closest || !e.target.closest("#diagbox")) dlog(ev, delDesc(e.target) + " · в фокусе " + delDesc(document.activeElement)); }, true); });
     setTimeout(diagShow, 300);
   }
   function showErr(msg) {
