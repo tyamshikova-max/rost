@@ -517,7 +517,8 @@ a.dchip { padding-right: 10px } .dchip a { color: var(--fg); text-decoration: no
 .dpsum { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 12px 0; max-width: 900px } .dpsum > div { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid }
 .dpsum b { font: 700 calc(24px * var(--fs)) var(--mono) } .dpsum small { color: var(--muted) }
 .dpmood button { font-size: calc(20px * var(--fs)); padding: 4px 12px }
-.dptopbox { display: grid; gap: 4px; margin: 12px 0 4px; padding: 10px 14px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--star) 50%, var(--line)); background: color-mix(in srgb, var(--star) 7%, var(--panel)); max-width: 900px }
+.dptopbox { display: grid; gap: 4px; margin: 12px 0 4px; padding: 10px 14px; border-radius: 12px; border: 1px solid #e6c46e; border-color: color-mix(in srgb, var(--star) 55%, transparent); background: #fbf2d9; background: color-mix(in srgb, color-mix(in srgb, var(--star) 16%, var(--solid, #fff)) var(--sheet, 86%), transparent); box-shadow: 0 4px 16px rgba(0, 0, 0, .05); backdrop-filter: blur(var(--blur)) saturate(1.3); -webkit-backdrop-filter: blur(var(--blur)) saturate(1.3); max-width: 900px }
+html.nosheet .dptopbox { background: color-mix(in srgb, var(--star) 10%, transparent); box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none }
 .dptopbox a { color: var(--fg); text-decoration: none } .dptopbox a.dn { color: var(--muted); text-decoration: line-through } .dptopbox a::before { content: "★ "; color: var(--star) }
 .dpcta { margin-top: 10px; gap: 6px }
 /* доски */
@@ -1960,7 +1961,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-41";
+  var APPV = "zd-app-2026-10-16-42";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
