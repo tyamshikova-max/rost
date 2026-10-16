@@ -4693,7 +4693,10 @@ CREATE TABLE inbox (
   function tstMerge(j) {
     var now = Date.now();
     LISTS.forEach(function (k) {
-      var m = {}; S[k].forEach(function (x) { m[x.id] = x; });
+      var m = {}, inFile = {}; S[k].forEach(function (x) { m[x.id] = x; });
+      (j[k] || []).forEach(function (x) { inFile[x.id] = 1; });
+      // прежний тестовый набор, которого нет в новом файле, убирается — тестовые данные не задваиваются
+      S[k].forEach(function (x) { if (x.tst && !x.purged && !inFile[x.id]) wipeRec(x, now); });
       (j[k] || []).forEach(function (x) { var y = m[x.id]; if (y && !y.tst) return; var z = JSON.parse(JSON.stringify(x)); z.tst = 1; z.upd = now; m[x.id] = z; });
       S[k] = Object.keys(m).map(function (id) { return m[id]; });
     });
