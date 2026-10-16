@@ -708,6 +708,11 @@ html.nosheet .dptopbox { background: color-mix(in srgb, var(--star) 10%, transpa
 .pn-subs .sr a { flex: 1; min-width: 0; color: var(--fg); text-decoration: none; overflow-wrap: anywhere; cursor: pointer }
 .pn-subs .sr.done a { text-decoration: line-through; color: var(--muted) }
 .pn-subs input { width: 100%; margin-top: 6px; background: var(--bg); border: 1px dashed var(--line); border-radius: 7px; padding: 6px 10px }
+.rpbar .seg a { padding: 6px 12px; background: var(--panel); text-decoration: none; color: var(--fg); font-size: calc(13.5px * var(--fs)) } .rpbar .seg a.on { background: var(--acc); color: #fff } .rpbar .btn.dis { opacity: .4; pointer-events: none } .rpbar .hq { margin-left: auto }
+.rp { max-width: 900px } .rphead { margin: 16px 0 6px } .rphead h1 { margin: 2px 0 4px; font-size: calc(26px * var(--fs)) }
+.rptbl { width: 100%; border-collapse: collapse; font-size: calc(14px * var(--fs)) } .rptbl td, .rptbl th { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left } .rptbl th { font-size: calc(12px * var(--fs)); color: var(--muted); font-weight: 500 } .rptbl .n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums }
+.rplist { list-style: none; margin: 4px 0 10px; padding: 0 } .rplist li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 2px; border-bottom: 1px solid var(--line) } .rplist li .muted { flex: none; text-align: right } .rpj li { display: grid; gap: 2px; justify-content: stretch } .rp h3 { margin: 14px 0 2px; font-size: calc(15px * var(--fs)) }
+@media print { .rpbar, .rp .hq, .rphead .hq { display: none !important } .rp { max-width: none } .rpblk, .stc { break-inside: avoid } .rp h2, .rp h3 { break-after: avoid } .stc { border: 1px solid #ccc !important; background: #fff !important } .rptbl td, .rptbl th, .rplist li { border-color: #ddd !important } .chart { -webkit-print-color-adjust: exact; print-color-adjust: exact } @page { margin: 14mm } }
 .setc { display: grid; gap: 8px; max-width: 760px; padding: 12px 14px; margin-top: 10px } .setch { display: flex; gap: 8px; align-items: center } .setch .setn { flex: 1; min-width: 0; font-weight: 600 }
 .setl { width: 100%; min-height: 84px; resize: vertical; font: inherit; line-height: 1.5 } .setd { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center } .setd .seg button { min-width: 34px } .setpre { font-size: calc(12.5px * var(--fs)) } .setsum { margin-left: auto; font-size: calc(12.5px * var(--fs)) }
 .tarbar, .tarsearch { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 12px 0 }
@@ -2079,7 +2084,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-49";
+  var APPV = "zd-app-2026-10-16-50";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -2511,6 +2516,7 @@ CREATE TABLE inbox (
     if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
     if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch"].indexOf(h) >= 0) return { v: h, a: "" };
     if ((m = h.match(/^daily-?(.*)$/))) return { v: "daily", a: m[1] };
+    if ((m = h.match(/^report-?(.*)$/))) return { v: "report", a: m[1] || "w0" };
     return { v: "today", a: "" };
   }
   // откуда открыли настройки или справку — туда и вернёт крестик / Esc
@@ -4720,6 +4726,60 @@ CREATE TABLE inbox (
     data.forEach(function (x, i) { var bh = (H - T - B) * x.v / mx, X = L + i * bw + bw * .15; h += '<rect x="' + X.toFixed(1) + '" y="' + (H - B - bh).toFixed(1) + '" width="' + (bw * .7).toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="2" style="fill:' + (x.c || "var(--acc)") + '"><title>' + esc(x.title || x.l) + ": " + x.v + "</title></rect>"; if (x.l && (n <= 14 || i % Math.ceil(n / 12) === 0)) h += '<text x="' + (X + bw * .35).toFixed(1) + '" y="' + (H - 7) + '" text-anchor="middle" style="fill:var(--muted);font:10px var(--sans)">' + esc(x.l) + "</text>"; });
     return h + "</svg>";
   }
+  /* ---------- отчёт за неделю или месяц: что сделано и сколько времени ушло; «Сохранить в PDF» — печать браузера ---------- */
+  var MONG = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+  function rpRange(a) {
+    var m = /^([wm])(-?\d+)?$/.exec(a || "") || [0, "w", "0"], kind = m[1], off = +(m[2] || 0), from, to;
+    if (kind === "w") { from = addDays(monday(Date.now()), off * 7); to = addDays(from, 7); }
+    else { var d = new Date(), f = new Date(d.getFullYear(), d.getMonth() + off, 1); from = f.getTime(); to = new Date(f.getFullYear(), f.getMonth() + 1, 1).getTime(); }
+    return { kind: kind, off: off, from: from, to: to, days: Math.round((to - from) / DAY) };
+  }
+  function rpTitle(r) {
+    var a = new Date(r.from), b = new Date(addDays(r.to, -1));
+    if (r.kind === "m") return MONF[a.getMonth()] + " " + a.getFullYear();
+    return a.getDate() + (a.getMonth() !== b.getMonth() ? " " + MONG[a.getMonth()] : "") + " — " + b.getDate() + " " + MONG[b.getMonth()] + " " + b.getFullYear();
+  }
+  function rpDay(ms) { return new Date(ms).toLocaleDateString("ru-RU", { weekday: "short", day: "numeric", month: "long" }); }
+  function vReport() {
+    var r = rpRange(ARG), now = Date.now(), endEff = Math.min(r.to, today0() + DAY), cur = r.off === 0;
+    var done = [], byDay = {}, fByDay = {}, byP = {};
+    doneEvents().forEach(function (e) { if (e.d < r.from || e.d >= r.to) return; var t = taskAnyId(e.t); if (!t || t.canc) return; done.push({ t: t, d: e.d }); var k = dKey(e.d); byDay[k] = (byDay[k] || 0) + 1; var rp = t.pid ? rootProj(t.pid) : null, pk = rp ? rp.id : ""; (byP[pk] = byP[pk] || { d: 0, m: 0 }).d++; });
+    var ss = focusSessions(r.from, r.to), fmin = 0, pomo = 0;
+    ss.forEach(function (x) { fmin += x.m; if (x.k === "pomo") pomo++; var k = dKey(x.end); fByDay[k] = (fByDay[k] || 0) + x.m; var t = taskAnyId(x.t), rp = t && t.pid ? rootProj(t.pid) : null, pk = rp ? rp.id : ""; (byP[pk] = byP[pk] || { d: 0, m: 0 }).m += x.m; });
+    var created = S.tasks.filter(function (t) { return (t.created || 0) >= r.from && t.created < r.to && !t.purged; }).length;
+    var miss = live(S.tasks).filter(function (t) { var d = t.at || t.due; return !t.done && d && d >= r.from && d < Math.min(r.to, today0()); }).sort(function (a, b) { return (a.at || a.due) - (b.at || b.due); });
+    var actDays = Object.keys(byDay).length;
+    var h = '<div class="tbar rpbar"><div class="seg"><a class="' + (r.kind === "w" ? "on" : "") + '" href="#report-w0">Неделя</a><a class="' + (r.kind === "m" ? "on" : "") + '" href="#report-m0">Месяц</a></div>' +
+      '<a class="btn sm" href="#report-' + r.kind + (r.off - 1) + '" aria-label="Раньше">‹</a>' + (cur ? "" : '<a class="btn sm" href="#report-' + r.kind + '0">' + (r.kind === "w" ? "Эта неделя" : "Этот месяц") + "</a>") + '<a class="btn sm' + (r.off >= 0 ? " dis" : "") + '" href="#report-' + r.kind + Math.min(0, r.off + 1) + '" aria-label="Позже">›</a>' +
+      '<button type="button" class="btn sm pri" data-a="rpprint" title="Откроется окно печати: выберите «Сохранить как PDF»">📄 Сохранить в PDF</button><a class="hq lq" href="#help-report" title="Справка">?</a></div>';
+    h += '<div class="rp"><div class="rphead"><div class="muted">Отчёт за ' + (r.kind === "w" ? "неделю" : "месяц") + (cur ? " · идёт сейчас" : "") + '</div><h1>' + esc(rpTitle(r)) + '</h1><div class="muted">Составлен ' + esc(new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })) + " · «Задачи»</div></div>";
+    function card(v, l, s2) { return '<div class="stc"><b>' + v + "</b><span>" + l + "</span>" + (s2 ? "<small>" + s2 + "</small>" : "") + "</div>"; }
+    h += '<div class="stgrid rpblk">' + card(done.length, "выполнено", actDays ? "в " + actDays + " " + plural(actDays, ["день", "дня", "дней"]) + " из " + Math.round((endEff - r.from) / DAY) : "") + card(hfmt(fmin), "часов фокуса", pomo ? "помидоров: " + pomo : "засечено время") + card(created, "создано задач", "") + card(miss.length, "не сделано в срок", miss.length ? "список ниже" : "всё по плану") + "</div>";
+    var per = [], fper = [];
+    for (var i = 0; i < r.days; i++) { var d = addDays(r.from, i), k = dKey(d), lab = r.kind === "w" ? WDS[new Date(d).getDay()] : String(new Date(d).getDate()); per.push({ l: lab, title: dayName(d), v: byDay[k] || 0 }); fper.push({ l: lab, title: dayName(d) + " — " + hfmt(fByDay[k] || 0), v: Math.round((fByDay[k] || 0) / 6) / 10 }); }
+    h += '<div class="rpblk"><h2>Выполнено по дням</h2>' + barsSVG(per) + "</div>";
+    if (fmin) h += '<div class="rpblk"><h2>Часы фокуса по дням</h2>' + barsSVG(fper) + "</div>";
+    var pk = Object.keys(byP).sort(function (a, b) { return (byP[b].m - byP[a].m) || (byP[b].d - byP[a].d); });
+    if (pk.length) h += '<div class="rpblk"><h2>По проектам</h2><table class="rptbl"><tr><th>Проект</th><th class="n">Выполнено</th><th class="n">Время</th></tr>' + pk.map(function (k) { var p = proj(k), x = byP[k]; return "<tr><td>" + (p ? esc(picon(p) + " " + p.n) : "📥 Без проекта") + '</td><td class="n">' + (x.d || "—") + '</td><td class="n">' + (x.m ? hfmt(x.m) : "—") + "</td></tr>"; }).join("") + "</table></div>";
+    var gl = goals().filter(function (g) { return g.st !== "paused"; });
+    if (gl.length) h += '<div class="rpblk"><h2>Цели</h2><table class="rptbl"><tr><th>Цель</th><th class="n">Прогресс</th><th class="n">Сделано за период</th></tr>' + gl.map(function (g) { var pr = goalProg(g), ids = {}; goalTasks(g).forEach(function (t) { ids[t.id] = 1; }); var n = done.filter(function (x) { return ids[x.t.id]; }).length; return "<tr><td>" + esc((g.ic || "🎯") + " " + g.n) + (g.st === "done" ? " ✓" : "") + '</td><td class="n">' + pr.pct + " %</td><td class=\"n\">" + (n || "—") + "</td></tr>"; }).join("") + "</table></div>";
+    var hb = habits().filter(function (x) { return !x.arch; }).map(function (x) {
+      var due = 0, ok = 0, st = Math.max(hStart(x), r.from);
+      for (var d2 = st; d2 < endEff; d2 = addDays(d2, 1)) { var v = hSt(x, dKey(d2)); if (v === "skip") continue; if (hDue(x, d2) || v) { due++; ok += hV(v); } }
+      return { x: x, due: due, ok: ok };
+    }).filter(function (y) { return y.due; });
+    if (hb.length) h += '<div class="rpblk"><h2>Привычки</h2><table class="rptbl"><tr><th>Привычка</th><th class="n">Выполнено</th><th class="n">%</th></tr>' + hb.map(function (y) { return "<tr><td>" + esc((y.x.ic ? y.x.ic + " " : "") + y.x.n) + '</td><td class="n">' + fmtN(y.ok) + " из " + y.due + '</td><td class="n">' + Math.round(y.ok / y.due * 100) + " %</td></tr>"; }).join("") + "</table></div>";
+    if (done.length) {
+      var gp = {}, go2 = []; done.slice().sort(function (a, b) { return a.d - b.d; }).forEach(function (x) { var rp = x.t.pid ? rootProj(x.t.pid) : null, k = rp ? rp.id : ""; if (!gp[k]) { gp[k] = []; go2.push(k); } gp[k].push(x); });
+      go2.sort(function (a, b) { return gp[b].length - gp[a].length; });
+      h += "<h2>Что сделано</h2>" + go2.map(function (k) { var p = proj(k); return '<div class="rpblk"><h3>' + (p ? esc(picon(p) + " " + p.n) : "📥 Без проекта") + ' <span class="c">' + gp[k].length + '</span></h3><ul class="rplist">' + gp[k].map(function (x) { var a = taskActual(x.t); return "<li><span>✓ " + esc(x.t.t) + '</span><span class="muted">' + esc(rpDay(x.d)) + (a ? " · " + fmtH(Math.round(a * 10) / 10) + " ч" : "") + "</span></li>"; }).join("") + "</ul></div>"; }).join("");
+    }
+    if (miss.length) h += '<div class="rpblk"><h2>Не сделано в срок</h2><ul class="rplist">' + miss.slice(0, 40).map(function (t) { return "<li><span>○ " + esc(t.t) + '</span><span class="muted">' + esc(rpDay(t.at || t.due)) + (t.pid && proj(t.pid) ? " · " + esc(proj(t.pid).n) : "") + "</span></li>"; }).join("") + (miss.length > 40 ? '<li class="muted">…и ещё ' + (miss.length - 40) + "</li>" : "") + "</ul></div>";
+    var dn = live(S.days).filter(function (x) { var k = x.id.slice(2), d = new Date(k + "T00:00").getTime(); return d >= r.from && d < r.to && (dNote(x) || dMood(x)); }).sort(function (a, b) { return a.id < b.id ? -1 : 1; });
+    if (dn.length) h += '<div class="rpblk"><h2>Дневник</h2><ul class="rplist rpj">' + dn.map(function (x) { var d = new Date(x.id.slice(2) + "T00:00").getTime(), m = dMood(x); return "<li><b>" + esc(rpDay(d)) + (m ? " " + MOODS[m - 1] : "") + "</b>" + (dNote(x) ? "<span>" + esc(dNote(x)) + "</span>" : "") + "</li>"; }).join("") + "</ul></div>";
+    if (!done.length && !fmin && !miss.length) h += '<p class="empty">За этот период пока нет выполненных задач и засечённого времени.</p>';
+    return h + "</div>";
+  }
   function vStats() {
     var days = +LS.get("zd-stdays") || 30, t0 = today0(), from = addDays(t0, -days + 1), ev = doneEvents().filter(function (e) { return e.d >= from; }), pom = live(S.acts).filter(function (a) { return a.k === "pomo" && a.d >= from; });
     var per = []; for (var i = 0; i < days; i++) { var d = addDays(from, i), e2 = addDays(d, 1); per.push({ l: days <= 14 ? WDS[new Date(d).getDay()] : String(new Date(d).getDate()), title: dayName(d), v: ev.filter(function (e) { return e.d >= d && e.d < e2; }).length }); }
@@ -4734,7 +4794,7 @@ CREATE TABLE inbox (
     var hl = habits().filter(function (h) { return !h.arch; }), hr = hl.length ? Math.round(hl.reduce(function (a, h) { return a + hRate(h, days); }, 0) / hl.length) : null;
     var trk = live(S.acts).filter(function (a) { return a.k === "time" && a.d >= from; }).reduce(function (a, x) { return a + (+x.m || 0); }, 0);
     var h = head("Статистика", "Сколько вы успеваете: выполненные задачи (и повторяющиеся тоже), помидоры, привычки.");
-    h += '<div class="tbar"><div class="seg sttabs"><button type="button" data-a="sttab" data-x="ov" class="' + (STTAB !== "time" ? "on" : "") + '">📊 Обзор</button><button type="button" data-a="sttab" data-x="time" class="' + (STTAB === "time" ? "on" : "") + '">⏱ Время</button></div><div class="seg">' + [7, 30, 90].map(function (n) { return '<button type="button" data-a="stdays" data-x="' + n + '" class="' + (days === n ? "on" : "") + '">' + n + " дней</button>"; }).join("") + "</div></div>";
+    h += '<div class="tbar"><div class="seg sttabs"><button type="button" data-a="sttab" data-x="ov" class="' + (STTAB !== "time" ? "on" : "") + '">📊 Обзор</button><button type="button" data-a="sttab" data-x="time" class="' + (STTAB === "time" ? "on" : "") + '">⏱ Время</button></div><a class="btn sm" href="#report-w0" title="Отчёт за неделю или месяц — можно сохранить в PDF">📄 Отчёт</a><div class="seg">' + [7, 30, 90].map(function (n) { return '<button type="button" data-a="stdays" data-x="' + n + '" class="' + (days === n ? "on" : "") + '">' + n + " дней</button>"; }).join("") + "</div></div>";
     if (STTAB === "time") return h + vTime(days);
     function card(v, l, s2) { return '<div class="stc"><b>' + v + "</b><span>" + l + "</span>" + (s2 ? '<small>' + s2 + "</small>" : "") + "</div>"; }
     h += '<div class="stgrid">' + card(ev.length, "выполнено", "в среднем " + String(Math.round(ev.length / days * 10) / 10).replace(".", ",") + " в день") + card(created, "создано", "за " + days + " дней") + card(cs + " " + plural(cs, ["день", "дня", "дней"]), "серия подряд", "лучшая: " + best) + card(pom.length, "помидоров", Math.round(pom.length * 25 / 60 * 10) / 10 + " ч фокуса") + card(open, "открыто сейчас", late ? '<span class="warnc">просрочено: ' + late + "</span>" : "просроченных нет") + (hr !== null ? card(hr + " %", "привычки выполнены", hl.length + " " + plural(hl.length, ["привычка", "привычки", "привычек"])) : "") + "</div>";
@@ -4829,7 +4889,7 @@ CREATE TABLE inbox (
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
   }
   // справка по вкладкам, как настройки; поиск ищет по всем разделам сразу
-  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
+  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
   var HQ = "";
   function htabOf(a) { if (HTABS.some(function (x) { return x[0] === a; })) return a; var f = HTABS.filter(function (x) { return x[3].indexOf(a) >= 0; })[0]; return f ? f[0] : "start"; }
   function vHelpTabs() {
@@ -4858,6 +4918,7 @@ CREATE TABLE inbox (
       tarch: [["tarch", "«Архив задач»: выполненные по месяцам, поиск, срок архивации"]],
       chat: [["pntabs", "Закладки внизу карточки: комментарии, история, вложения и заметки"]],
       sets: [["setstpl", "Наборы на странице «Шаблоны»: строки задач и дни, когда набор добавляется сам"], ["setspick", "Кнопка «▤ Набор» в «Сегодня»: добавить набор вручную"]],
+      report: [["report", "Отчёт за неделю: итоги, графики по дням, проекты, цели, привычки; «Сохранить в PDF»"]],
       hist: [["hist", "Блок «История» в карточке: что и когда менялось; ↶ вернуть — прежнее значение"]],
       quick: [["quick", "Быстрый ввод: под полем видно, что поняло приложение — дата и время, проект, тег, приоритет"]],
       pal: [["pal", "Палитра Ctrl+K: поиск по проектам, задачам и командам; Enter без выбора создаёт задачу"]],
@@ -5134,6 +5195,12 @@ CREATE TABLE inbox (
       "Главное дня видно вверху «Сегодня» и в виджете доски «Главное на сегодня».",
       "<b>Итоги дня</b> — «🌙 Итоги дня» в «Сегодня» (появляется вечером или после плана): сколько сделано, что с главным, что не успели (сразу перенести на завтра, через неделю или когда-нибудь), настроение дня и пара строк о том, как прошёл день.",
       "План, главное и итоги каждого дня сохраняются и синхронизируются."]));
+    h += sec("report", "Отчёт за неделю или месяц", ul([
+      "«Статистика» → <b>«📄 Отчёт»</b> или Ctrl+K → «Отчёт за неделю» / «Отчёт за месяц».",
+      "Вверху — «Неделя / Месяц» и стрелки ‹ › к прошлым периодам.",
+      "В отчёте: сколько выполнено и в сколько дней, часы фокуса и помидоры, сколько задач создано и сколько не сделано в срок; графики по дням; таблицы по проектам, целям и привычкам; список сделанного по проектам (с датой и временем, если засекали), список несделанного в срок и записи дневника.",
+      "<b>📄 Сохранить в PDF</b> открывает окно печати: выберите принтер «Сохранить как PDF» (на телефоне — «Печать» → «Сохранить как PDF»). Кнопки и левая панель в PDF не попадут.",
+      "Отчёт удобно отправить руководителю, наставнику или сохранить себе для обзора месяца."]));
     h += sec("sets", "Наборы задач на день и неделю", ul([
       "Набор — список задач, которые повторяются вместе: утренний ритуал, вечерний разбор, «обзор недели» по пятницам. Наборы живут на странице «Шаблоны» (значок внизу левой панели) в разделе «Наборы задач на день и неделю».",
       "<b>＋ Новый набор</b> — название и строки: каждая строка — задача, работает быстрый ввод («Зарядка в 7:00 #здоровье», «Разобрать почту +Работа !2»). Время относится ко дню, на который добавляется набор.",
@@ -5606,7 +5673,7 @@ CREATE TABLE inbox (
   document.addEventListener("mousedown", function (e) { if (!POP || !e.target.closest) return; if (e.target.closest(".pop, [data-a=pop], #ctx, #ctx2")) return; POP = null; setTimeout(render, 0); });
   // где какая страница справки
   function hq(id, title) { return '<a class="hq" href="#help-' + id + '" title="' + esc(title || "Справка по этому разделу") + '" aria-label="Справка">?</a>'; }
-  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", tarch: "tarch", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
+  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", tarch: "tarch", report: "report", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
   var SHELP = { "s-lists": "mini", "s-review": "focus", "s-flags": "flags", "s-srv": "srv", "s-digest": "digest", "s-ai": "ai", "s-sync": "sync", "s-backup": "backup", "s-diag": "diag", "s-wipe": "backup", "s-test": "backup" };
   function helpMarks() {
     var v = $("view");
@@ -5623,7 +5690,7 @@ CREATE TABLE inbox (
     CC = null; DV++;
     try { ctxShowBtn(); if (NOW) renderNow(); } catch (er) { /* не мешает */ }
     $("side").innerHTML = sideHTML();
-    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
+    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
     var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
     $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "templates");
     $("view").innerHTML = (V === "settings" || V === "help" ? "" : focusBar() + revBar()) + f();
@@ -6217,6 +6284,7 @@ CREATE TABLE inbox (
       case "setday": var sy = tplObj(el.dataset.id); if (!sy) return; var dy = ((sy.data || {}).days || []).slice(), wv = +el.dataset.v, ix = dy.indexOf(wv); if (ix >= 0) dy.splice(ix, 1); else dy.push(wv); sy.data = Object.assign({}, sy.data || {}, { days: dy }); touch(sy); save(); render(); return;
       case "setpre": e.preventDefault(); var sp2 = tplObj(el.dataset.id); if (!sp2) return; sp2.data = Object.assign({}, sp2.data || {}, { days: el.dataset.v === "all" ? [0, 1, 2, 3, 4, 5, 6] : el.dataset.v === "work" ? [1, 2, 3, 4, 5] : [] }); touch(sp2); save(); render(); return;
       case "setpick": var spr = el.getBoundingClientRect(), sl = sets(); ctxShow(spr.left, spr.bottom + 4, sl.map(function (x) { var added = setLines(x).every(function (ln, i) { return !!S.tasks.filter(function (t) { return t.id === setTid(x, today0(), i); }).length; }); return { c: x.id, i: added ? "✓" : "▤", l: x.n + (added ? " — уже добавлен" : ""), k: String(setLines(x).length) }; }).concat(sl.length ? ["-"] : [], [{ c: "__cfg", i: "⚙", l: sl.length ? "Настроить наборы…" : "Создать набор…" }]), { k: "setpick" }); return;
+      case "rpprint": var ot = document.title; document.title = "Отчёт «Задачи» — " + rpTitle(rpRange(ARG)); setTimeout(function () { window.print(); setTimeout(function () { document.title = ot; }, 800); }, 50); return;
       case "tarchset": S.opt.tarch = +el.dataset.v; optTouch(); save(); render(); toast(+el.dataset.v ? "В архив — выполненные больше " + tArchAge(+el.dataset.v) + " назад" : "Архив выключен: все выполненные — в «Сделано»"); return;
       case "tarmore": TARLIM += 300; render(); return;
       case "tarchclear": CONF = "tarchclear"; render(); return;
@@ -7257,7 +7325,7 @@ CREATE TABLE inbox (
     function hit(text) { var t = text.toLowerCase(); return ws.every(function (w) { return t.indexOf(w) >= 0; }); }
     function add(g, i, l, h, fn) { if (!ws.length || hit(l + " " + (h || ""))) out.push({ g: g, i: i, l: l, h: h || "", fn: fn }); }
     if (q) out.push({ g: "Создать", i: "＋", l: "Создать задачу «" + q + "»", h: quickPreview(parseQuick(q)), fn: function () { var t = newTaskFrom(q, viewCtx()); save(); render(); toast("Добавлено" + (t.at ? ": " + whenTxt(t) : "")); } });
-    [["inbox", "📥", "Входящие"], ["today", "☀", "Сегодня"], ["sprint", "🏃", "Спринт"], ["plans", "📅", "Планы"], ["someday", "⏳", "Когда-нибудь"], ["cal", "🗓", "Календарь"], ["flag", "🚩", "С флажком"], ["all", "☰", "Все задачи"], ["done", "✓", "Сделано"], ["tarch", "🗄", "Архив задач"], ["sprints", "📈", "Все спринты"], ["trash", "🗑", "Корзина"], ["gantt", "▤", "Таймлайн"], ["archive", "🗄", "Архив проектов"], ["templates", "⧉", "Шаблоны"], ["settings", "⚙", "Настройки"], ["help", "?", "Справка"]].forEach(function (x) { add("Перейти", x[1], x[2], "", function () { go(x[0]); }); });
+    [["inbox", "📥", "Входящие"], ["today", "☀", "Сегодня"], ["sprint", "🏃", "Спринт"], ["plans", "📅", "Планы"], ["someday", "⏳", "Когда-нибудь"], ["cal", "🗓", "Календарь"], ["flag", "🚩", "С флажком"], ["all", "☰", "Все задачи"], ["done", "✓", "Сделано"], ["tarch", "🗄", "Архив задач"], ["report-w0", "📄", "Отчёт за неделю"], ["report-m0", "📄", "Отчёт за месяц"], ["sprints", "📈", "Все спринты"], ["trash", "🗑", "Корзина"], ["gantt", "▤", "Таймлайн"], ["archive", "🗄", "Архив проектов"], ["templates", "⧉", "Шаблоны"], ["settings", "⚙", "Настройки"], ["help", "?", "Справка"]].forEach(function (x) { add("Перейти", x[1], x[2], "", function () { go(x[0]); }); });
     sets().forEach(function (x) { add("Действия", "▤", "Набор «" + x.n + "» → в «Сегодня»", "", function () { var n = setApply(x, today0()); save(); render(); toast(n ? "Добавлено: " + n : "«" + x.n + "» сегодня уже добавлен"); }); });
     add("Действия", "📝", "Новая заметка", "", function () { var nn4 = newNote({}); save(); NFOCUS = true; go("note-" + nn4.id); });
     nsecs().forEach(function (x) { add("Разделы заметок", "📁", nsPath(x).map(function (y) { return y.n; }).join(" / "), "", function () { go("nsec-" + x.id); }); });
