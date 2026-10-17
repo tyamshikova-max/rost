@@ -791,6 +791,14 @@ li.task { transition: transform .15s }
 @media (hover: none) {
   .task .acts button[data-a="flag"], .task .acts button[data-a="addsub"], .task .acts button[data-a="del"] { display: none } .pn-top > button:not(.hq), .pn-top > a:not(.hq) { min-width: 40px; min-height: 40px } .rgrip, .psg { display: none } .ibtn, .btn.sm { min-height: 36px } .chip { min-height: 32px } .task .ck { margin: 0 4px }
 }
+#ptabs { position: sticky; top: 56px; z-index: 22; display: flex; gap: 2px; align-items: flex-end; overflow-x: auto; scrollbar-width: thin; margin: -14px 0 14px; padding: 6px 0 0; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line) }
+.pgtab { flex: 0 1 190px; min-width: 96px; display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 10px; border: 1px solid transparent; border-bottom: 0; border-radius: 9px 9px 0 0; color: var(--muted); text-decoration: none; font-size: calc(13px * var(--fs)); cursor: pointer; position: relative; user-select: none }
+.pgtab:hover { background: var(--hover); color: var(--fg) } .pgtab.on { background: color-mix(in srgb, var(--solid, #fff) var(--sheet, 86%), transparent); color: var(--fg); border-color: var(--line); margin-bottom: -1px; padding-bottom: 7px; font-weight: 600 }
+.pgtab.on::before { content: ""; position: absolute; left: 8px; right: 8px; top: -1px; height: 2px; border-radius: 2px; background: var(--acc) } .pgtab.drop { box-shadow: inset 3px 0 0 var(--acc) }
+.pgti { flex: none; display: inline-flex; width: 16px; height: 16px; align-items: center; justify-content: center } .pgti svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round } .pgtem { font-size: calc(13px * var(--fs)); line-height: 1 } .pgtem svg { width: 15px; height: 15px }
+.pgtt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.pgtx { flex: none; border: 0; background: none; color: var(--muted); cursor: pointer; width: 20px; height: 20px; border-radius: 5px; font-size: 15px; line-height: 1; opacity: .5 } .pgtab:hover .pgtx, .pgtab.on .pgtx { opacity: 1 } .pgtx:hover { background: var(--hover); color: var(--fg) } .pgtp { flex: none; font-size: 11px; opacity: .7 }
+@media print { #ptabs { display: none !important } }
 .tarbar, .tarsearch { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 12px 0 }
 .tarsearch .inp { flex: 1; min-width: 200px; max-width: 420px } .tarlink { margin: 10px 0 0 }
 .pn-sec h3.pntabs { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; text-transform: none; letter-spacing: 0; margin-bottom: 10px }
@@ -2205,7 +2213,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-66";
+  var APPV = "zd-app-2026-10-16-67";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -2630,8 +2638,8 @@ CREATE TABLE inbox (
 
   /* ---------- маршруты ---------- */
   var V = "today", ARG = "", OPEN = null, CONF = null, QPV = "", RN = null, POP = null, SUB = null, FE = null;
-  function parse() {
-    var h = decodeURIComponent((location.hash || "").slice(1)), m;
+  function parse(hh) {
+    var h = hh !== undefined ? String(hh) : decodeURIComponent((location.hash || "").slice(1)), m;
     if ((m = h.match(/^task-(.+)$/))) return { v: "task", a: m[1] };
     if ((m = h.match(/^share-(.+)$/))) return { v: "share", a: m[1] };
     if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board|goal|menu|recipe|shop|rimp)-(.+)$/))) return { v: m[1], a: m[2] };
@@ -2661,6 +2669,83 @@ CREATE TABLE inbox (
   }
   function auxHead(title) { return '<div class="auxh"><h1>' + title + '</h1><button type="button" class="ibtn auxx" data-a="aux-close" title="Закрыть (Esc)" aria-label="Закрыть">' + ic("close") + "</button></div>"; }
   function go(h) { if (location.hash.slice(1) === h) route(); else location.hash = h; }
+  /* ---------- вкладки открытых страниц (как в многооконной программе); хранятся на этом устройстве ---------- */
+  var PTMAX = 8, PTCUR = "", PTJUMP = "", PTDRAG = null;
+  var PTICO = { inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
+  var PTNAME = { done: "Сделано", tarch: "Архив задач", trash: "Корзина", archive: "Архив проектов", templates: "Шаблоны", settings: "Настройки", help: "Справка", report: "Отчёт", recipes: "Рецепты", prods: "Продукты и цены", menunew: "Новое меню", notes: "Заметки", sprints: "Все спринты", search: "Поиск" };
+  function ptabsOn() { return innerWidth > 860 && LS.get("zd-ptabs") !== "off"; } // только на компьютере
+  function ptabs() { try { var a = JSON.parse(LS.get("zd-tabs") || "[]"); return Array.isArray(a) ? a.filter(function (t) { return t && t.h; }) : []; } catch (e) { return []; } }
+  function ptSave(a) { LS.set("zd-tabs", JSON.stringify(a.slice(0, 40))); }
+  function ptSkip(h) { return !h || /^(task|share|rimp|search)(-|$)/.test(h); }
+  function ptKey(h) { var r = parse(h); return r.v === "daily" ? "daily" + (r.a === "review" ? "-review" : "") : r.v === "help" || r.v === "settings" ? r.v : h; }
+  function ptTouch(h) {
+    h = ptKey(h); if (ptSkip(h)) return;
+    var a = ptabs(), i = -1; a.forEach(function (t, j) { if (t.h === h) i = j; });
+    if (i < 0) { var ci = -1; a.forEach(function (t, j) { if (t.h === PTCUR) ci = j; }); var nt = { h: h, at: Date.now() }; if (ci >= 0) a.splice(ci + 1, 0, nt); else a.push(nt); }
+    else if (Date.now() - (a[i].at || 0) < 1500 && PTCUR === h) return; else a[i].at = Date.now();
+    var un = a.filter(function (t) { return !t.pin; });
+    while (un.length > PTMAX) { var old = un.filter(function (t) { return t.h !== h; }).sort(function (x, y) { return (x.at || 0) - (y.at || 0); })[0]; if (!old) break; a.splice(a.indexOf(old), 1); un.splice(un.indexOf(old), 1); }
+    ptSave(a); PTCUR = h;
+  }
+  function ptSetY(h, y) { h = ptKey(h); var a = ptabs(), t = a.filter(function (x) { return x.h === h; })[0]; if (t) { t.y = Math.round(y || 0); ptSave(a); } }
+  function ptInfo(h) {
+    var r = parse(h), v = r.v, a = r.a, n = "", ico = PTICO[v] ? ic(PTICO[v]) : "";
+    if (v === "proj") { var p = proj(a); if (!p) return null; n = p.n; ico = '<span class="pgtem">' + piconH(p) + "</span>"; }
+    else if (v === "tag") { n = "#" + a; ico = '<span class="pgtem">#</span>'; }
+    else if (v === "filter") { var f = filt(a); if (!f) return null; n = f.n; ico = '<span class="pgtem">⛃</span>'; }
+    else if (v === "note") { var nt = note(a); if (!nt) return null; n = nt.t || "Заметка"; }
+    else if (v === "board") { var b = board(a); if (!b) return null; n = b.n; ico = ic("board"); }
+    else if (v === "goal") { var g = goal(a); if (!g) return null; n = g.n; ico = '<span class="pgtem">' + (g.ic || "🎯") + "</span>"; }
+    else if (v === "menu" && a) { var m = menuObj(a); if (!m) return null; n = menuTitle(m).replace(/^🎉 /, "🎉 "); }
+    else if (v === "recipe") { var rc = recipe(a); if (!rc) return null; n = rc.n; }
+    else if (v === "shop") { var ms = menuObj(a); if (!ms) return null; n = "Покупки: " + menuTitle(ms).replace(/^Меню на |^🎉 /, ""); }
+    else if (v === "daily") n = h === "daily-review" ? "Итоги дня" : "План дня";
+    else if (v === "sprint" && a) n = "Спринт";
+    else n = LISTN[v] || PTNAME[v] || v;
+    return { n: n, ico: ico };
+  }
+  function ptHTML() {
+    if (!ptabsOn()) return "";
+    var cur = ptKey(location.hash.slice(1) || "today"), a = ptabs(), out = [], dead = false;
+    a.forEach(function (t) { var inf = ptInfo(t.h); if (!inf) { dead = true; return; } out.push({ t: t, i: inf }); });
+    if (dead) ptSave(out.map(function (x) { return x.t; }));
+    if (out.length < 2) return "";
+    return '<div id="ptabs" role="tablist" aria-label="Открытые страницы">' + out.map(function (x) {
+      var on = x.t.h === cur;
+      return '<a class="pgtab' + (on ?" on" : "") + (x.t.pin ? " pin" : "") + '" href="#' + esc(x.t.h) + '" data-pt="' + esc(x.t.h) + '" draggable="true" role="tab" aria-selected="' + on + '" title="' + esc(x.i.n) + (x.t.pin ? " · закреплена" : "") + ' — правый клик: закрепить, закрыть другие"><span class="pgti">' + x.i.ico + '</span><span class="pgtt">' + esc(x.i.n) + "</span>" +
+        (x.t.pin ? '<span class="pgtp" title="Закреплена">📌</span>' : '<button type="button" class="pgtx" data-ptx="' + esc(x.t.h) + '" title="Закрыть вкладку" aria-label="Закрыть вкладку">×</button>') + "</a>";
+    }).join("") + "</div>";
+  }
+  function ptClose(h) {
+    var a = ptabs(), i = -1; a.forEach(function (t, j) { if (t.h === h) i = j; }); if (i < 0) return;
+    a.splice(i, 1); ptSave(a);
+    if (ptKey(location.hash.slice(1) || "today") === h) { var nx = a[i] || a[i - 1]; PTJUMP = nx ? nx.h : ""; go(nx ? nx.h : "today"); } else render();
+  }
+  document.addEventListener("click", function (e) {
+    var x = e.target.closest && e.target.closest("[data-ptx]"); if (x) { e.preventDefault(); e.stopPropagation(); ptClose(x.dataset.ptx); return; }
+    var t = e.target.closest && e.target.closest("[data-pt]"); if (t) PTJUMP = t.dataset.pt;
+  }, true);
+  document.addEventListener("auxclick", function (e) { var t = e.button === 1 && e.target.closest && e.target.closest("[data-pt]"); if (t) { e.preventDefault(); ptClose(t.dataset.pt); } });
+  document.addEventListener("contextmenu", function (e) {
+    var t = e.target.closest && e.target.closest("[data-pt]"); if (!t) return; e.preventDefault(); e.stopPropagation();
+    var h = t.dataset.pt, pin = ptabs().some(function (x) { return x.h === h && x.pin; });
+    ctxShow(e.clientX, e.clientY, [{ c: "pin", i: "📌", l: pin ? "Открепить вкладку" : "Закрепить вкладку" }, { c: "close", i: "×", l: "Закрыть" }, { c: "others", i: "⊟", l: "Закрыть другие (кроме закреплённых)" }, { c: "right", i: "→", l: "Закрыть вкладки справа" }, "-", { c: "help:ptabs", i: "?", l: "Как работают вкладки" }], { k: "ptab", id: h });
+  }, true);
+  document.addEventListener("dragstart", function (e) { var t = e.target.closest && e.target.closest("[data-pt]"); if (!t) return; PTDRAG = t.dataset.pt; try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", PTDRAG); } catch (er) { /* ok */ } }, true);
+  document.addEventListener("dragover", function (e) { if (!PTDRAG) return; var t = e.target.closest && e.target.closest("[data-pt]"); if (t) { e.preventDefault(); [].forEach.call(document.querySelectorAll(".pgtab.drop"), function (x) { x.classList.remove("drop"); }); t.classList.add("drop"); } });
+  document.addEventListener("drop", function (e) {
+    if (!PTDRAG) return; var t = e.target.closest && e.target.closest("[data-pt]"); var from = PTDRAG; PTDRAG = null; if (!t || t.dataset.pt === from) { render(); return; }
+    e.preventDefault(); var a = ptabs(), fi = -1, ti = -1; a.forEach(function (x, j) { if (x.h === from) fi = j; }); var it = a.splice(fi, 1)[0]; a.forEach(function (x, j) { if (x.h === t.dataset.pt) ti = j; });
+    var r = t.getBoundingClientRect(); a.splice(e.clientX > r.left + r.width / 2 ? ti + 1 : ti, 0, it); ptSave(a); render();
+  });
+  document.addEventListener("dragend", function () { if (PTDRAG) { PTDRAG = null; render(); } });
+  function ptCtx(h, c) {
+    var a = ptabs();
+    if (c === "pin") { a.forEach(function (x) { if (x.h === h) x.pin = !x.pin; }); ptSave(a); render(); return; }
+    if (c === "close") { ptClose(h); return; }
+    if (c === "others") { ptSave(a.filter(function (x) { return x.h === h || x.pin; })); if (ptKey(location.hash.slice(1) || "today") !== h) go(h); else render(); return; }
+    if (c === "right") { var i = -1; a.forEach(function (x, j) { if (x.h === h) i = j; }); ptSave(a.filter(function (x, j) { return j <= i || x.pin; })); render(); }
+  }
   function route() {
     if (BT) saveBody();
     var r = parse(), nh = location.hash.slice(1) || "today", restore = null;
@@ -2672,8 +2757,9 @@ CREATE TABLE inbox (
       else if (BACK && !(toAux && wasAux)) BACK = null;
       if (BACK && toAux) BACK.to = nh;
     }
+    if (CURH && CURH !== nh) ptSetY(CURH, window.scrollY);
     CURH = nh;
-    var same = r.v === V && r.a === ARG;
+    var same = r.v === V && r.a === ARG, ptj = PTJUMP && ptKey(nh) === PTJUMP ? ptabs().filter(function (x) { return x.h === PTJUMP; })[0] : null; PTJUMP = "";
     if (r.v === "cal" && V !== "cal") CAL.scrolled = false;
     if (r.v === "help" && (V !== "help" || r.a !== ARG)) HQ = "";
     if (r.v !== "settings" && r.v !== "help") LASTH = location.hash.slice(1) || "today";
@@ -2682,7 +2768,8 @@ CREATE TABLE inbox (
     V = r.v; ARG = r.a; if (!same) { CONF = null; POP = null; SUB = null; if (RN && RN.where === "page" && RN.id !== r.a) RN = null; }
     document.body.classList.remove("menu");
     render();
-    if (restore) {
+    if (ptj && !restore) { requestAnimationFrame(function () { window.scrollTo(0, ptj.y || 0); }); }
+    else if (restore) {
       if (restore.task && task(restore.task) && OPEN !== restore.task) openTask(restore.task);
       requestAnimationFrame(function () { window.scrollTo(0, restore.y || 0); });
     }
@@ -5694,6 +5781,8 @@ CREATE TABLE inbox (
     var stv = S.opt.start || "", stn = !stv ? "где остановились в прошлый раз" : /^board-/.test(stv) ? (board(stv.slice(6)) ? "доска «" + board(stv.slice(6)).n + "»" : "где остановились в прошлый раз") : (LISTN[stv] || stv);
     h += '<section class="card" id="s-start"><h2>Стартовый экран</h2><p class="muted" style="margin:0">Что открывается, когда вы запускаете приложение (при обновлении страницы остаётся текущее место). Удобно сделать стартовой доску — например, «Мой день».</p><div class="r"><button type="button" class="ddb" data-a="startpick">' + esc(stn.charAt(0).toUpperCase() + stn.slice(1)) + '<span class="dda">▾</span></button></div></section>';
     h += '<section class="card" id="s-day"><h2>План дня</h2><p class="muted" style="margin:0">Сколько часов в день вы готовы отдавать задачам — с этим числом шаг «Время» в плане дня сравнивает оценки задач и предупреждает о перегрузе.</p><div class="r" style="align-items:center"><input type="number" class="inp dpcapin" data-dpcap="1" min="1" max="24" step="0.5" value="' + dayCap() + '" aria-label="Часов на задачи в день"><span>ч в день</span><span class="muted">от 1 до 24</span></div></section>';
+    var ptm = LS.get("zd-ptabs") || "";
+    h += '<section class="card" id="s-ptabs"><h2>Вкладки открытых страниц</h2><p class="muted" style="margin:0">Строка вкладок над страницей, как в многооконной программе: каждая открытая страница — вкладка; нажатие возвращает к странице на то же место, × закрывает, правый клик — закрепить или закрыть другие, вкладки перетаскиваются. Только на компьютере (на телефоне вкладок нет), хранятся на этом устройстве.</p><div class="seg" style="margin-top:10px">' + [["", "Показывать"], ["off", "Не показывать"]].map(function (x) { return '<button type="button" data-a="ptmode" data-v="' + x[0] + '" class="' + (ptm === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></section>";
     var nsh = subHidden().length;
     h += '<section class="card" id="s-hints"><h2>Подсказки</h2><p class="muted" style="margin:0">Значки «?» у блоков ведут в справку по этому месту. Когда приложение освоено, их можно спрятать — справка останется в «?» внизу левой панели.</p><div class="r" style="margin-top:10px;align-items:center"><button type="button" class="lt' + (S.opt.noHq ? "" : " on") + '" data-a="hqtog"><span class="lbox"></span><span>Показывать значки «?»</span></button>' + (nsh ? '<button type="button" class="btn sm" data-a="subreset">Вернуть скрытые пояснения (' + nsh + ")</button>" : '<span class="muted">Пояснения под заголовками можно скрыть крестиком ✕ рядом с ними.</span>') + "</div></section>";
     var tad = tArchDays();
@@ -5725,7 +5814,7 @@ CREATE TABLE inbox (
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
   }
   // справка по вкладкам, как настройки; поиск ищет по всем разделам сразу
-  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "switch", "phone", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "menu", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
+  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "switch", "phone", "ptabs", "quick", "mini", "pal"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "menu", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
   var HQ = "";
   function htabOf(a) { if (HTABS.some(function (x) { return x[0] === a; })) return a; var f = HTABS.filter(function (x) { return x[3].indexOf(a) >= 0; })[0]; return f ? f[0] : "start"; }
   function vHelpTabs() {
@@ -5743,7 +5832,7 @@ CREATE TABLE inbox (
     }
     return auxHead("Справка") + '<div class="stabs"><nav class="stnav" aria-label="Разделы справки"><input type="search" id="helpq" class="inp hsrch" placeholder="Поиск по справке" value="' + esc(HQ) + '" autocomplete="off">' +
       HTABS.map(function (x) { return '<a href="#help-' + x[0] + '" class="' + (!q && cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") +
-      '</nav><div class="stbody help"><a class="hcourse" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf"><span class="hci">📘</span><span><b>Учебный курс «Задачи»</b><small>19 уроков с картинками, практикой и вопросами · PDF, 79 страниц, 8 МБ</small></span><span class="hcd">Скачать</span></a>' +
+      '</nav><div class="stbody help"><a class="hcourse" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf"><span class="hci">📘</span><span><b>Учебный курс «Задачи»</b><small>19 уроков с картинками, практикой и вопросами · PDF, 80 страниц, 8 МБ</small></span><span class="hcd">Скачать</span></a>' +
       '<a class="hcourse htest" href="testdata.json" download="Тестовые данные для Задач.json"><span class="hci">🧪</span><span><b>Тестовые данные для упражнений</b><small>Проекты, задачи, привычки, заметки, цели и доски · JSON, 55 КБ. Загрузить в программу: «Настройки» → «Данные и синхронизация» → «📂 Восстановить из файла» — файл добавится к вашим данным, ничего не заменяя; удалить потом можно одной кнопкой там же.</small></span><span class="hcd">Скачать</span></a>' + html + '<p class="foot">© ' + new Date().getFullYear() + " ytv · Задачи</p></div></div>";
   }
   function codeBox(id, title) { var el = $(id); return '<div class="codebox"><div class="h"><b>' + title + '</b><button class="btn sm" type="button" data-copy="' + id + '">Скопировать</button></div><pre>' + esc(el ? el.textContent.trim() : "") + "</pre></div>"; }
@@ -5758,6 +5847,7 @@ CREATE TABLE inbox (
       report: [["report", "Отчёт за неделю: итоги, графики по дням, проекты, цели, привычки; «Сохранить в PDF»"]],
       bnotif: [["bnset", "«Напоминания в браузере» в настройках: включаются на каждом устройстве отдельно"]],
       menu: [["menuweek", "Меню на неделю: блюда по дням, калории и стоимость дня, 🔒 — закрепить"], ["menushop", "Список покупок по отделам магазина: отметьте, что есть дома"], ["menufeast", "Праздничный стол: блюда по разделам, порции на гостей, план готовки"], ["menurecipe", "Рецепт: порция, вес, Б/Ж/У, стоимость и расчёт по каждому продукту"], ["menurimp", "«🔗 По ссылке»: загрузить рецепт с сайта, через закладку или из текста"], ["menuprice", "«🔄 Обновить цены»: свежие цены Росстата — через сервер или из скачанного файла"]],
+      ptabs: [["ptabs", "Вкладки открытых страниц: текущая подсвечена, × закрывает, правый клик — закрепить"]],
       hist: [["hist", "Блок «История» в карточке: что и когда менялось; ↶ вернуть — прежнее значение"]],
       quick: [["quick", "Быстрый ввод: под полем видно, что поняло приложение — дата и время, проект, тег, приоритет"]],
       pal: [["pal", "Палитра Ctrl+K: поиск по проектам, задачам и командам; Enter без выбора создаёт задачу"]],
@@ -5833,6 +5923,12 @@ CREATE TABLE inbox (
         "«Входящие» — каждый день до нуля.",
         "Засекать время (⏲ или 🍅) и ставить оценки с первого дня — через две недели аналитика покажет точность оценок."]) +
       "<p><b>Контрольные точки.</b> Через неделю: «Входящие» пустеют каждый день, просроченных меньше пяти, синхронизация не подводит, утренний план — до 5 минут? Если нет — упростите. Через две недели — включите спринт или доску «Мой день», уберите лишние пункты панели, спрячьте значки «?».</p>");
+    h += sec("ptabs", "Вкладки открытых страниц", ul([
+      "Над страницей — <b>строка вкладок</b>, как в многооконной программе: каждая открытая страница (список, проект, доска, заметка, рецепт, настройки) становится вкладкой со значком и названием; текущая подсвечена.",
+      "Нажатие на вкладку — вернуться к этой странице <b>на то же место прокрутки</b>. × или колесо мыши (средняя кнопка) — закрыть вкладку.",
+      "Правый клик по вкладке: <b>закрепить</b> 📌 (закреплённая не закрывается сама и остаётся слева, где вы её поставите), закрыть, закрыть другие, закрыть вкладки справа. Вкладки <b>перетаскиваются</b> мышью.",
+      "Незакреплённых вкладок — не больше 8: самая давно не открывавшаяся закрывается сама. Вкладки удалённых проектов, заметок и досок исчезают.",
+      "Вкладки есть только на компьютере — на телефоне их нет, там внизу панель быстрых переходов. Выключить вкладки: «Настройки» → «Общие» → «Вкладки открытых страниц» → «Не показывать». Вкладки хранятся на каждом компьютере свои."]));
     h += sec("phone", "На телефоне", ul([
       "<b>Нижняя панель</b>: Сегодня, Входящие, Календарь, Поиск и Меню (левая панель со всеми списками). Красная цифра у «Сегодня» — просроченные задачи.",
       "<b>Смахните задачу вправо</b> — она отмечается выполненной; <b>влево</b> — откроется меню переноса срока: сегодня, завтра, в понедельник, через неделю, когда-нибудь…",
@@ -6600,7 +6696,9 @@ CREATE TABLE inbox (
     var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
     var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
     $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "templates");
-    $("view").innerHTML = (V === "settings" || V === "help" ? "" : syncBar() + focusBar() + revBar()) + f();
+    try { ptTouch(location.hash.slice(1) || "today"); } catch (er) { /* вкладки не мешают */ }
+    var pth = ""; try { pth = ptHTML(); } catch (er) { pth = ""; }
+    $("view").innerHTML = pth + (V === "settings" || V === "help" ? "" : syncBar() + focusBar() + revBar()) + f();
     if (keepScroll !== null && $("cbody")) $("cbody").scrollTop = keepScroll; else calAfterRender();
     if (V === "gantt") gAfter();
     try { helpMarks(); } catch (er) { /* справочные значки не обязательны */ }
@@ -7207,6 +7305,7 @@ CREATE TABLE inbox (
       case "welcome-off": LS.set("zd-welcome", "off"); render(); return;
       case "lists-cfg": go("settings-general"); setTimeout(function () { var lx = document.querySelector(".lchk"); if (lx) lx.scrollIntoView({ block: "center" }); }, 120); return;
       case "syncnow": if (SYNC.enabled()) { SYNC.run(); toast("Синхронизирую…"); } return;
+      case "ptmode": if (el.dataset.v) LS.set("zd-ptabs", el.dataset.v); else LS.del("zd-ptabs"); render(); return;
       case "tarchset": S.opt.tarch = +el.dataset.v; optTouch(); save(); render(); toast(+el.dataset.v ? "В архив — выполненные больше " + tArchAge(+el.dataset.v) + " назад" : "Архив выключен: все выполненные — в «Сделано»"); return;
       case "tarmore": TARLIM += 300; render(); return;
       case "tarchclear": CONF = "tarchclear"; render(); return;
@@ -8245,6 +8344,7 @@ CREATE TABLE inbox (
     if (k === "bsrc") { var bs = board(id); if (!bs) return; if (c === "__none") delete bs.src; else bs.src = c; bSave(bs); toast(bs.src ? "Источник доски: " + wsrcName(bs.src) + " — виджеты без своего источника берут его" : "У каждого виджета теперь свой источник"); return; }
     if (k === "startpick") { S.opt.start = c === "__last" ? "" : c; optTouch(); save(); render(); return; }
     if (k === "btplproj") { bFromTpl("proj", c); return; }
+    if (k === "ptab") { ptCtx(id, c); return; }
     if (k === "mdish" || k === "fdish") { foodCtx(k, id, c); return; }
     if (k === "fire") { fireA(c); return; }
     if (k === "pnmore") { pnFire(c); return; }
