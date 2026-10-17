@@ -326,6 +326,11 @@ ol.steps li { margin: 6px 0 }
 #ctx .mi, #ctx2 .mi { text-align: center; font-size: calc(14px * var(--fs)); display: grid; place-items: center } #ctx .mi svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round }
 #ctx .mk, #ctx2 .mk { font: calc(11px * var(--fs)) var(--mono); color: var(--muted); white-space: nowrap }
 #ctx .foot { font-size: calc(12px * var(--fs)); color: var(--muted); padding: 6px 10px 4px; border-top: 1px solid var(--line); margin-top: 4px }
+#totop { position: fixed; z-index: 46; right: 31px; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: color-mix(in srgb, var(--solid, #fff) 92%, transparent); color: var(--fg); font-size: calc(18px * var(--fs)); line-height: 1; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, .14); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: grid; place-items: center }
+#totop:hover { background: var(--acc); color: #fff; border-color: var(--acc) }
+@media (min-width: 861px) { body.pnopen:not(.pnfull) #totop { right: calc(min(var(--pw, 620px), 100vw - 80px) + 31px) } }
+@media (max-width: 860px) { #totop { bottom: calc(138px + env(safe-area-inset-bottom, 0px)); right: 23px } body.pnopen #totop { bottom: calc(24px + env(safe-area-inset-bottom, 0px)); right: 18px } }
+@media print { #totop { display: none !important } }
 #pomo { position: fixed; z-index: 45; left: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 8px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 8px 10px; max-width: min(420px, calc(100vw - 32px)) }
 #pomo .pt { font: 600 calc(16px * var(--fs)) var(--mono); color: var(--p1) }
 #pomo.break .pt { color: var(--ok) }
@@ -1154,6 +1159,7 @@ h2[data-col].dropin { outline: 2px dashed var(--acc); outline-offset: 2px; borde
   <aside class="side" id="side" aria-label="Списки"></aside>
   <main class="main" id="view"></main>
 </div>
+<button id="totop" type="button" hidden aria-label="Наверх" title="Наверх">↑</button>
 <nav id="bnav" aria-label="Быстрые переходы"></nav>
 <div class="scrim" id="scrim"></div>
 <aside id="panel" hidden aria-label="Задача"></aside>
@@ -2199,7 +2205,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-65";
+  var APPV = "zd-app-2026-10-16-66";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -5833,7 +5839,8 @@ CREATE TABLE inbox (
       "<b>Долгое нажатие</b> на задачу — режим выбора: можно отметить несколько задач и удалить, перенести или изменить их разом.",
       "<b>Карточка задачи</b> открывается на весь экран; пустые поля спрятаны под «Ещё поля ▾». Под сроком — быстрые кнопки «Сегодня · Завтра · Пн · +неделя · Когда-нибудь». Редкие действия — в «⋯» вверху карточки.",
       "<b>Вид ▾</b> над списком — список или доска, группировка и сортировка; свёрнуто, чтобы задачам доставалось больше места.",
-      "Календарь на телефоне открывается видом «День»."]));
+      "Календарь на телефоне открывается видом «День».",
+      "<b>↑ Наверх</b> — круглая кнопка над «＋» появляется, когда длинная страница прокручена вниз: одно нажатие — и вы снова в начале. В открытой карточке задачи она поднимает к началу карточки. (Работает и на компьютере.)"]));
     h += sec("quick", "Быстрый ввод", "<p>Пишите задачу одной строкой — дата, время, тег, проект, приоритет, флажок и повтор распознаются сами, а строка под полем показывает, что поняло приложение. Задача попадает в открытый список: в проекте — в этот проект, на странице тега — с этим тегом, в «Сегодня» — на сегодня, в «Когда-нибудь» — туда же.</p>" +
       tbl(["Пишете", "Получается"], [["сегодня, завтра, послезавтра", "дата"], ["пн, вт … вс, в пятницу", "ближайший такой день"], ["20.10 или 20.10.2027", "дата"], ["в 18:30, 9:00, в 10", "время (если время сегодня уже прошло — завтра)"], ["через 30 минут, через 2 часа, через 3 дня, через неделю", "срок от текущего момента"], ["до пятницы, до 20.10, дедлайн завтра", "дедлайн — крайний срок отдельно от даты начала"], ["#дела", "тег (новый создастся сам)"], ["+Дом", "проект (если такого нет — будет создан)"], ["!1, !2, !3", "приоритет: срочно, важно, желательно"], ["!!", "первый флажок из вашего набора"], ["!!жёлтый", "флажок по названию"], ["каждый день, по будням, каждую неделю, каждый месяц, каждый год", "повтор"], ["каждые 3 дня, каждые 2 недели, каждый вторник, по пн и чт, каждое 15 число, в последний день месяца", "гибкий повтор"], ["… после выполнения", "следующий раз считается от дня, когда задача выполнена"]]) +
       "<p>Пример: <code>завтра в 10 позвонить в банк #дела +Дом !1</code>. Новая задача — круглая кнопка <b>＋</b> в правом нижнем углу любого списка (или клавиша <code>n</code>): внизу появится поле ввода; Enter — добавить (поле остаётся для следующей задачи), Esc или ✕ — закрыть. 🎤 в поле — сказать задачу голосом.</p>");
@@ -7305,7 +7312,7 @@ CREATE TABLE inbox (
   function openTask(id) { flushBody(); CED = null; if (OPEN !== id) DEPPICK = false; OPEN = id; SUB = null; renderPanel(); render(); var pt = $("pn-t"); if (pt && !task(id).t) pt.focus(); }
   // клик мимо открытой карточки задачи закрывает её (если этим кликом не открыли другую задачу)
   var OCL = null;
-  var OCL_KEEP = ".wkc, #panel, #ctx, #ctx2, #slash, #fmt, #pal, #toast, #errbar, #bulk, #pomo, #tagdd, #bh, #diagbox, #fab, #gtip, #ttw, .pop, .add.qfloat, .top, #syncBtn";
+  var OCL_KEEP = "#totop, .wkc, #panel, #ctx, #ctx2, #slash, #fmt, #pal, #toast, #errbar, #bulk, #pomo, #tagdd, #bh, #diagbox, #fab, #gtip, #ttw, .pop, .add.qfloat, .top, #syncBtn";
   document.addEventListener("pointerdown", function (e) { OCL = OPEN && !$("panel").hidden && !(e.target.closest && e.target.closest(OCL_KEEP)) && e.button === 0 ? OPEN : null; }, true);
   document.addEventListener("click", function (e) {
     var was = OCL; OCL = null; if (!was || (e.target.closest && e.target.closest(OCL_KEEP))) return;
@@ -8485,6 +8492,19 @@ CREATE TABLE inbox (
   });
 
   $("menuBtn").addEventListener("click", function () { document.body.classList.toggle("menu"); });
+  // кнопка «↑ наверх»: появляется на длинной странице; в открытой на телефоне карточке — поднимает карточку
+  function totopSc() { var P = $("panel"); return P && !P.hidden && innerWidth <= 860 ? P.querySelector(".pn-sc") : null; }
+  function totopUpd() { var b = $("totop"); if (!b) return; var sc = totopSc(), y = sc ? sc.scrollTop : (window.scrollY || document.documentElement.scrollTop || 0); b.hidden = y < 500; }
+  window.addEventListener("scroll", totopUpd, { passive: true });
+  document.addEventListener("scroll", function (e) { if (e.target && e.target.classList && e.target.classList.contains("pn-sc")) totopUpd(); }, true);
+  window.addEventListener("hashchange", function () { setTimeout(totopUpd, 60); });
+  $("totop").addEventListener("click", function () {
+    var sc = totopSc(), el = sc || window;
+    try { el.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) { el.scrollTo(0, 0); }
+    // если плавная прокрутка не сработала (старый браузер, экономия батареи) — мгновенно
+    setTimeout(function () { var y = sc ? sc.scrollTop : window.scrollY; if (y > 40) { if (sc) sc.scrollTop = 0; else window.scrollTo(0, 0); } totopUpd(); }, 900);
+  });
+  setInterval(function () { if (document.visibilityState === "visible") totopUpd(); }, 1500);
   function qPh() { var q = $("q"); if (q) q.placeholder = innerWidth < 600 ? "Поиск" : "Поиск · Ctrl+K — команды"; }
   qPh(); window.addEventListener("resize", qPh);
   $("scrim").addEventListener("click", function () { document.body.classList.remove("menu"); });
