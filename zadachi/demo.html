@@ -246,6 +246,12 @@ ol.steps li { margin: 6px 0 }
 .gsrow .gst { flex: 1; min-width: 0; display: grid } .gsrow .gst a { color: var(--fg); text-decoration: none; overflow-wrap: anywhere } .gsrow .gst a:hover { text-decoration: underline }
 .gsrow.gsnext { background: var(--acc-soft) } .gsrow.gsnext .gsn { color: var(--acc); font-weight: 700 } .gsnb { color: var(--acc) }
 .gsrow.gsblk .gst a { color: var(--muted) } .gsrow.gsover { box-shadow: inset 0 2px 0 var(--acc) } .gsrow.gsdrag { opacity: .5 }
+.tdh { display: none; flex: none; align-self: stretch; align-items: center; justify-content: center; width: 34px; margin: -4px -4px -4px 0; color: var(--muted); touch-action: none; cursor: grab }
+.tdh svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round }
+@media (pointer: coarse) { .tdh { display: flex } }
+li.task.tdsrc { opacity: .35 } .tdghost { box-shadow: var(--shadow); background: var(--panel); border-radius: 10px; opacity: .95 }
+li.task.tdbefore { box-shadow: inset 0 3px 0 var(--acc) } li.task.tdafter { box-shadow: inset 0 -3px 0 var(--acc) }
+body.tdragging { user-select: none; -webkit-user-select: none }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5269,7 +5275,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-74";
+  var APPV = "zd-app-2026-10-16-75";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -6160,6 +6166,7 @@ CREATE TABLE inbox (
       (SELMODE ? '<button type="button" class="selbox' + (SELS[t.id] ? " on" : "") + '" data-a="seltog" aria-label="Выбрать">' + (SELS[t.id] ? "✓" : "") + "</button>" : "") +
       '<button class="ck' + (t.prio ? " p" + t.prio : "") + (t.pin && !t.done ? " pin" : "") + '" type="button" data-a="toggle" aria-label="' + (t.done || ftd ? "Вернуть в работу" : "Готово") + '"></button>' +
       '<div class="bd" data-a="edit" tabindex="0" role="button"><div class="tt">' + esc(t.t) + "</div>" + (meta.length ? '<div class="mt">' + meta.join("") + "</div>" : "") + "</div>" +
+      (SELMODE ? "" : '<span class="tdh" title="Потяните, чтобы переставить" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg></span>') +
       '<div class="acts">' + (o.take ? '<button type="button" data-a="sptake" title="Взять в спринт" style="color:var(--acc);font-size:13px">→ в спринт</button>' : "") + (o.untake ? '<button type="button" data-a="spdrop" title="Вернуть в бэклог" style="font-size:13px">← в бэклог</button>' : "") + '<button type="button" class="fl' + (flagOf(t) ? " on" : "") + '" data-a="flag" title="Флажок">' + flagIc(flagOf(t)) + '</button><button type="button" data-a="addsub" title="Подзадача">＋</button><button type="button" data-a="del" title="Удалить">×</button></div></li>';
     if (SUB === t.id) h += '<li class="subadd" style="padding-left:' + (30 + (depth + 1) * 26) + 'px"><input id="subin" data-sub="' + t.id + '" placeholder="Подзадача — тоже с быстрым вводом: завтра, #тег, !1"><button class="btn pri sm" type="button" data-a="subok" data-x="' + t.id + '">Добавить</button><button class="btn sm" type="button" data-a="subcancel">Отмена</button></li>';
     return h;
@@ -9100,6 +9107,7 @@ CREATE TABLE inbox (
       "<b>Нижняя панель</b>: Сегодня, Входящие, Календарь, Поиск и Меню (левая панель со всеми списками). Красная цифра у «Сегодня» — просроченные задачи.",
       "<b>Смахните задачу вправо</b> — она отмечается выполненной; <b>влево</b> — откроется меню переноса срока: сегодня, завтра, в понедельник, через неделю, когда-нибудь…",
       "<b>Долгое нажатие</b> на задачу — режим выбора: можно отметить несколько задач и удалить, перенести или изменить их разом.",
+      "<b>Переставить задачу</b> — потяните за ручку ≡ справа у задачи и отпустите над другой задачей: встанет перед ней или после (у края экрана список сам прокручивается). Сортировка списка переключится на «вручную», порядок разойдётся на все устройства. В «Шагах по порядку» цели — стрелки ↑↓.",
       "<b>Карточка задачи</b> открывается на весь экран; пустые поля спрятаны под «Ещё поля ▾». Под сроком — быстрые кнопки «Сегодня · Завтра · Пн · +неделя · Когда-нибудь». Редкие действия — в «⋯» вверху карточки.",
       "<b>Вид ▾</b> над списком — список или доска, группировка и сортировка; свёрнуто, чтобы задачам доставалось больше места.",
       "Календарь на телефоне открывается видом «День».",
@@ -9517,7 +9525,7 @@ CREATE TABLE inbox (
   /* ---------- групповые действия: режим выбора, умный выбор, массовые правки с одной отменой ---------- */
   var SELMODE = false, LPT = null, LPSUP = false, BED = null, SWP = null;
   document.addEventListener("touchstart", function (e) {
-    var li = e.target.closest && e.target.closest("#view li.task"); if (!li || SELMODE || e.touches.length !== 1 || e.target.closest("input, textarea, select, .acts")) { SWP = null; return; }
+    var li = e.target.closest && e.target.closest("#view li.task"); if (!li || SELMODE || e.touches.length !== 1 || e.target.closest("input, textarea, select, .acts, .tdh")) { SWP = null; return; }
     SWP = { li: li, x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, on: false };
   }, { passive: true });
   document.addEventListener("touchmove", function (e) {
@@ -9727,7 +9735,7 @@ CREATE TABLE inbox (
   document.addEventListener("keydown", function (e) { if (BED && e.key === "Escape") { e.stopImmediatePropagation(); BED = null; bedRender(); } else if (BED && e.key === "Enter" && BED.mode === "replace" && /bedfind|bedrepl/.test(e.target.id || "")) { e.preventDefault(); bedApply(); } else if (SELMODE && e.key === "Escape" && $("ctx").hidden && !OPEN) { e.stopImmediatePropagation(); selModeSet(false); } }, true);
   // долгое нажатие на задачу (телефон) — начать выбор
   document.addEventListener("pointerdown", function (e) {
-    var li = e.target.closest && e.target.closest("#view li.task, #view .kcard"); if (!li || e.pointerType === "mouse" || e.target.closest("button, a, input")) return;
+    var li = e.target.closest && e.target.closest("#view li.task, #view .kcard"); if (!li || e.pointerType === "mouse" || e.target.closest("button, a, input, .tdh")) return;
     var x0 = e.clientX, y0 = e.clientY; clearTimeout(LPT);
     LPT = setTimeout(function () { LPT = null; LPSUP = true; SELMODE = true; SELS[li.dataset.id] = 1; LASTSEL = li.dataset.id; try { navigator.vibrate && navigator.vibrate(20); } catch (er) { /* нет */ } render(); }, 520);
     var mv = function (ev) { if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > 10) cancel(); }, cancel = function () { clearTimeout(LPT); LPT = null; document.removeEventListener("pointermove", mv, true); document.removeEventListener("pointerup", cancel, true); document.removeEventListener("pointercancel", cancel, true); };
@@ -11858,6 +11866,35 @@ CREATE TABLE inbox (
   /* ---------- перетаскивание: проекты в панели, задачи на проекты/теги/списки и на другие задачи ---------- */
   var DRAG = null;
   // ручной порядок: ставим задачу перед/после другой в том же видимом списке (проект задачи не меняется)
+  /* перетаскивание пальцем: тянем за ручку ≡, строка-призрак следует за пальцем, у края экрана список прокручивается;
+     отпустили над другой задачей того же уровня — она встаёт перед или после неё (как мышью) */
+  var TDR = null;
+  function tdScroller() { var P = $("panel"); if (P && !P.hidden && P.contains(TDR.li)) return P.querySelector(".pn-sc"); var m = $("view"); while (m && m !== document.body) { var cs = getComputedStyle(m); if (/(auto|scroll)/.test(cs.overflowY) && m.scrollHeight > m.clientHeight) return m; m = m.parentElement; } return null; }
+  function tdClear() { [].forEach.call(document.querySelectorAll(".tdbefore, .tdafter"), function (x) { x.classList.remove("tdbefore", "tdafter"); }); }
+  function tdEnd(apply) {
+    var d = TDR; TDR = null; if (!d) return; cancelAnimationFrame(d.raf); d.ghost.remove(); d.li.classList.remove("tdsrc"); tdClear(); document.body.classList.remove("tdragging");
+    if (apply && d.over) { var t = task(d.li.dataset.id); if (t) { reorderTask(t, d.over, d.pos); save(); render(); try { navigator.vibrate && navigator.vibrate(10); } catch (er) { /* ok */ } } }
+  }
+  document.addEventListener("touchstart", function (e) {
+    var h = e.target.closest && e.target.closest(".tdh"); if (!h || e.touches.length !== 1) return;
+    var li = h.closest("li.task"); if (!li || !task(li.dataset.id)) return;
+    e.preventDefault(); e.stopPropagation(); clearTimeout(LPT); LPT = null;
+    var r = li.getBoundingClientRect(), y = e.touches[0].clientY, g = li.cloneNode(true);
+    g.classList.add("tdghost"); g.style.cssText += ";position:fixed;left:" + r.left + "px;top:" + r.top + "px;width:" + r.width + "px;margin:0;z-index:250;pointer-events:none";
+    document.body.appendChild(g); li.classList.add("tdsrc"); document.body.classList.add("tdragging");
+    TDR = { li: li, ghost: g, dy: y - r.top, y: y, x: r.left + r.width / 2, over: null, pos: "before", pad: li.style.paddingLeft, raf: 0 };
+    TDR.sc = tdScroller();
+    (function tick() { if (!TDR) return; var vh = innerHeight, sp = TDR.y < 90 ? -10 : TDR.y > vh - 110 ? 10 : 0; if (sp) { if (TDR.sc) TDR.sc.scrollTop += sp; else window.scrollBy(0, sp); tdOver(); } TDR.raf = requestAnimationFrame(tick); })();
+  }, { passive: false, capture: true });
+  function tdOver() {
+    var d = TDR; if (!d) return; var el = document.elementFromPoint(d.x, d.y), o = el && el.closest && el.closest("li.task");
+    tdClear(); d.over = null;
+    if (!o || o === d.li || o.parentNode !== d.li.parentNode || o.style.paddingLeft !== d.pad) return;
+    var rr = o.getBoundingClientRect(); d.pos = d.y < rr.top + rr.height / 2 ? "before" : "after"; d.over = o; o.classList.add(d.pos === "before" ? "tdbefore" : "tdafter");
+  }
+  document.addEventListener("touchmove", function (e) { if (!TDR) return; e.preventDefault(); e.stopPropagation(); TDR.y = e.touches[0].clientY; TDR.ghost.style.top = (TDR.y - TDR.dy) + "px"; tdOver(); }, { passive: false, capture: true });
+  document.addEventListener("touchend", function (e) { if (!TDR) return; e.preventDefault(); e.stopPropagation(); tdEnd(true); }, { passive: false, capture: true });
+  document.addEventListener("touchcancel", function () { tdEnd(false); }, true);
   function reorderTask(t, li, pos) {
     var tg = task(li.dataset.id); if (!tg || tg.id === t.id) return;
     if (tdesc(t.id).some(function (x) { return x.id === tg.id; })) { toast("Нельзя поставить задачу внутрь её же подзадач"); return; }
