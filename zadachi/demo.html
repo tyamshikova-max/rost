@@ -5269,7 +5269,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-73";
+  var APPV = "zd-app-2026-10-16-74";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -6046,7 +6046,7 @@ CREATE TABLE inbox (
   var VDEF = { inbox: { group: "none", sort: "created" }, today: { group: "date", sort: "date" }, plans: { group: "day", sort: "date" }, flag: { group: "flag", sort: "date" }, all: { group: "project", sort: "date" }, proj: { group: "none", sort: "date", sub: false }, tag: { group: "project", sort: "date" } };
   function vopt() {
     if (V === "filter") { var f = filt(ARG); return { group: (f && f.group) || "project", sort: (f && f.sort) || "date", groups: ((f && f.groups) || []).filter(function (g) { return GROUPN[g] && g !== "none"; }) }; }
-    var d = VDEF[V] || { group: "none", sort: "date" }, o = VIEWS[curKey()] || {};
+    var d = VDEF[V] || { group: "none", sort: "date" }, o = vOf(curKey());
     if (V === "proj") { var pv = proj(ARG); if (pv && (pv.secs || []).length) d = { group: "section", sort: d.sort, sub: d.sub }; }
     var g0 = o.group || d.group;
     return { group: g0, sort: o.sort || d.sort, sub: o.sub !== undefined ? o.sub : d.sub, groups: g0 === "none" ? [] : (o.groups || []).filter(function (g) { return GROUPN[g] && g !== "none" && (V === "proj" || (g !== "section" && g !== "kcol")); }) };
@@ -6054,7 +6054,18 @@ CREATE TABLE inbox (
   function setVopt(k, v) {
     if (V === "filter") { var f = filt(ARG); if (f) { f[k] = v; touch(f); save(); } return; }
     var o = VIEWS[curKey()] = VIEWS[curKey()] || {}; o[k] = v; LS.set("zd-views", JSON.stringify(VIEWS));
+    if (VSYNC.indexOf(k) >= 0) vSyncSet(curKey(), k, v);
   }
+  /* сортировка и группировка списков синхронизируются между устройствами: у проекта — в нём самом (p.vw), у остальных
+     списков — в общих настройках (S.opt.views). Вид «список / доска» и свёрнутые группы остаются свои на каждом устройстве. */
+  var VSYNC = ["sort", "group", "groups", "sub"];
+  function vSynced(key) { var m = /^proj:(.+)$/.exec(key); if (m) { var p = proj(m[1]); return (p && p.vw) || {}; } return (S.opt.views || {})[key] || {}; }
+  function vSyncSet(key, k, v) {
+    var m = /^proj:(.+)$/.exec(key);
+    if (m) { var p = proj(m[1]); if (p) { p.vw = Object.assign({}, p.vw || {}); p.vw[k] = v; touch(p); save(); } return; }
+    var vs = S.opt.views = Object.assign({}, S.opt.views || {}); vs[key] = Object.assign({}, vs[key] || {}); vs[key][k] = v; optTouch(); save();
+  }
+  function vOf(key) { var o = Object.assign({}, VIEWS[key] || {}), sy = vSynced(key); VSYNC.forEach(function (k) { if (sy[k] !== undefined) o[k] = sy[k]; }); return o; }
   function cmpBy(sort) {
     // «-вид» — обратный порядок; закреплённые всё равно сверху
     if (sort && sort.charAt(0) === "-") { var inner = cmpBy(sort.slice(1)); return function (a, b) { if (!!a.pin !== !!b.pin && !a.done && !b.done) return a.pin ? -1 : 1; return -inner(a, b); }; }
@@ -7272,7 +7283,7 @@ CREATE TABLE inbox (
     var seen = {}, def = [];
     function open(t) { return !t.done && !t.canc && !t.parent && !seen[t.id]; }
     function projList(p) {
-      var o = VIEWS["proj:" + p.id] || {}, cmp = cmpBy(o.sort || "date"), secs = psecs(p).map(function (x) { return x.id; });
+      var o = vOf("proj:" + p.id), cmp = cmpBy(o.sort || "date"), secs = psecs(p).map(function (x) { return x.id; });
       return live(S.tasks).filter(function (t) { return t.pid === p.id && open(t); }).sort(function (a, b) { var sa = secs.indexOf(secOf(a, p)), sb = secs.indexOf(secOf(b, p)); return sa - sb || cmp(a, b); });
     }
     goalProjs(g).forEach(function (p0) { (function walk(p) { projList(p).forEach(function (t) { seen[t.id] = 1; def.push(t); }); pkids(p.id).forEach(walk); })(p0); });
@@ -9440,6 +9451,7 @@ CREATE TABLE inbox (
     /* ================= Данные и настройки ================= */
     h += sec("sync", "Синхронизация между устройствами", ul([
       "<b>Как включить</b>: «Настройки» → «Данные и синхронизация» → «Войти через Яндекс» — на каждом устройстве один раз. После этого задачи, проекты, цели, заметки, доски, привычки, комментарии, планы дней, теги, фильтры, флажки, шаблоны и оформление становятся одинаковыми везде.",
+      "<b>Порядок в списках</b> тоже общий: сортировка и группировка проекта и любого списка (в том числе «вручную» после перетаскивания) одинаковы на всех устройствах — поэтому и шаги целей идут в одном порядке. Своими на каждом устройстве остаются только вид «список / доска» и свёрнутые группы.",
       "<b>Где лежат данные</b>: в папке приложения на вашем Яндекс Диске («Приложения» → «Задачи»). Приложение видит только эту папку, остальной Диск ему недоступен.",
       "<b>Когда</b>: сама — через пару секунд после изменений, при открытии и при возвращении к вкладке. <b>Облачко вверху</b> («Диск · 07:31» — время последнего обмена): клик запускает синхронизацию сразу, пока идёт обмен — облачко мигает, внизу появится «Синхронизировано» или причина ошибки.",
       "<b>Как сливаются правки</b>: по каждой записи — побеждает более свежая правка. Поменяли одну задачу на телефоне, а другую на компьютере — сохранятся обе. <b>Удаление тоже синхронизируется</b>: удалённое на одном устройстве исчезнет на других после их синхронизации, удалять вручную на каждом не нужно.",
@@ -12190,6 +12202,22 @@ CREATE TABLE inbox (
   SRV.start();
   pomoTick();
   setInterval(function () { if (!document.hidden) softRender(); }, 60000);
+  // один раз: сортировки, выбранные раньше только на этом устройстве, переносятся в синхронизацию (если там ещё пусто)
+  (function () {
+    if (LS.get("zd-vmig") === "1") return;
+    var ch = false;
+    Object.keys(VIEWS).forEach(function (key) {
+      if (/^filter:/.test(key)) return;
+      var o = VIEWS[key] || {}, m = /^proj:(.+)$/.exec(key), p = m ? proj(m[1]) : null; if (m && !p) return;
+      var sy = vSynced(key), add = {};
+      VSYNC.forEach(function (k) { if (o[k] !== undefined && sy[k] === undefined) add[k] = o[k]; });
+      if (!Object.keys(add).length) return; ch = true;
+      if (p) { p.vw = Object.assign({}, p.vw || {}, add); touch(p); }
+      else { var vs = S.opt.views = Object.assign({}, S.opt.views || {}); vs[key] = Object.assign({}, vs[key] || {}, add); }
+    });
+    if (ch) { optTouch(); save(); }
+    LS.set("zd-vmig", "1");
+  })();
   /* ---------- демо-режим (вставляется только сборкой: python build.py --demo) ----------
      Отдельное хранилище (ключи «zdemo:…»), никакой синхронизации с Диском и сервером,
      при первом запуске — тестовые данные со сдвигом дат на сегодня. */
