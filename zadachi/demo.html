@@ -252,6 +252,13 @@ ol.steps li { margin: 6px 0 }
 li.task.tdsrc { opacity: .35 } .tdghost { box-shadow: var(--shadow); background: var(--panel); border-radius: 10px; opacity: .95 }
 li.task.tdbefore { box-shadow: inset 0 3px 0 var(--acc) } li.task.tdafter { box-shadow: inset 0 -3px 0 var(--acc) }
 body.tdragging { user-select: none; -webkit-user-select: none }
+.dpk { position: fixed; z-index: 260; width: 268px; background: var(--pop, var(--panel)); backdrop-filter: blur(18px) saturate(1.6); -webkit-backdrop-filter: blur(18px) saturate(1.6); color: var(--fg); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 10px; font: 14px/1.2 var(--sans) }
+.dpk button { font: inherit; color: inherit; background: none; border: 0; border-radius: 8px; cursor: pointer }
+.dpkh { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px } .dpkh b { font-weight: 600 } .dpkh button { width: 32px; height: 32px; font-size: 20px; line-height: 1 } .dpkh button:hover { background: var(--hover) }
+.dpkg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center } .dpkw { font-size: 12px; color: var(--muted); padding: 4px 0 } .dpkg .we { color: var(--warn) }
+.dpkg button { height: 32px; font-variant-numeric: tabular-nums } .dpkg button:hover { background: var(--hover) }
+.dpkg button.td { box-shadow: inset 0 0 0 1.5px var(--acc) } .dpkg button.on { background: var(--acc); color: #fff }
+.dpkf { display: flex; gap: 6px; justify-content: flex-end; margin-top: 8px; border-top: 1px solid var(--line); padding-top: 8px } .dpkf button { padding: 5px 10px; color: var(--acc); font-weight: 600 } .dpkf button:hover { background: var(--acc-soft) }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5275,7 +5282,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-75";
+  var APPV = "zd-app-2026-10-16-76";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -9127,6 +9134,7 @@ CREATE TABLE inbox (
     h += sec("keys", "Работа без мыши и меньше движения", ul([
       "<b>Tab</b> переходит по кнопкам, ссылкам и задачам; где сейчас фокус — видно по зелёной рамке. На задаче <b>Enter</b> или <b>пробел</b> открывает карточку.",
       "Первое нажатие Tab на странице показывает кнопку <b>«К содержимому страницы»</b> — она перескакивает верхнюю панель и левое меню.",
+      "<b>Поля даты</b>: число можно набрать с клавиатуры, а значок календаря справа (или <b>Alt+↓</b> в поле) открывает календарик — листайте месяцы стрелками ‹ ›, есть «Сегодня» и «Очистить». На телефоне открывается обычный выбор даты телефона.",
       "Горячие клавиши для задач — в разделе «Меню задачи и горячие клавиши» и по клавише <code>?</code>.",
       "Если в системе включено <b>«Уменьшить движение»</b> (Windows: «Параметры» → «Специальные возможности» → «Визуальные эффекты» → «Эффекты анимации»; iPhone: «Универсальный доступ» → «Движение»; Android: «Удалить анимацию»), приложение отключает анимации и плавную прокрутку."]));
     h += sec("pal", "Палитра команд и поиск", ul([
@@ -10187,12 +10195,56 @@ CREATE TABLE inbox (
   // поле даты: пока год набирается с клавиатуры, браузер уже считает дату полной («0002-10-19») и шлёт change —
   // приложение сохраняло её и перерисовывало страницу, и ввести год было невозможно. Неполный год пропускаем.
   ["change", "input"].forEach(function (ev) { document.addEventListener(ev, function (e) { var t = e.target; if (t && t.type === "date" && t.value && +t.value.slice(0, 4) < 1900) e.stopImmediatePropagation(); }, true); });
-  // значок календаря (и часов) в поле даты: открыть выбор явно — в некоторых браузерах и встроенных окнах сам он не срабатывает
+  /* ---------- свой календарик для полей даты ----------
+     Браузерное окно выбора даты в некоторых браузерах и встроенных окнах не открывается или сразу закрывается,
+     поэтому на компьютере значок в поле даты открывает календарик приложения. Ввод с клавиатуры работает как раньше;
+     на телефоне — родной выбор даты. Выбранная дата попадает в поле и отправляет input/change, как при обычном вводе. */
+  var DPK = null, DPKFINE = window.matchMedia ? matchMedia("(pointer: fine)") : { matches: true };
+  var DPKMON = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+  function dpkHit(e) { var t = e.target; if (!t || t.tagName !== "INPUT" || t.type !== "date" || t.disabled || t.readOnly || !DPKFINE.matches) return null; var r = t.getBoundingClientRect(); return e.clientX >= r.right - 34 ? t : null; }
+  function dpkClose() { if (!DPK) return; DPK.el.remove(); DPK = null; }
+  function dpkDraw() {
+    var d = DPK, y = d.y, m = d.m, first = new Date(y, m, 1), shift = (first.getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate(), tk = dKey(Date.now()), cur = d.inp.value;
+    var h = '<div class="dpkh"><button type="button" data-dk="-1" aria-label="Предыдущий месяц">‹</button><b>' + DPKMON[m] + " " + y + '</b><button type="button" data-dk="1" aria-label="Следующий месяц">›</button></div><div class="dpkg">' +
+      ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map(function (x, i) { return '<span class="dpkw' + (i > 4 ? " we" : "") + '">' + x + "</span>"; }).join("");
+    for (var i = 0; i < shift; i++) h += "<span></span>";
+    for (var dd = 1; dd <= days; dd++) { var k = y + "-" + p2(m + 1) + "-" + p2(dd), wd = (shift + dd - 1) % 7; h += '<button type="button" data-dd="' + k + '" class="' + (k === tk ? "td " : "") + (k === cur ? "on " : "") + (wd > 4 ? "we" : "") + '">' + dd + "</button>"; }
+    h += '</div><div class="dpkf"><button type="button" data-dd="' + tk + '">Сегодня</button>' + (cur ? '<button type="button" data-dd="">Очистить</button>' : "") + '<button type="button" data-dk="x">Закрыть</button></div>';
+    d.el.innerHTML = h;
+  }
+  function dpkOpen(inp) {
+    dpkClose();
+    var v = inp.value ? new Date(inp.value + "T12:00:00") : new Date(), el = document.createElement("div");
+    el.className = "dpk"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Выбор даты");
+    document.body.appendChild(el); DPK = { inp: inp, el: el, y: v.getFullYear(), m: v.getMonth() }; dpkDraw();
+    var r = inp.getBoundingClientRect(), w = el.offsetWidth, hgt = el.offsetHeight, left = Math.min(Math.max(8, r.right - w), innerWidth - w - 8), top = r.bottom + 6;
+    if (top + hgt > innerHeight - 8 && r.top - hgt - 6 > 8) top = r.top - hgt - 6;
+    el.style.left = left + "px"; el.style.top = Math.max(8, top) + "px";
+  }
+  function dpkSet(v) {
+    var inp = DPK.inp; dpkClose();
+    inp.value = v; inp.dispatchEvent(new Event("input", { bubbles: true })); inp.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  // щелчок по значку: браузерное окно не открываем — открываем своё
+  document.addEventListener("mousedown", function (e) {
+    if (DPK && !DPK.el.contains(e.target) && e.target !== DPK.inp) dpkClose();
+    if (DPK && DPK.el.contains(e.target)) { e.preventDefault(); return; } // фокус остаётся в поле
+    var t = dpkHit(e); if (t) { e.preventDefault(); if (DPK && DPK.inp === t) dpkClose(); else { t.focus(); dpkOpen(t); } }
+  }, true);
   document.addEventListener("click", function (e) {
-    var t = e.target; if (!t || t.tagName !== "INPUT" || (t.type !== "date" && t.type !== "time") || t.disabled || !t.showPicker) return;
-    var r = t.getBoundingClientRect(); if (e.clientX < r.right - 34 && t.value) return; // по тексту поля — обычный ввод с клавиатуры; пустое поле — сразу календарь
-    try { t.showPicker(); } catch (er) { /* браузер не умеет — останется ввод с клавиатуры */ }
-  });
+    if (dpkHit(e)) { e.preventDefault(); return; }
+    if (!DPK || !DPK.el.contains(e.target)) return;
+    var b = e.target.closest("button"); if (!b) return; e.preventDefault(); e.stopPropagation();
+    if (b.dataset.dk === "x") { dpkClose(); return; }
+    if (b.dataset.dk) { DPK.m += +b.dataset.dk; if (DPK.m < 0) { DPK.m = 11; DPK.y--; } if (DPK.m > 11) { DPK.m = 0; DPK.y++; } dpkDraw(); return; }
+    if (b.dataset.dd !== undefined) dpkSet(b.dataset.dd);
+  }, true);
+  document.addEventListener("keydown", function (e) {
+    if (DPK && e.key === "Escape") { e.preventDefault(); e.stopImmediatePropagation(); dpkClose(); return; }
+    // Alt+↓ в поле даты — открыть календарик с клавиатуры
+    if (e.altKey && e.key === "ArrowDown" && e.target && e.target.type === "date" && DPKFINE.matches) { e.preventDefault(); dpkOpen(e.target); }
+  }, true);
+  window.addEventListener("resize", dpkClose); document.addEventListener("scroll", function (e) { if (DPK && !DPK.el.contains(e.target)) dpkClose(); }, true);
   var RMOT = window.matchMedia ? matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
   // Enter или пробел на «кнопке» из div (строка задачи и т. п.) — как щелчок
   document.addEventListener("keydown", function (e) {
@@ -11634,7 +11686,7 @@ CREATE TABLE inbox (
     if (c === "open") { openTask(t.id); return; }
     if (c.indexOf("d:") === 0) {
       var v = c.slice(2);
-      if (v === "pick") { openTask(t.id); setTimeout(function () { var d = $("panel").querySelector('[data-pf="date"]'); if (d) { d.focus(); try { d.showPicker(); } catch (er) { /* ok */ } } }, 60); return; }
+      if (v === "pick") { openTask(t.id); setTimeout(function () { var d = $("panel").querySelector('[data-pf="date"]'); if (d) { d.focus(); if (DPKFINE.matches) dpkOpen(d); else try { d.showPicker(); } catch (er) { /* ok */ } } }, 60); return; }
       if (v === "none") { t.at = 0; t.allday = false; t.rep = ""; t.rem = false; delete t.some; }
       else if (v === "some") { t.at = 0; t.due = 0; t.allday = false; t.rep = ""; t.rem = false; t.some = true; }
       else if (v === "eve") { var ev = new Date(t0); ev.setHours(19, 0, 0, 0); t.at = ev.getTime(); t.allday = false; delete t.some; if (S.opt.autoRem && !t.rem) t.rem = true; }
