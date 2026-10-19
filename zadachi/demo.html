@@ -259,6 +259,10 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .dpkg button { height: 32px; font-variant-numeric: tabular-nums } .dpkg button:hover { background: var(--hover) }
 .dpkg button.td { box-shadow: inset 0 0 0 1.5px var(--acc) } .dpkg button.on { background: var(--acc); color: #fff }
 .dpkf { display: flex; gap: 6px; justify-content: flex-end; margin-top: 8px; border-top: 1px solid var(--line); padding-top: 8px } .dpkf button { padding: 5px 10px; color: var(--acc); font-weight: 600 } .dpkf button:hover { background: var(--acc-soft) }
+.gcard .gmv { margin-left: auto; display: inline-flex; gap: 2px; opacity: 0; transition: opacity .15s } .gcard:hover .gmv, .gcard .gmv:focus-within { opacity: 1 }
+.gcard .gmv .ibtn { width: 28px; height: 28px; font-size: 15px } .gcard .gmv .ibtn:disabled { opacity: .3 }
+@media (pointer: coarse) { .gcard .gmv { opacity: 1 } }
+.gcard.gcdrag { opacity: .45 } .gcard.gcbefore { box-shadow: -3px 0 0 var(--acc) } .gcard.gcafter { box-shadow: 3px 0 0 var(--acc) }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5282,7 +5286,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-76";
+  var APPV = "zd-app-2026-10-16-77";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -7336,7 +7340,8 @@ CREATE TABLE inbox (
     if (!l.length && GTAB === "active") h += '<p class="empty">Целей пока нет. Например: «Сдать экзамен по 1С к декабрю», «Закончить черновик книги», «Отремонтировать кухню до Нового года».</p>';
     h += '<div class="ggrid">' + l.map(function (g) {
       var pr = goalProg(g), nx = goalNext(g, 1)[0], ps = goalProjs(g);
-      return '<a class="gcard" href="#goal-' + g.id + '" style="--gc:' + col(g.c || 0) + '"><div class="gch"><span class="gic">' + (g.ic || "🎯") + '</span><b>' + esc(g.n) + "</b></div>" + gDue(g) +
+      var gi = l.indexOf(g), mv = l.length > 1 ? '<span class="gmv"><button type="button" class="ibtn" data-a="gord" data-id="' + g.id + '" data-x="-1" title="Переставить раньше" aria-label="Переставить раньше"' + (gi ? "" : " disabled") + '>←</button><button type="button" class="ibtn" data-a="gord" data-id="' + g.id + '" data-x="1" title="Переставить позже" aria-label="Переставить позже"' + (gi < l.length - 1 ? "" : " disabled") + ">→</button></span>" : "";
+      return '<a class="gcard" href="#goal-' + g.id + '" draggable="true" data-gid="' + g.id + '" style="--gc:' + col(g.c || 0) + '"><div class="gch"><span class="gic">' + (g.ic || "🎯") + '</span><b>' + esc(g.n) + "</b>" + mv + "</div>" + gDue(g) +
         '<div class="gpr">' + gBar(g, pr) + '<span>' + pr.pct + "%</span></div><small class=\"muted\">" + esc(pr.txt) + (ps.length ? " · " + ps.map(function (p) { return esc(p.n); }).join(", ") : "") + "</small>" +
         (nx && g.st !== "done" ? '<div class="gnext">Следующий шаг: ' + esc(nx.t) + "</div>" : "") + "</a>";
     }).join("") + "</div>";
@@ -9402,6 +9407,7 @@ CREATE TABLE inbox (
       "<b>Шаги по порядку</b> — на странице цели все её невыполненные задачи одним списком: из всех привязанных проектов (и подпроектов) и собственные задачи цели. Сначала порядок такой же, как в проектах: проекты друг за другом, внутри — как задачи стоят на странице проекта. Переставьте шаги стрелками ↑↓ или перетаскиванием — это и есть последовательность цели; «↺ Как в проектах» вернёт исходный порядок. Новые задачи встают в конец.",
       "<b>Следующий шаг</b> — первый в этом списке, который ничего не ждёт: задачи со связью «Сначала сделать» на невыполненную и задачи «Когда-нибудь» пропускаются. Он подсвечен в списке, показан на карточке цели, в виджете «Цели» и подсказывается при планировании дня.",
       "На карточке цели: срок с обратным отсчётом, следующий шаг, проекты с их прогрессом, «Зачем» и <b>дневник цели</b> — короткие записи о том, что приблизило к цели. «🎉 Цель достигнута» и «⏸ Отложить» убирают цель на соседние вкладки.",
+      "<b>Порядок целей</b> — на странице «Цели» перетащите карточку мышью или нажмите стрелки ← → на карточке (на компьютере они появляются при наведении, на телефоне видны всегда). Порядок общий для всех устройств и для виджета «Цели» на досках.",
       "Цели подсказывают следующие шаги при планировании дня, видны на странице проекта и в виджете доски «Цели»."]));
     h += sec("dash", "Доски (дашборды)", ul([
       "<b>Доска</b> — свой экран из виджетов: например, «Мой день», «Обзор недели», доска проекта или учёбы. Досок может быть сколько угодно, они в блоке «Доски» левой панели и синхронизируются вместе с задачами.",
@@ -10262,6 +10268,30 @@ CREATE TABLE inbox (
     if (i1 >= 0 && i2 >= 0 && i1 !== i2) { ids.splice(i2, 0, ids.splice(i1, 1)[0]); gsSet(g, ids); } else render();
   }, true);
   document.addEventListener("dragend", function () { if (GSDRAG) { GSDRAG = null; render(); } [].forEach.call(document.querySelectorAll(".gsover, .gsdrag"), function (x) { x.classList.remove("gsover", "gsdrag"); }); }, true);
+  // порядок целей во вкладке (активные / достигнутые / отложенные): ord — общий для всех устройств и виджета «Цели»
+  function gcMove(id, toId, step, after) {
+    var l = goals().filter(function (g) { return (g.st || "active") === GTAB; }), ids = l.map(function (g) { return g.id; }), i = ids.indexOf(id); if (i < 0) return;
+    ids.splice(i, 1);
+    var j = toId ? ids.indexOf(toId) + (after ? 1 : 0) : i + step; if (toId && ids.indexOf(toId) < 0) return;
+    j = Math.max(0, Math.min(ids.length, j)); ids.splice(j, 0, id);
+    ids.forEach(function (x, k) { var g = goal(x); if (g && g.ord !== k) { g.ord = k; touch(g); } });
+    save(); render();
+    setTimeout(function () { var b = document.querySelector('.gcard[data-gid="' + id + '"] [data-a="gord"][data-x="' + (step < 0 ? -1 : 1) + '"]'); if (step && b && !b.disabled) b.focus(); }, 0);
+  }
+  var GCDRAG = null;
+  document.addEventListener("dragstart", function (e) { var c = e.target.closest && e.target.closest(".gcard[data-gid]"); if (!c) return; GCDRAG = c.dataset.gid; c.classList.add("gcdrag"); try { e.dataTransfer.setData("text/plain", c.dataset.gid); e.dataTransfer.effectAllowed = "move"; } catch (er) { /* старый браузер */ } e.stopPropagation(); }, true);
+  document.addEventListener("dragover", function (e) {
+    if (!GCDRAG) return; var c = e.target.closest && e.target.closest(".gcard[data-gid]"); if (!c) return; e.preventDefault(); e.stopPropagation();
+    var r = c.getBoundingClientRect(), aft = e.clientX > r.left + r.width / 2;
+    [].forEach.call(document.querySelectorAll(".gcbefore, .gcafter"), function (x) { x.classList.remove("gcbefore", "gcafter"); });
+    if (c.dataset.gid !== GCDRAG) c.classList.add(aft ? "gcafter" : "gcbefore");
+  }, true);
+  document.addEventListener("drop", function (e) {
+    if (!GCDRAG) return; var c = e.target.closest && e.target.closest(".gcard[data-gid]"), from = GCDRAG; GCDRAG = null; if (!c) { render(); return; }
+    e.preventDefault(); e.stopPropagation(); var r = c.getBoundingClientRect();
+    if (c.dataset.gid !== from) gcMove(from, c.dataset.gid, 0, e.clientX > r.left + r.width / 2); else render();
+  }, true);
+  document.addEventListener("dragend", function () { if (GCDRAG) { GCDRAG = null; render(); } [].forEach.call(document.querySelectorAll(".gcdrag, .gcbefore, .gcafter"), function (x) { x.classList.remove("gcdrag", "gcbefore", "gcafter"); }); }, true);
   function toastUndo(msg, fn) { UNDOF = fn; var el = $("toast"); el.innerHTML = esc(msg) + ' · <a href="#" data-a="undo" style="color:inherit;font-weight:600">Вернуть</a>'; el.hidden = false; clearTimeout(tt); tt = setTimeout(function () { el.hidden = true; UNDOF = null; }, 7000); }
   function trashTask(t) { var all = [t].concat(tdesc(t.id)), now = Date.now(); all.forEach(function (x) { x.del = 1; x.delAt = now; x.delBy = t.id; touch(x); }); return all; }
   function restoreTask(t) {
@@ -10558,6 +10588,7 @@ CREATE TABLE inbox (
       case "glink": var rgl = el.getBoundingClientRect(); ctxShow(rgl.left, rgl.bottom + 4, ptree().map(function (x) { return { c: x.p.id, i: piconH(x.p), l: x.p.n, pad: x.d, k: x.p.goal === ARG ? "✓" : "" }; }), { k: "glink", id: ARG }); return;
       case "gsmove": var gm2 = goal(ARG); if (gm2) { var ids = goalSeq(gm2).map(function (t) { return t.id; }), i1 = ids.indexOf(el.dataset.id), i2 = i1 + (+el.dataset.x || 0); if (i1 >= 0 && i2 >= 0 && i2 < ids.length) { ids.splice(i2, 0, ids.splice(i1, 1)[0]); gsSet(gm2, ids); } } return;
       case "gsreset": var gr = goal(ARG); if (gr) { delete gr.order; touch(gr); save(); render(); toast("Порядок шагов — снова как в проектах"); } return;
+      case "gord": e.preventDefault(); gcMove(el.dataset.id, null, +el.dataset.x || 0); return;
       case "gunlink": var pu = proj(el.dataset.p); if (pu) { delete pu.goal; touch(pu); save(); render(); } return;
       case "glogdel": var gl = goal(ARG); if (gl) { gl.log = (gl.log || []).filter(function (x) { return String(x.d) !== el.dataset.d; }); touch(gl); save(); render(); } return;
       case "dpgo": DP.step = Math.max(0, Math.min(DPSTEPS.length - 1, +el.dataset.x)); render(); window.scrollTo(0, 0); return;
