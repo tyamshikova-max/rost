@@ -240,6 +240,12 @@ ol.steps li { margin: 6px 0 }
 .rhprods { display: grid; gap: 8px; margin: 10px 0 16px; } .rha > b { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
 .rhsel { margin: 8px 0 0; align-items: center; } .rhok { color: var(--ok); font-weight: 600; }
 .wtl .wtrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px; } .wtl .wtrow + .wtrow { border-top: 1px solid var(--line); } .wtl .wtrow .inp { flex: 1 1 200px; min-width: 0; }
+.gsl { list-style: none; margin: 0 0 8px; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden }
+.gsrow { display: flex; align-items: center; gap: 10px; padding: 7px 8px 7px 12px; cursor: grab } .gsrow + .gsrow { border-top: 1px solid var(--line) }
+.gsrow .gsn { flex: none; min-width: 1.6em; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right }
+.gsrow .gst { flex: 1; min-width: 0; display: grid } .gsrow .gst a { color: var(--fg); text-decoration: none; overflow-wrap: anywhere } .gsrow .gst a:hover { text-decoration: underline }
+.gsrow.gsnext { background: var(--acc-soft) } .gsrow.gsnext .gsn { color: var(--acc); font-weight: 700 } .gsnb { color: var(--acc) }
+.gsrow.gsblk .gst a { color: var(--muted) } .gsrow.gsover { box-shadow: inset 0 2px 0 var(--acc) } .gsrow.gsdrag { opacity: .5 }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5263,7 +5269,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-71";
+  var APPV = "zd-app-2026-10-16-72";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -7259,7 +7265,40 @@ CREATE TABLE inbox (
     var l = goalTasks(g), d = l.filter(function (t) { return t.done; }).length;
     return { pct: l.length ? Math.round(d / l.length * 100) : 0, txt: l.length ? d + " из " + l.length + " " + plural(l.length, ["задачи", "задач", "задач"]) : "пока нет задач" };
   }
-  function goalNext(g, n) { return goalTasks(g).filter(function (t) { return !t.done && !t.parent; }).sort(cmpBy("smart")).slice(0, n || 1); }
+  /* шаги цели по порядку. Без ручного порядка — как в проектах: проекты друг за другом, внутри — как на странице проекта
+     (сначала «без секции», потом секции, внутри — выбранная там сортировка), подпроекты следом; в конце — свои задачи цели.
+     Ручной порядок (g.order — id задач) ставит эти задачи вперёд в заданной последовательности, новые добавляются в конец. */
+  function goalSeq(g) {
+    var seen = {}, def = [];
+    function open(t) { return !t.done && !t.canc && !t.parent && !seen[t.id]; }
+    function projList(p) {
+      var o = VIEWS["proj:" + p.id] || {}, cmp = cmpBy(o.sort || "date"), secs = psecs(p).map(function (x) { return x.id; });
+      return live(S.tasks).filter(function (t) { return t.pid === p.id && open(t); }).sort(function (a, b) { var sa = secs.indexOf(secOf(a, p)), sb = secs.indexOf(secOf(b, p)); return sa - sb || cmp(a, b); });
+    }
+    goalProjs(g).forEach(function (p0) { (function walk(p) { projList(p).forEach(function (t) { seen[t.id] = 1; def.push(t); }); pkids(p.id).forEach(walk); })(p0); });
+    live(S.tasks).filter(function (t) { return t.goal === g.id && open(t); }).sort(cmpBy("smart")).forEach(function (t) { seen[t.id] = 1; def.push(t); });
+    var ord = g.order || []; if (!ord.length) return def;
+    var pos = {}; ord.forEach(function (id, i) { pos[id] = i; });
+    var a = def.filter(function (t) { return pos[t.id] !== undefined; }).sort(function (x, y) { return pos[x.id] - pos[y.id]; });
+    return a.concat(def.filter(function (t) { return pos[t.id] === undefined; }));
+  }
+  // следующий шаг — первый, который не ждёт невыполненную задачу («Сначала сделать») и не отложен в «Когда-нибудь»
+  function goalNext(g, n) { var l = goalSeq(g), ok = l.filter(function (t) { return !isBlocked(t) && !isSome(t); }); return (ok.length ? ok : l).slice(0, n || 1); }
+  function goalSeqHTML(g) {
+    var l = goalSeq(g), nx = goalNext(g, 1)[0];
+    var h = '<h2>Шаги по порядку <span class="c">' + l.length + "</span></h2>";
+    if (!l.length) return h + '<p class="muted" style="margin:4px 0">Невыполненных задач у цели нет. Привяжите проект или добавьте задачи ниже.</p>';
+    h += '<p class="muted" style="margin:0 0 6px">' + (g.order && g.order.length ? "Ваш порядок. Новые задачи встают в конец." : "Сейчас — как в проектах.") + " Переставьте стрелками или перетаскиванием — следующим шагом будет первый, который ничего не ждёт." +
+      (g.order && g.order.length ? ' <button type="button" class="btn sm" data-a="gsreset">↺ Как в проектах</button>' : "") + "</p>";
+    return h + '<ol class="gsl">' + l.map(function (t, i) {
+      var pj = t.pid && proj(t.pid), blk = isBlocked(t), w = blk ? depBlockers(t).filter(function (b) { return !b.done; })[0] : null;
+      return '<li class="gsrow' + (nx && nx.id === t.id ? " gsnext" : "") + (blk ? " gsblk" : "") + '" draggable="true" data-gs="' + t.id + '"><span class="gsn">' + (i + 1) + '</span><span class="gst"><a href="#task-' + t.id + '">' + esc(t.t) + "</a>" +
+        '<small class="muted">' + (pj ? esc(pj.n) : "задача цели") + (t.at ? " · " + esc(dayName(t.at)) : "") + (w ? " · ⏳ ждёт «" + esc(String(w.t).slice(0, 40)) + "»" : "") + (isSome(t) ? " · когда-нибудь" : "") + (nx && nx.id === t.id ? ' · <b class="gsnb">следующий шаг</b>' : "") + "</small></span>" +
+        '<button type="button" class="ibtn" data-a="gsmove" data-id="' + t.id + '" data-x="-1" title="Выше" aria-label="Выше"' + (i ? "" : " disabled") + ">↑</button>" +
+        '<button type="button" class="ibtn" data-a="gsmove" data-id="' + t.id + '" data-x="1" title="Ниже" aria-label="Ниже"' + (i < l.length - 1 ? "" : " disabled") + ">↓</button></li>";
+    }).join("") + "</ol>";
+  }
+  function gsSet(g, ids) { g.order = ids; touch(g); save(); render(); }
   function gBar(g, pr) { return '<div class="gpbar"><i style="width:' + pr.pct + "%;background:" + col(g.c || 0) + '"></i></div>'; }
   function gDue(g) { if (!g.due) return ""; var dl = dleft(g.due); return '<span class="gdue ' + dl.c + '">' + (g.st === "done" ? "срок был " + dayName(g.due).toLowerCase() : "⏳ " + dl.t + " · " + esc(dayName(g.due).toLowerCase())) + "</span>"; }
   function goalChip(g) { if (!g) return ""; var pr = goalProg(g); return '<a class="gchip" href="#goal-' + g.id + '" title="Цель: ' + esc(g.n) + '" style="--gc:' + col(g.c || 0) + '">' + (g.ic || "🎯") + " " + esc(g.n) + " · " + pr.pct + "%</a>"; }
@@ -7292,6 +7331,7 @@ CREATE TABLE inbox (
       (g.m ? '<div class="r gnum"><button type="button" class="btn sm" data-a="gstep" data-x="-1">−</button><input type="number" class="inp" data-goal="' + g.id + '" data-gf="cur" value="' + (+g.m.cur || 0) + '" step="any" style="width:90px"><button type="button" class="btn sm" data-a="gstep" data-x="1">＋</button><span class="muted">из</span><input type="number" class="inp" data-goal="' + g.id + '" data-gf="target" value="' + (+g.m.target || "") + '" step="any" placeholder="цель" style="width:90px"><input type="text" class="inp" data-goal="' + g.id + '" data-gf="unit" value="' + esc(g.m.unit || "") + '" placeholder="км, страниц, ₽" style="width:120px"></div>' : '<div class="wsub">Доля выполненных задач в привязанных проектах и задачах цели</div>') + "</div></div>" +
       '<div class="wcr"><span>Зачем</span><textarea class="inp" rows="2" data-goal="' + g.id + '" data-gf="desc" placeholder="Почему это важно, как поймёте, что цель достигнута">' + esc(g.desc || "") + "</textarea></div></div>";
     h += '<h2>Проекты цели <span class="c">' + ps.length + '</span></h2><div class="gprojs">' + ps.map(function (p) { var ids = pdesc(p.id), l = live(S.tasks).filter(function (t) { return ids.indexOf(t.pid) >= 0 && !t.canc; }), d = l.filter(function (t) { return t.done; }).length; return '<span class="gpj"><a href="#proj-' + p.id + '">' + piconH(p) + " " + esc(p.n) + '</a><small>' + d + "/" + l.length + '</small><button type="button" data-a="gunlink" data-p="' + p.id + '" title="Отвязать проект">×</button></span>'; }).join("") + '<button type="button" class="btn sm" data-a="glink">＋ Привязать проект</button></div>';
+    h += goalSeqHTML(g);
     h += "<h2>Задачи цели <span class=\"c\">" + open.length + "</span></h2>" + (renderTree(open, "smart", {}) || '<p class="muted" style="margin:4px 0">Отдельные шаги, которые не относятся ни к одному проекту. Задачу можно привязать и из её меню → «🎯 Цель».</p>') + wqa("goal:" + g.id, "g" + g.id);
     var lg = (g.log || []).slice().sort(function (a, b) { return b.d - a.d; });
     h += '<h2>Дневник цели</h2><p class="muted" style="margin:0 0 6px">Что приблизило к цели, какие выводы — коротко, раз в неделю.</p><div class="hadd" style="padding-left:0"><input type="text" class="inp" data-glog="' + g.id + '" placeholder="Например: сдала модуль 3, следующий — регистры сведений" aria-label="Запись в дневник цели"></div>' +
@@ -8945,7 +8985,7 @@ CREATE TABLE inbox (
     }
     return auxHead("Справка") + '<div class="stabs"><nav class="stnav" aria-label="Разделы справки"><input type="search" id="helpq" class="inp hsrch" placeholder="Поиск по справке" value="' + esc(HQ) + '" autocomplete="off">' +
       HTABS.map(function (x) { return '<a href="#help-' + x[0] + '" class="' + (!q && cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") +
-      '</nav><div class="stbody help"><a class="hcourse" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf"><span class="hci">📘</span><span><b>Учебный курс «Задачи»</b><small>19 уроков с картинками, практикой и вопросами · PDF, 79 страниц, 8 МБ</small></span><span class="hcd">Скачать</span></a>' +
+      '</nav><div class="stbody help"><a class="hcourse" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf"><span class="hci">📘</span><span><b>Учебный курс «Задачи»</b><small>19 уроков с картинками, практикой и вопросами · PDF, 80 страниц, 8 МБ</small></span><span class="hcd">Скачать</span></a>' +
       '<a class="hcourse htest" href="testdata.json" download="Тестовые данные для Задач.json"><span class="hci">🧪</span><span><b>Тестовые данные для упражнений</b><small>Проекты, задачи, привычки, заметки, цели и доски · JSON, 55 КБ. Загрузить в программу: «Настройки» → «Данные и синхронизация» → «📂 Восстановить из файла» — файл добавится к вашим данным, ничего не заменяя; удалить потом можно одной кнопкой там же.</small></span><span class="hcd">Скачать</span></a>' + html + '<p class="foot">© ' + new Date().getFullYear() + " ytv · Задачи</p></div></div>";
   }
   function codeBox(id, title) { var el = $(id); return '<div class="codebox"><div class="h"><b>' + title + '</b><button class="btn sm" type="button" data-copy="' + id + '">Скопировать</button></div><pre>' + esc(el ? el.textContent.trim() : "") + "</pre></div>"; }
@@ -9329,6 +9369,8 @@ CREATE TABLE inbox (
       "<b>Цель</b> — большой результат над проектами: «Сдать экзамен по 1С», «Дописать книгу». Пункт «Цели» в левой панели; новая цель — строкой внизу списка.",
       "<b>Привязка</b>: правая кнопка по проекту → «🎯 Цель» (подпроекты идут вместе с ним) или меню задачи → «🎯 Цель» для отдельных шагов; на странице цели — «＋ Привязать проект» и строка новой задачи.",
       "<b>Прогресс</b> считается сам — доля выполненных задач во всех привязанных проектах и задачах цели. Или «по числу»: цель в километрах, страницах, рублях — ＋/− меняют текущее значение.",
+      "<b>Шаги по порядку</b> — на странице цели все её невыполненные задачи одним списком: из всех привязанных проектов (и подпроектов) и собственные задачи цели. Сначала порядок такой же, как в проектах: проекты друг за другом, внутри — как задачи стоят на странице проекта. Переставьте шаги стрелками ↑↓ или перетаскиванием — это и есть последовательность цели; «↺ Как в проектах» вернёт исходный порядок. Новые задачи встают в конец.",
+      "<b>Следующий шаг</b> — первый в этом списке, который ничего не ждёт: задачи со связью «Сначала сделать» на невыполненную и задачи «Когда-нибудь» пропускаются. Он подсвечен в списке, показан на карточке цели, в виджете «Цели» и подсказывается при планировании дня.",
       "На карточке цели: срок с обратным отсчётом, следующий шаг, проекты с их прогрессом, «Зачем» и <b>дневник цели</b> — короткие записи о том, что приблизило к цели. «🎉 Цель достигнута» и «⏸ Отложить» убирают цель на соседние вкладки.",
       "Цели подсказывают следующие шаги при планировании дня, видны на странице проекта и в виджете доски «Цели»."]));
     h += sec("dash", "Доски (дашборды)", ul([
@@ -10129,6 +10171,16 @@ CREATE TABLE inbox (
     if (tg.getAttribute && tg.getAttribute("role") === "button" && tg.tagName !== "BUTTON" && tg.dataset.a) { e.preventDefault(); tg.click(); }
   });
   $("skipBtn").addEventListener("click", function () { var v = $("view"), f = v.querySelector("[tabindex='0'], button, a[href], input"); (f || v).focus(); });
+  var GSDRAG = null;
+  document.addEventListener("dragstart", function (e) { var r = e.target.closest && e.target.closest(".gsrow"); if (!r) return; GSDRAG = r.dataset.gs; r.classList.add("gsdrag"); try { e.dataTransfer.setData("text/plain", GSDRAG); e.dataTransfer.effectAllowed = "move"; } catch (er) { /* старый браузер */ } e.stopPropagation(); }, true);
+  document.addEventListener("dragover", function (e) { if (!GSDRAG) return; var r = e.target.closest && e.target.closest(".gsrow"); if (!r) return; e.preventDefault(); e.stopPropagation(); [].forEach.call(document.querySelectorAll(".gsover"), function (x) { if (x !== r) x.classList.remove("gsover"); }); r.classList.add("gsover"); }, true);
+  document.addEventListener("drop", function (e) {
+    if (!GSDRAG) return; var r = e.target.closest && e.target.closest(".gsrow"), g = goal(ARG), from = GSDRAG; GSDRAG = null;
+    if (!r || !g) return; e.preventDefault(); e.stopPropagation();
+    var ids = goalSeq(g).map(function (t) { return t.id; }), i1 = ids.indexOf(from), i2 = ids.indexOf(r.dataset.gs);
+    if (i1 >= 0 && i2 >= 0 && i1 !== i2) { ids.splice(i2, 0, ids.splice(i1, 1)[0]); gsSet(g, ids); } else render();
+  }, true);
+  document.addEventListener("dragend", function () { if (GSDRAG) { GSDRAG = null; render(); } [].forEach.call(document.querySelectorAll(".gsover, .gsdrag"), function (x) { x.classList.remove("gsover", "gsdrag"); }); }, true);
   function toastUndo(msg, fn) { UNDOF = fn; var el = $("toast"); el.innerHTML = esc(msg) + ' · <a href="#" data-a="undo" style="color:inherit;font-weight:600">Вернуть</a>'; el.hidden = false; clearTimeout(tt); tt = setTimeout(function () { el.hidden = true; UNDOF = null; }, 7000); }
   function trashTask(t) { var all = [t].concat(tdesc(t.id)), now = Date.now(); all.forEach(function (x) { x.del = 1; x.delAt = now; x.delBy = t.id; touch(x); }); return all; }
   function restoreTask(t) {
@@ -10423,6 +10475,8 @@ CREATE TABLE inbox (
       case "gmode": var gm = goal(ARG); if (gm) { if (el.dataset.x === "num") gm.m = gm.m || { cur: 0, target: 10, unit: "" }; else delete gm.m; touch(gm); save(); render(); } return;
       case "gstep": var gp = goal(ARG); if (gp && gp.m) { gp.m.cur = Math.round(((+gp.m.cur || 0) + (+el.dataset.x)) * 100) / 100; touch(gp); save(); render(); } return;
       case "glink": var rgl = el.getBoundingClientRect(); ctxShow(rgl.left, rgl.bottom + 4, ptree().map(function (x) { return { c: x.p.id, i: piconH(x.p), l: x.p.n, pad: x.d, k: x.p.goal === ARG ? "✓" : "" }; }), { k: "glink", id: ARG }); return;
+      case "gsmove": var gm2 = goal(ARG); if (gm2) { var ids = goalSeq(gm2).map(function (t) { return t.id; }), i1 = ids.indexOf(el.dataset.id), i2 = i1 + (+el.dataset.x || 0); if (i1 >= 0 && i2 >= 0 && i2 < ids.length) { ids.splice(i2, 0, ids.splice(i1, 1)[0]); gsSet(gm2, ids); } } return;
+      case "gsreset": var gr = goal(ARG); if (gr) { delete gr.order; touch(gr); save(); render(); toast("Порядок шагов — снова как в проектах"); } return;
       case "gunlink": var pu = proj(el.dataset.p); if (pu) { delete pu.goal; touch(pu); save(); render(); } return;
       case "glogdel": var gl = goal(ARG); if (gl) { gl.log = (gl.log || []).filter(function (x) { return String(x.d) !== el.dataset.d; }); touch(gl); save(); render(); } return;
       case "dpgo": DP.step = Math.max(0, Math.min(DPSTEPS.length - 1, +el.dataset.x)); render(); window.scrollTo(0, 0); return;
