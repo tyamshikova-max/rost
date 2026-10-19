@@ -2230,7 +2230,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-70";
+  var APPV = "zd-app-2026-10-16-71";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -7086,6 +7086,9 @@ CREATE TABLE inbox (
     if (subs.length) out.push("", subs.map(function (x) { return (x.done ? "☑ " : "☐ ") + x.t; }).join("\n"));
     return out.join("\n");
   }
+  // поле даты: пока год набирается с клавиатуры, браузер уже считает дату полной («0002-10-19») и шлёт change —
+  // приложение сохраняло её и перерисовывало страницу, и ввести год было невозможно. Неполный год пропускаем.
+  ["change", "input"].forEach(function (ev) { document.addEventListener(ev, function (e) { var t = e.target; if (t && t.type === "date" && t.value && +t.value.slice(0, 4) < 1900) e.stopImmediatePropagation(); }, true); });
   var RMOT = window.matchMedia ? matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
   // Enter или пробел на «кнопке» из div (строка задачи и т. п.) — как щелчок
   document.addEventListener("keydown", function (e) {
