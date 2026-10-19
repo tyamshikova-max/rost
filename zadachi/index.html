@@ -2257,7 +2257,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-78";
+  var APPV = "zd-app-2026-10-16-79";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -4010,9 +4010,15 @@ CREATE TABLE inbox (
     h += '</div><p class="muted setfn">Строка набора главнее: свой +Проект или !приоритет в строке побеждают общие, теги складываются. Уже созданные задачи не меняются.' + (d.mode === "sub" ? " Создаётся задача с названием набора, строки — её подзадачи; проект, теги и цель — у главной задачи." : d.mode === "chk" ? " Создаётся одна задача с названием набора, строки — пункты чек-листа в её описании; время из строки пишется перед пунктом, оценка — на всю задачу." : "") + "</p>" + setPreviewHTML(x) + "</details>";
     return h;
   }
-  var SETFOPEN = {};
-  document.addEventListener("toggle", function (e) { var dd = e.target; if (dd && dd.dataset && dd.dataset.setfo) SETFOPEN[dd.dataset.setfo] = dd.open; }, true);
-  function setFSet(id, k, v) { var x = tplObj(id); if (!x) return; var d = x.data = Object.assign({}, x.data || {}); var f = d.f = Object.assign({}, d.f || {}); if (v === "" || v === 0 || v === null || (Array.isArray(v) && !v.length)) delete f[k]; else f[k] = v; if (k === "pid") delete f.sec; touch(x); save(); SETFOPEN[id] = true; render(); }
+  // раскрыт ли блок «Общие поля» — запоминаем сразу в момент щелчка (и на устройстве), чтобы перерисовка страницы его не закрывала
+  var SETFOPEN = (function () { try { return JSON.parse(LS.get("zd-setfo") || "{}") || {}; } catch (e) { return {}; } })();
+  document.addEventListener("click", function (e) {
+    var sm = e.target.closest && e.target.closest(".setfd > summary"); if (!sm) return;
+    e.preventDefault(); var dd = sm.parentNode, id = dd.dataset.setfo, op = !SETFOPEN[id];
+    if (op) SETFOPEN[id] = true; else delete SETFOPEN[id]; LS.set("zd-setfo", JSON.stringify(SETFOPEN));
+    [].forEach.call(document.querySelectorAll('.setfd[data-setfo="' + id + '"]'), function (x) { x.open = op; });
+  }, true);
+  function setFSet(id, k, v) { var x = tplObj(id); if (!x) return; var d = x.data = Object.assign({}, x.data || {}); var f = d.f = Object.assign({}, d.f || {}); if (v === "" || v === 0 || v === null || (Array.isArray(v) && !v.length)) delete f[k]; else f[k] = v; if (k === "pid") delete f.sec; touch(x); save(); SETFOPEN[id] = true; LS.set("zd-setfo", JSON.stringify(SETFOPEN)); render(); }
   function setsAuto() {
     var d = today0(), k = dKey(d); if (SETDAY === k || !S.tpls) return; SETDAY = k;
     var wd = new Date(d).getDay(), n = 0, names = [];
@@ -7773,7 +7779,7 @@ CREATE TABLE inbox (
       case "rev-ok": var rp = proj(ARG); if (rp) { rp.revAt = Date.now(); touch(rp); save(); toast("✓ «" + rp.n + "» проверен"); if (revDue().length) revGo(1); else { render(); toast("✓ Все проекты проверены"); } } return;
       case "setnew": var sx = touch({ id: uid(), kind: "set", n: sets().length ? "Новый набор" : "Утро", data: { text: sets().length ? "" : "Зарядка в 7:00 #здоровье\nСтакан воды\nРазобрать «Входящие»\nВыбрать три главные задачи дня", days: [] }, created: Date.now() }); S.tpls.push(sx); save(); render(); setTimeout(function () { var i = document.querySelector('[data-setn="' + sx.id + '"]'); if (i) { i.focus(); i.select(); } }, 50); return;
       case "setfp": setFSet(el.dataset.id, "prio", +el.dataset.v || 0); return;
-      case "setfm": var sm0 = tplObj(el.dataset.id); if (sm0) { sm0.data = Object.assign({}, sm0.data || {}); if (el.dataset.v === "sub" || el.dataset.v === "chk") sm0.data.mode = el.dataset.v; else delete sm0.data.mode; touch(sm0); save(); SETFOPEN[sm0.id] = true; render(); } return;
+      case "setfm": var sm0 = tplObj(el.dataset.id); if (sm0) { sm0.data = Object.assign({}, sm0.data || {}); if (el.dataset.v === "sub" || el.dataset.v === "chk") sm0.data.mode = el.dataset.v; else delete sm0.data.mode; touch(sm0); save(); SETFOPEN[sm0.id] = true; LS.set("zd-setfo", JSON.stringify(SETFOPEN)); render(); } return;
       case "setrun": var sr = tplObj(el.dataset.id); if (!sr) return; if (!setLines(sr).length) { toast("В наборе пока нет строк"); return; } var nr = setApply(sr, today0()); save(); render(); toast(nr ? "«" + sr.n + "»: в «Сегодня» добавлено " + nr + " " + plural(nr, ["задача", "задачи", "задач"]) : "«" + sr.n + "» сегодня уже добавлен"); return;
       case "setdel": var sd = tplObj(el.dataset.id); if (!sd) return; sd.del = 1; sd.delAt = Date.now(); touch(sd); save(); render(); toastUndo("Набор «" + sd.n + "» удалён", function () { delete sd.del; delete sd.delAt; touch(sd); save(); render(); }); return;
       case "setday": var sy = tplObj(el.dataset.id); if (!sy) return; var dy = ((sy.data || {}).days || []).slice(), wv = +el.dataset.v, ix = dy.indexOf(wv); if (ix >= 0) dy.splice(ix, 1); else dy.push(wv); sy.data = Object.assign({}, sy.data || {}, { days: dy }); touch(sy); save(); render(); return;
