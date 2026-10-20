@@ -5294,7 +5294,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-83";
+  var APPV = "zd-app-2026-10-16-84";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -7831,7 +7831,7 @@ CREATE TABLE inbox (
   }
   var BTPL = {
     day: { n: "Мой день", i: "☀", d: "Задачи на сегодня, привычки, сроки, календарь на 3 дня, помодоро, быстрый ввод и главное на день.",
-      w: function () { return [{ type: "tasks", sz: "l", cfg: { src: "list:today", t: "Сегодня" } }, { type: "habits", sz: "m" }, { type: "dead", sz: "m", cfg: { days: 7 } }, { type: "quick", sz: "m", cfg: { src: "list:today" } }, { type: "daytop", sz: "m" }, { type: "goals", sz: "m" }, { type: "cal", sz: "m", cfg: { days: 3 } }, { type: "pomo", sz: "m" }]; } },
+      w: function () { return [{ type: "daytop", sz: "m" }, { type: "tasks", sz: "l", cfg: { src: "list:today", t: "Сегодня" } }, { type: "habits", sz: "m" }, { type: "dead", sz: "m", cfg: { days: 7 } }, { type: "quick", sz: "m", cfg: { src: "list:today" } }, { type: "goals", sz: "m" }, { type: "cal", sz: "m", cfg: { days: 3 } }, { type: "pomo", sz: "m" }]; } },
     week: { n: "Обзор недели", i: "📅", d: "Итоги недели в цифрах, график, спринт, просроченное, «Входящие», планы на 7 дней и место для выводов.",
       w: function () { return [{ type: "count", sz: "s", cfg: { m: "done7", t: "Сделано за неделю" } }, { type: "count", sz: "s", cfg: { m: "late", t: "Просрочено" } }, { type: "count", sz: "s", cfg: { m: "open", src: "list:inbox", t: "Во «Входящих»" } }, { type: "count", sz: "s", cfg: { m: "open", src: "list:sprint", t: "Осталось в спринте" } }, { type: "chart", sz: "m", cfg: { days: 14 } }, { type: "sprint", sz: "m" }, { type: "tasks", sz: "m", cfg: { src: "list:late", lim: 10, add: 0 } }, { type: "tasks", sz: "m", cfg: { src: "list:inbox", lim: 10 } }, { type: "tasks", sz: "m", cfg: { src: "list:week", lim: 10, add: 0 } }, { type: "sticky", sz: "m", cfg: { t: "Итоги недели", c: 1, text: "Что получилось:\n\nЧто мешало:\n\nГлавное на следующую неделю:" } }]; } },
     proj: { n: "Проект", i: "📁", d: "Всё по одному проекту: прогресс, задачи, канбан, сроки, просроченное, заметки и ссылки на материалы.", needs: "proj",
@@ -12460,6 +12460,19 @@ CREATE TABLE inbox (
     });
     if (ch) { optTouch(); save(); }
     LS.set("zd-vmig", "1");
+  })();
+  // один раз: на доске «Мой день» виджет «★ Главное на сегодня» — первым (добавляем или переставляем наверх; просьба 20.10.2026)
+  (function () {
+    if (LS.get("zd-daytopmig") === "1") return;
+    var ch = false;
+    boards().forEach(function (b) {
+      if (!/мой\s*день/i.test(b.n || "")) return;
+      var ws = b.w || [], k = -1; ws.forEach(function (w, i) { if (k < 0 && w.type === "daytop") k = i; });
+      if (k === 0) return; // уже первым
+      b.w = k > 0 ? [ws[k]].concat(ws.slice(0, k), ws.slice(k + 1)) : [{ id: uid(), type: "daytop", sz: "m", cfg: {} }].concat(ws); touch(b); ch = true;
+    });
+    if (ch) save();
+    LS.set("zd-daytopmig", "1");
   })();
   /* ---------- демо-режим (вставляется только сборкой: python build.py --demo) ----------
      Отдельное хранилище (ключи «zdemo:…»), никакой синхронизации с Диском и сервером,
