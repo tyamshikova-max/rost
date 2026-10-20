@@ -2428,7 +2428,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-108";
+  var APPV = "zd-app-2026-10-16-109";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -4599,7 +4599,7 @@ CREATE TABLE inbox (
         '<div class="gpr">' + gBar(g, pr) + '<span>' + pr.pct + "%</span></div><small class=\"muted\">" + esc(pr.txt) + (ps.length ? " · " + ps.map(function (p) { return esc(p.n); }).join(", ") : "") + "</small>" +
         (nx && g.st !== "done" ? '<div class="gnext">Следующий шаг: ' + esc(nx.t) + "</div>" : "") + "</a>";
     }).join("") + "</div>";
-    if (GTAB === "active") h += '<div class="hadd"><span>＋</span><input type="text" class="inp" data-gnew="1" placeholder="Новая цель — напишите и нажмите Enter" aria-label="Новая цель"></div><div class="r" style="margin-top:6px"><button type="button" class="btn sm" data-a="svnew">🛟 Новая цель-накопление</button></div>';
+    if (GTAB === "active") h += '<div class="hadd"><span>＋</span><input type="text" class="inp" data-gnew="1" placeholder="Новая цель — напишите и нажмите Enter" aria-label="Новая цель"></div><div class="r" style="margin-top:6px"><button type="button" class="btn sm" data-a="svnew">🏦 Новая цель-накопление</button></div>';
     return h;
   }
   function vGoal() {
@@ -4611,7 +4611,7 @@ CREATE TABLE inbox (
     if (g.sv) h += svHTML(g); else h += '<div class="gtop" style="--gc:' + col(g.c || 0) + '"><div class="gring">' + gRing(pr.pct, col(g.c || 0)) + '</div><div class="gtopi"><b>' + esc(pr.txt) + "</b>" + gDue(g) + (goalNext(g, 1)[0] ? '<div class="gnext">Следующий шаг: <a href="#task-' + goalNext(g, 1)[0].id + '">' + esc(goalNext(g, 1)[0].t) + "</a></div>" : "") + "</div></div>";
     h += '<div class="card gset"><div class="wcr"><span>Срок</span><div class="r"><input type="date" class="inp" data-goal="' + g.id + '" data-gf="due" value="' + (g.due ? dKey(g.due) : "") + '">' + (g.due ? '<button type="button" class="ibtn" data-a="gdue0" title="Без срока">✕</button>' : "") + "</div></div>" +
       '<div class="wcr"><span>Цвет</span><div class="sw">' + COLORS.map(function (c, i) { return '<button type="button" data-a="gcol" data-v="' + i + '" class="' + ((g.c || 0) === i ? "on" : "") + '" style="background:' + c[1] + '" title="' + c[0] + '"></button>'; }).join("") + "</div></div>" +
-      '<div class="wcr"><span>Прогресс</span><div><div class="seg"><button type="button" data-a="gmode" data-x="tasks" class="' + (g.m || g.sv ? "" : "on") + '">по задачам</button><button type="button" data-a="gmode" data-x="num" class="' + (g.m ? "on" : "") + '">по числу</button><button type="button" data-a="gmode" data-x="sv" class="' + (g.sv ? "on" : "") + '">🛟 накопление ₽</button></div>' +
+      '<div class="wcr"><span>Прогресс</span><div><div class="seg"><button type="button" data-a="gmode" data-x="tasks" class="' + (g.m || g.sv ? "" : "on") + '">по задачам</button><button type="button" data-a="gmode" data-x="num" class="' + (g.m ? "on" : "") + '">по числу</button><button type="button" data-a="gmode" data-x="sv" class="' + (g.sv ? "on" : "") + '">🏦 накопление ₽</button></div>' +
       (g.sv ? svSetHTML(g) : g.m ? '<div class="r gnum"><button type="button" class="btn sm" data-a="gstep" data-x="-1">−</button><input type="number" class="inp" data-goal="' + g.id + '" data-gf="cur" value="' + (+g.m.cur || 0) + '" step="any" style="width:90px"><button type="button" class="btn sm" data-a="gstep" data-x="1">＋</button><span class="muted">из</span><input type="number" class="inp" data-goal="' + g.id + '" data-gf="target" value="' + (+g.m.target || "") + '" step="any" placeholder="цель" style="width:90px"><input type="text" class="inp" data-goal="' + g.id + '" data-gf="unit" value="' + esc(g.m.unit || "") + '" placeholder="км, страниц, ₽" style="width:120px"></div>' : '<div class="wsub">Доля выполненных задач в привязанных проектах и задачах цели</div>') + "</div></div>" +
       '<div class="wcr"><span>Зачем</span><textarea class="inp" rows="2" data-goal="' + g.id + '" data-gf="desc" placeholder="Почему это важно, как поймёте, что цель достигнута">' + esc(g.desc || "") + "</textarea></div></div>";
     h += '<h2>Проекты цели <span class="c">' + ps.length + '</span></h2><div class="gprojs">' + ps.map(function (p) { var ids = pdesc(p.id), l = live(S.tasks).filter(function (t) { return ids.indexOf(t.pid) >= 0 && !t.canc; }), d = l.filter(function (t) { return t.done; }).length; return '<span class="gpj"><a href="#proj-' + p.id + '">' + piconH(p) + " " + esc(p.n) + '</a><small>' + d + "/" + l.length + '</small><button type="button" data-a="gunlink" data-p="' + p.id + '" title="Отвязать проект">×</button></span>'; }).join("") + '<button type="button" class="btn sm" data-a="glink">＋ Привязать проект</button></div>';
@@ -4775,7 +4775,7 @@ CREATE TABLE inbox (
     goals: { n: "Цели", i: "🎯", sec: "Цели", sz: "m", d: "Прогресс целей: все активные или одна выбранная." },
     order: { n: "Порядок дома", i: "🏠", sec: "Задачи", sz: "m", d: "Последний чекап порядка (недельный, %) и быстрый чекап сегодня." },
     budget: { n: "Бюджет недели", i: "💰", sec: "Цели", sz: "m", d: "Гибкие траты недели: потрачено из лимита и сколько можно в день; доход − расход периода." },
-    savings: { n: "Накопления", i: "🛟", sec: "Цели", sz: "m", d: "Цели-накопления в рублях: процент, сколько собрано и сколько отложено в этом месяце." },
+    savings: { n: "Накопления", i: "🏦", sec: "Цели", sz: "m", d: "Цели-накопления в рублях: процент, сколько собрано и сколько отложено в этом месяце." },
     routine: { n: "Распорядок дня", i: "🕒", sec: "Задачи", sz: "m", d: "Блоки времени на сегодня: что сейчас, план и факт; итог за 7 дней." },
     daytop: { n: "Главное на сегодня", i: "★", sec: "Задачи", sz: "m", d: "Три главные задачи дня из плана и кнопки «План дня» и «Итоги»." },
     sticky: { n: "Стикер", i: "🗒", sec: "Инструменты", sz: "s", d: "Свободный текст: цель недели, мысль, напоминание себе." },
@@ -6738,8 +6738,7 @@ CREATE TABLE inbox (
     return '<div class="svset"><label><span class="muted">Сумма цели</span>' + num("svtarget", s.target, "1 000 000") + ' ₽</label><label title="Сколько уже лежит в накоплениях — от этой суммы считаются процент, график и план"><span class="muted">Уже накоплено (начальный остаток)</span>' + num("svstart", s.start, "0") + ' ₽</label>' +
       '<label title="На какую дату этот остаток — отсюда начинается график"><span class="muted">Остаток на дату</span><input type="date" class="inp" data-goal="' + g.id + '" data-gf="svfrom" value="' + dKey(s.from || g.created || Date.now()) + '"></label>' +
       '<label title="Сколько уходит в месяц — покажу, на сколько месяцев хватит накопленного"><span class="muted">Расходы в месяц (необязательно)</span>' + num("svmexp", s.mexp, "например, 100 000") + ' ₽</label>' +
-      '<label title="Раз в месяц появится задача «Отложить» — когда отметите её, спрошу сумму"><span class="muted">Напоминать откладывать</span><select class="inp" data-goal="' + g.id + '" data-gf="svrday"><option value="0">не напоминать</option>' +
-      Array.apply(null, Array(28)).map(function (x, i) { return '<option value="' + (i + 1) + '"' + (+s.rday === i + 1 ? " selected" : "") + ">" + (i + 1) + "-го числа</option>"; }).join("") + "</select></label></div>" +
+      '<label title="Раз в месяц появится задача «Отложить» — когда отметите её, спрошу сумму"><span class="muted">Напоминать откладывать</span><button type="button" class="btn sm svrdb" data-a="svrday" data-g="' + g.id + '">' + (+s.rday ? "каждое " + s.rday + "-е число" : "не напоминать") + ' ▾</button>' + (SVRDIN === g.id ? '<span class="r"><input class="inp" type="number" min="1" max="28" id="svrdin" data-g="' + g.id + '" value="' + (+s.rday || "") + '" placeholder="1–28" style="width:80px"><span class="muted">число, Enter</span></span>' : "") + "</label></div>" +
       (g.due ? "" : '<div class="wsub">Поставьте срок выше — посчитаю, сколько откладывать в месяц и идёте ли вы по графику.</div>');
   }
   function svBar(g, r) {
@@ -6762,6 +6761,9 @@ CREATE TABLE inbox (
     h += r.ops.length ? '<div class="svlog">' + r.ops.slice(0, SVALL === g.id ? 500 : 12).map(function (x) { return '<div class="svlr"><span class="muted">' + esc(new Date(x.d).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: new Date(x.d).getFullYear() === new Date().getFullYear() ? undefined : "2-digit" })) + '</span><span class="svln">' + esc(x.n || (x.a > 0 ? "пополнение" : "снятие")) + '</span><b class="' + (x.a >= 0 ? "ok" : "warn") + '">' + (x.a >= 0 ? "+" : "−") + Math.abs(Math.round(x.a)).toLocaleString("ru-RU") + '</b><button type="button" class="ibtn" data-a="svdel" data-id="' + x.id + '" title="Удалить запись">×</button></div>'; }).join("") + "</div>" + (r.ops.length > 12 && SVALL !== g.id ? '<button type="button" class="btn sm" data-a="svall" data-g="' + g.id + '">Показать все записи · ' + r.ops.length + "</button>" : "") : '<p class="muted" style="margin:6px 0 0">Записей пока нет. Впишите сумму и нажмите «＋ Отложила».</p>';
     return h + "</div>";
   }
+  var SVRDIN = "";
+  document.addEventListener("change", function (e) { var t = e.target; if (t.id !== "svrdin") return; var g = goal(t.dataset.g), v = Math.max(0, Math.min(28, Math.round(+t.value || 0))); SVRDIN = ""; if (g && g.sv) { g.sv = Object.assign({}, g.sv, { rday: v }); svRemSync(g); touch(g); save(); } render(); if (v) toast("Напоминание: каждое " + v + "-е число"); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.id === "svrdin") { e.preventDefault(); e.target.blur(); } });
   var SVALL = "", SVMPR = ["январе", "феврале", "марте", "апреле", "мае", "июне", "июле", "августе", "сентябре", "октябре", "ноябре", "декабре"];
   // график: накоплено на конец каждого месяца (факт) и прямая плана от старта до суммы цели к сроку
   function svChart(g, r) {
@@ -6790,11 +6792,11 @@ CREATE TABLE inbox (
     render();
     toastUndo(ms === 100 ? "🎉 Цель накоплена! Можно отметить её достигнутой" : ms ? "🎉 " + ms + "% пути — так держать!" : (a > 0 ? "+" : "−") + rub(Math.abs(a)) + " · «" + g.n + "»", function () { op.del = 1; op.delAt = Date.now(); touch(op); });
   }
-  // напоминание: одна повторяющаяся задача на цель — «🛟 Отложить в …» раз в месяц нужного числа
+  // напоминание: одна повторяющаяся задача на цель — «🏦 Отложить в …» раз в месяц нужного числа
   function svRemSync(g) {
     var s = g.sv || {}, day = +s.rday || 0, t = s.rtid ? task(s.rtid) : null;
     if (!day || g.st === "done" || g.st === "drop") { if (t && !t.done) { t.del = 1; t.delAt = Date.now(); touch(t); } return; }
-    var title = "🛟 Отложить: " + g.n, now = new Date(), nx = new Date(now.getFullYear(), now.getMonth(), day).getTime(); if (nx < today0()) nx = new Date(now.getFullYear(), now.getMonth() + 1, day).getTime();
+    var title = "🏦 Отложить: " + g.n, now = new Date(), nx = new Date(now.getFullYear(), now.getMonth(), day).getTime(); if (nx < today0()) nx = new Date(now.getFullYear(), now.getMonth() + 1, day).getTime();
     if (!t || t.done) { t = newTaskFrom(title, { day: nx }); t.at = nx; t.allday = true; t.rem = false; t.tags = []; s.rtid = t.id; }
     t.t = title; t.rep = "custom"; t.rr = { f: "m", n: 1, md: day }; t.svg = g.id; t.goal = g.id;
     if (t.at && new Date(t.at).getDate() !== day && t.allday) t.at = nx;
@@ -6804,7 +6806,7 @@ CREATE TABLE inbox (
   function svAsk(gid) {
     var g = goal(gid); if (!g || !g.sv) return; var r = svStat(g), el = $("svask");
     if (!el) { el = document.createElement("div"); el.id = "svask"; el.setAttribute("role", "dialog"); document.body.appendChild(el); }
-    el.innerHTML = '<b>🛟 Сколько отложили в «' + esc(g.n) + '»?</b><div class="r"><input type="text" inputmode="numeric" class="inp" id="svaska" value="' + (r.plan ? r.plan.toLocaleString("ru-RU") : "") + '" placeholder="Сумма, ₽"><button type="button" class="btn sm pri" data-a="svaskok" data-g="' + g.id + '">Записать</button><button type="button" class="btn sm" data-a="svaskno">Не сейчас</button></div>' + (r.plan ? '<small class="muted">План на месяц — ' + rub(r.plan) + (r.month ? ", уже отложено " + rub(r.month) : "") + "</small>" : "");
+    el.innerHTML = '<b>🏦 Сколько отложили в «' + esc(g.n) + '»?</b><div class="r"><input type="text" inputmode="numeric" class="inp" id="svaska" value="' + (r.plan ? r.plan.toLocaleString("ru-RU") : "") + '" placeholder="Сумма, ₽"><button type="button" class="btn sm pri" data-a="svaskok" data-g="' + g.id + '">Записать</button><button type="button" class="btn sm" data-a="svaskno">Не сейчас</button></div>' + (r.plan ? '<small class="muted">План на месяц — ' + rub(r.plan) + (r.month ? ", уже отложено " + rub(r.month) : "") + "</small>" : "");
     el.hidden = false; setTimeout(function () { var i = $("svaska"); if (i) { i.focus(); i.select(); } }, 30);
   }
   function svAct(a, el) {
@@ -6813,7 +6815,9 @@ CREATE TABLE inbox (
       case "svadd": var ai = $("svamt"), di = $("svdate"), d = di && di.value ? new Date(di.value + "T12:00").getTime() : Date.now(); if (d > today0() + DAY - 1) d = Date.now(); else if (sod(d) === today0()) d = Date.now();
         svAddOp(g, svAmt(ai && ai.value) * (+el.dataset.x < 0 ? -1 : 1), ($("svnote") || {}).value, d); setTimeout(function () { var i = $("svamt"); if (i) i.focus(); }, 30); return true;
       case "svdel": var op = live(S.sops || []).filter(function (x) { return x.id === el.dataset.id; })[0]; if (!op) return true; op.del = 1; op.delAt = Date.now(); touch(op); save(); render(); toastUndo("Запись удалена", function () { delete op.del; delete op.delAt; touch(op); }); return true;
-      case "svnew": var ng = goalCreate("Подушка безопасности"); ng.ic = "🛟"; ng.sv = { target: 0, start: 0, from: today0() }; touch(ng); save(); go("goal-" + ng.id); setTimeout(function () { var i = document.querySelector('[data-gf="svtarget"]'); if (i) i.focus(); }, 80); return true;
+      case "svnew": var ng = goalCreate("Подушка безопасности"); ng.ic = "🏦"; ng.sv = { target: 0, start: 0, from: today0() }; touch(ng); save(); go("goal-" + ng.id); setTimeout(function () { var i = document.querySelector('[data-gf="svtarget"]'); if (i) i.focus(); }, 80); return true;
+      case "svrday": var rr = el.getBoundingClientRect(), curd = +((g || {}).sv || {}).rday || 0; var dl = [1, 5, 10, 11, 15, 20, 25]; if (curd && dl.indexOf(curd) < 0) dl.push(curd); dl.sort(function (a, b) { return a - b; });
+        ctxShow(rr.left, rr.bottom + 4, [{ c: "0", i: curd ? "" : "✓", l: "Не напоминать" }].concat(dl.map(function (d) { return { c: String(d), i: curd === d ? "✓" : "", l: "Каждое " + d + "-е число" + (d === 11 ? " (начало периода)" : "") }; })).concat([{ c: "x", i: "✎", l: "Другое число…" }]), { k: "svrday", id: g ? g.id : "" }); return true;
       case "svall": SVALL = SVALL === el.dataset.g ? "" : el.dataset.g; render(); return true;
       case "svaskok": var v = svAmt(($("svaska") || {}).value); $("svask").hidden = true; if (g && v) svAddOp(g, v, "по напоминанию"); return true;
       case "svaskno": $("svask").hidden = true; return true;
@@ -6831,7 +6835,7 @@ CREATE TABLE inbox (
   function svWidget(c) {
     var l = (c.gid ? [goal(c.gid)] : goals().filter(function (g) { return (g.st || "active") === "active"; })).filter(svOn);
     if (!l.length) return '<p class="wempty">Целей-накоплений пока нет — откройте цель и выберите прогресс «накопление ₽»</p>';
-    return '<div class="wgl">' + l.map(function (g) { var r = svStat(g); return '<a class="wg" href="#goal-' + g.id + '"><span class="wgn">' + (g.ic || "🛟") + " " + esc(g.n) + '</span><span class="wgp">' + r.pct + "%</span>" + svBar(g, r) + '<small class="muted">' + rub(r.cur) + " из " + rub(r.tg) + (r.plan && r.left > 0 ? " · в этом месяце " + rub(r.month) + " из " + rub(r.plan) : "") + "</small></a>"; }).join("") + "</div>";
+    return '<div class="wgl">' + l.map(function (g) { var r = svStat(g); return '<a class="wg" href="#goal-' + g.id + '"><span class="wgn">' + (g.ic || "🏦") + " " + esc(g.n) + '</span><span class="wgp">' + r.pct + "%</span>" + svBar(g, r) + '<small class="muted">' + rub(r.cur) + " из " + rub(r.tg) + (r.plan && r.left > 0 ? " · в этом месяце " + rub(r.month) + " из " + rub(r.plan) : "") + "</small></a>"; }).join("") + "</div>";
   }
 
   /* ---------- Бюджет: недели (пн–вс) и периоды (11-е → 10-е) из файла «Финансы … .xlsx».
@@ -7649,7 +7653,7 @@ CREATE TABLE inbox (
       2: { 1: [["Правило 24 часов: первая запись в списке желаний", 3, "p", "Покупка от " + rub(fcOpt().th) + " — сначала в «Желания», решение не раньше чем через сутки (от " + rub(fcOpt().th30) + " — через 30 дней).", "wish"]], 3: [["День без трат", 0, "h", "Ни одной покупки по гибким статьям.", "ns"]], 5: [["День без трат", 0, "h", "Второй за неделю.", "ns"]] },
       3: { 1: [["Перенести долги в список", 15, "d", "«Бюджет» → «Долги»: из листа «Долги» — карты, сплиты, кредиты. Остаток, ставка, минимальный платёж, дата. Ипотеку можно отметить «вне челленджа».", "debts"]], 2: [["Ставки и минимальные платежи", 10, "d", "Уточните в банковских приложениях: ставку и минимальный платёж по каждой карте."]], 3: [["Выбрать стратегию", 5, "d", "«Снежный ком»: сначала самый маленький остаток — быстрые победы. «Лавина»: сначала самая высокая ставка — меньше переплата. На остальные — минимальные платежи.", "strat"]], 4: [["Даты платежей по долгам — в справочник", 5, "u", "Чтобы «Неделя» показывала, что ожидается."]], 6: [["День без трат", 0, "h", "", "ns"]] },
       4: { 1: [["Найти деньги на фокус-долг", 15, "d", "Посмотрите «Период»: какая гибкая статья даст 1 000–5 000 ₽ в месяц? Эту сумму — сверх минимума на фокус-долг."]], 3: [["День без трат", 0, "h", "", "ns"]], 5: [["Платёж сверх минимума по фокус-долгу", 5, "d", "Даже небольшой. Отметьте в «Долгах» новый остаток в воскресенье."]] },
-      5: { 1: [["Правило конверта", 5, "s", "Остаток лимита недели в воскресенье — в конверт или на фокус-долг (у вас в файле: «остаток на конец перекладывается в конверт»)."]], 2: [["Небольшой резерв от новых долгов (по желанию)", 10, "s", "Не подушка, а заслон: сумма на поломку или лекарства, чтобы не брать новый кредит. Цель-накопление «Резерв»."]], 4: [["Цель «Подушка безопасности» — создать сейчас, копить после долгов", 5, "s", "«Цели» → «🛟 Новая цель-накопление»: сумма и начальный остаток. Пополнения начнутся, когда закроется последний долг.", "sv"]], 6: [["День без трат", 0, "h", "", "ns"]] },
+      5: { 1: [["Правило конверта", 5, "s", "Остаток лимита недели в воскресенье — в конверт или на фокус-долг (у вас в файле: «остаток на конец перекладывается в конверт»)."]], 2: [["Небольшой резерв от новых долгов (по желанию)", 10, "s", "Не подушка, а заслон: сумма на поломку или лекарства, чтобы не брать новый кредит. Цель-накопление «Резерв»."]], 4: [["Цель «Подушка безопасности» — создать сейчас, копить после долгов", 5, "s", "«Цели» → «🏦 Новая цель-накопление»: сумма и начальный остаток. Пополнения начнутся, когда закроется последний долг.", "sv"]], 6: [["День без трат", 0, "h", "", "ns"]] },
       6: { 1: [["Сравнить план и факт прошлых периодов", 15, "p", "«Бюджет» → «Период», листайте назад: какие статьи стабильно выше плана?"]], 2: [["Поправить план следующего периода в файле", 15, "p", "Лист «Фин план 2026» и месячный лист следующего периода: реалистичные суммы."]], 4: [["Обновить следующий период из файла", 5, "u", "Чтобы лимиты недель считались от нового плана.", "bupd"]], 6: [["День без трат", 0, "h", "", "ns"]] },
       7: { 1: [["Подписки: что не используется — отменить", 15, "p", "Справочник платежей и выписка банка за 2 месяца."]], 2: [["Лишние карты и счета", 10, "p", "Карты с платным обслуживанием, которыми не пользуетесь, — закрыть."]], 3: [["Тарифы связи и интернета", 10, "p", "Сравните с актуальными — часто старый тариф дороже нового."]], 4: [["Страховки", 10, "p", "Что застраховано, за сколько, нужно ли."]], 5: [["Вещи на продажу", 10, "s", "«План уборки» → «Места» → «На выход»: что продать — выставить. Продажа — доход «Продажи»."]] },
       8: { 1: [["Доходы: план и факт по источникам", 10, "p", "«Бюджет» → «Период» → «Доходы»."]], 2: [["Фриланс: часы и ставка", 10, "p", "Лист «Unica»: сколько часов, какая фактическая ставка, где «дельта»."]], 3: [["Одна идея, как поднять доход или убрать утечку", 10, "p", "Записать в дневник цели или задачей."]], 5: [["День без трат", 0, "h", "", "ns"]] },
@@ -8395,7 +8399,7 @@ CREATE TABLE inbox (
       "<b>Цель</b> — большой результат над проектами: «Сдать экзамен по 1С», «Дописать книгу». Пункт «Цели» в левой панели; новая цель — строкой внизу списка.",
       "<b>Привязка</b>: правая кнопка по проекту → «🎯 Цель» (подпроекты идут вместе с ним) или меню задачи → «🎯 Цель» для отдельных шагов; на странице цели — «＋ Привязать проект» и строка новой задачи.",
       "<b>Прогресс</b> считается сам — доля выполненных задач во всех привязанных проектах и задачах цели. Или «по числу»: цель в километрах, страницах, рублях — ＋/− меняют текущее значение.",
-      "<b>🛟 Цель-накопление (₽)</b> — на странице цели «Прогресс» → «накопление ₽» или кнопка «🛟 Новая цель-накопление» на странице «Цели». Укажите сумму цели, <b>начальный остаток</b> (сколько уже накоплено) и дату этого остатка, по желанию — срок цели и расходы в месяц. Пополнения и снятия записываются журналом («＋ Отложила», «− Сняла»), текущая сумма считается сама. Видно: процент и полосу с отметками 25/50/75%, сколько откладывать в месяц до срока, сколько отложено в этом месяце, идёте ли по графику, прогноз даты при вашем темпе, на сколько месяцев расходов хватит; ниже — график по месяцам. «Напоминать откладывать» — раз в месяц появится задача «🛟 Отложить: …»; отметите её — приложение спросит сумму и запишет пополнение. Целей-накоплений может быть несколько; виджет доски «Накопления» показывает все.",
+      "<b>🏦 Цель-накопление (₽)</b> — на странице цели «Прогресс» → «накопление ₽» или кнопка «🏦 Новая цель-накопление» на странице «Цели». Укажите сумму цели, <b>начальный остаток</b> (сколько уже накоплено) и дату этого остатка, по желанию — срок цели и расходы в месяц. Пополнения и снятия записываются журналом («＋ Отложила», «− Сняла»), текущая сумма считается сама. Видно: процент и полосу с отметками 25/50/75%, сколько откладывать в месяц до срока, сколько отложено в этом месяце, идёте ли по графику, прогноз даты при вашем темпе, на сколько месяцев расходов хватит; ниже — график по месяцам. «Напоминать откладывать» — раз в месяц появится задача «🏦 Отложить: …»; отметите её — приложение спросит сумму и запишет пополнение. Целей-накоплений может быть несколько; виджет доски «Накопления» показывает все.",
       "<b>Шаги по порядку</b> — на странице цели все её невыполненные задачи одним списком: из всех привязанных проектов (и подпроектов) и собственные задачи цели. Сначала порядок такой же, как в проектах: проекты друг за другом, внутри — как задачи стоят на странице проекта. Переставьте шаги стрелками ↑↓ или перетаскиванием — это и есть последовательность цели; «↺ Как в проектах» вернёт исходный порядок. Новые задачи встают в конец.",
       "<b>Следующий шаг</b> — первый в этом списке, который ничего не ждёт: задачи со связью «Сначала сделать» на невыполненную и задачи «Когда-нибудь» пропускаются. Он подсвечен в списке, показан на карточке цели, в виджете «Цели» и подсказывается при планировании дня.",
       "На карточке цели: срок с обратным отсчётом, следующий шаг, проекты с их прогрессом, «Зачем» и <b>дневник цели</b> — короткие записи о том, что приблизило к цели. «🎉 Цель достигнута» и «⏸ Отложить» убирают цель на соседние вкладки.",
@@ -9594,7 +9598,7 @@ CREATE TABLE inbox (
       case "gdue0": var g0 = goal(ARG); if (g0) { g0.due = 0; touch(g0); save(); render(); } return;
       case "gmode": var gm = goal(ARG); if (gm) {
           var gx = el.dataset.x;
-          if (gx === "sv") { gm.sv = gm.sv || { target: gm.m && (gm.m.unit || "").indexOf("₽") >= 0 ? +gm.m.target || 0 : 0, start: gm.m && (gm.m.unit || "").indexOf("₽") >= 0 ? +gm.m.cur || 0 : 0, from: today0() }; delete gm.m; if (!gm.ic || gm.ic === "🎯") gm.ic = "🛟"; }
+          if (gx === "sv") { gm.sv = gm.sv || { target: gm.m && (gm.m.unit || "").indexOf("₽") >= 0 ? +gm.m.target || 0 : 0, start: gm.m && (gm.m.unit || "").indexOf("₽") >= 0 ? +gm.m.cur || 0 : 0, from: today0() }; delete gm.m; if (!gm.ic || gm.ic === "🎯") gm.ic = "🏦"; }
           else { if (gm.sv) { gm.sv.rday = 0; svRemSync(gm); delete gm.sv; } if (gx === "num") gm.m = gm.m || { cur: 0, target: 10, unit: "" }; else delete gm.m; }
           touch(gm); save(); render(); } return;
       case "gstep": var gp = goal(ARG); if (gp && gp.m) { gp.m.cur = Math.round(((+gp.m.cur || 0) + (+el.dataset.x)) * 100) / 100; touch(gp); save(); render(); } return;
@@ -10818,6 +10822,8 @@ CREATE TABLE inbox (
     if (k && k.indexOf("clpick:") === 0) { clPick(k.slice(7), id, c); return; }
     if (k && k.indexOf("czico:") === 0) { var zl = czList().map(function (z) { return Object.assign({}, z); }); zl.forEach(function (z) { if (z.id === id) z.i = c === "~" ? "" : c; }); czSave(zl); render(); return; }
     if (k && k.indexOf("czmove:") === 0) { czMove(k.slice(7), c === "~" ? "" : c); return; }
+    if (k === "svrday" && c === "x") { SVRDIN = id; render(); setTimeout(function () { var i = $("svrdin"); if (i) { i.focus(); i.select(); } }, 40); return; }
+    if (k === "svrday") { var sg = goal(id); if (sg && sg.sv) { sg.sv = Object.assign({}, sg.sv, { rday: +c || 0 }); svRemSync(sg); touch(sg); save(); render(); toast(+c ? "Напоминание: каждое " + c + "-е число — задача «🏦 Отложить»" : "Напоминание выключено"); } return; }
     if (k === "ckzone") { var cq = live(S.chq || []).filter(function (x) { return x.id === id; })[0]; if (cq) { cq.zone = c; touch(cq); save(); render(); } return; }
     if (k === "burcat") { var bg = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bg) { bg.cat = c; touch(bg); save(); render(); } return; }
     if (k === "tbpick") { var tl = tbList(); tl.forEach(function (b) { if (b.id === id) b.cat = c; }); tbSave(TBTAB, tl); render(); return; }
@@ -11392,6 +11398,13 @@ CREATE TABLE inbox (
     });
     if (ch) { optTouch(); save(); }
     LS.set("zd-vmig", "1");
+  })();
+  // один раз: значок «спасательный круг» (его нет в шрифте Windows 10 — виден квадратик) → 🏦 в целях и задачах
+  (function () {
+    if (LS.get("zd-lifebuoy") === "1") return; var old = String.fromCodePoint(0x1F6DF), ch = false;
+    (S.goals || []).forEach(function (g) { if (g.ic === old) { g.ic = "🏦"; touch(g); ch = true; } });
+    (S.tasks || []).forEach(function (t) { if (t.t && t.t.indexOf(old) >= 0) { t.t = t.t.split(old).join("🏦"); touch(t); ch = true; } });
+    if (ch) save(); LS.set("zd-lifebuoy", "1");
   })();
   // один раз: на доску «Мой день» — виджет «Распорядок дня» сразу после «Главного на сегодня» (просьба 20.10.2026)
   (function () {
