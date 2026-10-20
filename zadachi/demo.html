@@ -376,6 +376,7 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .ckqe { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 5px 0 } .ckqe.off { opacity: .5 } .ckqn { flex: 2 1 220px; min-width: 0 } .ckqa { flex: 1 1 170px; min-width: 0 } .ckqm { width: 64px }
 #ckask { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60; width: min(420px, calc(100vw - 32px)); display: grid; gap: 8px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--solid, var(--panel)); box-shadow: 0 12px 40px rgba(0, 0, 0, .2) } #ckask .r { gap: 6px }
 .ckw { display: flex; gap: 12px; align-items: center; color: var(--fg); text-decoration: none } .ckwb { min-width: 64px; height: 64px; border-radius: 16px; display: grid; place-items: center; font-size: calc(20px * var(--fs)); font-weight: 700 } .ckw > span:last-child { display: grid; gap: 2px }
+.czset { display: grid; gap: 8px; padding: 12px 14px; margin-top: 12px } .czl { display: grid; gap: 4px } .czr { display: flex; flex-wrap: wrap; gap: 6px; align-items: center } .czr.off .czn { color: var(--muted) } .czi { min-width: 40px; font-size: calc(16px * var(--fs)) } .czn { flex: 1 1 180px; min-width: 0; max-width: 280px } .czc { font-size: calc(12px * var(--fs)); min-width: 90px } .czb { display: inline-flex } .czb .ibtn:disabled { opacity: .3; cursor: default }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5436,7 +5437,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-104";
+  var APPV = "zd-app-2026-10-16-105";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -9205,6 +9206,45 @@ CREATE TABLE inbox (
 
   /* ---------- План уборки: пул дел → раскладка по дням (зоны дня + лимит минут) → каждый день одна задача с чек-листом ---------- */
   var CZONES = { "": "любая", kitchen: "Кухня", bath: "Ванная и туалет", bed: "Спальня", living: "Гостиная", hall: "Прихожая", kids: "Детская", all: "Вся квартира" };
+  // зоны настраиваются (S.opt.clean.zl: [{ id, n, i, off }]); CZONES — их отображение «ключ → название» в порядке списка, пересобирается перед отрисовкой
+  var CZ0 = [["kitchen", "Кухня", "🍳"], ["bath", "Ванная и туалет", "🛁"], ["bed", "Спальня", "🛏"], ["living", "Гостиная", "🛋"], ["hall", "Прихожая", "🚪"], ["kids", "Детская", "🧸"], ["all", "Вся квартира", "🏠"]];
+  var CZICONS = ["🍳", "🍽", "🛁", "🚽", "🛏", "🛋", "🚪", "🧸", "🏠", "🏡", "🧺", "🧥", "🪴", "🌿", "🖥", "📚", "🪟", "🚗", "🐾", "🧹", "🎮", "👶", "💼", "🏋️"];
+  var CZOFF = {}, CZKEY = "";
+  function czList() { var l = (S.opt.clean || {}).zl; return Array.isArray(l) && l.length ? l : CZ0.map(function (x) { return { id: x[0], n: x[1], i: x[2] }; }); }
+  function czSync() {
+    var l = czList(), k = JSON.stringify(l); if (k === CZKEY) return; CZKEY = k;
+    Object.keys(CZONES).forEach(function (z) { delete CZONES[z]; }); CZONES[""] = "любая"; CZOFF = {};
+    l.forEach(function (z) { CZONES[z.id] = z.n; if (z.off) CZOFF[z.id] = 1; }); DV++;
+  }
+  function czSave(l) { CZKEY = ""; cSet("zl", l.map(function (z) { return { id: z.id, n: z.n, i: z.i || "", off: z.off ? 1 : 0 }; })); czSync(); }
+  function czUse(id) { return { ch: choresAll().filter(function (c) { return (c.zone || "") === id; }).length, q: live(S.chq || []).filter(function (q) { return (q.zone || "") === id; }).length, d: Object.keys(cOpt().zones).filter(function (w) { return cOpt().zones[w] === id; }).length }; }
+  function czSetHTML() {
+    var l = czList();
+    return '<div class="card czset"><h3 style="margin:0">Зоны</h3><p class="muted" style="margin:0">Свои зоны дома: добавить, переименовать, порядок (в нём зоны идут в списках и на карте порядка), скрыть ненужную. Удалить можно пустую зону — или сначала перенести её дела и вопросы в другую.</p><div class="czl">' +
+      l.map(function (z, i) { var u = czUse(z.id), n = u.ch + u.q; return '<div class="czr' + (z.off ? " off" : "") + '"><button type="button" class="btn sm czi" data-a="czico" data-id="' + z.id + '" title="Значок">' + (z.i || "▫") + '</button><input class="inp czn" data-czn="' + z.id + '" value="' + esc(z.n) + '" aria-label="Название зоны"><span class="muted czc">' + (n ? u.ch + " " + plural(u.ch, ["дело", "дела", "дел"]) + (u.q ? " · " + u.q + " " + plural(u.q, ["вопрос", "вопроса", "вопросов"]) : "") : "пусто") + '</span><span class="czb"><button type="button" class="ibtn" data-a="czmv" data-id="' + z.id + '" data-x="-1" title="Выше"' + (i ? "" : " disabled") + '>↑</button><button type="button" class="ibtn" data-a="czmv" data-id="' + z.id + '" data-x="1" title="Ниже"' + (i < l.length - 1 ? "" : " disabled") + '>↓</button><button type="button" class="ibtn" data-a="czoff" data-id="' + z.id + '" title="' + (z.off ? "Показывать в выборе зоны" : "Скрыть из выбора зоны") + '">' + (z.off ? "🙈" : "👁") + '</button><button type="button" class="ibtn" data-a="czdel" data-id="' + z.id + '" title="Удалить зону">🗑</button></span></div>'; }).join("") +
+      '</div><div class="r"><input class="inp" id="cznew" placeholder="Новая зона: Балкон, Кабинет…" style="max-width:260px" aria-label="Новая зона"><button type="button" class="btn sm" data-a="czadd">＋ Зона</button></div></div>';
+  }
+  function czAct(a, el) {
+    var id = el.dataset.id, l = czList().map(function (z) { return Object.assign({}, z); }), i = -1; l.forEach(function (z, k) { if (z.id === id) i = k; });
+    switch (a) {
+      case "czadd": var inp = $("cznew"), v = inp && inp.value.trim(); if (!v) { toast("Напишите название зоны"); return true; } if (czList().some(function (z) { return z.n.toLowerCase() === v.toLowerCase(); })) { toast("Такая зона уже есть"); return true; } l.push({ id: "z" + uid(), n: v.slice(0, 40), i: "" }); czSave(l); render(); toast("Зона «" + v + "» добавлена"); return true;
+      case "czmv": var j = i + (+el.dataset.x || 0); if (i < 0 || j < 0 || j >= l.length) return true; l.splice(j, 0, l.splice(i, 1)[0]); czSave(l); render(); return true;
+      case "czoff": if (i >= 0) { l[i].off = l[i].off ? 0 : 1; czSave(l); render(); } return true;
+      case "czico": var rc = el.getBoundingClientRect(); ctxShow(rc.left, rc.bottom + 4, [{ c: "~", i: "", l: "Без значка" }].concat(CZICONS.map(function (x) { return { c: x, i: x, l: "" }; })), { k: "czico:" + id, id: id }); return true;
+      case "czdel": if (i < 0) return true; var u = czUse(id);
+        if (!u.ch && !u.q && !u.d) { var gone = l.splice(i, 1)[0]; czSave(l); render(); toastUndo("Зона «" + gone.n + "» удалена", function () { var l2 = czList().slice(); l2.splice(i, 0, gone); czSave(l2); }); return true; }
+        var r2 = el.getBoundingClientRect(); ctxShow(r2.left, r2.bottom + 4, l.filter(function (z) { return z.id !== id; }).map(function (z) { return { c: z.id, i: z.i || "", l: "Перенести всё в «" + z.n + "» и удалить" }; }).concat([{ c: "~", i: "", l: "Перенести в «любая» и удалить" }]), { k: "czmove:" + id, id: id }); toast("В зоне " + u.ch + " " + plural(u.ch, ["дело", "дела", "дел"]) + (u.q ? ", " + u.q + " " + plural(u.q, ["вопрос", "вопроса", "вопросов"]) + " чекапа" : "") + (u.d ? ", она — зона дня" : "") + " — куда перенести?"); return true;
+    }
+    return false;
+  }
+  // перенести дела, вопросы чекапа и «зону дня» из зоны from в to и удалить from
+  function czMove(from, to) {
+    choresAll().forEach(function (c) { if ((c.zone || "") === from) { c.zone = to; touch(c); } });
+    live(S.chq || []).forEach(function (q) { if ((q.zone || "") === from) { q.zone = to; touch(q); } });
+    var zs = Object.assign({}, cOpt().zones); Object.keys(zs).forEach(function (w) { if (zs[w] === from) { if (to) zs[w] = to; else delete zs[w]; } }); cSet("zones", zs);
+    czSave(czList().filter(function (z) { return z.id !== from; })); if (cOpt().on) { cleanSync(today0()); save(); } render(); toast("Зона удалена, всё перенесено в «" + (CZONES[to] || "любая") + "»");
+  }
+  document.addEventListener("change", function (e) { var t = e.target; if (!t.dataset || !t.dataset.czn) return; var v = t.value.trim(); var l = czList().map(function (z) { return Object.assign({}, z); }); l.forEach(function (z) { if (z.id === t.dataset.czn) { if (v) z.n = v.slice(0, 40); else t.value = z.n; } }); czSave(l); });
   var CFREQ = { d: ["Каждый день", 7], w3: ["3 раза в неделю", 3], w2: ["2 раза в неделю", 2], w1: ["Раз в неделю", 1], w2w: ["Раз в 2 недели", 1], m: ["Раз в месяц", 1] };
   var CWD = [1, 2, 3, 4, 5, 6, 0], CWDN = { 1: "Пн", 2: "Вт", 3: "Ср", 4: "Чт", 5: "Пт", 6: "Сб", 0: "Вс" };
   // стартовый пул поддерживающей уборки: [название, частота, минут, зона, тяжёлое]
@@ -9455,14 +9495,14 @@ CREATE TABLE inbox (
     h += '<div class="wcr"><span>Дни недели</span><div class="cldset">' + CWD.map(function (w) { return '<div class="r"><b class="cldn">' + CWDN[w] + '</b><input class="inp" type="number" min="0" max="480" step="5" data-cldm="' + w + '" value="' + (+o.mins[w] || 0) + '" aria-label="Минут в ' + CWDN[w] + '"><span class="muted">мин</span><button type="button" class="btn sm" data-a="clpick" data-k="dzone" data-id="' + w + '">' + (o.zones[w] ? esc(CZONES[o.zones[w]]) : "зона: любая") + " ▾</button></div>"; }).join("") + '</div></div><p class="muted">Минуты — лимит на дела по графику; ежедневная база идёт сверх него. 0 минут — в этот день только ежедневные дела. Зона дня притягивает дела этой зоны (например, «Пн — кухня»).</p>';
     h += ckSetHTML();
     h += '<div class="r"><button type="button" class="btn sm" data-a="clseed">↺ Вернуть стартовые дела</button></div></div>';
-    return h;
+    return h + czSetHTML();
   }
   // меню выбора: частота, зона, ответственный, проект плана, зона дня
   function clPickMenu(k, id) {
     if (k === "when") return Object.keys(CWHEN).map(function (w) { return { c: w, i: cWhen(chore(id) || {}) === w ? "✓" : "", l: CWHEN[w] }; });
     if (k === "blk") return [{ c: "~", i: cOpt().blk ? "" : "✓", l: "Весь день, без времени" }].concat(tbCfg().cats.map(function (x) { return { c: x.id, i: cOpt().blk === x.id ? "✓" : "", l: x.i + " В блок «" + x.n + "»" }; }));
     if (k === "fr") return Object.keys(CFREQ).map(function (f) { return { c: f, i: (chore(id) || {}).fr === f ? "✓" : "", l: CFREQ[f][0] }; });
-    if (k === "zone" || k === "dzone") { var cur = k === "zone" ? (chore(id) || {}).zone || "" : cOpt().zones[id] || ""; return Object.keys(CZONES).map(function (z) { return { c: z || "~", i: cur === z ? "✓" : "", l: z ? CZONES[z] : "любая" }; }); }
+    if (k === "zone" || k === "dzone") { var cur = k === "zone" ? (chore(id) || {}).zone || "" : cOpt().zones[id] || ""; return Object.keys(CZONES).filter(function (z) { return !CZOFF[z] || z === cur; }).map(function (z) { return { c: z || "~", i: cur === z ? "✓" : "", l: z ? CZONES[z] : "любая" }; }); }
     if (k === "resp") return people().map(function (p) { return { c: p.id || "~", i: ((chore(id) || {}).resp || "") === p.id ? "✓" : "", l: "👤 " + p.n }; });
     if (k === "pid") return [{ c: "~", i: cOpt().pid ? "" : "✓", l: "📥 Входящие (без проекта)" }].concat(ptree().map(function (z) { return { c: z.p.id, i: cOpt().pid === z.p.id ? "✓" : "", l: picon(z.p) + " " + z.p.n, pad: z.d }; }));
     return [];
@@ -9510,6 +9550,7 @@ CREATE TABLE inbox (
     var t = e.target; if (e.key !== "Enter") return;
     if (t.id === "clnew") { e.preventDefault(); var v = t.value.trim(); if (!v) return; S.chores = S.chores || []; S.chores.push(touch({ id: uid(), n: v.slice(0, 100), fr: "w1", min: 10, zone: "", heavy: 0, resp: "", days: [], ord: choresAll().length, created: Date.now() })); save(); render(); setTimeout(function () { var i = $("clnew"); if (i) i.focus(); }, 30); }
     if (t.id === "ppnew") { e.preventDefault(); fireA("ppadd"); }
+    if (t.id === "cznew") { e.preventDefault(); fireA("czadd"); }
   });
 
   /* ---------- Распорядок дня: блоки времени (сон, задачи, еда, дом…) — шаблоны «Будни» и «Выходные»,
@@ -10303,7 +10344,7 @@ CREATE TABLE inbox (
       case "ckadd": S.chq = S.chq || []; S.chq.push(touch({ id: uid(), zone: "all", n: "", a: "", min: 5, daily: 0, ord: ckQs().length })); save(); CKQOPEN = true; render(); setTimeout(function () { var i = document.querySelectorAll(".ckqn"); if (i.length) i[i.length - 1].focus(); }, 40); return true;
       case "ckdel": if (q) { q.del = 1; q.delAt = Date.now(); touch(q); save(); render(); toastUndo("Вопрос удалён", function () { delete q.del; delete q.delAt; touch(q); }); } return true;
       case "ckdaily": if (q) { q.daily = q.daily ? 0 : 1; touch(q); save(); render(); } return true;
-      case "ckzone": var rc = el.getBoundingClientRect(); ctxShow(rc.left, rc.bottom + 4, Object.keys(CZONES).filter(function (z) { return z; }).map(function (z) { return { c: z, i: q && q.zone === z ? "✓" : "", l: CZONES[z] }; }), { k: "ckzone", id: id }); return true;
+      case "ckzone": var rc = el.getBoundingClientRect(); ctxShow(rc.left, rc.bottom + 4, Object.keys(CZONES).filter(function (z) { return z && (!CZOFF[z] || (q && q.zone === z)); }).map(function (z) { return { c: z, i: q && q.zone === z ? "✓" : "", l: CZONES[z] }; }), { k: "ckzone", id: id }); return true;
       case "ckwd": cSet("ckwd", +el.dataset.v); ckRemSync(); render(); return true;
       case "ckdy": cSet("ckdy", el.dataset.v === "1"); ckRemSync(); render(); return true;
       case "ckgo": var gx = $("ckask"); if (gx) gx.hidden = true; CKMODE = el.dataset.k; CKRES = ""; CLTAB = "chk"; LS.set("zd-cltab", "chk"); go("clean"); return true;
@@ -10820,6 +10861,7 @@ CREATE TABLE inbox (
     h += sec("clean", "План уборки", ul([
       "Пункт <b>«План уборки»</b> в «Списках». Четыре вкладки: <b>Сегодня</b>, <b>Неделя</b>, <b>Дела</b>, <b>Настройки</b>. Пока план выключен, задачи не создаются — сначала поправьте дела и дни, потом «Включить план».",
       "<b>Дела</b> — пул поддерживающей уборки (сразу есть 25 типичных дел, всё правится): название, частота (каждый день, 2–3 раза в неделю, раз в неделю, раз в 2 недели, раз в месяц), минуты, зона (кухня, ванная, спальня…), ответственный, 💪 тяжёлое. Кнопки дней Пн…Вс закрепляют дело за своими днями; без них — раскладка сама. ⏸ — временно не планировать.",
+      "<b>Зоны</b> — свои: «Настройки» плана → «Зоны». Добавить («Балкон», «Кабинет»), переименовать, поменять порядок ↑↓ (в нём зоны идут в списках и на карте порядка), значок, скрыть 👁 из выбора. Удалить можно пустую зону; если в ней есть дела или вопросы чекапа — приложение предложит перенести их в другую зону.",
       "<b>Настройки</b>: проект, куда попадают задачи уборки; минуты на уборку в каждый день недели (0 — день без уборки); зона дня («Пн — кухня») — дела этой зоны тянутся в её день; что делать с невыполненным за прошлые дни — оставлять или закрывать как отменённое.",
       "<b>Раскладка</b> — и по зонам, и по времени: дело встаёт в день своей зоны, лимит минут дня по возможности не превышается, повторы разносятся по неделе (2 раза — Пн и Чт, а не подряд), тяжёлые — в дни с большим запасом. Дела «раз в 2 недели» и «раз в месяц» чередуются по неделям. Вкладка <b>Неделя</b> показывает сетку и загрузку каждого дня; нажмите на дело — откроются его настройки.",
       "<b>Каждый день</b> появляется одна задача «🧹 Уборка · N мин» с чек-листом дел — в выбранном проекте. В чек-листе два раздела: <b>🔁 Каждый день</b> (утро и вечер — отдельно) и <b>📅 По графику</b>. Если у дел разные ответственные, задача у каждого своя. Если включён распорядок дня, задача встаёт на начало блока «🏠 Дом» (в настройках плана — другой блок или «весь день»).",
@@ -11353,6 +11395,7 @@ CREATE TABLE inbox (
     if (DIAG && DIAG.on) { DIAG.renders.push(Date.now()); dlog("перерисовка", "← " + dstack()); }
     var now = Date.now(); RTIMES.push(now); if (RTIMES.length > 45) RTIMES.shift();
     if (!RWARN && RTIMES.length >= 40 && now - RTIMES[RTIMES.length - 40] < 3000) { RWARN = true; showErr("Слишком частые перерисовки страницы (40 за 3 с). Скопируйте этот текст и пришлите разработчику · " + V + " · " + String(new Error().stack || "").split("\n").slice(2, 7).join(" ").replace(/\s+/g, " ")); }
+    try { czSync(); } catch (er) { /* зоны — по умолчанию */ }
     try { renderInner(); } catch (er) {
       showErr((er && er.message || er) + " · " + V + (ARG ? "-" + ARG : "") + (er && er.stack ? " · " + String(er.stack).split("\n").slice(1, 3).join(" ").replace(/\s+/g, " ") : ""));
       try { $("view").innerHTML = '<p class="warnc">Не удалось показать эту страницу: ' + esc(er && er.message) + '. Остальное работает — откройте другой список слева.</p>'; } catch (e2) { /* нет */ }
@@ -11981,6 +12024,7 @@ CREATE TABLE inbox (
     if (a && svAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && buAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && ckAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && czAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
     switch (a) {
       case "add": addQuick(); return;
@@ -13301,6 +13345,8 @@ CREATE TABLE inbox (
     if (k === "fire") { fireA(c); return; }
     if (k === "pnmore") { pnFire(c); return; }
     if (k && k.indexOf("clpick:") === 0) { clPick(k.slice(7), id, c); return; }
+    if (k && k.indexOf("czico:") === 0) { var zl = czList().map(function (z) { return Object.assign({}, z); }); zl.forEach(function (z) { if (z.id === id) z.i = c === "~" ? "" : c; }); czSave(zl); render(); return; }
+    if (k && k.indexOf("czmove:") === 0) { czMove(k.slice(7), c === "~" ? "" : c); return; }
     if (k === "ckzone") { var cq = live(S.chq || []).filter(function (x) { return x.id === id; })[0]; if (cq) { cq.zone = c; touch(cq); save(); render(); } return; }
     if (k === "burcat") { var bg = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bg) { bg.cat = c; touch(bg); save(); render(); } return; }
     if (k === "tbpick") { var tl = tbList(); tl.forEach(function (b) { if (b.id === id) b.cat = c; }); tbSave(TBTAB, tl); render(); return; }
