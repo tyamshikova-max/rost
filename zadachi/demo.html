@@ -271,6 +271,11 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .setfg { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 8px 12px; align-items: center; margin: 10px 0 6px } .setfg > span { font-size: calc(13px * var(--fs)); color: var(--muted) } .setfg select.inp { max-width: 100% }
 @media (max-width: 560px) { .setfg { grid-template-columns: minmax(0, 1fr) } .setfg > span { margin-top: 4px } }
 .setfpick { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left } .setfmode { flex-wrap: wrap } .setfdesc { width: 100%; resize: vertical; font: inherit; line-height: 1.45 } .setfsec:empty { display: none } .setfn { font-size: calc(12.5px * var(--fs)); margin: 4px 0 8px } .setpv { display: grid; gap: 3px; font-size: calc(13.5px * var(--fs)) } .setpvr { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline } .setpvr.setpvs { padding-left: 20px }
+.tdtb { margin: 0 0 12px; padding: 10px 12px 9px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--panel) 80%, transparent) }
+.tdtbl { position: relative; height: 14px; border-radius: 7px; background: var(--hover); overflow: hidden; cursor: pointer } .tdtbl i { position: absolute; top: 0; bottom: 0 }
+.tdtbn { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--fg); box-shadow: 0 0 0 1px var(--panel) }
+.tdtb .tbscale { margin: 2px 0 6px } .tdtbc { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; font-size: calc(13.5px * var(--fs)) }
+.tdtbp { padding: 1px 9px; border-radius: 999px; background: color-mix(in srgb, var(--bc) 18%, transparent); color: color-mix(in srgb, var(--bc) 65%, var(--fg)); font-weight: 600 }
 .tdload { margin: 0 0 12px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--panel) 80%, transparent); font-size: calc(13.5px * var(--fs)) }
 .tdlt { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; align-items: baseline } .tdlt b { font-weight: 600; font-variant-numeric: tabular-nums }
 .tdlb { display: flex; height: 6px; border-radius: 99px; background: var(--hover); overflow: hidden; margin-top: 6px } .tdlb i { display: block; height: 100% } .tdlb .d { background: var(--ok) } .tdlb .o { background: var(--acc) }
@@ -5383,7 +5388,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-94";
+  var APPV = "zd-app-2026-10-16-95";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -6159,7 +6164,7 @@ CREATE TABLE inbox (
   function qSource(q) { if (q.status === "del") return S.tasks.filter(function (t) { return t.del && !t.purged; }); if (q.status === "arch") { var a = archIds() || {}; return live(S.tasks).filter(function (t) { return a[t.pid]; }); } return tasks(); }
 
   /* ---------- группировка и сортировка ---------- */
-  var GROUPN = { section: "по секциям", kcol: "по колонкам проекта", none: "без группировки", date: "по сроку", day: "по дням", project: "по проекту", prio: "по приоритету", tag: "по тегу", flag: "по флажку", status: "по статусу", sprint: "по спринту" };
+  var GROUPN = { section: "по секциям", kcol: "по колонкам проекта", none: "без группировки", date: "по сроку", day: "по дням", project: "по проекту", prio: "по приоритету", tag: "по тегу", flag: "по флажку", status: "по статусу", sprint: "по спринту", tb: "по распорядку" };
   var SORTN = { smart: "умная", manual: "вручную (перетаскиванием)", date: "по сроку", due: "по дедлайну", prio: "по приоритету", name: "по названию", created: "сначала новые" };
   // умная сортировка: важное без даты → сегодня → просроченное → будущее → без даты → когда-нибудь
   function smartB(t) { var ea = effAt(t); if (!ea) return isSome(t) ? 5 : t.prio === 1 ? 0 : 4; if (isPastDay(t)) return 2; if (ea < today0() + DAY) return 1; return 3; }
@@ -6235,6 +6240,12 @@ CREATE TABLE inbox (
       else if (g === "kcol") { var kc = kcolOf(t, gp), ko = pcols(gp).map(function (x) { return x.id; }).indexOf(kc); put(kc, kc === "done" ? "Готово" : pcols(gp)[ko].n, t, kc === "done" ? 999 : ko); }
       else if (g === "status") { var cl = colOf(t); put(cl, { todo: "Нужно сделать", doing: "В работе", done: "Готово" }[cl], t, { doing: 0, todo: 1, done: 2 }[cl]); }
       else if (g === "sprint") { if (!t.sprint) put("~", "Бэклог (без спринта)", t, "~"); else put(t.sprint, spLabel(t.sprint) + (t.sprint === curSprintId() ? " · текущий" : ""), t, t.sprint); }
+      else if (g === "tb") {
+        var tb = t.at && !t.allday ? tbAtBlock(t.at) : null;
+        if (isPastDay(t)) put("a", "Просрочено", t, -1);
+        else if (!tb) put("~", "Без времени", t, 9e15);
+        else { var tc = tbCat(tb.cat), nw = Date.now() >= tb.st && Date.now() < tb.en; put(tb.key, (sod(t.at) !== t0 ? dayName(t.at) + " · " : "") + tc.i + " " + tc.n + " " + hm(tb.st) + "–" + hm(tb.en) + (nw ? " · сейчас" : ""), t, tb.st, tc.c); }
+      }
       else if (g === "tag") { var tg = t.tags || []; if (!tg.length) put("~", "Без тега", t, "~"); tg.forEach(function (x) { put("#" + x, "#" + x, t, x, tcolor(x)); }); }
       else put("all", "", t, 0);
     });
@@ -6322,7 +6333,7 @@ CREATE TABLE inbox (
   }
   // вложенные группы: заголовок каждого уровня сворачивается, задача перетаскивается на заголовок — свойство меняется
   var GDROP = /^(date|day|project|prio|flag|status|sprint|kcol|section)$/;
-  function gHead(g, gr, depth, pk, folded, n) { var tag = "h" + Math.min(2 + depth, 5); return "<" + tag + ' class="ngh d' + depth + (gr.key === "a" && (g === "date" || g === "day") ? " warnc" : "") + '"' + (GDROP.test(g) ? ' data-col="' + esc(g + ":" + gr.key) + '"' : "") + '><button type="button" class="gf" data-a="gfold" data-k="' + esc(pk) + '">' + (folded ? "▸" : "▾") + "</button>" + (gr.ih ? '<span class="gico">' + gr.ih + "</span>" : gr.color ? '<span class="pdot"><i style="background:' + gr.color + '"></i></span>' : "") + esc(gr.title) + ' <span class="c">' + n + "</span></" + tag + ">"; }
+  function gHead(g, gr, depth, pk, folded, n) { var tag = "h" + Math.min(2 + depth, 5); return "<" + tag + ' class="ngh d' + depth + (gr.key === "a" && (g === "date" || g === "day" || g === "tb") ? " warnc" : "") + '"' + (GDROP.test(g) ? ' data-col="' + esc(g + ":" + gr.key) + '"' : "") + '><button type="button" class="gf" data-a="gfold" data-k="' + esc(pk) + '">' + (folded ? "▸" : "▾") + "</button>" + (gr.ih ? '<span class="gico">' + gr.ih + "</span>" : gr.color ? '<span class="pdot"><i style="background:' + gr.color + '"></i></span>' : "") + esc(gr.title) + ' <span class="c">' + n + "</span></" + tag + ">"; }
   function renderNested(list, levels, vo, o, depth, path) {
     if (!levels.length) return renderTree(list, vo.sort, o);
     var g = levels[0], rest = levels.slice(1), fold = (VIEWS[curKey()] || {}).gfold || {}, h = "";
@@ -6612,7 +6623,7 @@ CREATE TABLE inbox (
   function noteDel(n) { n.del = 1; n.delAt = Date.now(); touch(n); save(); var back = n.sec && nsec(n.sec) ? "nsec-" + n.sec : "notes"; go(back); toastUndo("Заметка удалена", function () { delete n.del; delete n.delAt; touch(n); save(); render(); }); }
   function vWaiting() { return std("Жду ответа", "Задачи, переданные кому-то. В день «спросить» задача появится в «Сегодня» — напомнить о себе. Пометить задачу: меню задачи → «⏳ Жду ответа…» или строка «Жду ответа» в карточке.", waitList(), { empty: "Ничего не ждёте — хорошо. Когда отдадите задачу кому-то, отметьте её «⏳ Жду ответа».", scope: function (t) { return !!t.wait; } }); }
   function vSomeday() { return std("Когда-нибудь", "Идеи и дела «не сейчас». Они не попадают во «Входящие» и «Сегодня», пока вы не назначите им дату.", somedayList(), { empty: "Пусто. Отправить задачу сюда — меню задачи → «Установить дату» → «Когда-нибудь» (Alt+O).", scope: isSome }); }
-  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: todayLoadHTML() + aiBox() + todayPlanBox() + habitsToday(), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
+  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: tbNowHTML() + todayLoadHTML() + aiBox() + todayPlanBox() + habitsToday(), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
   var PDAY = 0, PFROM = 0;
   function pFrom() { if (!PFROM) PFROM = monday(Date.now()); return PFROM; }
   function onDay(t, d0) { return (t.at && sod(t.at) === d0) || (t.due && sod(t.due) === d0); }
@@ -9529,6 +9540,29 @@ CREATE TABLE inbox (
     var to = x[0] > from ? x[0] - 1 : x[0]; if (from >= 0 && to !== from) tbMove(id, to);
   });
   document.addEventListener("pointercancel", function () { if (TBDR) { TBDR = null; tbDrEnd(); } });
+  function tbTimeSet(t) {
+    var ds = t.dataset, m = /^(\d{1,2}):(\d{2})/.exec(t.value || ""); if (!m) return; var v = +m[1] * 60 + +m[2];
+    var l = tbList(), b = l.filter(function (x) { return x.id === (ds.tbs || ds.tbe); })[0]; if (!b || (ds.tbs ? b.s : b.e) === v) return;
+    if (ds.tbs) b.s = v; else b.e = v; tbSave(TBTAB, l); setTimeout(render, 0);
+  }
+  document.addEventListener("focusout", function (e) { var t = e.target; if (t && t.dataset && (t.dataset.tbs || t.dataset.tbe)) tbTimeSet(t); });
+  document.addEventListener("keydown", function (e) { var t = e.target; if (e.key === "Enter" && t && t.dataset && (t.dataset.tbs || t.dataset.tbe)) { e.preventDefault(); t.blur(); } });
+  // блок распорядка, в который попадает момент ms (с учётом ночного блока вчерашнего дня)
+  function tbAtBlock(ms) { if (!tbCfg().on) return null; return tbCover(sod(ms)).filter(function (b) { return ms >= b.st && ms < b.en; })[0] || null; }
+  // «Сегодня»: полоска суток с отметкой «сейчас», какой блок идёт и что дальше
+  function tbNowHTML() {
+    if (!tbCfg().on) return "";
+    var t0 = today0(), now = Date.now(), bl = tbCover(t0); if (!bl.length) return "";
+    var pct = function (ms) { return Math.max(0, Math.min(100, (ms - t0) / DAY * 100)); };
+    var pill = function (b) { var ct = tbCat(b.cat); return '<span class="tdtbp" style="--bc:' + ct.c + '">' + esc(ct.i + " " + ct.n) + "</span>"; };
+    var cur = bl.filter(function (b) { return now >= b.st && now < b.en; })[0], seen = {};
+    var nx = bl.concat(tbDay(addDays(t0, 1))).filter(function (b) { if (seen[b.key]) return false; seen[b.key] = 1; return b.st >= (cur ? cur.en : now); }).sort(function (a, b) { return a.st - b.st; })[0];
+    var h = '<div class="tdtb"><div class="tdtbl" data-a="tbcfg" title="Распорядок дня — нажмите, чтобы настроить">' + bl.map(function (b) { var ct = tbCat(b.cat), a = pct(b.st), z = pct(b.en); return '<i style="left:' + a.toFixed(2) + "%;width:" + (z - a).toFixed(2) + "%;background:" + ct.c + '" title="' + esc(ct.i + " " + ct.n + " " + hm(b.st) + "–" + hm(b.en)) + '"></i>'; }).join("") + '<span class="tdtbn" style="left:' + pct(now).toFixed(2) + '%"></span></div>' +
+      '<div class="tbscale"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div><div class="tdtbc">';
+    h += cur ? "<span>Сейчас:</span>" + pill(cur) + '<span class="muted">до ' + hm(cur.en) + " · осталось " + hTxt((cur.en - now) / 3600e3) + "</span>" : '<span class="muted">Сейчас — время вне блоков</span>';
+    if (nx) h += '<span class="muted">· дальше</span>' + pill(nx) + '<span class="muted">' + (sod(nx.st) !== t0 ? "завтра " : "") + hm(nx.st) + "–" + hm(nx.en) + "</span>";
+    return h + "</div></div>";
+  }
   function tbList() { var c = tbCfg(); return (TBTAB === "we" ? c.we : c.wd).map(function (b) { return Object.assign({}, b); }); }
   function tbAct(a, el) {
     var id = el.dataset.id;
@@ -9552,7 +9586,8 @@ CREATE TABLE inbox (
   document.addEventListener("change", function (e) {
     var t = e.target, ds = t.dataset || {};
     var tm = function (v) { var m = /^(\d{1,2}):(\d{2})/.exec(v || ""); return m ? Math.min(1439, +m[1] * 60 + +m[2]) : null; };
-    if (ds.tbs || ds.tbe) { var v = tm(t.value); if (v === null) return; var l = tbList(), b = l.filter(function (x) { return x.id === (ds.tbs || ds.tbe); })[0]; if (!b) return; if (ds.tbs) b.s = v; else b.e = v; tbSave(TBTAB, l); setTimeout(render, 0); return; }
+    // время блока: пока поле в фокусе, часы и минуты ещё набираются — сохраняем, когда из поля ушли (иначе «12» превращалось в 01:00)
+    if (ds.tbs || ds.tbe) { if (document.activeElement !== t) tbTimeSet(t); return; }
     if (ds.tbcc || ds.tbci || ds.tbcn) { var cid = ds.tbcc || ds.tbci || ds.tbcn, cats = tbCfg().cats.map(function (x) { if (x.id !== cid) return x; var y = Object.assign({}, x); if (ds.tbcc) y.c = t.value; else if (ds.tbci) y.i = t.value.trim().slice(0, 4) || "•"; else y.n = t.value.trim().slice(0, 30) || x.n; return y; }); tbSave("cats", cats); return; }
   });
 
@@ -10052,6 +10087,7 @@ CREATE TABLE inbox (
       "<b>Блоки времени</b> — сон, задачи, еда, дом, развитие, бизнес, спорт, отдых (категории свои: название, цвет, значок). Это не задачи, а распорядок: какое время на что отведено.",
       "Два шаблона — <b>«Будни»</b> и <b>«Выходные»</b>: «Настройки» → «Общие» → «Распорядок дня». Блок — категория и время «с — по»; сон через полночь (23:00–07:00) тоже можно. Полоска сверху показывает сутки целиком. «⇄ Скопировать» переносит шаблон в другой.",
       "<b>В календаре</b> (день и неделя) блоки видны цветным фоном, задачи — поверх. Выключить фон — там же: «В календаре — не показывать».",
+      "<b>В «Сегодня»</b> сверху — полоска суток с отметкой «сейчас» и строка: какой блок идёт, сколько осталось и что дальше (нажмите на полоску — откроются настройки). В «Вид ▾» → «Группировка» есть вариант <b>«по распорядку»</b>: задачи со временем раскладываются по блокам, задачи без времени — в группу «Без времени».",
       "<b>Виджет «Распорядок дня»</b> на доске (на «Мой день» добавлен сам): блоки сегодня, текущий подсвечен «сейчас», у каждого — <b>факт / план</b>. Факт — учтённое время (таймер ⏲ и помидоры), попавшее в блок; для сна, еды, спорта нажмите <b>✓</b> — блок прошёл как запланировано. Внизу — итог по категориям за 7 дней: сколько из запланированного прожито."]));
     h += sec("food", "Меню: рецепты, неделя, праздник, покупки", ul([
       "Пункт <b>«Меню»</b> в «Списках» (или Ctrl+K → «Меню»). Вверху — кто ест: взрослые и дети (порция ребёнка — 0,6 взрослой); по этому числу пересчитываются продукты и стоимость.",
