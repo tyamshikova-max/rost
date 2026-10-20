@@ -275,6 +275,7 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .tdlt { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; align-items: baseline } .tdlt b { font-weight: 600; font-variant-numeric: tabular-nums }
 .tdlb { display: flex; height: 6px; border-radius: 99px; background: var(--hover); overflow: hidden; margin-top: 6px } .tdlb i { display: block; height: 100% } .tdlb .d { background: var(--ok) } .tdlb .o { background: var(--acc) }
 .tdload.over .tdlb { box-shadow: inset 0 0 0 1px var(--warn) } .tdlw { color: var(--warn); font-weight: 600 } .tdln { font-size: calc(12px * var(--fs)); margin-top: 4px }
+.hicg { margin: 6px 0 0 } .hicg > .muted { display: block; font-size: calc(12px * var(--fs)); margin: 0 0 3px } .hico .mico, .hc .mico { width: 1.15em; height: 1.15em; vertical-align: -0.2em } .hchip.done .mico, .hc.done .mico { color: #fff !important }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -4838,6 +4839,37 @@ CREATE TABLE inbox (
   // монохромные значки: [содержимое svg, эмодзи для текстовых мест (списки выбора, меню), подпись]
   var MICO = {
     folder: ['<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>', "📁", "Папка"],
+    water: ['<path d="M12 3c3.5 4.2 6 7.5 6 10.5a6 6 0 0 1-12 0C6 10.5 8.5 7.2 12 3zM9 14.5a3 3 0 0 0 3 3"/>', "💧", "Вода"],
+    glass: ['<path d="M6 3h12l-1.6 16.2A2 2 0 0 1 14.4 21H9.6a2 2 0 0 1-2-1.8zM6.6 9h10.8"/>', "🥛", "Стакан воды"],
+    walk: ['<circle cx="13" cy="4.5" r="1.8"/><path d="M10 21l2-6 3 3v3M9 12l2-4.5h3l1.5 3.5 2.5 1M12 15l-.5-4M9.5 12L8 16"/>', "🚶", "Прогулка"],
+    steps: ['<path d="M7 4c1.7 0 2.5 1.6 2.5 4S8.5 12 7 12 4.5 10.4 4.5 8 5.3 4 7 4zM5 15h4v2a2 2 0 0 1-4 0zM17 8c1.7 0 2.5 1.6 2.5 4s-1 4-2.5 4-2.5-1.6-2.5-4 .8-4 2.5-4zM15 19h4v.5a2 2 0 0 1-4 0z"/>', "👣", "Шаги"],
+    yoga: ['<circle cx="12" cy="4.5" r="1.8"/><path d="M12 7.5v6M5 11l7 2.5 7-2.5M6 20c2-3 4-4 6-4s4 1 6 4M9 20h6"/>', "🧘", "Медитация"],
+    stretch: ['<circle cx="12" cy="4.5" r="1.8"/><path d="M5 8l7 2 7-2M12 10v5M12 15l-4 6M12 15l4 6"/>', "🤸", "Растяжка"],
+    bike: ['<circle cx="6" cy="16" r="3.5"/><circle cx="18" cy="16" r="3.5"/><path d="M6 16l3.5-7h5L18 16M9.5 9L12 16h2.5M13 6h3"/>', "🚴", "Велосипед"],
+    swim: ['<circle cx="16" cy="6" r="1.8"/><path d="M3 15c1.5 1.3 3 1.3 4.5 0s3-1.3 4.5 0 3 1.3 4.5 0 3-1.3 4.5 0M3 19c1.5 1.3 3 1.3 4.5 0s3-1.3 4.5 0 3 1.3 4.5 0 3-1.3 4.5 0M6 12l4-4 3 2 2-1"/>', "🏊", "Плавание"],
+    bed: ['<path d="M3 18V7M3 13h18v5M21 18v-3a2 2 0 0 0-2-2M7 10.5h.01M3 18h18"/><circle cx="7" cy="10.5" r="1.5"/>', "😴", "Сон"],
+    tooth: ['<path d="M7 3c2 0 3 1 5 1s3-1 5-1c2.5 0 3.5 2.5 3 5-.6 3-1.8 4-2.5 7-.5 2.5-1 5-2.5 5s-1.5-4-3-4-1.5 4-3 4-2-2.5-2.5-5C5.8 12 4.6 11 4 8c-.5-2.5.5-5 3-5z"/>', "🦷", "Зубы"],
+    pill: ['<rect x="2.5" y="8.5" width="19" height="7" rx="3.5" transform="rotate(-35 12 12)"/><path d="M9.7 8.8l4.6 6.4"/>', "💊", "Лекарства"],
+    apple: ['<path d="M12 7.5c-1.5-1-5.5-1.5-7 1.5-1.5 3 0 8 2.5 10.5 1.3 1.3 2.7 1.3 4.5.5 1.8.8 3.2.8 4.5-.5C19 16.5 20.5 11.5 19 9c-1.5-3-5.5-2.5-7-1.5zM12 7.5c0-2 1-3.5 3-4.5"/>', "🍎", "Фрукты"],
+    salad: ['<path d="M3 11h18a9 9 0 0 1-18 0zM8 11c0-2.5 1.5-4.5 4-5M12 11c.5-2.5 2.5-4 5-4M7 21h10"/>', "🥗", "Здоровая еда"],
+    nophone: ['<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2M3 3l18 18"/>', "📵", "Без телефона"],
+    sunrise: ['<path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 4v4M4.9 9.9l1.4 1.4M19.1 9.9l-1.4 1.4M9 6l3-3 3 3M5 21h14"/>', "🌅", "Ранний подъём"],
+    broom: ['<path d="M14 3l-4 8M6.5 11h7l1.5 3c.8 1.8.5 4.5-.5 7H5.5c-1-2.5-1.3-5.2-.5-7zM8 21l.5-4M11 21v-4"/>', "🧹", "Уборка"],
+    coin: ['<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>', "💰", "Накопления"],
+    lang: ['<path d="M3 5h9M7.5 3v2M5 5c0 4 2.5 7 6 8.5M10 5c-.5 3.5-2.5 6.5-6.5 8.5M13 21l4-9 4 9M14.3 18h5.4"/>', "🗣️", "Язык"],
+    scale: ['<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 9a6 6 0 0 1 8 0l-2.5 3h-3zM12 9.5l1-1.5"/>', "⚖️", "Вес"],
+    shower: ['<path d="M4 21V7a4 4 0 0 1 8 0M12 7a3 3 0 0 1 6 0zM14 13v1M17 13v1M20 13v1M15.5 16v1M18.5 16v1M14 19v1M17 19v1"/>', "🚿", "Душ"],
+    nosugar: ['<rect x="7" y="8" width="10" height="8" rx="2"/><path d="M7 10L4 8v8l3-2M17 10l3-2v8l-3-2M3 3l18 18"/>', "🍬", "Без сладкого"],
+    nosmoke: ['<path d="M3 15h13v3H3zM19 15v3M21.5 15v3M17 8c0-2 2-2 2-4M20 9c0-1.5 1.5-1.5 1.5-3M2 3l19 19"/>', "🚭", "Не курить"],
+    noalc: ['<path d="M7 3h10l-1 7a4 4 0 0 1-8 0zM12 14v6M8.5 21h7M3 3l18 18"/>', "🚫", "Без алкоголя"],
+    brain: ['<path d="M9.5 4A3 3 0 0 0 6.5 7a3 3 0 0 0-2 5 3 3 0 0 0 1.5 4.5A3.5 3.5 0 0 0 9.5 20h1V4zM14.5 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-1.5 4.5A3.5 3.5 0 0 1 14.5 20h-1V4z"/>', "🧠", "Тренировка ума"],
+    eye: ['<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>', "👁️", "Отдых для глаз"],
+    breath: ['<path d="M3 8h10.5a2.5 2.5 0 1 0-2.5-2.5M3 12h15.5a2.5 2.5 0 1 1-2.5 2.5M3 16h8.5a2.5 2.5 0 1 1-2.5 2.5"/>', "🌬️", "Дыхание"],
+    snow: ['<path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6M9.5 4.5L12 7l2.5-2.5M9.5 19.5L12 17l2.5 2.5"/>', "❄️", "Закаливание"],
+    pray: ['<path d="M12 21V11M12 11c-1-3-3-5-3-8M12 11c1-3 3-5 3-8M9 3c-2 4-4 7-4 11l3 3M15 3c2 4 4 7 4 11l-3 3M8 17l4 4 4-4"/>', "🙏", "Благодарность"],
+    journal: ['<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v18M12 8h4M12 12h4"/>', "📓", "Дневник"],
+    plant: ['<path d="M7 14h10l-1.3 6.2a1 1 0 0 1-1 .8H9.3a1 1 0 0 1-1-.8zM12 14V9M12 9c0-3 2-5 5-5 0 3-2 5-5 5zM12 11c0-2.5-1.8-4-4.5-4 0 2.5 1.8 4 4.5 4z"/>', "🪴", "Полить цветы"],
+    guitar: ['<path d="M19 3l2 2-6 6M13.5 9.5l1 1M10 11a3.5 3.5 0 0 0-5 0c-1.5 1.5-1 2.5-2 4s0 4.5 2 5 3.5-.5 5-2 2.5-.5 4-2a3.5 3.5 0 0 0-1-5z"/><circle cx="9" cy="15" r="1.5"/>', "🎸", "Инструмент"],
     home: ['<path d="M4 11l8-7 8 7M6 9.5V20h12V9.5M10 20v-6h4v6"/>', "🏠", "Дом"],
     work: ['<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M3 13h18"/>', "💼", "Работа"],
     book: ['<path d="M4 19V5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2 2 2 0 0 0 2 2h13"/>', "📖", "Книга"],
@@ -5300,7 +5332,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-86";
+  var APPV = "zd-app-2026-10-16-87";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -5494,7 +5526,7 @@ CREATE TABLE inbox (
     habits().forEach(function (h) {
       if (h.arch || !/^\d\d:\d\d$/.test(h.time || "")) return;
       var d = new Date(); d.setHours(+h.time.slice(0, 2), +h.time.slice(3, 5), 0, 0);
-      for (var i = 0; i < 8; i++) { var c = addDays(d.getTime(), i); if (c > now && hDue(h, c) && ["done", "skip"].indexOf(hSt(h, dKey(c))) < 0) { out["h:" + h.id] = { id: "h:" + h.id, at: c, text: (h.ic || "🔁") + " Привычка: " + h.n, rrule: (h.days || []).length ? "R|w|1|" + h.days.join(",") + "||" + new Date().getTimezoneOffset() : "R|d|1|||" + new Date().getTimezoneOffset(), task: "" }; break; } }
+      for (var i = 0; i < 8; i++) { var c = addDays(d.getTime(), i); if (c > now && hDue(h, c) && ["done", "skip"].indexOf(hSt(h, dKey(c))) < 0) { out["h:" + h.id] = { id: "h:" + h.id, at: c, text: (hIcoT(h) || "🔁") + " Привычка: " + h.n, rrule: (h.days || []).length ? "R|w|1|" + h.days.join(",") + "||" + new Date().getTimezoneOffset() : "R|d|1|||" + new Date().getTimezoneOffset(), task: "" }; break; } }
     });
     return out;
   }
@@ -7972,6 +8004,15 @@ CREATE TABLE inbox (
   });
 
   /* ---------- привычки (как в Singularity: день — кружок с тремя состояниями) ---------- */
+  var HMICO = [["Тело", ["water", "glass", "walk", "steps", "run", "gym", "stretch", "yoga", "bike", "swim", "snow", "breath", "bed", "sunrise", "shower", "tooth"]],
+    ["Здоровье и еда", ["pill", "health", "apple", "salad", "food", "coffee", "scale", "eye", "heart"]],
+    ["Ум и творчество", ["book", "study", "lang", "brain", "journal", "pen", "note", "code", "music", "guitar", "headph", "palette", "camera"]],
+    ["Дом и люди", ["broom", "plant", "home", "paw", "users", "phone", "chat", "pray", "smile", "sun", "moon"]],
+    ["Деньги и дела", ["coin", "wallet", "cart", "list", "check", "target", "clock", "cal", "trophy"]],
+    ["Отказаться от", ["nophone", "nosugar", "nosmoke", "noalc"]]];
+  // значок привычки: «i:имя» — контурный из общего набора (в цвет привычки), иначе эмодзи как есть
+  function hIcoH(x) { if (!x || !x.ic) return ""; if (/^i:/.test(x.ic)) return micoSVG(x.ic.slice(2), col(x.c || 0)) || "●"; return esc(x.ic); }
+  function hIcoT(x) { if (!x || !x.ic) return ""; if (/^i:/.test(x.ic)) { var m = MICO[x.ic.slice(2)]; return m ? m[1] : ""; } return x.ic; }
   var HICONS = ["💧", "🏃", "🧘", "📖", "✍️", "🥗", "😴", "💪", "🚶", "🦷", "💊", "🧠", "🎸", "🗣️", "📵", "🌅", "🧹", "💰", "🙏", "☕"];
   var HED = null, HDEL = null, HV = { tab: "act", wk: 0, mon: 0 }, HDR = null;
   function habits() { return live(S.habits).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0) || (a.created || 0) - (b.created || 0); }); }
@@ -8028,7 +8069,7 @@ CREATE TABLE inbox (
     var tip = dayName(d) + " — " + (HSTN[st] || (due ? "не выполнено" : "необязательный день")) + (g > 1 && st !== "skip" ? ": " + n + " из " + g : "") + (fut ? "" : ". Клик — следующее состояние, правая кнопка — выбрать");
     return '<button type="button" class="hc' + (st ? " " + st : "") + (due ? "" : " off") + (fut ? " fut" : "") + (d === today0() ? " today" : "") + '" data-a="hmark" data-h="' + h.id + '" data-d="' + day + '"' + (fut ? " disabled" : "") + ' title="' + esc(tip) + '" style="--hc:' + col(h.c || 0) + '">' + (lab !== undefined ? lab : g > 1 && n && n < g ? n : "") + "</button>";
   }
-  function hMarkIco(x) { return x.ic ? '<span class="hico">' + x.ic + "</span>" : '<span class="hdot"></span>'; }
+  function hMarkIco(x) { return x.ic ? '<span class="hico">' + hIcoH(x) + "</span>" : '<span class="hdot"></span>'; }
   function hDaysTxt(x) { return (x.days || []).length ? x.days.slice().sort(function (a, b) { return (a + 6) % 7 - (b + 6) % 7; }).map(function (i) { return WDS[i]; }).join(", ") : "каждый день"; }
   function habitRow(x, days) {
     var lk = "", prev = "";
@@ -8054,7 +8095,9 @@ CREATE TABLE inbox (
       '<div class="hmh"><button type="button" class="ibtn" data-a="hmon" data-x="-1" title="Предыдущий месяц">‹</button><b>' + esc(mt) + '</b><button type="button" class="ibtn" data-a="hmon" data-x="1" title="Следующий месяц"' + (HV.mon >= 0 ? " disabled" : "") + ">›</button></div>" +
       '<div class="hmon">' + cal + "</div>" +
       '<div class="lbl">Цвет</div><div class="sw">' + COLORS.map(function (c, i) { return sel("c", i, (x.c || 0) === i, "", c[0]).replace("<button ", '<button style="background:' + c[1] + '" '); }).join("") + "</div>" +
-      '<div class="lbl">Значок (необязательно)</div><div class="icg">' + sel("ic", "", !x.ic, "●", "Без значка — цветная точка") + HICONS.map(function (ic) { return sel("ic", ic, x.ic === ic, ic); }).join("") + "</div>" +
+      '<div class="lbl">Значок (необязательно)</div><div class="icg mono">' + sel("ic", "", !x.ic, "●", "Без значка — цветная точка") + "</div>" +
+      HMICO.map(function (g) { return '<div class="hicg"><span class="muted">' + g[0] + '</span><div class="icg mono">' + g[1].filter(function (k) { return MICO[k]; }).map(function (k) { return sel("ic", "i:" + k, x.ic === "i:" + k, micoSVG(k, col(x.c || 0)), MICO[k][2]); }).join("") + "</div></div>"; }).join("") +
+      '<div class="hicg"><span class="muted">Эмодзи</span><div class="icg">' + HICONS.map(function (ic) { return sel("ic", ic, x.ic === ic, ic); }).join("") + "</div></div>" +
       '<div class="lbl">Дни выполнения</div><div class="seg">' + [1, 2, 3, 4, 5, 6, 0].map(function (i) { return sel("day", i, ds.indexOf(i) >= 0, WDS[i]); }).join("") + "</div>" +
       '<div class="r"><label class="f">Сколько раз в день<input type="number" class="inp" min="1" max="20" data-hfv="goal" data-h="' + x.id + '" value="' + (x.goal || 1) + '" style="width:80px"></label><label class="f">Напомнить в Telegram<input type="time" class="inp" data-hfv="time" data-h="' + x.id + '" value="' + esc(x.time || "") + '"></label></div>' +
       '<div class="r hact"><button class="btn" type="button" data-a="harch" data-h="' + x.id + '">' + (x.arch ? "↩ Восстановить" : "🗄 В архив") + "</button>" +
@@ -8099,7 +8142,7 @@ CREATE TABLE inbox (
   function habitsToday() {
     var l = habits().filter(function (h) { return !h.arch && hDue(h, today0()); }); if (!l.length) return "";
     var tk = dKey(today0());
-    return '<div class="htoday">' + l.map(function (x) { var st = hSt(x, tk), n = hCount(x, tk), g = x.goal || 1; return '<button type="button" class="hchip' + (st ? " " + st : "") + '" data-a="hmark" data-h="' + x.id + '" data-d="' + tk + '" style="--hc:' + col(x.c || 0) + '" title="' + esc(HSTN[st] || "Клик — выполнено, ещё клик — частично") + '">' + (x.ic ? x.ic + " " : '<i class="hdot"></i>') + esc(x.n) + (g > 1 ? " · " + n + "/" + g : st === "done" ? " ✓" : st === "part" ? " ½" : st === "skip" ? " ‖" : "") + "</button>"; }).join("") + '<a class="muted" href="#habits" style="align-self:center">все привычки →</a></div>';
+    return '<div class="htoday">' + l.map(function (x) { var st = hSt(x, tk), n = hCount(x, tk), g = x.goal || 1; return '<button type="button" class="hchip' + (st ? " " + st : "") + '" data-a="hmark" data-h="' + x.id + '" data-d="' + tk + '" style="--hc:' + col(x.c || 0) + '" title="' + esc(HSTN[st] || "Клик — выполнено, ещё клик — частично") + '">' + (x.ic ? hIcoH(x) + " " : '<i class="hdot"></i>') + esc(x.n) + (g > 1 ? " · " + n + "/" + g : st === "done" ? " ✓" : st === "part" ? " ½" : st === "skip" ? " ‖" : "") + "</button>"; }).join("") + '<a class="muted" href="#habits" style="align-self:center">все привычки →</a></div>';
   }
   // перетаскивание привычек за ⋮⋮
   document.addEventListener("pointerdown", function (e) {
@@ -8256,7 +8299,7 @@ CREATE TABLE inbox (
       for (var d2 = st; d2 < endEff; d2 = addDays(d2, 1)) { var v = hSt(x, dKey(d2)); if (v === "skip") continue; if (hDue(x, d2) || v) { due++; ok += hV(v); } }
       return { x: x, due: due, ok: ok };
     }).filter(function (y) { return y.due; });
-    if (hb.length) h += '<div class="rpblk"><h2>Привычки</h2><table class="rptbl"><tr><th>Привычка</th><th class="n">Выполнено</th><th class="n">%</th></tr>' + hb.map(function (y) { return "<tr><td>" + esc((y.x.ic ? y.x.ic + " " : "") + y.x.n) + '</td><td class="n">' + fmtN(y.ok) + " из " + y.due + '</td><td class="n">' + Math.round(y.ok / y.due * 100) + " %</td></tr>"; }).join("") + "</table></div>";
+    if (hb.length) h += '<div class="rpblk"><h2>Привычки</h2><table class="rptbl"><tr><th>Привычка</th><th class="n">Выполнено</th><th class="n">%</th></tr>' + hb.map(function (y) { return "<tr><td>" + esc((hIcoT(y.x) ? hIcoT(y.x) + " " : "") + y.x.n) + '</td><td class="n">' + fmtN(y.ok) + " из " + y.due + '</td><td class="n">' + Math.round(y.ok / y.due * 100) + " %</td></tr>"; }).join("") + "</table></div>";
     if (done.length) {
       var gp = {}, go2 = []; done.slice().sort(function (a, b) { return a.d - b.d; }).forEach(function (x) { var rp = x.t.pid ? rootProj(x.t.pid) : null, k = rp ? rp.id : ""; if (!gp[k]) { gp[k] = []; go2.push(k); } gp[k].push(x); });
       go2.sort(function (a, b) { return gp[b].length - gp[a].length; });
@@ -9472,7 +9515,7 @@ CREATE TABLE inbox (
       "<b>Итоги под списком</b> (за 30 дней): самая успешная привычка, самая сложная и средний процент выполнения всех привычек. Процент: выполненные дни + половина частичных, делённые на дни по расписанию (паузы не считаются).",
       "<b>Статистика привычки</b>: клик по названию открывает справа карточку — текущая и самая длинная серия, сколько дней выполнено, процент за 30 дней и за всё время, частичные дни и паузы, календарь месяца (в нём тоже можно отмечать, ‹ › — другие месяцы). Esc или ✕ закрывает.",
       "<b>Архив</b>: «🗄 В архив» в карточке убирает привычку из списка, сохраняя отметки и статистику, — она появится на вкладке «Архив». «↩ Восстановить» возвращает её со всем прогрессом. «🗑 Удалить» стирает привычку и её отметки безвозвратно (после подтверждения).",
-      "Привычки на сегодня видны и в «Сегодня» — клик по ним отмечает так же. Из напоминания в Telegram привычку можно отметить кнопкой «✓ Отметить». В «Статистике» есть средний процент выполнения привычек."]));
+      "Привычки на сегодня видны и в «Сегодня» — клик по ним отмечает так же. Из напоминания в Telegram привычку можно отметить кнопкой «✓ Отметить». В «Статистике» есть средний процент выполнения привычек.", "<b>Значок привычки</b> — в её карточке: контурные значки в стиле приложения по группам (тело, здоровье и еда, ум и творчество, дом и люди, деньги и дела, «отказаться от») рисуются в цвет привычки; на выполненной отметке значок белый. Ниже — эмодзи, если привычнее они. Без значка — цветная точка."]));
     h += sec("pomo", "Помодоро", ul([
       "<b>Что это</b>: 25 минут работы над одной задачей без отвлечений, затем 5 минут перерыва. Помогает начать трудное дело и не распыляться.",
       "<b>Как запустить</b>: ⏱ вверху карточки задачи, меню задачи → «Запустить Помодоро» или ▶ у задачи в виджете «Помодоро» на доске.",
@@ -10703,7 +10746,7 @@ CREATE TABLE inbox (
       case "calday": CAL.d = +el.dataset.x; CAL.mode = "day"; LS.set("zd-calmode", "day"); CAL.scrolled = false; render(); return;
       case "sttab": STTAB = el.dataset.x; LS.set("zd-sttab", STTAB); render(); return;
       case "stdays": LS.set("zd-stdays", el.dataset.x); render(); return;
-      case "hmark": var hh = hab(el.dataset.h); if (hh) { hMark(hh, el.dataset.d); render(); var hst = hSt(hh, el.dataset.d); if (hst === "done" && el.dataset.d === dKey(today0())) toast((hh.ic ? hh.ic + " " : "") + hh.n + " ✓ · серия 🔥 " + fmtN(hStreak(hh))); } return;
+      case "hmark": var hh = hab(el.dataset.h); if (hh) { hMark(hh, el.dataset.d); render(); var hst = hSt(hh, el.dataset.d); if (hst === "done" && el.dataset.d === dKey(today0())) toast((hIcoT(hh) ? hIcoT(hh) + " " : "") + hh.n + " ✓ · серия 🔥 " + fmtN(hStreak(hh))); } return;
       case "nowgo": nowStart(); return;
       case "selmode": selModeSet(!SELMODE); if (SELMODE) toast("Режим выбора: отмечайте задачи, ☐ у заголовка — вся группа"); return;
       case "seltog": var stid = el.closest("li.task, .kcard"); if (stid) { var sid = stid.dataset.id; if (SELS[sid]) delete SELS[sid]; else SELS[sid] = 1; render(); } return;
@@ -11703,7 +11746,7 @@ CREATE TABLE inbox (
       if (h.arch || !/^\d\d:\d\d$/.test(h.time || "") || !hDue(h, t0) || hSt(h, dKey(t0))) return;
       var at = t0 + (+h.time.slice(0, 2) * 60 + +h.time.slice(3)) * 60000, key = "h:" + h.id + "@" + dKey(t0);
       if (at > now || now - at > win || fired[key]) return;
-      fired[key] = now; add++; bnShow(key, "🔁 " + (h.ic ? h.ic + " " : "") + h.n, "Привычка на сегодня, " + h.time, "");
+      fired[key] = now; add++; bnShow(key, "🔁 " + (hIcoT(h) ? hIcoT(h) + " " : "") + h.n, "Привычка на сегодня, " + h.time, "");
     });
     if (add) { Object.keys(fired).forEach(function (k) { if (now - fired[k] > 3 * DAY) delete fired[k]; }); LS.set("zd-bnfired", JSON.stringify(fired)); }
   }
