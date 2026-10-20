@@ -584,7 +584,9 @@ html.nosheet .dptopbox { background: color-mix(in srgb, var(--star) 10%, transpa
 .wbtn { margin-left: auto; display: flex; gap: 2px; flex: none } .wbtn button { border: 0; background: none; color: var(--muted); cursor: pointer; width: 24px; height: 24px; border-radius: 6px; font-size: calc(14px * var(--fs)); padding: 0 }
 .wbtn button:hover { background: var(--hover); color: var(--fg) } .wdg:not(:hover) .wbtn [data-a="wcfg"] { opacity: 0 } .bgrid.edit .wbtn [data-a="wcfg"], .wdg.cfgon .wbtn button { opacity: 1 }
 @media (hover: none) { .wdg .wbtn [data-a="wcfg"] { opacity: .6 } }
-.wgrip { cursor: grab; touch-action: none; user-select: none; font-size: calc(14px * var(--fs)); color: var(--muted); padding: 0 2px }
+.wgrip { cursor: grab; touch-action: none; user-select: none; font-size: calc(14px * var(--fs)); color: var(--muted); padding: 0 2px; transition: opacity .15s }
+.wdg:not(:hover) .wgrip { opacity: 0 } .bgrid.edit .wgrip, .wdg.cfgon .wgrip { opacity: 1 } @media (pointer: coarse) { .wdg .wgrip { opacity: 1; padding: 4px 6px; margin: -4px 0 -4px -6px } }
+body.wdragging { user-select: none; -webkit-user-select: none }
 .bgrid.edit .wdg { border-style: dashed } .wdg.wdrag { opacity: .4 } .wdg.wtb { box-shadow: -4px 0 0 var(--acc) } .wdg.wta { box-shadow: 4px 0 0 var(--acc) }
 .wb { flex: 1; min-height: 0; overflow: auto; padding: 0 12px 10px }
 .wb .list { margin: 0 } .wb li.task { padding-top: 3px; padding-bottom: 3px; min-height: 0 } .wb li.task .acts { display: none } .wb li.task .fold.sp { width: 4px }
@@ -2261,7 +2263,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-84";
+  var APPV = "zd-app-2026-10-16-85";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -4786,12 +4788,12 @@ CREATE TABLE inbox (
     if (w.type === "proj") h += row("Проект", dd("wproj", proj(c.pid) ? (c._inh ? "как у доски · " : "") + proj(c.pid).n : "выбрать…"));
     if (w.type === "note") h += row("Заметка", dd("wnote", note(c.nid) ? note(c.nid).t || "Без названия" : "выбрать…"));
     if (w.type === "sticky" || w.type === "chart") h += row("Цвет", '<div class="sw">' + COLORS.map(function (cc, i) { return '<button type="button" data-a="wset" data-k="c" data-v="' + i + '" class="' + ((c.c !== undefined ? +c.c : w.type === "sticky" ? 6 : 0) === i ? "on" : "") + '" style="background:' + cc[1] + '" title="' + cc[0] + '"></button>'; }).join("") + "</div>");
-    return '<div class="wcfg">' + h + '<div class="r"><button type="button" class="btn pri sm" data-a="wcfg">Готово</button><button type="button" class="btn sm" data-a="wsize">Размер: ' + WSZ[w.sz || "m"][2] + '</button><button type="button" class="btn sm warn" data-a="wdel" style="margin-left:auto">Убрать виджет</button></div></div>';
+    return '<div class="wcfg">' + h + '<div class="r"><button type="button" class="btn pri sm" data-a="wcfg">Готово</button><button type="button" class="btn sm" data-a="wsize">Размер: ' + WSZ[w.sz || "m"][2] + '</button><button type="button" class="btn sm" data-a="wmv" data-x="-1" title="Поставить раньше">← Раньше</button><button type="button" class="btn sm" data-a="wmv" data-x="1" title="Поставить позже">Позже →</button><button type="button" class="btn sm warn" data-a="wdel" style="margin-left:auto">Убрать виджет</button></div></div>';
   }
   function wHTML(b, w0) {
     var w = wEff(b, w0), sz = WSZ[w.sz] || WSZ.m, c = w.cfg || {}, href = wHref(w), ttl = c.t || wDefTitle(w), cfg = WCFG === w.id;
     var st = w.type === "sticky" ? ' style="--wc:' + col(c.c !== undefined ? +c.c : 6) + '"' : "";
-    return '<section class="wdg w-' + w.type + " c" + sz[0] + " r" + sz[1] + (cfg ? " cfgon" : "") + '" data-w="' + w.id + '"' + st + '><header class="wh">' + (BEDIT ? '<span class="wgrip" title="Перетащите, чтобы переставить">⠿</span>' : "") + '<span class="wi">' + (WT[w.type] || {}).i + "</span>" +
+    return '<section class="wdg w-' + w.type + " c" + sz[0] + " r" + sz[1] + (cfg ? " cfgon" : "") + '" data-w="' + w.id + '"' + st + '><header class="wh"><span class="wgrip" title="Потяните, чтобы переставить виджет" aria-hidden="true">⠿</span>' + '<span class="wi">' + (WT[w.type] || {}).i + "</span>" +
       (href ? '<a class="wt" href="#' + esc(href) + '" title="Открыть раздел">' + esc(ttl) + "</a>" : '<span class="wt">' + esc(ttl) + "</span>") +
       '<span class="wbtn">' + (w.type === "note" && note(c.nid) && !BEDIT ? '<button type="button" data-a="wnedit" class="' + (WNED === w.id ? "on" : "") + '" title="' + (WNED === w.id ? "Готово" : "Править заметку здесь") + '">' + (WNED === w.id ? "✓" : "✎") + "</button>" : "") + (BEDIT ? '<button type="button" data-a="wsize" title="Размер">⤡</button><button type="button" data-a="wdel" title="Убрать с доски">×</button>' : "") + '<button type="button" data-a="wcfg" title="Настроить виджет" aria-label="Настроить виджет">⚙</button></span></header>' +
       '<div class="wb">' + (cfg ? wCfgHTML(b, w) : wBody(b, w)) + "</div></section>";
@@ -4886,12 +4888,13 @@ CREATE TABLE inbox (
   }, true);
   document.addEventListener("pointermove", function (e) {
     if (!WDR) return; if (Math.abs(e.clientX - WDR.x0) + Math.abs(e.clientY - WDR.y0) > 6) WDR.moved = true; if (!WDR.moved) return;
-    WDR.el.classList.add("wdrag"); var t = null;
+    WDR.el.classList.add("wdrag"); document.body.classList.add("wdragging"); var t = null;
+    WDR.y = e.clientY; if (!WDR.raf) (function auto() { if (!WDR) return; var sp = WDR.y < 80 ? -12 : WDR.y > innerHeight - 90 ? 12 : 0; if (sp) window.scrollBy(0, sp); WDR.raf = requestAnimationFrame(auto); })();
     [].forEach.call(document.querySelectorAll(".bgrid > .wdg"), function (x) { x.classList.remove("wtb", "wta"); var r = x.getBoundingClientRect(); if (x !== WDR.el && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) { t = x; WDR.before = e.clientX < r.left + r.width / 2; } });
     WDR.t = t; if (t) t.classList.add(WDR.before ? "wtb" : "wta");
   });
   document.addEventListener("pointerup", function () {
-    var g = WDR; WDR = null; if (!g) return; g.el.classList.remove("wdrag"); [].forEach.call(document.querySelectorAll(".bgrid > .wdg"), function (x) { x.classList.remove("wtb", "wta"); });
+    var g = WDR; WDR = null; if (!g) return; if (g.raf) cancelAnimationFrame(g.raf); document.body.classList.remove("wdragging"); g.el.classList.remove("wdrag"); [].forEach.call(document.querySelectorAll(".bgrid > .wdg"), function (x) { x.classList.remove("wtb", "wta"); });
     if (!g.moved || !g.t) return;
     var b = board(ARG); if (!b) return; var a = b.w.filter(function (w) { return w.id === g.el.dataset.w; })[0]; if (!a) return;
     var rest = b.w.filter(function (w) { return w !== a; }), ti = rest.map(function (w) { return w.id; }).indexOf(g.t.dataset.w); if (ti < 0) return;
@@ -6498,7 +6501,7 @@ CREATE TABLE inbox (
       "<b>Меню доски</b> (⋯ справа вверху или правая кнопка по доске в панели): открывать при запуске, дублировать, переставить выше или ниже, удалить. На телефоне виджеты встают в одну колонку.",
       "<b>Стартовая доска</b>: ⋯ → «🏠 Открывать при запуске приложения» — эта доска будет встречать вас при каждом открытии (при обновлении страницы остаётся текущее место). Выбрать стартовый экран можно и в «Настройки» → «Общие» → «Стартовый экран». Логотип «Задачи» вверху тоже ведёт на стартовый экран.",
       "<b>Источник доски</b>: кнопка «Источник: …» в шапке доски — выберите проект, тег, фильтр или список, и все виджеты без своего источника (список задач, сроки, числа, график, календарь, канбан, быстрый ввод, прогресс проекта) покажут его. Так одна доска легко переключается с проекта на проект. Своё значение у виджета (⚙ → «Откуда») главнее; «Как у доски» возвращает общее. Доска по шаблону «Проект» сразу создаётся с источником.",
-      "<b>Заметка на доске</b>: ✎ в заголовке виджета заметки или двойной клик по тексту — правите прямо на доске тем же редактором, что и в заметке («/» — блоки, выделение — форматирование). ✓ — готово, всё сохраняется само."]));
+      "<b>Заметка на доске</b>: ✎ в заголовке виджета заметки или двойной клик по тексту — правите прямо на доске тем же редактором, что и в заметке («/» — блоки, выделение — форматирование). ✓ — готово, всё сохраняется само.", "<b>Переставить виджет</b>: потяните за ручку ⠿ слева в его заголовке (на компьютере она появляется при наведении, на телефоне видна всегда) и отпустите на другом виджете — синяя черта покажет, куда он встанет; у края экрана доска сама прокручивается. Или ⚙ виджета → «← Раньше» / «Позже →»."]));
     h += sec("stats", "Статистика", ul([
       "Пункт «Статистика» в «Списках». Две вкладки — <b>📊 Обзор</b> и <b>⏱ Время</b>; период — 7, 30 или 90 дней.",
       "<b>Обзор</b>: выполнено задач (вместе с выполнениями повторяющихся) и в среднем в день, создано, серия дней подряд с выполненными задачами и лучшая серия, помидоры и часы фокуса, открыто сейчас и сколько просрочено, средний процент выполнения привычек; графики по дням, по проектам, по дням недели, по спринтам.",
@@ -7688,6 +7691,7 @@ CREATE TABLE inbox (
       case "waddt": var bwa = board(ARG); if (!bwa) return; var nk = el.dataset.k, nw = wAdd(bwa, nk, bwa.src ? {} : nk === "tasks" ? { src: bwa.pid ? "proj:" + bwa.pid : "list:today" } : nk === "quick" ? { src: bwa.pid ? "proj:" + bwa.pid : "list:inbox" } : nk === "proj" && bwa.pid ? { pid: bwa.pid } : {}); WADD = false; if (/^(proj|note|countdown|links)$/.test(nk) && !(nk === "proj" && (bwa.pid || /^proj:/.test(bwa.src || "")))) WCFG = nw.id; render(); setTimeout(function () { var x = document.querySelector('.wdg[data-w="' + nw.id + '"]'); if (x) x.scrollIntoView({ block: "nearest", behavior: "smooth" }); }, 30); return;
       case "wcfg": var wcw = el.closest(".wdg"); if (wcw) { WCFG = WCFG === wcw.dataset.w ? null : wcw.dataset.w; render(); } return;
       case "wdel": var bwd = board(ARG), wdw = el.closest(".wdg"); if (bwd && wdw) { var wi = bwd.w.map(function (w) { return w.id; }).indexOf(wdw.dataset.w), wrm = bwd.w[wi]; if (wi < 0) return; bwd.w.splice(wi, 1); WCFG = null; bSave(bwd); toastUndo("Виджет убран", function () { bwd.w.splice(Math.min(wi, bwd.w.length), 0, wrm); touch(bwd); save(); render(); }); } return;
+      case "wmv": var wmb = board(ARG), wme = el.closest(".wdg"); if (wmb && wme) { var wl = (wmb.w || []).slice(), wi = wl.map(function (w) { return w.id; }).indexOf(wme.dataset.w), wj = wi + (+el.dataset.x || 0); if (wi >= 0 && wj >= 0 && wj < wl.length) { wl.splice(wj, 0, wl.splice(wi, 1)[0]); wmb.w = wl; bSave(wmb); setTimeout(function () { var ne = document.querySelector('.wdg[data-w="' + wme.dataset.w + '"]'); if (ne) ne.scrollIntoView({ block: "nearest" }); }, 30); } else toast(wj < 0 ? "Виджет уже первый" : "Виджет уже последний"); } return;
       case "wsize": var wsw = el.closest(".wdg"), rws = el.getBoundingClientRect(), wsb = board(ARG), wso = wOf(wsb, wsw && wsw.dataset.w); if (wso) ctxShow(rws.left, rws.bottom + 4, Object.keys(WSZ).map(function (k) { return { c: k, i: "", l: WSZ[k][2], k: (wso.sz || "m") === k ? "✓" : "" }; }), { k: "wsz", id: wso.id }); return;
       case "wset": var bws = board(ARG), wsx = wOf(bws, el.closest(".wdg").dataset.w); if (wsx) { wsx.cfg = wsx.cfg || {}; var wv = el.dataset.v; wsx.cfg[el.dataset.k] = /^-?\d+$/.test(wv) ? +wv : wv; bSave(bws); } return;
       case "wsrc": var rsr = el.getBoundingClientRect(), bsr = board(ARG); ctxShow(rsr.left, rsr.bottom + 4, [{ c: "__inh", i: "↺", l: bsr && bsr.src ? "Как у доски (" + wsrcName(bsr.src) + ")" : "По умолчанию" }, "-"].concat(wsrcMenu()), { k: "wsrc", id: el.closest(".wdg").dataset.w }); return;
