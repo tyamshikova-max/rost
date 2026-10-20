@@ -270,7 +270,7 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .setfd { border-top: 1px solid var(--line); padding-top: 8px } .setfd > summary { cursor: pointer; font-size: calc(13.5px * var(--fs)); list-style-position: inside }
 .setfg { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 8px 12px; align-items: center; margin: 10px 0 6px } .setfg > span { font-size: calc(13px * var(--fs)); color: var(--muted) } .setfg select.inp { max-width: 100% }
 @media (max-width: 560px) { .setfg { grid-template-columns: minmax(0, 1fr) } .setfg > span { margin-top: 4px } }
-.setfmode { flex-wrap: wrap } .setfdesc { width: 100%; resize: vertical; font: inherit; line-height: 1.45 } .setfsec:empty { display: none } .setfn { font-size: calc(12.5px * var(--fs)); margin: 4px 0 8px } .setpv { display: grid; gap: 3px; font-size: calc(13.5px * var(--fs)) } .setpvr { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline } .setpvr.setpvs { padding-left: 20px }
+.setfpick { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left } .setfmode { flex-wrap: wrap } .setfdesc { width: 100%; resize: vertical; font: inherit; line-height: 1.45 } .setfsec:empty { display: none } .setfn { font-size: calc(12.5px * var(--fs)); margin: 4px 0 8px } .setpv { display: grid; gap: 3px; font-size: calc(13.5px * var(--fs)) } .setpvr { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline } .setpvr.setpvs { padding-left: 20px }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -2257,7 +2257,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-80";
+  var APPV = "zd-app-2026-10-16-81";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -4003,18 +4003,18 @@ CREATE TABLE inbox (
     return sum.length ? ': <span class="muted">' + esc(sum.join(" · ")) + "</span>" : ' <span class="muted">— проект, теги, приоритет, оценка, цель, описание</span>';
   }
   function setSecHTML(x) {
-    var f = setF(x), pj = f.pid && proj(f.pid), secs = pj ? psecs(pj) : [];
-    return secs.length ? '<select class="inp" data-setf="sec" data-id="' + x.id + '"><option value="">без секции</option>' + secs.map(function (z) { return '<option value="' + z.id + '"' + (z.id === f.sec ? " selected" : "") + ">" + esc(z.n) + "</option>"; }).join("") + "</select>" : "";
+    var f = setF(x), pj = f.pid && proj(f.pid), secs = pj ? psecs(pj) : [], sc = secs.filter(function (z) { return z.id === f.sec; })[0];
+    return secs.length ? '<button type="button" class="btn sm setfpick" data-a="setfsx" data-id="' + x.id + '">▤ ' + esc(sc ? sc.n : "без секции") + " ▾</button>" : "";
   }
   function setNoteHTML(x) { var d = x.data || {}; return "Строка набора главнее: свой +Проект или !приоритет в строке побеждают общие, теги складываются. Уже созданные задачи не меняются." + (d.mode === "sub" ? " Создаётся задача с названием набора, строки — её подзадачи; проект, теги, цель и описание — у главной задачи." : d.mode === "chk" ? " Создаётся одна задача с названием набора, строки — пункты чек-листа в её описании (после общего описания); время из строки пишется перед пунктом, оценка — на всю задачу." : " Описание копируется в каждую задачу."); }
   function setFieldsHTML(x) {
     var f = setF(x), d = x.data || {};
     var h = '<details class="setfd"' + (SETFOPEN[x.id] ? " open" : "") + ' data-setfo="' + x.id + '"><summary>⚙ Общие поля задач<span class="setfsum">' + setSumHTML(x) + '</span></summary><div class="setfg">';
-    h += '<span>Проект</span><div class="r"><select class="inp" data-setf="pid" data-id="' + x.id + '"><option value="">— как в строке (без проекта)</option>' + ptree().map(function (z) { return '<option value="' + z.p.id + '"' + (z.p.id === f.pid ? " selected" : "") + ">" + "  ".repeat(z.d) + esc(z.p.n) + "</option>"; }).join("") + '</select><span class="setfsec">' + setSecHTML(x) + "</span></div>";
+    h += '<span>Проект</span><div class="r"><button type="button" class="btn sm setfpick" data-a="setfpj" data-id="' + x.id + '">' + (f.pid && proj(f.pid) ? esc(picon(proj(f.pid)) + " " + proj(f.pid).n) : "— как в строке (без проекта)") + ' ▾</button><span class="setfsec">' + setSecHTML(x) + "</span></div>";
     h += '<span>Теги</span><input class="inp" data-setf="tags" data-id="' + x.id + '" value="' + esc((f.tags || []).map(function (g) { return "#" + g; }).join(" ")) + '" placeholder="#утро #здоровье" autocomplete="off">';
     h += '<span>Приоритет</span><div class="seg">' + [[0, "—"], [1, "1"], [2, "2"], [3, "3"]].map(function (v) { return '<button type="button" data-a="setfp" data-id="' + x.id + '" data-v="' + v[0] + '" class="' + ((f.prio || 0) === v[0] ? "on" : "") + '">' + v[1] + "</button>"; }).join("") + "</div>";
     h += '<span>' + (d.mode === "chk" ? "Оценка задачи" : "Оценка на задачу") + '</span><div class="r"><input class="inp" type="number" min="0" step="5" data-setf="est" data-id="' + x.id + '" value="' + (f.est ? Math.round(f.est * 60) : "") + '" placeholder="—" style="width:90px"><span class="muted">мин</span></div>';
-    h += '<span>Цель</span><select class="inp" data-setf="goal" data-id="' + x.id + '"><option value="">— без цели</option>' + goals().filter(function (g) { return (g.st || "active") === "active"; }).map(function (g) { return '<option value="' + g.id + '"' + (g.id === f.goal ? " selected" : "") + ">" + esc((g.ic || "🎯") + " " + g.n) + "</option>"; }).join("") + "</select>";
+    h += '<span>Цель</span><div class="r"><button type="button" class="btn sm setfpick" data-a="setfgl" data-id="' + x.id + '">' + (f.goal && goal(f.goal) ? esc((goal(f.goal).ic || "🎯") + " " + goal(f.goal).n) : "— без цели") + " ▾</button></div>";
     h += '<span>Описание</span><textarea class="inp setfdesc" data-setf="desc" data-id="' + x.id + '" rows="' + Math.max(2, Math.min(8, String(f.desc || "").split("\n").length + 1)) + '" placeholder="Текст, который попадёт в описание задачи: что сделать, ссылки, напоминание себе">' + esc(f.desc || "") + "</textarea>";
     h += '<span>Как создавать</span><div class="seg setfmode">' + [["", "отдельными задачами"], ["sub", "задачей с подзадачами"], ["chk", "задачей с чек-листом"]].map(function (m) { return '<button type="button" data-a="setfm" data-id="' + x.id + '" data-v="' + m[0] + '" class="' + ((d.mode || "") === m[0] ? "on" : "") + '">' + m[1] + "</button>"; }).join("") + "</div>";
     h += '</div><p class="muted setfn">' + setNoteHTML(x) + '</p><div class="setpvw">' + setPreviewHTML(x) + "</div></details>";
@@ -7797,6 +7797,12 @@ CREATE TABLE inbox (
       case "rev-ok": var rp = proj(ARG); if (rp) { rp.revAt = Date.now(); touch(rp); save(); toast("✓ «" + rp.n + "» проверен"); if (revDue().length) revGo(1); else { render(); toast("✓ Все проекты проверены"); } } return;
       case "setnew": var sx = touch({ id: uid(), kind: "set", n: sets().length ? "Новый набор" : "Утро", data: { text: sets().length ? "" : "Зарядка в 7:00 #здоровье\nСтакан воды\nРазобрать «Входящие»\nВыбрать три главные задачи дня", days: [] }, created: Date.now() }); S.tpls.push(sx); save(); render(); setTimeout(function () { var i = document.querySelector('[data-setn="' + sx.id + '"]'); if (i) { i.focus(); i.select(); } }, 50); return;
       case "setfp": setFSet(el.dataset.id, "prio", +el.dataset.v || 0); return;
+      case "setfpj": case "setfsx": case "setfgl":
+        var xf = tplObj(el.dataset.id); if (!xf) return; var ff = setF(xf), rcf = el.getBoundingClientRect(), its;
+        if (a === "setfpj") its = [{ c: "~", i: ff.pid ? "" : "✓", l: "— как в строке (без проекта)" }].concat(ptree().map(function (z) { return { c: z.p.id, i: ff.pid === z.p.id ? "✓" : "", l: picon(z.p) + " " + z.p.n, pad: z.d }; }));
+        else if (a === "setfsx") its = [{ c: "~", i: ff.sec ? "" : "✓", l: "Без секции" }].concat(psecs(proj(ff.pid)).map(function (z) { return { c: z.id, i: ff.sec === z.id ? "✓" : "", l: z.n }; }));
+        else its = [{ c: "~", i: ff.goal ? "" : "✓", l: "— без цели" }].concat(goals().filter(function (g) { return (g.st || "active") === "active" || g.id === ff.goal; }).map(function (g) { return { c: g.id, i: g.ic || "🎯", l: g.n, k: ff.goal === g.id ? "✓" : "" }; }));
+        ctxShow(rcf.left, rcf.bottom + 4, its, { k: a, id: xf.id }); return;
       case "setfm": var sm0 = tplObj(el.dataset.id); if (sm0) { sm0.data = Object.assign({}, sm0.data || {}); if (el.dataset.v === "sub" || el.dataset.v === "chk") sm0.data.mode = el.dataset.v; else delete sm0.data.mode; touch(sm0); save(); SETFOPEN[sm0.id] = true; LS.set("zd-setfo", JSON.stringify(SETFOPEN)); render(); } return;
       case "setrun": var sr = tplObj(el.dataset.id); if (!sr) return; if (!setLines(sr).length) { toast("В наборе пока нет строк"); return; } var nr = setApply(sr, today0()); save(); render(); toast(nr ? "«" + sr.n + "»: в «Сегодня» добавлено " + nr + " " + plural(nr, ["задача", "задачи", "задач"]) : "«" + sr.n + "» сегодня уже добавлен"); return;
       case "setdel": var sd = tplObj(el.dataset.id); if (!sd) return; sd.del = 1; sd.delAt = Date.now(); touch(sd); save(); render(); toastUndo("Набор «" + sd.n + "» удалён", function () { delete sd.del; delete sd.delAt; touch(sd); save(); render(); }); return;
@@ -8861,6 +8867,7 @@ CREATE TABLE inbox (
     if (k === "mdish" || k === "fdish") { foodCtx(k, id, c); return; }
     if (k === "fire") { fireA(c); return; }
     if (k === "pnmore") { pnFire(c); return; }
+    if (k === "setfpj" || k === "setfsx" || k === "setfgl") { setFSet(id, { setfpj: "pid", setfsx: "sec", setfgl: "goal" }[k], c === "~" ? "" : c); return; }
     if (k === "ctxsel") { ctxSet(c); return; }
     if (k === "setpick") { if (c === "__cfg") { go("templates"); setTimeout(function () { var hx = $("sets"); if (hx) hx.scrollIntoView({ block: "start" }); }, 80); return; } var sk = tplObj(c); if (sk) { var nk = setApply(sk, today0()); save(); render(); toast(nk ? "«" + sk.n + "»: в «Сегодня» добавлено " + nk + " " + plural(nk, ["задача", "задачи", "задач"]) : "«" + sk.n + "» сегодня уже добавлен"); } return; }
     if (k === "dpest") { var te = task(id); if (te) { te.est = +c || 0; touch(te); save(); render(); } return; }
