@@ -316,7 +316,12 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .tbsum { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; font-size: calc(12px * var(--fs)); color: var(--muted) } .tbsum b { width: 100%; color: var(--fg); font-weight: 600 } .tbsum span { border-left: 3px solid var(--bc); padding-left: 5px }
 .tbline { position: relative; height: 14px; border-radius: 7px; background: var(--hover); margin: 12px 0 2px; overflow: hidden } .tbline i { position: absolute; top: 0; bottom: 0 }
 .tbscale { display: flex; justify-content: space-between; font-size: calc(11px * var(--fs)); color: var(--muted); margin-bottom: 8px }
-.tbedit { display: grid; gap: 6px; margin: 8px 0 } .tbrow { gap: 6px; align-items: center } .tbrow input[type=time] { width: 110px } .tbcat { border-left: 4px solid var(--bc) !important; min-width: 140px; text-align: left }
+.tbedit { display: grid; gap: 6px; margin: 8px 0; container-type: inline-size } .tbhint { margin: 8px 0 0; font-size: calc(12.5px * var(--fs)) }
+.tbgrip { cursor: grab; touch-action: none; user-select: none; color: var(--muted); font-size: 18px; line-height: 1; padding: 6px 4px; border-radius: 6px } .tbgrip:hover { color: var(--fg); background: var(--hover) }
+.tbrow { border-radius: 10px; padding: 2px 4px } .tbrow.tbdrag { opacity: .5; background: var(--hover) } .tbrow.tbinsb { box-shadow: inset 0 2px 0 var(--acc) } .tbrow.tbinsa { box-shadow: inset 0 -2px 0 var(--acc) }
+.tbmvs { display: inline-flex } .tbmvs .ibtn:disabled { opacity: .3; cursor: default } .tbrow { display: grid; grid-template-columns: auto minmax(120px, 180px) auto auto auto; grid-template-areas: "g c t m x"; gap: 4px 6px; align-items: center } .tbrow input[type=time] { width: 104px }
+.tbrow .tbgrip { grid-area: g } .tbrow .tbcat { grid-area: c; min-width: 0 } .tbtm { grid-area: t; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px } .tbrow .tbmvs { grid-area: m } .tbrow > [data-a=tbdel] { grid-area: x }
+@container (max-width: 560px) { .tbrow { grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "g c m x" ". t t t"; padding: 4px } .tbrow + .tbrow { border-top: 1px solid var(--line); border-radius: 0 } } .tbcat { border-left: 4px solid var(--bc) !important; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .tbcats { display: grid; gap: 6px; margin-bottom: 8px } .tbcrow { gap: 6px; align-items: center } .tbcrow input[type=color] { width: 30px; height: 30px; padding: 0; border: 0; background: none; cursor: pointer } .tbci { width: 54px; text-align: center } .tbcrow .inp:not(.tbci) { max-width: 220px }
 .clzh { padding: 6px 12px 2px; font-size: calc(12px * var(--fs)); font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em } .clzh .c { font-weight: 400 }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
@@ -5378,7 +5383,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-93";
+  var APPV = "zd-app-2026-10-16-94";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -9484,10 +9489,46 @@ CREATE TABLE inbox (
     h += '<div class="r" style="margin-top:8px"><div class="seg"><button type="button" data-a="tbon" data-v="1" class="' + (c.on ? "on" : "") + '">Включён</button><button type="button" data-a="tbon" data-v="0" class="' + (c.on ? "" : "on") + '">Выключен</button></div><div class="seg"><button type="button" data-a="tbcal" data-v="1" class="' + (c.cal ? "on" : "") + '">В календаре — показывать</button><button type="button" data-a="tbcal" data-v="0" class="' + (c.cal ? "" : "on") + '">не показывать</button></div></div>';
     h += '<div class="tbline">' + l.map(function (b) { var e = b.e > b.s ? b.e : 1440, ct = tbCat(b.cat); return '<i style="left:' + (b.s / 14.4) + "%;width:" + ((e - b.s) / 14.4) + "%;background:" + ct.c + '" title="' + esc(ct.n) + '"></i>' + (b.e < b.s ? '<i style="left:0;width:' + (b.e / 14.4) + "%;background:" + ct.c + '"></i>' : ""); }).join("") + '</div><div class="tbscale"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>';
     h += '<div class="htabs"><button type="button" class="tb' + (TBTAB === "wd" ? " on" : "") + '" data-a="tbtab" data-x="wd">Будни</button><button type="button" class="tb' + (TBTAB === "we" ? " on" : "") + '" data-a="tbtab" data-x="we">Выходные</button></div>';
-    h += '<div class="tbedit">' + l.map(function (b) { var ct = tbCat(b.cat); return '<div class="r tbrow"><button type="button" class="btn sm tbcat" data-a="tbpick" data-id="' + b.id + '" style="--bc:' + ct.c + '">' + esc(ct.i + " " + ct.n) + ' ▾</button><input type="time" class="inp" data-tbs="' + b.id + '" value="' + tbHM(b.s) + '" aria-label="Начало"><span class="muted">–</span><input type="time" class="inp" data-tbe="' + b.id + '" value="' + tbHM(b.e) + '" aria-label="Конец">' + (b.e < b.s ? '<span class="muted">до следующего дня</span>' : "") + '<button type="button" class="ibtn" data-a="tbdel" data-id="' + b.id + '" title="Убрать блок">×</button></div>'; }).join("") + '</div><div class="r"><button type="button" class="btn sm" data-a="tbadd">＋ Блок</button><button type="button" class="btn sm" data-a="tbcopy" title="Скопировать этот шаблон в другой">⇄ Скопировать в «' + (TBTAB === "we" ? "Будни" : "Выходные") + '»</button></div>';
+    h += '<p class="muted tbhint">Порядок блоков меняется перетаскиванием за ⠿ или стрелками ↑↓: длительность каждого блока сохраняется, время пересчитывается само.</p>';
+    h += '<div class="tbedit">' + l.map(function (b, i) { var ct = tbCat(b.cat); return '<div class="tbrow" data-tbr="' + b.id + '"><span class="tbgrip" title="Перетащите, чтобы поменять порядок" aria-hidden="true">⠿</span><button type="button" class="btn sm tbcat" data-a="tbpick" data-id="' + b.id + '" style="--bc:' + ct.c + '">' + esc(ct.i + " " + ct.n) + ' ▾</button><span class="tbtm"><input type="time" class="inp" data-tbs="' + b.id + '" value="' + tbHM(b.s) + '" aria-label="Начало"><span class="muted">–</span><input type="time" class="inp" data-tbe="' + b.id + '" value="' + tbHM(b.e) + '" aria-label="Конец">' + (b.e < b.s ? '<span class="muted">до след. дня</span>' : "") + '</span><span class="tbmvs"><button type="button" class="ibtn" data-a="tbmv" data-id="' + b.id + '" data-d="-1" title="Раньше"' + (i ? "" : " disabled") + '>↑</button><button type="button" class="ibtn" data-a="tbmv" data-id="' + b.id + '" data-d="1" title="Позже"' + (i < l.length - 1 ? "" : " disabled") + '>↓</button></span><button type="button" class="ibtn" data-a="tbdel" data-id="' + b.id + '" title="Убрать блок">×</button></div>'; }).join("") + '</div><div class="r"><button type="button" class="btn sm" data-a="tbadd">＋ Блок</button><button type="button" class="btn sm" data-a="tbcopy" title="Скопировать этот шаблон в другой">⇄ Скопировать в «' + (TBTAB === "we" ? "Будни" : "Выходные") + '»</button></div>';
     h += '<h3 style="margin:14px 0 6px">Категории</h3><div class="tbcats">' + c.cats.map(function (ct) { return '<div class="r tbcrow"><input type="color" data-tbcc="' + ct.id + '" value="' + ct.c + '" aria-label="Цвет"><input class="inp tbci" data-tbci="' + ct.id + '" value="' + esc(ct.i) + '" maxlength="4" aria-label="Значок"><input class="inp" data-tbcn="' + ct.id + '" value="' + esc(ct.n) + '" aria-label="Название"><button type="button" class="ibtn" data-a="tbcdel" data-id="' + ct.id + '" title="Убрать категорию">×</button></div>'; }).join("") + '</div><div class="r"><input class="inp" id="tbcnew" placeholder="Новая категория: Дорога, Семья, Хобби…" style="max-width:280px"><button type="button" class="btn sm" data-a="tbcadd">＋ Категория</button><button type="button" class="btn sm" data-a="tbreset" style="margin-left:auto">↺ Как было по умолчанию</button></div></section>';
     return h;
   }
+  // поменять порядок: блок встаёт на место to, все блоки сохраняют длительность, промежутки между местами — как были;
+  // отсчёт — от начала первого блока, так что день начинается и заканчивается в то же время
+  function tbMove(id, to) {
+    var old = tbList(), l = tbList().sort(function (a, b) { return a.s - b.s; }), from = -1;
+    l.forEach(function (b, i) { if (b.id === id) from = i; });
+    if (from < 0 || to < 0 || to >= l.length || to === from) return;
+    var dur = function (b) { return ((b.e - b.s) % 1440 + 1440) % 1440 || 1440; };
+    var gaps = l.map(function (b, i) { return i < l.length - 1 ? Math.max(0, l[i + 1].s - (b.s + dur(b))) : 0; }), cur = l[0].s, tab = TBTAB;
+    l.splice(to, 0, l.splice(from, 1)[0]);
+    l.forEach(function (b, i) { var d = dur(b); b.s = cur % 1440; b.e = (cur + d) % 1440; cur += d + gaps[i]; });
+    tbSave(tab, l); render();
+    var ct = tbCat(l[to].cat); toastUndo("«" + ct.n + "» теперь " + tbHM(l[to].s) + "–" + tbHM(l[to].e), function () { tbSave(tab, old); });
+  }
+  // перетаскивание за ⠿ (мышь и палец)
+  var TBDR = null;
+  function tbIns(y) { var rows = [].slice.call(document.querySelectorAll(".tbrow[data-tbr]")); for (var i = 0; i < rows.length; i++) { var rc = rows[i].getBoundingClientRect(); if (y < rc.top + rc.height / 2) return [i, rows]; } return [rows.length, rows]; }
+  function tbScroller(el) { for (var x = el && el.parentElement; x && x !== document.body; x = x.parentElement) { var oy = getComputedStyle(x).overflowY; if ((oy === "auto" || oy === "scroll") && x.scrollHeight > x.clientHeight) return x; } return document.scrollingElement; }
+  function tbDrEnd() { [].forEach.call(document.querySelectorAll(".tbdrag, .tbinsb, .tbinsa"), function (x) { x.classList.remove("tbdrag", "tbinsb", "tbinsa"); }); }
+  document.addEventListener("pointerdown", function (e) {
+    var g = e.target.closest && e.target.closest(".tbgrip"); if (!g) return; var r = g.closest(".tbrow"); if (!r) return;
+    TBDR = { id: r.dataset.tbr, sc: tbScroller(r) }; r.classList.add("tbdrag"); try { g.setPointerCapture(e.pointerId); } catch (er) { /* старый браузер */ } e.preventDefault();
+  });
+  document.addEventListener("pointermove", function (e) {
+    if (!TBDR) return; e.preventDefault();
+    var x = tbIns(e.clientY), rows = x[1]; [].forEach.call(document.querySelectorAll(".tbinsb, .tbinsa"), function (q) { q.classList.remove("tbinsb", "tbinsa"); });
+    if (x[0] < rows.length) rows[x[0]].classList.add("tbinsb"); else if (rows.length) rows[rows.length - 1].classList.add("tbinsa");
+    var sc = TBDR.sc, top = sc === document.scrollingElement ? 0 : sc.getBoundingClientRect().top, bot = sc === document.scrollingElement ? innerHeight : sc.getBoundingClientRect().bottom;
+    if (e.clientY < top + 50) sc.scrollTop -= 12; else if (e.clientY > bot - 50) sc.scrollTop += 12;
+  });
+  document.addEventListener("pointerup", function (e) {
+    if (!TBDR) return; var id = TBDR.id, x = tbIns(e.clientY), rows = x[1], from = -1; TBDR = null; tbDrEnd();
+    rows.forEach(function (r, i) { if (r.dataset.tbr === id) from = i; });
+    var to = x[0] > from ? x[0] - 1 : x[0]; if (from >= 0 && to !== from) tbMove(id, to);
+  });
+  document.addEventListener("pointercancel", function () { if (TBDR) { TBDR = null; tbDrEnd(); } });
   function tbList() { var c = tbCfg(); return (TBTAB === "we" ? c.we : c.wd).map(function (b) { return Object.assign({}, b); }); }
   function tbAct(a, el) {
     var id = el.dataset.id;
@@ -9496,6 +9537,7 @@ CREATE TABLE inbox (
       case "tbcal": tbSave("cal", el.dataset.v === "1"); render(); return true;
       case "tbtab": TBTAB = el.dataset.x; render(); return true;
       case "tbadd": var l = tbList(), last = l.reduce(function (m, b) { return Math.max(m, b.e > b.s ? b.e : 0); }, 480); l.push({ id: uid(), cat: tbCfg().cats[0].id, s: Math.min(1380, last), e: Math.min(1439, last + 60) }); tbSave(TBTAB, l); render(); return true;
+      case "tbmv": var ml = tbList().sort(function (a, b) { return a.s - b.s; }), mi = -1; ml.forEach(function (b, i) { if (b.id === id) mi = i; }); tbMove(id, mi + (+el.dataset.d || 0)); return true;
       case "tbdel": tbSave(TBTAB, tbList().filter(function (b) { return b.id !== id; })); render(); return true;
       case "tbcopy": var src = tbList().map(function (b) { return Object.assign({}, b, { id: uid() }); }); tbSave(TBTAB === "we" ? "wd" : "we", src); render(); toast("Шаблон скопирован в «" + (TBTAB === "we" ? "Будни" : "Выходные") + "»"); return true;
       case "tbpick": var r = el.getBoundingClientRect(), cur = (tbList().filter(function (b) { return b.id === id; })[0] || {}).cat; ctxShow(r.left, r.bottom + 4, tbCfg().cats.map(function (ct) { return { c: ct.id, i: cur === ct.id ? "✓" : ct.i, l: ct.n }; }), { k: "tbpick", id: id }); return true;
