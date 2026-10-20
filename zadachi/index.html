@@ -280,6 +280,24 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .tdlb { display: flex; height: 6px; border-radius: 99px; background: var(--hover); overflow: hidden; margin-top: 6px } .tdlb i { display: block; height: 100% } .tdlb .d { background: var(--ok) } .tdlb .o { background: var(--acc) }
 .tdload.over .tdlb { box-shadow: inset 0 0 0 1px var(--warn) } .tdlw { color: var(--warn); font-weight: 600 } .tdln { font-size: calc(12px * var(--fs)); margin-top: 4px }
 .hicg { margin: 6px 0 0 } .hicg > .muted { display: block; font-size: calc(12px * var(--fs)); margin: 0 0 3px } .hico .mico, .hc .mico { width: 1.15em; height: 1.15em; vertical-align: -0.2em } .hchip.done .mico, .hc.done .mico { color: #fff !important }
+.clbanner { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: var(--acc-soft); margin: 0 0 12px }
+.cltop { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; margin: 6px 0 10px } .cltop > .muted:last-child { margin-left: auto }
+.cllist .clrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px } .cllist .clrow + .clrow { border-top: 1px solid var(--line) }
+.clrow .clt { flex: 1 1 200px; min-width: 0; display: grid } .clrow.dn .clt { text-decoration: line-through; color: var(--muted) } .clrow.off .clt { color: var(--muted) }
+.clrow .ck { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--muted); background: none; cursor: pointer; flex: none; padding: 0 } .clrow.dn .ck { background: var(--ok); border-color: var(--ok) }
+.clwho { margin: 14px 0 6px; font-size: calc(14px * var(--fs)) }
+.clwnav { align-items: center; gap: 8px; margin: 4px 0 10px } .clwnav .muted { font-size: calc(12.5px * var(--fs)) }
+.clgrid { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 8px; overflow-x: auto; padding-bottom: 4px }
+.clday { border: 1px solid var(--line); border-radius: 12px; padding: 8px; background: color-mix(in srgb, var(--panel) 85%, transparent); display: grid; gap: 4px; align-content: start; min-width: 0 }
+.clday.today { border-color: var(--acc); box-shadow: inset 0 0 0 1px var(--acc) } .clday.offd { opacity: .55 }
+.cldh { display: flex; justify-content: space-between; gap: 4px; font-size: calc(13px * var(--fs)) } .cldl { font-size: calc(12px * var(--fs)); color: var(--muted) } .cldl.over { color: var(--warn); font-weight: 600 }
+.clchip { display: block; font-size: calc(12.5px * var(--fs)); padding: 4px 6px; border-radius: 7px; background: var(--hover); color: var(--fg); text-decoration: none; overflow-wrap: anywhere } .clchip:hover { background: var(--acc-soft) }
+.clpool .clp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 10px } .clpool .clp + .clp { border-top: 1px solid var(--line) } .clpool .clp.off { opacity: .5 } .clpool .clp.open { background: var(--acc-soft) }
+.clpn { flex: 1 1 220px; min-width: 0 } .clpm input { width: 64px } .cldays button { min-width: 30px; padding: 3px 4px; font-size: calc(12px * var(--fs)) }
+.clset .wcr { align-items: center } .cldset { display: grid; gap: 6px } .cldset .r { gap: 6px; align-items: center } .cldset input { width: 74px } .cldn { min-width: 26px }
+.pplist { display: grid; gap: 6px; margin: 10px 0 } .pprow { display: flex; gap: 8px; align-items: center; max-width: 360px } .pprow .inp { flex: 1 } .ppme { font-weight: 600; padding: 6px 10px }
+.tresp { color: var(--muted) }
+@media (max-width: 700px) { .clgrid { grid-template-columns: repeat(7, minmax(110px, 1fr)) } }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -1752,7 +1770,7 @@ CREATE TABLE inbox (
     if (!ok && Date.now() - SAVEWARN > 60000) { SAVEWARN = Date.now(); toast("⚠ В браузере не хватает места для данных — они сохраняются на Яндекс Диск, но обратитесь к разработчику"); }
   }
   var S = (function () { try { var raw = LS.get("zd-state") || "null"; if (raw.charCodeAt(0) === 1) raw = lzUnpack(raw); return JSON.parse(raw); } catch (e) { return null; } })() || {};
-  S.recipes = S.recipes || []; S.menus = S.menus || []; S.prods = S.prods || [];
+  S.recipes = S.recipes || []; S.menus = S.menus || []; S.prods = S.prods || []; S.chores = S.chores || []; S.chlog = S.chlog || [];
   S.v = 2; S.tasks = S.tasks || []; S.projects = S.projects || []; S.tags = S.tags || []; S.filters = S.filters || []; S.sprints = S.sprints || []; S.comments = S.comments || []; S.habits = S.habits || []; S.hlog = S.hlog || []; S.acts = S.acts || []; S.tpls = S.tpls || []; S.flags = S.flags || []; S.notes = S.notes || []; S.nsecs = S.nsecs || []; S.ntags = S.ntags || []; S.boards = S.boards || []; S.goals = S.goals || []; S.days = S.days || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
   var VIEWS = (function () { try { return JSON.parse(LS.get("zd-views") || "{}") || {}; } catch (e) { return {}; } })();
   function save(quiet) { try { unScan(); } catch (er) { /* отмена не мешает сохранению */ } try { histScan(); } catch (er) { /* история не мешает сохранению */ } if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); DV++; saveLocal(); if (!quiet) { SYNC.later(); SRV.later(); } }
@@ -2302,7 +2320,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-89";
+  var APPV = "zd-app-2026-10-16-90";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -2317,6 +2335,8 @@ CREATE TABLE inbox (
     if (k === "days") return "d" + String(x.id || "d:0000").slice(2, 6);
     if (k === "notes" || k === "nsecs" || k === "ntags") return "notes";
     if (k === "recipes" || k === "menus" || k === "prods") return "food";
+    if (k === "chores") return "core";
+    if (k === "chlog") return "c" + String(x.id || "cl:0000").slice(3, 7);
     return "core";
   }
   function segSnapshot() {
@@ -2336,7 +2356,7 @@ CREATE TABLE inbox (
     (b || []).forEach(function (x) { var y = m[x.id]; if (!y || (x.upd || 0) > (y.upd || 0)) m[x.id] = x; });
     return Object.keys(m).map(function (k) { return m[k]; });
   }
-  var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "flags", "notes", "nsecs", "ntags", "boards", "goals", "days", "recipes", "menus", "prods"];
+  var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "flags", "notes", "nsecs", "ntags", "boards", "goals", "days", "recipes", "menus", "prods", "chores", "chlog"];
   function snapshot() { return { v: 2, tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, notes: S.notes, nsecs: S.nsecs, ntags: S.ntags, boards: S.boards, opt: S.opt }; }
   var SYNC = {
     st: "off", at: 0, msg: "", t: null, busy: false, seen: {}, lastPush: 0,
@@ -2733,7 +2753,7 @@ CREATE TABLE inbox (
     if ((m = h.match(/^share-(.+)$/))) return { v: "share", a: m[1] };
     if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board|goal|menu|recipe|shop|rimp)-(.+)$/))) return { v: m[1], a: m[2] };
     if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
-    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch", "menu", "menunew", "recipes", "rhave", "prods"].indexOf(h) >= 0) return { v: h, a: "" };
+    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch", "menu", "menunew", "recipes", "rhave", "prods", "clean"].indexOf(h) >= 0) return { v: h, a: "" };
     if ((m = h.match(/^daily-?(.*)$/))) return { v: "daily", a: m[1] };
     if ((m = h.match(/^report-?(.*)$/))) return { v: "report", a: m[1] || "w0" };
     return { v: "today", a: "" };
@@ -2760,7 +2780,7 @@ CREATE TABLE inbox (
   function go(h) { if (location.hash.slice(1) === h) route(); else location.hash = h; }
   /* ---------- вкладки открытых страниц (как в многооконной программе); хранятся на этом устройстве ---------- */
   var PTMAX = 8, PTCUR = "", PTJUMP = "", PTDRAG = null;
-  var PTICO = { inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
+  var PTICO = { clean: "clean", inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
   var PTNAME = { done: "Сделано", tarch: "Архив задач", trash: "Корзина", archive: "Архив проектов", templates: "Шаблоны", settings: "Настройки", help: "Справка", report: "Отчёт", recipes: "Рецепты", prods: "Продукты и цены", menunew: "Новое меню", notes: "Заметки", sprints: "Все спринты", search: "Поиск" };
   function ptabsOn() { return innerWidth > 860 && LS.get("zd-ptabs") !== "off"; } // только на компьютере
   function ptabs() { try { var a = JSON.parse(LS.get("zd-tabs") || "[]"); return Array.isArray(a) ? a.filter(function (t) { return t && t.h; }) : []; } catch (e) { return []; } }
@@ -2877,6 +2897,7 @@ CREATE TABLE inbox (
 
   /* ---------- боковая панель ---------- */
   var ICO = {
+    clean: '<path d="M14 3l-4 8M6.5 11h7l1.5 3c.8 1.8.5 4.5-.5 7H5.5c-1-2.5-1.3-5.2-.5-7zM8 21l.5-4M11 21v-4"/>',
     food: '<path d="M7 3v6.5a2 2 0 0 0 4 0V3M9 11.5V21"/><path d="M16.5 21V3c-2.2 1.6-3.2 4.3-3.2 7.4 0 1.7.9 2.6 3.2 2.6"/>',
     journal: '<path d="M6 3.5h11a1.5 1.5 0 0 1 1.5 1.5v14A1.5 1.5 0 0 1 17 20.5H6z"/><path d="M6 3.5v17M9.5 8h5.5M9.5 11.5h5.5"/>',
     wait: '<path d="M4 5.5h16v10.5H10l-4.5 3.5V16H4z"/><path d="M12 8.2v3l2 1.2"/>',
@@ -2952,13 +2973,13 @@ CREATE TABLE inbox (
     return itemHTML("proj", p.id, "proj-" + p.id, '<span class="pic">' + piconH(p) + "</span>", inFav ? pname(p) : p.n, n, { drag: !inFav, pad: inFav ? 0 : d, chev: chev, fav: !!p.fav });
   }
   // левая панель из блоков; порядок блоков и пунктов «Списков» меняется перетаскиванием и хранится в S.opt
-  var SIDE_DEF = ["fav", "boards", "lists", "projects", "notes", "filters", "tags", "service"], LISTS_DEF = ["inbox", "today", "goals", "waiting", "journal", "cal", "gantt", "matrix", "habits", "menu", "sprint", "plans", "someday", "flag", "all", "stats"];
+  var SIDE_DEF = ["fav", "boards", "lists", "projects", "notes", "filters", "tags", "service"], LISTS_DEF = ["inbox", "today", "goals", "waiting", "journal", "cal", "gantt", "matrix", "habits", "menu", "clean", "sprint", "plans", "someday", "flag", "all", "stats"];
   function sideOrder() { var o = (S.opt.side || []).filter(function (x) { return SIDE_DEF.indexOf(x) >= 0; }); SIDE_DEF.forEach(function (x) { if (o.indexOf(x) < 0) { var si = o.indexOf("service"); if (si >= 0) o.splice(si, 0, x); else o.push(x); } }); return o; }
   function listsAll() { var o = (S.opt.lists || []).filter(function (x) { return LISTS_DEF.indexOf(x) >= 0; }); LISTS_DEF.forEach(function (x) { if (o.indexOf(x) < 0) o.push(x); }); return o; }
   var NEWHIDE = ["gantt", "matrix", "sprint", "journal", "waiting", "someday", "flag"];
   function hiddenLists() { var l = LS.get("zd-hide"); if (l) { try { var a = JSON.parse(l); if (Array.isArray(a)) return a; } catch (e) { /* старый формат */ } } return S.opt.hideLists || (LS.get("zd-newdef") === "1" ? NEWHIDE : []); }
   function listsOrder() { var hid = hiddenLists(); return listsAll().filter(function (x) { return x === "inbox" || hid.indexOf(x) < 0; }); }
-  var LISTN = { menu: "Меню", journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
+  var LISTN = { menu: "Меню", clean: "План уборки", journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
   function setListHidden(id, hide) { if (id === "inbox") return; var h = hiddenLists().filter(function (x) { return x !== id; }); if (hide) h.push(id); S.opt.hideLists = h; LS.set("zd-hide", JSON.stringify(h)); optTouch(); save(); render(); }
   // блоки левой панели сворачиваются кликом по заголовку (запоминается на этом устройстве)
   function sideFold() { try { return JSON.parse(LS.get("zd-sfold") || "{}") || {}; } catch (e) { return {}; } }
@@ -2985,6 +3006,7 @@ CREATE TABLE inbox (
       waiting: function () { var wl = waitList(), due = wl.filter(function (t) { return t.wait.ask && t.wait.ask < today0() + DAY; }).length; return itemHTML("smart", "waiting", "waiting", ic("wait"), "Жду ответа", wl.length ? wl.length + (due ? '</span><span class="n od" title="Пора спросить: ' + due + '">' + due : "") : 0, { drag: true }); },
       goals: function () { return itemHTML("smart", "goals", "goals", ic("goal"), "Цели", goals().filter(function (g) { return (g.st || "active") === "active"; }).length, { drag: true }); },
       menu: function () { return itemHTML("smart", "menu", "menu", ic("food"), "Меню", 0, { drag: true }); },
+      clean: function () { var cn = cOpt().on ? cPlanFor(today0()).on.length : 0; return itemHTML("smart", "clean", "clean", ic("clean"), "План уборки", cn, {}); },
       habits: function () { var n = habits().filter(function (h) { return !h.arch && hDue(h, today0()) && !hSt(h, dKey(today0())); }).length; return itemHTML("smart", "habits", "habits", ic("habits"), "Привычки", n, { drag: true }); },
       stats: function () { return itemHTML("smart", "stats", "stats", ic("stats"), "Статистика", 0, { drag: true }); },
       someday: function () { return itemHTML("smart", "someday", "someday", ic("someday"), "Когда-нибудь", somedayList().length, { drag: true }); },
@@ -3174,6 +3196,7 @@ CREATE TABLE inbox (
     if (par && !inSet[par.id]) meta.push('<a class="tag" href="#" data-a="openpar" data-x="' + par.id + '" title="Открыть родительскую задачу">↳ ' + esc(par.t.slice(0, 40)) + "</a>");
     var p = proj(t.pid);
     if (p && !o.noProj) meta.push(pdotHTML(p, true));
+    if (t.resp && personName(t.resp)) meta.push('<span class="tag tresp" title="Ответственный">👤 ' + esc(personName(t.resp)) + "</span>");
     if (t.goal && goal(t.goal) && V !== "goal") meta.push('<a class="tag" href="#goal-' + t.goal + '" title="Цель">' + (goal(t.goal).ic || "🎯") + " " + esc(goal(t.goal).n.slice(0, 30)) + "</a>");
     (t.tags || []).forEach(function (g) { meta.push('<a class="tag" href="#tag-' + esc(g) + '" style="color:' + tcolor(g) + '">' + esc(tlab(g)) + "</a>"); });
     var bt = bodyTodo(t); if (bt) meta.push("☑ " + bt[0] + "/" + bt[1]); else if (t.body || t.note) meta.push("📝");
@@ -6024,6 +6047,245 @@ CREATE TABLE inbox (
     } catch (e) { return head("Рецепт не загрузился", "") + '<p class="warnc">' + esc((e && e.message) || "Не получилось прочитать страницу") + '</p><p><a href="#recipes">К рецептам</a> — там можно вставить текст рецепта вручную.</p>'; }
   }
 
+  /* ---------- Ответственные: кому поручена задача (по умолчанию — «Я») ---------- */
+  function people() { return [{ id: "", n: "Я" }].concat((S.opt.people || []).filter(function (x) { return x && x.id && x.n; })); }
+  function personName(id) { var p = people().filter(function (x) { return x.id === (id || ""); })[0]; return p ? p.n : ""; }
+  function respOptions(cur) { return people().map(function (x) { return '<option value="' + x.id + '"' + ((cur || "") === x.id ? " selected" : "") + ">" + esc(x.n) + "</option>"; }).join(""); }
+  function peopleHTML() {
+    var l = (S.opt.people || []).filter(function (x) { return x && x.id; });
+    return '<section class="card" id="s-people"><h2>Ответственные</h2><p class="muted" style="margin:0">Кому можно поручить задачу — список для поля «Ответственный» в карточке задачи и в «Плане уборки». По умолчанию ответственный — вы («Я»).</p>' +
+      '<div class="pplist"><div class="pprow"><span class="ppme">Я</span><span class="muted">по умолчанию</span></div>' +
+      l.map(function (x) { return '<div class="pprow"><input class="inp" data-ppn="' + x.id + '" value="' + esc(x.n) + '" aria-label="Имя"><button type="button" class="ibtn" data-a="ppdel" data-id="' + x.id + '" title="Убрать из списка">×</button></div>'; }).join("") +
+      '</div><div class="r"><input class="inp" id="ppnew" placeholder="Имя: Маша, Сергей, няня…" autocomplete="off" style="max-width:260px"><button type="button" class="btn sm" data-a="ppadd">＋ Добавить</button></div></section>';
+  }
+  function ppSave(l) { S.opt.people = l; optTouch(); save(); render(); }
+
+  /* ---------- План уборки: пул дел → раскладка по дням (зоны дня + лимит минут) → каждый день одна задача с чек-листом ---------- */
+  var CZONES = { "": "любая", kitchen: "Кухня", bath: "Ванная и туалет", bed: "Спальня", living: "Гостиная", hall: "Прихожая", kids: "Детская", all: "Вся квартира" };
+  var CFREQ = { d: ["Каждый день", 7], w3: ["3 раза в неделю", 3], w2: ["2 раза в неделю", 2], w1: ["Раз в неделю", 1], w2w: ["Раз в 2 недели", 1], m: ["Раз в месяц", 1] };
+  var CWD = [1, 2, 3, 4, 5, 6, 0], CWDN = { 1: "Пн", 2: "Вт", 3: "Ср", 4: "Чт", 5: "Пт", 6: "Сб", 0: "Вс" };
+  // стартовый пул поддерживающей уборки: [название, частота, минут, зона, тяжёлое]
+  var CSTART = [["Помыть посуду", "d", 15, "kitchen", 0], ["Протереть столешницу и плиту", "d", 5, "kitchen", 0], ["5 минут порядка: вещи на места", "d", 5, "all", 0], ["Заправить кровать", "d", 2, "bed", 0],
+    ["Вынести мусор", "w3", 5, "kitchen", 0], ["Полить цветы", "w2", 5, "living", 0], ["Протереть раковину и смеситель", "w2", 5, "bath", 0], ["Пропылесосить", "w2", 20, "all", 1], ["Стирка", "w2", 10, "all", 0],
+    ["Почистить унитаз", "w1", 10, "bath", 0], ["Помыть ванну или душ", "w1", 15, "bath", 1], ["Помыть зеркала", "w1", 10, "bath", 0], ["Помыть полы", "w1", 30, "all", 1], ["Протереть пыль", "w1", 15, "living", 0],
+    ["Погладить и разобрать бельё", "w1", 30, "all", 1], ["Почистить микроволновку", "w1", 5, "kitchen", 0], ["Разобрать холодильник: выбросить просроченное", "w1", 10, "kitchen", 0], ["Порядок в обуви в прихожей", "w1", 10, "hall", 0],
+    ["Порядок в детской вместе с ребёнком", "w3", 15, "kids", 0], ["Сменить постельное бельё", "w2w", 15, "bed", 0], ["Протереть ручки и выключатели", "w2w", 10, "all", 0], ["Почистить плиту тщательно", "w2w", 20, "kitchen", 1],
+    ["Помыть холодильник внутри", "m", 30, "kitchen", 1], ["Почистить духовку", "m", 30, "kitchen", 1], ["Помыть окна", "m", 45, "living", 1]];
+  function cOpt() { var o = S.opt.clean || {}; return { on: !!o.on, pid: o.pid || "", mins: Object.assign({ 1: 60, 2: 60, 3: 60, 4: 60, 5: 60, 6: 120, 0: 60 }, o.mins || {}), zones: Object.assign({}, o.zones || {}), close: o.close === "close" ? "close" : "keep" }; }
+  function cSet(k, v) { var o = S.opt.clean = Object.assign({}, S.opt.clean || {}); o[k] = v; optTouch(); save(); }
+  function choresAll() { return live(S.chores || []).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0) || (a.created || 0) - (b.created || 0); }); }
+  function chores() { return choresAll().filter(function (x) { return !x.off; }); }
+  function chore(id) { return choresAll().filter(function (x) { return x.id === id; })[0] || null; }
+  function cleanSeed(force) {
+    S.chores = S.chores || []; var have = {}; S.chores.forEach(function (x) { have[x.id] = 1; }); var n = 0;
+    if (S.chores.length && !force) return 0;
+    CSTART.forEach(function (c, i) { var id = "ch-" + ("0" + (i + 1)).slice(-2); if (have[id]) return; S.chores.push(touch({ id: id, n: c[0], fr: c[1], min: c[2], zone: c[3], heavy: c[4] ? 1 : 0, resp: "", days: [], ord: i, created: 1 })); n++; });
+    if (n) save(); return n;
+  }
+  function cHash(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+  function cWeekNo(ms) { return Math.round((monday(ms) - monday(new Date(2026, 0, 5).getTime())) / (7 * DAY)); }
+  // недельный шаблон: какие дела в какой день недели. Свои дни у дела — как задано; остальные раскладываются автоматически:
+  // зона дня притягивает дела этой зоны, лимит минут дня не превышается, повторы разносятся по неделе, тяжёлые — в дни побольше
+  function cTemplate() {
+    return memo("ctpl", function () {
+      var o = cOpt(), avail = CWD.filter(function (w) { return +o.mins[w] > 0; }); if (!avail.length) avail = CWD.slice();
+      var load = {}, out = {}; CWD.forEach(function (w) { load[w] = 0; out[w] = []; });
+      var wt = function (c) { return c.fr === "w2w" ? .5 : c.fr === "m" ? .25 : 1; };
+      var put = function (c, ds) { ds.forEach(function (w) { out[w].push(c.id); load[w] += (+c.min || 0) * wt(c); }); };
+      var list = chores();
+      list.filter(function (c) { return (c.days || []).length; }).forEach(function (c) { put(c, c.days.filter(function (w) { return CWD.indexOf(+w) >= 0; }).map(Number)); });
+      var auto = list.filter(function (c) { return !(c.days || []).length; }).sort(function (a, b) { return (CFREQ[b.fr] || [0, 1])[1] - (CFREQ[a.fr] || [0, 1])[1] || (b.heavy || 0) - (a.heavy || 0) || (+b.min || 0) - (+a.min || 0) || (a.ord || 0) - (b.ord || 0); });
+      auto.forEach(function (c) {
+        var k = Math.min((CFREQ[c.fr] || [0, 1])[1], avail.length);
+        if (k >= avail.length) { put(c, avail); return; }
+        var best = null, bestS = 1e9, combos = [];
+        (function gen(st, i) { if (st.length === k) { combos.push(st.slice()); return; } for (var j = i; j < avail.length; j++) { st.push(avail[j]); gen(st, j + 1); st.pop(); } })([], 0);
+        combos.forEach(function (ds) {
+          var sc = 0;
+          ds.forEach(function (w) {
+            var cap = +o.mins[w] || 20, m = (+c.min || 0) * wt(c), z = o.zones[w] || "";
+            sc += Math.max(0, load[w] + m - cap) * 4 + (load[w] + m) / cap * 10;
+            if (z && z === c.zone) sc -= 25; else if (z && c.zone && c.zone !== "all") sc += 8;
+            if (c.heavy) sc -= cap / 6;
+          });
+          if (k > 1) { var pos = ds.map(function (w) { return CWD.indexOf(w); }).sort(function (a, b) { return a - b; }); for (var g = 0; g < pos.length; g++) { var gap = g ? pos[g] - pos[g - 1] : pos[0] + 7 - pos[pos.length - 1]; if (gap < 2) sc += 20; sc += Math.abs(gap - 7 / k) * 2; } }
+          if (sc < bestS) { bestS = sc; best = ds; }
+        });
+        put(c, best || [avail[0]]);
+      });
+      return out;
+    });
+  }
+  function cLogId(d0) { return "cl:" + dKey(d0); }
+  function cLog(d0, create) { var id = cLogId(d0); S.chlog = S.chlog || []; var r = S.chlog.filter(function (x) { return x.id === id && !x.del; })[0] || null; if (!r && create) { r = touch({ id: id, skip: [], post: [], add: [] }); S.chlog.push(r); } return r; }
+  // дела на конкретный день: шаблон дня недели с учётом чередования (раз в 2 недели / раз в месяц), пропусков и переносов
+  function cPlanFor(d0) {
+    var w = new Date(d0).getDay(), wk = cWeekNo(d0), lg = cLog(d0) || {}, skip = lg.skip || [], post = lg.post || [];
+    var ids = (cTemplate()[w] || []).filter(function (id) { var c = chore(id); if (!c || c.off) return false; if (c.fr === "w2w" && (wk + cHash(c.id)) % 2) return false; if (c.fr === "m" && (wk + cHash(c.id)) % 4) return false; return true; });
+    (lg.add || []).forEach(function (id) { if (ids.indexOf(id) < 0 && chore(id)) ids.push(id); });
+    return { all: ids, on: ids.filter(function (id) { return skip.indexOf(id) < 0 && post.indexOf(id) < 0; }), skip: skip.filter(function (id) { return chore(id); }), post: post.filter(function (id) { return chore(id); }), add: lg.add || [] };
+  }
+  function cItem(c) { return c.n + " · " + (+c.min || 0) + " мин"; }
+  function cTid(resp, d0) { return "cln-" + (resp || "me") + "-" + dKey(d0); }
+  function cTaskOf(resp, d0) { var id = cTid(resp, d0); return S.tasks.filter(function (t) { return t.id === id; })[0] || null; }
+  function cChecked(t) { var m = {}; if (!t || !t.body) return m; TXTD.innerHTML = t.body; [].forEach.call(TXTD.querySelectorAll("ul.todo > li"), function (li) { if (li.getAttribute("data-checked") === "1") m[li.textContent.trim()] = 1; }); return m; }
+  // задачи дня: по одной на ответственного, чек-лист — дела дня; отметки сохраняются, пропущенные и перенесённые убираются
+  function cleanSync(d0) {
+    var o = cOpt(), pl = cPlanFor(d0), groups = {};
+    pl.on.forEach(function (id) { var c = chore(id); var r = c.resp && personName(c.resp) ? c.resp : ""; (groups[r] = groups[r] || []).push(c); });
+    var resps = Object.keys(groups); (S.tasks || []).forEach(function (t) { if (t.cln && t.cln === dKey(d0) && !t.del && resps.indexOf(t.resp || "") < 0) resps.push(t.resp || ""); });
+    var ch = false;
+    resps.forEach(function (r) {
+      var l = groups[r] || [], t = cTaskOf(r, d0), ck = cChecked(t), mins = l.reduce(function (a, c) { return a + (+c.min || 0); }, 0);
+      if (!l.length) { if (t && !t.del && !t.done && !Object.keys(ck).length) { t.del = 1; t.delAt = Date.now(); touch(t); ch = true; } return; }
+      var title = "🧹 Уборка · " + mins + " мин" + (r ? " — " + personName(r) : "");
+      var body = '<ul class="todo">' + l.map(function (c) { var tx = cItem(c); return "<li" + (ck[tx] ? ' data-checked="1"' : "") + ">" + esc(tx) + "</li>"; }).join("") + '</ul><p>Пропустить или перенести дело — <a href="#clean">План уборки</a>.</p>';
+      if (!t) { t = newTaskFrom(title, { day: d0 }); t.id = cTid(r, d0); t.at = d0; t.allday = true; t.rem = false; t.rep = ""; delete t.dur; t.tags = []; }
+      else if (t.del) { if (t.purged) return; delete t.del; delete t.delAt; }
+      if (t.t === title && t.body === body && t.pid === (o.pid && proj(o.pid) ? o.pid : t.pid)) return;
+      t.t = title; t.body = body; delete t.note; t.cln = dKey(d0); t.resp = r; t.est = Math.round(mins / 60 * 100) / 100; if (o.pid && proj(o.pid)) t.pid = o.pid;
+      var all = l.every(function (c) { return ck[cItem(c)]; }); if (all && !t.done) { t.done = true; t.dt = Date.now(); } else if (!all && t.done && !t.canc) { t.done = false; delete t.dt; }
+      touch(t); ch = true;
+    });
+    return ch;
+  }
+  var CLDAY = "";
+  function cleanAuto() {
+    var o = cOpt(); if (!o.on || !SETGATE) return; var k = dKey(today0()); if (CLDAY === k) return; CLDAY = k;
+    var ch = cleanSync(today0());
+    if (o.close === "close") (S.tasks || []).forEach(function (t) { if (t.cln && !t.done && !t.del && t.cln < k) { t.done = true; t.canc = true; t.dt = Date.now(); touch(t); ch = true; } });
+    if (ch) save();
+  }
+  function cToggle(id, d0) {
+    if (!cOpt().on) { toast("Сначала включите план — тогда появится задача «🧹 Уборка» с чек-листом"); return; }
+    var c = chore(id); if (!c) return; var r = c.resp && personName(c.resp) ? c.resp : "", t = cTaskOf(r, d0); if (!t) { cleanSync(d0); t = cTaskOf(r, d0); } if (!t) return;
+    TXTD.innerHTML = t.body || ""; var tx = cItem(c);
+    [].forEach.call(TXTD.querySelectorAll("ul.todo > li"), function (li) { if (li.textContent.trim() === tx) { if (li.getAttribute("data-checked") === "1") li.removeAttribute("data-checked"); else li.setAttribute("data-checked", "1"); } });
+    t.body = TXTD.innerHTML; touch(t); cleanSync(d0); save(); render();
+  }
+  function cMove(id, d0, how) {
+    var lg = cLog(d0, true), c = chore(id); if (!c) return;
+    if (how === "skip") { lg.skip = (lg.skip || []).filter(function (x) { return x !== id; }).concat(id); }
+    else if (how === "post") { lg.post = (lg.post || []).filter(function (x) { return x !== id; }).concat(id); var nx = cLog(addDays(d0, 1), true); nx.add = (nx.add || []).filter(function (x) { return x !== id; }).concat(id); touch(nx); }
+    else if (how === "back") { lg.skip = (lg.skip || []).filter(function (x) { return x !== id; }); if ((lg.post || []).indexOf(id) >= 0) { lg.post = lg.post.filter(function (x) { return x !== id; }); var n2 = cLog(addDays(d0, 1)); if (n2) { n2.add = (n2.add || []).filter(function (x) { return x !== id; }); touch(n2); } } }
+    touch(lg); if (cOpt().on) { cleanSync(d0); var nk = dKey(addDays(d0, 1)); if ((how === "post" || how === "back") && (S.tasks || []).some(function (t) { return t.cln === nk && !t.del; })) cleanSync(addDays(d0, 1)); } save(); render();
+    if (how !== "back") toastUndo(how === "skip" ? "«" + c.n + "» — пропущено сегодня" : "«" + c.n + "» — перенесено на завтра", function () { cMove(id, d0, "back"); });
+  }
+  var CLTAB = "", CLWK = 0;
+  function clTab() { return CLTAB || LS.get("zd-cltab") || "today"; }
+  function vClean() {
+    if (!(S.chores || []).length) cleanSeed();
+    var o = cOpt(), tab = clTab();
+    var h = head("План уборки", "Поддерживающая уборка по дням недели: у дела — частота, время и зона; у дня — лимит минут и своя зона. Каждый день — одна задача с чек-листом.");
+    if (!o.on) h += '<div class="clbanner"><span>План выключен — задачи на день не создаются. Проверьте дела и настройки, потом включите.</span><button type="button" class="btn sm pri" data-a="clon">Включить план</button></div>';
+    h += '<div class="htabs cltabs">' + [["today", "Сегодня"], ["week", "Неделя"], ["pool", "Дела · " + chores().length], ["set", "Настройки"]].map(function (x) { return '<button type="button" class="tb' + (tab === x[0] ? " on" : "") + '" data-a="cltab" data-x="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>";
+    if (tab === "week") h += clWeekHTML(); else if (tab === "pool") h += clPoolHTML(); else if (tab === "set") h += clSetHTML(); else h += clTodayHTML();
+    return h;
+  }
+  function clTodayHTML() {
+    var d0 = today0(), o = cOpt(), pl = cPlanFor(d0), cap = +o.mins[new Date(d0).getDay()] || 0, mins = 0, h = "";
+    var groups = {}; pl.on.forEach(function (id) { var c = chore(id); mins += +c.min || 0; var r = c.resp && personName(c.resp) ? c.resp : ""; (groups[r] = groups[r] || []).push(c); });
+    var z = o.zones[new Date(d0).getDay()];
+    h += '<div class="cltop"><b>' + esc(new Date(d0).toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" })) + "</b>" + (z ? ' <span class="muted">· зона дня: ' + esc(CZONES[z]) + "</span>" : "") + '<span class="muted">' + mins + " мин" + (cap ? " из " + cap : "") + "</span></div>";
+    if (!pl.on.length) h += '<p class="empty">На сегодня дел по уборке нет.</p>';
+    Object.keys(groups).forEach(function (r) {
+      var t = cTaskOf(r, d0), ck = cChecked(t);
+      h += (Object.keys(groups).length > 1 || r ? '<h3 class="clwho">👤 ' + esc(personName(r)) + "</h3>" : "") + '<div class="gsheet cllist">' + groups[r].map(function (c) {
+        var on = !!ck[cItem(c)], mv = pl.add.indexOf(c.id) >= 0;
+        return '<div class="clrow' + (on ? " dn" : "") + '"><button type="button" class="ck" data-a="clchk" data-id="' + c.id + '" aria-label="' + (on ? "Вернуть" : "Сделано") + '"></button><span class="clt">' + esc(c.n) + '<small class="muted">' + (+c.min || 0) + " мин · " + esc(CZONES[c.zone] || "") + (mv ? " · перенесено со вчера" : "") + "</small></span>" +
+          (on ? "" : '<button type="button" class="btn sm" data-a="clskip" data-id="' + c.id + '" title="Сегодня не делать">⏭ Пропустить</button><button type="button" class="btn sm" data-a="clpost" data-id="' + c.id + '" title="Перенести на завтра">→ На завтра</button>') + "</div>";
+      }).join("") + "</div>";
+    });
+    var off = pl.skip.map(function (id) { return [id, "пропущено"]; }).concat(pl.post.map(function (id) { return [id, "перенесено на завтра"]; }));
+    if (off.length) h += '<h3 class="clwho">Не сегодня</h3><div class="gsheet cllist">' + off.map(function (x) { var c = chore(x[0]); return '<div class="clrow off"><span class="clt">' + esc(c.n) + '<small class="muted">' + x[1] + '</small></span><button type="button" class="btn sm" data-a="clback" data-id="' + c.id + '">Вернуть на сегодня</button></div>'; }).join("") + "</div>";
+    if (!o.on) h += '<p class="muted">Чтобы отмечать дела, включите план — тогда каждый день появится задача «🧹 Уборка» с чек-листом.</p>';
+    return h;
+  }
+  function clWeekHTML() {
+    var o = cOpt(), m0 = addDays(monday(Date.now()), 7 * CLWK), t0 = today0();
+    var h = '<div class="r clwnav"><button type="button" class="btn sm" data-a="clwk" data-x="-1">‹</button><b>' + esc(new Date(m0).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + " – " + new Date(addDays(m0, 6)).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })) + '</b><button type="button" class="btn sm" data-a="clwk" data-x="1">›</button>' + (CLWK ? '<button type="button" class="btn sm" data-a="clwk" data-x="0">Эта неделя</button>' : "") + '<span class="muted">Дела «раз в 2 недели» и «раз в месяц» чередуются по неделям.</span></div><div class="clgrid">';
+    for (var i = 0; i < 7; i++) {
+      var d0 = addDays(m0, i), w = new Date(d0).getDay(), pl = cPlanFor(d0), cap = +o.mins[w] || 0, mins = pl.on.reduce(function (a, id) { return a + (+chore(id).min || 0); }, 0);
+      h += '<div class="clday' + (d0 === t0 ? " today" : "") + (!cap ? " offd" : "") + '"><div class="cldh"><b>' + CWDN[w] + " " + new Date(d0).getDate() + "</b>" + (o.zones[w] ? '<span class="muted">' + esc(CZONES[o.zones[w]]) + "</span>" : "") + '</div><div class="cldl' + (cap && mins > cap ? " over" : "") + '">' + mins + (cap ? " / " + cap : "") + " мин</div>" +
+        pl.on.map(function (id) { var c = chore(id); return '<a href="#" class="clchip" data-a="clopen" data-id="' + c.id + '" title="' + esc(CFREQ[c.fr] ? CFREQ[c.fr][0] : "") + " · " + (+c.min || 0) + ' мин">' + esc(c.n) + (c.resp && personName(c.resp) ? ' <span class="muted">· ' + esc(personName(c.resp)) + "</span>" : "") + "</a>"; }).join("") + "</div>";
+    }
+    return h + '</div><p class="muted">Нажмите на дело, чтобы поправить частоту, время, зону или закрепить его за своими днями.</p>';
+  }
+  var CLOPEN = "";
+  function clPoolHTML() {
+    var h = '<p class="muted" style="margin:0 0 8px">Частота, время, зона, ответственный. «Дни» — закрепить дело за конкретными днями (иначе раскладка сама). Тяжёлые дела попадают в дни с большим запасом времени.</p><div class="gsheet clpool">';
+    h += choresAll().map(function (c) {
+      var ds = c.days || [];
+      return '<div class="clp' + (c.off ? " off" : "") + (CLOPEN === c.id ? " open" : "") + '" data-ch="' + c.id + '"><input class="inp clpn" data-chf="n" data-id="' + c.id + '" value="' + esc(c.n) + '" aria-label="Название дела">' +
+        '<button type="button" class="btn sm" data-a="clpick" data-k="fr" data-id="' + c.id + '">' + esc((CFREQ[c.fr] || CFREQ.w1)[0]) + ' ▾</button>' +
+        '<span class="r clpm"><input class="inp" type="number" min="1" max="240" step="5" data-chf="min" data-id="' + c.id + '" value="' + (+c.min || "") + '" aria-label="Минут"><span class="muted">мин</span></span>' +
+        '<button type="button" class="btn sm" data-a="clpick" data-k="zone" data-id="' + c.id + '">' + esc(CZONES[c.zone || ""] || "любая") + ' ▾</button>' +
+        '<button type="button" class="btn sm" data-a="clpick" data-k="resp" data-id="' + c.id + '">👤 ' + esc(personName(c.resp) || "Я") + ' ▾</button>' +
+        '<button type="button" class="btn sm' + (c.heavy ? " on" : "") + '" data-a="clheavy" data-id="' + c.id + '" title="Тяжёлое — ставить в дни с большим запасом времени" aria-pressed="' + (c.heavy ? "true" : "false") + '">💪</button>' +
+        '<span class="seg cldays" title="Свои дни (пусто — авто)">' + CWD.map(function (w) { return '<button type="button" data-a="clday" data-id="' + c.id + '" data-v="' + w + '" class="' + (ds.indexOf(w) >= 0 ? "on" : "") + '">' + CWDN[w] + "</button>"; }).join("") + "</span>" +
+        '<button type="button" class="ibtn" data-a="cloff" data-id="' + c.id + '" title="' + (c.off ? "Включить" : "Временно не планировать") + '">' + (c.off ? "▶" : "⏸") + '</button><button type="button" class="ibtn" data-a="cldel" data-id="' + c.id + '" title="Удалить дело">🗑</button></div>';
+    }).join("") + "</div>";
+    return h + '<div class="hadd"><span>＋</span><input type="text" class="inp" id="clnew" placeholder="Новое дело — напишите и нажмите Enter" aria-label="Новое дело"></div>';
+  }
+  function clSetHTML() {
+    var o = cOpt(), pj = o.pid && proj(o.pid);
+    var h = '<div class="card clset"><div class="wcr"><span>План</span><div class="seg"><button type="button" data-a="clon" class="' + (o.on ? "on" : "") + '">Включён</button><button type="button" data-a="cloff2" class="' + (o.on ? "" : "on") + '">Выключен</button></div></div>';
+    h += '<div class="wcr"><span>Проект для задач уборки</span><button type="button" class="btn sm" data-a="clpick" data-k="pid" data-id="">' + (pj ? esc(picon(pj) + " " + pj.n) : "📥 Входящие (без проекта)") + " ▾</button></div>";
+    h += '<div class="wcr"><span>Невыполненное за прошлые дни</span><div class="seg"><button type="button" data-a="clclose" data-v="keep" class="' + (o.close === "keep" ? "on" : "") + '">оставлять</button><button type="button" data-a="clclose" data-v="close" class="' + (o.close === "close" ? "on" : "") + '">закрывать как отменённое</button></div></div>';
+    h += '<div class="wcr"><span>Дни недели</span><div class="cldset">' + CWD.map(function (w) { return '<div class="r"><b class="cldn">' + CWDN[w] + '</b><input class="inp" type="number" min="0" max="480" step="5" data-cldm="' + w + '" value="' + (+o.mins[w] || 0) + '" aria-label="Минут в ' + CWDN[w] + '"><span class="muted">мин</span><button type="button" class="btn sm" data-a="clpick" data-k="dzone" data-id="' + w + '">' + (o.zones[w] ? esc(CZONES[o.zones[w]]) : "зона: любая") + " ▾</button></div>"; }).join("") + '</div></div><p class="muted">0 минут — в этот день уборки нет. Зона дня притягивает дела этой зоны (например, «Пн — кухня»).</p>';
+    h += '<div class="r"><button type="button" class="btn sm" data-a="clseed">↺ Вернуть стартовые дела</button></div></div>';
+    return h;
+  }
+  // меню выбора: частота, зона, ответственный, проект плана, зона дня
+  function clPickMenu(k, id) {
+    if (k === "fr") return Object.keys(CFREQ).map(function (f) { return { c: f, i: (chore(id) || {}).fr === f ? "✓" : "", l: CFREQ[f][0] }; });
+    if (k === "zone" || k === "dzone") { var cur = k === "zone" ? (chore(id) || {}).zone || "" : cOpt().zones[id] || ""; return Object.keys(CZONES).map(function (z) { return { c: z || "~", i: cur === z ? "✓" : "", l: z ? CZONES[z] : "любая" }; }); }
+    if (k === "resp") return people().map(function (p) { return { c: p.id || "~", i: ((chore(id) || {}).resp || "") === p.id ? "✓" : "", l: "👤 " + p.n }; });
+    if (k === "pid") return [{ c: "~", i: cOpt().pid ? "" : "✓", l: "📥 Входящие (без проекта)" }].concat(ptree().map(function (z) { return { c: z.p.id, i: cOpt().pid === z.p.id ? "✓" : "", l: picon(z.p) + " " + z.p.n, pad: z.d }; }));
+    return [];
+  }
+  function clPick(k, id, c) {
+    var v = c === "~" ? "" : c;
+    if (k === "pid") { cSet("pid", v); if (cOpt().on) { cleanSync(today0()); save(); } render(); return; }
+    if (k === "dzone") { var z = Object.assign({}, cOpt().zones); if (v) z[id] = v; else delete z[id]; cSet("zones", z); DV++; render(); return; }
+    var ch = chore(id); if (!ch) return; ch[k] = v; touch(ch); save(); if (cOpt().on) { cleanSync(today0()); save(); } render();
+  }
+  function clAct(a, el) {
+    var id = el.dataset.id, c = id ? chore(id) : null;
+    switch (a) {
+      case "cltab": CLTAB = el.dataset.x; LS.set("zd-cltab", CLTAB); render(); return true;
+      case "clon": cSet("on", true); CLDAY = ""; cleanAuto(); save(); render(); toast("План уборки включён — задача на сегодня в «Сегодня»"); return true;
+      case "cloff2": cSet("on", false); render(); return true;
+      case "clclose": cSet("close", el.dataset.v); render(); return true;
+      case "clwk": CLWK = el.dataset.x === "0" ? 0 : CLWK + (+el.dataset.x || 0); render(); return true;
+      case "clchk": cToggle(id, today0()); return true;
+      case "clskip": cMove(id, today0(), "skip"); return true;
+      case "clpost": cMove(id, today0(), "post"); return true;
+      case "clback": cMove(id, today0(), "back"); return true;
+      case "clopen": CLTAB = "pool"; LS.set("zd-cltab", "pool"); CLOPEN = id; render(); setTimeout(function () { var r = document.querySelector('.clp[data-ch="' + id + '"]'); if (r) r.scrollIntoView({ block: "center" }); }, 40); return true;
+      case "clpick": var rc = el.getBoundingClientRect(); ctxShow(rc.left, rc.bottom + 4, clPickMenu(el.dataset.k, id), { k: "clpick:" + el.dataset.k, id: id }); return true;
+      case "clheavy": if (c) { c.heavy = c.heavy ? 0 : 1; touch(c); save(); render(); } return true;
+      case "cloff": if (c) { c.off = c.off ? 0 : 1; touch(c); save(); if (cOpt().on) { cleanSync(today0()); save(); } render(); } return true;
+      case "clday": if (c) { var ds = (c.days || []).slice(), w = +el.dataset.v, i = ds.indexOf(w); if (i >= 0) ds.splice(i, 1); else ds.push(w); c.days = ds; touch(c); save(); if (cOpt().on) { cleanSync(today0()); save(); } render(); } return true;
+      case "cldel": if (c) { c.del = 1; c.delAt = Date.now(); touch(c); save(); if (cOpt().on) { cleanSync(today0()); save(); } render(); toastUndo("Дело «" + c.n + "» удалено", function () { delete c.del; delete c.delAt; touch(c); }); } return true;
+      case "clseed": var nn = cleanSeed(true); render(); toast(nn ? "Добавлено стартовых дел: " + nn : "Все стартовые дела уже есть"); return true;
+      case "ppadd": var pi = $("ppnew"), pv = pi && pi.value.trim(); if (!pv) { toast("Напишите имя"); return true; } ppSave((S.opt.people || []).concat({ id: uid(), n: pv.slice(0, 40) })); toast("«" + pv + "» — в списке ответственных"); return true;
+      case "ppdel": ppSave((S.opt.people || []).filter(function (x) { return x.id !== id; })); return true;
+    }
+    return false;
+  }
+  document.addEventListener("change", function (e) {
+    var t = e.target, ds = t.dataset || {};
+    if (ds.chf && ds.id) { var c = chore(ds.id); if (!c) return; if (ds.chf === "n") { var v = t.value.trim(); if (!v) { t.value = c.n; return; } c.n = v.slice(0, 100); } else c.min = Math.max(1, Math.min(240, Math.round(+t.value || 0))); touch(c); save(); if (cOpt().on) { cleanSync(today0()); save(); } return; }
+    if (ds.cldm !== undefined) { var m = Object.assign({}, cOpt().mins); m[ds.cldm] = Math.max(0, Math.min(480, Math.round(+t.value || 0))); cSet("mins", m); DV++; return; }
+    if (ds.ppn) { var l = (S.opt.people || []).map(function (x) { return x.id === ds.ppn ? { id: x.id, n: t.value.trim().slice(0, 40) || x.n } : x; }); S.opt.people = l; optTouch(); save(); return; }
+  });
+  document.addEventListener("keydown", function (e) {
+    var t = e.target; if (e.key !== "Enter") return;
+    if (t.id === "clnew") { e.preventDefault(); var v = t.value.trim(); if (!v) return; S.chores = S.chores || []; S.chores.push(touch({ id: uid(), n: v.slice(0, 100), fr: "w1", min: 10, zone: "", heavy: 0, resp: "", days: [], ord: choresAll().length, created: Date.now() })); save(); render(); setTimeout(function () { var i = $("clnew"); if (i) i.focus(); }, 30); }
+    if (t.id === "ppnew") { e.preventDefault(); fireA("ppadd"); }
+  });
+
   function vStats() {
     var days = +LS.get("zd-stdays") || 30, t0 = today0(), from = addDays(t0, -days + 1), ev = doneEvents().filter(function (e) { return e.d >= from; }), pom = live(S.acts).filter(function (a) { return a.k === "pomo" && a.d >= from; });
     var per = []; for (var i = 0; i < days; i++) { var d = addDays(from, i), e2 = addDays(d, 1); per.push({ l: days <= 14 ? WDS[new Date(d).getDay()] : String(new Date(d).getDate()), title: dayName(d), v: ev.filter(function (e) { return e.d >= d && e.d < e2; }).length }); }
@@ -6101,6 +6363,7 @@ CREATE TABLE inbox (
     h += "</section>";
     var th = LS.get("zd-theme") || "system";
     var hid = hiddenLists();
+    h += peopleHTML();
     h += '<section class="card" id="s-lists"><h2>Пункты «Списков»</h2><p class="muted" style="margin:0">Снимите галочку, чтобы скрыть пункт из левой панели (в Ctrl+K он останется). «Входящие» видны всегда. Скрыть можно и правым кликом по пункту.</p><div class="lchk">' +
       listsAll().map(function (k) { var on = k === "inbox" || hid.indexOf(k) < 0; return '<button type="button" class="lt' + (on ? " on" : "") + '" data-a="lhide" data-id="' + k + '" role="switch" aria-checked="' + on + '"' + (k === "inbox" ? " disabled" : "") + '><span class="lbox"></span>' + ic(k) + "<span>" + LISTN[k] + "</span></button>"; }).join("") + "</div></section>";
     h += '<section class="card"><h2>Левая панель</h2><p class="muted" style="margin:0">Блоки («Избранное», «Списки», «Проекты», «Фильтры», «Теги», «Служебное») переставляются перетаскиванием за заголовок, пункты «Списков» — перетаскиванием самих пунктов. Порядок синхронизируется между устройствами.</p><div class="r"><button class="btn" type="button" data-a="side-reset">Вернуть исходный порядок</button><button class="btn" type="button" data-a="mini">' + (document.body.classList.contains("mini") ? "Развернуть панель" : "Свернуть панель до иконок") + "</button></div></section>";
@@ -6141,7 +6404,7 @@ CREATE TABLE inbox (
     return auxHead("Настройки") + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
   }
   // справка по вкладкам, как настройки; поиск ищет по всем разделам сразу
-  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "switch", "phone", "ptabs", "quick", "mini", "pal", "keys"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "undo", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "food", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
+  var HTABS = [["start", "help", "С чего начать", ["start", "flow", "switch", "phone", "ptabs", "quick", "mini", "pal", "keys"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "resp", "undo", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "food", "clean", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
   var HQ = "";
   function htabOf(a) { if (HTABS.some(function (x) { return x[0] === a; })) return a; var f = HTABS.filter(function (x) { return x[3].indexOf(a) >= 0; })[0]; return f ? f[0] : "start"; }
   function vHelpTabs() {
@@ -6374,6 +6637,10 @@ CREATE TABLE inbox (
       "В архиве задачи сгруппированы по месяцам выполнения; строка поиска ищет по названию, тегам и проекту. Нажмите на задачу — откроется карточка с историей; снимите отметку — задача вернётся в работу.",
       "«Убрать архив в корзину…» — перенести все задачи архива в корзину (30 дней их можно восстановить). «Удалить выполненные» на странице «Сделано» задачи архива не трогает.",
       "На скорость синхронизации архив не влияет: выполненные задачи и так хранятся на Диске по месяцам, и старые месяцы не пересылаются заново."]));
+    h += sec("resp", "Ответственный", ul([
+      "Любую задачу можно поручить: в карточке поле <b>«Ответственный»</b> (если пусто — спрятано под «Ещё поля»). По умолчанию ответственный — вы («Я»), и тогда ничего не показывается.",
+      "Если выбран кто-то другой, в списке у задачи появляется 👤 с именем.",
+      "Список людей — «Настройки» → «Общие» → «Ответственные»: добавить, переименовать, убрать. Тот же список — у дел в «Плане уборки»."]));
     h += sec("undo", "Отмена действий: Ctrl+Z и «Вернуть»", ul([
       "Отметили задачу выполненной, удалили, перенесли в другой проект или изменили сразу несколько задач — внизу на 7 секунд появляется подсказка с <b>«Вернуть»</b>.",
       "<b>Ctrl+Z</b> (на Mac — ⌘Z) отменяет последнее действие, даже если подсказка уже исчезла; нажмите ещё раз — отменится предыдущее. Помнятся последние 40 действий: правки задач, проектов, заметок, меню и рецептов.",
@@ -6503,6 +6770,13 @@ CREATE TABLE inbox (
       "Главное дня видно вверху «Сегодня» и в виджете доски «Главное на сегодня».",
       "<b>Итоги дня</b> — «🌙 Итоги дня» в «Сегодня» (появляется вечером или после плана): сколько сделано, что с главным, что не успели (сразу перенести на завтра, через неделю или когда-нибудь), настроение дня и пара строк о том, как прошёл день.",
       "План, главное и итоги каждого дня сохраняются и синхронизируются.", "<b>Загрузка дня</b> — строка вверху «Сегодня»: сколько часов уже запланировано задачами на сегодня (вместе с просроченными), сколько сделано и сколько осталось, из скольких часов в день (настраивается в «Плане дня»). Считается по оценке времени ⏱ в карточке задачи; если оценки нет — по длительности, у задачи с точным временем — 30 минут. Больше нормы — красная пометка «перегруз»."]));
+    h += sec("clean", "План уборки", ul([
+      "Пункт <b>«План уборки»</b> в «Списках». Четыре вкладки: <b>Сегодня</b>, <b>Неделя</b>, <b>Дела</b>, <b>Настройки</b>. Пока план выключен, задачи не создаются — сначала поправьте дела и дни, потом «Включить план».",
+      "<b>Дела</b> — пул поддерживающей уборки (сразу есть 25 типичных дел, всё правится): название, частота (каждый день, 2–3 раза в неделю, раз в неделю, раз в 2 недели, раз в месяц), минуты, зона (кухня, ванная, спальня…), ответственный, 💪 тяжёлое. Кнопки дней Пн…Вс закрепляют дело за своими днями; без них — раскладка сама. ⏸ — временно не планировать.",
+      "<b>Настройки</b>: проект, куда попадают задачи уборки; минуты на уборку в каждый день недели (0 — день без уборки); зона дня («Пн — кухня») — дела этой зоны тянутся в её день; что делать с невыполненным за прошлые дни — оставлять или закрывать как отменённое.",
+      "<b>Раскладка</b> — и по зонам, и по времени: дело встаёт в день своей зоны, лимит минут дня по возможности не превышается, повторы разносятся по неделе (2 раза — Пн и Чт, а не подряд), тяжёлые — в дни с большим запасом. Дела «раз в 2 недели» и «раз в месяц» чередуются по неделям. Вкладка <b>Неделя</b> показывает сетку и загрузку каждого дня; нажмите на дело — откроются его настройки.",
+      "<b>Каждый день</b> появляется одна задача «🧹 Уборка · N мин» с чек-листом дел — в выбранном проекте. Если у дел разные ответственные, задача у каждого своя.",
+      "<b>Сегодня</b>: отметить дело сделанным (отметка ставится и в чек-листе задачи), <b>⏭ Пропустить</b> — сегодня не нужно, <b>→ На завтра</b> — перенести. Передумали — «Вернуть на сегодня» внизу или «Вернуть» в подсказке."]));
     h += sec("food", "Меню: рецепты, неделя, праздник, покупки", ul([
       "Пункт <b>«Меню»</b> в «Списках» (или Ctrl+K → «Меню»). Вверху — кто ест: взрослые и дети (порция ребёнка — 0,6 взрослой); по этому числу пересчитываются продукты и стоимость.",
       "<b>Рецепты</b> — около 200 простых блюд домашней русской кухни сразу: завтраки, супы, вторые, гарниры, салаты, закуски, выпечка, напитки; много вегетарианских 🥦, рыбных 🐟 и детских 🧒, есть праздничные 🎉 — отдельно новогодние 🎄 и пасхальные 🥚. Праздничный стол к Новому году сам подбирает новогодние блюда. У каждого — порции, время, вес порции, калории и Б/Ж/У, примерная стоимость порции. Ингредиенты пишутся строками: «Картофель 500 г», «Яйца 2 шт», «Сметана 2 ст.л.», «Соль по вкусу» — приложение само находит продукт в справочнике и считает.",
@@ -6998,6 +7272,7 @@ CREATE TABLE inbox (
   function render() {
     try { histScan(); } catch (er) { /* история не мешает */ }
     try { setsAuto(); } catch (er) { /* наборы не мешают */ }
+    try { cleanAuto(); } catch (er) { /* план уборки не мешает */ }
     try { applyLook(); } catch (er) { /* оформление не мешает работе */ }
     // пока пишете в редакторе на странице (текст заметки, описание проекта) — страницу вокруг не перерисовываем, только левую панель; остальное обновится, когда выйдете из редактора
     var ae0 = document.activeElement;
@@ -7028,7 +7303,7 @@ CREATE TABLE inbox (
   document.addEventListener("mousedown", function (e) { if (!POP || !e.target.closest) return; if (e.target.closest(".pop, [data-a=pop], #ctx, #ctx2")) return; POP = null; setTimeout(render, 0); });
   // где какая страница справки
   function hq(id, title) { return '<a class="hq" href="#help-' + id + '" title="' + esc(title || "Справка по этому разделу") + '" aria-label="Справка">?</a>'; }
-  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", tarch: "tarch", report: "report", menu: "food", menunew: "food", recipes: "food", recipe: "food", rhave: "food", prods: "food", shop: "food", rimp: "food", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
+  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", tarch: "tarch", report: "report", clean: "clean", menu: "food", menunew: "food", recipes: "food", recipe: "food", rhave: "food", prods: "food", shop: "food", rimp: "food", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
   var SHELP = { "s-lists": "mini", "s-review": "focus", "s-flags": "flags", "s-srv": "srv", "s-digest": "digest", "s-ai": "ai", "s-sync": "sync", "s-backup": "backup", "s-diag": "diag", "s-wipe": "backup", "s-test": "backup" };
   function helpMarks() {
     var v = $("view");
@@ -7046,7 +7321,7 @@ CREATE TABLE inbox (
     try { ctxShowBtn(); if (NOW) renderNow(); } catch (er) { /* не мешает */ }
     $("side").innerHTML = sideHTML();
     try { $("bnav").innerHTML = bnavHTML(); document.documentElement.classList.toggle("nohq", !!S.opt.noHq); } catch (er) { /* не мешает */ }
-    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, rhave: vRhave, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
+    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, rhave: vRhave, clean: vClean, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
     var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
     $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "templates");
     try { ptTouch(location.hash.slice(1) || "today"); } catch (er) { /* вкладки не мешают */ }
@@ -7634,6 +7909,7 @@ CREATE TABLE inbox (
     if (!t && edb) t = task(edb.dataset.ed);
     if (el.closest(".nav") && a) e.preventDefault();
     if (a && (foodAct(a, el, e) || foodAct2(a, el))) return;
+    if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
     switch (a) {
       case "add": addQuick(); return;
       case "qclose": qClose(); return;
@@ -8051,6 +8327,7 @@ CREATE TABLE inbox (
       '<span>Дедлайн</span><div class="v"><input type="date" data-pf="due" value="' + (t.due ? dKey(t.due) : "") + '">' + (t.due ? '<button class="btn sm" type="button" data-p="nodue" title="Убрать дедлайн">✕</button>' + (t.due < today0() && !t.done ? '<span class="warnc">просрочен</span>' : "") : '<span class="muted">крайний срок, если он отличается от даты начала</span>') + "</div>" +
       (psecs(proj(t.pid)).length ? '<span>Секция</span><div class="v"><select data-pf="sec"><option value="">— без секции —</option>' + psecs(proj(t.pid)).map(function (x) { return '<option value="' + x.id + '"' + (t.sec === x.id ? " selected" : "") + ">" + esc(x.n) + "</option>"; }).join("") + "</select></div>" : "") +
       '<span>Проект</span><div class="v"><select data-pf="pid"><option value="">Входящие (без проекта)</option>' + ptree().map(function (x) { return '<option value="' + x.p.id + '"' + (t.pid === x.p.id ? " selected" : "") + ">" + "  ".repeat(x.d).replace(/ /g, "&nbsp;") + picon(x.p) + " " + esc(x.p.n) + "</option>"; }).join("") + '</select><button type="button" class="ibtn pnp" data-p="pnew" title="Новый проект для этой задачи">＋</button>' + (PNP ? '<div class="pnpbox"><input type="text" id="pn-np" placeholder="Название нового проекта" autocomplete="off" maxlength="60"><button type="button" class="btn pri sm" data-p="pnewok">Создать</button><button type="button" class="btn sm" data-p="pnewx">Отмена</button></div>' : "") + "</div>" +
+      '<span>Ответственный</span><div class="v"><select data-pf="resp">' + respOptions(t.resp) + "</select></div>" +
       '<span>Спринт</span><div class="v"><select data-pf="sprint">' + spOptions(t) + '</select><span class="muted">оценка</span><input type="number" min="0" step="0.5" data-pf="est" value="' + (+t.est || "") + '" placeholder="ч" style="width:70px"><span class="muted">ч</span></div>' +
       (t.done ? "" : '<span>Статус</span><div class="v"><div class="seg"><button type="button" data-p="st" data-v="" class="' + (t.st !== "doing" ? "on" : "") + '">Нужно сделать</button><button type="button" data-p="st" data-v="doing" class="' + (t.st === "doing" ? "on" : "") + '">В работе</button></div></div>') +
       '<span>Приоритет</span><div class="v"><div class="seg">' + [[1, "1"], [2, "2"], [3, "3"], [0, "—"]].map(function (x) { return '<button type="button" data-p="prio" data-v="' + x[0] + '" class="' + ((t.prio || 0) === x[0] ? "on" : "") + '" title="' + ["обычный", "срочно", "важно", "желательно"][x[0]] + '">' + x[1] + "</button>"; }).join("") + "</div></div>" +
@@ -8096,7 +8373,7 @@ CREATE TABLE inbox (
     try { document.execCommand("defaultParagraphSeparator", false, "p"); } catch (er) { /* старый браузер */ }
   }
   /* ---------- карточка задачи: поля и блоки переставляются мышью (порядок — в настройках, синхронизируется) ---------- */
-  var PNROW = { "Срок": "due", "Дедлайн": "deadline", "Секция": "sec", "Проект": "proj", "Спринт": "sprint", "Статус": "status", "Приоритет": "prio", "Теги": "tags", "Учёт времени": "track", "Входит в": "parent", "Напоминание": "rem", "Сначала сделать": "after", "Ждут эту задачу": "blocks", "Жду ответа": "wait" };
+  var PNROW = { "Ответственный": "resp", "Срок": "due", "Дедлайн": "deadline", "Секция": "sec", "Проект": "proj", "Спринт": "sprint", "Статус": "status", "Приоритет": "prio", "Теги": "tags", "Учёт времени": "track", "Входит в": "parent", "Напоминание": "rem", "Сначала сделать": "after", "Ждут эту задачу": "blocks", "Жду ответа": "wait" };
   var PNSEC = ["props", "desc", "subs", "chat"], PDR = null;
   // порядок: сохранённый; недостающие поля встают после своего соседа из порядка по умолчанию
   function pnOrder(keys, saved, def) { var out = saved.filter(function (k) { return keys.indexOf(k) >= 0; }); keys.forEach(function (k) { if (out.indexOf(k) >= 0) return; var di = def.indexOf(k), at = 0; for (var j = di - 1; j >= 0; j--) { var pi = out.indexOf(def[j]); if (pi >= 0) { at = pi + 1; break; } } out.splice(at, 0, k); }); return out; }
@@ -8114,7 +8391,7 @@ CREATE TABLE inbox (
       var defR = Object.keys(PNROW).map(function (x) { return PNROW[x]; });
       pnOrder(rows.map(function (r) { return r.k; }), S.opt.pnRows || [], defR).forEach(function (k) { var r = rows.filter(function (x) { return x.k === k; })[0]; if (r) pr.appendChild(r.w); });
       pr.dataset.sec = "props"; pr.insertAdjacentHTML("afterbegin", '<span class="sgrip psg" title="Перетащите, чтобы переставить блок свойств">⋮⋮</span>');
-      var tq = task(OPEN), emp = tq ? { deadline: !tq.due, sec: !tq.sec, sprint: !tq.sprint && !tq.est, status: tq.st !== "doing", track: !tq.tt && !tq.ttOn, parent: !tq.parent, rem: !tq.rem, after: !(tq.after || []).length, wait: !tq.wait } : {}, nm = 0;
+      var tq = task(OPEN), emp = tq ? { resp: !tq.resp, deadline: !tq.due, sec: !tq.sec, sprint: !tq.sprint && !tq.est, status: tq.st !== "doing", track: !tq.tt && !tq.ttOn, parent: !tq.parent, rem: !tq.rem, after: !(tq.after || []).length, wait: !tq.wait } : {}, nm = 0;
       rows.forEach(function (r) { if (emp[r.k]) { r.w.classList.add("pmore"); nm++; } });
       if (nm) { var pmo = LS.get("zd-pnmore"); if (pmo === "0" || (pmo !== "1" && innerWidth <= 860)) pr.classList.add("pcol"); pr.insertAdjacentHTML("beforeend", '<button type="button" class="pmoreb" data-p="pmore">' + pmoreTxt(pr) + "</button>"); }
     }
@@ -8310,6 +8587,7 @@ CREATE TABLE inbox (
       } else if (f === "rep") { if (v === "custom" && !t.rr) { var r0 = ruleOf(t.rep ? t : { rep: "weekly", at: t.at }) || { f: "w", n: 1 }; t.rr = JSON.parse(JSON.stringify(r0)); if (t.rr.f === "w" && !t.rr.wd) t.rr.wd = [new Date(t.at).getDay()]; } t.rep = v; }
       else if (f === "due") t.due = v ? new Date(v + "T00:00").getTime() : 0;
       else if (f === "sprint") { if (v && !sprint(v)) ensureSprint(new Date(v.slice(2) + "T00:00").getTime()); setSprint(t, v); }
+      else if (f === "resp") { if (v) t.resp = v; else delete t.resp; }
       else if (f === "est") t.est = Math.max(0, Math.round((parseFloat(String(v).replace(",", ".")) || 0) * 10) / 10);
       else if (f === "rem") t.rem = !!v && !!t.at;
       else if (f === "sec") t.sec = v;
@@ -8946,6 +9224,7 @@ CREATE TABLE inbox (
     if (k === "mdish" || k === "fdish") { foodCtx(k, id, c); return; }
     if (k === "fire") { fireA(c); return; }
     if (k === "pnmore") { pnFire(c); return; }
+    if (k && k.indexOf("clpick:") === 0) { clPick(k.slice(7), id, c); return; }
     if (k === "setfpj" || k === "setfsx" || k === "setfgl") { setFSet(id, { setfpj: "pid", setfsx: "sec", setfgl: "goal" }[k], c === "~" ? "" : c); return; }
     if (k === "ctxsel") { ctxSet(c); return; }
     if (k === "setpick") { if (c === "__cfg") { go("templates"); setTimeout(function () { var hx = $("sets"); if (hx) hx.scrollIntoView({ block: "start" }); }, 80); return; } var sk = tplObj(c); if (sk) { var nk = setApply(sk, today0()); save(); render(); toast(nk ? "«" + sk.n + "»: в «Сегодня» добавлено " + nk + " " + plural(nk, ["задача", "задачи", "задач"]) : "«" + sk.n + "» сегодня уже добавлен"); } return; }
