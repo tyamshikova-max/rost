@@ -271,6 +271,10 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .setfg { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 8px 12px; align-items: center; margin: 10px 0 6px } .setfg > span { font-size: calc(13px * var(--fs)); color: var(--muted) } .setfg select.inp { max-width: 100% }
 @media (max-width: 560px) { .setfg { grid-template-columns: minmax(0, 1fr) } .setfg > span { margin-top: 4px } }
 .setfpick { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left } .setfmode { flex-wrap: wrap } .setfdesc { width: 100%; resize: vertical; font: inherit; line-height: 1.45 } .setfsec:empty { display: none } .setfn { font-size: calc(12.5px * var(--fs)); margin: 4px 0 8px } .setpv { display: grid; gap: 3px; font-size: calc(13.5px * var(--fs)) } .setpvr { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline } .setpvr.setpvs { padding-left: 20px }
+.tdload { margin: 0 0 12px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--panel) 80%, transparent); font-size: calc(13.5px * var(--fs)) }
+.tdlt { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; align-items: baseline } .tdlt b { font-weight: 600; font-variant-numeric: tabular-nums }
+.tdlb { display: flex; height: 6px; border-radius: 99px; background: var(--hover); overflow: hidden; margin-top: 6px } .tdlb i { display: block; height: 100% } .tdlb .d { background: var(--ok) } .tdlb .o { background: var(--acc) }
+.tdload.over .tdlb { box-shadow: inset 0 0 0 1px var(--warn) } .tdlw { color: var(--warn); font-weight: 600 } .tdln { font-size: calc(12px * var(--fs)); margin-top: 4px }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5296,7 +5300,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-85";
+  var APPV = "zd-app-2026-10-16-86";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -6522,7 +6526,7 @@ CREATE TABLE inbox (
   function noteDel(n) { n.del = 1; n.delAt = Date.now(); touch(n); save(); var back = n.sec && nsec(n.sec) ? "nsec-" + n.sec : "notes"; go(back); toastUndo("Заметка удалена", function () { delete n.del; delete n.delAt; touch(n); save(); render(); }); }
   function vWaiting() { return std("Жду ответа", "Задачи, переданные кому-то. В день «спросить» задача появится в «Сегодня» — напомнить о себе. Пометить задачу: меню задачи → «⏳ Жду ответа…» или строка «Жду ответа» в карточке.", waitList(), { empty: "Ничего не ждёте — хорошо. Когда отдадите задачу кому-то, отметьте её «⏳ Жду ответа».", scope: function (t) { return !!t.wait; } }); }
   function vSomeday() { return std("Когда-нибудь", "Идеи и дела «не сейчас». Они не попадают во «Входящие» и «Сегодня», пока вы не назначите им дату.", somedayList(), { empty: "Пусто. Отправить задачу сюда — меню задачи → «Установить дату» → «Когда-нибудь» (Alt+O).", scope: isSome }); }
-  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: aiBox() + todayPlanBox() + habitsToday(), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
+  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: todayLoadHTML() + aiBox() + todayPlanBox() + habitsToday(), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
   var PDAY = 0, PFROM = 0;
   function pFrom() { if (!PFROM) PFROM = monday(Date.now()); return PFROM; }
   function onDay(t, d0) { return (t.at && sod(t.at) === d0) || (t.due && sod(t.due) === d0); }
@@ -7503,6 +7507,21 @@ CREATE TABLE inbox (
   function dayTop() { var r = dayRec(); return r ? (r.top || []).map(task).filter(Boolean) : []; }
   // сколько часов в день отдаётся задачам (настраивается, 1–24)
   function dayCap() { var v = +S.opt.dayCap; return v >= 1 && v <= 24 ? v : 8; }
+  // загрузка дня в «Сегодня»: сколько часов запланировано задачами (оценка, иначе длительность, иначе 30 мин у задачи со временем)
+  function hTxt(h) { var m = Math.round(h * 60), hh = Math.floor(m / 60), mm = m % 60; return hh ? hh + " ч" + (mm ? " " + mm + " мин" : "") : mm + " мин"; }
+  function todayLoadHTML() {
+    var t0 = today0(), open = todayList().filter(function (t) { return !t.parent || !task(t.parent) || task(t.parent).done; });
+    var done = tasks().filter(function (t) { return t.done && t.dt && t.dt >= t0 && !t.parent; });
+    var ho = open.reduce(function (a, t) { return a + tHours(t); }, 0), hd = done.reduce(function (a, t) { return a + tHours(t); }, 0), cap = dayCap(), tot = ho + hd;
+    var noEst = open.filter(function (t) { return !tHours(t); }).length;
+    if (!tot && !noEst) return "";
+    var pd = Math.min(100, hd / cap * 100), po = Math.min(100 - pd, ho / cap * 100), over = tot > cap;
+    return '<div class="tdload' + (over ? " over" : "") + '" title="Считается по оценке времени задач; без оценки — по длительности, у задачи со временем — 30 мин. Часов в день — в «Плане дня»">' +
+      '<div class="tdlt"><span>⏱ Запланировано <b>' + hTxt(tot) + "</b> из " + cap + " ч" + (hd ? ' · сделано <b>' + hTxt(hd) + "</b>" : "") + (ho ? " · осталось <b>" + hTxt(ho) + "</b>" : "") + "</span>" +
+      (over ? '<span class="tdlw">перегруз на ' + hTxt(tot - cap) + "</span>" : tot < cap ? '<span class="muted">свободно ' + hTxt(cap - tot) + "</span>" : "") + "</div>" +
+      '<div class="tdlb"><i class="d" style="width:' + pd.toFixed(1) + '%"></i><i class="o" style="width:' + po.toFixed(1) + '%"></i></div>' +
+      (noEst ? '<div class="muted tdln">Без оценки времени: ' + noEst + " " + plural(noEst, ["задача", "задачи", "задач"]) + " — поставьте ⏱ в карточке, чтобы подсчёт был точнее</div>" : "") + "</div>";
+  }
   function tHours(t) { return +t.est ? +t.est : t.dur ? t.dur / 60 : t.at && !t.allday ? .5 : 0; }
   function dpRow(t, acts) { var p = proj(t.pid); return '<div class="dprow' + (t.done ? " dn" : "") + '"><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + (p ? ' <small>' + esc(p.n) + "</small>" : "") + (t.at || t.due ? ' <small class="' + (isLate(t) ? "late" : "") + '">' + esc(t.at ? whenTxt(t) : "⏰ " + dayName(t.due)) + "</small>" : "") + '</a><span class="dpa">' + acts.map(function (a) { return '<button type="button" class="btn sm' + (a[2] ? " " + a[2] : "") + '" data-a="dpa" data-t="' + t.id + '" data-c="' + a[0] + '">' + a[1] + "</button>"; }).join("") + "</span></div>"; }
   function vDaily() {
@@ -9470,7 +9489,7 @@ CREATE TABLE inbox (
       "<b>План дня</b> — кнопка «☀ Спланировать день» в «Сегодня» (или адрес #daily). Пять коротких шагов: <b>Входящие</b> (для каждой задачи — сегодня, завтра, через неделю, когда-нибудь, в проект, готово или удалить), <b>Просроченное</b> (взять сегодня, перенести, отменить), <b>Главное</b> (★ до трёх задач, которые сделают день удачным; ниже — предложения: следующие шаги ваших целей, близкие дедлайны, задачи спринта и с флажком), <b>Время</b> (хватит ли часов: сумма оценок задач сравнивается с тем, сколько часов в день вы отдаёте задачам — число от 1 до 24 меняется прямо в шаге или в «Настройки» → «Общие» → «План дня»; у каждой задачи — время начала и оценка, предупреждение о перегрузе) и <b>Готово</b>.",
       "Главное дня видно вверху «Сегодня» и в виджете доски «Главное на сегодня».",
       "<b>Итоги дня</b> — «🌙 Итоги дня» в «Сегодня» (появляется вечером или после плана): сколько сделано, что с главным, что не успели (сразу перенести на завтра, через неделю или когда-нибудь), настроение дня и пара строк о том, как прошёл день.",
-      "План, главное и итоги каждого дня сохраняются и синхронизируются."]));
+      "План, главное и итоги каждого дня сохраняются и синхронизируются.", "<b>Загрузка дня</b> — строка вверху «Сегодня»: сколько часов уже запланировано задачами на сегодня (вместе с просроченными), сколько сделано и сколько осталось, из скольких часов в день (настраивается в «Плане дня»). Считается по оценке времени ⏱ в карточке задачи; если оценки нет — по длительности, у задачи с точным временем — 30 минут. Больше нормы — красная пометка «перегруз»."]));
     h += sec("food", "Меню: рецепты, неделя, праздник, покупки", ul([
       "Пункт <b>«Меню»</b> в «Списках» (или Ctrl+K → «Меню»). Вверху — кто ест: взрослые и дети (порция ребёнка — 0,6 взрослой); по этому числу пересчитываются продукты и стоимость.",
       "<b>Рецепты</b> — около 200 простых блюд домашней русской кухни сразу: завтраки, супы, вторые, гарниры, салаты, закуски, выпечка, напитки; много вегетарианских 🥦, рыбных 🐟 и детских 🧒, есть праздничные 🎉 — отдельно новогодние 🎄 и пасхальные 🥚. Праздничный стол к Новому году сам подбирает новогодние блюда. У каждого — порции, время, вес порции, калории и Б/Ж/У, примерная стоимость порции. Ингредиенты пишутся строками: «Картофель 500 г», «Яйца 2 шт», «Сметана 2 ст.л.», «Соль по вкусу» — приложение само находит продукт в справочнике и считает.",
