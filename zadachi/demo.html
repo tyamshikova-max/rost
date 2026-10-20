@@ -395,6 +395,12 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .invseg button { font-size: calc(12px * var(--fs)) } .invseg button.on.iv1 { background: color-mix(in srgb, var(--ok) 30%, var(--panel)); color: var(--fg) } .invseg button.on.iv0 { background: color-mix(in srgb, #e05a4f 25%, var(--panel)); color: var(--fg) }
 .chguide { margin-left: auto; font-size: calc(12.5px * var(--fs)) }
 .help .hgt { border-collapse: collapse; width: 100%; font-size: calc(13px * var(--fs)); margin: 6px 0 10px } .help .hgt th, .help .hgt td { border: 1px solid var(--line); padding: 5px 8px; text-align: left; vertical-align: top } .help .hgt th { background: var(--hover); font-weight: 600 }
+.chln.fcu { background: color-mix(in srgb, #378add 18%, transparent) } .chln.fcp { background: color-mix(in srgb, var(--ok) 18%, transparent) } .chln.fcdl { background: color-mix(in srgb, #e05a4f 20%, transparent) } .chln.fcs { background: color-mix(in srgb, #7f77dd 22%, transparent) } .chln.fch { background: color-mix(in srgb, #e9a83a 25%, transparent) }
+.fchab, .fcck { display: grid; gap: 8px; padding: 12px 14px; margin: 10px 0 } .fcnsr { gap: 10px; align-items: center } .fcnsd { display: grid; grid-template-columns: repeat(14, 1fr); gap: 3px } .fcnsd i { height: 12px; border-radius: 4px; background: var(--hover) } .fcnsd i.on { background: var(--ok) }
+.fcdr { gap: 8px; align-items: center } .fcdr #fcdiary { flex: 1 1 260px; min-width: 0 } .fcimp { display: inline-flex; gap: 4px; align-items: center; font-size: calc(12.5px * var(--fs)) } .fcdlist { display: grid; gap: 2px; font-size: calc(13px * var(--fs)) } .fcckd { margin: 6px 0 } .fcckd > summary { cursor: pointer }
+.fcstrat { gap: 8px; align-items: center; margin: 0 0 10px } .fcdebts { padding: 4px 12px } .fcd { display: grid; gap: 5px; padding: 10px 0; border-bottom: 1px solid var(--line) } .fcd.focus { box-shadow: inset 3px 0 0 var(--acc); padding-left: 10px } .fcd.off, .fcd.closed { opacity: .6 }
+.fcdh { display: flex; gap: 8px; align-items: center } .fcdn { flex: 1; min-width: 0; font-weight: 600 } .fcdp { font-weight: 700; font-variant-numeric: tabular-nums } .fcdf { gap: 6px 10px; align-items: center; font-size: calc(12.5px * var(--fs)); color: var(--muted) } .fcdf label { display: inline-flex; gap: 4px; align-items: center } .fcdf .inp { width: 110px } .fcdf .inp.fcsm { width: 56px }
+.fcwadd { gap: 6px; margin: 0 0 8px } .fcwish { padding: 4px 12px } .fcw { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line) } .fcw.dec { opacity: .6 } .fcwt { flex: 1 1 220px; min-width: 0 }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -4905,7 +4911,7 @@ CREATE TABLE inbox (
     if (!ok && Date.now() - SAVEWARN > 60000) { SAVEWARN = Date.now(); toast("⚠ В браузере не хватает места для данных — они сохраняются на Яндекс Диск, но обратитесь к разработчику"); }
   }
   var S = (function () { try { var raw = LS.get("zd-state") || "null"; if (raw.charCodeAt(0) === 1) raw = lzUnpack(raw); return JSON.parse(raw); } catch (e) { return null; } })() || {};
-  S.recipes = S.recipes || []; S.menus = S.menus || []; S.prods = S.prods || []; S.chores = S.chores || []; S.chlog = S.chlog || []; S.tblog = S.tblog || []; S.sops = S.sops || []; S.bpers = S.bpers || []; S.bwk = S.bwk || []; S.bregs = S.bregs || []; S.chq = S.chq || []; S.ckr = S.ckr || []; S.dplaces = S.dplaces || []; S.dout = S.dout || [];
+  S.recipes = S.recipes || []; S.menus = S.menus || []; S.prods = S.prods || []; S.chores = S.chores || []; S.chlog = S.chlog || []; S.tblog = S.tblog || []; S.sops = S.sops || []; S.bpers = S.bpers || []; S.bwk = S.bwk || []; S.bregs = S.bregs || []; S.chq = S.chq || []; S.ckr = S.ckr || []; S.dplaces = S.dplaces || []; S.dout = S.dout || []; S.debts = S.debts || []; S.dbal = S.dbal || []; S.wish = S.wish || []; S.nsd = S.nsd || []; S.mdiary = S.mdiary || []; S.fck = S.fck || [];
   S.v = 2; S.tasks = S.tasks || []; S.projects = S.projects || []; S.tags = S.tags || []; S.filters = S.filters || []; S.sprints = S.sprints || []; S.comments = S.comments || []; S.habits = S.habits || []; S.hlog = S.hlog || []; S.acts = S.acts || []; S.tpls = S.tpls || []; S.flags = S.flags || []; S.notes = S.notes || []; S.nsecs = S.nsecs || []; S.ntags = S.ntags || []; S.boards = S.boards || []; S.goals = S.goals || []; S.days = S.days || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
   var VIEWS = (function () { try { return JSON.parse(LS.get("zd-views") || "{}") || {}; } catch (e) { return {}; } })();
   function save(quiet) { try { unScan(); } catch (er) { /* отмена не мешает сохранению */ } try { histScan(); } catch (er) { /* история не мешает сохранению */ } if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); DV++; saveLocal(); if (!quiet) { SYNC.later(); SRV.later(); } }
@@ -5455,7 +5461,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-107";
+  var APPV = "zd-app-2026-10-16-108";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -5494,7 +5500,7 @@ CREATE TABLE inbox (
     (b || []).forEach(function (x) { var y = m[x.id]; if (!y || (x.upd || 0) > (y.upd || 0)) m[x.id] = x; });
     return Object.keys(m).map(function (k) { return m[k]; });
   }
-  var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "flags", "notes", "nsecs", "ntags", "boards", "goals", "days", "recipes", "menus", "prods", "chores", "chlog", "tblog", "sops", "bpers", "bwk", "bregs", "chq", "ckr", "dplaces", "dout"];
+  var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "flags", "notes", "nsecs", "ntags", "boards", "goals", "days", "recipes", "menus", "prods", "chores", "chlog", "tblog", "sops", "bpers", "bwk", "bregs", "chq", "ckr", "dplaces", "dout", "debts", "dbal", "wish", "nsd", "mdiary", "fck"];
   function snapshot() { return { v: 2, tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, notes: S.notes, nsecs: S.nsecs, ntags: S.ntags, boards: S.boards, opt: S.opt }; }
   var SYNC = {
     st: "off", at: 0, msg: "", t: null, busy: false, seen: {}, lastPush: 0,
@@ -10127,7 +10133,8 @@ CREATE TABLE inbox (
       (o.fname ? '<span class="muted">📄 ' + esc(o.fname) + (BUFINFO ? " · изменён " + esc(new Date(BUFINFO.mt).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) : "") + "</span>" + (BUFINFO && o.fmt && BUFINFO.mt > o.fmt ? '<span class="buchg">в файле есть изменения — обновите</span>' : "") : '<span class="muted">Файл не выбран — <a href="#" data-a="bufile">выбрать файл</a> (запомнится в настройках)</span>') + "</div>";
     if (BUUPD) h += buUpdHTML();
     if (BULAST) h += '<div class="bulast"><b>Обновлено: ' + esc(BULAST.what) + "</b>" + (BULAST.diff.length ? '<span class="muted">' + esc(BULAST.diff.slice(0, 12).join(" · ")) + (BULAST.diff.length > 12 ? " …" : "") + "</span>" : '<span class="muted">изменений нет</span>') + (BULAST.msgs.length ? '<span class="warnc">' + esc(BULAST.msgs.join("; ")) + "</span>" : "") + (BULAST.warns.length ? '<span class="muted">⚠ ' + esc(BULAST.warns.join("; ")) + "</span>" : "") + '<button type="button" class="ibtn" data-a="bulastx" title="Скрыть">×</button></div>';
-    h += '<div class="htabs butabs">' + [["week", "Неделя"], ["per", "Период"], ["regs", "Регулярные платежи"]].map(function (x) { return '<button type="button" class="tb' + (tab === x[0] ? " on" : "") + '" data-a="butab" data-x="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>";
+    h += '<div class="htabs butabs">' + [["week", "Неделя"], ["per", "Период"], ["regs", "Регулярные платежи"], ["debts", "Долги"], ["wish", "Желания"], ["fch", fcOpt().on ? "💰 Челлендж" : "Челлендж"]].map(function (x) { return '<button type="button" class="tb' + (tab === x[0] ? " on" : "") + '" data-a="butab" data-x="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>";
+    if (tab === "debts") return h + fcDebtsHTML(); if (tab === "wish") return h + fcWishHTML(); if (tab === "fch") return h + fcHTML();
     if (!buPers().length && tab !== "regs") return h + '<div class="card bunone"><b>Данных пока нет.</b><p class="muted">1. Выберите файл «Финансы … .xlsx» (кнопка выше или «Настройки» → «Бюджет»).<br>2. «⟳ Обновить из файла» → текущий период.<br>Читается только выбранное: период (лист «Ноябрь 2026» = 11.10–10.11), несколько периодов или одна неделя. Файл открывается прямо в браузере на этом компьютере и никуда не отправляется — в «Задачи» попадают только суммы по дням и статьям.</p></div>';
     if (tab === "per") h += buPerHTML(); else if (tab === "regs") h += buRegsHTML(); else h += buWeekHTML();
     setTimeout(buPeek, 0);
@@ -10210,7 +10217,8 @@ CREATE TABLE inbox (
       '<div class="wcr"><span>Файл</span><div class="r"><button type="button" class="btn sm" data-a="bufile">📄 ' + (o.fname ? "Другой файл…" : "Выбрать файл…") + "</button>" + (o.fname ? '<span>' + esc(o.fname) + "</span>" : '<span class="muted">не выбран</span>') + (o.fname && buCanRemember() ? '<button type="button" class="ibtn" data-a="bufilex" title="Забыть файл на этом компьютере">✕</button>' : "") + "</div></div>" +
       '<p class="muted">' + (buCanRemember() ? "Файл запоминается на этом компьютере (Chrome, Edge) — дальше «Обновить» читает его сам; при первом чтении за сеанс браузер спросит разрешение. На телефоне файл не нужен: обновлённые суммы приходят синхронизацией." : "В этом браузере файл нельзя запомнить — его нужно выбирать при каждом обновлении. На компьютере в Chrome или Edge он запоминается.") + " Сам файл никуда не отправляется — в «Задачи» попадают только суммы.</p>" +
       '<div class="wcr"><span>Статьи</span><div class="bukinds">' + cats.map(function (c) { var k = buKind(c); return '<div class="r bukr"><span class="bukn">' + esc(c) + '</span><div class="seg">' + Object.keys(BKN).map(function (x) { return '<button type="button" data-a="bukind" data-c="' + esc(c) + '" data-v="' + x + '" class="' + (k === x ? "on" : "") + '" title="' + BKN[x][1] + '">' + BKN[x][0] + "</button>"; }).join("") + "</div></div>"; }).join("") + "</div></div>" +
-      '<p class="muted">Гибкая — недельный лимит из остатка плана, перерасход и экономия переносятся на следующие недели. Платёж — план и факт на период. «Не считать» — показывается отдельно и не входит в расходы.</p></section>';
+      '<p class="muted">Гибкая — недельный лимит из остатка плана, перерасход и экономия переносятся на следующие недели. Платёж — план и факт на период. «Не считать» — показывается отдельно и не входит в расходы.</p>' +
+      '<div class="wcr"><span>Правило «остывания»</span><div class="r"><span class="muted">от</span><input class="inp" data-fcth="th" value="' + fcOpt().th.toLocaleString("ru-RU") + '" inputmode="numeric" style="width:110px"><span class="muted">₽ — сутки, от</span><input class="inp" data-fcth="th30" value="' + fcOpt().th30.toLocaleString("ru-RU") + '" inputmode="numeric" style="width:110px"><span class="muted">₽ — 30 дней</span></div></div></section>';
   }
   function buAct(a, el) {
     var id = el.dataset.id;
@@ -10629,6 +10637,222 @@ CREATE TABLE inbox (
     }
     return false;
   }
+
+  /* ---------- Челлендж «Деньги под контролем»: старт 11-го, три бюджетных периода. Сначала долги, потом подушка.
+     Дорожки: учёт, план и лимиты, долги, накопления, привычки. Будни 5–15 минут, воскресенье — денежный час, 10-е — закрытие периода.
+     Плюс: долги (S.debts, остатки S.dbal), список желаний с «остыванием» (S.wish), дни без трат (S.nsd), денежный дневник (S.mdiary), финансовый чекап (S.fck). ---------- */
+  function fcOpt() { var o = (S.opt.bud || {}).fch || {}; return { start: +o.start || 0, on: !!o.on, after: o.after !== false, th: +o.th || 10000, th30: +o.th30 || 50000, strat: o.strat || "" }; }
+  function fcSet(k, v) { var o = Object.assign({}, (S.opt.bud || {}).fch || {}); o[k] = v; buSet("fch", o); }
+  function fcEnd() { var o = fcOpt(); if (!o.start) return 0; var d = new Date(o.start); return new Date(d.getFullYear(), d.getMonth() + 3, 10).getTime(); }
+  function fcDay(d0) {
+    var o = fcOpt(); if (!o.on || !o.start) return null; var k = Math.round((sod(d0) - sod(o.start)) / DAY); if (k < 0) return null;
+    var end = fcEnd(), total = Math.round((end - sod(o.start)) / DAY) + 1, post = sod(d0) > end; if (post && !o.after) return null;
+    return { n: k + 1, total: total, wk: Math.floor(k / 7) + 1, wd: k % 7 + 1, sun: new Date(d0).getDay() === 0, close: new Date(d0).getDate() === 10, post: post, per: Math.min(3, Math.floor(k / 31) + 1) };
+  }
+  var FCW = {
+    1: ["Видеть деньги", "Неделя учёта: каждый день вносим траты в 1С, настраиваем бюджет и справочник платежей. Ничего не урезаем — просто смотрим."],
+    2: ["Жить по лимиту", "Утром — «можно в день до воскресенья», вечером — две минуты сверки и строка в дневнике. Крупные покупки — через список желаний и правило 24 часов. Два дня без трат."],
+    3: ["Долги: полная картина", "Все долги в одном списке: остаток, ставка, минимальный платёж, дата. Выбираем стратегию: «снежный ком» или «лавина», и фокус-долг."],
+    4: ["Долги: ритм", "Каждое воскресенье — остатки долгов. Ищем 1 000–5 000 ₽ в месяц сверх минимума на фокус-долг."],
+    5: ["Конверты и защита от новых долгов", "Остаток недели — в конверт или на фокус-долг. Подушку начнём копить, когда закроются долги (кроме ипотеки), а пока — небольшой резерв, чтобы поломка не стала новым кредитом."],
+    6: ["План следующего периода", "Сравниваем план и факт прошлых периодов: где план нереалистичен, где есть запас. Поправляем план в файле."],
+    7: ["Расхламление финансов", "Подписки, лишние карты, тарифы связи и интернета, страховки. Вещи на продажу из «Мест» — в доход."],
+    8: ["Доходы", "Доходы по источникам: план и факт. Фриланс — часы и ставка. Одна идея, как поднять доход или убрать утечку."],
+    9: ["Долги: проверка", "Сколько закрыто с начала челленджа, верна ли стратегия, хватает ли денег на фокус-долг."],
+    10: ["Привычки", "Три дня без трат, дневник — какие покупки на эмоциях повторяются и почему."],
+    11: ["Ритуалы", "Ставим постоянные: денежный час по воскресеньям, закрытие периода 10-го, ревизия подписок и страховок раз в квартал."],
+    12: ["Закрепление", "Без новых заданий — только привычки и ритуалы. Смотрим, держится ли ритм."],
+    13: ["Финиш", "Итоги трёх периодов: доход − расход, недели в лимите, долги, дни без трат."]
+  };
+  // задания дня: [текст, мин, дорожка u|p|d|s|h, подсказка, авто-ключ]
+  function fcItems(d0) {
+    var day = fcDay(d0); if (!day) return null; var it = [], hab = [], w = day.wk, wd = day.wd;
+    hab.push(["Внести траты дня в 1С", 5, "u", "Всё, что потратили сегодня, — в 1С. Чеки и уведомления банка в помощь."]);
+    if (w >= 2 || day.post) { hab.push(["Утром: «можно в день до воскресенья»", 1, "p", "«Бюджет» → «Неделя». Это ваш ориентир на сегодня."]); hab.push(["Строка в денежном дневнике", 1, "h", "Одна строка: что купили на эмоциях и почему, или «сегодня без импульсов». Ниже, в блоке «Дневник».", "diary"]); }
+    if (day.close) it.push(["Закрытие периода", 30, "p", "Выгрузка из 1С → «⟳ Обновить» период → «Бюджет» → «Период»: доход − расход, где перерасход, сколько недель уложились. Что переносим в новый период?", "close"]);
+    var sunItems = function () {
+      it.push(["Денежный час: обновить бюджет из файла", 10, "u", "Выгрузка из 1С → «⟳ Обновить из файла» → неделя или период. Посмотрите итог недели и прошлую неделю.", "upd"]);
+      it.push(["Финансовый чекап недели", 5, "p", "Пять вопросов «да / частично / нет» — ниже, в блоке «Чекап недели».", "fck"]);
+      if (w >= 3 || day.post) it.push(["Обновить остатки долгов", 5, "d", "«Бюджет» → «Долги»: впишите текущий остаток по каждому — увидите, сколько закрыто.", "dbal"]);
+      if (!day.post && sod(d0) >= addDays(fcEnd(), -6)) it.push(["Итоги челленджа", 15, "p", "Три периода: доход − расход, недели в лимите, на сколько уменьшились долги, сколько дней без трат и сэкономлено на «передумала». Дальше — ритуалы.", "fin"]);
+    };
+    if (day.post || w > 13) { if (wd === 3 && !day.sun) it.push(["День без трат", 0, "h", "Ни одной покупки по гибким статьям. Отметьте в блоке «Дни без трат».", "ns"]); if (day.sun) sunItems(); return { day: day, it: it, hab: hab }; }
+    var P = {
+      1: { 1: [["Выбрать файл и обновить текущий период", 10, "u", "«Настройки» → «Бюджет» → «Выбрать файл», затем «⟳ Обновить из файла» → «Один период».", "bupd"]], 2: [["Проверить виды статей", 5, "p", "«Настройки» → «Бюджет»: гибкие (недельный лимит), платежи (план на период), не считать."]], 3: [["Справочник: ипотека и кредиты", 10, "u", "«Бюджет» → «Регулярные платежи»: название, статья, число месяца, сумма.", "regs2"]], 4: [["Справочник: связь, интернет, подписки", 10, "u", "Всё, что списывается каждый месяц: мобильная связь, интернет, подписки, сервисы.", "regs4"]], 5: [["Первая запись в денежном дневнике", 2, "h", "Одна покупка недели, сделанная на эмоциях, — без оценок, просто заметить.", "diary"]], 6: [["Попробовать день без трат", 0, "h", "Ни одной покупки по гибким статьям. Получится — отметьте.", "ns"]] },
+      2: { 1: [["Правило 24 часов: первая запись в списке желаний", 3, "p", "Покупка от " + rub(fcOpt().th) + " — сначала в «Желания», решение не раньше чем через сутки (от " + rub(fcOpt().th30) + " — через 30 дней).", "wish"]], 3: [["День без трат", 0, "h", "Ни одной покупки по гибким статьям.", "ns"]], 5: [["День без трат", 0, "h", "Второй за неделю.", "ns"]] },
+      3: { 1: [["Перенести долги в список", 15, "d", "«Бюджет» → «Долги»: из листа «Долги» — карты, сплиты, кредиты. Остаток, ставка, минимальный платёж, дата. Ипотеку можно отметить «вне челленджа».", "debts"]], 2: [["Ставки и минимальные платежи", 10, "d", "Уточните в банковских приложениях: ставку и минимальный платёж по каждой карте."]], 3: [["Выбрать стратегию", 5, "d", "«Снежный ком»: сначала самый маленький остаток — быстрые победы. «Лавина»: сначала самая высокая ставка — меньше переплата. На остальные — минимальные платежи.", "strat"]], 4: [["Даты платежей по долгам — в справочник", 5, "u", "Чтобы «Неделя» показывала, что ожидается."]], 6: [["День без трат", 0, "h", "", "ns"]] },
+      4: { 1: [["Найти деньги на фокус-долг", 15, "d", "Посмотрите «Период»: какая гибкая статья даст 1 000–5 000 ₽ в месяц? Эту сумму — сверх минимума на фокус-долг."]], 3: [["День без трат", 0, "h", "", "ns"]], 5: [["Платёж сверх минимума по фокус-долгу", 5, "d", "Даже небольшой. Отметьте в «Долгах» новый остаток в воскресенье."]] },
+      5: { 1: [["Правило конверта", 5, "s", "Остаток лимита недели в воскресенье — в конверт или на фокус-долг (у вас в файле: «остаток на конец перекладывается в конверт»)."]], 2: [["Небольшой резерв от новых долгов (по желанию)", 10, "s", "Не подушка, а заслон: сумма на поломку или лекарства, чтобы не брать новый кредит. Цель-накопление «Резерв»."]], 4: [["Цель «Подушка безопасности» — создать сейчас, копить после долгов", 5, "s", "«Цели» → «🛟 Новая цель-накопление»: сумма и начальный остаток. Пополнения начнутся, когда закроется последний долг.", "sv"]], 6: [["День без трат", 0, "h", "", "ns"]] },
+      6: { 1: [["Сравнить план и факт прошлых периодов", 15, "p", "«Бюджет» → «Период», листайте назад: какие статьи стабильно выше плана?"]], 2: [["Поправить план следующего периода в файле", 15, "p", "Лист «Фин план 2026» и месячный лист следующего периода: реалистичные суммы."]], 4: [["Обновить следующий период из файла", 5, "u", "Чтобы лимиты недель считались от нового плана.", "bupd"]], 6: [["День без трат", 0, "h", "", "ns"]] },
+      7: { 1: [["Подписки: что не используется — отменить", 15, "p", "Справочник платежей и выписка банка за 2 месяца."]], 2: [["Лишние карты и счета", 10, "p", "Карты с платным обслуживанием, которыми не пользуетесь, — закрыть."]], 3: [["Тарифы связи и интернета", 10, "p", "Сравните с актуальными — часто старый тариф дороже нового."]], 4: [["Страховки", 10, "p", "Что застраховано, за сколько, нужно ли."]], 5: [["Вещи на продажу", 10, "s", "«План уборки» → «Места» → «На выход»: что продать — выставить. Продажа — доход «Продажи»."]] },
+      8: { 1: [["Доходы: план и факт по источникам", 10, "p", "«Бюджет» → «Период» → «Доходы»."]], 2: [["Фриланс: часы и ставка", 10, "p", "Лист «Unica»: сколько часов, какая фактическая ставка, где «дельта»."]], 3: [["Одна идея, как поднять доход или убрать утечку", 10, "p", "Записать в дневник цели или задачей."]], 5: [["День без трат", 0, "h", "", "ns"]] },
+      9: { 1: [["Долги: сколько закрыто с начала", 10, "d", "«Бюджет» → «Долги»: прогресс по каждому и по всем."]], 3: [["Стратегия: всё ли верно?", 5, "d", "Фокус-долг закрывается? Если нет — найдите ещё 1 000–2 000 ₽ или смените стратегию."]], 5: [["День без трат", 0, "h", "", "ns"]] },
+      10: { 1: [["День без трат", 0, "h", "", "ns"]], 3: [["День без трат", 0, "h", "", "ns"]], 5: [["День без трат", 0, "h", "", "ns"]], 6: [["Дневник: повторяющиеся триггеры", 10, "h", "Перечитайте дневник: что повторяется? Одно правило на будущее (например, не заходить в маркетплейс вечером)."]] },
+      11: { 1: [["Поставить ритуалы", 5, "p", "Одна кнопка: «💰 Денежный час» по воскресеньям, «📅 Закрытие периода» 10-го, «🔎 Ревизия подписок и страховок» раз в квартал.", "rit"]], 3: [["День без трат", 0, "h", "", "ns"]] },
+      12: { 3: [["День без трат", 0, "h", "", "ns"]] }, 13: { 3: [["День без трат", 0, "h", "", "ns"]] }
+    };
+    (P[w] && P[w][wd] || []).forEach(function (x) { if (!(day.sun && x[4] === "ns")) it.push(x); });
+    if (day.sun) sunItems();
+    return { day: day, it: it, hab: hab };
+  }
+  function fcThisWeek(d0) { return monday(d0); }
+  function fcAuto(x, d0) {
+    var k = x[4], m = fcThisWeek(d0);
+    if (k === "bupd") return buPers().some(function (P) { return P.src && P.src.at >= sod(fcOpt().start); });
+    if (k === "upd") return buPers().some(function (P) { return P.src && P.src.at >= m; });
+    if (k === "regs2") return live(S.bregs || []).length >= 2;
+    if (k === "regs4") return live(S.bregs || []).length >= 4;
+    if (k === "diary") return !!fcDiary(d0);
+    if (k === "ns") return !!fcNs(d0);
+    if (k === "wish") return live(S.wish || []).length >= 1;
+    if (k === "debts") return live(S.debts || []).length >= 1;
+    if (k === "strat") return !!fcOpt().strat;
+    if (k === "sv") return goals().some(function (g) { return g.sv; });
+    if (k === "fck") { var r = fcCk(d0); return !!(r && FCQ.every(function (q) { return r.a[q[0]] !== undefined; })); }
+    if (k === "dbal") return live(S.debts || []).filter(function (d) { return !d.off; }).every(function (d) { return live(S.dbal || []).some(function (b) { return b.debt === d.id && b.d >= m; }); }) && live(S.debts || []).length > 0;
+    if (k === "rit") return !!(S.opt.bud || {}).fcrit;
+    return null;
+  }
+  function fcTid(d0) { return "fch-" + dKey(d0); }
+  function fcSync(d0) {
+    var c = fcItems(d0), t = S.tasks.filter(function (x) { return x.id === fcTid(d0); })[0];
+    if (!c) { if (t && !t.done && !t.del) { t.del = 1; t.delAt = Date.now(); touch(t); return true; } return false; }
+    var ck = cChecked(t), all = c.it.concat(c.hab), mins = c.it.concat(c.hab).reduce(function (s, x) { return s + (x[1] || 0); }, 0);
+    var body = '<ul class="todo">' + all.map(function (x) { var a = fcAuto(x, d0), on = a === null ? !!ck[x[0]] : a; return "<li" + (on ? ' data-checked="1"' : "") + ">" + esc(x[0]) + "</li>"; }).join("") + '</ul><p>Подсказки — <a href="#budget">Бюджет → Челлендж</a>.</p>';
+    var title = "💰 Деньги · день " + c.day.n + (c.day.post ? "" : " из " + c.day.total) + (c.day.sun ? " · денежный час" : c.day.close ? " · закрытие периода" : "") + " · " + mins + " мин";
+    if (!t) { t = newTaskFrom(title, { day: d0 }); t.id = fcTid(d0); t.at = d0; t.allday = true; t.rem = false; t.rep = ""; t.tags = []; }
+    else if (t.del) { if (t.purged) return false; delete t.del; delete t.delAt; }
+    if (t.t === title && t.body === body) return false;
+    t.t = title; t.body = body; delete t.note;
+    TXTD.innerHTML = body; var lis = TXTD.querySelectorAll("ul.todo > li"), done = lis.length && [].every.call(lis, function (l) { return l.getAttribute("data-checked") === "1"; });
+    if (done && !t.done) { t.done = true; t.dt = Date.now(); } else if (!done && t.done) { t.done = false; delete t.dt; }
+    touch(t); return true;
+  }
+  function fcAutoRun() { if (!SETGATE || !fcOpt().on) return; if (fcSync(today0())) save(); }
+  function fcToggle(txt, d0) {
+    var t = S.tasks.filter(function (x) { return x.id === fcTid(d0); })[0]; if (!t) { fcSync(d0); t = S.tasks.filter(function (x) { return x.id === fcTid(d0); })[0]; } if (!t) return;
+    TXTD.innerHTML = t.body || ""; [].forEach.call(TXTD.querySelectorAll("ul.todo > li"), function (li) { if (li.textContent.trim() === txt) { if (li.getAttribute("data-checked") === "1") li.removeAttribute("data-checked"); else li.setAttribute("data-checked", "1"); } });
+    t.body = TXTD.innerHTML; touch(t); fcSync(d0); save(); render();
+  }
+  /* --- привычки: дни без трат, дневник, финансовый чекап --- */
+  function fcNs(d0) { return live(S.nsd || []).filter(function (x) { return x.id === "ns:" + dKey(d0); })[0] || null; }
+  function fcDiary(d0) { return live(S.mdiary || []).filter(function (x) { return x.id === "md:" + dKey(d0) && x.t; })[0] || null; }
+  var FCQ = [["log", "Все траты недели внесены в 1С?"], ["lim", "Неделя уложилась в лимит гибких статей?"], ["pay", "Платежи по долгам и счетам — вовремя?"], ["env", "Остаток — в конверт или на фокус-долг?"], ["big", "Крупные покупки прошли правило 24 часов?"]];
+  function fcCk(d0) { var id = "fk:" + dKey(monday(d0)); return live(S.fck || []).filter(function (x) { return x.id === id; })[0] || null; }
+  function fcStreak() { var n = 0, d = today0(); if (!fcNs(d)) d = addDays(d, -1); while (fcNs(d) && n < 400) { n++; d = addDays(d, -1); } return n; }
+  function fcHabHTML(d0) {
+    var p0 = buPRange(buPid(d0)), nsCount = live(S.nsd || []).filter(function (x) { var k = x.id.slice(3); return k >= dKey(p0.from) && k <= dKey(p0.to); }).length, st = fcStreak(), ns = fcNs(d0), md = live(S.mdiary || []).filter(function (x) { return x.id === "md:" + dKey(d0); })[0];
+    var h = '<div class="card fchab"><div class="bulab">Дни без трат · дневник</div><div class="r fcnsr"><button type="button" class="btn sm' + (ns ? " on" : "") + '" data-a="fcns" aria-pressed="' + !!ns + '">' + (ns ? "✓ Сегодня — без трат" : "Сегодня без трат?") + '</button><span class="muted">в этом периоде: ' + nsCount + (st > 1 ? " · подряд " + st : "") + "</span></div>";
+    var days = []; for (var i = 13; i >= 0; i--) { var d = addDays(today0(), -i); days.push('<i class="' + (fcNs(d) ? "on" : "") + '" title="' + esc(new Date(d).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })) + '"></i>'); } h += '<div class="fcnsd">' + days.join("") + "</div>";
+    h += '<div class="r fcdr"><input class="inp" id="fcdiary" value="' + esc(md ? md.t : "") + '" placeholder="Дневник: что купила на эмоциях и почему — или «сегодня без импульсов»" aria-label="Денежный дневник"><label class="muted fcimp"><input type="checkbox" id="fcimp"' + (md && md.imp ? " checked" : "") + "> импульсивная покупка</label></div>";
+    var last = live(S.mdiary || []).filter(function (x) { return x.t; }).sort(function (a, b) { return b.id < a.id ? -1 : 1; }).slice(0, 5);
+    if (last.length) h += '<div class="fcdlist">' + last.map(function (x) { return '<div><span class="muted">' + esc(new Date(x.id.slice(3) + "T00:00").toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" })) + "</span> " + (x.imp ? "⚡ " : "") + esc(x.t) + "</div>"; }).join("") + "</div>";
+    return h + "</div>";
+  }
+  function fcCkHTML(d0) {
+    var r = fcCk(d0), w = buWeek(monday(d0)), auto = w.cats.length && !w.miss.length ? (w.tot.fact <= w.tot.lim + 1 ? 2 : w.tot.fact <= w.tot.lim * 1.1 ? 1 : 0) : null;
+    var s = 0, n = 0; FCQ.forEach(function (q) { var v = r && r.a[q[0]]; if (v !== undefined && v !== null) { s += +v; n += 2; } });
+    return '<div class="card fcck"><div class="bulab">Финансовый чекап недели ' + esc(buWName(monday(d0))) + (n ? ' · <b class="ckp ' + ckCls(Math.round(s / n * 100)) + '">' + Math.round(s / n * 100) + "%</b>" : "") + "</div>" + FCQ.map(function (q) {
+      var v = r ? r.a[q[0]] : undefined;
+      return '<div class="ckq"><span>' + esc(q[1]) + (q[0] === "lim" && auto !== null ? ' <small class="muted">по файлу: ' + (auto === 2 ? "да" : auto === 1 ? "почти" : "нет") + "</small>" : "") + '</span><span class="seg ckseg">' + CKV.map(function (x) { return '<button type="button" data-a="fcans" data-q="' + q[0] + '" data-v="' + x[0] + '" class="' + (v === x[0] ? "on v" + x[0] : "") + '">' + x[1] + "</button>"; }).join("") + "</span></div>";
+    }).join("") + "</div>";
+  }
+  /* --- долги --- */
+  function fcDebtCur(d) { var b = live(S.dbal || []).filter(function (x) { return x.debt === d.id; }).sort(function (a, c) { return c.d - a.d; })[0]; return b ? +b.v : +d.start || 0; }
+  function fcDebtsSorted() { var s = fcOpt().strat, l = live(S.debts || []).filter(function (d) { return !d.off; }); return l.sort(function (a, b) { var ca = fcDebtCur(a), cb = fcDebtCur(b); if ((ca <= 0) !== (cb <= 0)) return ca <= 0 ? 1 : -1; return s === "av" ? (+b.rate || 0) - (+a.rate || 0) || ca - cb : ca - cb || (+b.rate || 0) - (+a.rate || 0); }); }
+  function fcDebtsHTML() {
+    var all = live(S.debts || []), act = fcDebtsSorted(), st = all.filter(function (d) { return !d.off; }).reduce(function (s, d) { return s + (+d.start || 0); }, 0), cur = all.filter(function (d) { return !d.off; }).reduce(function (s, d) { return s + Math.max(0, fcDebtCur(d)); }, 0), pct = st ? Math.round((st - cur) / st * 100) : 0, focus = act.filter(function (d) { return fcDebtCur(d) > 0; })[0], o = fcOpt();
+    var h = '<div class="butiles"><div class="butile"><small>Долги сейчас</small><span>' + buRub(cur) + '</span><small class="muted">было ' + buRub(st) + '</small></div><div class="butile"><small>Закрыто</small><span class="ok">' + buRub(st - cur) + " · " + pct + "%</span></div>" + (focus ? '<div class="butile"><small>Фокус-долг</small><span>' + esc(focus.n) + '</span><small class="muted">лишние деньги — сюда, на остальные — минимум</small></div>' : "") + "</div>";
+    h += '<div class="r fcstrat"><span class="muted">Стратегия:</span><div class="seg"><button type="button" data-a="fcstrat" data-v="sb" class="' + (o.strat === "sb" ? "on" : "") + '" title="Сначала самый маленький остаток — быстрые победы">❄ снежный ком</button><button type="button" data-a="fcstrat" data-v="av" class="' + (o.strat === "av" ? "on" : "") + '" title="Сначала самая высокая ставка — меньше переплата">⛰ лавина</button></div><span class="muted">' + (o.strat === "av" ? "сначала самая высокая ставка" : o.strat === "sb" ? "сначала самый маленький остаток" : "выберите — от этого зависит порядок и фокус-долг") + "</span></div>";
+    h += '<div class="gsheet fcdebts">' + (all.length ? act.concat(all.filter(function (d) { return d.off; })).map(function (d, i) {
+      var c = fcDebtCur(d), p = +d.start ? Math.max(0, Math.min(100, Math.round((+d.start - c) / +d.start * 100))) : 0, lastB = live(S.dbal || []).filter(function (x) { return x.debt === d.id; }).sort(function (a, b) { return b.d - a.d; })[0];
+      return '<div class="fcd' + (d.off ? " off" : "") + (focus && d.id === focus.id ? " focus" : "") + (+d.start > 0 && c <= 0 ? " closed" : "") + '"><div class="fcdh"><input class="inp fcdn" data-fcd="n" data-id="' + d.id + '" value="' + esc(d.n) + '" aria-label="Название"><span class="fcdp">' + (+d.start > 0 && c <= 0 ? "🎉 закрыт" : +d.start ? p + "%" : "впишите «было»") + "</span></div>" + buBar(+d.start - c, +d.start, -1, +d.start > 0 && c <= 0 ? "" : "pay") +
+        '<div class="r fcdf"><label>было <input class="inp" data-fcd="start" data-id="' + d.id + '" value="' + (d.start ? Math.round(d.start).toLocaleString("ru-RU") : "") + '" inputmode="numeric"></label><label>сейчас <input class="inp" data-fcd="cur" data-id="' + d.id + '" value="' + Math.round(c).toLocaleString("ru-RU") + '" inputmode="numeric"></label><label>ставка <input class="inp fcsm" data-fcd="rate" data-id="' + d.id + '" value="' + (d.rate || "") + '" inputmode="decimal">%</label><label>мин. платёж <input class="inp" data-fcd="min" data-id="' + d.id + '" value="' + (d.min ? Math.round(d.min).toLocaleString("ru-RU") : "") + '" inputmode="numeric"></label><label>число <input class="inp fcsm" data-fcd="day" data-id="' + d.id + '" value="' + (d.day || "") + '" inputmode="numeric"></label>' +
+        '<button type="button" class="btn sm' + (d.off ? " on" : "") + '" data-a="fcdoff" data-id="' + d.id + '" title="Не считать в челлендже (например, ипотека)">' + (d.off ? "вне челленджа" : "в челлендже") + '</button><button type="button" class="ibtn" data-a="fcddel" data-id="' + d.id + '" title="Удалить">🗑</button></div>' + (lastB ? '<small class="muted">остаток обновлён ' + esc(new Date(lastB.d).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })) + "</small>" : "") + "</div>";
+    }).join("") : '<p class="muted" style="padding:8px 0">Пока пусто. Добавьте карты, сплиты и кредиты из листа «Долги».</p>') + '</div><div class="hadd" style="padding-left:0"><span>＋</span><input type="text" class="inp" id="fcdnew" placeholder="Новый долг: «Кредитная карта Сбер» — Enter" aria-label="Новый долг"></div><p class="muted">«Сейчас» — обновляйте по воскресеньям из банковских приложений: прогресс считается от «было». Ипотеку можно оставить «вне челленджа».</p>';
+    return h;
+  }
+  /* --- желания с «остыванием» --- */
+  function fcWishWait(x) { var o = fcOpt(), p = +x.price || 0; return p >= o.th30 ? 30 * DAY : p >= o.th ? DAY : 0; }
+  function fcWishHTML() {
+    var o = fcOpt(), l = live(S.wish || []).sort(function (a, b) { return (a.dec ? 1 : 0) - (b.dec ? 1 : 0) || b.at - a.at; }), saved = l.filter(function (x) { return x.dec === "skip"; }).reduce(function (s, x) { return s + (+x.price || 0); }, 0);
+    var h = '<p class="muted" style="margin:0 0 8px">Правило «остывания»: покупка от ' + rub(o.th) + " — решение не раньше чем через сутки, от " + rub(o.th30) + ' — через 30 дней. Запишите желание и вернитесь, когда время выйдет.</p><div class="butiles"><div class="butile"><small>Сэкономлено на «передумала»</small><span class="ok">' + buRub(saved) + '</span></div><div class="butile"><small>Ждут решения</small><span>' + l.filter(function (x) { return !x.dec; }).length + "</span></div></div>";
+    h += '<div class="r fcwadd"><input class="inp" id="fcwn" placeholder="Что хочется купить" style="flex:1;min-width:180px"><input class="inp" id="fcwp" placeholder="Цена, ₽" inputmode="numeric" style="width:120px"><button type="button" class="btn sm pri" data-a="fcwadd">＋ В список</button></div>';
+    h += '<div class="gsheet fcwish">' + (l.length ? l.map(function (x) {
+      var ready = Date.now() >= x.at + fcWishWait(x), left = x.at + fcWishWait(x) - Date.now();
+      return '<div class="fcw' + (x.dec ? " dec" : "") + '"><span class="fcwt">' + esc(x.n) + ' <small class="muted">' + (x.price ? buRub(x.price) + " · " : "") + "записано " + esc(new Date(x.at).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })) + "</small></span>" +
+        (x.dec ? '<span class="muted">' + (x.dec === "buy" ? "🛍 купила" : "🙅 передумала") + "</span>" : ready ? '<span class="r"><button type="button" class="btn sm" data-a="fcwdec" data-id="' + x.id + '" data-v="buy">Всё ещё нужно — купить</button><button type="button" class="btn sm pri" data-a="fcwdec" data-id="' + x.id + '" data-v="skip">Передумала</button></span>' : '<span class="muted">остывает ещё ' + (left > DAY ? Math.ceil(left / DAY) + " дн." : Math.ceil(left / 3600e3) + " ч") + "</span>") + '<button type="button" class="ibtn" data-a="fcwdel" data-id="' + x.id + '" title="Удалить">×</button></div>';
+    }).join("") : '<p class="muted" style="padding:8px 0">Пока пусто.</p>') + "</div>";
+    return h;
+  }
+  /* --- экран челленджа --- */
+  var FCVIEW = 0;
+  function fcHTML() {
+    var o = fcOpt(), h = "";
+    if (!o.on) {
+      var t = new Date(), nx = new Date(t.getFullYear(), t.getMonth() + (t.getDate() > 11 ? 1 : 0), 11);
+      return h + '<div class="card chstart"><h3 style="margin:0">💰 Челлендж «Деньги под контролем»</h3><p class="muted" style="margin:0">Три бюджетных периода (с 11-го по 10-е, около 13 недель). Сначала учёт и лимиты, потом долги, конверты и план, расхламление финансов, доходы, ритуалы. Будни — 5–15 минут, воскресенье — денежный час, 10-е — закрытие периода. Сначала долги, подушка — после них. Плюс дни без трат, денежный дневник, список желаний с правилом 24 часов (от ' + rub(o.th) + ") и финансовый чекап по воскресеньям.</p>" +
+        '<div class="r"><span class="muted">Старт (11-е число)</span><input type="date" class="inp" id="fcstartd" value="' + dKey(nx.getTime()) + '"><button type="button" class="btn sm pri" data-a="fcstart">Начать челлендж</button></div></div>' + fcHabHTML(today0());
+    }
+    var d0 = addDays(today0(), FCVIEW), c = fcItems(d0), day = c && c.day;
+    h += '<div class="r chnav"><button type="button" class="btn sm" data-a="fcday" data-x="-1">‹</button><b>' + esc(new Date(d0).toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" })) + '</b><button type="button" class="btn sm" data-a="fcday" data-x="1">›</button>' + (FCVIEW ? '<button type="button" class="btn sm" data-a="fcday" data-x="0">Сегодня</button>' : "") + '<span class="muted chstop"><a href="#" data-a="fcstop">остановить челлендж</a></span></div>';
+    if (!c) return h + '<p class="muted">' + (d0 < sod(o.start) ? "Челлендж начнётся " + esc(new Date(o.start).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })) + "." : "Челлендж завершён.") + "</p>" + fcHabHTML(today0());
+    var wk = FCW[day.wk], pct = Math.min(100, Math.round(day.n / day.total * 100));
+    h += '<div class="card chday"><div class="chhd"><b>💰 День ' + day.n + (day.post ? "" : " из " + day.total) + '</b><span class="muted">' + (day.post ? "ритуалы" : "период " + day.per + " из 3 · неделя " + day.wk + (wk ? " · " + esc(wk[0]) : "")) + "</span></div>" + (day.post ? "" : '<div class="chprog"><i style="width:' + pct + '%"></i></div>');
+    if (wk && !day.post && (day.wd === 1 || FCINTRO === day.wk)) h += '<div class="chintro"><b>Неделя ' + day.wk + ": " + esc(wk[0]) + "</b><span>" + esc(wk[1]) + "</span></div>"; else if (wk && !day.post) h += '<a href="#" class="chintrol muted" data-a="fcintro" data-x="' + day.wk + '">что на этой неделе?</a>';
+    var ck = cChecked(S.tasks.filter(function (x) { return x.id === fcTid(d0); })[0]), LN = { u: ["учёт", "fcu"], p: ["план", "fcp"], d: ["долги", "fcdl"], s: ["накопления", "fcs"], h: ["привычки", "fch"] };
+    var row = function (x) {
+      var a = fcAuto(x, d0), on = a === null ? !!ck[x[0]] : a, ln = LN[x[2]] || ["", ""];
+      var act = { bupd: '<button type="button" class="btn sm" data-a="butab" data-x="week">Бюджет</button>', upd: '<button type="button" class="btn sm" data-a="buupd">⟳ Обновить</button>', regs2: '<button type="button" class="btn sm" data-a="butab" data-x="regs">Справочник</button>', regs4: '<button type="button" class="btn sm" data-a="butab" data-x="regs">Справочник</button>', wish: '<button type="button" class="btn sm" data-a="butab" data-x="wish">Желания</button>', debts: '<button type="button" class="btn sm" data-a="butab" data-x="debts">Долги</button>', strat: '<button type="button" class="btn sm" data-a="butab" data-x="debts">Выбрать</button>', dbal: '<button type="button" class="btn sm" data-a="butab" data-x="debts">Долги</button>', sv: '<a class="btn sm" href="#goals">Цели</a>', rit: (S.opt.bud || {}).fcrit ? "" : '<button type="button" class="btn sm pri" data-a="fcrit">Поставить ритуалы</button>' }[x[4]] || "";
+      return '<div class="chit' + (on ? " dn" : "") + '"><button type="button" class="ck chck" data-a="fcchk" data-t="' + esc(x[0]) + '"' + (a !== null ? ' disabled title="Отметится само"' : "") + '></button><span class="chtt">' + esc(x[0]) + '</span><span class="chln ' + ln[1] + '">' + ln[0] + (x[1] ? " · " + x[1] + " мин" : "") + '</span><span class="chh">' + esc(x[3] || "") + (act ? " " + act : "") + "</span></div>";
+    };
+    if (c.it.length) h += '<div class="chsub">Задания дня</div>' + c.it.map(row).join("");
+    h += '<div class="chsub">Привычки — каждый день</div>' + c.hab.map(row).join("") + "</div>";
+    if (day.sun || FCVIEW === 0 && new Date().getDay() === 0) h += fcCkHTML(d0);
+    return h + fcHabHTML(today0()) + (day.sun ? "" : '<details class="fcckd"><summary class="muted">Финансовый чекап этой недели</summary>' + fcCkHTML(d0) + "</details>");
+  }
+  var FCINTRO = 0;
+  function fcAct(a, el) {
+    var id = el.dataset.id;
+    switch (a) {
+      case "fcstart": var sd = ($("fcstartd") || {}).value; if (!sd) { toast("Выберите дату"); return true; } var dd = new Date(sd + "T00:00"); if (dd.getDate() !== 11) toast("Удобнее с 11-го — начала бюджетного периода"); fcSet("start", dd.getTime()); fcSet("on", true); FCVIEW = 0; fcAutoRun(); render(); return true;
+      case "fcstop": fcSet("on", false); var t = S.tasks.filter(function (x) { return x.id === fcTid(today0()); })[0]; if (t && !t.done) { t.del = 1; t.delAt = Date.now(); touch(t); save(); } render(); toast("Челлендж остановлен. Долги, желания и дневник сохранены."); return true;
+      case "fcday": FCVIEW = el.dataset.x === "0" ? 0 : FCVIEW + (+el.dataset.x || 0); render(); return true;
+      case "fcintro": FCINTRO = FCINTRO === +el.dataset.x ? 0 : +el.dataset.x; render(); return true;
+      case "fcchk": if (FCVIEW > 0) { toast("Это задание будущего дня"); return true; } fcToggle(el.dataset.t, addDays(today0(), FCVIEW)); return true;
+      case "fcns": var k = "ns:" + dKey(today0()), x = live(S.nsd || []).filter(function (y) { return y.id === k; })[0]; S.nsd = S.nsd || []; if (x) { x.del = 1; touch(x); } else { var old = (S.nsd || []).filter(function (y) { return y.id === k; })[0]; if (old) { delete old.del; touch(old); } else S.nsd.push(touch({ id: k })); } fcSync(today0()); save(); render(); return true;
+      case "fcans": var mk = "fk:" + dKey(monday(addDays(today0(), FCVIEW))), r = live(S.fck || []).filter(function (y) { return y.id === mk; })[0]; S.fck = S.fck || []; if (!r) { r = touch({ id: mk, a: {} }); S.fck.push(r); } r.a = Object.assign({}, r.a); var v = +el.dataset.v; if (r.a[el.dataset.q] === v) delete r.a[el.dataset.q]; else r.a[el.dataset.q] = v; touch(r); fcSync(today0()); save(); render(); return true;
+      case "fcstrat": fcSet("strat", el.dataset.v); fcSync(today0()); save(); render(); return true;
+      case "fcdoff": var d = live(S.debts || []).filter(function (y) { return y.id === id; })[0]; if (d) { d.off = d.off ? 0 : 1; touch(d); save(); render(); } return true;
+      case "fcddel": var d2 = live(S.debts || []).filter(function (y) { return y.id === id; })[0]; if (d2) { d2.del = 1; d2.delAt = Date.now(); touch(d2); save(); render(); toastUndo("Долг удалён", function () { delete d2.del; delete d2.delAt; touch(d2); }); } return true;
+      case "fcwadd": var n = ($("fcwn") || {}).value; if (!n || !n.trim()) { toast("Что хочется купить?"); return true; } S.wish = S.wish || []; var w = touch({ id: uid(), n: n.trim().slice(0, 100), price: svAmt(($("fcwp") || {}).value), at: Date.now() }); S.wish.push(w); fcSync(today0()); save(); render(); var wt = fcWishWait(w); toast(wt ? "Записано — решение " + (wt > DAY ? "через 30 дней" : "завтра") : "Записано — дешевле порога, решайте сразу"); return true;
+      case "fcwdec": var w2 = live(S.wish || []).filter(function (y) { return y.id === id; })[0]; if (w2) { w2.dec = el.dataset.v; w2.dAt = Date.now(); touch(w2); save(); render(); if (w2.dec === "skip") toast("🙅 Сэкономлено " + buRub(+w2.price || 0)); } return true;
+      case "fcwdel": var w3 = live(S.wish || []).filter(function (y) { return y.id === id; })[0]; if (w3) { w3.del = 1; touch(w3); save(); render(); } return true;
+      case "fcrit": var mk2 = function (title, rep, rr, at, body) { var t2 = newTaskFrom(title, { day: at }); t2.at = at; t2.allday = true; t2.rem = false; t2.tags = []; t2.rep = rep; if (rr) t2.rr = rr; if (body) t2.body = body; touch(t2); return t2.id; };
+        var sun = today0(); while (new Date(sun).getDay() !== 0) sun = addDays(sun, 1); var td = new Date(), ten = new Date(td.getFullYear(), td.getMonth() + (td.getDate() > 10 ? 1 : 0), 10).getTime(), q1 = new Date(td.getFullYear(), td.getMonth() + 1, 15).getTime();
+        var ids = [mk2("💰 Денежный час · 30 мин", "weekly", null, sun, '<ul class="todo"><li>Выгрузка из 1С и «⟳ Обновить» неделю</li><li>Итог недели и «можно в день» на следующую</li><li>Остатки долгов</li><li>Финансовый чекап</li><li>Желания: что «остыло»</li></ul>'), mk2("📅 Закрытие периода · 1 ч", "custom", { f: "m", n: 1, md: 10 }, ten, '<ul class="todo"><li>Обновить период из файла</li><li>Доход − расход, где перерасход</li><li>План следующего периода</li><li>Остаток — в конверт или на долг</li></ul>'), mk2("🔎 Ревизия подписок и страховок", "custom", { f: "m", n: 3, md: 15 }, q1, "")];
+        buSet("fcrit", ids.join(",")); fcSync(today0()); save(); render(); toast("Ритуалы поставлены: денежный час, закрытие периода, ревизия раз в квартал"); return true;
+    }
+    return false;
+  }
+  document.addEventListener("change", function (e) {
+    var t = e.target, ds = t.dataset || {};
+    if (t.id === "fcdiary" || t.id === "fcimp") { var k = "md:" + dKey(today0()), v = ($("fcdiary") || {}).value || "", imp = !!($("fcimp") || {}).checked; S.mdiary = S.mdiary || []; var r = S.mdiary.filter(function (x) { return x.id === k; })[0]; if (!r) { r = { id: k }; S.mdiary.push(r); } r.t = v.trim().slice(0, 300); r.imp = imp ? 1 : 0; delete r.del; touch(r); fcSync(today0()); save(); return; }
+    if (!ds.fcd) return; var d = live(S.debts || []).filter(function (x) { return x.id === ds.id; })[0]; if (!d) return;
+    if (ds.fcd === "n") { if (t.value.trim()) d.n = t.value.trim().slice(0, 80); }
+    else if (ds.fcd === "cur") { S.dbal = S.dbal || []; S.dbal.push(touch({ id: uid(), debt: d.id, d: Date.now(), v: Math.max(0, svAmt(t.value)) })); fcSync(today0()); }
+    else if (ds.fcd === "rate") d.rate = Math.max(0, parseFloat(String(t.value).replace(",", ".")) || 0);
+    else if (ds.fcd === "day") d.day = Math.max(0, Math.min(31, Math.round(+t.value || 0)));
+    else d[ds.fcd] = Math.max(0, svAmt(t.value));
+    touch(d); save(); setTimeout(render, 0);
+  });
+  document.addEventListener("change", function (e) { var t = e.target; if (!t.dataset || !t.dataset.fcth) return; var v = svAmt(t.value); if (v > 0) fcSet(t.dataset.fcth, v); });
+  document.addEventListener("keydown", function (e) {
+    var t = e.target; if (e.key !== "Enter") return;
+    if (t.id === "fcdnew") { e.preventDefault(); var v = t.value.trim(); if (!v) return; S.debts = S.debts || []; S.debts.push(touch({ id: uid(), n: v.slice(0, 80), start: 0, rate: 0, min: 0, day: 0, off: /ипотек/i.test(v) ? 1 : 0 })); fcSync(today0()); save(); render(); setTimeout(function () { var i = $("fcdnew"); if (i) i.focus(); }, 30); }
+    if (t.id === "fcwn" || t.id === "fcwp") { e.preventDefault(); fcAct("fcwadd", t); }
+    if (t.id === "fcdiary") { e.preventDefault(); t.blur(); toast("Записано в дневник"); }
+  });
 
   function vStats() {
     var days = +LS.get("zd-stdays") || 30, t0 = today0(), from = addDays(t0, -days + 1), ev = doneEvents().filter(function (e) { return e.d >= from; }), pom = live(S.acts).filter(function (a) { return a.k === "pomo" && a.d >= from; });
@@ -11150,6 +11374,8 @@ CREATE TABLE inbox (
       "<b>Лимит недели</b> = (план периода − уже потрачено с 11-го) ÷ оставшиеся дни × дни недели в периоде. Перерасход уменьшает следующие недели, экономия — увеличивает: если держаться лимитов, к 10-му период сходится с планом. «Обычно» — план ÷ дни × 7, без переноса.",
       "<b>Неделя</b>: лимит, потрачено, сколько можно в день до воскресенья, прошлая неделя; по каждой гибкой статье — полоса с чертой «положено к сегодня»; регулярные платежи этой недели (оплачено ли — по факту статьи с 11-го) и платежи периода. <b>Итог закрытой недели</b> запоминается при первом обновлении после воскресенья — видно и его, и текущую цифру по файлу.",
       "<b>Период</b>: доходы, расходы и <b>доход − расход</b> (факт и план); статьи — факт против плана и «положено к сегодня», прогноз на 10-е и сколько тратить в день, чтобы уложиться; доходы по источникам; таблица недель периода с отклонением и нарастающим итогом.",
+      "<b>💰 Челлендж «Деньги под контролем»</b> — «Бюджет» → «Челлендж»: старт 11-го, три бюджетных периода (около 13 недель). Неделя 1 — видеть деньги (файл, виды статей, справочник платежей, дневник, день без трат); 2 — жить по лимиту и правило 24 часов; 3–4 — долги: список, ставки, стратегия, фокус-долг; 5 — конверты, резерв от новых долгов, цель «Подушка» (копить — после долгов); 6 — план следующего периода; 7 — расхламление финансов; 8 — доходы; 9 — проверка долгов; 10 — привычки; 11 — ритуалы; 12–13 — закрепление и итоги. Каждый день — «внести траты в 1С», со 2-й недели — «можно в день» утром и строка в дневнике. Воскресенье — денежный час (обновить из файла, финансовый чекап, остатки долгов), 10-е — закрытие периода. Задача «💰 Деньги · день N» — в «Сегодня»; многие пункты отмечаются сами.",
+      "<b>Долги</b> — вкладка «Долги»: было, сейчас (обновляйте по воскресеньям), ставка, минимальный платёж, число. Стратегия: ❄ снежный ком (сначала самый маленький остаток) или ⛰ лавина (сначала самая высокая ставка) — сверху «фокус-долг», куда идут лишние деньги. Ипотеку можно оставить «вне челленджа». <b>Желания</b> — правило «остывания»: покупка от 10 000 ₽ — решение через сутки, от 50 000 ₽ — через 30 дней (пороги — в «Настройки» → «Бюджет»); «передумала» копит «сэкономлено». <b>Дни без трат</b>, <b>денежный дневник</b> (одна строка в день, ⚡ — импульсивная покупка) и <b>финансовый чекап недели</b> (5 вопросов «да / частично / нет») — во вкладке «Челлендж».",
       "<b>Регулярные платежи</b> — справочник: название, статья, число месяца, сумма (ипотека, кредиты, коммунальные, связь, интернет, подписки, услуги). Видно и сравнение с планом статьи. Виджет доски «Бюджет недели» — неделя и доход − расход периода."]));
     h += sec("routine", "Распорядок дня: блоки времени", ul([
       "<b>Блоки времени</b> — сон, задачи, еда, дом, развитие, бизнес, спорт, отдых (категории свои: название; цвет — нажмите на цветной кружок слева и выберите из палитры; значок — кнопка рядом: выберите из набора или вставьте любой эмодзи). Это не задачи, а распорядок: какое время на что отведено.",
@@ -11655,6 +11881,7 @@ CREATE TABLE inbox (
     try { setsAuto(); } catch (er) { /* наборы не мешают */ }
     try { cleanAuto(); } catch (er) { /* план уборки не мешает */ }
     try { chAuto(); } catch (er) { /* челлендж не мешает */ }
+    try { fcAutoRun(); } catch (er) { /* финансовый челлендж не мешает */ }
     try { applyLook(); } catch (er) { /* оформление не мешает работе */ }
     // пока пишете в редакторе на странице (текст заметки, описание проекта) — страницу вокруг не перерисовываем, только левую панель; остальное обновится, когда выйдете из редактора
     var ae0 = document.activeElement;
@@ -12301,6 +12528,7 @@ CREATE TABLE inbox (
     if (a && czAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && chAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && invAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && fcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
     switch (a) {
       case "add": addQuick(); return;
