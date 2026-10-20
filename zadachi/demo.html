@@ -5461,7 +5461,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-109";
+  var APPV = "zd-app-2026-10-16-110";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -7438,7 +7438,7 @@ CREATE TABLE inbox (
 
   /* ---------- режим «Сейчас»: одна задача на весь экран, таймер, подзадачи ---------- */
   var NOW = null; // { q: [id…], i }
-  function nowQueue(startId) { var top = dayTop().filter(function (t) { return !t.done; }).map(function (t) { return t.id; }), rest = todayList().filter(function (t) { return !t.parent && top.indexOf(t.id) < 0; }).sort(cmpBy("smart")).map(function (t) { return t.id; }), q = top.concat(rest); if (startId) { q = q.filter(function (x) { return x !== startId; }); q.unshift(startId); } return q; }
+  function nowQueue(startId) { var top = dayTop().filter(function (t) { return !doneToday(t); }).map(function (t) { return t.id; }), rest = todayList().filter(function (t) { return !t.parent && top.indexOf(t.id) < 0; }).sort(cmpBy("smart")).map(function (t) { return t.id; }), q = top.concat(rest); if (startId) { q = q.filter(function (x) { return x !== startId; }); q.unshift(startId); } return q; }
   function nowStart(startId) { var q = nowQueue(startId); if (!q.length) { toast("На сегодня задач нет — добавьте задачу или спланируйте день"); return; } closeTask(); NOW = { q: q, i: 0 }; renderNow(); }
   function nowExit() { NOW = null; var b = $("nowbox"); if (b) b.remove(); render(); }
   function renderNow() {
@@ -7502,7 +7502,7 @@ CREATE TABLE inbox (
       if (mt !== mon) { mon = mt; x += "<h2>" + esc(mt.charAt(0).toUpperCase() + mt.slice(1)) + "</h2>"; }
       var top = (d.top || []).map(function (id) { return live(S.tasks).filter(function (t) { return t.id === id; })[0]; }).filter(Boolean), md = dMood(d), dn = d.review && d.review.done;
       return x + '<div class="jday"><div class="jdh"><b>' + esc(new Date(ms).toLocaleDateString("ru-RU", { weekday: "short", day: "numeric", month: "long" })) + "</b>" + (md ? '<span class="jem">' + MOODS[md - 1] + "</span>" : "") + (dn !== undefined ? '<span class="muted">сделано: ' + dn + "</span>" : "") + "</div>" +
-        (top.length ? '<div class="jtop">' + top.map(function (t) { return '<span class="' + (t.done ? "dn" : "") + '">' + (t.done ? "✓" : "★") + " " + esc(t.t) + "</span>"; }).join("") + "</div>" : "") +
+        (top.length ? '<div class="jtop">' + top.map(function (t) { var dn = doneOn(t, ms); return '<span class="' + (dn ? "dn" : "") + '">' + (dn ? "✓" : "★") + " " + esc(t.t) + "</span>"; }).join("") + "</div>" : "") +
         (dNote(d) ? '<div class="jtxt">' + esc(dNote(d)).replace(/\n/g, "<br>") + "</div>" : "") + "</div>";
     }).join("") : '<p class="muted">' + (JQ ? "Ничего не нашлось." : "Здесь появятся прошлые дни — после первых записей или итогов дня.") + "</p>";
     return h;
@@ -7686,6 +7686,8 @@ CREATE TABLE inbox (
   function dayRec(create) { var id = dayId(), r = S.days.filter(function (x) { return x.id === id && !x.del; })[0] || null; if (!r && create) { r = touch({ id: id, top: [] }); S.days.push(r); } return r; }
   // сделана сегодня: закрыта сегодня или повторяющаяся, отмеченная сегодня (она уже переехала на следующий срок)
   function doneToday(t) { if (t.done || t.ftd === dKey(Date.now())) return true; var m = memo("dntoday", function () { var x = {}, t0 = today0(); live(S.acts).forEach(function (a) { if (a.k === "done" && a.d >= t0) x[a.t] = 1; }); return x; }); return !!m[t.id]; }
+  // сделана в день d0: закрыта в этот день или повторяющаяся, отмеченная в этот день (сегодня — doneToday)
+  function doneOn(t, d0) { if (sod(d0) === today0()) return doneToday(t); var e = d0 + DAY; if (t.done && (!t.dt || (t.dt >= d0 && t.dt < e))) return true; return live(S.acts).some(function (a) { return a.k === "done" && a.t === t.id && a.d >= d0 && a.d < e; }); }
   function dayTop() { var r = dayRec(); return r ? (r.top || []).map(task).filter(Boolean) : []; }
   // сколько часов в день отдаётся задачам (настраивается, 1–24)
   function dayCap() { var v = +S.opt.dayCap; return v >= 1 && v <= 24 ? v : 8; }
@@ -7752,8 +7754,8 @@ CREATE TABLE inbox (
     var dr = dayRec(), rv = (dr && dr.review) || {}, t0 = today0(), done = doneEvents().filter(function (e) { return e.d >= t0; }).map(function (e) { return task(e.t) || live(S.tasks).filter(function (x) { return x.id === e.t; })[0]; }).filter(Boolean);
     var left = todayList().filter(function (t) { return !t.parent; }).sort(cmpBy("smart")), top = (dr && dr.top || []).map(function (id) { return live(S.tasks).filter(function (x) { return x.id === id; })[0]; }).filter(Boolean);
     var h = head("Итоги дня", new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) + " · закройте день, чтобы завтра начать с чистого листа");
-    h += '<div class="dpsum"><div><b>' + done.length + '</b><small>сделано сегодня</small></div><div><b>' + left.length + '</b><small>осталось</small></div><div><b>' + top.filter(function (t) { return t.done; }).length + " из " + top.length + '</b><small>главных сделано</small></div></div>';
-    if (top.length) h += '<div class="card dpbody"><h2>★ Главное</h2>' + top.map(function (t) { return '<div class="dprow' + (t.done ? " dn" : "") + '"><span class="dpstar on">' + (t.done ? "✓" : "★") + '</span><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + "</a></div>"; }).join("") + "</div>";
+    h += '<div class="dpsum"><div><b>' + done.length + '</b><small>сделано сегодня</small></div><div><b>' + left.length + '</b><small>осталось</small></div><div><b>' + top.filter(function (t) { return doneToday(t); }).length + " из " + top.length + '</b><small>главных сделано</small></div></div>';
+    if (top.length) h += '<div class="card dpbody"><h2>★ Главное</h2>' + top.map(function (t) { var dn = doneToday(t); return '<div class="dprow' + (dn ? " dn" : "") + '"><span class="dpstar on">' + (dn ? "✓" : "★") + '</span><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + "</a></div>"; }).join("") + "</div>";
     h += '<div class="card dpbody"><h2>Что не успели <span class="c">' + left.length + "</span></h2>" + (left.length ? left.map(function (t) { return dpRow(t, [["done", "✓ Сделано"], ["d:1", "Завтра"], ["d:7", "Через неделю"], ["d:some", "Когда-нибудь"]]); }).join("") : '<p class="dpempty">✓ Всё сделано — отличный день</p>') + "</div>";
     if (done.length) h += '<div class="card dpbody"><h2>Сделано <span class="c">' + done.length + "</span></h2>" + done.slice(0, 30).map(function (t) { return '<div class="dprow dn"><span class="dpstar">✓</span><span class="dpt">' + esc(t.t) + "</span></div>"; }).join("") + "</div>";
     var mood = DRV.mood || dMood(dr || {}) || 0;
