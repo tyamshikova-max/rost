@@ -2320,7 +2320,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-90";
+  var APPV = "zd-app-2026-10-16-91";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -3277,21 +3277,18 @@ CREATE TABLE inbox (
     var gs = groupsOf(list, vo.group), h = "";
     if (o.plans && vo.group === "day") {
       // «Планы»: две недели вперёд, пустые дни тоже видны
-      var t0 = today0(), by = {}; gs.forEach(function (g) { by[g.key] = g; });
-      if (by.a) h += '<h2 class="warnc">Просрочено <span class="c">' + by.a.items.length + "</span></h2>" + renderTree(by.a.items, vo.sort, o);
-      for (var i = 0; i < 14; i++) {
-        var d0 = t0 + i * DAY, g = by[dKey(d0)];
-        h += "<h2>" + dayName(d0) + (i > 1 ? ' <span class="c">' + new Date(d0).toLocaleDateString("ru-RU", { weekday: "long" }) + "</span>" : "") + (g ? ' <span class="c">' + g.items.length + "</span>" : "") + "</h2>" + (g ? renderTree(g.items, vo.sort, { noDay: true }) : '<p class="muted" style="margin:0 4px">—</p>');
-      }
+      var t0 = today0(), by = {}, pf = (VIEWS[curKey()] || {}).gfold || {}; gs.forEach(function (g) { by[g.key] = g; });
+      var ph = function (k, title, n, cls) { var f = !!pf["p:" + k]; return { f: f, h: '<h2 class="ngh d0' + (cls ? " " + cls : "") + '"><button type="button" class="gf" data-a="gfold" data-k="p:' + esc(k) + '">' + (f ? "▸" : "▾") + "</button>" + title + (n !== null ? ' <span class="c">' + n + "</span>" : "") + "</h2>" }; };
+      var blk = function (k, title, items, cls, opt) { var x = ph(k, title, items ? items.length : null, cls); h += x.h + (x.f ? "" : items ? renderTree(items, vo.sort, opt || o) : '<p class="muted" style="margin:0 4px">—</p>'); };
+      if (by.a) blk("a", "Просрочено", by.a.items, "warnc");
+      for (var i = 0; i < 14; i++) { var d0 = t0 + i * DAY, g = by[dKey(d0)]; blk(dKey(d0), dayName(d0) + (i > 1 ? ' <span class="c">' + new Date(d0).toLocaleDateString("ru-RU", { weekday: "long" }) + "</span>" : ""), g ? g.items : null, "", { noDay: true }); }
       var later = list.filter(function (t) { return effAt(t) >= t0 + 14 * DAY; });
-      if (later.length) h += "<h2>Позже <span class=\"c\">" + later.length + "</span></h2>" + renderTree(later, vo.sort, o);
-      if (by.z) h += "<h2>Без срока <span class=\"c\">" + by.z.items.length + "</span></h2>" + renderTree(by.z.items, vo.sort, o);
+      if (later.length) blk("later", "Позже", later);
+      if (by.z) blk("z", "Без срока", by.z.items);
       return h;
     }
-    gs.forEach(function (g) {
-      h += '<h2' + (g.key === "a" ? ' class="warnc"' : "") + (/^(date|day|project|prio|flag|status|sprint|kcol)$/.test(vo.group) ? ' data-col="' + esc(vo.group + ":" + g.key) + '"' : "") + ">" + (g.ih ? '<span class="gico">' + g.ih + "</span>" : g.color ? '<span class="pdot"><i style="background:' + g.color + '"></i></span>' : "") + esc(g.title) + ' <span class="c">' + g.items.length + "</span></h2>" +
-        renderTree(g.items, vo.sort, { noProj: vo.group === "project", noDay: vo.group === "day" });
-    });
+    // одна группировка — тем же путём, что и многоуровневая: у каждой группы ▾/▸, свёрнутое запоминается для списка
+    h = renderNested(list, [vo.group], vo, o, 0, "");
     return h || '<p class="empty">' + (o.empty || "Задач нет.") + "</p>";
   }
   function vmode() { return (VIEWS[curKey()] || {}).mode || "list"; }
@@ -6668,7 +6665,7 @@ CREATE TABLE inbox (
       "<b>Вложенная группировка</b>: «＋» справа от группировки добавляет ещё один уровень внутри — например, по проекту → внутри по тегу → внутри по флажку (до четырёх уровней). Каждый уровень меняется своим списком, «Убрать этот уровень» — в его списке. ▾ у заголовка группы сворачивает её. На доске второй уровень показан подзаголовками внутри колонок.",
       "<b>Сортировки</b>: умная (важное без даты → сегодня → просроченное → будущее → без даты → когда-нибудь), вручную, по сроку, по дедлайну, по приоритету, по названию, сначала новые. Кнопка ⇅ — обратный порядок. Закреплённые задачи всегда сверху.",
       "Заголовки групп принимают задачи: перетащите задачу на «Завтра», «Приоритет 1», имя проекта или секцию — свойство поменяется.",
-      "<b>⛃ Фильтр</b> — быстрый отбор поверх списка (см. «Теги, флажки, фильтры»)."]));
+      "<b>⛃ Фильтр</b> — быстрый отбор поверх списка (см. «Теги, флажки, фильтры»).", "<b>Свернуть группу</b> — стрелка ▾ слева от названия группы (проект, срок, приоритет, день в «Планах»…): задачи группы прячутся, остаётся заголовок с числом. Свёрнутое запоминается для каждого списка на этом устройстве."]));
     h += sec("board", "Доска (канбан)", "<p>На доске колонки строятся по выбранной группировке: без группировки или «по статусу» — «Нужно сделать / В работе / Готово (за 7 дней)»; по проекту, приоритету, сроку, дням, тегу, флажку, спринту — соответствующие колонки (пустые тоже видны, чтобы было куда перетащить). Перетащите карточку в другую колонку — поменяется статус, проект, приоритет, срок, флажок или спринт; в колонку тега — тег добавится; в «Готово» — задача выполнена. Клик по карточке открывает задачу. У проекта есть свой канбан с собственными колонками — см. «Проекты».</p>");
     h += sec("cal", "Календарь", ul([
       "Виды <b>День</b>, <b>Неделя</b>, <b>Месяц</b>; стрелки ‹ › и «Сегодня». Клик по числу открывает этот день. На телефоне календарь открывается видом «День» — неделя на узком экране плохо читается.",
