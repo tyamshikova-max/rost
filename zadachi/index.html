@@ -93,6 +93,10 @@ body.mini .side .lab .sfch { display: none }
 .side .none { color: var(--muted); font-size: calc(13px * var(--fs)); padding: 2px 10px }
 .main { padding: 20px 28px 80px; width: 100%; min-width: 0 }
 .main.narrow > * { max-width: 920px }
+.main.narrow > #ptabs { max-width: none } /* панель вкладок — всегда во всю ширину, даже на узких страницах */
+html #ptabs { overflow-y: hidden; scrollbar-width: none } html #ptabs::-webkit-scrollbar { display: none }
+/* вкладки не сжимаются меньше читаемой ширины: лишние уходят вбок, панель листается колёсиком, текущая всегда на виду */
+html #ptabs .pgtab { min-width: 118px }
 .main .sub, .main .help p { max-width: 920px }
 h1 { font-size: calc(26px * var(--fs)); line-height: 1.2; margin: 0; text-wrap: balance }
 h2 { font-size: calc(15px * var(--fs)); margin: 22px 0 6px; display: flex; gap: 8px; align-items: center }
@@ -2257,7 +2261,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-82";
+  var APPV = "zd-app-2026-10-16-83";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -2760,6 +2764,8 @@ CREATE TABLE inbox (
         (x.t.pin ? '<span class="pgtp" title="Закреплена">📌</span>' : '<button type="button" class="pgtx" data-ptx="' + esc(x.t.h) + '" title="Закрыть вкладку" aria-label="Закрыть вкладку">×</button>') + "</a>";
     }).join("") + "</div>";
   }
+  // колесо мыши над вкладками листает их вбок
+  document.addEventListener("wheel", function (e) { var b = e.target.closest && e.target.closest("#ptabs"); if (!b || b.scrollWidth <= b.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; e.preventDefault(); b.scrollLeft += e.deltaY; }, { passive: false });
   function ptClose(h) {
     var a = ptabs(), i = -1; a.forEach(function (t, j) { if (t.h === h) i = j; }); if (i < 0) return;
     a.splice(i, 1); ptSave(a);
@@ -6181,7 +6187,7 @@ CREATE TABLE inbox (
       "Нажатие на вкладку — вернуться к этой странице <b>на то же место прокрутки</b>. × или колесо мыши (средняя кнопка) — закрыть вкладку.",
       "Правый клик по вкладке: <b>закрепить</b> 📌 (закреплённая не закрывается сама и остаётся слева, где вы её поставите), закрыть, закрыть другие, закрыть вкладки справа. Вкладки <b>перетаскиваются</b> мышью.",
       "Незакреплённых вкладок — не больше 8: самая давно не открывавшаяся закрывается сама. Вкладки удалённых проектов, заметок и досок исчезают.",
-      "Вкладки есть только на компьютере — на телефоне их нет, там внизу панель быстрых переходов. Выключить вкладки: «Настройки» → «Общие» → «Вкладки открытых страниц» → «Не показывать». Вкладки хранятся на каждом компьютере свои."]));
+      "Вкладки есть только на компьютере — на телефоне их нет, там внизу панель быстрых переходов. Выключить вкладки: «Настройки» → «Общие» → «Вкладки открытых страниц» → «Не показывать». Вкладки хранятся на каждом компьютере свои.", "Если вкладок больше, чем помещается, лишние уходят вбок: листайте панель колёсиком мыши — текущая вкладка всегда остаётся на виду."]));
     h += sec("phone", "На телефоне", ul([
       "<b>Нижняя панель</b>: Сегодня, Входящие, Календарь, Поиск и Меню (левая панель со всеми списками). Красная цифра у «Сегодня» — просроченные задачи.",
       "<b>Смахните задачу вправо</b> — она отмечается выполненной; <b>влево</b> — откроется меню переноса срока: сегодня, завтра, в понедельник, через неделю, когда-нибудь…",
@@ -6977,9 +6983,11 @@ CREATE TABLE inbox (
     $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "templates");
     try { ptTouch(location.hash.slice(1) || "today"); } catch (er) { /* вкладки не мешают */ }
     var pth = ""; try { pth = ptHTML(); } catch (er) { pth = ""; }
+    var PTSL = $("ptabs") ? $("ptabs").scrollLeft : 0;
     $("view").innerHTML = pth + (V === "settings" || V === "help" ? "" : syncBar() + focusBar() + revBar()) + f();
     if (keepScroll !== null && $("cbody")) $("cbody").scrollTop = keepScroll; else calAfterRender();
     if (V === "gantt") gAfter();
+    var ptb = $("ptabs"); if (ptb) { ptb.scrollLeft = PTSL; var pon = ptb.querySelector(".pgtab.on"); if (pon) { var bl = ptb.getBoundingClientRect(), ol = pon.getBoundingClientRect(); if (ol.left < bl.left) ptb.scrollLeft -= bl.left - ol.left + 24; else if (ol.right > bl.right) ptb.scrollLeft += ol.right - bl.right + 24; } }
     try { helpMarks(); } catch (er) { /* справочные значки не обязательны */ }
     try { groupSelMarks(); } catch (er) { /* не мешает */ }
     var bb = backBar(); if (bb) $("view").insertAdjacentHTML("afterbegin", bb);
