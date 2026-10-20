@@ -622,6 +622,7 @@ a.dchip { padding-right: 10px } .dchip a { color: var(--fg); text-decoration: no
 .dpmood button { font-size: calc(20px * var(--fs)); padding: 4px 12px }
 .dptopbox { display: grid; gap: 4px; margin: 12px 0 4px; padding: 10px 14px; border-radius: 12px; border: 1px solid #e6c46e; border-color: color-mix(in srgb, var(--star) 55%, transparent); background: #fbf2d9; background: color-mix(in srgb, color-mix(in srgb, var(--star) 16%, var(--solid, #fff)) var(--sheet, 86%), transparent); box-shadow: 0 4px 16px rgba(0, 0, 0, .05); backdrop-filter: blur(var(--blur)) saturate(1.3); -webkit-backdrop-filter: blur(var(--blur)) saturate(1.3); max-width: 900px }
 html.nosheet .dptopbox { background: color-mix(in srgb, var(--star) 10%, transparent); box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none }
+.wdtdn { display: flex; gap: 10px; align-items: flex-start; padding: 6px 4px; color: var(--muted); text-decoration: none } .wdtdn s { color: var(--muted) } .wdtdn > span:last-child { display: grid; min-width: 0 } .wdtdn .ck { flex: none; margin-top: 2px } .wdtdn .ck::after { content: ""; width: 9px; height: 5px; border: 2px solid var(--panel); border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px) }
 .dptopbox a { color: var(--fg); text-decoration: none } .dptopbox a.dn { color: var(--muted); text-decoration: line-through } .dptopbox a::before { content: "★ "; color: var(--star) }
 .dpcta { margin-top: 10px; gap: 6px }
 /* доски */
@@ -5391,7 +5392,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-100";
+  var APPV = "zd-app-2026-10-16-101";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -7604,6 +7605,8 @@ CREATE TABLE inbox (
   var DP = { step: 0 }, DPSTEPS = [["inbox", "Входящие"], ["late", "Просроченное"], ["main", "Главное"], ["time", "Время"], ["go", "Готово"]];
   function dayId(ms) { return "d:" + dKey(ms || today0()); }
   function dayRec(create) { var id = dayId(), r = S.days.filter(function (x) { return x.id === id && !x.del; })[0] || null; if (!r && create) { r = touch({ id: id, top: [] }); S.days.push(r); } return r; }
+  // сделана сегодня: закрыта сегодня или повторяющаяся, отмеченная сегодня (она уже переехала на следующий срок)
+  function doneToday(t) { if (t.done || t.ftd === dKey(Date.now())) return true; var m = memo("dntoday", function () { var x = {}, t0 = today0(); live(S.acts).forEach(function (a) { if (a.k === "done" && a.d >= t0) x[a.t] = 1; }); return x; }); return !!m[t.id]; }
   function dayTop() { var r = dayRec(); return r ? (r.top || []).map(task).filter(Boolean) : []; }
   // сколько часов в день отдаётся задачам (настраивается, 1–24)
   function dayCap() { var v = +S.opt.dayCap; return v >= 1 && v <= 24 ? v : 8; }
@@ -7683,7 +7686,7 @@ CREATE TABLE inbox (
     var h = "";
     try { h += menuTodayHTML(); } catch (er) { /* меню не мешает */ }
     if (LS.get("zd-welcome") !== "off" && !live(S.projects).length && live(S.tasks).length <= 3 && !tstCount()) h += '<div class="card welcome"><button type="button" class="ibtn wx" data-a="welcome-off" title="Скрыть" aria-label="Скрыть">✕</button><b>👋 Добро пожаловать в «Задачи»!</b><p class="muted">С чего начать — выберите удобное:</p><div class="r"><button type="button" class="btn sm pri" data-a="tstload">🧪 Загрузить тестовые данные</button><a class="btn sm" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf">📘 Скачать учебный курс</a><a class="btn sm" href="#settings-sync">☁ Войти через Яндекс</a></div><p class="muted" style="margin:8px 0 0">Тестовые данные — готовые примеры для упражнений курса; удаляются одной кнопкой. Вход через Яндекс нужен, чтобы задачи были и на телефоне, и на компьютере.</p></div>';
-    if (top.length) h += '<div class="dptopbox"><b>★ Главное на сегодня</b>' + top.map(function (t) { return '<a class="' + (t.done ? "dn" : "") + '" href="#task-' + t.id + '">' + (t.done ? "✓ " : "") + esc(t.t) + "</a>"; }).join("") + "</div>";
+    if (top.length) h += '<div class="dptopbox"><b>★ Главное на сегодня</b>' + top.map(function (t) { var dn = doneToday(t); return '<a class="' + (dn ? "dn" : "") + '" href="#task-' + t.id + '">' + (dn ? "✓ " : "") + esc(t.t) + "</a>"; }).join("") + "</div>";
     h += '<div class="r dpcta">' + (!dr || !dr.planned ? '<a class="btn sm pri" href="#daily">☀ Спланировать день</a>' : '<a class="btn sm" href="#daily">☀ План дня</a>') + '<button type="button" class="btn sm" data-a="nowgo" title="Одна задача на весь экран, таймер и подзадачи">◉ Сейчас</button><button type="button" class="btn sm" data-a="setpick" title="Добавить набор задач: утро, вечер, обзор недели">▤ Набор</button>' + (late || (dr && dr.planned) ? '<a class="btn sm" href="#daily-review">🌙 Итоги дня' + (dr && dr.review ? " ✓" : "") + "</a>" : "") + '<button type="button" class="btn sm" data-a="todaymore" title="Ещё: распечатать, поделиться' + (AI.ready() ? ", ИИ" : "") + '" aria-label="Ещё">⋯</button></div>';
     return h;
   }
@@ -7909,7 +7912,10 @@ CREATE TABLE inbox (
       case "routine": return tbWidget();
       case "daytop":
         var tp2 = dayTop(), drr = dayRec();
-        return (tp2.length ? '<div class="wdt">' + tp2.map(function (t) { return renderTree([t], "smart", {}).replace(/ draggable="true"/g, ""); }).join("") + "</div>" : '<p class="wempty">Главное ещё не выбрано</p>') + '<div class="r" style="margin-top:6px"><a class="btn sm' + (drr && drr.planned ? "" : " pri") + '" href="#daily">☀ План дня</a><a class="btn sm" href="#daily-review">🌙 Итоги</a></div>';
+        return (tp2.length ? '<div class="wdt">' + tp2.map(function (t) {
+          if (!t.done && doneToday(t) && t.rep) return '<a class="wdtdn" href="#task-' + t.id + '"><span class="ck dn"></span><span><s>' + esc(t.t) + '</s><small class="muted">сделано сегодня · следующий раз ' + esc(whenTxt(t).toLowerCase()) + "</small></span></a>";
+          return renderTree([t], "smart", {}).replace(/ draggable="true"/g, "");
+        }).join("") + "</div>" : '<p class="wempty">Главное ещё не выбрано</p>') + '<div class="r" style="margin-top:6px"><a class="btn sm' + (drr && drr.planned ? "" : " pri") + '" href="#daily">☀ План дня</a><a class="btn sm" href="#daily-review">🌙 Итоги</a></div>';
       case "countdown":
         if (!c.date) return '<p class="wempty">Укажите дату — ⚙ вверху виджета</p>';
         var tgt = new Date(c.date + "T00:00").getTime(), dl2 = Math.round((tgt - today0()) / DAY), from2 = c.from || tgt - 30 * DAY, prog = Math.max(0, Math.min(100, Math.round((Date.now() - from2) / Math.max(1, tgt - from2) * 100)));
