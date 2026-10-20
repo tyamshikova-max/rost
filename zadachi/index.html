@@ -2355,7 +2355,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-95";
+  var APPV = "zd-app-2026-10-16-96";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -6465,10 +6465,10 @@ CREATE TABLE inbox (
     var c = tbCfg(), l = (TBTAB === "we" ? c.we : c.wd).slice().sort(function (a, b) { return a.s - b.s; });
     var h = '<section class="card" id="s-routine"><h2>Распорядок дня</h2><p class="muted" style="margin:0">Блоки времени — сон, задачи, еда, дом, развитие… Два шаблона: «Будни» и «Выходные». Блоки видны цветным фоном в календаре, а виджет «Распорядок дня» на доске показывает, что сейчас, и план/факт: факт — учтённое время (таймер, помидоры) в блоке или ваша отметка «✓ было».</p>';
     h += '<div class="r" style="margin-top:8px"><div class="seg"><button type="button" data-a="tbon" data-v="1" class="' + (c.on ? "on" : "") + '">Включён</button><button type="button" data-a="tbon" data-v="0" class="' + (c.on ? "" : "on") + '">Выключен</button></div><div class="seg"><button type="button" data-a="tbcal" data-v="1" class="' + (c.cal ? "on" : "") + '">В календаре — показывать</button><button type="button" data-a="tbcal" data-v="0" class="' + (c.cal ? "" : "on") + '">не показывать</button></div></div>';
-    h += '<div class="tbline">' + l.map(function (b) { var e = b.e > b.s ? b.e : 1440, ct = tbCat(b.cat); return '<i style="left:' + (b.s / 14.4) + "%;width:" + ((e - b.s) / 14.4) + "%;background:" + ct.c + '" title="' + esc(ct.n) + '"></i>' + (b.e < b.s ? '<i style="left:0;width:' + (b.e / 14.4) + "%;background:" + ct.c + '"></i>' : ""); }).join("") + '</div><div class="tbscale"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>';
+    h += '<div class="tbline">' + tbLineHTML(l) + '</div><div class="tbscale"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>';
     h += '<div class="htabs"><button type="button" class="tb' + (TBTAB === "wd" ? " on" : "") + '" data-a="tbtab" data-x="wd">Будни</button><button type="button" class="tb' + (TBTAB === "we" ? " on" : "") + '" data-a="tbtab" data-x="we">Выходные</button></div>';
     h += '<p class="muted tbhint">Порядок блоков меняется перетаскиванием за ⠿ или стрелками ↑↓: длительность каждого блока сохраняется, время пересчитывается само.</p>';
-    h += '<div class="tbedit">' + l.map(function (b, i) { var ct = tbCat(b.cat); return '<div class="tbrow" data-tbr="' + b.id + '"><span class="tbgrip" title="Перетащите, чтобы поменять порядок" aria-hidden="true">⠿</span><button type="button" class="btn sm tbcat" data-a="tbpick" data-id="' + b.id + '" style="--bc:' + ct.c + '">' + esc(ct.i + " " + ct.n) + ' ▾</button><span class="tbtm"><input type="time" class="inp" data-tbs="' + b.id + '" value="' + tbHM(b.s) + '" aria-label="Начало"><span class="muted">–</span><input type="time" class="inp" data-tbe="' + b.id + '" value="' + tbHM(b.e) + '" aria-label="Конец">' + (b.e < b.s ? '<span class="muted">до след. дня</span>' : "") + '</span><span class="tbmvs"><button type="button" class="ibtn" data-a="tbmv" data-id="' + b.id + '" data-d="-1" title="Раньше"' + (i ? "" : " disabled") + '>↑</button><button type="button" class="ibtn" data-a="tbmv" data-id="' + b.id + '" data-d="1" title="Позже"' + (i < l.length - 1 ? "" : " disabled") + '>↓</button></span><button type="button" class="ibtn" data-a="tbdel" data-id="' + b.id + '" title="Убрать блок">×</button></div>'; }).join("") + '</div><div class="r"><button type="button" class="btn sm" data-a="tbadd">＋ Блок</button><button type="button" class="btn sm" data-a="tbcopy" title="Скопировать этот шаблон в другой">⇄ Скопировать в «' + (TBTAB === "we" ? "Будни" : "Выходные") + '»</button></div>';
+    h += '<div class="tbedit">' + l.map(function (b, i) { var ct = tbCat(b.cat); return '<div class="tbrow" data-tbr="' + b.id + '"><span class="tbgrip" title="Перетащите, чтобы поменять порядок" aria-hidden="true">⠿</span><button type="button" class="btn sm tbcat" data-a="tbpick" data-id="' + b.id + '" style="--bc:' + ct.c + '">' + esc(ct.i + " " + ct.n) + ' ▾</button><span class="tbtm"><input type="time" class="inp" data-tbs="' + b.id + '" value="' + tbHM(b.s) + '" aria-label="Начало"><span class="muted">–</span><input type="time" class="inp" data-tbe="' + b.id + '" value="' + tbHM(b.e) + '" aria-label="Конец">' + '<span class="muted tbnd"' + (b.e < b.s ? "" : " hidden") + '>до след. дня</span>' + '</span><span class="tbmvs"><button type="button" class="ibtn" data-a="tbmv" data-id="' + b.id + '" data-d="-1" title="Раньше"' + (i ? "" : " disabled") + '>↑</button><button type="button" class="ibtn" data-a="tbmv" data-id="' + b.id + '" data-d="1" title="Позже"' + (i < l.length - 1 ? "" : " disabled") + '>↓</button></span><button type="button" class="ibtn" data-a="tbdel" data-id="' + b.id + '" title="Убрать блок">×</button></div>'; }).join("") + '</div><div class="r"><button type="button" class="btn sm" data-a="tbadd">＋ Блок</button><button type="button" class="btn sm" data-a="tbcopy" title="Скопировать этот шаблон в другой">⇄ Скопировать в «' + (TBTAB === "we" ? "Будни" : "Выходные") + '»</button></div>';
     h += '<h3 style="margin:14px 0 6px">Категории</h3><div class="tbcats">' + c.cats.map(function (ct) { return '<div class="r tbcrow"><input type="color" data-tbcc="' + ct.id + '" value="' + ct.c + '" aria-label="Цвет"><input class="inp tbci" data-tbci="' + ct.id + '" value="' + esc(ct.i) + '" maxlength="4" aria-label="Значок"><input class="inp" data-tbcn="' + ct.id + '" value="' + esc(ct.n) + '" aria-label="Название"><button type="button" class="ibtn" data-a="tbcdel" data-id="' + ct.id + '" title="Убрать категорию">×</button></div>'; }).join("") + '</div><div class="r"><input class="inp" id="tbcnew" placeholder="Новая категория: Дорога, Семья, Хобби…" style="max-width:280px"><button type="button" class="btn sm" data-a="tbcadd">＋ Категория</button><button type="button" class="btn sm" data-a="tbreset" style="margin-left:auto">↺ Как было по умолчанию</button></div></section>';
     return h;
   }
@@ -6510,10 +6510,11 @@ CREATE TABLE inbox (
   function tbTimeSet(t) {
     var ds = t.dataset, m = /^(\d{1,2}):(\d{2})/.exec(t.value || ""); if (!m) return; var v = +m[1] * 60 + +m[2];
     var l = tbList(), b = l.filter(function (x) { return x.id === (ds.tbs || ds.tbe); })[0]; if (!b || (ds.tbs ? b.s : b.e) === v) return;
-    if (ds.tbs) b.s = v; else b.e = v; tbSave(TBTAB, l); setTimeout(render, 0);
+    if (ds.tbs) b.s = v; else b.e = v; tbSave(TBTAB, l);
+    var ln = document.querySelector("#s-routine .tbline"), row = t.closest(".tbrow"), nd = row && row.querySelector(".tbnd");
+    if (ln) ln.innerHTML = tbLineHTML(l.slice().sort(function (x, y) { return x.s - y.s; })); if (nd) nd.hidden = !(b.e < b.s);
   }
-  document.addEventListener("focusout", function (e) { var t = e.target; if (t && t.dataset && (t.dataset.tbs || t.dataset.tbe)) tbTimeSet(t); });
-  document.addEventListener("keydown", function (e) { var t = e.target; if (e.key === "Enter" && t && t.dataset && (t.dataset.tbs || t.dataset.tbe)) { e.preventDefault(); t.blur(); } });
+  function tbLineHTML(l) { return l.map(function (b) { var e = b.e > b.s ? b.e : 1440, ct = tbCat(b.cat); return '<i style="left:' + (b.s / 14.4) + "%;width:" + ((e - b.s) / 14.4) + "%;background:" + ct.c + '" title="' + esc(ct.n) + '"></i>' + (b.e < b.s ? '<i style="left:0;width:' + (b.e / 14.4) + "%;background:" + ct.c + '"></i>' : ""); }).join(""); }
   // блок распорядка, в который попадает момент ms (с учётом ночного блока вчерашнего дня)
   function tbAtBlock(ms) { if (!tbCfg().on) return null; return tbCover(sod(ms)).filter(function (b) { return ms >= b.st && ms < b.en; })[0] || null; }
   // «Сегодня»: полоска суток с отметкой «сейчас», какой блок идёт и что дальше
@@ -6553,8 +6554,8 @@ CREATE TABLE inbox (
   document.addEventListener("change", function (e) {
     var t = e.target, ds = t.dataset || {};
     var tm = function (v) { var m = /^(\d{1,2}):(\d{2})/.exec(v || ""); return m ? Math.min(1439, +m[1] * 60 + +m[2]) : null; };
-    // время блока: пока поле в фокусе, часы и минуты ещё набираются — сохраняем, когда из поля ушли (иначе «12» превращалось в 01:00)
-    if (ds.tbs || ds.tbe) { if (document.activeElement !== t) tbTimeSet(t); return; }
+    // время блока: сохраняем сразу, но страницу не перерисовываем — иначе сбивается набор («12» → 01:00) и закрывается окошко выбора времени
+    if (ds.tbs || ds.tbe) { tbTimeSet(t); return; }
     if (ds.tbcc || ds.tbci || ds.tbcn) { var cid = ds.tbcc || ds.tbci || ds.tbcn, cats = tbCfg().cats.map(function (x) { if (x.id !== cid) return x; var y = Object.assign({}, x); if (ds.tbcc) y.c = t.value; else if (ds.tbci) y.i = t.value.trim().slice(0, 4) || "•"; else y.n = t.value.trim().slice(0, 30) || x.n; return y; }); tbSave("cats", cats); return; }
   });
 
@@ -7560,7 +7561,7 @@ CREATE TABLE inbox (
     var ae = document.activeElement, keep = null;
     if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && ($("view").contains(ae) || $("side").contains(ae)) && !ae.classList.contains("rn")) {
       var fk = fieldKey(ae);
-      if (fk) keep = { k: fk, v: ae.value, dv: ae.defaultValue, s: ae.selectionStart, e: ae.selectionEnd, txt: /^(text|search|url|number|)$/.test(ae.type || "") || ae.tagName === "TEXTAREA", own: ae.id === "qa" || ae.id === "subin" };
+      if (fk) keep = { k: fk, v: ae.value, dv: ae.defaultValue, s: ae.selectionStart, e: ae.selectionEnd, txt: /^(text|search|url|number|)$/.test(ae.type || "") || ae.tagName === "TEXTAREA", tmv: /^(time|date)$/.test(ae.type || ""), own: ae.id === "qa" || ae.id === "subin" };
     }
     // слишком частые перерисовки — показать, откуда они (для диагностики)
     if (DIAG && DIAG.on) { DIAG.renders.push(Date.now()); dlog("перерисовка", "← " + dstack()); }
@@ -7573,7 +7574,7 @@ CREATE TABLE inbox (
     if (keep && (!document.activeElement || document.activeElement === document.body)) {
       var nf = null; try { nf = document.querySelector(keep.k); } catch (e) { nf = null; }
       if (nf && /^(INPUT|TEXTAREA|SELECT)$/.test(nf.tagName)) {
-        if (keep.txt && !keep.own && keep.v !== keep.dv && nf.value === keep.dv) nf.value = keep.v;
+        if ((keep.txt || keep.tmv) && !keep.own && keep.v !== keep.dv && nf.value === keep.dv) nf.value = keep.v;
         try { nf.focus({ preventScroll: true }); if (keep.txt && keep.s !== null && keep.s !== undefined) nf.setSelectionRange(keep.s, keep.e); } catch (e) { /* поле без курсора */ }
       }
     }
