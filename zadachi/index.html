@@ -297,6 +297,18 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .clset .wcr { align-items: center } .cldset { display: grid; gap: 6px } .cldset .r { gap: 6px; align-items: center } .cldset input { width: 74px } .cldn { min-width: 26px }
 .pplist { display: grid; gap: 6px; margin: 10px 0 } .pprow { display: flex; gap: 8px; align-items: center; max-width: 360px } .pprow .inp { flex: 1 } .ppme { font-weight: 600; padding: 6px 10px }
 .tresp { color: var(--muted) }
+.clsh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px } .clsh .clsn { margin-left: auto } .clsh2 { margin: 16px 0 0 }
+.main .gsheet.clbase { padding: 10px 14px 12px; display: grid; gap: 7px } .clbase .clzh { padding: 2px 0 0 }
+.clbar { height: 5px; border-radius: 9px; background: var(--hover); overflow: hidden } .clbar > i { display: block; height: 100%; background: var(--ok) }
+.clbchips { display: flex; flex-wrap: wrap; gap: 6px }
+.clbchip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px 5px 7px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font: inherit; font-size: calc(13px * var(--fs)); cursor: pointer; text-align: left }
+.clbchip:hover { border-color: var(--acc) } .clbchip.dn { color: var(--muted); text-decoration: line-through }
+.clbchip .ck, .clbdone .ck { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--muted); flex: none; box-sizing: border-box } .clbchip.dn .ck, .clbdone .ck { background: var(--ok); border-color: var(--ok) }
+.clbdone { display: flex; width: 100%; align-items: center; gap: 9px; padding: 9px 14px; margin: 10px 0 0; border-radius: 12px; border: 1px solid var(--line); background: color-mix(in srgb, var(--ok) 11%, var(--panel)); color: var(--fg); font: inherit; cursor: pointer; text-align: left } .clbdone .muted { margin-left: auto; font-size: calc(12px * var(--fs)) }
+.cltrkh { margin: 0 0 6px; font-size: calc(13px * var(--fs)) }
+.cltc { display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 5px 7px; border-radius: 9px; background: var(--hover); font-size: calc(11.5px * var(--fs)); min-width: 0 } .cltc.full { background: color-mix(in srgb, var(--ok) 18%, transparent) } .cltc.fut { opacity: .5 }
+.cltq { display: flex; flex-wrap: wrap; gap: 3px } .cltq i { width: 10px; height: 10px; border-radius: 3px; border: 1px solid var(--line); background: var(--panel) } .cltq i.f { background: var(--ok); border-color: var(--ok) }
+.clph { padding: 12px 0 2px; font-weight: 600 } .clph .c { font-weight: 400; color: var(--muted); font-size: calc(12px * var(--fs)) }
 @media (max-width: 700px) { .clgrid { grid-template-columns: repeat(7, minmax(110px, 1fr)) } }
 .ctb { position: absolute; left: 0; right: 0; background: color-mix(in srgb, var(--bc) 13%, transparent); border-left: 3px solid color-mix(in srgb, var(--bc) 55%, transparent); pointer-events: none; z-index: 0; box-sizing: border-box; overflow: hidden }
 .ctbl { display: block; font-size: calc(10.5px * var(--fs)); color: color-mix(in srgb, var(--bc) 85%, var(--fg)); padding: 1px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .9 }
@@ -2333,7 +2345,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-92";
+  var APPV = "zd-app-2026-10-16-93";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -6084,7 +6096,7 @@ CREATE TABLE inbox (
     ["Погладить и разобрать бельё", "w1", 30, "all", 1], ["Почистить микроволновку", "w1", 5, "kitchen", 0], ["Разобрать холодильник: выбросить просроченное", "w1", 10, "kitchen", 0], ["Порядок в обуви в прихожей", "w1", 10, "hall", 0],
     ["Порядок в детской вместе с ребёнком", "w3", 15, "kids", 0], ["Сменить постельное бельё", "w2w", 15, "bed", 0], ["Протереть ручки и выключатели", "w2w", 10, "all", 0], ["Почистить плиту тщательно", "w2w", 20, "kitchen", 1],
     ["Помыть холодильник внутри", "m", 30, "kitchen", 1], ["Почистить духовку", "m", 30, "kitchen", 1], ["Помыть окна", "m", 45, "living", 1]];
-  function cOpt() { var o = S.opt.clean || {}; return { on: !!o.on, pid: o.pid || "", mins: Object.assign({ 1: 60, 2: 60, 3: 60, 4: 60, 5: 60, 6: 120, 0: 60 }, o.mins || {}), zones: Object.assign({}, o.zones || {}), close: o.close === "close" ? "close" : "keep" }; }
+  function cOpt() { var o = S.opt.clean || {}; return { on: !!o.on, pid: o.pid || "", mins: Object.assign({ 1: 60, 2: 60, 3: 60, 4: 60, 5: 60, 6: 120, 0: 60 }, o.mins || {}), zones: Object.assign({}, o.zones || {}), close: o.close === "close" ? "close" : "keep", blk: o.blk === "-" ? "" : o.blk || "home" }; }
   function cSet(k, v) { var o = S.opt.clean = Object.assign({}, S.opt.clean || {}); o[k] = v; optTouch(); save(); }
   function choresAll() { return live(S.chores || []).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0) || (a.created || 0) - (b.created || 0); }); }
   function chores() { return choresAll().filter(function (x) { return !x.off; }); }
@@ -6103,12 +6115,13 @@ CREATE TABLE inbox (
     return memo("ctpl", function () {
       var o = cOpt(), avail = CWD.filter(function (w) { return +o.mins[w] > 0; }); if (!avail.length) avail = CWD.slice();
       var load = {}, out = {}; CWD.forEach(function (w) { load[w] = 0; out[w] = []; });
-      var wt = function (c) { return c.fr === "w2w" ? .5 : c.fr === "m" ? .25 : 1; };
+      var wt = function (c) { return c.fr === "d" ? 0 : c.fr === "w2w" ? .5 : c.fr === "m" ? .25 : 1; };
       var put = function (c, ds) { ds.forEach(function (w) { out[w].push(c.id); load[w] += (+c.min || 0) * wt(c); }); };
       var list = chores();
       list.filter(function (c) { return (c.days || []).length; }).forEach(function (c) { put(c, c.days.filter(function (w) { return CWD.indexOf(+w) >= 0; }).map(Number)); });
       var auto = list.filter(function (c) { return !(c.days || []).length; }).sort(function (a, b) { return (CFREQ[b.fr] || [0, 1])[1] - (CFREQ[a.fr] || [0, 1])[1] || (b.heavy || 0) - (a.heavy || 0) || (+b.min || 0) - (+a.min || 0) || (a.ord || 0) - (b.ord || 0); });
       auto.forEach(function (c) {
+        if (c.fr === "d") { put(c, CWD.slice()); return; }
         var k = Math.min((CFREQ[c.fr] || [0, 1])[1], avail.length);
         if (k >= avail.length) { put(c, avail); return; }
         var best = null, bestS = 1e9, combos = [];
@@ -6136,9 +6149,31 @@ CREATE TABLE inbox (
     var w = new Date(d0).getDay(), wk = cWeekNo(d0), lg = cLog(d0) || {}, skip = lg.skip || [], post = lg.post || [];
     var ids = (cTemplate()[w] || []).filter(function (id) { var c = chore(id); if (!c || c.off) return false; if (c.fr === "w2w" && (wk + cHash(c.id)) % 2) return false; if (c.fr === "m" && (wk + cHash(c.id)) % 4) return false; return true; });
     (lg.add || []).forEach(function (id) { if (ids.indexOf(id) < 0 && chore(id)) ids.push(id); });
-    return { all: ids, on: ids.filter(function (id) { return skip.indexOf(id) < 0 && post.indexOf(id) < 0; }), skip: skip.filter(function (id) { return chore(id); }), post: post.filter(function (id) { return chore(id); }), add: lg.add || [] };
+    var on = ids.filter(function (id) { return skip.indexOf(id) < 0 && post.indexOf(id) < 0; });
+    return { all: ids, on: on, dly: on.filter(function (id) { return cIsD(chore(id)); }), pln: on.filter(function (id) { return !cIsD(chore(id)); }), skip: skip.filter(function (id) { return chore(id); }), post: post.filter(function (id) { return chore(id); }), add: lg.add || [] };
   }
   function cItem(c) { return c.n + " · " + (+c.min || 0) + " мин"; }
+  // ежедневные дела — «база»: отдельный блок, своё время суток (утро / вечер), лимит дня их не считает
+  var CWHEN = { am: "☀ Утром", any: "В течение дня", pm: "🌙 Вечером" }, CWHL = { am: "утро", pm: "вечер" }, CWHEN0 = { "ch-04": "am", "ch-01": "pm", "ch-02": "pm", "ch-03": "pm" };
+  function cIsD(c) { return !!c && c.fr === "d"; }
+  function cWhen(c) { var w = c.when || CWHEN0[c.id] || "any"; return CWHEN[w] ? w : "any"; }
+  function cResp(c) { return c.resp && personName(c.resp) ? c.resp : ""; }
+  function cZord(a, b) { var zo = Object.keys(CZONES).filter(function (z) { return z; }).concat([""]); return zo.indexOf(a.zone || "") - zo.indexOf(b.zone || ""); }
+  function cWord(a, b) { var o = { am: 0, any: 1, pm: 2 }; return o[cWhen(a)] - o[cWhen(b)] || cZord(a, b); }
+  function cMins(l) { return l.reduce(function (a, c) { return a + (+c.min || 0); }, 0); }
+  function cDel(n) { return n + " " + plural(n, ["дело", "дела", "дел"]); }
+  // отметки за день по всем задачам уборки (у каждого ответственного своя); задача закрыта целиком — сделано всё
+  function cCkDay(d0) {
+    var ix = memo("clnix", function () { var x = {}; (S.tasks || []).forEach(function (t) { if (t.cln && !t.del) (x[t.cln] = x[t.cln] || []).push(t); }); return x; }), m = {};
+    (ix[dKey(d0)] || []).forEach(function (t) { Object.assign(m, cChecked(t)); if (t.done && !t.canc) m.__all = 1; });
+    return m;
+  }
+  function cOn(ck, c) { return !!(ck.__all || ck[cItem(c)]); }
+  function cBaseDone(d0) { var pl = cPlanFor(d0); if (!pl.dly.length) return null; var ck = cCkDay(d0); return pl.dly.every(function (id) { return cOn(ck, chore(id)); }); }
+  // сколько дней подряд база сделана целиком (сегодня считается, если уже сделана)
+  function cStreak() { var d = today0(), n = 0; if (cBaseDone(d) !== true) d = addDays(d, -1); for (var i = 0; i < 120; i++, d = addDays(d, -1)) { var x = cBaseDone(d); if (x === false) break; if (x) n++; } return n; }
+  // время задачи: начало блока распорядка (по умолчанию «🏠 Дом») в этот день; длительность — по минутам дел, не длиннее блока
+  function cTime(d0, mins) { var o = cOpt(); if (!o.blk || !tbCfg().on) return null; var b = tbDay(d0).filter(function (x) { return x.cat === o.blk; })[0]; if (!b) return null; return { at: b.st, dur: Math.max(15, Math.min(Math.round((b.en - b.st) / 6e4), Math.round((mins || 15) / 5) * 5)) }; }
   function cTid(resp, d0) { return "cln-" + (resp || "me") + "-" + dKey(d0); }
   function cTaskOf(resp, d0) { var id = cTid(resp, d0); return S.tasks.filter(function (t) { return t.id === id; })[0] || null; }
   function cChecked(t) { var m = {}; if (!t || !t.body) return m; TXTD.innerHTML = t.body; [].forEach.call(TXTD.querySelectorAll("ul.todo > li"), function (li) { if (li.getAttribute("data-checked") === "1") m[li.textContent.trim()] = 1; }); return m; }
@@ -6152,10 +6187,18 @@ CREATE TABLE inbox (
       var l = groups[r] || [], t = cTaskOf(r, d0), ck = cChecked(t), mins = l.reduce(function (a, c) { return a + (+c.min || 0); }, 0);
       if (!l.length) { if (t && !t.del && !t.done && !Object.keys(ck).length) { t.del = 1; t.delAt = Date.now(); touch(t); ch = true; } return; }
       var title = "🧹 Уборка · " + mins + " мин" + (r ? " — " + personName(r) : "");
-      var body = '<ul class="todo">' + l.map(function (c) { var tx = cItem(c); return "<li" + (ck[tx] ? ' data-checked="1"' : "") + ">" + esc(tx) + "</li>"; }).join("") + '</ul><p>Пропустить или перенести дело — <a href="#clean">План уборки</a>.</p>';
+      var li = function (c) { var tx = cItem(c); return "<li" + (ck[tx] ? ' data-checked="1"' : "") + ">" + esc(tx) + "</li>"; };
+      var dl = l.filter(cIsD).sort(cWord), sl = l.filter(function (c) { return !cIsD(c); }).sort(cZord), secs = [];
+      ["am", "any", "pm"].forEach(function (w) { var x = dl.filter(function (c) { return cWhen(c) === w; }); if (x.length) secs.push(["🔁 Каждый день" + (CWHL[w] ? " · " + CWHL[w] : ""), x]); });
+      if (sl.length) secs.push(["📅 По графику", sl]);
+      var body = (secs.length > 1 ? secs.map(function (x) { return "<p><b>" + esc(x[0]) + '</b></p><ul class="todo">' + x[1].map(li).join("") + "</ul>"; }).join("") : '<ul class="todo">' + dl.concat(sl).map(li).join("") + "</ul>") + '<p>Пропустить или перенести дело — <a href="#clean">План уборки</a>.</p>';
       if (!t) { t = newTaskFrom(title, { day: d0 }); t.id = cTid(r, d0); t.at = d0; t.allday = true; t.rem = false; t.rep = ""; delete t.dur; t.tags = []; }
       else if (t.del) { if (t.purged) return; delete t.del; delete t.delAt; }
-      if (t.t === title && t.body === body && t.pid === (o.pid && proj(o.pid) ? o.pid : t.pid)) return;
+      // время ставим сами, пока задачу не передвинули вручную
+      var tm = cTime(d0, mins), auto = t.clat ? t.at === t.clat : !!t.allday && t.at === d0;
+      var tch = auto && (tm ? t.at !== tm.at || t.allday || t.dur !== tm.dur : !t.allday);
+      if (t.t === title && t.body === body && !tch && t.pid === (o.pid && proj(o.pid) ? o.pid : t.pid)) return;
+      if (tch) { if (tm) { t.at = tm.at; t.allday = false; t.dur = tm.dur; t.clat = tm.at; } else { t.at = d0; t.allday = true; delete t.dur; delete t.clat; } }
       t.t = title; t.body = body; delete t.note; t.cln = dKey(d0); t.resp = r; t.est = Math.round(mins / 60 * 100) / 100; if (o.pid && proj(o.pid)) t.pid = o.pid;
       var all = l.every(function (c) { return ck[cItem(c)]; }); if (all && !t.done) { t.done = true; t.dt = Date.now(); } else if (!all && t.done && !t.canc) { t.done = false; delete t.dt; }
       touch(t); ch = true;
@@ -6184,7 +6227,16 @@ CREATE TABLE inbox (
     touch(lg); if (cOpt().on) { cleanSync(d0); var nk = dKey(addDays(d0, 1)); if ((how === "post" || how === "back") && (S.tasks || []).some(function (t) { return t.cln === nk && !t.del; })) cleanSync(addDays(d0, 1)); } save(); render();
     if (how !== "back") toastUndo(how === "skip" ? "«" + c.n + "» — пропущено сегодня" : "«" + c.n + "» — перенесено на завтра", function () { cMove(id, d0, "back"); });
   }
-  var CLTAB = "", CLWK = 0;
+  // «Лёгкий день»: все несделанные дела по графику — на завтра; ежедневные остаются
+  function cLight(d0) {
+    var ck = cCkDay(d0), ids = cPlanFor(d0).pln.filter(function (id) { return !cOn(ck, chore(id)); });
+    if (!ids.length) { toast("Дела по графику на сегодня уже сделаны"); return; }
+    var lg = cLog(d0, true), nx = cLog(addDays(d0, 1), true), not = function (x) { return ids.indexOf(x) < 0; };
+    var resync = function () { if (!cOpt().on) return; cleanSync(d0); var nk = dKey(addDays(d0, 1)); if ((S.tasks || []).some(function (t) { return t.cln === nk && !t.del; })) cleanSync(addDays(d0, 1)); };
+    lg.post = (lg.post || []).filter(not).concat(ids); nx.add = (nx.add || []).filter(not).concat(ids); touch(lg); touch(nx); resync(); save(); render();
+    toastUndo("🪶 Лёгкий день: " + cDel(ids.length) + " по графику — на завтра", function () { lg.post = (lg.post || []).filter(not); nx.add = (nx.add || []).filter(not); touch(lg); touch(nx); resync(); });
+  }
+  var CLTAB = "", CLWK = 0, CLBOPEN = false;
   function clTab() { return CLTAB || LS.get("zd-cltab") || "today"; }
   function vClean() {
     if (!(S.chores || []).length) cleanSeed();
@@ -6196,22 +6248,36 @@ CREATE TABLE inbox (
     return h;
   }
   function clTodayHTML() {
-    var d0 = today0(), o = cOpt(), pl = cPlanFor(d0), cap = +o.mins[new Date(d0).getDay()] || 0, mins = 0, h = "";
-    var groups = {}; pl.on.forEach(function (id) { var c = chore(id); mins += +c.min || 0; var r = c.resp && personName(c.resp) ? c.resp : ""; (groups[r] = groups[r] || []).push(c); });
-    var z = o.zones[new Date(d0).getDay()];
-    h += '<div class="cltop"><b>' + esc(new Date(d0).toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" })) + "</b>" + (z ? ' <span class="muted">· зона дня: ' + esc(CZONES[z]) + "</span>" : "") + '<span class="muted">' + mins + " мин" + (cap ? " из " + cap : "") + "</span></div>";
+    var d0 = today0(), o = cOpt(), pl = cPlanFor(d0), cap = +o.mins[new Date(d0).getDay()] || 0, ck = cCkDay(d0), h = "";
+    var dl = pl.dly.map(chore).sort(cWord), sl = pl.pln.map(chore), dm = cMins(dl), sm = cMins(sl), z = o.zones[new Date(d0).getDay()], tk = (S.tasks || []).filter(function (t) { return t.cln === dKey(d0) && !t.del && !t.allday && t.at; })[0];
+    h += '<div class="cltop"><b>' + esc(new Date(d0).toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" })) + "</b>" + (z ? ' <span class="muted">· зона дня: ' + esc(CZONES[z]) + "</span>" : "") + (tk ? ' <span class="muted">· задача в ' + hm(tk.at) + "</span>" : "") + '<span class="muted">' + (dl.length ? "база " + dm + " мин · " : "") + "по графику " + sm + " мин" + (cap ? " из " + cap : "") + "</span></div>";
     if (!pl.on.length) h += '<p class="empty">На сегодня дел по уборке нет.</p>';
+    if (dl.length) {
+      var nd = dl.filter(function (c) { return cOn(ck, c); }).length, all = nd === dl.length;
+      if (all && !CLBOPEN) { var st = cStreak(); h += '<button type="button" class="clbdone" data-a="clbopen"><span class="ck"></span><span>База на сегодня сделана' + (st > 1 ? " · " + st + " " + plural(st, ["день", "дня", "дней"]) + " подряд" : "") + '</span><span class="muted">показать</span></button>'; }
+      else {
+        h += '<div class="gsheet clbase"><div class="clsh"><b>🔁 Каждый день</b><span class="muted">база · ' + cDel(dl.length) + " · " + dm + ' мин</span><span class="clsn muted">' + nd + " из " + dl.length + (all ? ' · <a href="#" data-a="clbopen">свернуть</a>' : "") + '</span></div><div class="clbar"><i style="width:' + Math.round(nd / dl.length * 100) + '%"></i></div>';
+        var ws = ["am", "any", "pm"].filter(function (w) { return dl.some(function (c) { return cWhen(c) === w; }); });
+        ws.forEach(function (w) {
+          h += (ws.length > 1 ? '<div class="clzh">' + CWHEN[w] + "</div>" : "") + '<div class="clbchips">' + dl.filter(function (c) { return cWhen(c) === w; }).map(function (c) {
+            var on = cOn(ck, c);
+            return '<button type="button" class="clbchip' + (on ? " dn" : "") + '" data-a="clchk" data-id="' + c.id + '" aria-pressed="' + on + '" title="' + (+c.min || 0) + " мин · " + esc(CZONES[c.zone] || "") + '"><span class="ck"></span>' + esc(c.n) + (cResp(c) ? ' <span class="muted">· ' + esc(personName(c.resp)) + "</span>" : "") + "</button>";
+          }).join("") + "</div>";
+        });
+        h += "</div>";
+      }
+    }
+    var left = sl.some(function (c) { return !cOn(ck, c); });
+    h += '<div class="clsh clsh2"><b>📅 По графику на сегодня</b><span class="muted">' + cDel(sl.length) + " · " + sm + " мин" + (cap ? " из " + cap : "") + "</span>" + (left ? '<button type="button" class="btn sm clsn" data-a="cllight" title="Все несделанные дела по графику — на завтра; ежедневные остаются">🪶 Лёгкий день</button>' : "") + "</div>";
+    if (!sl.length && pl.on.length) h += '<p class="muted">' + (pl.post.length ? "Дела по графику перенесены на завтра — сегодня только база." : "Сегодня по графику ничего — только база.") + "</p>";
+    var groups = {}; sl.forEach(function (c) { var r = cResp(c); (groups[r] = groups[r] || []).push(c); });
     Object.keys(groups).forEach(function (r) {
-      var t = cTaskOf(r, d0), ck = cChecked(t);
-      var zo2 = Object.keys(CZONES).filter(function (z) { return z; }).concat([""]), lastZ = null;
-      groups[r].sort(function (a, b) { return zo2.indexOf(a.zone || "") - zo2.indexOf(b.zone || ""); });
+      var lastZ = null; groups[r].sort(cZord);
       h += (Object.keys(groups).length > 1 || r ? '<h3 class="clwho">👤 ' + esc(personName(r)) + "</h3>" : "") + '<div class="gsheet cllist">' + groups[r].map(function (c) {
         var zh = (c.zone || "") !== lastZ ? '<div class="clzh">' + esc(c.zone ? CZONES[c.zone] || "Без зоны" : "Без зоны") + "</div>" : ""; lastZ = c.zone || "";
-        return zh + (function () {
-        var on = !!ck[cItem(c)], mv = pl.add.indexOf(c.id) >= 0;
-        return '<div class="clrow' + (on ? " dn" : "") + '"><button type="button" class="ck" data-a="clchk" data-id="' + c.id + '" aria-label="' + (on ? "Вернуть" : "Сделано") + '"></button><span class="clt">' + esc(c.n) + '<small class="muted">' + (+c.min || 0) + " мин · " + esc(CZONES[c.zone] || "") + (mv ? " · перенесено со вчера" : "") + "</small></span>" +
+        var on = cOn(ck, c), mv = pl.add.indexOf(c.id) >= 0;
+        return zh + '<div class="clrow' + (on ? " dn" : "") + '"><button type="button" class="ck" data-a="clchk" data-id="' + c.id + '" aria-label="' + (on ? "Вернуть" : "Сделано") + '"></button><span class="clt">' + esc(c.n) + '<small class="muted">' + (+c.min || 0) + " мин · " + esc(CZONES[c.zone] || "") + (c.heavy ? " · тяжёлое" : "") + (mv ? " · перенесено со вчера" : "") + "</small></span>" +
           (on ? "" : '<button type="button" class="btn sm" data-a="clskip" data-id="' + c.id + '" title="Сегодня не делать">⏭ Пропустить</button><button type="button" class="btn sm" data-a="clpost" data-id="' + c.id + '" title="Перенести на завтра">→ На завтра</button>') + "</div>";
-        })();
       }).join("") + "</div>";
     });
     var off = pl.skip.map(function (id) { return [id, "пропущено"]; }).concat(pl.post.map(function (id) { return [id, "перенесено на завтра"]; }));
@@ -6220,14 +6286,23 @@ CREATE TABLE inbox (
     return h;
   }
   function clWeekHTML() {
-    var o = cOpt(), m0 = addDays(monday(Date.now()), 7 * CLWK), t0 = today0();
-    var h = '<div class="r clwnav"><button type="button" class="btn sm" data-a="clwk" data-x="-1">‹</button><b>' + esc(new Date(m0).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + " – " + new Date(addDays(m0, 6)).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })) + '</b><button type="button" class="btn sm" data-a="clwk" data-x="1">›</button>' + (CLWK ? '<button type="button" class="btn sm" data-a="clwk" data-x="0">Эта неделя</button>' : "") + '<span class="muted">Дела «раз в 2 недели» и «раз в месяц» чередуются по неделям.</span></div><div class="clgrid">';
-    for (var i = 0; i < 7; i++) {
-      var d0 = addDays(m0, i), w = new Date(d0).getDay(), pl = cPlanFor(d0), cap = +o.mins[w] || 0, mins = pl.on.reduce(function (a, id) { return a + (+chore(id).min || 0); }, 0);
-      h += '<div class="clday' + (d0 === t0 ? " today" : "") + (!cap ? " offd" : "") + '"><div class="cldh"><b>' + CWDN[w] + " " + new Date(d0).getDate() + "</b>" + (o.zones[w] ? '<span class="muted">' + esc(CZONES[o.zones[w]]) + "</span>" : "") + '</div><div class="cldl' + (cap && mins > cap ? " over" : "") + '">' + mins + (cap ? " / " + cap : "") + " мин</div>" +
-        pl.on.map(function (id) { var c = chore(id); return '<a href="#" class="clchip" data-a="clopen" data-id="' + c.id + '" title="' + esc(CFREQ[c.fr] ? CFREQ[c.fr][0] : "") + " · " + (+c.min || 0) + ' мин">' + esc(c.n) + (c.resp && personName(c.resp) ? ' <span class="muted">· ' + esc(personName(c.resp)) + "</span>" : "") + "</a>"; }).join("") + "</div>";
+    var o = cOpt(), m0 = addDays(monday(Date.now()), 7 * CLWK), t0 = today0(), i, d0, w, pl;
+    var h = '<div class="r clwnav"><button type="button" class="btn sm" data-a="clwk" data-x="-1">‹</button><b>' + esc(new Date(m0).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + " – " + new Date(addDays(m0, 6)).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })) + '</b><button type="button" class="btn sm" data-a="clwk" data-x="1">›</button>' + (CLWK ? '<button type="button" class="btn sm" data-a="clwk" data-x="0">Эта неделя</button>' : "") + '<span class="muted">Дела «раз в 2 недели» и «раз в месяц» чередуются по неделям.</span></div>';
+    var dAll = chores().filter(cIsD);
+    if (dAll.length) h += '<div class="cltrkh"><b>🔁 Каждый день</b> <span class="muted">' + cDel(dAll.length) + " · " + cMins(dAll) + " мин в день — отмечено по дням</span></div>";
+    h += '<div class="clgrid">';
+    if (dAll.length) for (i = 0; i < 7; i++) {
+      d0 = addDays(m0, i); pl = cPlanFor(d0);
+      var ck = d0 <= t0 ? cCkDay(d0) : {}, ds = pl.dly.map(chore).sort(cWord), nd = ds.filter(function (c) { return cOn(ck, c); }).length;
+      h += '<div class="cltc' + (d0 > t0 ? " fut" : ds.length && nd === ds.length ? " full" : "") + '" title="' + esc(ds.map(function (c) { return (cOn(ck, c) ? "✓ " : "○ ") + c.n; }).join("\n")) + '"><span class="cltq">' + ds.map(function (c) { return '<i class="' + (cOn(ck, c) ? "f" : "") + '"></i>'; }).join("") + "</span>" + (d0 > t0 || !ds.length ? "" : '<span class="muted">' + nd + "/" + ds.length + "</span>") + "</div>";
     }
-    return h + '</div><p class="muted">Нажмите на дело, чтобы поправить частоту, время, зону или закрепить его за своими днями.</p>';
+    for (i = 0; i < 7; i++) {
+      d0 = addDays(m0, i); w = new Date(d0).getDay(); pl = cPlanFor(d0);
+      var cap = +o.mins[w] || 0, sl = pl.pln.map(chore), mins = cMins(sl);
+      h += '<div class="clday' + (d0 === t0 ? " today" : "") + (!cap ? " offd" : "") + '"><div class="cldh"><b>' + CWDN[w] + " " + new Date(d0).getDate() + "</b>" + (o.zones[w] ? '<span class="muted">' + esc(CZONES[o.zones[w]]) + "</span>" : "") + '</div><div class="cldl' + (cap && mins > cap ? " over" : "") + '">' + mins + (cap ? " / " + cap : "") + " мин</div>" +
+        sl.map(function (c) { return '<a href="#" class="clchip" data-a="clopen" data-id="' + c.id + '" title="' + esc(CFREQ[c.fr] ? CFREQ[c.fr][0] : "") + " · " + (+c.min || 0) + ' мин">' + esc(c.n) + (cResp(c) ? ' <span class="muted">· ' + esc(personName(c.resp)) + "</span>" : "") + "</a>"; }).join("") + "</div>";
+    }
+    return h + '</div><p class="muted">Минуты дня — только дела по графику (ежедневная база считается отдельно). Нажмите на дело, чтобы поправить частоту, время, зону или закрепить его за своими днями.</p>';
   }
   var CLOPEN = "";
   function clPoolHTML() {
@@ -6236,6 +6311,7 @@ CREATE TABLE inbox (
       var ds = c.days || [];
       return '<div class="clp' + (c.off ? " off" : "") + (CLOPEN === c.id ? " open" : "") + '" data-ch="' + c.id + '"><input class="inp clpn" data-chf="n" data-id="' + c.id + '" value="' + esc(c.n) + '" aria-label="Название дела">' +
         '<button type="button" class="btn sm" data-a="clpick" data-k="fr" data-id="' + c.id + '">' + esc((CFREQ[c.fr] || CFREQ.w1)[0]) + ' ▾</button>' +
+        (cIsD(c) ? '<button type="button" class="btn sm" data-a="clpick" data-k="when" data-id="' + c.id + '">' + CWHEN[cWhen(c)] + " ▾</button>" : "") +
         '<span class="r clpm"><input class="inp" type="number" min="1" max="240" step="5" data-chf="min" data-id="' + c.id + '" value="' + (+c.min || "") + '" aria-label="Минут"><span class="muted">мин</span></span>' +
         '<button type="button" class="btn sm" data-a="clpick" data-k="zone" data-id="' + c.id + '">' + esc(CZONES[c.zone || ""] || "любая") + ' ▾</button>' +
         '<button type="button" class="btn sm" data-a="clpick" data-k="resp" data-id="' + c.id + '">👤 ' + esc(personName(c.resp) || "Я") + ' ▾</button>' +
@@ -6243,7 +6319,10 @@ CREATE TABLE inbox (
         '<span class="seg cldays" title="Свои дни (пусто — авто)">' + CWD.map(function (w) { return '<button type="button" data-a="clday" data-id="' + c.id + '" data-v="' + w + '" class="' + (ds.indexOf(w) >= 0 ? "on" : "") + '">' + CWDN[w] + "</button>"; }).join("") + "</span>" +
         '<button type="button" class="ibtn" data-a="cloff" data-id="' + c.id + '" title="' + (c.off ? "Включить" : "Временно не планировать") + '">' + (c.off ? "▶" : "⏸") + '</button><button type="button" class="ibtn" data-a="cldel" data-id="' + c.id + '" title="Удалить дело">🗑</button></div>';
     };
-    var zo = Object.keys(CZONES).filter(function (z) { return z; }).concat([""]), all = choresAll();
+    var zo = Object.keys(CZONES).filter(function (z) { return z; }).concat([""]), dly = choresAll().filter(cIsD).sort(cWord), all = choresAll().filter(function (c) { return !cIsD(c); });
+    var wk = Math.round(all.filter(function (c) { return !c.off; }).reduce(function (a, c) { return a + (+c.min || 0) * (c.fr === "w2w" ? .5 : c.fr === "m" ? .25 : (CFREQ[c.fr] || [0, 1])[1]); }, 0) / 5) * 5;
+    if (dly.length) h += '<div class="clph">🔁 Каждый день <span class="c">' + cDel(dly.length) + " · " + cMins(dly.filter(function (c) { return !c.off; })) + " мин в день</span></div>" + dly.map(row).join("");
+    h += '<div class="clph">📅 По графику <span class="c">' + cDel(all.length) + " · ≈ " + (wk >= 60 ? Math.floor(wk / 60) + " ч " + (wk % 60 ? wk % 60 + " мин " : "") : wk + " мин ") + "в неделю</span></div>";
     h += zo.map(function (z) { var l = all.filter(function (c) { return (c.zone || "") === z || (z === "" && !CZONES[c.zone || ""]); }); return l.length ? '<div class="clzh">' + esc(z ? CZONES[z] : "Без зоны") + ' <span class="c">' + l.length + "</span></div>" + l.map(row).join("") : ""; }).join("") + "</div>";
     return h + '<div class="hadd"><span>＋</span><input type="text" class="inp" id="clnew" placeholder="Новое дело — напишите и нажмите Enter" aria-label="Новое дело"></div>';
   }
@@ -6251,13 +6330,17 @@ CREATE TABLE inbox (
     var o = cOpt(), pj = o.pid && proj(o.pid);
     var h = '<div class="card clset"><div class="wcr"><span>План</span><div class="seg"><button type="button" data-a="clon" class="' + (o.on ? "on" : "") + '">Включён</button><button type="button" data-a="cloff2" class="' + (o.on ? "" : "on") + '">Выключен</button></div></div>';
     h += '<div class="wcr"><span>Проект для задач уборки</span><button type="button" class="btn sm" data-a="clpick" data-k="pid" data-id="">' + (pj ? esc(picon(pj) + " " + pj.n) : "📥 Входящие (без проекта)") + " ▾</button></div>";
+    var bc = cOpt().blk && tbCfg().cats.filter(function (x) { return x.id === cOpt().blk; })[0];
+    h += '<div class="wcr"><span>Время задачи</span><button type="button" class="btn sm" data-a="clpick" data-k="blk" data-id="">' + (bc ? esc(bc.i + " В блок «" + bc.n + "»") : "Весь день, без времени") + " ▾</button></div>" + (bc ? '<p class="muted">Задача «🧹 Уборка» встаёт на начало этого блока распорядка дня' + (tbCfg().on ? "" : " (сейчас распорядок выключен — задача на весь день)") + ". Передвинули её вручную — время больше не трогается.</p>" : "");
     h += '<div class="wcr"><span>Невыполненное за прошлые дни</span><div class="seg"><button type="button" data-a="clclose" data-v="keep" class="' + (o.close === "keep" ? "on" : "") + '">оставлять</button><button type="button" data-a="clclose" data-v="close" class="' + (o.close === "close" ? "on" : "") + '">закрывать как отменённое</button></div></div>';
-    h += '<div class="wcr"><span>Дни недели</span><div class="cldset">' + CWD.map(function (w) { return '<div class="r"><b class="cldn">' + CWDN[w] + '</b><input class="inp" type="number" min="0" max="480" step="5" data-cldm="' + w + '" value="' + (+o.mins[w] || 0) + '" aria-label="Минут в ' + CWDN[w] + '"><span class="muted">мин</span><button type="button" class="btn sm" data-a="clpick" data-k="dzone" data-id="' + w + '">' + (o.zones[w] ? esc(CZONES[o.zones[w]]) : "зона: любая") + " ▾</button></div>"; }).join("") + '</div></div><p class="muted">0 минут — в этот день уборки нет. Зона дня притягивает дела этой зоны (например, «Пн — кухня»).</p>';
+    h += '<div class="wcr"><span>Дни недели</span><div class="cldset">' + CWD.map(function (w) { return '<div class="r"><b class="cldn">' + CWDN[w] + '</b><input class="inp" type="number" min="0" max="480" step="5" data-cldm="' + w + '" value="' + (+o.mins[w] || 0) + '" aria-label="Минут в ' + CWDN[w] + '"><span class="muted">мин</span><button type="button" class="btn sm" data-a="clpick" data-k="dzone" data-id="' + w + '">' + (o.zones[w] ? esc(CZONES[o.zones[w]]) : "зона: любая") + " ▾</button></div>"; }).join("") + '</div></div><p class="muted">Минуты — лимит на дела по графику; ежедневная база идёт сверх него. 0 минут — в этот день только ежедневные дела. Зона дня притягивает дела этой зоны (например, «Пн — кухня»).</p>';
     h += '<div class="r"><button type="button" class="btn sm" data-a="clseed">↺ Вернуть стартовые дела</button></div></div>';
     return h;
   }
   // меню выбора: частота, зона, ответственный, проект плана, зона дня
   function clPickMenu(k, id) {
+    if (k === "when") return Object.keys(CWHEN).map(function (w) { return { c: w, i: cWhen(chore(id) || {}) === w ? "✓" : "", l: CWHEN[w] }; });
+    if (k === "blk") return [{ c: "~", i: cOpt().blk ? "" : "✓", l: "Весь день, без времени" }].concat(tbCfg().cats.map(function (x) { return { c: x.id, i: cOpt().blk === x.id ? "✓" : "", l: x.i + " В блок «" + x.n + "»" }; }));
     if (k === "fr") return Object.keys(CFREQ).map(function (f) { return { c: f, i: (chore(id) || {}).fr === f ? "✓" : "", l: CFREQ[f][0] }; });
     if (k === "zone" || k === "dzone") { var cur = k === "zone" ? (chore(id) || {}).zone || "" : cOpt().zones[id] || ""; return Object.keys(CZONES).map(function (z) { return { c: z || "~", i: cur === z ? "✓" : "", l: z ? CZONES[z] : "любая" }; }); }
     if (k === "resp") return people().map(function (p) { return { c: p.id || "~", i: ((chore(id) || {}).resp || "") === p.id ? "✓" : "", l: "👤 " + p.n }; });
@@ -6267,6 +6350,7 @@ CREATE TABLE inbox (
   function clPick(k, id, c) {
     var v = c === "~" ? "" : c;
     if (k === "pid") { cSet("pid", v); if (cOpt().on) { cleanSync(today0()); save(); } render(); return; }
+    if (k === "blk") { cSet("blk", v || "-"); if (cOpt().on) { cleanSync(today0()); save(); } render(); return; }
     if (k === "dzone") { var z = Object.assign({}, cOpt().zones); if (v) z[id] = v; else delete z[id]; cSet("zones", z); DV++; render(); return; }
     var ch = chore(id); if (!ch) return; ch[k] = v; touch(ch); save(); if (cOpt().on) { cleanSync(today0()); save(); } render();
   }
@@ -6279,6 +6363,8 @@ CREATE TABLE inbox (
       case "clclose": cSet("close", el.dataset.v); render(); return true;
       case "clwk": CLWK = el.dataset.x === "0" ? 0 : CLWK + (+el.dataset.x || 0); render(); return true;
       case "clchk": cToggle(id, today0()); return true;
+      case "clbopen": CLBOPEN = !CLBOPEN; render(); return true;
+      case "cllight": cLight(today0()); return true;
       case "clskip": cMove(id, today0(), "skip"); return true;
       case "clpost": cMove(id, today0(), "post"); return true;
       case "clback": cMove(id, today0(), "back"); return true;
@@ -6884,8 +6970,9 @@ CREATE TABLE inbox (
       "<b>Дела</b> — пул поддерживающей уборки (сразу есть 25 типичных дел, всё правится): название, частота (каждый день, 2–3 раза в неделю, раз в неделю, раз в 2 недели, раз в месяц), минуты, зона (кухня, ванная, спальня…), ответственный, 💪 тяжёлое. Кнопки дней Пн…Вс закрепляют дело за своими днями; без них — раскладка сама. ⏸ — временно не планировать.",
       "<b>Настройки</b>: проект, куда попадают задачи уборки; минуты на уборку в каждый день недели (0 — день без уборки); зона дня («Пн — кухня») — дела этой зоны тянутся в её день; что делать с невыполненным за прошлые дни — оставлять или закрывать как отменённое.",
       "<b>Раскладка</b> — и по зонам, и по времени: дело встаёт в день своей зоны, лимит минут дня по возможности не превышается, повторы разносятся по неделе (2 раза — Пн и Чт, а не подряд), тяжёлые — в дни с большим запасом. Дела «раз в 2 недели» и «раз в месяц» чередуются по неделям. Вкладка <b>Неделя</b> показывает сетку и загрузку каждого дня; нажмите на дело — откроются его настройки.",
-      "<b>Каждый день</b> появляется одна задача «🧹 Уборка · N мин» с чек-листом дел — в выбранном проекте. Если у дел разные ответственные, задача у каждого своя.",
-      "<b>Сегодня</b>: отметить дело сделанным (отметка ставится и в чек-листе задачи), <b>⏭ Пропустить</b> — сегодня не нужно, <b>→ На завтра</b> — перенести. Передумали — «Вернуть на сегодня» внизу или «Вернуть» в подсказке."]));
+      "<b>Каждый день</b> появляется одна задача «🧹 Уборка · N мин» с чек-листом дел — в выбранном проекте. В чек-листе два раздела: <b>🔁 Каждый день</b> (утро и вечер — отдельно) и <b>📅 По графику</b>. Если у дел разные ответственные, задача у каждого своя. Если включён распорядок дня, задача встаёт на начало блока «🏠 Дом» (в настройках плана — другой блок или «весь день»).",
+      "<b>Ежедневные дела — «база»</b> (частота «Каждый день»): отдельный блок сверху, у каждого — утро, вечер или в течение дня. Лимит минут дня их не считает. Всё отмечено — блок сворачивается в строку «База сделана · N дней подряд». На вкладке <b>Неделя</b> над сеткой — трекер базы по дням, а в самой сетке только дела по графику.",
+      "<b>Сегодня</b>: отметить дело сделанным (отметка ставится и в чек-листе задачи), <b>⏭ Пропустить</b> — сегодня не нужно, <b>→ На завтра</b> — перенести. <b>🪶 Лёгкий день</b> — все несделанные дела по графику разом на завтра, база остаётся. Передумали — «Вернуть на сегодня» внизу или «Вернуть» в подсказке."]));
     h += sec("routine", "Распорядок дня: блоки времени", ul([
       "<b>Блоки времени</b> — сон, задачи, еда, дом, развитие, бизнес, спорт, отдых (категории свои: название, цвет, значок). Это не задачи, а распорядок: какое время на что отведено.",
       "Два шаблона — <b>«Будни»</b> и <b>«Выходные»</b>: «Настройки» → «Общие» → «Распорядок дня». Блок — категория и время «с — по»; сон через полночь (23:00–07:00) тоже можно. Полоска сверху показывает сутки целиком. «⇄ Скопировать» переносит шаблон в другой.",
