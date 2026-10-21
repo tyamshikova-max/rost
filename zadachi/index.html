@@ -452,6 +452,14 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .dphab .htoday { margin: 2px 0 0 } .dptopbox.dphab a::before { content: none } .dptopbox.dphab .htoday > a { color: var(--muted) }
 .dptopbox a.mv { color: var(--muted) } .dptopbox a.mv::before { content: none } .dptopbox small { color: var(--muted) } .tmvr { margin-top: 4px }
 .dprow.mv .dpt { color: var(--muted) } .dprow.mv .dpstar { color: var(--muted) } .jtop .mv { color: var(--muted) } .wdtmv { flex: none; width: 18px; text-align: center; color: var(--muted) }
+.rqsaved { gap: 6px; flex-wrap: wrap; align-items: center; margin: 4px 0 10px } .rqbuild { display: grid; gap: 10px; padding: 12px 14px; margin: 0 0 12px }
+.rqfs { display: flex; flex-wrap: wrap; gap: 8px 12px } .rqf { display: grid; gap: 2px } .rqf small { font-size: calc(11.5px * var(--fs)); color: var(--muted) } .rqdates { gap: 8px; align-items: center } .rqsub { display: flex; gap: 6px; align-items: center; font-size: calc(13px * var(--fs)) }
+.rqsave { gap: 6px; flex-wrap: wrap } .rqsave #rqname { flex: 1 1 260px; min-width: 0 } .rqnote { margin: 0 0 8px; font-size: calc(12.5px * var(--fs)) }
+.rqchart { padding: 12px 14px; margin: 0 0 12px } .rqbars { display: grid; gap: 6px } .rqbar { display: grid; grid-template-columns: minmax(90px, 34%) minmax(40px, 1fr) auto; gap: 8px; align-items: center; font-size: calc(13px * var(--fs)) } .rql { overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .rqb { height: 10px; border-radius: 5px; background: var(--hover); overflow: hidden } .rqb > i { display: block; height: 100%; border-radius: 5px; background: var(--acc) } .rqv { font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right }
+.rqtw { overflow-x: auto; margin: 0 0 12px } .rqt { border-collapse: collapse; width: 100%; font-size: calc(13px * var(--fs)); font-variant-numeric: tabular-nums; background: var(--panel); border-radius: 10px }
+.rqt th, .rqt td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap } .rqt th:first-child { text-align: left; white-space: normal; min-width: 140px } .rqt thead th { color: var(--muted); font-weight: 500; font-size: calc(12px * var(--fs)) } .rqt tfoot td, .rqt tfoot th { font-weight: 700 } .rqt td.rqc { cursor: pointer } .rqt td.rqc:hover { background: var(--hover) }
+.rqdrill { display: grid; gap: 0; padding: 10px 14px; margin: 0 0 12px } .rqdr { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; gap: 10px; padding: 5px 0; border-top: 1px solid var(--line); font-size: calc(13px * var(--fs)) } .rqdr a { color: var(--fg); text-decoration: none } .rqdr a:hover { text-decoration: underline }
+.rqw { display: grid; gap: 8px } .rqwh { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap } .rqwh b { font-size: calc(20px * var(--fs)) } .rqw .rqtw { margin: 0 }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -1929,7 +1937,7 @@ CREATE TABLE inbox (
     if (!ok && Date.now() - SAVEWARN > 60000) { SAVEWARN = Date.now(); toast("⚠ В браузере не хватает места для данных — они сохраняются на Яндекс Диск, но обратитесь к разработчику"); }
   }
   var S = (function () { try { var raw = LS.get("zd-state") || "null"; if (raw.charCodeAt(0) === 1) raw = lzUnpack(raw); return JSON.parse(raw); } catch (e) { return null; } })() || {};
-  S.recipes = S.recipes || []; S.menus = S.menus || []; S.prods = S.prods || []; S.chores = S.chores || []; S.chlog = S.chlog || []; S.tblog = S.tblog || []; S.sops = S.sops || []; S.bpers = S.bpers || []; S.bwk = S.bwk || []; S.bregs = S.bregs || []; S.chq = S.chq || []; S.ckr = S.ckr || []; S.dplaces = S.dplaces || []; S.dout = S.dout || []; S.debts = S.debts || []; S.dbal = S.dbal || []; S.wish = S.wish || []; S.nsd = S.nsd || []; S.mdiary = S.mdiary || []; S.fck = S.fck || []; S.env = S.env || []; S.pantry = S.pantry || []; S.kchk = S.kchk || []; S.kwaste = S.kwaste || [];
+  S.recipes = S.recipes || []; S.menus = S.menus || []; S.prods = S.prods || []; S.chores = S.chores || []; S.chlog = S.chlog || []; S.tblog = S.tblog || []; S.sops = S.sops || []; S.bpers = S.bpers || []; S.bwk = S.bwk || []; S.bregs = S.bregs || []; S.chq = S.chq || []; S.ckr = S.ckr || []; S.dplaces = S.dplaces || []; S.dout = S.dout || []; S.debts = S.debts || []; S.dbal = S.dbal || []; S.wish = S.wish || []; S.nsd = S.nsd || []; S.mdiary = S.mdiary || []; S.fck = S.fck || []; S.env = S.env || []; S.pantry = S.pantry || []; S.kchk = S.kchk || []; S.kwaste = S.kwaste || []; S.reports = S.reports || [];
   S.v = 2; S.tasks = S.tasks || []; S.projects = S.projects || []; S.tags = S.tags || []; S.filters = S.filters || []; S.sprints = S.sprints || []; S.comments = S.comments || []; S.habits = S.habits || []; S.hlog = S.hlog || []; S.acts = S.acts || []; S.tpls = S.tpls || []; S.flags = S.flags || []; S.notes = S.notes || []; S.nsecs = S.nsecs || []; S.ntags = S.ntags || []; S.boards = S.boards || []; S.goals = S.goals || []; S.days = S.days || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
   var VIEWS = (function () { try { return JSON.parse(LS.get("zd-views") || "{}") || {}; } catch (e) { return {}; } })();
   function save(quiet) { try { unScan(); } catch (er) { /* отмена не мешает сохранению */ } try { histScan(); } catch (er) { /* история не мешает сохранению */ } if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); DV++; saveLocal(); if (!quiet) { SYNC.later(); SRV.later(); } }
@@ -2479,7 +2487,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-133";
+  var APPV = "zd-app-2026-10-16-134";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -2518,7 +2526,7 @@ CREATE TABLE inbox (
     (b || []).forEach(function (x) { var y = m[x.id]; if (!y || (x.upd || 0) > (y.upd || 0)) m[x.id] = x; });
     return Object.keys(m).map(function (k) { return m[k]; });
   }
-  var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "flags", "notes", "nsecs", "ntags", "boards", "goals", "days", "recipes", "menus", "prods", "chores", "chlog", "tblog", "sops", "bpers", "bwk", "bregs", "chq", "ckr", "dplaces", "dout", "debts", "dbal", "wish", "nsd", "mdiary", "fck", "env", "pantry", "kchk", "kwaste"];
+  var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "flags", "notes", "nsecs", "ntags", "boards", "goals", "days", "recipes", "menus", "prods", "chores", "chlog", "tblog", "sops", "bpers", "bwk", "bregs", "chq", "ckr", "dplaces", "dout", "debts", "dbal", "wish", "nsd", "mdiary", "fck", "env", "pantry", "kchk", "kwaste", "reports"];
   function snapshot() { return { v: 2, tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, notes: S.notes, nsecs: S.nsecs, ntags: S.ntags, boards: S.boards, opt: S.opt }; }
   var SYNC = {
     st: "off", at: 0, msg: "", t: null, busy: false, seen: {}, lastPush: 0,
@@ -2913,9 +2921,9 @@ CREATE TABLE inbox (
     var h = hh !== undefined ? String(hh) : decodeURIComponent((location.hash || "").slice(1)), m;
     if ((m = h.match(/^task-(.+)$/))) return { v: "task", a: m[1] };
     if ((m = h.match(/^share-(.+)$/))) return { v: "share", a: m[1] };
-    if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board|goal|menu|recipe|shop|rimp)-(.+)$/))) return { v: m[1], a: m[2] };
+    if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board|goal|menu|recipe|shop|rimp|rpt)-(.+)$/))) return { v: m[1], a: m[2] };
     if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
-    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch", "menu", "menunew", "recipes", "rhave", "prods", "clean", "budget", "kitchen"].indexOf(h) >= 0) return { v: h, a: "" };
+    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch", "menu", "menunew", "recipes", "rhave", "prods", "clean", "budget", "kitchen", "rpt"].indexOf(h) >= 0) return { v: h, a: "" };
     if ((m = h.match(/^daily-?(.*)$/))) return { v: "daily", a: m[1] };
     if ((m = h.match(/^report-?(.*)$/))) return { v: "report", a: m[1] || "w0" };
     return { v: "today", a: "" };
@@ -2942,7 +2950,7 @@ CREATE TABLE inbox (
   function go(h) { if (location.hash.slice(1) === h) route(); else location.hash = h; }
   /* ---------- вкладки открытых страниц (как в многооконной программе); хранятся на этом устройстве ---------- */
   var PTMAX = 8, PTCUR = "", PTJUMP = "", PTDRAG = null;
-  var PTICO = { kitchen: "food", rhave: "food", rimp: "food", budget: "budget", clean: "clean", inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
+  var PTICO = { rpt: "stats", kitchen: "food", rhave: "food", rimp: "food", budget: "budget", clean: "clean", inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
   var PTNAME = { done: "Сделано", tarch: "Архив задач", trash: "Корзина", archive: "Архив проектов", templates: "Шаблоны", settings: "Настройки", help: "Справка", report: "Отчёт", recipes: "Рецепты", prods: "Продукты и цены", menunew: "Новое меню", rhave: "Из того, что есть", rimp: "Рецепт по ссылке", share: "Поделились", notes: "Заметки", sprints: "Все спринты", search: "Поиск" };
   function ptabsOn() { return innerWidth > 860 && LS.get("zd-ptabs") !== "off"; } // только на компьютере
   function ptabs() { try { var a = JSON.parse(LS.get("zd-tabs") || "[]"); return Array.isArray(a) ? a.filter(function (t) { return t && t.h; }) : []; } catch (e) { return []; } }
@@ -2972,6 +2980,7 @@ CREATE TABLE inbox (
     else if (v === "shop") { var ms = menuObj(a); if (!ms) return null; n = "Покупки: " + menuTitle(ms).replace(/^Меню на |^🎉 /, ""); }
     else if (v === "daily") n = h === "daily-review" ? "Итоги дня" : "План дня";
     else if (v === "sprint" && a) n = "Спринт";
+    else if (v === "rpt" && a) { var rpq = rqRep(a); n = rpq ? "🧮 " + rpq.n : "Отчёты"; }
     else if (v === "nsec") { var ns = nsec(a); if (!ns) return null; n = ns.n || ns.t || "Раздел заметок"; ico = ic("journal"); }
     else if (v === "ntag") { n = "#" + a; ico = '<span class="pgtem">#</span>'; }
     else if (v === "task") { var tk = task(a); if (!tk) return null; n = tk.t || "Задача"; }
@@ -3141,13 +3150,13 @@ CREATE TABLE inbox (
     return itemHTML("proj", p.id, "proj-" + p.id, '<span class="pic">' + piconH(p) + "</span>", inFav ? pname(p) : p.n, n, { drag: !inFav, pad: inFav ? 0 : d, chev: chev, fav: !!p.fav });
   }
   // левая панель из блоков; порядок блоков и пунктов «Списков» меняется перетаскиванием и хранится в S.opt
-  var SIDE_DEF = ["fav", "boards", "lists", "projects", "notes", "filters", "tags", "service"], LISTS_DEF = ["inbox", "today", "goals", "waiting", "journal", "cal", "gantt", "matrix", "habits", "menu", "clean", "budget", "sprint", "plans", "someday", "flag", "all", "stats"];
+  var SIDE_DEF = ["fav", "boards", "lists", "projects", "notes", "filters", "tags", "service"], LISTS_DEF = ["inbox", "today", "goals", "waiting", "journal", "cal", "gantt", "matrix", "habits", "menu", "clean", "budget", "sprint", "plans", "someday", "flag", "all", "stats", "rpt"];
   function sideOrder() { var o = (S.opt.side || []).filter(function (x) { return SIDE_DEF.indexOf(x) >= 0; }); SIDE_DEF.forEach(function (x) { if (o.indexOf(x) < 0) { var si = o.indexOf("service"); if (si >= 0) o.splice(si, 0, x); else o.push(x); } }); return o; }
   function listsAll() { var o = (S.opt.lists || []).filter(function (x) { return LISTS_DEF.indexOf(x) >= 0; }); LISTS_DEF.forEach(function (x) { if (o.indexOf(x) < 0) o.push(x); }); return o; }
   var NEWHIDE = ["gantt", "matrix", "sprint", "journal", "waiting", "someday", "flag"];
   function hiddenLists() { var l = LS.get("zd-hide"); if (l) { try { var a = JSON.parse(l); if (Array.isArray(a)) return a; } catch (e) { /* старый формат */ } } return S.opt.hideLists || (LS.get("zd-newdef") === "1" ? NEWHIDE : []); }
   function listsOrder() { var hid = hiddenLists(); return listsAll().filter(function (x) { return x === "inbox" || hid.indexOf(x) < 0; }); }
-  var LISTN = { kitchen: "Кухня", menu: "Меню", clean: "План уборки", budget: "Бюджет", journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
+  var LISTN = { rpt: "Отчёты", kitchen: "Кухня", menu: "Меню", clean: "План уборки", budget: "Бюджет", journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
   function setListHidden(id, hide) { if (id === "inbox") return; var h = hiddenLists().filter(function (x) { return x !== id; }); if (hide) h.push(id); S.opt.hideLists = h; LS.set("zd-hide", JSON.stringify(h)); optTouch(); save(); render(); }
   // блоки левой панели сворачиваются кликом по заголовку (запоминается на этом устройстве)
   function sideFold() { try { return JSON.parse(LS.get("zd-sfold") || "{}") || {}; } catch (e) { return {}; } }
@@ -3178,6 +3187,7 @@ CREATE TABLE inbox (
       clean: function () { var cn = cOpt().on ? cPlanFor(today0()).on.length : 0; return itemHTML("smart", "clean", "clean", ic("clean"), "План уборки", cn, {}); },
       habits: function () { var n = habits().filter(function (h) { return !h.arch && hDue(h, today0()) && !hSt(h, dKey(today0())); }).length; return itemHTML("smart", "habits", "habits", ic("habits"), "Привычки", n, { drag: true }); },
       stats: function () { return itemHTML("smart", "stats", "stats", ic("stats"), "Статистика", 0, { drag: true }); },
+      rpt: function () { return itemHTML("smart", "rpt", "rpt", ic("stats"), "Отчёты", 0, { drag: true }); },
       someday: function () { return itemHTML("smart", "someday", "someday", ic("someday"), "Когда-нибудь", somedayList().length, { drag: true }); },
       flag: function () { return itemHTML("smart", "flag", "flag", ic("flag"), "С флажком", flagList().length, { drag: true }); },
       all: function () { return itemHTML("smart", "all", "all", ic("all"), "Все задачи", 0, { drag: true }); },
@@ -4884,6 +4894,7 @@ CREATE TABLE inbox (
     routine: { n: "Распорядок дня", i: "🕒", sec: "Задачи", sz: "m", d: "Блоки времени на сегодня: что сейчас, план и факт; итог за 7 дней." },
     daytop: { n: "Главное на сегодня", i: "★", sec: "Задачи", sz: "m", d: "Три главные задачи дня из плана и кнопки «План дня» и «Итоги»." },
     sticky: { n: "Стикер", i: "🗒", sec: "Инструменты", sz: "s", d: "Свободный текст: цель недели, мысль, напоминание себе." },
+    report: { n: "Отчёт", i: "🧮", sec: "Статистика", sz: "l", d: "Сохранённый отчёт из «Отчётов»: диаграмма или таблица по проектам, тегам, периодам — обновляется сам." },
     links: { n: "Ссылки", i: "🔗", sec: "Инструменты", sz: "s", d: "Закладки: сайты, документы, курсы — открываются в новой вкладке." }
   };
   var WSZ = { s: [1, 1, "Маленький · 1×1"], t: [1, 2, "Высокий · 1×2"], m: [2, 1, "Средний · 2×1"], l: [2, 2, "Большой · 2×2"], w: [4, 1, "Широкий · 4×1"], x: [4, 2, "Огромный · 4×2"] };
@@ -4956,12 +4967,14 @@ CREATE TABLE inbox (
     if (w.type === "goals") return c.gid && goal(c.gid) ? goal(c.gid).n : "Цели";
     if (w.type === "time") return "Время за " + (c.days || 7) + " дн.";
     if (w.type === "daytop") return "Главное на сегодня";
+    if (w.type === "report") { var wr = rqRep(c.rid); return wr ? wr.n : "Отчёт"; }
     return (WT[w.type] || {}).n || "Виджет";
   }
   function wHref(w) {
     var c = w.cfg || {};
     if (w.type === "tasks" || (w.type === "count" && c.src) || (w.type === "dead" && c.src && c.src !== "list:all")) return wsrcHref(c.src || "list:today");
     if (w.type === "proj" && proj(c.pid)) return "proj-" + c.pid;
+    if (w.type === "report") return rqRep(c.rid) ? "rpt-" + c.rid : "rpt";
     if (w.type === "note" && note(c.nid)) return "note-" + c.nid;
     if (w.type === "habits") return "habits"; if (w.type === "chart") return "stats"; if (w.type === "dead") return "plans";
     if (w.type === "cal") return "cal"; if (w.type === "sprint") return "sprint"; if (w.type === "goals") return c.gid ? "goal-" + c.gid : "goals"; if (w.type === "time") return "stats"; if (w.type === "daytop") return "daily"; if (w.type === "routine") return "cal"; if (w.type === "savings") return "goals"; if (w.type === "budget") return "budget"; if (w.type === "order") return "clean"; if (w.type === "chals") return "clean"; if (w.type === "kanban" && c.src && c.src !== "list:all") return wsrcHref(c.src);
@@ -4982,6 +4995,7 @@ CREATE TABLE inbox (
   function wBody(b, w) {
     var c = w.cfg || {}, h = "";
     switch (w.type) {
+      case "report": return rqWidget(b, w);
       case "tasks":
         var src = c.src || "list:today", all = wsrcList(src), inSet = {}; all.forEach(function (t) { inSet[t.id] = 1; });
         var roots = all.filter(function (t) { return !t.parent || !inSet[t.parent]; }).sort(cmpBy(c.sort || "smart")), lim = +c.lim || 0, shown = lim ? roots.slice(0, lim) : roots;
@@ -5098,6 +5112,7 @@ CREATE TABLE inbox (
     if (w.type === "count") h += row("Откуда", dd("wsrc", sl("list:all"))) + row("Что считать", seg("m", Object.keys(WCNT).map(function (k) { return [k, WCNT[k]]; }), c.m || "open"));
     if (w.type === "chart") h += row("Откуда", dd("wsrc", sl("list:all"))) + row("Период", seg("days", [[7, "7 дн."], [14, "14 дн."], [30, "30 дн."]], c.days || 14));
     if (w.type === "quick") h += row("Куда добавлять", dd("wsrc", sl("list:inbox")));
+    if (w.type === "report") h += row("Отчёт", reports().length ? seg("rid", reports().map(function (r) { return [r.id, esc(r.n)]; }), c.rid || "") : '<a href="#rpt">Создать отчёт в «Отчётах»</a>');
     if (w.type === "cal") h += row("Откуда", dd("wsrc", sl("list:all"))) + row("Дней вперёд", seg("days", [[3, "3"], [7, "7"], [14, "14"]], c.days || 7));
     if (w.type === "kanban") h += row("Откуда", dd("wsrc", sl("list:all")));
     if (w.type === "time") h += row("Период", seg("days", [[7, "7 дн."], [30, "30 дн."]], c.days || 7));
@@ -5177,6 +5192,7 @@ CREATE TABLE inbox (
     else if (k === "tag") w = { type: "tasks", cfg: { src: "tag:" + id } };
     else if (k === "filter") w = { type: "tasks", cfg: { src: "filter:" + id } };
     else if (k === "note") w = { type: "note", cfg: { nid: id } };
+    else if (k === "rpt") w = { type: "report", cfg: { rid: id } };
     else if (k === "list") w = id === "habits" ? { type: "habits" } : id === "stats" ? { type: "chart", cfg: { days: 14 } } : { type: "tasks", cfg: { src: "list:" + (WSRC_L[id] ? id : /^(plans|cal|gantt)$/.test(id) ? "week" : "all") } };
     if (!w) return;
     var b = bid === "new" ? bCreate("Новая доска", []) : board(bid); if (!b) return;
@@ -8707,6 +8723,190 @@ CREATE TABLE inbox (
   }
   function kpShopList(N) { var nd = {}; N.list.forEach(function (e) { nd[fNorm(e.p.n)] = 1; }); return kpBuy().filter(function (x) { return !nd[fNorm(x.n)]; }).map(function (x) { return x.n; }); }
 
+  /* ---------- Конструктор отчётов: период, показатель, разрезы (строки × столбцы), фильтр.
+     Сохранённые отчёты — S.reports {id, n, created, cfg}; виджет доски «Отчёт» (cfg.rid) показывает сохранённый отчёт вживую.
+     cfg: per (d7|d30|d90|w0|w-1|m0|m-1|q0|y0|custom + from/to), met, rows, cols, src (фильтр как у виджетов), view, sort, lim, sub. ---------- */
+  var RQM = { done: ["Выполнено", "задач"], created: ["Создано", "задач"], canc: ["Отменено", "задач"], open: ["Открыто сейчас", "задач"], late: ["Просрочено сейчас", "задач"], time: ["Время по таймеру", "ч"], est: ["Оценка выполненного", "ч"] };
+  var RQD = { none: "Без разреза", proj: "Проект", root: "Проект верхнего уровня", tag: "Тег", ctx: "Контекст (@)", prio: "Приоритет", status: "Статус", goal: "Цель", day: "День", week: "Неделя", month: "Месяц", wd: "День недели" };
+  var RQP = { d7: "Последние 7 дней", d30: "Последние 30 дней", d90: "Последние 90 дней", w0: "Эта неделя", "w-1": "Прошлая неделя", m0: "Этот месяц", "m-1": "Прошлый месяц", q0: "Этот квартал", y0: "Этот год", custom: "Свой период" };
+  var RQV = { auto: "Авто", bars: "Диаграмма", table: "Таблица" };
+  var RQPRIO = { 1: "❗ Приоритет 1", 2: "Приоритет 2", 3: "Приоритет 3", 0: "Обычный" }, RQWD = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"], RQTIME = ["day", "week", "month", "wd"];
+  function rqDef() { return { per: "d30", met: "done", rows: "proj", cols: "none", src: "", view: "auto", sort: "val", lim: 0, sub: 1 }; }
+  function reports() { return live(S.reports || []).sort(function (a, b) { return (a.created || 0) - (b.created || 0); }); }
+  function rqRep(id) { return reports().filter(function (r) { return r.id === id; })[0] || null; }
+  function rqRange(c) {
+    var t0 = today0(), now = new Date(), from = addDays(t0, -29), to = addDays(t0, 1), y = now.getFullYear(), m = now.getMonth();
+    if (c.per === "d7") from = addDays(t0, -6); else if (c.per === "d90") from = addDays(t0, -89);
+    else if (c.per === "w0") { from = monday(t0); to = addDays(from, 7); } else if (c.per === "w-1") { from = addDays(monday(t0), -7); to = monday(t0); }
+    else if (c.per === "m0") { from = new Date(y, m, 1).getTime(); to = new Date(y, m + 1, 1).getTime(); } else if (c.per === "m-1") { from = new Date(y, m - 1, 1).getTime(); to = new Date(y, m, 1).getTime(); }
+    else if (c.per === "q0") { var q = Math.floor(m / 3) * 3; from = new Date(y, q, 1).getTime(); to = new Date(y, q + 3, 1).getTime(); } else if (c.per === "y0") { from = new Date(y, 0, 1).getTime(); to = new Date(y + 1, 0, 1).getTime(); }
+    else if (c.per === "custom") { if (c.from) from = new Date(c.from + "T00:00").getTime(); if (c.to) to = addDays(new Date(c.to + "T00:00").getTime(), 1); if (to <= from) to = addDays(from, 1); }
+    return { from: from, to: to };
+  }
+  function rqPerTxt(c, r) { var f = function (ms) { return new Date(ms).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" }); }; return (c.per === "custom" ? "" : (RQP[c.per] || RQP.d30) + ": ") + f(r.from) + " — " + f(addDays(r.to, -1)); }
+  function rqSnap(c) { return c.met === "open" || c.met === "late"; }
+  // что считаем: записи {t — задача, d — дата для разрезов по времени, v — вклад}
+  function rqItems(c, r) {
+    var pred = c.src ? wsrcPred(c.src) : function () { return true; }, ok = function (t) { return t && !t.purged && (c.sub || !t.parent) && pred(t); }, out = [];
+    if (c.met === "done" || c.met === "est") doneEvents().forEach(function (e) { if (e.d < r.from || e.d >= r.to) return; var t = taskAnyId(e.t); if (!ok(t) || t.canc) return; var v = c.met === "est" ? tHours(t) : 1; if (v) out.push({ t: t, d: e.d, v: v }); });
+    else if (c.met === "created") S.tasks.forEach(function (t) { if (!t.del && t.created >= r.from && t.created < r.to && ok(t)) out.push({ t: t, d: t.created, v: 1 }); });
+    else if (c.met === "canc") S.tasks.forEach(function (t) { if (t.canc && t.dt >= r.from && t.dt < r.to && ok(t)) out.push({ t: t, d: t.dt, v: 1 }); });
+    else if (c.met === "time") live(S.acts).forEach(function (a) { if ((a.k !== "time" && a.k !== "pomo") || a.d < r.from || a.d >= r.to) return; var m = +a.m || (a.k === "pomo" ? 25 : 0); if (!m) return; var t = a.t ? taskAnyId(a.t) : null; if (!t) { if (c.src) return; t = { id: "", t: "Без задачи", tags: [] }; } else if (!ok(t)) return; out.push({ t: t, d: a.d, v: m / 60 }); });
+    else tasks().forEach(function (t) { if (t.done || !ok(t) || (c.met === "late" && !isLate(t))) return; out.push({ t: t, d: t.at || t.due || t.created || 0, v: 1 }); });
+    return out;
+  }
+  function rqGoalOf(t) { var g = t.goal && goal(t.goal); if (g) return g; var p = proj(t.pid); if (p) { var pa = ppath(p); for (var i = pa.length - 1; i >= 0; i--) if (pa[i].goal && goal(pa[i].goal)) return goal(pa[i].goal); } return null; }
+  // ключи разреза для записи: [[ключ для сортировки, подпись], …] — у тегов и контекстов их может быть несколько
+  function rqKeys(dim, it) {
+    var t = it.t, d = new Date(it.d || 0);
+    if (dim === "proj") { var p = proj(t.pid); return [[p ? p.id : "", p ? ppath(p).map(function (x) { return x.n; }).join(" / ") : "📥 Без проекта"]]; }
+    if (dim === "root") { var rp = t.pid ? rootProj(t.pid) : null; return [[rp ? rp.id : "", rp ? rp.n : "📥 Без проекта"]]; }
+    if (dim === "tag") { var tg = (t.tags || []).filter(function (g) { return !isCtx(g); }); return tg.length ? tg.map(function (g) { return [g, "#" + g]; }) : [["", "Без тегов"]]; }
+    if (dim === "ctx") { var cx = (t.tags || []).filter(isCtx); return cx.length ? cx.map(function (g) { return [g, g]; }) : [["", "Без контекста"]]; }
+    if (dim === "prio") { var pr = +t.prio || 0; return [[String(pr || 9), RQPRIO[pr] || "Обычный"]]; }
+    if (dim === "status") return [t.canc ? ["5", "Отменено"] : t.done ? ["4", "Сделано"] : t.st === "doing" ? ["2", "В работе"] : t.id && isLate(t) ? ["1", "Просрочено"] : ["3", "Нужно сделать"]];
+    if (dim === "goal") { var g = rqGoalOf(t); return [[g ? g.id : "", g ? (g.ic || "🎯") + " " + g.n : "Без цели"]]; }
+    if (dim === "day") return [[dKey(it.d), d.toLocaleDateString("ru-RU", { weekday: "short", day: "numeric", month: "short" })]];
+    if (dim === "week") { var mo = monday(it.d); return [[dKey(mo), buWName(mo)]]; }
+    if (dim === "month") return [[d.getFullYear() + "-" + p2(d.getMonth() + 1), MONF[d.getMonth()] + " " + d.getFullYear()]];
+    if (dim === "wd") { var w = (d.getDay() + 6) % 7; return [[String(w), RQWD[w]]]; }
+    return [["all", "Итого"]];
+  }
+  // пустые клетки времени в периоде (дни, недели, месяцы без событий тоже видны)
+  function rqTimeKeys(dim, r) {
+    var out = [], d;
+    if (dim === "wd") return RQWD.map(function (l, i) { return [String(i), l]; });
+    if (dim === "day") { if ((r.to - r.from) / DAY > 120) return null; for (d = r.from; d < r.to; d = addDays(d, 1)) out.push(rqKeys("day", { d: d, t: {} })[0]); }
+    if (dim === "week") { if ((r.to - r.from) / DAY > 400) return null; for (d = monday(r.from); d < r.to; d = addDays(d, 7)) out.push(rqKeys("week", { d: d, t: {} })[0]); }
+    if (dim === "month") { var a = new Date(r.from); for (d = new Date(a.getFullYear(), a.getMonth(), 1).getTime(); d < r.to && out.length < 60; d = new Date(new Date(d).getFullYear(), new Date(d).getMonth() + 1, 1).getTime()) out.push(rqKeys("month", { d: d, t: {} })[0]); }
+    return out;
+  }
+  function rqCalc(c) {
+    var r = rqRange(c), items = rqItems(c, r), cols = c.cols && c.cols !== "none" && c.cols !== c.rows ? c.cols : "", R = {}, C = {}, cell = {}, tot = 0, multi = false;
+    var put = function (map, k) { if (!map[k[0]]) map[k[0]] = { k: k[0], l: k[1], v: 0, n: 0 }; return map[k[0]]; };
+    items.forEach(function (it) {
+      var rk = rqKeys(c.rows || "none", it), ck = cols ? rqKeys(cols, it) : [["", ""]]; tot += it.v; if (rk.length > 1 || ck.length > 1) multi = true;
+      rk.forEach(function (a) { var x = put(R, a); x.v += it.v; x.n++; ck.forEach(function (b) { if (cols) { var ckey = a[0] + "\u0001" + b[0]; cell[ckey] = (cell[ckey] || 0) + it.v; } }); });
+      if (cols) ck.forEach(function (b) { var y = put(C, b); y.v += it.v; y.n++; });
+    });
+    var tm = function (dim, map) { if (RQTIME.indexOf(dim) < 0 || rqSnap(c)) return; (rqTimeKeys(dim, r) || []).forEach(function (k) { put(map, k); }); };
+    tm(c.rows, R); if (cols) tm(cols, C);
+    var order = function (dim, map, lim) {
+      var l = Object.keys(map).map(function (k) { return map[k]; });
+      if (RQTIME.indexOf(dim) >= 0 || dim === "prio" || dim === "status") l.sort(function (a, b) { return a.k < b.k ? -1 : a.k > b.k ? 1 : 0; });
+      else l.sort(function (a, b) { return (a.k === "") - (b.k === "") || (c.sort === "name" ? (a.l < b.l ? -1 : 1) : b.v - a.v || (a.l < b.l ? -1 : 1)); });
+      if (lim && l.length > lim && RQTIME.indexOf(dim) < 0) { var rest = l.slice(lim), o = { k: "\u0002", l: "Остальное (" + rest.length + ")", v: 0, n: 0, rest: rest.map(function (x) { return x.k; }) }; rest.forEach(function (x) { o.v += x.v; o.n += x.n; }); l = l.slice(0, lim).concat(o); }
+      return l;
+    };
+    return { r: r, items: items, rows: order(c.rows || "none", R, +c.lim || 0), cols: cols ? order(cols, C, 8) : [], cell: cell, tot: tot, multi: multi, colDim: cols };
+  }
+  function rqFmt(c, v) { return RQM[c.met][1] === "ч" ? fmtH(v) + " ч" : String(Math.round(v * 10) / 10).replace(".", ","); }
+  function rqCellV(Q, row, col) {
+    var rk = row.rest || [row.k], ck = col.rest || [col.k], s = 0;
+    rk.forEach(function (a) { ck.forEach(function (b) { s += Q.cell[a + "\u0001" + b] || 0; }); }); return s;
+  }
+  // диаграмма: время — вертикальные столбцы, остальное — горизонтальные полосы
+  function rqChart(c, Q, small) {
+    if (!Q.rows.length) return "";
+    if (RQTIME.indexOf(c.rows) >= 0) return barsSVG(Q.rows.map(function (x) { return { l: c.rows === "day" ? String(+x.k.slice(8)) : c.rows === "month" ? MONS[+x.k.slice(5) - 1] : c.rows === "week" ? x.l.split("–")[0] : x.l, title: x.l, v: Math.round(x.v * 10) / 10 }; }), { w: 680, h: small ? 130 : 180 });
+    var mx = Math.max.apply(null, Q.rows.map(function (x) { return x.v; }).concat([0.0001])), l = small ? Q.rows.slice(0, small) : Q.rows;
+    return '<div class="rqbars">' + l.map(function (x) { return '<div class="rqbar" title="' + esc(x.l + ": " + rqFmt(c, x.v)) + '"><span class="rql">' + esc(x.l) + '</span><span class="rqb"><i style="width:' + (x.v / mx * 100).toFixed(1) + '%"></i></span><span class="rqv">' + rqFmt(c, x.v) + "</span></div>"; }).join("") + (small && Q.rows.length > small ? '<small class="muted">ещё ' + (Q.rows.length - small) + "…</small>" : "") + "</div>";
+  }
+  function rqTable(c, Q, drill) {
+    if (!Q.rows.length) return '<p class="muted">За этот период ничего нет.</p>';
+    var td = function (v, a, b) { return "<td" + (drill ? ' class="rqc" data-a="rqdrill" data-r="' + esc(a) + '" data-c="' + esc(b) + '"' : "") + ">" + (v ? rqFmt(c, v) : '<span class="muted">·</span>') + "</td>"; };
+    var h = '<div class="rqtw"><table class="rqt"><thead><tr><th>' + esc(RQD[c.rows] || "") + "</th>" + Q.cols.map(function (y) { return "<th>" + esc(y.l) + "</th>"; }).join("") + "<th>" + (Q.cols.length ? "Итого" : esc(RQM[c.met][0])) + "</th><th>%</th></tr></thead><tbody>";
+    h += Q.rows.map(function (x) { return "<tr><th>" + esc(x.l) + "</th>" + Q.cols.map(function (y) { return td(rqCellV(Q, x, y), x.k, y.k); }).join("") + td(x.v, x.k, "") + '<td class="muted">' + (Q.tot ? Math.round(x.v / Q.tot * 100) : 0) + "%</td></tr>"; }).join("");
+    h += "</tbody><tfoot><tr><th>Итого</th>" + Q.cols.map(function (y) { return "<td>" + rqFmt(c, y.v) + "</td>"; }).join("") + "<td>" + rqFmt(c, Q.tot) + "</td><td></td></tr></tfoot></table></div>";
+    return h;
+  }
+  // текст таблицы для Excel (табуляция)
+  function rqTSV(c, Q) {
+    var L = [[RQD[c.rows] || ""].concat(Q.cols.map(function (y) { return y.l; }), [Q.cols.length ? "Итого" : RQM[c.met][0]])];
+    Q.rows.forEach(function (x) { L.push([x.l].concat(Q.cols.map(function (y) { return String(Math.round(rqCellV(Q, x, y) * 100) / 100).replace(".", ","); }), [String(Math.round(x.v * 100) / 100).replace(".", ",")])); });
+    L.push(["Итого"].concat(Q.cols.map(function (y) { return String(Math.round(y.v * 100) / 100).replace(".", ","); }), [String(Math.round(Q.tot * 100) / 100).replace(".", ",")]));
+    return L.map(function (r) { return r.join("\t"); }).join("\n");
+  }
+
+  /* --- страница «Отчёты» --- */
+  var RQC = null, RQID = "", RQDR = null;
+  function rqLoad() {
+    if (V === "rpt" && ARG) { var sr = rqRep(ARG); if (sr && RQID !== ARG) { RQID = ARG; RQC = Object.assign(rqDef(), sr.cfg || {}); RQDR = null; delete INPV.rqname; } if (sr) return; }
+    if (V === "rpt" && !ARG && RQID) { RQID = ""; RQC = null; RQDR = null; delete INPV.rqname; }
+    if (!RQC) { try { RQC = Object.assign(rqDef(), JSON.parse(LS.get("zd-rqdraft") || "{}") || {}); } catch (e) { RQC = rqDef(); } }
+  }
+  function rqChanged() {
+    if (RQID) { var sr = rqRep(RQID); if (sr) { sr.cfg = Object.assign({}, RQC); touch(sr); save(); } }
+    else LS.set("zd-rqdraft", JSON.stringify(RQC));
+    RQDR = null; render();
+  }
+  function vRpt() {
+    rqLoad(); var c = RQC, sr = RQID ? rqRep(RQID) : null, Q = rqCalc(c);
+    var dd = function (k, lab, val) { return '<span class="rqf"><small>' + lab + '</small><button type="button" class="ddb sm" data-a="rqdd" data-k="' + k + '">' + esc(val) + '<span class="dda">▾</span></button></span>'; };
+    var h = head("Отчёты", "Конструктор: период, что считать и в каких разрезах. Сохраните отчёт — он появится в списке, его можно открыть в любой момент и вынести на доску виджетом.");
+    var rl = reports();
+    h += '<div class="r rqsaved"><span class="muted">Сохранённые:</span>' + (rl.length ? rl.map(function (r) { return '<a class="chip' + (r.id === RQID ? " on" : "") + '" href="#rpt-' + r.id + '">🧮 ' + esc(r.n) + "</a>"; }).join("") : '<span class="muted">пока нет</span>') + '<a class="chip" href="#rpt">＋ Новый</a></div>';
+    h += '<div class="card rqbuild"><div class="rqfs">' + dd("per", "Период", c.per === "custom" ? "Свой период" : RQP[c.per] || RQP.d30) + dd("met", "Что считать", RQM[c.met][0]) + dd("rows", "Строки", RQD[c.rows] || "—") + dd("cols", "Столбцы", c.cols && c.cols !== "none" ? RQD[c.cols] : "—") + dd("src", "Какие задачи", c.src ? wsrcName(c.src) : "Все задачи") + dd("view", "Вид", RQV[c.view] || RQV.auto) + dd("sort", "Порядок", c.sort === "name" ? "по названию" : "по величине") + dd("lim", "Строк", +c.lim ? "первые " + c.lim : "все") + "</div>";
+    if (c.per === "custom") { var rr0 = rqRange(c); h += '<div class="r rqdates"><span class="muted">с</span><input type="date" class="inp" id="rqfrom" value="' + esc(c.from || dKey(rr0.from)) + '"><span class="muted">по</span><input type="date" class="inp" id="rqto" value="' + esc(c.to || dKey(addDays(rr0.to, -1))) + '"></div>'; }
+    h += '<label class="rqsub"><input type="checkbox" id="rqsub"' + (c.sub ? " checked" : "") + "> учитывать подзадачи</label>";
+    h += '<div class="r rqsave"><input class="inp" id="rqname" placeholder="Название отчёта, например «Работа по проектам за месяц»" value="' + esc(iv("rqname", sr ? sr.n : "")) + '">' + (sr ? '<button type="button" class="btn sm" data-a="rqsaveas">⧉ Сохранить как новый</button>' : '<button type="button" class="btn sm pri" data-a="rqsave">💾 Сохранить отчёт</button>') + '<button type="button" class="btn sm" data-a="rqpin">📌 На доску</button><button type="button" class="btn sm" data-a="rqcopy">📋 Таблицу — в буфер</button>' + (sr ? '<button type="button" class="btn sm" data-a="rqdel">🗑 Удалить</button>' : "") + "</div>" + (sr ? '<p class="muted rqnote">Изменения сохраняются в отчёт сразу — и виджеты на досках обновятся.</p>' : "") + "</div>";
+    var Qn = Q.items.length, vw = c.view === "auto" ? "both" : c.view;
+    h += '<div class="butiles"><div class="butile"><small>' + esc(RQM[c.met][0]) + '</small><span>' + rqFmt(c, Q.tot) + (RQM[c.met][1] === "ч" ? "" : " ") + '</span><small class="muted">' + esc(rqSnap(c) ? "на сейчас, без периода" : rqPerTxt(c, Q.r)) + '</small></div><div class="butile"><small>' + esc(RQD[c.rows] || "") + '</small><span>' + Q.rows.length + '</span><small class="muted">строк в отчёте</small></div>' + (c.met === "time" || c.met === "est" ? '<div class="butile"><small>Записей</small><span>' + Qn + "</span></div>" : "") + "</div>";
+    if (Q.multi) h += '<p class="muted rqnote">Задача с несколькими тегами или контекстами считается в каждом из них, поэтому сумма строк может быть больше итога.</p>';
+    if (vw !== "table") h += '<div class="card rqchart">' + (rqChart(c, Q) || '<p class="muted">За этот период ничего нет.</p>') + "</div>";
+    if (vw !== "bars") h += rqTable(c, Q, true);
+    if (RQDR) h += rqDrillHTML(c, Q);
+    return h;
+  }
+  function rqDrillHTML(c, Q) {
+    var rset = {}, cset = {}, rowO = Q.rows.filter(function (x) { return x.k === RQDR.r; })[0], colO = Q.cols.filter(function (y) { return y.k === RQDR.c; })[0];
+    (rowO && rowO.rest || [RQDR.r]).forEach(function (k) { rset[k] = 1; }); (colO && colO.rest || [RQDR.c]).forEach(function (k) { cset[k] = 1; });
+    var l = Q.items.filter(function (it) { return rqKeys(c.rows || "none", it).some(function (a) { return rset[a[0]]; }) && (!Q.colDim || RQDR.c === "" || rqKeys(Q.colDim, it).some(function (b) { return cset[b[0]]; })); });
+    var lab = (rowO ? rowO.l : "") + (colO ? " · " + colO.l : "");
+    return '<div class="card rqdrill"><div class="kph"><b>' + esc(lab) + " — " + l.length + " " + plural(l.length, ["запись", "записи", "записей"]) + '</b><button type="button" class="ibtn" data-a="rqdrillx" aria-label="Закрыть">✕</button></div>' + l.slice(0, 150).map(function (it) { return '<div class="rqdr"><span class="muted">' + esc(it.d ? new Date(it.d).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "2-digit" }) : "") + "</span>" + (it.t.id ? '<a href="#task-' + it.t.id + '">' + esc(it.t.t) + "</a>" : "<span>" + esc(it.t.t) + "</span>") + '<span class="rqv">' + rqFmt(c, it.v) + "</span></div>"; }).join("") + (l.length > 150 ? '<small class="muted">показаны первые 150</small>' : "") + "</div>";
+  }
+  function rqMenu(k) {
+    var o = function (v, l, cur) { return { c: k + "=" + v, i: "", l: l, k: String(cur) === String(v) ? "✓" : "" }; }, c = RQC;
+    if (k === "per") return Object.keys(RQP).map(function (x) { return o(x, RQP[x], c.per); });
+    if (k === "met") return Object.keys(RQM).map(function (x) { return o(x, RQM[x][0] + (x === "open" || x === "late" ? " (без периода)" : ""), c.met); });
+    if (k === "rows") return Object.keys(RQD).map(function (x) { return o(x, RQD[x], c.rows); });
+    if (k === "cols") return [o("none", "— без столбцов —", c.cols || "none")].concat(Object.keys(RQD).filter(function (x) { return x !== "none"; }).map(function (x) { return o(x, RQD[x], c.cols); }));
+    if (k === "view") return Object.keys(RQV).map(function (x) { return o(x, RQV[x] + (x === "auto" ? " — диаграмма и таблица" : ""), c.view); });
+    if (k === "sort") return [o("val", "По величине", c.sort), o("name", "По названию", c.sort)];
+    if (k === "lim") return [[0, "Все"], [5, "Первые 5"], [10, "Первые 10"], [20, "Первые 20"]].map(function (x) { return o(x[0], x[1], +c.lim || 0); });
+    if (k === "src") { var it = [o("", "Все задачи", c.src || "")]; wsrcMenu().forEach(function (x) { if (x && x.sub) it.push({ i: x.i, l: x.l, sub: x.sub.map(function (s) { return { c: "src=" + s.c, i: s.i, l: s.l, pad: s.pad, k: c.src === s.c ? "✓" : "" }; }) }); }); return it; }
+    return [];
+  }
+  function rqAct(a, el) {
+    switch (a) {
+      case "rqdd": var rc = el.getBoundingClientRect(); ctxShow(rc.left, rc.bottom + 4, rqMenu(el.dataset.k), { k: "rqset", id: "" }); return true;
+      case "rqdrill": RQDR = { r: el.dataset.r, c: el.dataset.c }; render(); setTimeout(function () { var d = document.querySelector(".rqdrill"); if (d) d.scrollIntoView({ block: "nearest", behavior: "smooth" }); }, 30); return true;
+      case "rqdrillx": RQDR = null; render(); return true;
+      case "rqsave": case "rqsaveas": var nm = String(($("rqname") || {}).value || "").trim() || (RQM[RQC.met][0] + " · " + (RQD[RQC.rows] || "") + " · " + (RQP[RQC.per] || "")); delete INPV.rqname;
+        var r = touch({ id: uid(), n: nm.slice(0, 80), created: Date.now(), cfg: Object.assign({}, RQC) }); (S.reports = S.reports || []).push(r); save(); RQID = ""; go("rpt-" + r.id); toast("Отчёт «" + r.n + "» сохранён"); return true;
+      case "rqdel": var d = rqRep(RQID); if (d) { d.del = 1; d.delAt = Date.now(); touch(d); save(); RQID = ""; RQC = null; go("rpt"); toastUndo("Отчёт «" + d.n + "» удалён", function () { delete d.del; delete d.delAt; touch(d); }); } return true;
+      case "rqpin": if (!RQID) { toast("Сначала сохраните отчёт — на доске он будет обновляться сам"); var ni = $("rqname"); if (ni) ni.focus(); return true; } var rp = el.getBoundingClientRect(); ctxShow(rp.left, rp.bottom + 4, pinMenu("").sub, { k: "rpt", id: RQID }); return true;
+      case "rqcopy": var txt = rqTSV(RQC, rqCalc(RQC)); if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { toast("Таблица скопирована — вставьте в Excel"); }, function () { toast("Не удалось скопировать"); }); return true;
+    }
+    return false;
+  }
+  function rqSet(c) { var m = /^(\w+)=(.*)$/.exec(c || ""); if (!m) return; rqLoad(); var k = m[1], v = m[2]; RQC[k] = k === "lim" ? +v || 0 : v; if (k === "per" && v === "custom" && !RQC.from) { RQC.from = dKey(addDays(today0(), -29)); RQC.to = dKey(today0()); } rqChanged(); }
+  document.addEventListener("change", function (e) {
+    var t = e.target; if (!t || V !== "rpt") return;
+    if (t.id === "rqfrom" || t.id === "rqto") { rqLoad(); RQC[t.id === "rqfrom" ? "from" : "to"] = t.value; rqChanged(); return; }
+    if (t.id === "rqsub") { rqLoad(); RQC.sub = t.checked ? 1 : 0; rqChanged(); return; }
+    if (t.id === "rqname" && RQID) { var sr = rqRep(RQID), v = t.value.trim(); if (sr && v) { sr.n = v.slice(0, 80); touch(sr); save(); delete INPV.rqname; render(); } }
+  });
+  // виджет доски «Отчёт»
+  function rqWidget(b, w) {
+    var c = w.cfg || {}, sr = rqRep(c.rid);
+    if (!sr) return '<p class="wempty">' + (reports().length ? "Выберите отчёт в ⚙" : 'Отчётов пока нет — <a href="#rpt">создайте в «Отчётах»</a>') + "</p>";
+    var cf = Object.assign(rqDef(), sr.cfg || {}), Q = rqCalc(cf), dm = wDim(b, w), big = dm.r >= 2 || dm.c >= 3;
+    var h = '<div class="rqw"><div class="rqwh"><b>' + rqFmt(cf, Q.tot) + '</b><small class="muted">' + esc(RQM[cf.met][0].toLowerCase() + " · " + (rqSnap(cf) ? "на сейчас" : rqPerTxt(cf, Q.r))) + "</small></div>";
+    h += cf.view === "table" || (Q.cols.length && big) ? rqTable(cf, Q, false) : rqChart(cf, Q, big ? 12 : 5) || '<p class="wempty">За период ничего нет</p>';
+    return h + "</div>";
+  }
+
   function chalsWidget() {
     var h = "", t0 = today0(), any = false;
     if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
@@ -8856,7 +9056,7 @@ CREATE TABLE inbox (
     var hl = habits().filter(function (h) { return !h.arch; }), hr = hl.length ? Math.round(hl.reduce(function (a, h) { return a + hRate(h, days); }, 0) / hl.length) : null;
     var trk = live(S.acts).filter(function (a) { return a.k === "time" && a.d >= from; }).reduce(function (a, x) { return a + (+x.m || 0); }, 0);
     var h = head("Статистика", "Сколько вы успеваете: выполненные задачи (и повторяющиеся тоже), помидоры, привычки.");
-    h += '<div class="tbar"><div class="seg sttabs"><button type="button" data-a="sttab" data-x="ov" class="' + (STTAB !== "time" ? "on" : "") + '">📊 Обзор</button><button type="button" data-a="sttab" data-x="time" class="' + (STTAB === "time" ? "on" : "") + '">⏱ Время</button></div><a class="btn sm" href="#report-w0" title="Отчёт за неделю или месяц — можно сохранить в PDF">📄 Отчёт</a><div class="seg">' + [7, 30, 90].map(function (n) { return '<button type="button" data-a="stdays" data-x="' + n + '" class="' + (days === n ? "on" : "") + '">' + n + " дней</button>"; }).join("") + "</div></div>";
+    h += '<div class="tbar"><div class="seg sttabs"><button type="button" data-a="sttab" data-x="ov" class="' + (STTAB !== "time" ? "on" : "") + '">📊 Обзор</button><button type="button" data-a="sttab" data-x="time" class="' + (STTAB === "time" ? "on" : "") + '">⏱ Время</button></div><a class="btn sm" href="#report-w0" title="Отчёт за неделю или месяц — можно сохранить в PDF">📄 Отчёт</a><a class="btn sm" href="#rpt" title="Свой отчёт: любой период, проекты, теги, приоритеты, время">🧮 Конструктор отчётов</a><div class="seg">' + [7, 30, 90].map(function (n) { return '<button type="button" data-a="stdays" data-x="' + n + '" class="' + (days === n ? "on" : "") + '">' + n + " дней</button>"; }).join("") + "</div></div>";
     if (STTAB === "time") return h + vTime(days);
     function card(v, l, s2) { return '<div class="stc"><b>' + v + "</b><span>" + l + "</span>" + (s2 ? '<small>' + s2 + "</small>" : "") + "</div>"; }
     h += '<div class="stgrid">' + card(ev.length, "выполнено", "в среднем " + String(Math.round(ev.length / days * 10) / 10).replace(".", ",") + " в день") + card(created, "создано", "за " + days + " дней") + card(cs + " " + plural(cs, ["день", "дня", "дней"]), "серия подряд", "лучшая: " + best) + card(pom.length, "помидоров", Math.round(pom.length * 25 / 60 * 10) / 10 + " ч фокуса") + card(open, "открыто сейчас", late ? '<span class="warnc">просрочено: ' + late + "</span>" : "просроченных нет") + (hr !== null ? card(hr + " %", "привычки выполнены", hl.length + " " + plural(hl.length, ["привычка", "привычки", "привычек"])) : "") + "</div>";
@@ -9412,6 +9612,18 @@ CREATE TABLE inbox (
       "Задача дня <b>«🍳 Кухня · день N»</b> — в «Сегодня», с чек-листом. Многие пункты отмечаются сами: место кладовой заполнено, чек записан, меню на 3 или 7 дней составлено, постоянные покупки заведены.",
       "В 8-ю неделю — кнопка «Поставить» для повторяющейся задачи «🍳 Кухонный час» по воскресеньям. Кладовая, чеки и выброшенное остаются и после челленджа."
     ]));
+    h += sec("reports", "Отчёты: конструктор и виджет", ul([
+      "Пункт <b>«Отчёты»</b> в «Списках» (или «Статистика» → «🧮 Конструктор отчётов»).",
+      "<b>Период</b> — последние 7/30/90 дней, эта или прошлая неделя, этот или прошлый месяц, квартал, год или свой (с — по).",
+      "<b>Что считать</b>: выполнено, создано, отменено, открыто сейчас, просрочено сейчас (эти два — на текущий момент, без периода), время по таймеру и помидорам (ч), оценка выполненного (ч).",
+      "<b>Строки</b> и <b>Столбцы</b> — разрезы: проект (с подпроектами в названии), проект верхнего уровня, тег, контекст @, приоритет, статус, цель, день, неделя, месяц, день недели. Строки × столбцы — сводная таблица, например «проект × месяц».",
+      "<b>Какие задачи</b> — фильтр: проект (с подпроектами), тег, сохранённый фильтр или флажок. «Учитывать подзадачи» — галочка.",
+      "Вид — диаграмма и таблица, только диаграмма или только таблица; порядок — по величине или по названию; «Строк» — первые 5/10/20, остальное сложится в «Остальное».",
+      "Клик по числу в таблице — список задач, из которых оно сложилось. «📋 Таблицу — в буфер» — вставляется в Excel столбцами.",
+      "<b>💾 Сохранить отчёт</b> — с названием; сохранённые — кнопками вверху, синхронизируются между устройствами. Изменения открытого сохранённого отчёта записываются сразу; «⧉ Сохранить как новый» — копия.",
+      "<b>📌 На доску</b> — виджет «Отчёт» показывает сохранённый отчёт вживую: диаграмма (маленький виджет — первые 5 строк, большой — 12) или таблица. В ⚙ виджета можно выбрать другой отчёт.",
+      "Задача с несколькими тегами или контекстами считается в каждом из них — сумма строк тогда больше итога (приложение предупредит)."
+    ]));
     h += sec("report", "Отчёт за неделю или месяц", ul([
       "«Статистика» → <b>«📄 Отчёт»</b> или Ctrl+K → «Отчёт за неделю» / «Отчёт за месяц».",
       "Вверху — «Неделя / Месяц» и стрелки ‹ › к прошлым периодам.",
@@ -9894,7 +10106,7 @@ CREATE TABLE inbox (
   }
   var RTIMES = [], RWARN = false, RHOLD = null;
   // поля без своего хранилища (дата старта челленджа, дата пополнения, списки обновления бюджета): выбранное значение переживает перерисовку
-  var INPV = {}, INPVID = { kcstartd: 1, fcstartd: 1, chstartd: 1, svdate: 1, bu1: 1, bu2a: 1, bu2b: 1, bu3: 1 };
+  var INPV = {}, INPVID = { rqname: 1, kcstartd: 1, fcstartd: 1, chstartd: 1, svdate: 1, bu1: 1, bu2a: 1, bu2b: 1, bu3: 1 };
   function iv(id, def) { return INPV[id] !== undefined && INPV[id] !== "" ? INPV[id] : def; }
   ["input", "change"].forEach(function (ev) { document.addEventListener(ev, function (e) { var t = e.target; if (t && t.id && INPVID[t.id]) INPV[t.id] = t.value; }, true); });
   // выбрали в списке (или цвет в палитре) — поле отпускает фокус до обработчиков, и страница обновляется сразу
@@ -9944,7 +10156,7 @@ CREATE TABLE inbox (
   document.addEventListener("mousedown", function (e) { if (!POP || !e.target.closest) return; if (e.target.closest(".pop, [data-a=pop], #ctx, #ctx2")) return; POP = null; setTimeout(render, 0); });
   // где какая страница справки
   function hq(id, title) { return '<a class="hq" href="#help-' + id + '" title="' + esc(title || "Справка по этому разделу") + '" aria-label="Справка">?</a>'; }
-  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", tarch: "tarch", report: "report", clean: "clean", budget: "budget", menu: "food", menunew: "food", recipes: "food", recipe: "food", rhave: "food", kitchen: "kitchen", prods: "food", shop: "food", rimp: "food", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
+  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", tarch: "tarch", report: "report", clean: "clean", budget: "budget", menu: "food", menunew: "food", recipes: "food", recipe: "food", rhave: "food", kitchen: "kitchen", rpt: "reports", prods: "food", shop: "food", rimp: "food", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
   var SHELP = { "s-lists": "mini", "s-review": "focus", "s-flags": "flags", "s-srv": "srv", "s-digest": "digest", "s-ai": "ai", "s-sync": "sync", "s-backup": "backup", "s-diag": "diag", "s-wipe": "backup", "s-test": "backup" };
   function helpMarks() {
     var v = $("view");
@@ -9962,7 +10174,7 @@ CREATE TABLE inbox (
     try { ctxShowBtn(); if (NOW) renderNow(); } catch (er) { /* не мешает */ }
     $("side").innerHTML = sideHTML();
     try { $("bnav").innerHTML = bnavHTML(); document.documentElement.classList.toggle("nohq", !!S.opt.noHq); } catch (er) { /* не мешает */ }
-    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, rhave: vRhave, kitchen: vKitchen, clean: vClean, budget: vBudget, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
+    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, rhave: vRhave, kitchen: vKitchen, rpt: vRpt, clean: vClean, budget: vBudget, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
     var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
     $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "templates");
     try { ptTouch(location.hash.slice(1) || "today"); } catch (er) { /* вкладки не мешают */ }
@@ -10565,6 +10777,7 @@ CREATE TABLE inbox (
     if (a && fcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && kcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && tmAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && rqAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -11896,6 +12109,7 @@ CREATE TABLE inbox (
     if (k === "svrday" && c === "x") { SVRDIN = id; render(); setTimeout(function () { var i = $("svrdin"); if (i) { i.focus(); i.select(); } }, 40); return; }
     if (k === "svrday") { var sg = goal(id); if (sg && sg.sv) { sg.sv = Object.assign({}, sg.sv, { rday: +c || 0 }); svRemSync(sg); touch(sg); save(); render(); toast(+c ? "Напоминание: каждое " + c + "-е число — задача «🏦 Отложить»" : "Напоминание выключено"); } return; }
     if (k === "rhexp" || k === "kpexp") { var kpx = k === "kpexp" ? pantry().filter(function (x) { return x.id === id; })[0] : (kpMigrate(), kpFind(id)) || kpSet(id, 2); if (kpx) { if (+c < 0) delete kpx.exp; else kpx.exp = dKey(addDays(today0(), +c)); kpx.at = Date.now(); touch(kpx); save(); } render(); return; }
+    if (k === "rqset") { rqSet(c); return; }
     if (k === "kpmv") { var kpm = pantry().filter(function (x) { return x.id === id; })[0]; if (kpm) { kpm.pl = c; touch(kpm); save(); render(); } return; }
     if (k === "ckzone") { var cq = live(S.chq || []).filter(function (x) { return x.id === id; })[0]; if (cq) { cq.zone = c; touch(cq); save(); render(); } return; }
     if (k === "burcat") { var bg = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bg) { bg.cat = c; touch(bg); save(); render(); } return; }
