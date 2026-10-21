@@ -498,6 +498,8 @@ html.nosheet .dptopbox.dphab { background: color-mix(in srgb, var(--ok) 15%, tra
 .mmf { position: absolute; top: 50%; transform: translateY(-50%); min-width: 18px; height: 18px; padding: 0 4px; border-radius: 999px; border: 1.5px solid var(--bc); background: var(--panel); color: var(--fg); font-size: 11px; line-height: 14px; cursor: pointer; opacity: 0; font-weight: 600 } .mmn:hover .mmf, .mmn.sel .mmf, .mmf.on { opacity: 1 }
 .mmhint { font-size: calc(12px * var(--fs)); margin: 0 } .mmout { padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel) } .mmouth { font-size: calc(17px * var(--fs)); margin-bottom: 6px } .mmout ul { margin: 2px 0; padding-left: 22px } .mmout li { margin: 2px 0 } .mmtxtd summary { cursor: pointer; color: var(--muted) } .mmtxtd textarea { width: 100%; font-family: var(--mono); margin: 8px 0 }
 .mmntp textarea, .mmpp textarea { width: 100%; box-sizing: border-box }
+.mmtk, .mmpg { position: absolute; top: -9px; width: 18px; height: 18px; border-radius: 50%; padding: 0; cursor: pointer; font-size: 11px; line-height: 15px; z-index: 2 } .mmtk { left: -9px; border: 1.5px solid var(--bc); background: var(--panel); color: #fff; font-weight: 700 } .mmtk.on { background: var(--ok); border-color: var(--ok) } .mmpg { right: -9px; border: 1px solid var(--line); background: var(--panel); font-size: 10px }
+.mmn.dn { color: var(--muted); text-decoration: line-through } .mmwa { display: block; width: 100%; height: 100%; min-height: 0 } .mmw { width: 100%; height: 100%; display: block } .w-mmap .wb { padding: 6px }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5700,7 +5702,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-141";
+  var APPV = "zd-app-2026-10-16-142";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -6962,7 +6964,7 @@ CREATE TABLE inbox (
     if (!rd || nk.length) h += '<div class="nsub"><div class="nsubh"><b>Вложенные страницы' + (nk.length ? " · " + nk.length : "") + "</b>" + (rd ? "" : '<button type="button" class="btn sm" data-a="note-sub">＋ Вложенная страница</button>') + "</div>" + (nk.length ? '<div class="nsubg">' + nk.map(function (k) { var kk = nKids(k.id).length, tx = noteText(k); return '<a class="nsubc" href="#note-' + k.id + '">' + (nCovCss(k) ? '<span class="nsubcov" style="' + nCovCss(k) + '"></span>' : "") + "<b>" + esc(nIc(k)) + " " + esc(nTitle(k)) + "</b>" + (tx ? "<small>" + esc(tx.slice(0, 90)) + "</small>" : "") + (kk ? '<small class="muted">' + kk + " " + plural(kk, ["вложенная", "вложенные", "вложенных"]) + "</small>" : "") + "</a>"; }).join("") + "</div>" : '<p class="muted" style="margin:0">Страницы внутри этой — для подробностей, примеров, уроков. Или наберите в тексте <code>[[</code> и название.</p>') + "</div>";
     if (nbl.length) h += '<div class="nback"><b>Ссылаются сюда · ' + nbl.length + "</b>" + nbl.map(function (x) { return x.k === "n" ? '<a href="#note-' + x.o.id + '">' + esc(nIc(x.o)) + " " + esc(nTitle(x.o)) + "</a>" : '<a href="#task-' + x.o.id + '">' + (x.o.done ? "✓ " : "☐ ") + esc(x.o.t) + "</a>"; }).join("") + "</div>";
     h += nfListHTML(n, rd);
-    if (!rd) h += '<p class="muted nfoot"><button type="button" class="btn sm" data-a="notepin">📌 На доску</button><button type="button" class="btn sm" data-a="nhist">🕘 История</button><button type="button" class="btn sm" data-a="ntplsave" title="Тип, значок, обложка, свойства и текст этой страницы станут шаблоном">⧉ Сохранить как шаблон</button> · Создана ' + new Date(n.created || n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) + (n.upd ? " · изменена " + new Date(n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : "") + ' · <button type="button" class="btn sm warn" data-a="note-del">🗑 Удалить заметку</button></p>';
+    if (!rd) h += '<p class="muted nfoot"><button type="button" class="btn sm" data-a="notepin">📌 На доску</button><button type="button" class="btn sm" data-a="nhist">🕘 История</button>' + (mmIs(n) ? "" : '<button type="button" class="btn sm" data-a="mmfrom">🧠 Карта из страницы ▾</button>') + '<button type="button" class="btn sm" data-a="ntplsave" title="Тип, значок, обложка, свойства и текст этой страницы станут шаблоном">⧉ Сохранить как шаблон</button> · Создана ' + new Date(n.created || n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) + (n.upd ? " · изменена " + new Date(n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : "") + ' · <button type="button" class="btn sm warn" data-a="note-del">🗑 Удалить заметку</button></p>';
     if (NPOP === "hist" && !rd) h += nhHTML(n);
     if (NQ.trim()) setTimeout(nHiApply, 0);
     return '<div class="npage' + (tocI.length >= 2 ? " hastoc" : "") + (rd ? " nread" : "") + '"><aside class="ntoc" id="ntoc">' + nTocHTML(tocI) + '</aside><div class="nmain">' + h + "</div></div>";
@@ -7909,7 +7911,7 @@ CREATE TABLE inbox (
     var g = goal(ARG); if (!g) return head("Цель не найдена", '<a href="#goals">Все цели</a>');
     var pr = goalProg(g), ps = goalProjs(g), tl = live(S.tasks).filter(function (t) { return t.goal === g.id; }), open = tl.filter(function (t) { return !t.done; });
     var h = '<div class="crumbs"><a href="#goals">Цели</a> /</div><div class="bhd"><h1 class="bh1"><button type="button" class="gicb" data-a="gic" title="Сменить значок">' + (g.ic || "🎯") + '</button><input class="btitle" data-goal="' + g.id + '" data-gf="n" value="' + esc(g.n) + '" aria-label="Название цели" autocomplete="off"></h1>' +
-      '<span class="r bbar">' + (g.st === "done" ? '<span class="gbadge">🎉 Достигнута</span><button type="button" class="btn sm" data-a="gst" data-x="active">Вернуть в работу</button>' : g.st === "drop" ? '<span class="gbadge">⏸ Отложена</span><button type="button" class="btn sm" data-a="gst" data-x="active">Вернуть в работу</button>' : '<button type="button" class="btn sm pri" data-a="gst" data-x="done">🎉 Цель достигнута</button><button type="button" class="btn sm" data-a="gst" data-x="drop">⏸ Отложить</button>') + '<button type="button" class="ibtn" data-a="gdel" title="Удалить цель">🗑</button></span></div>';
+      '<span class="r bbar"><button type="button" class="btn sm" data-a="gmap" title="Карта мыслей: цель → проекты → задачи">🧠 Карта</button>' + (g.st === "done" ? '<span class="gbadge">🎉 Достигнута</span><button type="button" class="btn sm" data-a="gst" data-x="active">Вернуть в работу</button>' : g.st === "drop" ? '<span class="gbadge">⏸ Отложена</span><button type="button" class="btn sm" data-a="gst" data-x="active">Вернуть в работу</button>' : '<button type="button" class="btn sm pri" data-a="gst" data-x="done">🎉 Цель достигнута</button><button type="button" class="btn sm" data-a="gst" data-x="drop">⏸ Отложить</button>') + '<button type="button" class="ibtn" data-a="gdel" title="Удалить цель">🗑</button></span></div>';
     h += gdHTML(g);
     if (GNOTE) h += '<div class="icg gicons">' + GICONS.map(function (x) { return '<button type="button" data-a="gicv" data-v="' + x + '">' + x + "</button>"; }).join("") + "</div>";
     if (g.sv) h += svHTML(g); else h += '<div class="gtop" style="--gc:' + col(g.c || 0) + '"><div class="gring">' + gRing(pr.pct, col(g.c || 0)) + '</div><div class="gtopi"><b>' + esc(pr.txt) + "</b>" + gDue(g) + (goalNext(g, 1)[0] ? '<div class="gnext">Следующий шаг: <a href="#task-' + goalNext(g, 1)[0].id + '">' + esc(goalNext(g, 1)[0].t) + "</a></div>" : "") + "</div></div>";
@@ -8131,6 +8133,7 @@ CREATE TABLE inbox (
     routine: { n: "Распорядок дня", i: "🕒", sec: "Задачи", sz: "m", d: "Блоки времени на сегодня: что сейчас, план и факт; итог за 7 дней." },
     daytop: { n: "Главное на сегодня", i: "★", sec: "Задачи", sz: "m", d: "Три главные задачи дня из плана и кнопки «План дня» и «Итоги»." },
     sticky: { n: "Стикер", i: "🗒", sec: "Инструменты", sz: "s", d: "Свободный текст: цель недели, мысль, напоминание себе." },
+    mmap: { n: "Карта мыслей", i: "🧠", sec: "Заметки", sz: "l", d: "Карта мыслей из базы знаний: ветки и отметки задач; клик — открыть карту." },
     report: { n: "Отчёт", i: "🧮", sec: "Статистика", sz: "l", d: "Сохранённый отчёт из «Отчётов»: диаграмма или таблица по проектам, тегам, периодам — обновляется сам." },
     links: { n: "Ссылки", i: "🔗", sec: "Инструменты", sz: "s", d: "Закладки: сайты, документы, курсы — открываются в новой вкладке." }
   };
@@ -8205,6 +8208,7 @@ CREATE TABLE inbox (
     if (w.type === "time") return "Время за " + (c.days || 7) + " дн.";
     if (w.type === "daytop") return "Главное на сегодня";
     if (w.type === "report") { var wr = rqRep(c.rid); return wr ? wr.n : "Отчёт"; }
+    if (w.type === "mmap") { var wm = note(c.nid); return wm ? nTitle(wm) : "Карта мыслей"; }
     return (WT[w.type] || {}).n || "Виджет";
   }
   function wHref(w) {
@@ -8212,6 +8216,7 @@ CREATE TABLE inbox (
     if (w.type === "tasks" || (w.type === "count" && c.src) || (w.type === "dead" && c.src && c.src !== "list:all")) return wsrcHref(c.src || "list:today");
     if (w.type === "proj" && proj(c.pid)) return "proj-" + c.pid;
     if (w.type === "report") return rqRep(c.rid) ? "rpt-" + c.rid : "rpt";
+    if (w.type === "mmap") return note(c.nid) ? "note-" + c.nid : "notes";
     if (w.type === "note" && note(c.nid)) return "note-" + c.nid;
     if (w.type === "habits") return "habits"; if (w.type === "chart") return "stats"; if (w.type === "dead") return "plans";
     if (w.type === "cal") return "cal"; if (w.type === "sprint") return "sprint"; if (w.type === "goals") return c.gid ? "goal-" + c.gid : "goals"; if (w.type === "time") return "stats"; if (w.type === "daytop") return "daily"; if (w.type === "routine") return "cal"; if (w.type === "savings") return "goals"; if (w.type === "budget") return "budget"; if (w.type === "order") return "clean"; if (w.type === "chals") return "clean"; if (w.type === "kanban" && c.src && c.src !== "list:all") return wsrcHref(c.src);
@@ -8233,6 +8238,7 @@ CREATE TABLE inbox (
     var c = w.cfg || {}, h = "";
     switch (w.type) {
       case "report": return rqWidget(b, w);
+      case "mmap": var mn = note(c.nid); return mmIs(mn) ? '<a class="mmwa" href="#note-' + mn.id + '" title="Открыть карту">' + mmSVG(mn) + "</a>" : '<p class="wempty">' + (notes().some(mmIs) ? "Выберите карту в ⚙" : "Карт пока нет — «Заметки» → «📋 Из шаблона» → «🧠 Карта мыслей»") + "</p>";
       case "tasks":
         var src = c.src || "list:today", all = wsrcList(src), inSet = {}; all.forEach(function (t) { inSet[t.id] = 1; });
         var roots = all.filter(function (t) { return !t.parent || !inSet[t.parent]; }).sort(cmpBy(c.sort || "smart")), lim = +c.lim || 0, shown = lim ? roots.slice(0, lim) : roots;
@@ -8349,6 +8355,7 @@ CREATE TABLE inbox (
     if (w.type === "count") h += row("Откуда", dd("wsrc", sl("list:all"))) + row("Что считать", seg("m", Object.keys(WCNT).map(function (k) { return [k, WCNT[k]]; }), c.m || "open"));
     if (w.type === "chart") h += row("Откуда", dd("wsrc", sl("list:all"))) + row("Период", seg("days", [[7, "7 дн."], [14, "14 дн."], [30, "30 дн."]], c.days || 14));
     if (w.type === "quick") h += row("Куда добавлять", dd("wsrc", sl("list:inbox")));
+    if (w.type === "mmap") h += row("Карта", notes().some(mmIs) ? seg("nid", notes().filter(mmIs).sort(function (x, y) { return (y.upd || 0) - (x.upd || 0); }).slice(0, 10).map(function (x) { return [x.id, esc(nTitle(x).slice(0, 30))]; }), c.nid || "") : '<a href="#notes">Создать карту в «Заметках»</a>');
     if (w.type === "report") h += row("Отчёт", reports().length ? seg("rid", reports().map(function (r) { return [r.id, esc(r.n)]; }), c.rid || "") : '<a href="#rpt">Создать отчёт в «Отчётах»</a>');
     if (w.type === "cal") h += row("Откуда", dd("wsrc", sl("list:all"))) + row("Дней вперёд", seg("days", [[3, "3"], [7, "7"], [14, "14"]], c.days || 7));
     if (w.type === "kanban") h += row("Откуда", dd("wsrc", sl("list:all")));
@@ -8428,7 +8435,7 @@ CREATE TABLE inbox (
     else if (k === "proj") w = { type: "tasks", cfg: { src: "proj:" + id } };
     else if (k === "tag") w = { type: "tasks", cfg: { src: "tag:" + id } };
     else if (k === "filter") w = { type: "tasks", cfg: { src: "filter:" + id } };
-    else if (k === "note") w = { type: "note", cfg: { nid: id } };
+    else if (k === "note") w = mmIs(note(id)) ? { type: "mmap", cfg: { nid: id } } : { type: "note", cfg: { nid: id } };
     else if (k === "rpt") w = { type: "report", cfg: { rid: id } };
     else if (k === "list") w = id === "habits" ? { type: "habits" } : id === "stats" ? { type: "chart", cfg: { days: 14 } } : { type: "tasks", cfg: { src: "list:" + (WSRC_L[id] ? id : /^(plans|cal|gantt)$/.test(id) ? "week" : "all") } };
     if (!w) return;
@@ -12331,7 +12338,7 @@ CREATE TABLE inbox (
   function mmFind(n, id) { var r = null, p = null; mmWalk(mmRoot(n), function (x, par) { if (x.id === id) { r = x; p = par; } }); return r ? { x: r, p: p } : null; }
   function mmTexts(nd) { var o = []; mmWalk(nd, function (x) { if (x.t) o.push(x.t); }); return o; }
   function mmCount(nd) { var c = -1; mmWalk(nd, function () { c++; }); return Math.max(0, c); }
-  function mmLabel(n, x) { return x === mmRoot(n) ? nTitle(n) : x.t || ""; }
+  function mmLabel(n, x) { if (x === mmRoot(n)) return nTitle(n); var t = mmTask(x); if (t && !t.del) return t.t; var pg = mmPage(x); if (pg) return nTitle(pg); return x.t || ""; }
   function mmPush(n) { var u = MMU[n.id] = MMU[n.id] || []; u.push(JSON.stringify(n.mm)); if (u.length > 80) u.shift(); nhSnap(n); }
   function mmSave(n) { touch(n); save(); render(); }
   function mmNew(par, n) { var c = { id: uid(), t: "", k: [] }; if (par === mmRoot(n)) { var r = 0, l = 0; (par.k || []).forEach(function (x) { var w = mmCount(x) + 1; if (x.side === "l") l += w; else r += w; }); c.side = l < r ? "l" : "r"; } return c; }
@@ -12368,7 +12375,7 @@ CREATE TABLE inbox (
   function mmViewHTML(n, rd) {
     var root = mmRoot(n); if (!MMSEL || !mmFind(n, MMSEL)) MMSEL = root.id;
     var bar = '<div class="r mmbar"><span class="seg"><button type="button" data-a="mmview" data-x="map" class="' + (MMTXT === "list" ? "" : "on") + '">🧠 Карта</button><button type="button" data-a="mmview" data-x="list" class="' + (MMTXT === "list" ? "on" : "") + '">☰ Список</button></span>' +
-      (rd ? "" : '<button type="button" class="btn sm" data-a="mmadd" title="Tab">＋ Ветка</button><button type="button" class="btn sm" data-a="mmsib" title="Enter">＋ Рядом</button><button type="button" class="btn sm" data-a="mmren" title="F2 или пробел">✎</button><button type="button" class="btn sm" data-a="mmcol" title="Цвет ветки">🎨</button><button type="button" class="btn sm" data-a="mmic" title="Значок">☺</button><button type="button" class="btn sm" data-a="mmnote" title="Заметка к узлу">📝</button><button type="button" class="btn sm" data-a="mmdel" title="Delete">🗑</button><button type="button" class="btn sm" data-a="mmpaste" title="Вставить многоуровневый список">📋 Из списка</button>') +
+      (rd ? "" : '<button type="button" class="btn sm" data-a="mmadd" title="Tab">＋ Ветка</button><button type="button" class="btn sm" data-a="mmsib" title="Enter">＋ Рядом</button><button type="button" class="btn sm" data-a="mmren" title="F2 или пробел">✎</button><button type="button" class="btn sm" data-a="mmcol" title="Цвет ветки">🎨</button><button type="button" class="btn sm" data-a="mmic" title="Значок">☺</button><button type="button" class="btn sm" data-a="mmnote" title="Заметка к узлу">📝</button><button type="button" class="btn sm" data-a="mmdel" title="Delete">🗑</button><button type="button" class="btn sm" data-a="mmpaste" title="Вставить многоуровневый список">📋 Из списка</button><button type="button" class="btn sm" data-a="mmtask" title="Связать узел с задачей">☐ В задачу ▾</button><button type="button" class="btn sm" data-a="mmpage" title="Узел — страница базы знаний">📄 В страницу ▾</button>' + (n.mm.src ? '<button type="button" class="btn sm" data-a="mmsync" title="Добавить на карту новое из источника (проекта, цели, страницы)">🔄 Обновить</button>' : "") + (AI.ready() ? '<button type="button" class="btn sm" data-a="mmai" title="ИИ разложит выбранный узел на ветки">✨ Разложить</button>' : "")) +
       '<span class="mmz"><button type="button" class="btn sm" data-a="mmzoom" data-x="-1" aria-label="Мельче">−</button><button type="button" class="btn sm" data-a="mmzoom" data-x="0" title="Вписать в экран">⤢</button><button type="button" class="btn sm" data-a="mmzoom" data-x="1" aria-label="Крупнее">＋</button></span><button type="button" class="btn sm" data-a="mmexp">⤓ ▾</button></div>';
     var h = '<div class="mmwrap">' + bar;
     var sx = mmFind(n, MMSEL);
@@ -12387,7 +12394,8 @@ CREATE TABLE inbox (
       var st = "left:" + (v.cx + ox - s.w / 2).toFixed(1) + "px;top:" + (v.cy + oy - s.h / 2).toFixed(1) + "px;width:" + s.w + "px;height:" + s.h + "px;font-size:" + s.fs + "px;font-weight:" + s.fw + ";line-height:" + s.lh + "px;padding:" + s.py + "px " + s.px + "px;--bc:" + v.col;
       var inner = ed ? '<input class="mmin" id="mmin" value="' + esc(mmLabel(n, x)) + '" autocomplete="off" aria-label="Текст узла">' : s.lines.map(esc).join("<br>") + (x.nt ? '<span class="mmntb" title="' + esc(x.nt) + '">📝</span>' : "");
       var fold = kc && v.d > 0 ? '<button type="button" class="mmf' + (x.f ? " on" : "") + '" data-a="mmfold" data-id="' + id + '" style="' + (v.side > 0 ? "right:-22px" : "left:-22px") + '" title="' + (x.f ? "Развернуть" : "Свернуть") + '">' + (x.f ? mmCount(x) : "−") + "</button>" : "";
-      return '<div class="mmn d' + Math.min(v.d, 2) + (MMSEL === id ? " sel" : "") + (x.f ? " fld" : "") + '" data-mid="' + id + '" style="' + st + '"' + (x.nt ? ' title="' + esc(x.nt) + '"' : "") + ">" + inner + fold + "</div>";
+      var tk = mmTask(x), pgl = mmPage(x), bdg = (tk && !tk.del ? '<button type="button" class="mmtk' + (tk.done ? " on" : "") + '" data-a="mmck" data-id="' + id + '" title="' + (tk.done ? "Задача выполнена — вернуть" : "Задача — отметить выполненной") + '">' + (tk.done ? "✓" : "") + "</button>" : "") + (pgl ? '<button type="button" class="mmpg" data-a="mmpg" data-id="' + id + '" title="Открыть страницу «' + esc(nTitle(pgl)) + '»">📄</button>' : "");
+      return '<div class="mmn d' + Math.min(v.d, 2) + (MMSEL === id ? " sel" : "") + (x.f ? " fld" : "") + (tk && tk.done ? " dn" : "") + '" data-mid="' + id + '" style="' + st + '"' + (x.nt ? ' title="' + esc(x.nt) + '"' : "") + ">" + inner + fold + bdg + "</div>";
     }).join("");
     var tr = "translate(" + (vw.rx - ox * vw.s).toFixed(1) + "px," + (vw.ry - oy * vw.s).toFixed(1) + "px) scale(" + vw.s + ")";
     h += '<div class="mmvp' + (rd ? " ro" : "") + '" id="mmvp" tabindex="0" data-note="' + n.id + '" data-ox="' + ox.toFixed(1) + '" data-oy="' + oy.toFixed(1) + '" data-w="' + W + '" data-h="' + H + '"><div class="mmst" style="width:' + W + "px;height:" + H + "px;transform:" + tr + '">' + svg + nodes + "</div></div>";
@@ -12399,7 +12407,7 @@ CREATE TABLE inbox (
   function mmAfter(n) {
     var vp = $("mmvp"); if (!vp) return; var vw = MMV[n.id];
     if (vw && vw.fit) mmFit(n);
-    var inp = $("mmin"); if (inp) { inp.focus(); inp.select(); } else if (document.activeElement === document.body) { try { vp.focus({ preventScroll: true }); } catch (e) { vp.focus(); } }
+    var inp = $("mmin"); if (inp) { try { inp.focus({ preventScroll: true }); } catch (e) { inp.focus(); } inp.select(); } else if (document.activeElement === document.body) { try { vp.focus({ preventScroll: true }); } catch (e) { vp.focus(); } }
   }
   function mmApply(n) { var vp = $("mmvp"), st = vp && vp.querySelector(".mmst"), vw = MMV[n.id]; if (!st || !vw) return; st.style.transform = "translate(" + (vw.rx - +vp.dataset.ox * vw.s).toFixed(1) + "px," + (vw.ry - +vp.dataset.oy * vw.s).toFixed(1) + "px) scale(" + vw.s + ")"; }
   function mmFit(n) { var vp = $("mmvp"); if (!vp) return; var W = +vp.dataset.w, H = +vp.dataset.h, cw = vp.clientWidth, ch = vp.clientHeight, s = Math.max(0.3, Math.min(1.2, (cw - 20) / W, (ch - 20) / H)); MMV[n.id] = { s: s, rx: (cw - W * s) / 2 + +vp.dataset.ox * s, ry: (ch - H * s) / 2 + +vp.dataset.oy * s }; mmApply(n); }
@@ -12423,7 +12431,7 @@ CREATE TABLE inbox (
     var v = String(val || "").replace(/\s+/g, " ").trim(), isNew = MMNEW === f.x.id; MMNEW = "";
     if (cancel || !v) { if (isNew && f.p) { f.p.k.splice(f.p.k.indexOf(f.x), 1); MMSEL = f.p.id; mmSave(n); return; } render(); return; }
     if (f.x === mmRoot(n)) { if (v !== n.t) { n.t = v.slice(0, 200); mmSave(n); } else render(); return; }
-    if (v !== f.x.t) { if (!isNew) mmPush(n); f.x.t = v.slice(0, 300); mmSave(n); } else render();
+    if (v !== f.x.t || v !== mmLabel(n, f.x)) { if (!isNew) mmPush(n); f.x.t = v.slice(0, 300); var tk = mmTask(f.x); if (tk && !tk.del && tk.t !== v) { tk.t = v.slice(0, 1000); touch(tk); } var pg = mmPage(f.x); if (pg && pg.t !== v) { pg.t = v.slice(0, 200); touch(pg); } mmSave(n); } else render();
   }
   function mmNav(n, key) {
     var N = MMLAY || mmLayout(n), cur = N[MMSEL]; if (!cur) return; var x = cur.x, root = mmRoot(n), t = null;
@@ -12535,6 +12543,134 @@ CREATE TABLE inbox (
   document.addEventListener("wheel", function (e) { var vp = e.target.closest && e.target.closest("#mmvp"); if (!vp) return; var n = mmCur(); if (!n || !MMV[n.id]) return; e.preventDefault(); MMV[n.id].fit = 0; if (e.ctrlKey || e.metaKey) { var r = vp.getBoundingClientRect(); mmZoom(n, e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX - r.left, e.clientY - r.top); } else { MMV[n.id].rx -= e.deltaX; MMV[n.id].ry -= e.deltaY; mmApply(n); } }, { passive: false });
   // текст страницы для экспорта: у карты — сначала ветки списком
   function nBodyOf(n) { return mmIs(n) ? mmListHTML(mmRoot(n)) + (n.body || "") : n.body || ""; }
+
+  /* ---------- Карта мыслей, волна 2: узел ↔ задача (x.tid) и страница (x.nid), карта из страницы / проекта / цели (n.mm.src), виджет доски, ✨ ИИ ---------- */
+  function mmTask(x) { return x && x.tid ? task(x.tid) || taskAnyId(x.tid) : null; }
+  function mmPage(x) { return x && x.nid ? note(x.nid) : null; }
+  // узел → задача; ветку целиком — задача с подзадачами
+  function mmToTasks(n, x, pid, deep) {
+    var made = 0;
+    (function mk(y, parT) {
+      var t = mmTask(y);
+      if (!t || t.del) { t = newTaskFrom("задача", { pid: pid || "" }); t.t = (y.t || "Без названия").slice(0, 1000); t.at = 0; t.due = 0; t.allday = false; t.tags = []; t.rep = ""; if (parT) t.parent = parT.id; touch(t); y.tid = t.id; made++; }
+      if (deep) (y.k || []).forEach(function (c) { mk(c, t); });
+    })(x, null);
+    return made;
+  }
+  // узел → вложенная страница этой карты; ветку целиком — страницы со вложенными
+  function mmToPages(n, x, deep) {
+    var made = 0;
+    (function mk(y, par) {
+      var p = mmPage(y);
+      if (!p) { p = newNote({ t: (y.t || "Без названия").slice(0, 200), sec: n.sec || "" }); p.parent = par.id; if (y.nt) p.body = "<p>" + esc(y.nt) + "</p>"; touch(p); y.nid = p.id; made++; }
+      if (deep) (y.k || []).forEach(function (c) { mk(c, p); });
+    })(x, n);
+    return made;
+  }
+  // карта из проекта: подпроекты и открытые задачи (с подзадачами); узлы связаны с задачами
+  function mmProjTree(pid, seen) {
+    seen = seen || {}; var out = [];
+    pkids(pid).forEach(function (sp) { if (seen["p" + sp.id]) return; seen["p" + sp.id] = 1; out.push({ id: uid(), t: sp.n, ppid: sp.id, k: mmProjTree(sp.id, seen) }); });
+    function tk(parentId) { return tasks().filter(function (t) { return !t.done && t.pid === pid && (t.parent || "") === parentId && !seen["t" + t.id]; }).sort(cmpBy("smart")).map(function (t) { seen["t" + t.id] = 1; return { id: uid(), t: t.t.slice(0, 300), tid: t.id, k: tk(t.id) }; }); }
+    return out.concat(tk(""));
+  }
+  function mmNewMap(title, kids, src, parentNote) {
+    var n = newNote({ t: title.slice(0, 200), sec: parentNote ? parentNote.sec || "" : "" }); if (parentNote) n.parent = parentNote.id;
+    n.tpl = "map"; n.ic = "🧠"; n.mm = { r: { id: uid(), k: kids }, src: src || "" };
+    var i = 0; (n.mm.r.k || []).forEach(function (c) { c.side = i++ % 2 ? "l" : "r"; });
+    touch(n); save(); MMSEL = n.mm.r.id; go("note-" + n.id); return n;
+  }
+  function mmFromProj(pid) { var p = proj(pid); if (!p) return; mmNewMap("Карта: " + p.n, mmProjTree(pid), "proj:" + pid); toast("Карта проекта построена — узлы связаны с задачами"); }
+  function mmFromGoal(gid) {
+    var g = goal(gid); if (!g) return; var seen = {}, kids = goalProjs(g).map(function (p) { seen["p" + p.id] = 1; return { id: uid(), t: p.n, ppid: p.id, k: mmProjTree(p.id, seen) }; });
+    var own = live(S.tasks).filter(function (t) { return t.goal === g.id && !t.done && !seen["t" + t.id] && !t.parent; }); if (own.length) kids.push({ id: uid(), t: "Шаги цели", k: own.map(function (t) { return { id: uid(), t: t.t.slice(0, 300), tid: t.id, k: [] }; }) });
+    mmNewMap("Карта: " + g.n, kids, "goal:" + gid); toast("Карта цели построена: проекты и шаги");
+  }
+  // карта из страницы: заголовки — ветки, списки под ними — подпункты; или из вложенных страниц
+  function mmFromPage(n, mode) {
+    var kids = [];
+    if (mode === "kids") (function walk(pid, out) { nKids(pid).forEach(function (k) { var x = { id: uid(), t: nTitle(k), nid: k.id, k: [] }; out.push(x); walk(k.id, x.k); }); })(n.id, kids);
+    else {
+      TXTD.innerHTML = n.body || ""; var st = [{ l: 0, k: kids }];
+      var li = function (ul) { return [].filter.call(ul.children, function (c) { return c.tagName === "LI"; }).map(function (c) { var cp = c.cloneNode(true); [].forEach.call(cp.querySelectorAll("ul,ol"), function (u) { u.remove(); }); var sub = c.querySelector(":scope > ul, :scope > ol"); return { id: uid(), t: cp.textContent.replace(/\s+/g, " ").trim().slice(0, 300) || "…", k: sub ? li(sub) : [] }; }); };
+      [].forEach.call(TXTD.children, function (b) {
+        var m = /^H([1-3])$/.exec(b.tagName);
+        if (m) { var lv = +m[1]; while (st.length > 1 && st[st.length - 1].l >= lv) st.pop(); var x = { id: uid(), t: b.textContent.replace(/\s+/g, " ").trim().slice(0, 300), k: [] }; st[st.length - 1].k.push(x); st.push({ l: lv, k: x.k }); }
+        else if (b.tagName === "UL" || b.tagName === "OL") li(b).forEach(function (x) { st[st.length - 1].k.push(x); });
+      });
+    }
+    if (!kids.length) { toast(mode === "kids" ? "У страницы нет вложенных страниц" : "В тексте нет заголовков и списков — карте не из чего строиться"); return; }
+    mmNewMap("Карта: " + nTitle(n), kids, mode === "kids" ? "page:" + n.id : "", n); toast("Карта построена — она вложена в «" + nTitle(n) + "»");
+  }
+  // обновить карту из источника: добавить новые подпроекты, задачи, страницы (ничего не удаляет)
+  function mmSync(n) {
+    var src = (n.mm && n.mm.src) || "", m = /^(proj|goal|page):(.+)$/.exec(src); if (!m) return;
+    var have = {}; mmWalk(mmRoot(n), function (x) { if (x.tid) have["t" + x.tid] = x; if (x.ppid) have["p" + x.ppid] = x; if (x.nid) have["n" + x.nid] = x; });
+    var added = 0; mmPush(n);
+    function merge(into, fresh) { fresh.forEach(function (f) { var key = f.tid ? "t" + f.tid : f.ppid ? "p" + f.ppid : f.nid ? "n" + f.nid : ""; var ex = key && have[key]; if (ex) { merge(ex.k = ex.k || [], f.k || []); return; } var cnt = mmCount(f) + 1; into.push(f); added += cnt; mmWalk(f, function (y) { if (y.tid) have["t" + y.tid] = y; if (y.ppid) have["p" + y.ppid] = y; if (y.nid) have["n" + y.nid] = y; }); }); }
+    var root = mmRoot(n), fresh = [];
+    if (m[1] === "proj") fresh = mmProjTree(m[2]);
+    else if (m[1] === "goal") { var g = goal(m[2]); if (g) fresh = goalProjs(g).map(function (p) { return { id: uid(), t: p.n, ppid: p.id, k: mmProjTree(p.id) }; }); }
+    else (function walk(pid, out) { nKids(pid).forEach(function (k) { if (k.id === n.id) return; var x = { id: uid(), t: nTitle(k), nid: k.id, k: [] }; out.push(x); walk(k.id, x.k); }); })(m[2], fresh);
+    merge(root.k = root.k || [], fresh); root.k.forEach(function (c) { if (!c.side) c.side = mmNew(root, n).side; });
+    mmSave(n); toast(added ? "Добавлено узлов: " + added : "Нового нет — карта актуальна");
+  }
+  // ✨ ИИ: разложить тему выбранного узла на ветки
+  function mmAI(n) {
+    if (!AI.ready()) { toast("Подключите ИИ в «Настройки» → «ИИ»"); return; } if (AI.busy) return;
+    var f = mmFind(n, MMSEL) || { x: mmRoot(n), p: null }, path = []; (function up(id) { var ff = mmFind(n, id); if (!ff) return; path.unshift(mmLabel(n, ff.x)); if (ff.p) up(ff.p.id); })(f.x.id);
+    var have = (f.x.k || []).map(function (c) { return c.t; }).filter(Boolean);
+    var prompt = "Ты помогаешь строить карту мыслей. Тема карты: «" + nTitle(n) + "». Разложи узел «" + path.join(" → ") + "» на 4–7 веток, у каждой 2–4 подпункта." + (have.length ? " Уже есть ветки: " + have.join("; ") + " — не повторяй их." : "") + " Пиши по-русски, коротко (2–6 слов на пункт). Ответ — только многоуровневый список: каждая строка — пункт, вложенность — табуляция, без нумерации, пояснений и лишнего текста.";
+    AI.busy = true; toast("✨ " + AI.name() + " раскладывает «" + mmLabel(n, f.x).slice(0, 40) + "»…");
+    AI.text(prompt).then(function (txt) {
+      AI.busy = false; var add = mmParse(String(txt || "").replace(/```[a-z]*\n?|```/g, "")); if (!add.length) { toast("ИИ не вернул список — попробуйте ещё раз"); return; }
+      var nn = note(n.id); if (!nn) return; var ff = mmFind(nn, f.x.id) || { x: mmRoot(nn) }; mmPush(nn); ff.x.k = (ff.x.k || []).concat(add); ff.x.f = false; if (ff.x === mmRoot(nn)) add.forEach(function (c) { c.side = mmNew(ff.x, nn).side; });
+      mmSave(nn); toast("✨ Добавлено узлов: " + add.reduce(function (s0, c) { return s0 + mmCount(c) + 1; }, 0) + " — лишнее удалите Delete, Ctrl+Z — отменить всё");
+    }).catch(function (e) { AI.busy = false; toast("ИИ: " + ((e && e.msg) || "не получилось")); });
+  }
+  // картинка карты для виджета доски (цвета — из темы приложения)
+  function mmSVG(n) {
+    var N = mmLayout(n), b = mmBounds(N), pad = 20, ox = -b.x0 + pad, oy = -b.y0 + pad, W = Math.ceil(b.x1 - b.x0 + pad * 2), H = Math.ceil(b.y1 - b.y0 + pad * 2), s = '<svg class="mmw" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMidYMid meet">';
+    Object.keys(N).forEach(function (id) { var v = N[id]; if (!v.p || v.cx === undefined) return; var p = N[v.p.id]; s += '<path d="' + mmEdge({ cx: p.cx + ox, cy: p.cy + oy, s: p.s }, { cx: v.cx + ox, cy: v.cy + oy, s: v.s, side: v.side, d: v.d }) + '" fill="none" style="stroke:' + v.col + '" stroke-width="' + (v.d === 1 ? 3 : 2) + '"/>'; });
+    Object.keys(N).forEach(function (id) { var v = N[id], x0 = v.cx + ox - v.s.w / 2, y0 = v.cy + oy - v.s.h / 2, t = mmTask(v.x);
+      if (v.d === 0) s += '<rect x="' + x0 + '" y="' + y0 + '" width="' + v.s.w + '" height="' + v.s.h + '" rx="' + v.s.h / 2 + '" style="fill:var(--panel);stroke:var(--fg)" stroke-width="2"/>';
+      else if (v.d === 1) s += '<rect x="' + x0 + '" y="' + y0 + '" width="' + v.s.w + '" height="' + v.s.h + '" rx="10" style="fill:' + v.col + ';fill-opacity:.16;stroke:' + v.col + '" stroke-width="1.5"/>';
+      else s += '<line x1="' + x0 + '" x2="' + (x0 + v.s.w) + '" y1="' + (y0 + v.s.h) + '" y2="' + (y0 + v.s.h) + '" style="stroke:' + v.col + '" stroke-width="2"/>';
+      v.s.lines.forEach(function (l, i) { s += '<text x="' + (x0 + v.s.px) + '" y="' + (y0 + v.s.py + v.s.lh * (i + 0.72)) + '" font-size="' + v.s.fs + '" font-weight="' + v.s.fw + '" style="fill:var(--fg)' + (t && t.done ? ";text-decoration:line-through;opacity:.6" : "") + '">' + esc(l) + "</text>"; });
+    });
+    return s + "</svg>";
+  }
+  function mm2Act(a, el) {
+    var n = mmCur();
+    if (a === "mmfrom") { var src = note(ARG); if (!src) return true; var rf = el.getBoundingClientRect(); ctxShow(rf.left, rf.bottom + 4, [{ c: "head", i: "H", l: "Из заголовков и списков текста" }].concat(nKids(src.id).length ? [{ c: "kids", i: "📄", l: "Из вложенных страниц (" + (nDesc(src.id).length - 1) + ")" }] : []), { k: "mmfrom", id: src.id }); return true; }
+    if (a === "gmap") { mmFromGoal(ARG); return true; }
+    if (!n) return false;
+    switch (a) {
+      case "mmck": var f = mmFind(n, el.dataset.id), t = f && mmTask(f.x); if (t && !t.del) { toggle(t); } else if (f) { toast("Задача удалена — связь снята"); delete f.x.tid; mmSave(n); } return true;
+      case "mmpg": var f2 = mmFind(n, el.dataset.id), pg = f2 && mmPage(f2.x); if (pg) go("note-" + pg.id); else if (f2) { toast("Страница удалена — связь снята"); delete f2.x.nid; mmSave(n); } return true;
+      case "mmtask": var fx = mmFind(n, MMSEL); if (!fx || fx.x === mmRoot(n)) { toast("Выберите узел — центр карты в задачу не превращается"); return true; } var rt = el.getBoundingClientRect(), dest = function (deep) { return [{ c: (deep ? "b:" : "o:") + "", i: "📥", l: "Входящие" }, "-"].concat(ptree().slice(0, 60).map(function (pp) { return { c: (deep ? "b:" : "o:") + pp.p.id, i: piconH(pp.p), l: pp.p.n, pad: pp.d }; })); };
+        ctxShow(rt.left, rt.bottom + 4, [{ i: "☐", l: "Этот узел — в задачу", sub: dest(false) }, { i: "🌿", l: "Ветку целиком — задача с подзадачами", sub: dest(true) }].concat(fx.x.tid ? ["-", { c: "un", i: "✕", l: "Отвязать задачу (задача останется)" }] : []), { k: "mmtask", id: n.id }); return true;
+      case "mmpage": var fp = mmFind(n, MMSEL); if (!fp || fp.x === mmRoot(n)) { toast("Выберите узел — центр карты уже эта страница"); return true; } var rp = el.getBoundingClientRect();
+        ctxShow(rp.left, rp.bottom + 4, [{ c: "one", i: "📄", l: "Этот узел — вложенная страница" }, { c: "deep", i: "🌿", l: "Ветку целиком — страницы со вложенными" }, { i: "🔗", l: "Связать с существующей страницей", sub: notes().filter(function (x) { return x.id !== n.id; }).sort(function (x, y) { return (y.upd || 0) - (x.upd || 0); }).slice(0, 40).map(function (x) { return { c: "link:" + x.id, i: esc(nIc(x)), l: nTitle(x).slice(0, 50) }; }) }].concat(fp.x.nid ? ["-", { c: "un", i: "✕", l: "Отвязать страницу (страница останется)" }] : []), { k: "mmpage", id: n.id }); return true;
+      case "mmsync": mmSync(n); return true;
+      case "mmai": mmAI(n); return true;
+    }
+    return false;
+  }
+  function mm2Ctx(k, id, c) {
+    if (k === "mmfrom") { var src = note(id); if (src) mmFromPage(src, c); return; }
+    var n = note(id); if (!mmIs(n)) return; var f = mmFind(n, MMSEL); if (!f) return;
+    if (k === "mmtask") {
+      if (c === "un") { mmPush(n); delete f.x.tid; mmSave(n); toast("Связь с задачей снята"); return; }
+      var deep = c.charAt(0) === "b", pid = c.slice(2); mmPush(n); var made = mmToTasks(n, f.x, pid, deep); save(); mmSave(n);
+      toast(made ? "Создано задач: " + made + (pid && proj(pid) ? " — в «" + proj(pid).n + "»" : " — во «Входящих»") + ". Отметки ☐ на карте — живые" : "Эти узлы уже связаны с задачами"); return;
+    }
+    if (k === "mmpage") {
+      if (c === "un") { mmPush(n); delete f.x.nid; mmSave(n); toast("Связь со страницей снята"); return; }
+      if (c.indexOf("link:") === 0) { var pg = note(c.slice(5)); if (pg) { mmPush(n); f.x.nid = pg.id; mmSave(n); toast("Узел связан со страницей «" + nTitle(pg) + "»"); } return; }
+      mmPush(n); var made2 = mmToPages(n, f.x, c === "deep"); save(); mmSave(n); toast(made2 ? "Создано страниц: " + made2 + " — внутри этой карты; 📄 на узле открывает страницу" : "Эти узлы уже связаны со страницами");
+    }
+  }
 
   function chalsWidget() {
     var h = "", t0 = today0(), any = false;
@@ -13115,6 +13251,8 @@ CREATE TABLE inbox (
       "<b>Поиск</b> по заметкам показывает в карточках отрывок с найденным, а на открытой странице подсвечивает совпадения в тексте.",
       "<b>🧠 Карта мыслей</b> — тип страницы: «📋 Из шаблона» → «🧠 Карта мыслей» (или «Тип» в шапке страницы). В центре — название страницы, ветки расходятся вправо и влево, у каждой свой цвет. <b>Tab</b> — ветка, <b>Enter</b> — рядом, <b>F2</b> или пробел — переименовать (или двойной клик), <b>Delete</b> — удалить, стрелки — ходить по карте, Ctrl+Z — отменить. Кнопки над картой — то же для телефона, плюс 🎨 цвет ветки, ☺ значок, 📝 заметка к узлу (видна при наведении).",
       "На карте: перетащите узел на другой — ветка переедет; − / число у узла — свернуть и развернуть; тяните фон или крутите колесо — сдвинуть, Ctrl+колесо или −/＋ — масштаб, ⤢ — вписать в экран. «☰ Список» — те же ветки списком и «✎ Править как текст» (отступ Tab — уровень). «📋 Из списка» — вставить многоуровневый список (из Word, от ИИ) в выбранный узел. «⤓» — картинка PNG, Markdown или копия списком. Под картой — обычный текст страницы для заметок.",
+      "<b>Карта ↔ задачи и страницы</b>: «☐ В задачу ▾» — выбранный узел или всю ветку (с подзадачами) — в задачи «Входящих» или проекта; на узле появляется кружок-отметка, он живой: отметили на карте — задача выполнена, и наоборот. «📄 В страницу ▾» — узел или ветку — во вложенные страницы карты (📄 на узле открывает страницу) или связать с уже существующей. Переименовали узел — переименуется и задача или страница.",
+      "<b>Карту можно построить</b>: из страницы — «🧠 Карта из страницы ▾» внизу (из заголовков и списков текста или из вложенных страниц); из проекта — правый клик по проекту → «🧠 Карта мыслей проекта» (подпроекты и открытые задачи); из цели — «🧠 Карта» на странице цели (проекты и шаги). «🔄 Обновить» на такой карте добавит новое из источника, ничего не удаляя. <b>✨ Разложить</b> — ИИ (если подключён) предложит ветки для выбранного узла. «📌 На доску» с карты — виджет «Карта мыслей».",
       "<b>🕸 Граф связей</b> — кнопка в «Заметках»: точки — страницы (цвет — раздел, размер — сколько связей), серые линии — вложенность, цветные — ссылки [[…]]. Клик по точке — открыть страницу.",
       "Раздел и «Все заметки» — <b>▦ Плитки</b> (карточки с обложками) или <b>☰ Список</b> (строки: значок, название, путь, дата).",
       "Удалённые заметки 30 дней лежат в Корзине. Заметки синхронизируются между устройствами вместе с задачами."]));
@@ -14429,6 +14567,7 @@ CREATE TABLE inbox (
     if (a && nbAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && nb5Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && mmAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && mm2Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -15749,7 +15888,7 @@ CREATE TABLE inbox (
       if (k === "proj") items.push(["subproj", "＋ Подпроект"], { c: "focus", i: "🎯", l: FOCUS === id ? "Выйти из фокуса" : "Фокус на проекте" }, { i: "↻", l: "Интервал проверки", sub: [[-1, "по умолчанию (" + (S.opt.revDays !== undefined ? +S.opt.revDays : 7) + " дн.)"], [7, "каждую неделю"], [14, "раз в 2 недели"], [30, "раз в месяц"], [182, "раз в полгода"], [0, "никогда"]].map(function (x) { var cur = o.rev === undefined || o.rev === null ? -1 : +o.rev; return { c: "rv:" + x[0], i: cur === x[0] ? "✓" : "", l: x[1] }; }) }, ["tplsave", "⧉ Сохранить как шаблон"], ["arch", "🗄 В архив"]);
       if (k === "tag") items.push({ i: "↳", l: "Вложить в тег", sub: [{ c: "tp:", i: o.par ? "" : "✓", l: "— верхний уровень —" }].concat(tags().filter(function (x) { return tagDesc(o.n).indexOf(x.n) < 0; }).map(function (x) { return { c: "tp:" + x.n, i: o.par === x.n ? "✓" : "", l: "#" + x.n }; })) });
       if (k === "proj" && CLIP && task(CLIP.id)) items.push(["pasteproj", "📋 Вставить задачу сюда"]);
-      items.push(pinMenu()); if (k === "proj") items.push({ i: "🎯", l: "Цель", sub: goalMenu(o.goal || "", "pg:") }, pinMenu("progress"), { c: "pboard", i: "▦", l: "Доска проекта (по шаблону)" });
+      items.push(pinMenu()); if (k === "proj") items.push({ i: "🎯", l: "Цель", sub: goalMenu(o.goal || "", "pg:") }, pinMenu("progress"), { c: "pboard", i: "▦", l: "Доска проекта (по шаблону)" }, { c: "pmap", i: "🧠", l: "Карта мыслей проекта" });
       items.push(["fav", o.fav ? "☆ Убрать из избранного" : "★ В избранное"], "-", ["del", "🗑 Удалить в корзину", 1], "-", { c: "help:" + (k === "proj" ? "tree" : k === "tag" ? "tags" : "filters"), i: "?", l: "Справка" });
       ctxShow(e.clientX, e.clientY, items, { k: k, id: id });
       return;
@@ -15795,6 +15934,7 @@ CREATE TABLE inbox (
       bSave(bb); return;
     }
     if (k === "proj" && c === "pboard") { bFromTpl("proj", id); return; }
+    if (k === "proj" && c === "pmap") { mmFromProj(id); return; }
     if (k === "task") { var t = task(id); if (t) taskCmd(t, c); return; }
     if (k === "view") { if (c === "paste-here") pasteInto(null); return; }
     if (k === "hst") { var hp = String(id).split("|"), hx2 = hab(hp[0]); if (hx2) { hSet(hx2, hp[1], c === "none" ? "" : c); render(); } return; }
@@ -15811,6 +15951,7 @@ CREATE TABLE inbox (
     }
     if (k === "nsecpick") { var nsn = note(id); if (nsn) { nsn.parent = ""; touch(nsn); nSetSec(nsn, c.slice(3)); save(); render(); } return; }
     if (k === "mmcol" || k === "mmic" || k === "mmexp") { mmCtx(k, id, c); return; }
+    if (k === "mmtask" || k === "mmpage" || k === "mmfrom") { mm2Ctx(k, id, c); return; }
     if (k === "nexp") { var en = note(id); if (en) nExport(en, c.replace("+", ""), c.indexOf("+") > 0); return; }
     if (k === "ntplset") { var tn = note(id); if (tn) { if (c === "~") delete tn.tpl; else tn.tpl = c; if (tn.tpl === "map" && !mmRoot(tn)) tn.mm = { r: { id: uid(), k: [] } }; touch(tn); save(); render(); } return; }
     if (k === "nprsel") { var pp = id.split("|"), sn = note(pp[0]); if (sn) { sn.pr = sn.pr || {}; if (c === "~") delete sn.pr[pp[1]]; else sn.pr[pp[1]] = c; touch(sn); save(); render(); } return; }
