@@ -2465,7 +2465,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-126";
+  var APPV = "zd-app-2026-10-16-127";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -6924,13 +6924,16 @@ CREATE TABLE inbox (
     });
   }
   function buGrid(xml, ss) {
-    var cells = {}, d = xmlDoc(xml), cs = d.getElementsByTagName("c");
+    var cells = {}, shm = {}, shd = [], d = xmlDoc(xml), cs = d.getElementsByTagName("c");
     for (var i = 0; i < cs.length; i++) {
       var c = cs[i], ref = c.getAttribute("r"), t = c.getAttribute("t"), vEl = c.getElementsByTagName("v")[0], fEl = c.getElementsByTagName("f")[0], v = vEl ? vEl.textContent : null;
       if (t === "s" && v !== null) v = ss[+v]; else if (t === "inlineStr") { var is = c.getElementsByTagName("t")[0]; v = is ? is.textContent : null; } else if (t !== "str" && t !== "b" && v !== null && v !== "") v = +v;
       var m = /^([A-Z]+)(\d+)$/.exec(ref || ""); if (!m) continue;
-      cells[(+m[2] - 1) + "," + colIdx(m[1])] = { v: v === "" ? null : v, f: fEl && fEl.textContent ? fEl.textContent : null };
+      var cr = +m[2] - 1, cc = colIdx(m[1]), x = cells[cr + "," + cc] = { v: v === "" ? null : v, f: fEl && fEl.textContent ? fEl.textContent : null };
+      // общая формула: текст хранится один раз в первой ячейке группы, остальные ссылаются на неё по номеру
+      if (fEl && fEl.getAttribute("t") === "shared") { var si = fEl.getAttribute("si"); if (x.f) shm[si] = { f: x.f, r: cr, c: cc }; else shd.push([x, si, cr, cc]); }
     }
+    shd.forEach(function (q) { var mf = shm[q[1]]; if (mf) q[0].f = buShift(mf.f, q[2] - mf.r, q[3] - mf.c); });
     // текст ячейки; формула-ссылка вида =V10 без сохранённого значения (после выгрузки из 1С) — берём текст из ячейки, на которую ссылается
     var txt = function (r, c, depth) {
       var x = cells[r + "," + c]; if (!x) return ""; if (typeof x.v === "string") return x.v.trim();
@@ -6939,12 +6942,20 @@ CREATE TABLE inbox (
     };
     return { cells: cells, get: function (r, c) { return cells[r + "," + c] || null; }, txt: function (r, c) { return txt(r, c, 0); } };
   }
+  // сдвиг относительных ссылок формулы (для общих формул): A1 → на dr строк и dc столбцов, $A$1 не меняется
+  function buShift(f, dr, dc) {
+    return f.replace(/"[^"]*"|('(?:[^']|'')+'!|[A-Za-zА-Яа-яЁё_][\wА-Яа-яЁё.]*!)?(\$?)([A-Z]{1,3})(\$?)(\d+)(?![\w(])/g, function (m, sh, ca, col, ra, row, off, str) {
+      if (m.charAt(0) === '"' || (!sh && /[A-Za-z_]/.test(str.charAt(off - 1)))) return m;
+      return (sh || "") + ca + (ca ? col : bfxColL(colIdx(col) + dc)) + ra + (ra ? row : +row + dr);
+    });
+  }
   // число в ячейке: сохранённое значение, иначе посчитать простую формулу (после выгрузки из 1С значения формул сброшены)
   function buNum(G, r, c, depth) {
     var x = G.get(r, c); if (!x) return 0; if (typeof x.v === "number") return x.v;
     if (typeof x.v === "string" && x.v !== "" && !x.f) { var n = parseFloat(x.v.replace(/\s/g, "").replace(",", ".")); return isFinite(n) ? n : 0; }
-    if (!x.f || (depth || 0) > 12) return x.f ? NaN : 0;
-    return buEval(G, x.f, (depth || 0) + 1);
+    if (!x.f || (depth || 0) > 400) return x.f ? NaN : 0;
+    var mk = r + "," + c; if (G.memo && mk in G.memo) return G.memo[mk];
+    var v = buEval(G, x.f, (depth || 0) + 1); if (G.memo) G.memo[mk] = v; return v;
   }
   function buEval(G, src, depth) {
     var s = src.replace(/\$/g, ""), i = 0;
@@ -6957,12 +6968,36 @@ CREATE TABLE inbox (
       if (s[i] === "+") { i++; return prim(); }
       if ((m = /^\d+(?:[.,]\d+)?(?:E[+-]?\d+)?/i.exec(s.slice(i)))) { i += m[0].length; return +m[0].replace(",", "."); }
       if ((m = /^SUM\(([A-Z]+\d+):([A-Z]+\d+)\)/i.exec(s.slice(i)))) { i += m[0].length; var a = ref(m[1].toUpperCase()), b = ref(m[2].toUpperCase()), t = 0; for (var r = Math.min(a[0], b[0]); r <= Math.max(a[0], b[0]); r++) for (var c = Math.min(a[1], b[1]); c <= Math.max(a[1], b[1]); c++) t += buNum(G, r, c, depth) || 0; return t; }
+      // ссылка на другой лист: 'Октябрь 2026'!O7 — лист подгружается снаружи (buCalc), пока его нет — исключение need
+      if ((m = /^(?:'((?:[^']|'')+)'|([A-Za-zА-Яа-яЁё0-9_.]+))!([A-Z]+\d+)/.exec(s.slice(i)))) { i += m[0].length; if (!G.ext) throw new Error("формула"); var G2 = G.ext((m[1] || m[2]).replace(/''/g, "'")), rc2 = ref(m[3]); return buNum(G2, rc2[0], rc2[1], depth); }
       if ((m = /^[A-Z]+\d+/.exec(s.slice(i)))) { i += m[0].length; var rc = ref(m[0]); return buNum(G, rc[0], rc[1], depth); }
       throw new Error("формула");
     }
     function term() { var v = prim(); for (;;) { ws(); if (s[i] === "*") { i++; v *= prim(); } else if (s[i] === "/") { i++; var d = prim(); v = d ? v / d : NaN; } else return v; } }
     function expr() { var v = term(); for (;;) { ws(); if (s[i] === "+") { i++; v += term(); } else if (s[i] === "-") { i++; v -= term(); } else return v; } }
-    try { var v = expr(); ws(); return i >= s.length && isFinite(v) ? v : NaN; } catch (e) { return NaN; }
+    try { var v = expr(); ws(); return i >= s.length && isFinite(v) ? v : NaN; } catch (e) { if (e && e.need) throw e; return NaN; }
+  }
+  // ячейка с формулами, которые ссылаются на другие листы: недостающие листы подгружаются, расчёт повторяется
+  function buCalc(bk, grids, G, r, c) {
+    var n = 0;
+    var link = function (g) { g.memo = {}; g.ext = function (nm) { var x = grids[nm]; if (x === null) throw new Error("нет листа"); if (!x) throw { need: nm }; return x; }; return g; };
+    link(G);
+    var go = function () {
+      try { return Promise.resolve(buNum(G, r, c)); }
+      catch (e) {
+        if (!e || !e.need || ++n > 80) return Promise.resolve(NaN);
+        return bk.grid(e.need).then(function (g2) { grids[e.need] = g2 ? link(g2) : null; Object.keys(grids).forEach(function (k) { if (grids[k]) grids[k].memo = {}; }); G.memo = {}; return go(); });
+      }
+    };
+    return go();
+  }
+  function buBal(bk, G, name) {
+    var all = Object.keys(G.cells).map(function (k) { var p = k.split(","); return [+p[0], +p[1]]; });
+    var at = function (txt, row) { return all.filter(function (rc) { return (row === undefined || rc[0] === row) && buNorm(G.txt(rc[0], rc[1])) === txt; }).sort(function (a, b) { return a[1] - b[1] || a[0] - b[0]; })[0]; };
+    var e = at("конец"); if (!e) return Promise.resolve(null);
+    var grids = {}; grids[name] = G;
+    var keys = [["start", "начало"], ["inc", "доход"], ["exp", "расход"], ["end", "конец"], ["gain", "прирост"]], out = {};
+    return keys.reduce(function (pr, k) { return pr.then(function () { var h = at(k[1], e[0]); if (!h) return; return buCalc(bk, grids, G, h[0] + 1, h[1]).then(function (v) { out[k[0]] = isFinite(v) ? Math.round(v * 100) / 100 : null; }); }); }, Promise.resolve()).then(function () { return out.end === undefined || out.end === null ? null : out; });
   }
   // месячный лист → { pid, name, plan, cats, days, inc, warn }
   function buParse(G, name) {
@@ -7045,7 +7080,7 @@ CREATE TABLE inbox (
       var jobs = pids.map(function (pid) {
         var nm = bk.names.filter(function (x) { return buNorm(x) === buNorm(buPName(pid)); })[0];
         if (!nm) return Promise.resolve({ pid: pid, miss: true });
-        return bk.grid(nm).then(function (G) { return buParse(G, nm); }).then(function (x) { x.pid = pid; return x; }, function (e) { return { pid: pid, err: e.message }; });
+        return bk.grid(nm).then(function (G) { var x = buParse(G, nm); return buBal(bk, G, nm).then(function (b) { x.bal = b; return x; }, function () { return x; }); }).then(function (x) { x.pid = pid; return x; }, function (e) { return { pid: pid, err: e.message }; });
       });
       return Promise.all(jobs);
     }).then(function (res) {
@@ -7055,7 +7090,7 @@ CREATE TABLE inbox (
         if (x.err) { msgs.push(x.err); return; }
         S.bpers = S.bpers || []; var P = buPer(x.pid);
         if (!P) { P = { id: x.pid, days: {} }; S.bpers.push(P); }
-        P.n = x.name; P.plan = x.plan; P.cats = x.cats; P.inc = x.inc; P.from = buPRange(x.pid).from; P.to = buPRange(x.pid).to;
+        P.n = x.name; P.plan = x.plan; P.cats = x.cats; P.inc = x.inc; if (x.bal) P.bal = x.bal; else delete P.bal; P.from = buPRange(x.pid).from; P.to = buPRange(x.pid).to;
         if (wk) { for (var j = 0; j < 7; j++) { var k = dKey(addDays(wk, j)); if (buPid(addDays(wk, j)) !== x.pid) continue; if (x.days[k]) P.days[k] = x.days[k]; else delete P.days[k]; } }
         else P.days = x.days;
         P.src = { f: file.name, mt: file.lastModified, at: Date.now() }; touch(P);
@@ -7211,6 +7246,13 @@ CREATE TABLE inbox (
     if (P) { var pr = buPeriod(P), pays = pr.rows.filter(function (x) { return x.k === "pay"; }); if (pays.length) h += '<div class="card busec"><div class="bulab">Платежи периода ' + esc(buPName(P.id)) + " — план и факт</div>" + pays.map(function (x) { return '<div class="burow"><span>' + esc(x.c) + buPct(x.fact, x.plan) + "</span>" + buBar(x.fact, x.plan, -1, x.fact > x.plan + 1 ? "bad" : "pay") + '<span class="bunum' + (x.fact > x.plan + 1 ? " bad" : "") + '">' + buRub(x.fact) + " / " + buRub(x.plan) + (x.fact > x.plan + 1 ? " · сверх плана" : x.plan - x.fact >= 1 ? " · осталось " + buRub(x.plan - x.fact) : " ✓") + "</span></div>"; }).join("") + "</div>"; }
     return h;
   }
+  // фактический остаток из листа месяца («Конец» = начало + доходы − расходы ± корректировка)
+  function buBalTile(P) {
+    var b = P.bal, cur = today0() <= P.to;
+    if (!b) return '<div class="butile"><small>' + (cur ? "Остаток сейчас" : "Остаток на конец периода") + '</small><span class="muted">—</span><small class="muted">обновите период из файла</small></div>';
+    var g = b.gain;
+    return '<div class="butile" title="Ячейка «Конец» листа: начало + доходы − расходы ± корректировка"><small>' + (cur ? "Остаток сейчас" : "Остаток на конец периода") + "</small><span>" + buRub(b.end) + '</span><small class="muted">' + (b.start !== null && b.start !== undefined ? "начало " + buRub(b.start) : "") + (g !== null && g !== undefined ? ' · <span class="' + (g < 0 ? "bad" : "ok") + '">' + (g < 0 ? "−" : "+") + buRub(Math.abs(g)).replace("−", "") + "</span> за период" : "") + "</small></div>";
+  }
   function buPerHTML() {
     var pid = BUPER || buPid(today0()), P = buPer(pid);
     var h = '<div class="r bunav"><button type="button" class="btn sm" data-a="buper" data-x="-1">‹</button><b>' + esc(buPName(pid)) + '</b><span class="muted">' + new Date(buPRange(pid).from).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + " – " + new Date(buPRange(pid).to).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + '</span><button type="button" class="btn sm" data-a="buper" data-x="1">›</button>' + (BUPER && BUPER !== buPid(today0()) ? '<button type="button" class="btn sm" data-a="buper" data-x="0">Текущий</button>' : "") + "</div>";
@@ -7220,7 +7262,7 @@ CREATE TABLE inbox (
     h += '<div class="butiles"><div class="butile"><small>Доходы' + buPct(r.inc.fact, r.inc.plan) + '</small><span>' + buRub(r.inc.fact) + '</span><small class="muted">план ' + buRub(r.inc.plan) + "</small></div>" +
       '<div class="butile"><small>Расходы' + buPct(r.exp.fact, r.exp.plan) + '</small><span class="' + (r.exp.fact > r.exp.plan ? "bad" : "") + '">' + buRub(r.exp.fact) + '</span><small class="muted">план ' + buRub(r.exp.plan) + "</small></div>" +
       '<div class="butile"><small>Доход − расход</small><span class="' + (ifa < 0 ? "bad" : "ok") + '">' + buRub(ifa) + '</span><small class="muted">по плану ' + buRub(ip) + "</small></div>" +
-      '<div class="butile"><small>Прошло дней</small><span>' + r.el + " из " + r.pd + '</span><small class="muted">' + Math.round(ep) + "% периода</small></div></div>";
+      buBalTile(P) + '<div class="butile"><small>Прошло дней</small><span>' + r.el + " из " + r.pd + '</span><small class="muted">' + Math.round(ep) + "% периода</small></div></div>";
     h += '<div class="card busec"><div class="bulab">Статьи — факт и план' + (r.el && r.el < r.pd ? " · черта — сколько «положено» к сегодня (план × " + Math.round(ep) + "%)" : "") + "</div>" + r.rows.map(function (x) {
       var fx = x.k === "flex", cls = fx ? buCls(x.fact, x.plan, r.el < r.pd ? ep : undefined) : x.fact > x.plan + 1 ? "bad" : "";
       return '<div class="burow" title="' + esc(fx ? buTip(x.fact, x.plan, r.el < r.pd ? ep : -1) : buTip(x.fact, x.plan)) + '"><span>' + esc(x.c) + buPct(x.fact, x.plan) + ' <small class="muted">' + BKN[x.k][0] + "</small></span>" + buBar(x.fact, x.plan, fx && r.el < r.pd ? ep : -1, fx ? cls : x.fact > x.plan + 1 ? "bad" : "pay") + '<span class="bunum ' + cls + '">' + buRub(x.fact) + " / " + buRub(x.plan) + "</span>" +
@@ -7533,7 +7575,7 @@ CREATE TABLE inbox (
   function buWidget() {
     if (!buPers().length) return '<p class="wempty">Данных нет — откройте «Бюджет» и обновите из файла</p>';
     var w = buWeek(monday(today0())), P = buPer(buPid(today0())), T = w.tot, h = '<div class="buw"><div class="buwl"><b>Неделя ' + esc(buWName(w.mon)) + buPct(T.fact, T.lim) + '</b><span class="' + buCls(T.fact, T.lim) + '">' + buRub(T.fact) + " из " + buRub(T.lim) + "</span></div>" + buBar(T.fact, T.lim, -1, buCls(T.fact, T.lim)) + (w.dl ? '<small class="muted">можно в день до вс: ' + buRub(Math.max(0, T.perDay)) + "</small>" : "");
-    if (P) { var r = buPeriod(P), ifa = r.inc.fact - r.exp.fact; h += '<div class="buwl"><span class="muted">Расходы периода' + buPct(r.exp.fact, r.exp.plan) + '</span><span class="' + (r.exp.fact > r.exp.plan ? "bad" : "") + '">' + buRub(r.exp.fact) + " из " + buRub(r.exp.plan) + "</span></div>" + '<div class="buwl"><span class="muted">' + esc(buPName(P.id)) + ": доход − расход</span><span class=\"" + (ifa < 0 ? "bad" : "ok") + '">' + buRub(ifa) + "</span></div>"; }
+    if (P) { var r = buPeriod(P), ifa = r.inc.fact - r.exp.fact; h += '<div class="buwl"><span class="muted">Расходы периода' + buPct(r.exp.fact, r.exp.plan) + '</span><span class="' + (r.exp.fact > r.exp.plan ? "bad" : "") + '">' + buRub(r.exp.fact) + " из " + buRub(r.exp.plan) + "</span></div>" + '<div class="buwl"><span class="muted">' + esc(buPName(P.id)) + ": доход − расход</span><span class=\"" + (ifa < 0 ? "bad" : "ok") + '">' + buRub(ifa) + "</span></div>" + (P.bal ? '<div class="buwl"><span class="muted">Остаток сейчас</span><span>' + buRub(P.bal.end) + "</span></div>" : ""); }
     return h + "</div>";
   }
 
