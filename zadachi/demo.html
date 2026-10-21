@@ -358,6 +358,12 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .bubr { position: relative; height: 9px; border-radius: 5px; background: var(--hover); overflow: hidden } .bubr > i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: var(--ok) } .bubr > u { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--fg) }
 .bubr > i.warn { background: var(--buwarn) } .bubr > i.bad { background: #d4574a } .bubr > i.pay { background: var(--acc) } .bubr > i.inc { background: #378add }
 .bunum.ok, .butile .ok, .buw .ok, .bupay .ok, .butbl td.ok { color: var(--ok) } .bunum.warn, .butile .warn, .buadj .warn { color: var(--buwarn) } .bunum.bad, .butile .bad, .buw .bad, .bupay .bad, .butbl td.bad, .buadj .bad { color: #c94a3a }
+.bulegend { margin-top: -4px; font-size: calc(12px * var(--fs)) }
+.bufx { display: grid; gap: 6px; padding: 9px 0 8px; border-top: 1px solid var(--line) } .bulegend + .bufx, .bulab + .bufx { border-top: 0; padding-top: 2px }
+.bufxh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: calc(14px * var(--fs)) } .bufxh > b { font-weight: 600 } .bufxpc { color: var(--muted); font-variant-numeric: tabular-nums }
+.bufxr { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap } .bufxr.bad { color: #c94a3a }
+.buchip { font-size: calc(11.5px * var(--fs)); padding: 1px 8px; border-radius: 10px; color: var(--buwarn); background: color-mix(in srgb, var(--buwarn) 14%, transparent) } .buchip.bad { color: #c94a3a; background: color-mix(in srgb, #c94a3a 14%, transparent) }
+.bufxs { display: flex; flex-wrap: wrap; gap: 2px 16px; font-size: calc(12.5px * var(--fs)); color: var(--muted); font-variant-numeric: tabular-nums } .bufxs b { color: var(--fg); font-weight: 500 }
 .bupay { display: flex; gap: 10px; align-items: baseline; padding: 4px 0; border-top: 1px solid var(--line); font-size: calc(13.5px * var(--fs)) } .bupay .bud { width: 48px; flex: none; color: var(--muted); font-size: calc(12px * var(--fs)) } .bupay .bun { flex: 1; min-width: 0 }
 .butbl { overflow-x: auto } .butbl table { width: 100%; border-collapse: collapse; font-size: calc(13px * var(--fs)); font-variant-numeric: tabular-nums } .butbl th, .butbl td { padding: 5px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap } .butbl th:first-child, .butbl td:first-child { text-align: left } .butbl th { font-weight: 500; color: var(--muted); font-size: calc(12px * var(--fs)) } .butbl tr.cur td { background: var(--acc-soft) } .butbl tr.fut td { color: var(--muted) }
 .buregs { padding: 4px 12px } .bureg { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 7px 0 } .bureg + .bureg { border-top: 1px solid var(--line) } .bureg.off { opacity: .5 } .burgn { flex: 1 1 180px; min-width: 0 } .burd { width: 64px } .bura { width: 110px }
@@ -5483,7 +5489,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-124";
+  var APPV = "zd-app-2026-10-16-125";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -10208,9 +10214,17 @@ CREATE TABLE inbox (
       '<div class="butile"><small>Потрачено' + buPct(T.fact, T.lim) + '</small><span class="' + buCls(T.fact, T.lim, mark) + '">' + buRub(T.fact) + "</span></div>" +
       (isCur && w.dl ? '<div class="butile"><small>Можно в день до воскресенья</small><span class="' + (T.perDay < 0 ? "bad" : "ok") + '">' + buRub(Math.max(0, T.perDay)) + "</span>" + (T.perDay < 0 ? '<small class="bad">уже перерасход ' + buRub(-T.left) + "</small>" : "") + "</div>" : '<div class="butile"><small>Итог недели</small><span class="' + (T.left < 0 ? "bad" : "ok") + '">' + (T.left < 0 ? "перерасход " + buRub(-T.left) : "экономия " + buRub(T.left)) + "</span></div>") +
       (prev.cats.length && !prev.miss.length ? '<div class="butile"><small>Прошлая неделя</small><span class="' + (prev.tot.left < 0 ? "bad" : "ok") + '">' + (prev.tot.left < 0 ? "перерасход " + buRub(-prev.tot.left) : "экономия " + buRub(prev.tot.left)) + "</span></div>" : "") + "</div>";
-    h += '<div class="card busec"><div class="bulab">Гибкие статьи — лимит недели из остатка плана периода' + (isCur ? " · черта — сколько «положено» к сегодня" : "") + "</div>" + (w.cats.length ? w.cats.map(function (x) {
-      var cw = buCls(x.fact, x.lim, mark), pd = isCur && w.dl && buNorm(x.c) === "траты" ? (x.left >= 0 ? "в день до вс: " + buRub(x.left / w.dl) + " (" + w.dl + " " + plural(w.dl, ["день", "дня", "дней"]) + " с сегодняшним)" : "лимит недели исчерпан") : "";
-      return '<div class="burow" title="' + esc(buTip(x.fact, x.lim, mark) + (pd ? " · " + pd : "")) + '"><span>' + esc(x.c) + buPct(x.fact, x.lim) + "</span>" + buBar(x.fact, x.lim, mark, cw) + '<span class="bunum ' + cw + '">' + buRub(x.fact) + " / " + buRub(x.lim) + "</span>" + (Math.abs(x.lim - x.norm) >= 50 ? '<small class="muted buadj">обычно ' + buRub(x.norm) + (x.lim < x.norm ? " — урезано за прошлый перерасход" : " — больше за прошлую экономию") + "</small>" : "") + (pd ? '<small class="muted buadj">' + (x.left >= 0 ? "≈ " : "") + pd + "</small>" : "") + (cw === "warn" ? '<small class="buadj"><span class="warn">быстрее графика: ' + Math.round(x.fact / x.lim * 100) + "% лимита, к сегодня положено ≈" + Math.round(mark) + "%</span></small>" : "") + "</div>";
+    // гибкие статьи: строка «название · % · статус — осталось», полоса, одна строка деталей
+    h += '<div class="card busec"><div class="bulab">Гибкие статьи · лимит на неделю</div>' + (isCur ? '<small class="muted bulegend">Полоса — потрачено из лимита, черта — сколько «положено» к сегодня</small>' : "") + (w.cats.length ? w.cats.map(function (x) {
+      var cw = buCls(x.fact, x.lim, mark), over = x.left < 0, isT = isCur && w.dl && buNorm(x.c) === "траты";
+      var det = ["<b>" + buRub(x.fact) + "</b> из " + buRub(x.lim)];
+      if (isT && !over) det.push("<b>≈ " + buRub(x.left / w.dl) + "</b> в день до вс");
+      if (Math.abs(x.lim - x.norm) >= 50) det.push((x.lim < x.norm ? "лимит урезан за прошлый перерасход" : "лимит больше за прошлую экономию") + ", обычно " + buRub(x.norm));
+      var tip = buTip(x.fact, x.lim, mark) + (isT && !over ? " · в день до вс: " + buRub(x.left / w.dl) + " (" + w.dl + " " + plural(w.dl, ["день", "дня", "дней"]) + " с сегодняшним)" : "");
+      return '<div class="bufx" title="' + esc(tip) + '"><div class="bufxh"><b>' + esc(x.c) + '</b><span class="bufxpc">' + (x.lim > 0 ? Math.round(x.fact / x.lim * 100) + "%" : "") + "</span>" +
+        (cw === "warn" ? '<span class="buchip">быстрее графика</span>' : over ? '<span class="buchip bad">перерасход</span>' : "") +
+        '<span class="bufxr' + (over ? " bad" : "") + '">' + (over ? "−" + buRub(-x.left).replace("−", "") : "осталось " + buRub(x.left)) + "</span></div>" +
+        buBar(x.fact, x.lim, mark, cw) + '<div class="bufxs">' + det.map(function (d) { return "<span>" + d + "</span>"; }).join("") + "</div></div>";
     }).join("") : '<p class="muted">Нет гибких статей — отметьте их в «Настройки» → «Бюджет».</p>') + "</div>";
     if (w.snap) { var sf = buSum(w.snap.fact), sl = buSum(w.snap.lim); h += '<p class="muted busnap">Итог на момент закрытия недели (' + esc(new Date(w.snap.at).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })) + "): потрачено " + buRub(sf) + " из " + buRub(sl) + (Math.abs(sf - Math.round(T.fact)) >= 1 ? " · сейчас по файлу " + buRub(T.fact) : " · совпадает с файлом") + "</p>"; }
     // платежи этой недели (справочник) и платежи периода
