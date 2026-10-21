@@ -755,10 +755,14 @@ html.nosheet .dptopbox { background: color-mix(in srgb, var(--star) 10%, transpa
 .bsrcb { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .bstartb { font-size: calc(12px * var(--fs)); color: var(--muted); white-space: nowrap }
 .wdg #nrte { min-height: 100%; max-width: none; border: 0; border-radius: 0; background: none; padding: 2px 2px 8px 30px; box-sizing: border-box; font-size: calc(14px * var(--fs)) } .wdg #nrte.empty::before { left: 30px; top: 2px }
 .wbtn button.on { color: var(--acc); background: var(--acc-soft) } .wnote { cursor: text }
-.bgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 190px; grid-auto-flow: dense; gap: 14px; margin-top: 16px; max-width: 1400px }
+.bgrid { display: grid; grid-template-columns: repeat(var(--bcols, 4), minmax(0, 1fr)); grid-auto-rows: 190px; grid-auto-flow: dense; gap: 14px; margin-top: 16px; max-width: 1400px }
 .wdg { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; position: relative }
-.wdg.c1 { grid-column: span 1 } .wdg.c2 { grid-column: span 2 } .wdg.c4 { grid-column: 1 / -1 } .wdg.r2 { grid-row: span 2 }
-.wdg.cfgon { grid-row: span 2; box-shadow: 0 0 0 2px var(--acc-soft); border-color: var(--acc) }
+.wdg { grid-column: span var(--cs, 2); grid-row: span var(--rs, 1) }
+.wrs { position: absolute; right: 0; bottom: 0; width: 18px; height: 18px; cursor: nwse-resize; touch-action: none; z-index: 3; background: linear-gradient(135deg, transparent 50%, color-mix(in srgb, var(--muted) 55%, transparent) 50%, color-mix(in srgb, var(--muted) 55%, transparent) 60%, transparent 60%, transparent 70%, color-mix(in srgb, var(--muted) 55%, transparent) 70%, color-mix(in srgb, var(--muted) 55%, transparent) 80%, transparent 80%); border-bottom-right-radius: 12px; opacity: 0; transition: opacity .15s }
+.wdg:hover .wrs, .bgrid.edit .wrs, .wdg.wrsing .wrs { opacity: 1 } body.wresizing, body.wresizing * { cursor: nwse-resize !important; user-select: none }
+.wdg.wrsing { outline: 2px dashed var(--acc); outline-offset: 2px } .wdg.wrsing::after { content: attr(data-rs); position: absolute; right: 24px; bottom: 6px; z-index: 4; padding: 2px 8px; border-radius: 6px; background: var(--acc); color: #fff; font-size: calc(12px * var(--fs)); font-weight: 600 }
+.bcolsr { align-items: center; gap: 8px; margin: 10px 0 0 }
+.wdg.cfgon { grid-row: span var(--rsc, 2); box-shadow: 0 0 0 2px var(--acc-soft); border-color: var(--acc) }
 .wh { display: flex; align-items: center; gap: 6px; padding: 9px 10px 6px 12px; font-size: calc(13px * var(--fs)); color: var(--muted); flex: none }
 .wh .wi { width: 18px; text-align: center; flex: none }
 .wh .wt { font-weight: 600; color: var(--fg); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 } .wh a.wt:hover { color: var(--acc) }
@@ -824,8 +828,8 @@ body.wdragging { user-select: none; -webkit-user-select: none }
 .btpl { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin-top: 18px; max-width: 1100px }
 .btc { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start }
 .btc .bti { font-size: calc(26px * var(--fs)) } .btc p { margin: 0; font-size: calc(13px * var(--fs)); flex: 1 } .btw { display: flex; gap: 4px; flex-wrap: wrap; margin: 4px 0 6px } .btw span { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; background: var(--hover); font-size: calc(13px * var(--fs)) }
-@media (max-width: 900px) { .bgrid { grid-template-columns: repeat(2, minmax(0, 1fr)) } .wdg.c4 { grid-column: 1 / -1 } }
-@media (max-width: 600px) { .bgrid { grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto } .wdg.c1, .wdg.c2, .wdg.c4 { grid-column: 1 / -1 } .wdg.r2, .wdg.cfgon { grid-row: auto } .wdg { min-height: 150px; max-height: 460px } .wcr { grid-template-columns: minmax(0, 1fr) } }
+@media (max-width: 900px) { .bgrid { grid-template-columns: repeat(2, minmax(0, 1fr)) } .wdg { grid-column: span 1 } .wdg.cwm { grid-column: 1 / -1 } .wrs { display: none } }
+@media (max-width: 600px) { .bgrid { grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto } .wdg, .wdg.cwm { grid-column: 1 / -1 } .wdg, .wdg.cfgon { grid-row: auto } .wdg { min-height: 150px; max-height: 460px } .wcr { grid-template-columns: minmax(0, 1fr) } }
 /* привычки */
 .hwrap { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; max-width: 1160px }
 .hmain { flex: 1 1 540px; min-width: 0 } .hwrap > .hdet { flex: 1 1 300px; max-width: 420px }
@@ -2475,7 +2479,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-132";
+  var APPV = "zd-app-2026-10-16-133";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -4848,8 +4852,12 @@ CREATE TABLE inbox (
     var c = Object.assign({}, w.cfg || {});
     if (b && b.src && !c.src && WSRCT.hasOwnProperty(w.type)) { c.src = b.src; c._inh = 1; }
     if (b && w.type === "proj" && !c.pid && /^proj:/.test(b.src || "")) { c.pid = b.src.slice(5); c._inh = 1; }
-    return { id: w.id, type: w.type, sz: w.sz, cfg: c };
+    return { id: w.id, type: w.type, sz: w.sz, cw: w.cw, rh: w.rh, cfg: c };
   }
+  // колонок у доски: 3, 4 или 5; размер виджета — своя ширина (колонки) и высота (ряды) или старый размер-пресет
+  function bCols(b) { var n = +(b && b.cols) || 4; return n >= 3 && n <= 5 ? n : 4; }
+  function wDim(b, w) { var cols = bCols(b), sz = WSZ[w.sz] || WSZ.m, c = w.cw ? +w.cw : sz[0] >= 4 ? cols : sz[0], r = w.rh ? +w.rh : sz[1]; return { c: Math.max(1, Math.min(cols, c)), r: Math.max(1, Math.min(4, r)) }; }
+  function wDimTxt(b, w) { var d = wDim(b, w); return d.c + " " + plural(d.c, ["колонка", "колонки", "колонок"]) + " × " + d.r + " " + plural(d.r, ["ряд", "ряда", "рядов"]); }
   function boards() { return live(S.boards).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0) || (a.created || 0) - (b.created || 0); }); }
   function board(id) { return id ? live(S.boards).filter(function (b) { return b.id === id; })[0] || null : null; }
   function wOf(b, wid) { return b ? (b.w || []).filter(function (w) { return w.id === wid; })[0] || null : null; }
@@ -5099,12 +5107,12 @@ CREATE TABLE inbox (
     if (w.type === "proj") h += row("Проект", dd("wproj", proj(c.pid) ? (c._inh ? "как у доски · " : "") + proj(c.pid).n : "выбрать…"));
     if (w.type === "note") h += row("Заметка", dd("wnote", note(c.nid) ? note(c.nid).t || "Без названия" : "выбрать…"));
     if (w.type === "sticky" || w.type === "chart") h += row("Цвет", '<div class="sw">' + COLORS.map(function (cc, i) { return '<button type="button" data-a="wset" data-k="c" data-v="' + i + '" class="' + ((c.c !== undefined ? +c.c : w.type === "sticky" ? 6 : 0) === i ? "on" : "") + '" style="background:' + cc[1] + '" title="' + cc[0] + '"></button>'; }).join("") + "</div>");
-    return '<div class="wcfg">' + h + '<div class="r"><button type="button" class="btn pri sm" data-a="wcfg">Готово</button><button type="button" class="btn sm" data-a="wsize">Размер: ' + WSZ[w.sz || "m"][2] + '</button><button type="button" class="btn sm" data-a="wmv" data-x="-1" title="Поставить раньше">← Раньше</button><button type="button" class="btn sm" data-a="wmv" data-x="1" title="Поставить позже">Позже →</button><button type="button" class="btn sm warn" data-a="wdel" style="margin-left:auto">Убрать виджет</button></div></div>';
+    return '<div class="wcfg">' + h + '<div class="r"><button type="button" class="btn pri sm" data-a="wcfg">Готово</button><button type="button" class="btn sm" data-a="wsize">Размер: ' + wDimTxt(b, w) + '</button><button type="button" class="btn sm" data-a="wmv" data-x="-1" title="Поставить раньше">← Раньше</button><button type="button" class="btn sm" data-a="wmv" data-x="1" title="Поставить позже">Позже →</button><button type="button" class="btn sm warn" data-a="wdel" style="margin-left:auto">Убрать виджет</button></div></div>';
   }
   function wHTML(b, w0) {
     var w = wEff(b, w0), sz = WSZ[w.sz] || WSZ.m, c = w.cfg || {}, href = wHref(w), ttl = c.t || wDefTitle(w), cfg = WCFG === w.id;
-    var st = w.type === "sticky" ? ' style="--wc:' + col(c.c !== undefined ? +c.c : 6) + '"' : "";
-    return '<section class="wdg w-' + w.type + " c" + sz[0] + " r" + sz[1] + (cfg ? " cfgon" : "") + '" data-w="' + w.id + '"' + st + '><header class="wh"><span class="wgrip" title="Потяните, чтобы переставить виджет" aria-hidden="true">⠿</span>' + '<span class="wi">' + (WT[w.type] || {}).i + "</span>" +
+    var dm = wDim(b, w), st = ' style="--cs:' + dm.c + ";--rs:" + dm.r + ";--rsc:" + Math.max(2, dm.r) + (w.type === "sticky" ? ";--wc:" + col(c.c !== undefined ? +c.c : 6) : "") + '"';
+    return '<section class="wdg w-' + w.type + (dm.c >= 2 ? " cwm" : "") + (cfg ? " cfgon" : "") + '" data-w="' + w.id + '"' + st + '><span class="wrs" title="Потяните, чтобы изменить ширину и высоту" aria-hidden="true"></span><header class="wh"><span class="wgrip" title="Потяните, чтобы переставить виджет" aria-hidden="true">⠿</span>' + '<span class="wi">' + (WT[w.type] || {}).i + "</span>" +
       (href ? '<a class="wt" href="#' + esc(href) + '" title="Открыть раздел">' + esc(ttl) + "</a>" : '<span class="wt">' + esc(ttl) + "</span>") +
       '<span class="wbtn">' + (w.type === "note" && note(c.nid) && !BEDIT ? '<button type="button" data-a="wnedit" class="' + (WNED === w.id ? "on" : "") + '" title="' + (WNED === w.id ? "Готово" : "Править заметку здесь") + '">' + (WNED === w.id ? "✓" : "✎") + "</button>" : "") + (BEDIT ? '<button type="button" data-a="wsize" title="Размер">⤡</button><button type="button" data-a="wdel" title="Убрать с доски">×</button>' : "") + '<button type="button" data-a="wcfg" title="Настроить виджет" aria-label="Настроить виджет">⚙</button></span></header>' +
       '<div class="wb">' + (cfg ? wCfgHTML(b, w) : wBody(b, w)) + "</div></section>";
@@ -5138,21 +5146,21 @@ CREATE TABLE inbox (
     if (BT && BTE && BTE.id === "nrte") saveBody();
     var h = '<div class="bhd"><h1 class="bh1"><span class="bic">' + ic("board") + '</span><input class="btitle" data-board="' + b.id + '" value="' + esc(b.n) + '" aria-label="Название доски" autocomplete="off"></h1>' +
       '<span class="r bbar"><button type="button" class="ddb sm bsrcb" data-a="bsrc" title="Общий источник: виджеты без своего источника показывают его">' + (b.src ? "Источник: " + esc(wsrcName(b.src)) : "Источник: свой у виджетов") + '<span class="dda">▾</span></button>' + (S.opt.start === "board-" + b.id ? '<span class="bstartb" title="Открывается при запуске приложения">🏠 стартовая</span>' : "") + '<button type="button" class="btn sm' + (WADD ? " on" : "") + '" data-a="wadd">＋ Виджет</button><button type="button" class="btn sm' + (BEDIT ? " pri" : "") + '" data-a="bedit">' + (BEDIT ? "✓ Готово" : "✎ Изменить доску") + '</button><button type="button" class="ibtn" data-a="bmenu" title="Ещё" aria-label="Ещё">⋯</button></span></div>';
-    if (BEDIT) h += '<p class="muted bhint">Тяните виджеты за ⠿, ⤡ — размер, × — убрать с доски, ⚙ — настройки. Изменения сохраняются сразу.</p>';
+    if (BEDIT) h += '<div class="r bcolsr"><span class="muted">Колонок на доске:</span><span class="seg">' + [3, 4, 5].map(function (n) { return '<button type="button" data-a="bcols" data-x="' + n + '" class="' + (bCols(b) === n ? "on" : "") + '">' + n + "</button>"; }).join("") + '</span></div><p class="muted bhint">Тяните виджеты за ⠿ — переставить; за уголок ◢ справа внизу — ширина и высота (по клеткам сетки); ⤡ — размер из меню, × — убрать с доски, ⚙ — настройки. Изменения сохраняются сразу.</p>';
     if (WADD) {
       var secs = {}; Object.keys(WT).forEach(function (k) { (secs[WT[k].sec] = secs[WT[k].sec] || []).push(k); });
       h += '<div class="wcat"><div class="wcath"><b>Добавить виджет</b><button type="button" class="ibtn" data-a="wadd" aria-label="Закрыть">✕</button></div>' + Object.keys(secs).map(function (sc) { return '<div class="wcs"><div class="lbl">' + sc + "</div>" + secs[sc].map(function (k) { return '<button type="button" class="wcc" data-a="waddt" data-k="' + k + '"><span class="wi">' + WT[k].i + "</span><b>" + WT[k].n + "</b><small>" + WT[k].d + "</small></button>"; }).join("") + "</div>"; }).join("") + "</div>";
     }
     var ws = b.w || [];
     if (!ws.length) h += '<div class="bempty"><p>На доске пока пусто.</p><button type="button" class="btn pri" data-a="wadd">＋ Добавить виджет</button><p class="muted">Ещё способ: в меню проекта, тега, фильтра или списка (правая кнопка мыши в левой панели) — «📌 На доску».</p></div>';
-    h += '<div class="bgrid' + (BEDIT ? " edit" : "") + '" data-board="' + b.id + '">' + ws.map(function (w) { return wHTML(b, w); }).join("") + "</div>";
+    h += '<div class="bgrid' + (BEDIT ? " edit" : "") + '" data-board="' + b.id + '" style="--bcols:' + bCols(b) + '">' + ws.map(function (w) { return wHTML(b, w); }).join("") + "</div>";
     return h;
   }
   function bMenu(b) { return [{ c: "bstart", i: "🏠", l: "Открывать при запуске приложения", k: S.opt.start === "board-" + b.id ? "✓" : "" }, { c: "bdup", i: "⧉", l: "Дублировать доску" }, { c: "bup", i: "↑", l: "Выше в панели" }, { c: "bdown", i: "↓", l: "Ниже в панели" }, "-", { c: "bdel", i: "🗑", l: "Удалить доску", warn: 1 }, "-", { c: "help:dash", i: "?", l: "Справка о досках" }]; }
   function bCmd(b, c) {
     if (c === "open") { go("board-" + b.id); return; }
     if (c === "bstart") { S.opt.start = S.opt.start === "board-" + b.id ? "" : "board-" + b.id; optTouch(); save(); render(); toast(S.opt.start ? "«" + b.n + "» будет открываться при запуске" : "При запуске — где остановились в прошлый раз"); return; }
-    if (c === "bdup") { var nb = bCreate(b.n + " (копия)", (b.w || []).map(function (w) { return { type: w.type, sz: w.sz, cfg: JSON.parse(JSON.stringify(w.cfg || {})) }; }), Object.assign(b.pid ? { pid: b.pid } : {}, b.src ? { src: b.src } : {})); go("board-" + nb.id); toast("Копия создана"); return; }
+    if (c === "bdup") { var nb = bCreate(b.n + " (копия)", (b.w || []).map(function (w) { return { type: w.type, sz: w.sz, cw: w.cw, rh: w.rh, cfg: JSON.parse(JSON.stringify(w.cfg || {})) }; }), Object.assign(b.pid ? { pid: b.pid } : {}, b.src ? { src: b.src } : {})); go("board-" + nb.id); toast("Копия создана"); return; }
     if (c === "bup" || c === "bdown") { var l = boards(), i = l.indexOf(b), j = c === "bup" ? i - 1 : i + 1; if (j < 0 || j >= l.length) return; l.splice(i, 1); l.splice(j, 0, b); l.forEach(function (x, k) { if (x.ord !== k) { x.ord = k; touch(x); } }); save(); render(); return; }
     if (c === "bdel") { if (S.opt.start === "board-" + b.id) { S.opt.start = ""; optTouch(); } b.del = 1; b.delAt = Date.now(); touch(b); save(); if (V === "board" && ARG === b.id) go(boards()[0] ? "board-" + boards()[0].id : "today"); else render(); toastUndo("Доска «" + b.n + "» удалена", function () { delete b.del; delete b.delAt; touch(b); save(); render(); }); }
   }
@@ -5203,6 +5211,26 @@ CREATE TABLE inbox (
     WDR.y = e.clientY; if (!WDR.raf) (function auto() { if (!WDR) return; var sp = WDR.y < 80 ? -12 : WDR.y > innerHeight - 90 ? 12 : 0; if (sp) window.scrollBy(0, sp); WDR.raf = requestAnimationFrame(auto); })();
     [].forEach.call(document.querySelectorAll(".bgrid > .wdg"), function (x) { x.classList.remove("wtb", "wta"); var r = x.getBoundingClientRect(); if (x !== WDR.el && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) { t = x; WDR.before = e.clientX < r.left + r.width / 2; } });
     WDR.t = t; if (t) t.classList.add(WDR.before ? "wtb" : "wta");
+  });
+  // ширина и высота виджета: тянем уголок ◢, размер прилипает к клеткам сетки
+  var WRS = null;
+  document.addEventListener("pointerdown", function (e) {
+    var hd = e.target.closest && e.target.closest(".bgrid .wrs"); if (!hd) return;
+    e.preventDefault(); e.stopPropagation();
+    var el = hd.closest(".wdg"), g = el.parentNode, gs = getComputedStyle(g), b = board(ARG), cols = bCols(b), gap = parseFloat(gs.columnGap) || 14, rg = parseFloat(gs.rowGap) || 14, gr = g.getBoundingClientRect(), r0 = el.getBoundingClientRect();
+    WRS = { el: el, id: el.dataset.w, left: r0.left, top: r0.top, cw: (gr.width - gap * (cols - 1)) / cols, rh: parseFloat(gs.gridAutoRows) || 190, gap: gap, rg: rg, cols: cols, c: +el.style.getPropertyValue("--cs") || 1, r: +el.style.getPropertyValue("--rs") || 1 };
+    try { hd.setPointerCapture(e.pointerId); } catch (er) { /* ok */ }
+    document.body.classList.add("wresizing"); el.classList.add("wrsing"); el.setAttribute("data-rs", WRS.c + "×" + WRS.r);
+  }, true);
+  document.addEventListener("pointermove", function (e) {
+    if (!WRS) return;
+    var c = Math.max(1, Math.min(WRS.cols, Math.round((e.clientX - WRS.left + WRS.gap) / (WRS.cw + WRS.gap)))), r = Math.max(1, Math.min(4, Math.round((e.clientY - WRS.top + WRS.rg) / (WRS.rh + WRS.rg))));
+    if (c === WRS.c && r === WRS.r) return; WRS.c = c; WRS.r = r;
+    WRS.el.style.setProperty("--cs", c); WRS.el.style.setProperty("--rs", r); WRS.el.style.setProperty("--rsc", Math.max(2, r)); WRS.el.classList.toggle("cwm", c >= 2); WRS.el.setAttribute("data-rs", c + "×" + r);
+  });
+  document.addEventListener("pointerup", function () {
+    var q = WRS; WRS = null; if (!q) return; document.body.classList.remove("wresizing"); q.el.classList.remove("wrsing"); q.el.removeAttribute("data-rs");
+    var b = board(ARG), w = wOf(b, q.id); if (!w) return; var d0 = wDim(b, w); if (d0.c === q.c && d0.r === q.r) return; w.cw = q.c; w.rh = q.r; bSave(b);
   });
   document.addEventListener("pointerup", function () {
     var g = WDR; WDR = null; if (!g) return; if (g.raf) cancelAnimationFrame(g.raf); document.body.classList.remove("wdragging"); g.el.classList.remove("wdrag"); [].forEach.call(document.querySelectorAll(".bgrid > .wdg"), function (x) { x.classList.remove("wtb", "wta"); });
@@ -9435,7 +9463,8 @@ CREATE TABLE inbox (
       "<b>Меню доски</b> (⋯ справа вверху или правая кнопка по доске в панели): открывать при запуске, дублировать, переставить выше или ниже, удалить. На телефоне виджеты встают в одну колонку.",
       "<b>Стартовая доска</b>: ⋯ → «🏠 Открывать при запуске приложения» — эта доска будет встречать вас при каждом открытии (при обновлении страницы остаётся текущее место). Выбрать стартовый экран можно и в «Настройки» → «Общие» → «Стартовый экран». Логотип «Задачи» вверху тоже ведёт на стартовый экран.",
       "<b>Источник доски</b>: кнопка «Источник: …» в шапке доски — выберите проект, тег, фильтр или список, и все виджеты без своего источника (список задач, сроки, числа, график, календарь, канбан, быстрый ввод, прогресс проекта) покажут его. Так одна доска легко переключается с проекта на проект. Своё значение у виджета (⚙ → «Откуда») главнее; «Как у доски» возвращает общее. Доска по шаблону «Проект» сразу создаётся с источником.",
-      "<b>Заметка на доске</b>: ✎ в заголовке виджета заметки или двойной клик по тексту — правите прямо на доске тем же редактором, что и в заметке («/» — блоки, выделение — форматирование). ✓ — готово, всё сохраняется само.", "<b>Переставить виджет</b>: потяните за ручку ⠿ слева в его заголовке (на компьютере она появляется при наведении, на телефоне видна всегда) и отпустите на другом виджете — синяя черта покажет, куда он встанет; у края экрана доска сама прокручивается. Или ⚙ виджета → «← Раньше» / «Позже →»."]));
+      "<b>Заметка на доске</b>: ✎ в заголовке виджета заметки или двойной клик по тексту — правите прямо на доске тем же редактором, что и в заметке («/» — блоки, выделение — форматирование). ✓ — готово, всё сохраняется само.", "<b>Переставить виджет</b>: потяните за ручку ⠿ слева в его заголовке (на компьютере она появляется при наведении, на телефоне видна всегда) и отпустите на другом виджете — синяя черта покажет, куда он встанет; у края экрана доска сама прокручивается. Или ⚙ виджета → «← Раньше» / «Позже →».",
+      "<b>Колонки и размеры</b> — «✎ Изменить доску»: вверху выберите 3, 4 или 5 колонок (у каждой доски своё). Ширину и высоту виджета меняйте, потянув уголок ◢ справа внизу (размер прилипает к клеткам: до всех колонок в ширину и до 4 рядов в высоту), или кнопкой ⤡ — меню «Ширина» и «Высота». Переставить — потянуть за ⠿. На телефоне виджеты идут в одну-две колонки."]));
     h += sec("stats", "Статистика", ul([
       "Пункт «Статистика» в «Списках». Две вкладки — <b>📊 Обзор</b> и <b>⏱ Время</b>; период — 7, 30 или 90 дней.",
       "<b>Обзор</b>: выполнено задач (вместе с выполнениями повторяющихся) и в среднем в день, создано, серия дней подряд с выполненными задачами и лучшая серия, помидоры и часы фокуса, открыто сейчас и сколько просрочено, средний процент выполнения привычек; графики по дням, по проектам, по дням недели, по спринтам.",
@@ -10666,7 +10695,8 @@ CREATE TABLE inbox (
       case "wcfg": var wcw = el.closest(".wdg"); if (wcw) { WCFG = WCFG === wcw.dataset.w ? null : wcw.dataset.w; render(); } return;
       case "wdel": var bwd = board(ARG), wdw = el.closest(".wdg"); if (bwd && wdw) { var wi = bwd.w.map(function (w) { return w.id; }).indexOf(wdw.dataset.w), wrm = bwd.w[wi]; if (wi < 0) return; bwd.w.splice(wi, 1); WCFG = null; bSave(bwd); toastUndo("Виджет убран", function () { bwd.w.splice(Math.min(wi, bwd.w.length), 0, wrm); touch(bwd); save(); render(); }); } return;
       case "wmv": var wmb = board(ARG), wme = el.closest(".wdg"); if (wmb && wme) { var wl = (wmb.w || []).slice(), wi = wl.map(function (w) { return w.id; }).indexOf(wme.dataset.w), wj = wi + (+el.dataset.x || 0); if (wi >= 0 && wj >= 0 && wj < wl.length) { wl.splice(wj, 0, wl.splice(wi, 1)[0]); wmb.w = wl; bSave(wmb); setTimeout(function () { var ne = document.querySelector('.wdg[data-w="' + wme.dataset.w + '"]'); if (ne) ne.scrollIntoView({ block: "nearest" }); }, 30); } else toast(wj < 0 ? "Виджет уже первый" : "Виджет уже последний"); } return;
-      case "wsize": var wsw = el.closest(".wdg"), rws = el.getBoundingClientRect(), wsb = board(ARG), wso = wOf(wsb, wsw && wsw.dataset.w); if (wso) ctxShow(rws.left, rws.bottom + 4, Object.keys(WSZ).map(function (k) { return { c: k, i: "", l: WSZ[k][2], k: (wso.sz || "m") === k ? "✓" : "" }; }), { k: "wsz", id: wso.id }); return;
+      case "bcols": var bcb = board(ARG); if (bcb) { bcb.cols = +el.dataset.x; bSave(bcb); } return;
+      case "wsize": var wsw = el.closest(".wdg"), rws = el.getBoundingClientRect(), wsb = board(ARG), wso = wOf(wsb, wsw && wsw.dataset.w); if (wso) { var wdm = wDim(wsb, wso), wit = []; for (var wc = 1; wc <= bCols(wsb); wc++) wit.push({ c: "w:" + wc, i: "↔", l: "Ширина: " + wc + " " + plural(wc, ["колонка", "колонки", "колонок"]) + (wc === bCols(wsb) ? " — во всю доску" : ""), k: wdm.c === wc ? "✓" : "" }); wit.push("-"); for (var wr = 1; wr <= 4; wr++) wit.push({ c: "h:" + wr, i: "↕", l: "Высота: " + wr + " " + plural(wr, ["ряд", "ряда", "рядов"]), k: wdm.r === wr ? "✓" : "" }); ctxShow(rws.left, rws.bottom + 4, wit, { k: "wsz", id: wso.id }); } return;
       case "wset": var bws = board(ARG), wsx = wOf(bws, el.closest(".wdg").dataset.w); if (wsx) { wsx.cfg = wsx.cfg || {}; var wv = el.dataset.v; wsx.cfg[el.dataset.k] = /^-?\d+$/.test(wv) ? +wv : wv; bSave(bws); } return;
       case "wsrc": var rsr = el.getBoundingClientRect(), bsr = board(ARG); ctxShow(rsr.left, rsr.bottom + 4, [{ c: "__inh", i: "↺", l: bsr && bsr.src ? "Как у доски (" + wsrcName(bsr.src) + ")" : "По умолчанию" }, "-"].concat(wsrcMenu()), { k: "wsrc", id: el.closest(".wdg").dataset.w }); return;
       case "bsrc": var rbs = el.getBoundingClientRect(); ctxShow(rbs.left, rbs.bottom + 4, [{ c: "__none", i: "", l: "— у каждого виджета свой —" }, "-"].concat(wsrcMenu()), { k: "bsrc", id: ARG }); return;
@@ -11879,7 +11909,7 @@ CREATE TABLE inbox (
     if (k === "wgoal") { var bg = board(ARG), wg = wOf(bg, id); if (wg) { wg.cfg = wg.cfg || {}; if (c) wg.cfg.gid = c; else delete wg.cfg.gid; bSave(bg); } return; }
     if (k === "wsz" || k === "wsrc" || k === "wsort" || k === "wproj" || k === "wnote") {
       var bb = board(ARG), ww = wOf(bb, id); if (!ww) return; ww.cfg = ww.cfg || {};
-      if (k === "wsz") ww.sz = c; else if (k === "wsrc") { if (c === "__inh") delete ww.cfg.src; else ww.cfg.src = c; } else if (k === "wsort") ww.cfg.sort = c; else if (k === "wproj") ww.cfg.pid = c; else ww.cfg.nid = c;
+      if (k === "wsz") { var wd0 = wDim(bb, ww); if (/^w:\d$/.test(c)) { ww.cw = +c.slice(2); ww.rh = wd0.r; } else if (/^h:\d$/.test(c)) { ww.rh = +c.slice(2); ww.cw = wd0.c; } else { ww.sz = c; delete ww.cw; delete ww.rh; } } else if (k === "wsrc") { if (c === "__inh") delete ww.cfg.src; else ww.cfg.src = c; } else if (k === "wsort") ww.cfg.sort = c; else if (k === "wproj") ww.cfg.pid = c; else ww.cfg.nid = c;
       bSave(bb); return;
     }
     if (k === "proj" && c === "pboard") { bFromTpl("proj", id); return; }
