@@ -523,6 +523,10 @@ html.nosheet .dptopbox.dphab { background: color-mix(in srgb, var(--ok) 15%, tra
 .mmmini { position: absolute; right: 10px; bottom: 10px; padding: 4px; border: 1px solid var(--line); border-radius: 8px; background: color-mix(in srgb, var(--panel) 92%, transparent); box-shadow: var(--shadow); cursor: pointer; z-index: 7; touch-action: none } .mmmini svg { display: block }
 .mmmkp { max-width: none } .mmmkr { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 6px 0 } .mmmkr > span:first-child { width: 86px; color: var(--muted); font-size: calc(12.5px * var(--fs)) } .mmmkb { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); display: inline-grid; place-items: center; padding: 0; cursor: pointer; font-size: 12px } .mmmkb:hover { border-color: var(--muted) } .mmmkb.on { border-color: var(--acc); box-shadow: 0 0 0 2px var(--acc-soft) } .mmmkb svg { display: block; pointer-events: none }
 #mmdect { flex: 1; min-width: 200px }
+.mmwrap.zen { position: fixed; inset: 0; z-index: 60; margin: 0; background: var(--bg); padding: calc(10px + env(safe-area-inset-top, 0px)) 12px calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 8px } .mmwrap.zen > .mmbar, .mmwrap.zen > .npop, .mmwrap.zen > .mmfocb, .mmwrap.zen > .mmhint, .mmwrap.zen > .mmtplst { display: none } .mmwrap.zen .mmvp { flex: 1; height: auto; min-height: 0 }
+.mmzenb { display: flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap } .mmzenb .muted { margin-right: auto } .mmprsb { display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; font-size: calc(16px * var(--fs)) } .mmprsb .btn.pri { min-width: 64px } .mmwrap.prs .mmf, .mmwrap.prs .mmmini { display: none }
+.mmn.trh { color: transparent !important; text-shadow: none !important } .mmn.trh > :not(.mmf) { visibility: hidden } .mmn.trh::after { content: "?"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-weight: 700; font-style: normal } .mmn.trok { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 55%, transparent) } .mmn.trno { box-shadow: 0 0 0 3px color-mix(in srgb, #e5484d 55%, transparent) }
+.mmbsp { max-width: none } .mmbsl { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; min-height: 34px; align-items: flex-start } .mmbsc { display: inline-flex; align-items: center; gap: 2px; padding: 5px 4px 5px 10px; border-radius: 10px; background: #fff3b0; color: #3a3200; border: 1px solid #e8d77a; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,.08); max-width: 280px; font-size: calc(14px * var(--fs)) } .mmbsc button { border: 0; background: transparent; cursor: pointer; color: inherit; opacity: .6; padding: 0 4px; font-size: 13px } .mmbsc button:hover { opacity: 1 } .mmbst { font-variant-numeric: tabular-nums; font-weight: 600; margin-right: 6px } #mmbsin { flex: 1; min-width: 220px; width: 100% }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5725,7 +5729,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-146";
+  var APPV = "zd-app-2026-10-16-147";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -12382,20 +12386,20 @@ CREATE TABLE inbox (
   function mmLayout(n, vroot) {
     var th = mmTh(n), DN = th.dens || 1, ff = MMFF[th.ff] || getComputedStyle(document.body).fontFamily || "sans-serif", root = vroot || mmRoot(n), N = {};
     function size(x, d) { var st = x.st || {}, fs = Math.round((d === 0 ? 18 : d === 1 ? 15 : 14) * (th.fz || 1) * (st.fz || 1)), fw = st.b ? 700 : d <= 1 ? 600 : 400, font = (st.i ? "italic " : "") + fw + " " + fs + "px " + ff, maxW = (d === 0 ? 260 : d === 1 ? 220 : 200) * Math.max(1, st.fz || 1), mkw = mmMkW(x, fs), lines = mmWrap((NUM[x.id] ? NUM[x.id] + " " : "") + (x.ic ? x.ic + " " : "") + (mmLabel(n, x) || " "), font, maxW), w = Math.max.apply(null, lines.map(function (l, li) { return mmMeasure(l, font) + (li ? 0 : mkw); })), px = d === 0 ? 18 : d === 1 ? 12 : 6, py = d === 0 ? 11 : d === 1 ? 7 : 4, lh = Math.round(fs * 1.35); var iw = x.img ? Math.min(maxW, 180) : 0, ih = x.img ? Math.round(iw * (+x.imgr || 0.66)) : 0; return { w: Math.ceil(Math.max(28, iw + 4, Math.min(maxW + 4, w + 4)) + px * 2 + (x.nt ? 18 : 0)), h: lines.length * lh + py * 2 + (ih ? ih + 6 : 0), iw: iw, ih: ih, mkw: mkw, lines: lines, it: !!st.i, fs: fs, fw: fw, lh: lh, px: px, py: py }; }
-    function prep(x, d, par) { var s = size(x, d), kids = x.f ? [] : x.k || [], gy = (d === 0 ? 22 : d === 1 ? 12 : 6) * DN; N[x.id] = { x: x, s: s, d: d, p: par, gy: gy }; kids.forEach(function (c) { prep(c, d + 1, x); }); var sh = kids.reduce(function (a, c) { return a + N[c.id].sh; }, 0) + gy * Math.max(0, kids.length - 1); N[x.id].sh = Math.max(s.h, sh); }
+    function prep(x, d, par) { var s = size(x, d), kids = x.f || (MMDLIM && d >= MMDLIM) ? [] : x.k || [], gy = (d === 0 ? 22 : d === 1 ? 12 : 6) * DN; N[x.id] = { x: x, s: s, d: d, p: par, gy: gy }; kids.forEach(function (c) { prep(c, d + 1, x); }); var sh = kids.reduce(function (a, c) { return a + N[c.id].sh; }, 0) + gy * Math.max(0, kids.length - 1); N[x.id].sh = Math.max(s.h, sh); }
     var NUM = {}; if (n.mm && n.mm.num) (function nm(x, pre) { (x.k || []).forEach(function (c, i) { var t = pre + (i + 1); NUM[c.id] = pre ? t : t + "."; nm(c, t + "."); }); })(mmRoot(n), "");
     prep(root, 0, null);
-    function kidsY(x) { var nx = N[x.id], kids = x.f ? [] : x.k || []; if (!kids.length) return; var tot = kids.reduce(function (a, c) { return a + N[c.id].sh; }, 0) + nx.gy * (kids.length - 1), y = nx.cy - tot / 2; kids.forEach(function (c) { var nc = N[c.id]; nc.side = nx.side; nc.cx = nx.cx + nx.side * (nx.s.w / 2 + 30 * DN + nc.s.w / 2); nc.cy = y + nc.sh / 2; y += nc.sh + nx.gy; kidsY(c); }); }
+    function kidsY(x) { var nx = N[x.id], kids = x.f ? [] : (x.k || []).filter(function (c) { return N[c.id]; }); if (!kids.length) return; var tot = kids.reduce(function (a, c) { return a + N[c.id].sh; }, 0) + nx.gy * (kids.length - 1), y = nx.cy - tot / 2; kids.forEach(function (c) { var nc = N[c.id]; nc.side = nx.side; nc.cx = nx.cx + nx.side * (nx.s.w / 2 + 30 * DN + nc.s.w / 2); nc.cy = y + nc.sh / 2; y += nc.sh + nx.gy; kidsY(c); }); }
     var nr = N[root.id]; nr.cx = 0; nr.cy = 0; nr.side = 1;
     var R = [], L = []; (root.f ? [] : root.k || []).forEach(function (c) { (c.side === "l" && !(n.mm && n.mm.lay === "right") ? L : R).push(c); });
     [[R, 1], [L, -1]].forEach(function (g) { var list = g[0], tot = list.reduce(function (a, c) { return a + N[c.id].sh; }, 0) + nr.gy * Math.max(0, list.length - 1), y = -tot / 2; list.forEach(function (c) { var nc = N[c.id]; nc.side = g[1]; nc.cx = g[1] * (nr.s.w / 2 + 48 * DN + nc.s.w / 2); nc.cy = y + nc.sh / 2; y += nc.sh + nr.gy; kidsY(c); }); });
-    if (n.mm && n.mm.lay === "down") mmPlaceDown(root, N, DN);
+    if (n.mm && n.mm.lay === "down") mmPlaceDown(root, N, DN); else if (n.mm && n.mm.lay === "radial") mmPlaceRadial(root, N, DN); else if (n.mm && n.mm.lay === "time") mmPlaceTime(root, N, DN); else if (n.mm && n.mm.lay === "fish") mmPlaceFish(root, N, DN);
     // цвет: у ветки первого уровня — свой по порядку (или выбранный), дальше наследуется
     var PAL = th.pal; (function cw(x, c, d) { var own = x.st && x.st.c ? x.st.c : typeof x.c === "number" && d > 0 ? PAL[x.c % PAL.length] : c; N[x.id] && (N[x.id].col = own); (x.k || []).forEach(function (k, i) { cw(k, d === 0 ? PAL[i % PAL.length] : own, d + 1); }); })(mmRoot(n), th.root || "var(--fg)", 0);
     (function pg(x) { var dn = 0, tt = 0; (x.k || []).forEach(function (c) { var r = pg(c), t = mmTask(c); dn += r[0]; tt += r[1]; if (t && !t.del) { tt++; if (t.done) dn++; } }); if (N[x.id]) N[x.id].prg = [dn, tt]; return [dn, tt]; })(mmRoot(n));
     return N;
   }
-  function mmBounds(N, n) { var b = { x0: 1e9, y0: 1e9, x1: -1e9, y1: -1e9 }; if (n && n.mm) mmDecoB(n, N, b);
+  function mmBounds(N, n) { var b = { x0: 1e9, y0: 1e9, x1: -1e9, y1: -1e9 }; if (n && n.mm) mmDecoB(n, N, b); if (N._ax) { b.x0 = Math.min(b.x0, N._ax.x0 - 10); b.x1 = Math.max(b.x1, N._ax.x1 + 16); }
     if (n) mmRels(n).forEach(function (r) { var g = mmRelGeo(N, r, 0, 0); if (!g) return; var lw = r.t ? r.t.length * 3.6 + 12 : 12; b.x0 = Math.min(b.x0, g.lx - lw); b.x1 = Math.max(b.x1, g.lx + lw); b.y0 = Math.min(b.y0, g.ly - 14); b.y1 = Math.max(b.y1, g.ly + 14); }); Object.keys(N).forEach(function (id) { var v = N[id]; if (v.cx === undefined) return; b.x0 = Math.min(b.x0, v.cx - v.s.w / 2 - 24); b.x1 = Math.max(b.x1, v.cx + v.s.w / 2 + 24); b.y0 = Math.min(b.y0, v.cy - v.s.h / 2); b.y1 = Math.max(b.y1, v.cy + v.s.h / 2); }); return b; }
   function mmEdge(a, b) { if (b.vert) { var X1 = a.cx, Y1 = a.cy + a.s.h / 2, X2 = b.cx, Y2 = b.cy - b.s.h / 2, dY = (Y2 - Y1) * 0.5; return "M" + X1.toFixed(1) + " " + Y1.toFixed(1) + " C" + X1.toFixed(1) + " " + (Y1 + dY).toFixed(1) + " " + X2.toFixed(1) + " " + (Y2 - dY).toFixed(1) + " " + X2.toFixed(1) + " " + Y2.toFixed(1); } var x1 = a.cx + b.side * a.s.w / 2, y1 = a.cy, x2 = b.cx - b.side * b.s.w / 2, y2 = b.cy + (b.d >= 2 ? b.s.h / 2 : 0), dx = (x2 - x1) * 0.5; return "M" + x1.toFixed(1) + " " + y1.toFixed(1) + " C" + (x1 + dx).toFixed(1) + " " + y1.toFixed(1) + " " + (x2 - dx).toFixed(1) + " " + y2.toFixed(1) + " " + x2.toFixed(1) + " " + y2.toFixed(1); }
   // экран карты
@@ -12403,8 +12407,8 @@ CREATE TABLE inbox (
     var root = mmRoot(n); if (MMQNID !== n.id) { MMQNID = n.id; MMQ = NQ.trim(); MMQI = -1; MMFOC = ""; MMFLT = ""; MMMS = {}; MMDECO = null; } var vr = mmVRoot(n); if (!MMSEL || !mmFind(n, MMSEL)) MMSEL = vr.id;
     var bar = '<div class="r mmbar"><span class="seg"><button type="button" data-a="mmview" data-x="map" class="' + (MMTXT === "list" ? "" : "on") + '">🧠 Карта</button><button type="button" data-a="mmview" data-x="list" class="' + (MMTXT === "list" ? "on" : "") + '">☰ Список</button></span>' +
       (rd ? "" : '<button type="button" class="btn sm" data-a="mmadd" title="Tab">＋ Ветка</button><button type="button" class="btn sm" data-a="mmsib" title="Enter">＋ Рядом</button><button type="button" class="btn sm" data-a="mmren" title="F2 или пробел">✎</button><button type="button" class="btn sm" data-a="mmcol" title="Цвет ветки">🎨</button><button type="button" class="btn sm" data-a="mmic" title="Значок">☺</button><button type="button" class="btn sm" data-a="mmnote" title="Заметка к узлу">📝</button><button type="button" class="btn sm" data-a="mmdel" title="Delete">🗑</button><button type="button" class="btn sm" data-a="mmside" title="Ветку первого уровня — на другую сторону (Alt+← / Alt+→)">⇄</button><button type="button" class="btn sm" data-a="mmfocus" title="Фокус: показать только выбранную ветку">🔎 Фокус</button><button type="button" class="btn sm' + (MMREL ? " on" : "") + '" data-a="mmrelb" title="Стрелка-связь от выбранного узла к другому">↗ Связь</button><button type="button" class="btn sm" data-a="mmimg" title="Картинка в узел">🖼</button><button type="button" class="btn sm' + (MMTHP ? " on" : "") + '" data-a="mmthb" title="Тема оформления карты">🖌 Тема</button><button type="button" class="btn sm' + (MMSTP ? " on" : "") + '" data-a="mmstyle" title="Стиль выбранного узла: форма, цвет, текст, кисть">Аа Стиль</button><button type="button" class="btn sm' + (MMMKP ? " on" : "") + '" data-a="mmmkb" title="Метки, рамки, итоги, нумерация">🏷 Метки</button><button type="button" class="btn sm' + (MMFLT ? " on" : "") + '" data-a="mmflt" title="Показать только узлы с метками или задачами">⧩ ' + (MMFLT ? esc(MMFLTN[MMFLT]) : "Фильтр") + ' ▾</button><button type="button" class="btn sm" data-a="mmmore" title="Копировать, вставить, раскладка">⋯</button><button type="button" class="btn sm" data-a="mmlvl" title="Свернуть и развернуть по уровням">⊟ Уровни ▾</button><button type="button" class="btn sm" data-a="mmpaste" title="Вставить многоуровневый список">📋 Из списка</button><button type="button" class="btn sm" data-a="mmtask" title="Связать узел с задачей">☐ В задачу ▾</button><button type="button" class="btn sm" data-a="mmpage" title="Узел — страница базы знаний">📄 В страницу ▾</button>' + (n.mm.src ? '<button type="button" class="btn sm" data-a="mmsync" title="Добавить на карту новое из источника (проекта, цели, страницы)">🔄 Обновить</button>' : "") + (AI.ready() ? '<button type="button" class="btn sm" data-a="mmai" title="ИИ разложит выбранный узел на ветки">✨ Разложить</button>' : "")) +
-      '<span class="mmqw"><input type="search" class="inp mmq" id="mmq" placeholder="Найти на карте — Enter" value="' + esc(MMQ) + '" autocomplete="off" aria-label="Найти на карте"><small class="muted" id="mmqc"></small></span><span class="mmz"><button type="button" class="btn sm" data-a="mmzoom" data-x="-1" aria-label="Мельче">−</button><button type="button" class="btn sm" data-a="mmzoom" data-x="0" title="Вписать в экран">⤢</button><button type="button" class="btn sm" data-a="mmzoom" data-x="1" aria-label="Крупнее">＋</button></span><button type="button" class="btn sm" data-a="mmexp">⤓ ▾</button></div>';
-    var h = '<div class="mmwrap">' + bar + (vr !== root ? '<div class="mmfocb">🔎 Фокус на ветке «' + esc(mmLabel(n, vr).slice(0, 60)) + '» — остальная карта скрыта <button type="button" class="btn sm" data-a="mmfocx">✕ Вся карта</button></div>' : "") + (MMRELED && !rd ? mmRelPanel(n) : "") + (MMTHP && !rd ? mmThPanel(n) : "") + (MMSTP && !rd ? mmStPanel(n) : "") + (MMMKP && !rd ? mmMkPanel(n) : "") + (MMDECO && !rd ? mmDecoPanel(n) : "") + (Object.keys(MMMS).length ? '<div class="mmfocb">Выделено узлов: ' + mmSelIds(n).length + ' — метки, цвет, стиль и Delete действуют на все <button type="button" class="btn sm" data-a="mmmsx">✕ Снять выделение</button></div>' : "");
+      '<button type="button" class="btn sm' + (MMZEN || MMPRS || MMBS || MMTR ? " on" : "") + '" data-a="mmmode" title="Презентация, мозговой штурм, тренажёр, во весь экран">▶ Режим ▾</button><span class="mmqw"><input type="search" class="inp mmq" id="mmq" placeholder="Найти на карте — Enter" value="' + esc(MMQ) + '" autocomplete="off" aria-label="Найти на карте"><small class="muted" id="mmqc"></small></span><span class="mmz"><button type="button" class="btn sm" data-a="mmzoom" data-x="-1" aria-label="Мельче">−</button><button type="button" class="btn sm" data-a="mmzoom" data-x="0" title="Вписать в экран">⤢</button><button type="button" class="btn sm" data-a="mmzoom" data-x="1" aria-label="Крупнее">＋</button></span><button type="button" class="btn sm" data-a="mmexp">⤓ ▾</button></div>';
+    var h = '<div class="mmwrap' + mmModeCls() + '">' + (MMBS ? "" : mmModeBar(n)) + bar + (MMBS ? mmModeBar(n) : "") + mmEmptyHint(n, rd) + (vr !== root ? '<div class="mmfocb">🔎 Фокус на ветке «' + esc(mmLabel(n, vr).slice(0, 60)) + '» — остальная карта скрыта <button type="button" class="btn sm" data-a="mmfocx">✕ Вся карта</button></div>' : "") + (MMRELED && !rd ? mmRelPanel(n) : "") + (MMTHP && !rd ? mmThPanel(n) : "") + (MMSTP && !rd ? mmStPanel(n) : "") + (MMMKP && !rd ? mmMkPanel(n) : "") + (MMDECO && !rd ? mmDecoPanel(n) : "") + (Object.keys(MMMS).length ? '<div class="mmfocb">Выделено узлов: ' + mmSelIds(n).length + ' — метки, цвет, стиль и Delete действуют на все <button type="button" class="btn sm" data-a="mmmsx">✕ Снять выделение</button></div>' : "");
     var sx = mmFind(n, MMSEL);
     if (MMNT && !rd) { var nx = mmFind(n, MMNT); if (nx) h += '<div class="npop mmntp"><div class="npoph"><b>📝 Заметка к «' + esc(mmLabel(n, nx.x).slice(0, 40)) + '»</b><button type="button" class="ibtn" data-a="mmnotex" aria-label="Закрыть">✕</button></div><textarea class="inp" id="mmnt" rows="3" placeholder="Пояснение, ссылка, мысль — видно при наведении на узел">' + esc(nx.x.nt || "") + "</textarea></div>"; }
     if (MMPASTE && !rd) h += '<div class="npop mmpp"><div class="npoph"><b>📋 Вставить список в «' + esc(sx ? mmLabel(n, sx.x).slice(0, 40) : "") + '»</b><button type="button" class="ibtn" data-a="mmpastex" aria-label="Закрыть">✕</button></div><textarea class="inp" id="mmpaste" rows="7" placeholder="Вставьте многоуровневый список: каждая строка — узел, отступ (Tab или пробелы) — уровень. Маркеры «-», «•», «1.» уберутся сами."></textarea><div class="r"><button type="button" class="btn sm pri" data-a="mmpasteok">Добавить ветки</button></div></div>';
@@ -12415,14 +12419,14 @@ CREATE TABLE inbox (
     }
     var N = mmLayout(n, vr), b = mmBounds(N, n), pad = 40, ox = -b.x0 + pad, oy = -b.y0 + pad, W = Math.ceil(b.x1 - b.x0 + pad * 2), H = Math.ceil(b.y1 - b.y0 + pad * 2); MMLAY = N;
     var vw = MMV[n.id] || (MMV[n.id] = { s: 1, rx: 0, ry: 0, fit: 1 });
-    var th = mmTh(n), FK = mmFltKeep(n, N), svg = '<svg class="mmsvg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + " " + H + '">' + (th.glow ? MMGLOW : "") + mmDecoSVG(n, N, ox, oy, { fg: "var(--fg)", mu: "var(--muted)", bg: "var(--panel)", ff: MMFF[th.ff] || getComputedStyle(document.body).fontFamily || "sans-serif" }, false) + Object.keys(N).map(function (id) { var v = N[id]; if (!v.p || v.cx === undefined) return ""; var eh = mmEdgeEl(th, N, v, ox, oy, v.col); return FK && !FK[id] ? eh.replace("<path ", '<path opacity="0.18" ') : eh; }).join("") + mmRelSVG(n, N, ox, oy) + "</svg>";
+    var th = mmTh(n), FK = mmFltKeep(n, N), svg = '<svg class="mmsvg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + " " + H + '">' + (th.glow ? MMGLOW : "") + mmDecoSVG(n, N, ox, oy, { fg: "var(--fg)", mu: "var(--muted)", bg: "var(--panel)", ff: MMFF[th.ff] || getComputedStyle(document.body).fontFamily || "sans-serif" }, false) + mmAxSVG(N, ox, oy, "var(--muted)") + Object.keys(N).map(function (id) { var v = N[id]; if (!v.p || v.cx === undefined) return ""; var eh = mmEdgeEl(th, N, v, ox, oy, v.col); return FK && !FK[id] ? eh.replace("<path ", '<path opacity="0.18" ') : eh; }).join("") + mmRelSVG(n, N, ox, oy) + "</svg>";
     var nodes = Object.keys(N).map(function (id) {
       var v = N[id], x = v.x, s = v.s, ed = MMED === id && !rd, kc = (x.k || []).length;
       var st = "left:" + (v.cx + ox - s.w / 2).toFixed(1) + "px;top:" + (v.cy + oy - s.h / 2).toFixed(1) + "px;width:" + s.w + "px;height:" + s.h + "px;font-size:" + s.fs + "px;font-weight:" + s.fw + ";line-height:" + s.lh + "px;padding:" + s.py + "px " + s.px + "px;--bc:" + v.col + (/^(fill|fillr|pillf)$/.test(mmShp(th, v)) ? ";--mon:" + mmOnC(th, v.col) : "") + (x.st && x.st.tc ? ";color:" + x.st.tc : "") + (s.it ? ";font-style:italic" : "");
       var inner = (x.img ? '<img class="mmimg" data-ydimg="' + esc(x.img) + '" alt="" style="width:' + s.iw + "px;height:" + s.ih + 'px">' : "") + (ed ? '<input class="mmin" id="mmin" value="' + esc(mmLabel(n, x)) + '" autocomplete="off" aria-label="Текст узла">' : mmMkHTML(x, s) + s.lines.map(esc).join("<br>") + (x.nt ? '<span class="mmntb" title="' + esc(x.nt) + '">📝</span>' : ""));
       var fold = kc && v.d > 0 ? '<button type="button" class="mmf' + (x.f ? " on" : "") + '" data-a="mmfold" data-id="' + id + '" style="' + (v.vert ? "left:50%;top:auto;bottom:-22px;transform:translateX(-50%)" : v.side > 0 ? "right:-22px" : "left:-22px") + '" title="' + (x.f ? "Развернуть" : "Свернуть") + '">' + (x.f ? mmCount(x) : "−") + "</button>" : "";
       var tk = mmTask(x), pgl = mmPage(x), bdg = mmPrgHTML(v) + (tk && !tk.del ? '<button type="button" class="mmtk' + (tk.done ? " on" : "") + '" data-a="mmck" data-id="' + id + '" title="' + (tk.done ? "Задача выполнена — вернуть" : "Задача — отметить выполненной") + '">' + (tk.done ? "✓" : "") + "</button>" : "") + (pgl ? '<button type="button" class="mmpg" data-a="mmpg" data-id="' + id + '" title="Открыть страницу «' + esc(nTitle(pgl)) + '»">📄</button>' : "") + (tk && !tk.del && !tk.done && (tk.at || tk.due) ? '<span class="mmdue' + (isLate(tk) ? " late" : mmDue(tk) === "сегодня" ? " tod" : "") + '">' + esc(mmDue(tk)) + "</span>" : "");
-      return '<div class="mmn d' + Math.min(v.d, 2) + " sh-" + mmShp(th, v) + (MMSEL === id ? " sel" : MMMS[id] ? " sel ms" : "") + (FK && !FK[id] ? " mmdim" : "") + (x.f ? " fld" : "") + (tk && tk.done ? " dn" : "") + (mmHit(n, x) ? " mmhit" : "") + '" data-mid="' + id + '" style="' + st + '"' + (x.nt ? ' title="' + esc(x.nt) + '"' : "") + ">" + inner + fold + bdg + "</div>";
+      return '<div class="mmn d' + Math.min(v.d, 2) + " sh-" + mmShp(th, v) + (MMSEL === id ? " sel" : MMMS[id] ? " sel ms" : "") + (FK && !FK[id] ? " mmdim" : "") + mmTrCls(v) + (x.f ? " fld" : "") + (tk && tk.done ? " dn" : "") + (mmHit(n, x) ? " mmhit" : "") + '" data-mid="' + id + '" style="' + st + '"' + (x.nt ? ' title="' + esc(x.nt) + '"' : "") + ">" + inner + fold + bdg + "</div>";
     }).join("") + mmRelLabels(n, N, ox, oy, rd) + mmDecoLabels(n, N, ox, oy, rd);
     var tr = "translate(" + (vw.rx - ox * vw.s).toFixed(1) + "px," + (vw.ry - oy * vw.s).toFixed(1) + "px) scale(" + vw.s + ")";
     h += '<div class="mmvp' + (rd ? " ro" : "") + (n.mm.lay === "down" ? " down" : "") + (MMREL ? " relmode" : "") + mmThCls(th) + (MMBR ? " brush" : "") + '" style="' + mmThVars(th) + '" id="mmvp" tabindex="0" data-note="' + n.id + '" data-ox="' + ox.toFixed(1) + '" data-oy="' + oy.toFixed(1) + '" data-w="' + W + '" data-h="' + H + '"><div class="mmst" style="width:' + W + "px;height:" + H + "px;transform:" + tr + '">' + svg + nodes + "</div>" + mmMiniHTML(n, N, ox, oy, W, H) + "</div>";
@@ -12437,7 +12441,7 @@ CREATE TABLE inbox (
     var inp = $("mmin"); if (inp) { try { inp.focus({ preventScroll: true }); } catch (e) { inp.focus(); } inp.select(); } else if (document.activeElement === document.body) { try { vp.focus({ preventScroll: true }); } catch (e) { vp.focus(); } }
   }
   function mmApply(n) { setTimeout(function () { mmMiniUpd(n); }, 0); var vp = $("mmvp"), st = vp && vp.querySelector(".mmst"), vw = MMV[n.id]; if (!st || !vw) return; st.style.transform = "translate(" + (vw.rx - +vp.dataset.ox * vw.s).toFixed(1) + "px," + (vw.ry - +vp.dataset.oy * vw.s).toFixed(1) + "px) scale(" + vw.s + ")"; }
-  function mmFit(n) { var vp = $("mmvp"); if (!vp) return; var W = +vp.dataset.w, H = +vp.dataset.h, cw = vp.clientWidth, ch = vp.clientHeight, s = Math.max(0.3, Math.min(1.2, (cw - 20) / W, (ch - 20) / H)); MMV[n.id] = { s: s, rx: (cw - W * s) / 2 + +vp.dataset.ox * s, ry: (ch - H * s) / 2 + +vp.dataset.oy * s }; mmApply(n); }
+  function mmFit(n) { var vp = $("mmvp"); if (!vp) return; var W = +vp.dataset.w, H = +vp.dataset.h, cw = vp.clientWidth, ch = vp.clientHeight, s = Math.max(0.3, Math.min(MMPRS ? 2.2 : 1.2, (cw - 20) / W, (ch - 20) / H)); MMV[n.id] = { s: s, rx: (cw - W * s) / 2 + +vp.dataset.ox * s, ry: (ch - H * s) / 2 + +vp.dataset.oy * s }; mmApply(n); }
   function mmZoom(n, k, px, py) { var vp = $("mmvp"), vw = MMV[n.id]; if (!vp || !vw) return; if (px === undefined) { px = vp.clientWidth / 2; py = vp.clientHeight / 2; } var s2 = Math.max(0.25, Math.min(2.5, vw.s * k)); vw.rx = px - (px - vw.rx) * s2 / vw.s; vw.ry = py - (py - vw.ry) * s2 / vw.s; vw.s = s2; mmApply(n); }
   // действия с узлами
   function mmCur() { var n = note(ARG); return mmIs(n) ? n : null; }
@@ -12512,7 +12516,7 @@ CREATE TABLE inbox (
       case "mmpastex": MMPASTE = false; render(); return true;
       case "mmpasteok": var add = mmParse(($("mmpaste") || {}).value); if (!add.length) { toast("Вставьте список: каждая строка — узел"); return true; } var fp = mmFind(n, MMSEL) || { x: mmRoot(n) }; mmPush(n); fp.x.k = (fp.x.k || []).concat(add); fp.x.f = false; if (fp.x === mmRoot(n)) add.forEach(function (c) { c.side = mmNew(fp.x, n).side; }); MMPASTE = false; mmSave(n); toast("Добавлено узлов: " + add.reduce(function (s0, c) { return s0 + mmCount(c) + 1; }, 0)); return true;
       case "mmtxtok": var rows = mmParse(($("mmtxt") || {}).value), old = {}; mmWalk(mmRoot(n), function (x) { if (x.t && !old[x.t]) old[x.t] = x; }); mmPush(n); (function keep(l) { l.forEach(function (x) { var o = old[x.t]; if (o) { ["c", "ic", "nt", "f", "side"].forEach(function (k) { if (o[k] !== undefined) x[k] = o[k]; }); } keep(x.k); }); })(rows); mmRoot(n).k = rows; mmSave(n); toast("Карта обновлена из текста"); return true;
-      case "mmexp": var re = el.getBoundingClientRect(); ctxShow(re.left, re.bottom + 4, [{ c: "png", i: "🖼", l: "Картинка PNG" }, { c: "svg", i: "✒", l: "Векторная картинка SVG" }, { c: "pdf", i: "📕", l: "PDF — через печать" }, { c: "md", i: "Ⓜ", l: "Markdown-список (.md)" }, { c: "copy", i: "📋", l: "Скопировать списком" }], { k: "mmexp", id: n.id }); return true;
+      case "mmexp": var re = el.getBoundingClientRect(); ctxShow(re.left, re.bottom + 4, [{ c: "png", i: "🖼", l: "Картинка PNG" }, { c: "svg", i: "✒", l: "Векторная картинка SVG" }, { c: "pdf", i: "📕", l: "PDF — через печать" }, { c: "opml", i: "⇄", l: "OPML — для XMind, MindNode, Workflowy" }, { c: "mmf", i: "⇄", l: "FreeMind (.mm) — для FreeMind, Freeplane" }, { c: "md", i: "Ⓜ", l: "Markdown-список (.md)" }, { c: "copy", i: "📋", l: "Скопировать списком" }], { k: "mmexp", id: n.id }); return true;
     }
     return false;
   }
@@ -12520,14 +12524,14 @@ CREATE TABLE inbox (
     var n = note(id); if (!mmIs(n)) return;
     if (k === "mmcol" || k === "mmic") { var fl = mmSelIds(n).map(function (sid) { return mmFind(n, sid); }).filter(Boolean); if (!fl.length) return; mmPush(n); fl.forEach(function (f) { if (k === "mmcol") { if (c === "~") delete f.x.c; else f.x.c = +c; if (f.x.st) { delete f.x.st.c; if (!Object.keys(f.x.st).length) delete f.x.st; } } else { if (c === "~") delete f.x.ic; else f.x.ic = c; } }); mmSave(n); return; }
     if (k === "mmexp") {
-      if (c === "png") mmPNG2(n); else if (c === "svg") mmSVGFile(n); else if (c === "pdf") mmPDF(n);
+      if (c === "opml" || c === "mmf") mmExportX(n, c); else if (c === "png") mmPNG2(n); else if (c === "svg") mmSVGFile(n); else if (c === "pdf") mmPDF(n);
       else if (c === "md") { nDownload(nFname(n) + ".md", "# " + nTitle(n) + "\n\n" + mmMd(mmRoot(n)), "text/markdown;charset=utf-8"); toast("Markdown сохранён в «Загрузки»"); }
       else if (navigator.clipboard) navigator.clipboard.writeText(nTitle(n) + "\n" + mmText(mmRoot(n), "\t")).then(function () { toast("Скопировано — вставляется в Word и другие программы списком"); }, function () { toast("Не удалось скопировать"); });
     }
   }
   // клавиатура: когда карта в фокусе (а не поле ввода)
   document.addEventListener("keydown", function (e) {
-    if (V !== "note") return; var n = mmCur(); if (!n) return; var t = e.target;
+    if (V !== "note") return; var n = mmCur(); if (!n) return; var t = e.target; if (mm8Key(n, e)) return;
     if (t && t.id === "mmin") {
       if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); mmCommit(n, t.value); }
       else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); mmCommit(n, t.value, true); }
@@ -12636,6 +12640,7 @@ CREATE TABLE inbox (
   document.addEventListener("pointerup", function (e) {
     if (mmPtrEnd(e)) return;
     var n = mmCur(); if (MMPAN) { MMPAN = null; return; } var d = MMDR; MMDR = null; if (!d || !n) return;
+    if (!d.moved && MMTR && mmTrClick(n, d.id)) return;
     if (!d.moved && d.add && !d.ro && !MMBR && !MMREL) { mmMsToggle(n, d.id); return; }
     if (!d.moved && Object.keys(MMMS).length && !MMBR && !MMREL) { MMMS = {}; if (MMSEL === d.id) { render(); return; } }
     if (!d.moved && MMBR && !d.ro) { mmBrushTo(n, d.id); return; }
@@ -12871,15 +12876,15 @@ CREATE TABLE inbox (
       case "mmreldel": mmPush(n); n.mm.rel = mmRels(n).filter(function (x) { return x.id !== MMRELED; }); MMRELED = ""; mmSave(n); toast("Связь удалена"); return true;
       case "mmimg": mmImgPick(n); return true;
       case "mmmore": var rm = el.getBoundingClientRect(), lay = n.mm.lay || "both", sel = mmFind(n, MMSEL), cl = mmClipGet();
-        ctxShow(rm.left, rm.bottom + 4, [{ c: "copy", i: "⧉", l: "Копировать ветку", k: "Ctrl+C" }, { c: "cut", i: "✂", l: "Вырезать ветку", k: "Ctrl+X" }, { c: "paste", i: "📥", l: cl ? "Вставить ветку в выбранный узел" : "Вставить ветку (буфер пуст)", k: "Ctrl+V" }, "-", { c: "par", i: "⤒", l: "Вставить родителя (обернуть узел)", k: "Ctrl+Enter" }, { c: "sort:az", i: "↧", l: "Сортировать ветки: А → Я" }, { c: "sort:za", i: "↥", l: "Сортировать ветки: Я → А" }, { c: "sort:p", i: "①", l: "Сортировать ветки: по приоритету" }, { c: "sort:due", i: "⏰", l: "Сортировать ветки: по сроку задачи" }, "-", { c: "lay:both", i: lay === "both" ? "✓" : "↔", l: "Раскладка: вправо и влево" }, { c: "lay:right", i: lay === "right" ? "✓" : "→", l: "Раскладка: всё вправо (дерево)" }, { c: "lay:down", i: lay === "down" ? "✓" : "↓", l: "Раскладка: сверху вниз (оргструктура)" }, "-", { c: "mini", i: LS.get("zd-mmmini") === "0" ? "▣" : "✓", l: "Мини-карта в углу" }].concat(sel && sel.x.img ? ["-", { c: "noimg", i: "🖼", l: "Убрать картинку из узла" }] : []), { k: "mmmore", id: n.id }); return true;
+        ctxShow(rm.left, rm.bottom + 4, [{ c: "copy", i: "⧉", l: "Копировать ветку", k: "Ctrl+C" }, { c: "cut", i: "✂", l: "Вырезать ветку", k: "Ctrl+X" }, { c: "paste", i: "📥", l: cl ? "Вставить ветку в выбранный узел" : "Вставить ветку (буфер пуст)", k: "Ctrl+V" }, "-", { c: "par", i: "⤒", l: "Вставить родителя (обернуть узел)", k: "Ctrl+Enter" }, { c: "sort:az", i: "↧", l: "Сортировать ветки: А → Я" }, { c: "sort:za", i: "↥", l: "Сортировать ветки: Я → А" }, { c: "sort:p", i: "①", l: "Сортировать ветки: по приоритету" }, { c: "sort:due", i: "⏰", l: "Сортировать ветки: по сроку задачи" }, "-", { c: "lay:both", i: lay === "both" ? "✓" : "↔", l: "Раскладка: вправо и влево" }, { c: "lay:right", i: lay === "right" ? "✓" : "→", l: "Раскладка: всё вправо (дерево)" }, { c: "lay:down", i: lay === "down" ? "✓" : "↓", l: "Раскладка: сверху вниз (оргструктура)" }, { c: "lay:radial", i: lay === "radial" ? "✓" : "◎", l: "Раскладка: по кругу" }, { c: "lay:time", i: lay === "time" ? "✓" : "⏳", l: "Раскладка: временная шкала" }, { c: "lay:fish", i: lay === "fish" ? "✓" : "🐟", l: "Раскладка: рыбья кость (причины)" }, "-", { c: "tpls", i: "🧩", l: "Новая карта из шаблона…" }, { c: "imp", i: "📂", l: "Открыть файл XMind, FreeMind, OPML…" }, "-", { c: "mini", i: LS.get("zd-mmmini") === "0" ? "▣" : "✓", l: "Мини-карта в углу" }].concat(sel && sel.x.img ? ["-", { c: "noimg", i: "🖼", l: "Убрать картинку из узла" }] : []), { k: "mmmore", id: n.id }); return true;
     }
     return false;
   }
   function mm4Ctx(k, id, c) {
     var n = note(id); if (!mmIs(n)) return;
-    if (k !== "mmmore") return; if (mm7More(n, c)) return;
+    if (k !== "mmmore") return; if (mm7More(n, c) || mm8More(n, c)) return;
     if (c === "copy") mmClipSet(n, false); else if (c === "cut") mmClipSet(n, true); else if (c === "paste") mmPasteText(n);
-    else if (c.indexOf("lay:") === 0) { mmPush(n); n.mm.lay = c.slice(4); if (MMV[n.id]) MMV[n.id].fit = 1; mmSave(n); toast({ both: "Вправо и влево", right: "Всё вправо", down: "Сверху вниз" }[n.mm.lay] || ""); }
+    else if (c.indexOf("lay:") === 0) { mmPush(n); n.mm.lay = c.slice(4); if (MMV[n.id]) MMV[n.id].fit = 1; mmSave(n); toast({ both: "Вправо и влево", right: "Всё вправо", down: "Сверху вниз", radial: "По кругу", time: "Временная шкала", fish: "Рыбья кость: справа — проблема, на костях — причины" }[n.mm.lay] || ""); }
     else if (c === "noimg") { var f = mmFind(n, MMSEL); if (f && f.x.img) { mmPush(n); var p = f.x.img; delete f.x.img; delete f.x.imgr; mmSave(n); if (YD.token()) YD.api("/resources?path=" + encodeURIComponent(p), { method: "DELETE", ok: [202, 204, 404] }).catch(function () { /* уже нет */ }); } }
   }
 
@@ -12940,6 +12945,7 @@ CREATE TABLE inbox (
   }
   // линия от родителя к узлу v в стиле темы
   function mmEdgeEl(th, N, v, ox, oy, col) {
+    if (v.rad || v.tl1 || v.tl || v.fb1 || v.fbl || typeof v.fb2 === "number") { var sp = mmEdgeSp(th, N, v, ox, oy, col); if (sp) return sp; }
     var p = N[v.p.id], ul = function (u) { return u.d > 0 && mmShp(th, u) === "under"; };
     var g = mmEdgeTh({ cx: p.cx + ox, cy: p.cy + oy, s: p.s, ul: ul(p) }, { cx: v.cx + ox, cy: v.cy + oy, s: v.s, side: v.side, vert: v.vert, ul: ul(v) }, th.ln, mmTW(th, v.d - 1), mmTW(th, v.d) * 0.9), fl = th.glow ? ' filter="url(#mmglow)"' : "";
     if (g.fill) return '<path d="' + g.d + '" style="fill:' + col + ';stroke:none"' + fl + "/>";
@@ -12968,7 +12974,7 @@ CREATE TABLE inbox (
     var fx = th.bg, bg = fx ? fx[0] : hex ? "#ffffff" : "var(--panel)", fg = fx ? fx[1] : hex ? "#1c211f" : "var(--fg)", mu = fx ? fx[2] : hex ? "#8a8f8c" : "var(--muted)";
     var ff = (MMFF[th.ff] || getComputedStyle(document.body).fontFamily || "sans-serif").replace(/"/g, "'"), col = function (c) { return c === "var(--fg)" ? fg : c; };
     var s = "<svg " + (hex ? 'xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" ' : 'class="mmw" preserveAspectRatio="xMidYMid meet"' + (fx ? ' style="--panel:' + fx[0] + ";--fg:" + fx[1] + ";--muted:" + fx[2] + '"' : "") + " ") + 'viewBox="0 0 ' + W + " " + H + '"><rect width="100%" height="100%" style="fill:' + bg + '"/>' + (th.glow ? MMGLOW : "");
-    var DC = { fg: fg, mu: mu, bg: bg, ff: ff }; s += mmDecoSVG(n, N, ox, oy, DC, false);
+    var DC = { fg: fg, mu: mu, bg: bg, ff: ff }; s += mmDecoSVG(n, N, ox, oy, DC, false) + mmAxSVG(N, ox, oy, mu);
     Object.keys(N).forEach(function (id) { var v = N[id]; if (!v.p || v.cx === undefined) return; s += mmEdgeEl(th, N, v, ox, oy, col(v.col)); });
     s += mmRelSVG(n, N, ox, oy, hex ? { m: mu, bg: bg } : false);
     Object.keys(N).forEach(function (id) {
@@ -13291,6 +13297,213 @@ CREATE TABLE inbox (
     if (c === "par") { mmAddParent(n); return true; }
     if (c.indexOf("sort:") === 0) { mmSortKids(n, c.slice(5)); return true; }
     if (c === "mini") { LS.set("zd-mmmini", LS.get("zd-mmmini") === "0" ? "1" : "0"); render(); toast(LS.get("zd-mmmini") === "0" ? "Мини-карта скрыта" : "Мини-карта — в правом нижнем углу, когда карта не помещается"); return true; }
+    return false;
+  }
+
+  /* --- карта: режимы (презентация, мозговой штурм n.mm.bs, тренажёр, во весь экран), раскладки «по кругу», «временная шкала», «рыбья кость»,
+     импорт XMind / FreeMind / OPML / текста, экспорт OPML и FreeMind, шаблоны карт --- */
+  var MMZEN = false, MMPRS = null, MMBS = false, MMTR = null, MMDLIM = 0, MMBST = null, MMFSON = false;
+  function mmModeCls() { return (MMZEN || MMPRS ? " zen" : "") + (MMPRS ? " prs" : ""); }
+  function mmFs(on) { try { if (on) { if (!document.fullscreenElement && document.documentElement.requestFullscreen) { var pr = document.documentElement.requestFullscreen(); MMFSON = true; if (pr && pr.catch) pr.catch(function () { MMFSON = false; }); } } else if (document.fullscreenElement && document.exitFullscreen) { MMFSON = false; document.exitFullscreen().catch(function () { /* уже вышли */ }); } } catch (e) { MMFSON = false; } }
+  document.addEventListener("fullscreenchange", function () { var n = mmCur(); if (!document.fullscreenElement) { if (MMFSON && (MMZEN || MMPRS)) { MMFSON = false; mmModeExit(); return; } MMFSON = false; } if (n && MMV[n.id] && (MMZEN || MMPRS)) { MMV[n.id].fit = 1; render(); } });
+  function mmModeExit() { var n = mmCur(); MMZEN = false; MMBS = false; MMTR = null; MMDLIM = 0; if (MMPRS) { MMPRS = null; MMFOC = ""; } mmFs(false); if (n && MMV[n.id]) MMV[n.id].fit = 1; render(); }
+  // презентация: обзор первого уровня → каждая ветка → вся карта
+  function mmPrsSteps(n) {
+    var root = mmRoot(n), lay = n.mm.lay || "both", ks = root.k || [], R = lay === "both" ? ks.filter(function (c) { return c.side !== "l"; }) : ks, L = lay === "both" ? ks.filter(function (c) { return c.side === "l"; }).reverse() : [], st = [{ id: root.id, lim: 1 }];
+    R.concat(L).forEach(function (c) { st.push({ id: c.id }); if (mmCount(c) > 14) (c.k || []).forEach(function (g) { if ((g.k || []).length) st.push({ id: g.id }); }); });
+    st.push({ id: root.id, lim: 0, all: true }); return st;
+  }
+  function mmPrsGo(n, i) { var P = MMPRS; if (!P) return; P.i = Math.max(0, Math.min(P.st.length - 1, i)); var s = P.st[P.i], root = mmRoot(n); if (!mmFind(n, s.id)) { P.st = mmPrsSteps(n); return mmPrsGo(n, 0); } MMFOC = s.id === root.id ? "" : s.id; MMDLIM = s.lim || 0; MMSEL = s.id; MMMS = {}; MMV[n.id] = { s: 1, rx: 0, ry: 0, fit: 1 }; render(); }
+  function mmModeBar(n) {
+    if (MMPRS) { var s = MMPRS.st[MMPRS.i], f = mmFind(n, s.id), nm = s.all ? "Вся карта" : s.lim ? "Обзор" : f ? mmLabel(n, f.x) : ""; return '<div class="mmprsb"><button type="button" class="btn" data-a="mmprsp" aria-label="Назад"' + (MMPRS.i ? "" : " disabled") + '>←</button><span><b>' + esc(nm.slice(0, 60)) + '</b> <span class="muted">' + (MMPRS.i + 1) + " / " + MMPRS.st.length + '</span></span><button type="button" class="btn pri" data-a="mmprsn" aria-label="Дальше"' + (MMPRS.i < MMPRS.st.length - 1 ? "" : " disabled") + '>→</button><button type="button" class="btn sm" data-a="mmmodex">✕ Выйти (Esc)</button></div>'; }
+    if (MMZEN) return '<div class="mmzenb"><span class="muted">' + esc(nTitle(n)) + '</span><button type="button" class="btn sm" data-a="mmzoom" data-x="0">⤢ Вписать</button><button type="button" class="btn sm" data-a="mmmodex">✕ Выйти (Esc)</button></div>';
+    if (MMTR) { var N = mmLayout(n), all = Object.keys(N).filter(function (id) { return N[id].d >= 1; }), rv = all.filter(function (id) { return MMTR.rev[id]; }).length, ok = Object.keys(MMTR.ok).length, no = Object.keys(MMTR.no).length, lst = MMTR.last && mmFind(n, MMTR.last);
+      return '<div class="mmfocb mmtrb">🎓 <b>Тренажёр</b>: вспомните, что под «?», и нажмите — проверить. Открыто ' + rv + " из " + all.length + " · ✓ " + ok + " · ✗ " + no + (lst ? ' · «' + esc(mmLabel(n, lst.x).slice(0, 30)) + '»: <button type="button" class="btn sm" data-a="mmtrok">✓ Помню</button><button type="button" class="btn sm" data-a="mmtrno">✗ Не помню</button>' : "") + '<button type="button" class="btn sm" data-a="mmtrall">Показать всё</button>' + (no ? '<button type="button" class="btn sm" data-a="mmtrre">Повторить ✗</button>' : "") + '<button type="button" class="btn sm" data-a="mmtrnew">Заново</button><button type="button" class="btn sm" data-a="mmmodex">✕ Выйти</button></div>'; }
+    if (MMBS) return mmBsPanel(n);
+    return "";
+  }
+  function mmTrCls(v) { if (!MMTR || v.d < 1) return ""; var id = v.x.id; return !MMTR.rev[id] ? " trh" : MMTR.ok[id] ? " trok" : MMTR.no[id] ? " trno" : ""; }
+  function mmTrClick(n, id) { var f = mmFind(n, id); if (!f || !f.p || MMTR.rev[id]) return false; MMTR.rev[id] = 1; MMTR.last = id; MMSEL = id; render(); return true; }
+  // мозговой штурм: идеи-карточки, потом — по веткам (перетащить на узел или ↳ в выбранный)
+  function mmBsPanel(n) {
+    var l = n.mm.bs || [], left = MMBST ? Math.max(0, MMBST.end - Date.now()) : 0;
+    return '<div class="npop mmbsp"><div class="npoph"><b>💡 Мозговой штурм</b><span class="r"><span class="mmbst" id="mmbst">' + (MMBST ? "⏱ " + mmBsT(left) : "") + '</span>' + [5, 10, 15].map(function (m) { return '<button type="button" class="btn sm" data-a="mmbstm" data-x="' + m + '">⏱ ' + m + " мин</button>"; }).join("") + (MMBST ? '<button type="button" class="btn sm" data-a="mmbstm" data-x="0">■</button>' : "") + '<button type="button" class="ibtn" data-a="mmmodex" aria-label="Закрыть">✕</button></span></div>' +
+      '<div class="r"><input class="inp" id="mmbsin" placeholder="Идея — Enter. Сначала количество: не оценивайте, просто записывайте" autocomplete="off" maxlength="300"></div>' +
+      '<div class="mmbsl">' + (l.length ? l.map(function (b) { return '<div class="mmbsc" draggable="true" data-bsid="' + b.id + '"><span>' + esc(b.t) + '</span><button type="button" data-a="mmbsto" data-id="' + b.id + '" title="В выбранный узел карты">↳</button><button type="button" data-a="mmbsdel" data-id="' + b.id + '" title="Удалить">✕</button></div>'; }).join("") : '<span class="muted">Идей пока нет. Пишите всё подряд — разложить по веткам можно потом.</span>') + "</div>" +
+      (l.length ? '<div class="r"><button type="button" class="btn sm" data-a="mmbsall">Все ' + l.length + ' — в выбранный узел</button><span class="muted">Перетащите карточку на узел карты — станет его веткой; ↳ — в выбранный узел.</span></div>' : "") + "</div>";
+  }
+  function mmBsT(ms) { var s = Math.ceil(ms / 1000); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+  setInterval(function () { if (!MMBST) return; var left = MMBST.end - Date.now(), el = $("mmbst"); if (left <= 0) { MMBST = null; if (el) el.textContent = ""; toast("⏱ Время вышло — теперь разложите идеи по веткам"); return; } if (el) el.textContent = "⏱ " + mmBsT(left); }, 1000);
+  function mmBsTo(n, bid, nodeId) {
+    var b = (n.mm.bs || []).filter(function (x) { return x.id === bid; })[0], f = mmFind(n, nodeId) || { x: mmRoot(n) }; if (!b) return;
+    mmPush(n); n.mm.bs = n.mm.bs.filter(function (x) { return x !== b; }); if (!n.mm.bs.length) delete n.mm.bs; var c = mmNew(f.x, n); c.t = b.t; f.x.k = f.x.k || []; f.x.k.push(c); f.x.f = false; mmSave(n);
+  }
+  document.addEventListener("keydown", function (e) {
+    if (!e.target || e.target.id !== "mmbsin" || e.key !== "Enter") return; e.preventDefault(); var n = mmCur(), v = e.target.value.trim(); if (!n || !v) return;
+    mmPush(n); n.mm.bs = (n.mm.bs || []).concat(v.split(/\s*;\s*/).filter(Boolean).map(function (t) { return { id: uid(), t: t.slice(0, 300) }; })); mmSave(n); setTimeout(function () { var i = $("mmbsin"); if (i) i.focus(); }, 30);
+  }, true);
+  document.addEventListener("dragstart", function (e) { var c = e.target.closest && e.target.closest(".mmbsc"); if (!c) return; e.dataTransfer.setData("text/plain", "mmbs:" + c.dataset.bsid); e.dataTransfer.effectAllowed = "move"; });
+  document.addEventListener("dragover", function (e) { var vp = e.target.closest && e.target.closest("#mmvp"); if (!vp || !MMBS) return; e.preventDefault(); [].forEach.call(document.querySelectorAll(".mmn.mmdrop"), function (x) { x.classList.remove("mmdrop"); }); var nd = e.target.closest(".mmn"); if (nd) nd.classList.add("mmdrop"); });
+  document.addEventListener("drop", function (e) { var vp = e.target.closest && e.target.closest("#mmvp"); if (!vp || !MMBS) return; var d = e.dataTransfer.getData("text/plain") || ""; if (d.indexOf("mmbs:") !== 0) return; e.preventDefault(); var n = mmCur(), nd = e.target.closest(".mmn"); if (n) mmBsTo(n, d.slice(5), nd ? nd.dataset.mid : mmRoot(n).id); });
+  // клавиши режимов — раньше остальных клавиш карты
+  function mm8Key(n, e) {
+    var k = e.key, t = e.target, inp = t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName);
+    if (MMPRS && !inp) {
+      if (/^(ArrowRight|ArrowDown|PageDown| |Enter)$/.test(k)) mmPrsGo(n, MMPRS.i + 1); else if (/^(ArrowLeft|ArrowUp|PageUp|Backspace)$/.test(k)) mmPrsGo(n, MMPRS.i - 1); else if (k === "Home") mmPrsGo(n, 0); else if (k === "End") mmPrsGo(n, MMPRS.st.length - 1); else if (k === "Escape") mmModeExit(); else return false;
+      e.preventDefault(); e.stopPropagation(); return true;
+    }
+    if ((MMZEN || MMTR || MMBS) && k === "Escape" && !inp && !MMED) { e.preventDefault(); e.stopPropagation(); mmModeExit(); return true; }
+    return false;
+  }
+  // раскладки: видимые дети
+  function mmVk(N, x) { return x.f ? [] : (x.k || []).filter(function (c) { return N[c.id]; }); }
+  function mmAx(N, a) { Object.defineProperty(N, "_ax", { value: a, enumerable: false, configurable: true }); }
+  function mmPlaceRadial(root, N, DN) {
+    var lv = {}, ext = {}, sum = {}, md = 0, r0 = N[root.id]; r0.cx = 0; r0.cy = 0; r0.side = 1;
+    (function lc(x) { var k = mmVk(N, x); lv[x.id] = k.length ? k.reduce(function (a, c) { return a + lc(c); }, 0) : 1; return lv[x.id]; })(root);
+    Object.keys(N).forEach(function (id) { var v = N[id]; if (!v.d) return; md = Math.max(md, v.d); ext[v.d] = Math.max(ext[v.d] || 0, v.s.w / 2); sum[v.d] = (sum[v.d] || 0) + v.s.w * 0.55 + v.s.h + 22; });
+    var R = { 0: 0 }; for (var d = 1; d <= md; d++) R[d] = Math.max((d === 1 ? r0.s.w / 2 + 50 * DN : R[d - 1] + (ext[d - 1] || 0) + 46 * DN) + (ext[d] || 0) * 0.7, sum[d] / (2 * Math.PI));
+    (function pl(x, a0, a1) { var k = mmVk(N, x), a = a0; k.forEach(function (c) { var sp = (a1 - a0) * lv[c.id] / lv[x.id], am = a + sp / 2, v = N[c.id]; v.cx = R[v.d] * Math.cos(am); v.cy = R[v.d] * Math.sin(am); v.side = Math.cos(am) >= -0.01 ? 1 : -1; v.rad = true; pl(c, a, a + sp); a += sp; }); })(root, -Math.PI / 2, 1.5 * Math.PI);
+  }
+  function mmBlk(N, x, ind, gap) { var v = N[x.id], h = v.s.h, w = v.s.w; mmVk(N, x).forEach(function (c) { var z = mmBlk(N, c, ind, gap); h += gap + z.h; w = Math.max(w, ind + z.w); }); v.blk = { h: h, w: w }; return v.blk; }
+  function mmPlaceTime(root, N, DN) {
+    var r = N[root.id], g = 8 * DN, ax = 44 * DN; r.cx = 0; r.cy = 0; r.side = 1;
+    var x0 = r.s.w / 2 + 46 * DN, cur = { "-1": x0, "1": x0 }, last = x0 - 70 * DN, xm = x0;
+    mmVk(N, root).forEach(function (c, i) {
+      var sd = i % 2 ? 1 : -1, v = N[c.id], z = mmBlk(N, c, 22, g), left = Math.max(cur[sd] + 26 * DN, last + 64 * DN - v.s.w / 2);
+      v.cx = left + v.s.w / 2; v.cy = sd * (ax + v.s.h / 2); v.side = 1; v.tl1 = sd; last = v.cx; cur[sd] = left + z.w; xm = Math.max(xm, cur[sd], v.cx);
+      (function pl(x) { var pv = N[x.id], y = pv.cy + sd * (pv.s.h / 2 + g); mmVk(N, x).forEach(function (ch) { var cv = N[ch.id]; cv.cx = pv.cx - pv.s.w / 2 + 22 + cv.s.w / 2; cv.cy = y + sd * cv.s.h / 2; cv.side = 1; cv.tl = sd; y += sd * (cv.blk.h + g); pl(ch); }); })(c);
+    });
+    mmAx(N, { k: "time", y: 0, x0: r.s.w / 2, x1: xm + 30 });
+  }
+  function mmPlaceFish(root, N, DN) {
+    var r = N[root.id], g = 8 * DN, sl = 0.45, hl = -r.s.w / 2, cur = { "-1": hl - 34 * DN, "1": hl - 34 * DN }, lastB = hl - 24 * DN, xmin = hl - 60; r.cx = 0; r.cy = 0; r.side = -1;
+    mmVk(N, root).forEach(function (c, i) {
+      var sd = i % 2 ? 1 : -1, v = N[c.id], ch = mmVk(N, c); ch.forEach(function (k) { mmBlk(N, k, 18, g); });
+      var L = Math.max(70 * DN, 30 * DN + ch.reduce(function (a, k) { return a + N[k.id].blk.h + 10 * DN; }, 0)), rx = Math.max(0, v.s.w / 2 - sl * L), B = Math.min(cur[sd] - rx, lastB - 56 * DN), lm = B - sl * L - v.s.w / 2;
+      v.cx = B - sl * L; v.cy = sd * (L + 4 + v.s.h / 2); v.side = -1; v.fb1 = { bx: B, L: L, sd: sd };
+      var y = 30 * DN;
+      ch.forEach(function (k) {
+        var cv = N[k.id], yc = y + cv.s.h / 2, bx = B - sl * yc; cv.cx = bx - 12 - cv.s.w / 2; cv.cy = sd * yc; cv.side = -1; cv.fb2 = bx; lm = Math.min(lm, cv.cx - cv.s.w / 2);
+        (function pl(x) { var pv = N[x.id], yy = Math.abs(pv.cy) + pv.s.h / 2 + g; mmVk(N, x).forEach(function (gk) { var gv = N[gk.id], ycc = yy + gv.s.h / 2, right = B - sl * ycc - 12 - 18 * (gv.d - 2); gv.cx = right - gv.s.w / 2; gv.cy = sd * ycc; gv.side = -1; gv.fbl = sd; lm = Math.min(lm, gv.cx - gv.s.w / 2); yy += gv.blk.h + g; pl(gk); }); })(k);
+        y += cv.blk.h + 10 * DN;
+      });
+      cur[sd] = lm - 30 * DN; lastB = B; xmin = Math.min(xmin, lm, B - sl * L - 20);
+    });
+    mmAx(N, { k: "fish", y: 0, x0: xmin - 16, x1: hl - 4 });
+  }
+  // линии особых раскладок
+  function mmEdgeSp(th, N, v, ox, oy, col) {
+    var p = N[v.p.id], F = mmF, d = "", w = v.d === 1 ? th.lw[0] : th.lw[1];
+    if (v.rad) { var a = mmBorderPt(p, ox, oy, v.cx + ox, v.cy + oy), b = mmBorderPt(v, ox, oy, p.cx + ox, p.cy + oy);
+      if (th.ln === "taper") { var dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L, h0 = mmTW(th, v.d - 1) / 2, h1 = mmTW(th, v.d) * 0.45; return '<path d="M' + F(a[0] + nx * h0) + " " + F(a[1] + ny * h0) + " L" + F(b[0] + nx * h1) + " " + F(b[1] + ny * h1) + " L" + F(b[0] - nx * h1) + " " + F(b[1] - ny * h1) + " L" + F(a[0] - nx * h0) + " " + F(a[1] - ny * h0) + ' Z" style="fill:' + col + ';stroke:none"/>'; }
+      d = "M" + F(a[0]) + " " + F(a[1]) + " L" + F(b[0]) + " " + F(b[1]); }
+    else if (v.tl1) d = "M" + F(v.cx + ox) + " " + F(p.cy + oy) + " V" + F(v.cy + oy - v.tl1 * v.s.h / 2);
+    else if (v.tl) { var px = p.cx + ox - p.s.w / 2 + 10; d = "M" + F(px) + " " + F(p.cy + oy + v.tl * p.s.h / 2) + " V" + F(v.cy + oy) + " H" + F(v.cx + ox - v.s.w / 2); }
+    else if (v.fb1) { d = "M" + F(v.fb1.bx + ox) + " " + F(p.cy + oy) + " L" + F(v.cx + ox) + " " + F(oy + v.fb1.sd * v.fb1.L); w = th.lw[0] * 1.2; }
+    else if (typeof v.fb2 === "number") d = "M" + F(v.fb2 + ox) + " " + F(v.cy + oy) + " H" + F(v.cx + ox + v.s.w / 2);
+    else if (v.fbl) { var qx = p.cx + ox + p.s.w / 2 - 8; d = "M" + F(qx) + " " + F(p.cy + oy + v.fbl * p.s.h / 2) + " V" + F(v.cy + oy) + " H" + F(v.cx + ox + v.s.w / 2); }
+    else return "";
+    return '<path d="' + d + '" style="fill:none;stroke:' + col + ";stroke-width:" + w + ';stroke-linecap:round;stroke-linejoin:round"' + (th.glow ? ' filter="url(#mmglow)"' : "") + "/>";
+  }
+  function mmAxSVG(N, ox, oy, col) {
+    var a = N._ax; if (!a) return ""; var F = mmF, y = a.y + oy, x0 = a.x0 + ox, x1 = a.x1 + ox;
+    return '<path d="M' + F(x0) + " " + F(y) + " H" + F(x1 - 8) + '" style="fill:none;stroke:' + col + ';stroke-width:3.2;stroke-linecap:round"/><path d="M' + F(x1 - 12) + " " + F(y - 7) + " L" + F(x1 + 2) + " " + F(y) + " L" + F(x1 - 12) + " " + F(y + 7) + ' Z" style="fill:' + col + '"/>';
+  }
+  // импорт карт из других программ и из текста
+  function mmXmlKids(el, tag, txt) { return [].filter.call(el.children, function (c) { return c.tagName === tag; }).map(function (c) { var o = { id: uid(), t: String(txt(c) || "").replace(/\s+/g, " ").trim().slice(0, 300), k: mmXmlKids(c, tag, txt) }; var ic = c.querySelector(":scope > icon[BUILTIN^='full-']"); if (ic) { var p = +ic.getAttribute("BUILTIN").slice(5); if (p >= 1 && p <= 5) o.mk = { p: p }; } return o; }); }
+  function mmXTopic(t) { var o = { id: uid(), t: String(t.title || "").replace(/\s+/g, " ").trim().slice(0, 300), k: ((t.children && t.children.attached) || []).map(mmXTopic) }; var nt = t.notes && t.notes.plain && t.notes.plain.content; if (nt) o.nt = String(nt).slice(0, 2000); var pm = (t.markers || []).map(function (m) { return /^priority-(\d)$/.exec(m.markerId || ""); }).filter(Boolean)[0]; if (pm && +pm[1] <= 5) o.mk = { p: +pm[1] }; return o; }
+  function mmX8Topic(el) { var tt = el.querySelector(":scope > title"), ch = [].filter.call(el.querySelectorAll(":scope > children > topics"), function (x) { return (x.getAttribute("type") || "attached") === "attached"; }); var k = []; ch.forEach(function (ts) { [].forEach.call(ts.children, function (c) { if (c.tagName === "topic") k.push(mmX8Topic(c)); }); }); return { id: uid(), t: String(tt ? tt.textContent : "").replace(/\s+/g, " ").trim().slice(0, 300), k: k }; }
+  function mmParseFile(name, buf) {
+    var ext = (/\.([a-z0-9]+)$/i.exec(name) || [])[1] || "", dec = function () { return new TextDecoder().decode(buf); }, xml = function (s) { var d = new DOMParser().parseFromString(s, "application/xml"); if (d.querySelector("parsererror")) throw new Error("файл повреждён или это не карта"); return d; };
+    ext = ext.toLowerCase();
+    if (ext === "xmind") return unzip(buf, function (nm) { return nm === "content.json" || nm === "content.xml"; }).then(function (o) {
+      if (o["content.json"]) { var sh = JSON.parse(o["content.json"]); sh = Array.isArray(sh) ? sh : [sh]; var rt = sh[0] && sh[0].rootTopic; if (!rt) throw new Error("в файле нет карты"); var x = mmXTopic(rt); return { t: x.t, k: x.k, sheets: sh.length }; }
+      if (o["content.xml"]) { var d = xml(o["content.xml"]), tp = d.querySelector("sheet > topic"); if (!tp) throw new Error("в файле нет карты"); var y = mmX8Topic(tp); return { t: y.t, k: y.k, sheets: d.querySelectorAll("sheet").length }; }
+      throw new Error("это не файл XMind");
+    });
+    return Promise.resolve().then(function () {
+      var s = dec();
+      if (ext === "mm") { var d = xml(s), top = d.querySelector("map > node"); if (!top) throw new Error("в файле нет карты"); var tx = function (c) { return c.getAttribute("TEXT") || (c.querySelector(":scope > richcontent") || {}).textContent || ""; }; return { t: tx(top), k: mmXmlKids(top, "node", tx) }; }
+      if (ext === "opml") { var d2 = xml(s), b = d2.querySelector("body"), ti = d2.querySelector("head > title"), tx2 = function (c) { return c.getAttribute("text") || c.getAttribute("title") || ""; }, k = mmXmlKids(b, "outline", tx2); if (k.length === 1 && !ti) return { t: k[0].t, k: k[0].k }; return { t: ti ? ti.textContent : name.replace(/\.[^.]+$/, ""), k: k }; }
+      var lines = s.replace(/\r/g, "").split("\n"), hd = -1, out = lines.map(function (l) { var m = /^(#{1,6})\s+(.*)$/.exec(l); if (m) { hd = m[1].length - 1; return new Array(hd + 1).join("\t") + m[2]; } return l.trim() ? new Array(hd + 2).join("\t") + l : ""; }).join("\n"), kk = mmParse(out);
+      if (kk.length === 1) return { t: kk[0].t, k: kk[0].k }; return { t: name.replace(/\.[^.]+$/, ""), k: kk };
+    });
+  }
+  function mmImportPick() {
+    var i = document.createElement("input"); i.type = "file"; i.accept = ".xmind,.mm,.opml,.xml,.txt,.md"; i.style.display = "none"; document.body.appendChild(i);
+    i.addEventListener("change", function () {
+      var f = i.files && i.files[0]; i.remove(); if (!f) return; var cur = mmCur();
+      f.arrayBuffer().then(function (buf) { return mmParseFile(f.name, buf); }).then(function (r) {
+        if (!r.k.length) { toast("В файле не нашлось веток"); return; }
+        var n = mmNewMap((r.t || f.name.replace(/\.[^.]+$/, "")).slice(0, 200), r.k, "", cur && cur.parent ? note(cur.parent) : null); MMV[n.id] = { s: 1, rx: 0, ry: 0, fit: 1 };
+        toast("Карта «" + nTitle(n) + "» загружена: узлов " + mmCount(n.mm.r) + (r.sheets > 1 ? " (из файла взят первый лист из " + r.sheets + ")" : ""));
+      }).catch(function (e) { toast("Не удалось открыть: " + ((e && e.message) || "неизвестный формат").replace("xlsx", "XMind").replace("Excel", "XMind")); });
+    });
+    i.click();
+  }
+  function mmExportX(n, c) {
+    var x = function (s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }, root = mmRoot(n);
+    if (c === "opml") { var o = function (nd, ind) { return (nd.k || []).map(function (k) { var ch = o(k, ind + "  "); return ind + '<outline text="' + x(mmLabel(n, k)) + '"' + (k.nt ? ' _note="' + x(k.nt) + '"' : "") + (ch ? ">\n" + ch + ind + "</outline>\n" : "/>\n"); }).join(""); };
+      nDownload(nFname(n) + ".opml", '<?xml version="1.0" encoding="UTF-8"?>\n<opml version="2.0">\n<head><title>' + x(nTitle(n)) + "</title></head>\n<body>\n" + '<outline text="' + x(nTitle(n)) + '">\n' + o(root, "  ") + "</outline>\n</bo" + "dy>\n</opml>\n", "text/x-opml;charset=utf-8"); toast("OPML сохранён — открывается в XMind, MindNode, FreeMind, Workflowy"); return; }
+    var m = function (nd, ind, d) { return (nd.k || []).map(function (k) { var ch = m(k, ind + "  ", d + 1); return ind + '<node TEXT="' + x(mmLabel(n, k)) + '"' + (d === 0 ? ' POSITION="' + (k.side === "l" ? "left" : "right") + '"' : "") + (k.mk && k.mk.p ? '><icon BUILTIN="full-' + k.mk.p + '"/' : "") + (ch || (k.mk && k.mk.p) ? ">\n" + ch + ind + "</node>\n" : "/>\n"); }).join(""); };
+    nDownload(nFname(n) + ".mm", '<map version="1.0.1">\n<node TEXT="' + x(nTitle(n)) + '">\n' + m(root, "  ", 0) + "</node>\n</map>\n", "application/x-freemind;charset=utf-8"); toast("Файл FreeMind сохранён — открывается в FreeMind, Freeplane, XMind");
+  }
+  // шаблоны карт
+  var MMTPL = {
+    swot: { n: "SWOT-анализ", ic: "⊞", t: "Сильные стороны\n\tЧто получается лучше всего?\n\tЧем отличаюсь от других?\nСлабые стороны\n\tЧего не хватает?\n\tЧто мешает?\nВозможности\n\tЧто можно использовать снаружи?\n\tКакие тренды на руку?\nУгрозы\n\tЧто может помешать?\n\tЧто делают конкуренты?" },
+    book: { n: "Конспект книги", ic: "📚", t: "Главная мысль\n\tв одном предложении\nКлючевые идеи\n\tИдея 1\n\tИдея 2\n\tИдея 3\nЦитаты\nПримеры и истории\nЧто применю\n\tДействие 1\n\tДействие 2\nВопросы и сомнения" },
+    lesson: { n: "Разбор урока", ic: "🎓", t: "Тема и цель\nНовые понятия\n\tПонятие 1\n\tПонятие 2\nГлавное\nПримеры\nВопросы\nДомашнее задание\nЧто повторить" },
+    week: { n: "План недели", ic: "🗓", lay: "right", t: "Главное на неделю\n\tЦель 1\n\tЦель 2\nПонедельник\nВторник\nСреда\nЧетверг\nПятница\nВыходные" },
+    goal: { n: "Цель → шаги", ic: "🎯", lay: "right", t: "Зачем это мне\nКак пойму, что цель достигнута\nШаги\n\tШаг 1\n\tШаг 2\n\tШаг 3\nРесурсы и помощь\nПрепятствия и решения\nСрок" },
+    project: { n: "Проект", ic: "🗂", t: "Цель и результат\nЗадачи\n\tЗадача 1\n\tЗадача 2\nСроки\nЛюди\nБюджет\nРиски" },
+    decide: { n: "Принятие решения", ic: "⚖", t: "Вариант А\n\tЗа\n\tПротив\nВариант Б\n\tЗа\n\tПротив\nКритерии выбора\nЧто подсказывает интуиция\nРешение" },
+    fish: { n: "Причины проблемы", ic: "🐟", lay: "fish", t: "Люди\n\tпричина\nМетоды\n\tпричина\nМатериалы\n\tпричина\nОборудование\n\tпричина\nСреда\n\tпричина\nИзмерения\n\tпричина" },
+    time: { n: "Этапы по времени", ic: "⏳", lay: "time", t: "Этап 1\n\tзадача\nЭтап 2\n\tзадача\nЭтап 3\n\tзадача\nЭтап 4\n\tзадача\nФиниш" },
+    radial: { n: "Идеи по кругу", ic: "◎", lay: "radial", t: "Идея 1\nИдея 2\nИдея 3\nИдея 4\nИдея 5\nИдея 6" }
+  };
+  function mmTplApply(id) {
+    var T = MMTPL[id], cur = mmCur(); if (!T) return; var kids = mmParse(T.t), i = 0; kids.forEach(function (c) { c.side = i++ % 2 ? "l" : "r"; });
+    if (cur && !(mmRoot(cur).k || []).length) { mmPush(cur); cur.mm.r.k = kids; if (T.lay) cur.mm.lay = T.lay; else delete cur.mm.lay; if (!cur.t || cur.t === "Без названия" || cur.t === "Карта мыслей") cur.t = T.n; MMV[cur.id] = { s: 1, rx: 0, ry: 0, fit: 1 }; mmSave(cur); toast("Шаблон «" + T.n + "» — замените подсказки своим текстом (F2 или двойной клик)"); return; }
+    var n = mmNewMap(T.n, kids, "", cur && cur.parent ? note(cur.parent) : null); if (T.lay) { n.mm.lay = T.lay; touch(n); save(); render(); } toast("Новая карта по шаблону «" + T.n + "»");
+  }
+  function mmEmptyHint(n, rd) {
+    if (rd || MMTXT === "list" || (mmRoot(n).k || []).length) return "";
+    return '<div class="ntplst mmtplst"><span class="muted">Начать с шаблона:</span>' + Object.keys(MMTPL).map(function (k) { return '<button type="button" class="chip" data-a="mmtpl" data-x="' + k + '">' + MMTPL[k].ic + " " + esc(MMTPL[k].n) + "</button>"; }).join("") + '<button type="button" class="chip" data-a="mmimp">📂 Открыть файл XMind, FreeMind, OPML</button></div>';
+  }
+  function mm8Act(a, el) {
+    var n = mmCur(); if (!n) return false;
+    switch (a) {
+      case "mmmode": var rm = el.getBoundingClientRect(); ctxShow(rm.left, rm.bottom + 4, [{ c: "prs", i: "▶", l: "Презентация — ветка за веткой" }, { c: "bs", i: "💡", l: "Мозговой штурм — идеи карточками" }, { c: "tr", i: "🎓", l: "Тренажёр — вспомнить ветки" }, { c: "zen", i: "⛶", l: "Во весь экран (без меню)" }], { k: "mmmode", id: n.id }); return true;
+      case "mmmodex": mmModeExit(); return true;
+      case "mmprsn": mmPrsGo(n, MMPRS ? MMPRS.i + 1 : 0); return true;
+      case "mmprsp": mmPrsGo(n, MMPRS ? MMPRS.i - 1 : 0); return true;
+      case "mmtrok": if (MMTR && MMTR.last) { MMTR.ok[MMTR.last] = 1; delete MMTR.no[MMTR.last]; MMTR.last = ""; render(); } return true;
+      case "mmtrno": if (MMTR && MMTR.last) { MMTR.no[MMTR.last] = 1; delete MMTR.ok[MMTR.last]; MMTR.last = ""; render(); } return true;
+      case "mmtrall": mmWalk(mmRoot(n), function (x) { MMTR.rev[x.id] = 1; }); MMTR.last = ""; render(); return true;
+      case "mmtrre": Object.keys(MMTR.no).forEach(function (id) { delete MMTR.rev[id]; }); MMTR.no = {}; MMTR.last = ""; render(); toast("Скрыты ветки, которые не вспомнились — ещё раз"); return true;
+      case "mmtrnew": MMTR = { rev: {}, ok: {}, no: {}, last: "" }; render(); return true;
+      case "mmbstm": var mn = +el.dataset.x; MMBST = mn ? { end: Date.now() + mn * 60000 } : null; render(); setTimeout(function () { var i = $("mmbsin"); if (i) i.focus(); }, 30); return true;
+      case "mmbsto": mmBsTo(n, el.dataset.id, MMSEL); return true;
+      case "mmbsdel": mmPush(n); n.mm.bs = (n.mm.bs || []).filter(function (x) { return x.id !== el.dataset.id; }); if (!n.mm.bs.length) delete n.mm.bs; mmSave(n); return true;
+      case "mmbsall": var f = mmFind(n, MMSEL) || { x: mmRoot(n) }, l = n.mm.bs || []; if (!l.length) return true; mmPush(n); f.x.k = f.x.k || []; l.forEach(function (b) { var c = mmNew(f.x, n); c.t = b.t; f.x.k.push(c); }); f.x.f = false; delete n.mm.bs; mmSave(n); toast("Идей разложено: " + l.length); return true;
+      case "mmtpl": mmTplApply(el.dataset.x); return true;
+      case "mmimp": mmImportPick(); return true;
+    }
+    return false;
+  }
+  function mm8Ctx(k, id, c) {
+    var n = note(id); if (!mmIs(n)) return;
+    if (k === "mmtpl") { mmTplApply(c); return; }
+    if (k !== "mmmode") return; MMZEN = false; MMBS = false; MMTR = null; MMPRS = null; MMDLIM = 0; MMFOC = "";
+    if (c === "prs") { MMPRS = { st: mmPrsSteps(n), i: 0 }; mmFs(true); mmPrsGo(n, 0); toast("Презентация: → или пробел — дальше, ← — назад, Esc — выйти"); return; }
+    if (c === "zen") { MMZEN = true; mmFs(true); if (MMV[n.id]) MMV[n.id].fit = 1; render(); return; }
+    if (c === "bs") { MMBS = true; render(); setTimeout(function () { var i = $("mmbsin"); if (i) i.focus(); }, 40); return; }
+    if (c === "tr") { MMTR = { rev: {}, ok: {}, no: {}, last: "" }; MMMS = {}; render(); toast("Тренажёр: ветки скрыты — вспоминайте и открывайте по одной"); }
+  }
+  function mm8More(n, c) {
+    if (c === "imp") { mmImportPick(); return true; }
+    if (c === "tpls") { var b = document.querySelector('[data-a="mmmore"]'), r = b ? b.getBoundingClientRect() : { left: 80, bottom: 120 }; setTimeout(function () { ctxShow(r.left, r.bottom + 4, Object.keys(MMTPL).map(function (k) { return { c: k, i: MMTPL[k].ic, l: MMTPL[k].n + (MMTPL[k].lay ? " · " + { fish: "рыбья кость", time: "временная шкала", radial: "по кругу", right: "дерево" }[MMTPL[k].lay] : "") }; }), { k: "mmtpl", id: n.id }); }, 0); return true; }
     return false;
   }
 
@@ -13880,6 +14093,8 @@ CREATE TABLE inbox (
       "<b>Аа Стиль</b> — оформление выбранного узла: форма, цвет ветки (любой), жирный и курсив (Ctrl+B, Ctrl+I), цвет и размер текста; галочка «для всей ветки» применяет форму и текст ко всем вложенным узлам. <b>🖌 Кисть</b> — скопировать стиль узла и нажимать другие узлы (Esc — закончить). «↺ Сбросить стиль» — вернуть к теме.",
       "<b>🏷 Метки</b> — приоритет 1–5 (Alt+1…5, Alt+0 — убрать), флажки, отметки (✓ ✗ ? ! ★), прогресс в процентах. Там же: <b>▢ Рамка</b> — пунктирная рамка с подписью вокруг выделенных веток, <b>} Итог</b> — фигурная скобка с выводом для соседних веток, <b>№ Нумерация</b> — 1, 1.1, 1.2. У веток с задачами внизу — кольцо «выполнено 3/5». Подпись рамки или итога — клик по ней.",
       "<b>Несколько узлов</b>: Shift+клик (или Ctrl+клик) — добавить узел к выделению, Shift+тянуть по пустому месту — выделить рамкой. Метки, цвет, стиль и Delete действуют на все выделенные; Esc — снять выделение. <b>⧩ Фильтр</b> — оставить яркими только узлы с приоритетом, флажком, звездой, незавершёнными задачами и т. п. В «⋯»: <b>вставить родителя</b> (Ctrl+Enter — обернуть узел новым уровнем), <b>сортировка</b> веток (по алфавиту, приоритету, сроку задачи), <b>мини-карта</b> в углу для больших карт.",
+      "<b>▶ Режим ▾</b>: <b>презентация</b> — на весь экран, сначала обзор, потом ветка за веткой (→ или пробел — дальше, ← — назад, Esc — выйти); <b>мозговой штурм</b> — пишите идеи карточками (Enter, можно через «;»), с таймером на 5–15 минут, потом перетащите карточки на узлы карты; <b>тренажёр</b> — ветки скрыты знаком «?», вспомните и откройте, отметьте «помню / не помню», повторите только забытое; <b>во весь экран</b> — карта без меню.",
+      "<b>Раскладки</b> в «⋯»: ещё <b>по кругу</b>, <b>временная шкала</b> (этапы вдоль оси, по очереди сверху и снизу) и <b>рыбья кость</b> (диаграмма Исикавы: справа — проблема, на костях — группы причин). Там же <b>🧩 шаблоны</b> (SWOT, конспект книги, разбор урока, план недели, цель → шаги, проект, решение, причины проблемы, этапы) и <b>📂 импорт</b> карт из XMind, FreeMind, OPML, Markdown. В «⤓» — экспорт в OPML и FreeMind.",
       "<b>↗ Связь</b> — стрелка между узлами разных веток: выберите узел, «↗ Связь», затем нажмите второй узел. Подпись («влияет на», «см. также») — клик по значку на стрелке; там же «⇄ Развернуть» и «Удалить». <b>🖼</b> — картинка в узел (с Яндекс Диска, уменьшается до 640 точек).",
       "<b>⋯</b> над картой: копировать, вырезать, вставить ветку (Ctrl+C / Ctrl+X / Ctrl+V — в том числе в другую карту; в Word ветка вставится списком, а многоуровневый список из Word или от ИИ вставится в карту ветками) и <b>раскладка</b>: вправо и влево, всё вправо (как дерево) или сверху вниз (как оргструктура; стрелки ↑↓ — уровни, ←→ — соседи). «⤓» — ещё SVG и PDF.",
       "<b>Карта ↔ задачи и страницы</b>: «☐ В задачу ▾» — выбранный узел или всю ветку (с подзадачами) — в задачи «Входящих» или проекта; на узле появляется кружок-отметка, он живой: отметили на карте — задача выполнена, и наоборот. «📄 В страницу ▾» — узел или ветку — во вложенные страницы карты (📄 на узле открывает страницу) или связать с уже существующей. Переименовали узел — переименуется и задача или страница.",
@@ -15205,6 +15420,7 @@ CREATE TABLE inbox (
     if (a && mm6Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a === "mmmsx") { MMMS = {}; render(); return; }
     if (a && mm7Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && mm8Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -16591,6 +16807,7 @@ CREATE TABLE inbox (
     if (k === "mmtask" || k === "mmpage" || k === "mmfrom") { mm2Ctx(k, id, c); return; }
     if (k === "mmmore") { mm4Ctx(k, id, c); return; }
     if (k === "mmflt") { mm7Ctx(k, id, c); return; }
+    if (k === "mmmode" || k === "mmtpl") { mm8Ctx(k, id, c); return; }
     if (k === "mmlvl") { var lm = note(id); if (mmIs(lm)) mmLevels(lm, c); return; }
     if (k === "nexp") { var en = note(id); if (en) nExport(en, c.replace("+", ""), c.indexOf("+") > 0); return; }
     if (k === "ntplset") { var tn = note(id); if (tn) { if (c === "~") delete tn.tpl; else tn.tpl = c; if (tn.tpl === "map" && !mmRoot(tn)) tn.mm = { r: { id: uid(), k: [] } }; touch(tn); save(); render(); } return; }
