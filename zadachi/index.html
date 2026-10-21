@@ -448,6 +448,8 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .kpadd { padding: 6px 0 0 } .kcadd { display: grid; gap: 8px; padding: 12px 14px; margin: 10px 0 0 }
 .kclist { display: grid } .kcr { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; padding: 5px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; font-size: calc(13.5px * var(--fs)) } .kcr > span:nth-child(2), .kcr > span:nth-child(3) { flex: 1 1 auto; min-width: 0 }
 .kwhy button { padding: 1px 8px; font-size: calc(12px * var(--fs)) }
+.dptopbox a.mv { color: var(--muted) } .dptopbox a.mv::before { content: none } .dptopbox small { color: var(--muted) } .tmvr { margin-top: 4px }
+.dprow.mv .dpt { color: var(--muted) } .dprow.mv .dpstar { color: var(--muted) } .jtop .mv { color: var(--muted) } .wdtmv { flex: none; width: 18px; text-align: center; color: var(--muted) }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -2471,7 +2473,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-130";
+  var APPV = "zd-app-2026-10-16-131";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -4453,7 +4455,7 @@ CREATE TABLE inbox (
 
   /* ---------- режим «Сейчас»: одна задача на весь экран, таймер, подзадачи ---------- */
   var NOW = null; // { q: [id…], i }
-  function nowQueue(startId) { var top = dayTop().filter(function (t) { return !doneToday(t); }).map(function (t) { return t.id; }), rest = todayList().filter(function (t) { return !t.parent && top.indexOf(t.id) < 0; }).sort(cmpBy("smart")).map(function (t) { return t.id; }), q = top.concat(rest); if (startId) { q = q.filter(function (x) { return x !== startId; }); q.unshift(startId); } return q; }
+  function nowQueue(startId) { var top = dayTop().filter(function (t) { return !doneToday(t) && !topMvKey(t); }).map(function (t) { return t.id; }), rest = todayList().filter(function (t) { return !t.parent && top.indexOf(t.id) < 0; }).sort(cmpBy("smart")).map(function (t) { return t.id; }), q = top.concat(rest); if (startId) { q = q.filter(function (x) { return x !== startId; }); q.unshift(startId); } return q; }
   function nowStart(startId) { var q = nowQueue(startId); if (!q.length) { toast("На сегодня задач нет — добавьте задачу или спланируйте день"); return; } closeTask(); NOW = { q: q, i: 0 }; renderNow(); }
   function nowExit() { NOW = null; var b = $("nowbox"); if (b) b.remove(); render(); }
   function renderNow() {
@@ -4517,7 +4519,7 @@ CREATE TABLE inbox (
       if (mt !== mon) { mon = mt; x += "<h2>" + esc(mt.charAt(0).toUpperCase() + mt.slice(1)) + "</h2>"; }
       var top = (d.top || []).map(function (id) { return live(S.tasks).filter(function (t) { return t.id === id; })[0]; }).filter(Boolean), md = dMood(d), dn = d.review && d.review.done;
       return x + '<div class="jday"><div class="jdh"><b>' + esc(new Date(ms).toLocaleDateString("ru-RU", { weekday: "short", day: "numeric", month: "long" })) + "</b>" + (md ? '<span class="jem">' + MOODS[md - 1] + "</span>" : "") + (dn !== undefined ? '<span class="muted">сделано: ' + dn + "</span>" : "") + "</div>" +
-        (top.length ? '<div class="jtop">' + top.map(function (t) { var dn = doneOn(t, ms); return '<span class="' + (dn ? "dn" : "") + '">' + (dn ? "✓" : "★") + " " + esc(t.t) + "</span>"; }).join("") + "</div>" : "") +
+        (top.length ? '<div class="jtop">' + top.map(function (t) { var dn = doneOn(t, ms), mk = !dn && (d.mv || {})[t.id]; if (mk) return '<span class="mv">↷ ' + esc(t.t) + " <small>перенесена " + esc(topMvTxt(mk)) + "</small></span>"; return '<span class="' + (dn ? "dn" : "") + '">' + (dn ? "✓" : "★") + " " + esc(t.t) + "</span>"; }).join("") + "</div>" : "") +
         (dNote(d) ? '<div class="jtxt">' + esc(dNote(d)).replace(/\n/g, "<br>") + "</div>" : "") + "</div>";
     }).join("") : '<p class="muted">' + (JQ ? "Ничего не нашлось." : "Здесь появятся прошлые дни — после первых записей или итогов дня.") + "</p>";
     return h;
@@ -4705,6 +4707,40 @@ CREATE TABLE inbox (
   // сделана в день d0: закрыта в этот день или повторяющаяся, отмеченная в этот день (сегодня — doneToday)
   function doneOn(t, d0) { if (sod(d0) === today0()) return doneToday(t); var e = d0 + DAY; if (t.done && (!t.dt || (t.dt >= d0 && t.dt < e))) return true; return live(S.acts).some(function (a) { return a.k === "done" && a.t === t.id && a.d >= d0 && a.d < e; }); }
   function dayTop() { var r = dayRec(); return r ? (r.top || []).map(task).filter(Boolean) : []; }
+  /* Главная задача, перенесённая на другой день: остаётся в «Главном» с пометкой «↷ перенесена …» и не считается невыполненной.
+     Перенос виден по самой задаче (срок позже сегодня, «Когда-нибудь» или без срока) — каким бы способом её ни перенесли; вернули на сегодня — пометка снимается.
+     Для истории дней пометка хранится в записи дня: r.mv = { id задачи: "ГГГГ-ММ-ДД" | "some" | "none" }. */
+  function topMvKey(t) {
+    if (!t || t.done || doneToday(t)) return null; var t0 = today0(), w = t.at || t.due || 0;
+    if (w && sod(w) <= t0) return null; if (t.due && sod(t.due) <= t0) return null; if (t.wait && t.wait.ask && sod(t.wait.ask) <= t0) return null;
+    return w ? dKey(w) : t.some ? "some" : "none";
+  }
+  function topMvTxt(k) { return k === "some" ? "в «Когда-нибудь»" : k === "none" ? "без срока" : "на " + new Date(k + "T00:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short" }); }
+  function topActive() { return dayTop().filter(function (t) { return !topMvKey(t); }); }
+  var TMVSEEN = {};
+  // при отрисовке: запомнить перенос в записи дня; если перенесли только что — подсказка с выбором замены и шагом на сегодня
+  function topMvScan() {
+    if (!SETGATE) return; var r = dayRec(); if (!r || !(r.top || []).length) return;
+    var mv = Object.assign({}, r.mv || {}), ch = false, fresh = null;
+    r.top.forEach(function (id) {
+      var t = task(id), k = t ? topMvKey(t) : null;
+      if (k) { if (mv[id] !== k) { if (mv[id] === undefined && t.upd && Date.now() - t.upd < 15000 && !TMVSEEN[id]) fresh = t; mv[id] = k; ch = true; } }
+      else if (mv[id] !== undefined) { delete mv[id]; ch = true; }
+    });
+    if (!ch) return; r.mv = mv; touch(r); save();
+    if (fresh) { TMVSEEN[fresh.id] = 1; setTimeout(function () { toastAct("★ «" + (fresh.t.length > 40 ? fresh.t.slice(0, 38) + "…" : fresh.t) + "» была главной на сегодня — перенесена " + topMvTxt(mv[fresh.id]), [["tmstep", "＋ Шаг на сегодня", fresh.id], ["tmrepl", "Выбрать замену", ""]]); }, 0); }
+  }
+  function tmAct(a, el) {
+    switch (a) {
+      case "tmrepl": $("toast").hidden = true; DP.step = 2; go("daily"); return true;
+      case "tmstep": var t = task(el.dataset.t); $("toast").hidden = true; if (!t) return true;
+        var n = newTaskFrom("Следующий шаг: " + t.t, { day: today0() }); n.at = today0(); n.allday = true; n.rem = false; n.rep = ""; if (t.pid) n.pid = t.pid; touch(n);
+        var r = dayRec(true); if (topActive().length < 3 && r.top.indexOf(n.id) < 0) { r.top.push(n.id); touch(r); }
+        save(); render(); go("task-" + n.id); toast("Шаг на сегодня добавлен" + (r.top.indexOf(n.id) >= 0 ? " в главное" : "") + " — уточните название"); return true;
+      case "tmdrop": var r2 = dayRec(); if (!r2) return true; var ix = r2.top.indexOf(el.dataset.t); if (ix >= 0) { r2.top.splice(ix, 1); if (r2.mv) delete r2.mv[el.dataset.t]; touch(r2); save(); render(); } return true;
+    }
+    return false;
+  }
   // сколько часов в день отдаётся задачам (настраивается, 1–24)
   function dayCap() { var v = +S.opt.dayCap; return v >= 1 && v <= 24 ? v : 8; }
   // загрузка дня в «Сегодня»: сколько часов запланировано задачами (оценка, иначе длительность, иначе 30 мин у задачи со временем)
@@ -4745,6 +4781,8 @@ CREATE TABLE inbox (
       tasks().filter(function (t) { return !t.done && t.due && t.due < today0() + 4 * DAY; }).forEach(function (t) { addS(t, "⏰ дедлайн " + dayName(t.due).toLowerCase()); });
       tasks().filter(function (t) { return !t.done && t.sprint === curSprintId() && !t.at; }).forEach(function (t) { addS(t, "🏃 в спринте"); });
       flagList().forEach(function (t) { addS(t, "⚑ с флажком"); });
+      var tmv = top.map(task).filter(function (t) { return t && topMvKey(t); });
+      if (tmv.length) b += '<h2>Перенесены</h2>' + tmv.map(function (t) { return '<div class="dprow mv"><span class="dpstar">↷</span><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + " <small>перенесена " + esc(topMvTxt(topMvKey(t))) + '</small></a><span class="dpa"><button type="button" class="btn sm" data-a="tmdrop" data-t="' + t.id + '">Убрать из главного</button></span></div>'; }).join("");
       if (sug.length) b += '<h2>Можно взять сегодня</h2>' + sug.slice(0, 12).map(function (x) { var t = x[0]; return '<div class="dprow"><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + ' <small>' + esc(x[1]) + '</small></a><span class="dpa"><button type="button" class="btn sm" data-a="dpa" data-t="' + t.id + '" data-c="d:0">＋ На сегодня</button></span></div>'; }).join("");
       var ag = goals().filter(function (g) { return (g.st || "active") === "active"; });
       if (ag.length) b += '<div class="dpgoals">🎯 Ваши цели: ' + ag.map(function (g) { return '<a href="#goal-' + g.id + '">' + esc(g.n) + " · " + goalProg(g).pct + "%</a>"; }).join(" · ") + "</div>";
@@ -4757,8 +4795,8 @@ CREATE TABLE inbox (
         (AI.ready() ? '<div class="r" style="margin-top:10px"><button type="button" class="btn sm aibtn" data-a="aiday">✨ ИИ расставит задачи по времени</button></div>' : "");
     } else {
       var tp = dayTop(), tl2 = todayList(), hrs = tl2.reduce(function (a, t) { return a + tHours(t); }, 0);
-      b = '<h2>План готов</h2><div class="dpsum"><div><b>' + tl2.length + '</b><small>задач на сегодня</small></div><div><b>' + fmtH(hrs) + ' ч</b><small>по оценкам</small></div><div><b>' + tp.length + '</b><small>главных</small></div></div>' +
-        (tp.length ? '<h2>★ Главное</h2>' + tp.map(function (t) { return '<div class="dprow top"><span class="dpstar on">★</span><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + "</a></div>"; }).join("") : '<p class="muted">Главное не выбрано — можно вернуться на шаг «Главное».</p>') +
+      b = '<h2>План готов</h2><div class="dpsum"><div><b>' + tl2.length + '</b><small>задач на сегодня</small></div><div><b>' + fmtH(hrs) + ' ч</b><small>по оценкам</small></div><div><b>' + tp.filter(function (t) { return !topMvKey(t); }).length + '</b><small>главных</small></div></div>' +
+        (tp.length ? '<h2>★ Главное</h2>' + tp.map(function (t) { var mk = topMvKey(t); return mk ? '<div class="dprow mv"><span class="dpstar">↷</span><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + " <small>перенесена " + esc(topMvTxt(mk)) + "</small></a></div>" : '<div class="dprow top"><span class="dpstar on">★</span><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + "</a></div>"; }).join("") : '<p class="muted">Главное не выбрано — можно вернуться на шаг «Главное».</p>') +
         '<div class="r" style="margin-top:14px"><button type="button" class="btn pri" data-a="dpdone">☀ Начать день</button></div>';
     }
     h += '<div class="dpbody card">' + b + "</div>";
@@ -4770,8 +4808,9 @@ CREATE TABLE inbox (
     var dr = dayRec(), rv = (dr && dr.review) || {}, t0 = today0(), done = doneEvents().filter(function (e) { return e.d >= t0; }).map(function (e) { return task(e.t) || live(S.tasks).filter(function (x) { return x.id === e.t; })[0]; }).filter(Boolean);
     var left = todayList().filter(function (t) { return !t.parent; }).sort(cmpBy("smart")), top = (dr && dr.top || []).map(function (id) { return live(S.tasks).filter(function (x) { return x.id === id; })[0]; }).filter(Boolean);
     var h = head("Итоги дня", new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) + " · закройте день, чтобы завтра начать с чистого листа");
-    h += '<div class="dpsum"><div><b>' + done.length + '</b><small>сделано сегодня</small></div><div><b>' + left.length + '</b><small>осталось</small></div><div><b>' + top.filter(function (t) { return doneToday(t); }).length + " из " + top.length + '</b><small>главных сделано</small></div></div>';
-    if (top.length) h += '<div class="card dpbody"><h2>★ Главное</h2>' + top.map(function (t) { var dn = doneToday(t); return '<div class="dprow' + (dn ? " dn" : "") + '"><span class="dpstar on">' + (dn ? "✓" : "★") + '</span><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + "</a></div>"; }).join("") + "</div>";
+    var topA = top.filter(function (t) { return !topMvKey(t); }), mvN = top.length - topA.length;
+    h += '<div class="dpsum"><div><b>' + done.length + '</b><small>сделано сегодня</small></div><div><b>' + left.length + '</b><small>осталось</small></div><div><b>' + topA.filter(function (t) { return doneToday(t); }).length + " из " + topA.length + '</b><small>главных сделано' + (mvN ? " · ↷ " + mvN + " " + plural(mvN, ["перенесена", "перенесены", "перенесено"]) : "") + "</small></div></div>";
+    if (top.length) h += '<div class="card dpbody"><h2>★ Главное</h2>' + top.map(function (t) { var mk = topMvKey(t); if (mk) return '<div class="dprow mv"><span class="dpstar">↷</span><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + " <small>перенесена " + esc(topMvTxt(mk)) + "</small></a></div>"; var dn = doneToday(t); return '<div class="dprow' + (dn ? " dn" : "") + '"><span class="dpstar on">' + (dn ? "✓" : "★") + '</span><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + "</a></div>"; }).join("") + "</div>";
     h += '<div class="card dpbody"><h2>Что не успели <span class="c">' + left.length + "</span></h2>" + (left.length ? left.map(function (t) { return dpRow(t, [["done", "✓ Сделано"], ["d:1", "Завтра"], ["d:7", "Через неделю"], ["d:some", "Когда-нибудь"]]); }).join("") : '<p class="dpempty">✓ Всё сделано — отличный день</p>') + "</div>";
     if (done.length) h += '<div class="card dpbody"><h2>Сделано <span class="c">' + done.length + "</span></h2>" + done.slice(0, 30).map(function (t) { return '<div class="dprow dn"><span class="dpstar">✓</span><span class="dpt">' + esc(t.t) + "</span></div>"; }).join("") + "</div>";
     var mood = DRV.mood || dMood(dr || {}) || 0;
@@ -4783,7 +4822,7 @@ CREATE TABLE inbox (
     var h = "";
     try { h += menuTodayHTML(); } catch (er) { /* меню не мешает */ }
     if (LS.get("zd-welcome") !== "off" && !live(S.projects).length && live(S.tasks).length <= 3 && !tstCount()) h += '<div class="card welcome"><button type="button" class="ibtn wx" data-a="welcome-off" title="Скрыть" aria-label="Скрыть">✕</button><b>👋 Добро пожаловать в «Задачи»!</b><p class="muted">С чего начать — выберите удобное:</p><div class="r"><button type="button" class="btn sm pri" data-a="tstload">🧪 Загрузить тестовые данные</button><a class="btn sm" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf">📘 Скачать учебный курс</a><a class="btn sm" href="#settings-sync">☁ Войти через Яндекс</a></div><p class="muted" style="margin:8px 0 0">Тестовые данные — готовые примеры для упражнений курса; удаляются одной кнопкой. Вход через Яндекс нужен, чтобы задачи были и на телефоне, и на компьютере.</p></div>';
-    if (top.length) h += '<div class="dptopbox"><b>★ Главное на сегодня</b>' + top.map(function (t) { var dn = doneToday(t); return '<a class="' + (dn ? "dn" : "") + '" href="#task-' + t.id + '">' + (dn ? "✓ " : "") + esc(t.t) + "</a>"; }).join("") + "</div>";
+    if (top.length) { var tmvN = 0; h += '<div class="dptopbox"><b>★ Главное на сегодня</b>' + top.map(function (t) { var mk = topMvKey(t); if (mk) { tmvN++; return '<a class="mv" href="#task-' + t.id + '">↷ ' + esc(t.t) + " <small>перенесена " + esc(topMvTxt(mk)) + "</small></a>"; } var dn = doneToday(t); return '<a class="' + (dn ? "dn" : "") + '" href="#task-' + t.id + '">' + (dn ? "✓ " : "") + esc(t.t) + "</a>"; }).join("") + (tmvN && top.length - tmvN < 3 ? '<span class="r tmvr"><button type="button" class="btn sm" data-a="tmrepl">Выбрать замену</button></span>' : "") + "</div>"; }
     h += '<div class="r dpcta">' + (!dr || !dr.planned ? '<a class="btn sm pri" href="#daily">☀ Спланировать день</a>' : '<a class="btn sm" href="#daily">☀ План дня</a>') + '<button type="button" class="btn sm" data-a="nowgo" title="Одна задача на весь экран, таймер и подзадачи">◉ Сейчас</button><button type="button" class="btn sm" data-a="setpick" title="Добавить набор задач: утро, вечер, обзор недели">▤ Набор</button>' + (late || (dr && dr.planned) ? '<a class="btn sm" href="#daily-review">🌙 Итоги дня' + (dr && dr.review ? " ✓" : "") + "</a>" : "") + '<button type="button" class="btn sm" data-a="todaymore" title="Ещё: распечатать, поделиться' + (AI.ready() ? ", ИИ" : "") + '" aria-label="Ещё">⋯</button></div>';
     return h;
   }
@@ -5018,6 +5057,7 @@ CREATE TABLE inbox (
       case "daytop":
         var tp2 = dayTop(), drr = dayRec();
         return (tp2.length ? '<div class="wdt">' + tp2.map(function (t) {
+          var mk2 = topMvKey(t); if (mk2) return '<a class="wdtdn" href="#task-' + t.id + '"><span class="wdtmv">↷</span><span>' + esc(t.t) + '<small class="muted">перенесена ' + esc(topMvTxt(mk2)) + "</small></span></a>";
           if (!t.done && doneToday(t) && t.rep) return '<a class="wdtdn" href="#task-' + t.id + '"><span class="ck dn"></span><span><s>' + esc(t.t) + '</s><small class="muted">сделано сегодня · следующий раз ' + esc(whenTxt(t).toLowerCase()) + "</small></span></a>";
           return renderTree([t], "smart", {}).replace(/ draggable="true"/g, "");
         }).join("") + "</div>" : '<p class="wempty">Главное ещё не выбрано</p>') + '<div class="r" style="margin-top:6px"><a class="btn sm' + (drr && drr.planned ? "" : " pri") + '" href="#daily">☀ План дня</a><a class="btn sm" href="#daily-review">🌙 Итоги</a></div>';
@@ -9251,6 +9291,7 @@ CREATE TABLE inbox (
       "<b>План дня</b> — кнопка «☀ Спланировать день» в «Сегодня» (или адрес #daily). Пять коротких шагов: <b>Входящие</b> (для каждой задачи — сегодня, завтра, через неделю, когда-нибудь, в проект, готово или удалить), <b>Просроченное</b> (взять сегодня, перенести, отменить), <b>Главное</b> (★ до трёх задач, которые сделают день удачным; ниже — предложения: следующие шаги ваших целей, близкие дедлайны, задачи спринта и с флажком), <b>Время</b> (хватит ли часов: сумма оценок задач сравнивается с тем, сколько часов в день вы отдаёте задачам — число от 1 до 24 меняется прямо в шаге или в «Настройки» → «Общие» → «План дня»; у каждой задачи — время начала и оценка, предупреждение о перегрузе) и <b>Готово</b>.",
       "Главное дня видно вверху «Сегодня» и в виджете доски «Главное на сегодня».",
       "<b>Итоги дня</b> — «🌙 Итоги дня» в «Сегодня» (появляется вечером или после плана): сколько сделано, что с главным, что не успели (сразу перенести на завтра, через неделю или когда-нибудь), настроение дня и пара строк о том, как прошёл день.",
+      "<b>Главную задачу перенесли</b> на другой день (сроком, свайпом, в карточке) — она остаётся в «Главном» серой с пометкой «↷ перенесена на …» и не считается невыполненной. В подсказке — «＋ Шаг на сегодня» (маленькая задача, чтобы сдвинуть дело сегодня) и «Выбрать замену»; на шаге «Главное» плана дня перенесённую можно убрать совсем. В итогах дня и в «Дневнике» перенесённые видны отдельно. Вернули задачу на сегодня — пометка снимается сама.",
       "План, главное и итоги каждого дня сохраняются и синхронизируются.", "<b>Загрузка дня</b> — строка вверху «Сегодня»: сколько часов уже запланировано задачами на сегодня (вместе с просроченными), сколько сделано и сколько осталось, из скольких часов в день (настраивается в «Плане дня»). Считается по оценке времени ⏱ в карточке задачи; если оценки нет — по длительности, у задачи с точным временем — 30 минут. Больше нормы — красная пометка «перегруз»."]));
     h += sec("clean", "План уборки", ul([
       "Пункт <b>«План уборки»</b> в «Списках». Четыре вкладки: <b>Сегодня</b>, <b>Неделя</b>, <b>Дела</b>, <b>Настройки</b>. Пока план выключен, задачи не создаются — сначала поправьте дела и дни, потом «Включить план».",
@@ -9833,6 +9874,7 @@ CREATE TABLE inbox (
     try { chAuto(); } catch (er) { /* челлендж не мешает */ }
     try { fcAutoRun(); } catch (er) { /* финансовый челлендж не мешает */ }
     try { kcAutoRun(); } catch (er) { /* кухонный челлендж не мешает */ }
+    try { topMvScan(); } catch (er) { /* пометка переноса главного не мешает */ }
     try { if (SETGATE && bpaySync()) save(); } catch (er) { /* напоминания о платежах не мешают */ }
     try { applyLook(); } catch (er) { /* оформление не мешает работе */ }
     // пока пишете в редакторе на странице (текст заметки, описание проекта) — страницу вокруг не перерисовываем, только левую панель; остальное обновится, когда выйдете из редактора
@@ -10281,6 +10323,7 @@ CREATE TABLE inbox (
     if (c.dataset.gid !== from) gcMove(from, c.dataset.gid, 0, e.clientX > r.left + r.width / 2); else render();
   }, true);
   document.addEventListener("dragend", function () { if (GCDRAG) { GCDRAG = null; render(); } [].forEach.call(document.querySelectorAll(".gcdrag, .gcbefore, .gcafter"), function (x) { x.classList.remove("gcdrag", "gcbefore", "gcafter"); }); }, true);
+  function toastAct(msg, acts) { var el = $("toast"); el.innerHTML = esc(msg) + acts.map(function (x) { return ' · <a href="#" data-a="' + x[0] + '" data-t="' + esc(x[2] || "") + '" style="color:inherit;font-weight:600">' + esc(x[1]) + "</a>"; }).join(""); el.hidden = false; clearTimeout(tt); tt = setTimeout(function () { el.hidden = true; }, 10000); }
   function toastUndo(msg, fn) { UNDOF = fn; var el = $("toast"); el.innerHTML = esc(msg) + ' · <a href="#" data-a="undo" style="color:inherit;font-weight:600">Вернуть</a>'; el.hidden = false; clearTimeout(tt); tt = setTimeout(function () { el.hidden = true; UNDOF = null; }, 7000); }
   function trashTask(t) { var all = [t].concat(tdesc(t.id)), now = Date.now(); all.forEach(function (x) { x.del = 1; x.delAt = now; x.delBy = t.id; touch(x); }); return all; }
   function restoreTask(t) {
@@ -10486,6 +10529,7 @@ CREATE TABLE inbox (
     if (a && invAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && fcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && kcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && tmAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -10601,7 +10645,7 @@ CREATE TABLE inbox (
         if (dc === "__proj") { var rdp = el.getBoundingClientRect(); ctxShow(rdp.left, rdp.bottom + 4, ptree().map(function (x) { return { c: "m:" + x.p.id, i: piconH(x.p), l: x.p.n, pad: x.d }; }), { k: "task", id: dt.id }); return; }
         if (dc === "del") { taskCmd(dt, "del"); render(); return; }
         taskCmd(dt, dc); render(); return;
-      case "dptop": var dr = dayRec(true), tid = el.dataset.t, ix = dr.top.indexOf(tid); if (ix >= 0) dr.top.splice(ix, 1); else { if (dr.top.length >= 3) { toast("Главных — не больше трёх: снимите звёздочку с другой задачи"); return; } dr.top.push(tid); } touch(dr); save(); render(); return;
+      case "dptop": var dr = dayRec(true), tid = el.dataset.t, ix = dr.top.indexOf(tid); if (ix >= 0) dr.top.splice(ix, 1); else { if (dr.top.filter(function (x) { return !topMvKey(task(x)); }).length >= 3) { toast("Главных — не больше трёх: снимите звёздочку с другой задачи"); return; } dr.top.push(tid); } touch(dr); save(); render(); return;
       case "dpdone": var dd = dayRec(true); dd.planned = Date.now(); touch(dd); save(); DP.step = 0; go("today"); toast("☀ Хорошего дня! План — в «Сегодня»"); return;
       case "dpest": var rde = el.getBoundingClientRect(); ctxShow(rde.left, rde.bottom + 4, [["0", "без оценки"], [".25", "15 мин"], [".5", "30 мин"], ["1", "1 ч"], ["1.5", "1,5 ч"], ["2", "2 ч"], ["3", "3 ч"], ["4", "4 ч"], ["6", "6 ч"]].map(function (o) { return { c: o[0], i: "", l: o[1] }; }), { k: "dpest", id: el.dataset.t }); return;
       case "dpmood": DRV.mood = +el.dataset.x; render(); return;
