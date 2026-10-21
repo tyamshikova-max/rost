@@ -421,6 +421,8 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .rhch { display: inline-flex; gap: 2px } .chip.soon { box-shadow: inset 0 0 0 1.5px #e9a83a } .chip.rhx { padding: 2px 6px }
 @media (max-width: 600px) { .main .sub.clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer } .main .sub.clamp.open { display: block } }
 .help .hgf { padding: 8px 12px; border-radius: 8px; background: var(--hover); font-weight: 600 }
+.gdlg { display: grid; gap: 8px; padding: 14px 16px; margin: 10px 0; border: 1px solid var(--acc) } .gdr { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; padding: 6px 0; border-top: 1px solid var(--line) } .gdr > span:first-child { flex: 1 1 220px; min-width: 0 } .gdlg .r { gap: 6px; align-items: center } .gdset { font-size: calc(12.5px * var(--fs)) }
+.gdrem { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding: 8px 12px; margin: 10px 0; border-radius: 10px; background: var(--acc-soft) } .gdremc { margin-top: 6px; font-size: calc(12.5px * var(--fs)); color: var(--acc) }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5481,7 +5483,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-115";
+  var APPV = "zd-app-2026-10-16-116";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -7650,7 +7652,7 @@ CREATE TABLE inbox (
       var gi = l.indexOf(g), mv = l.length > 1 ? '<span class="gmv"><button type="button" class="ibtn" data-a="gord" data-id="' + g.id + '" data-x="-1" title="Переставить раньше" aria-label="Переставить раньше"' + (gi ? "" : " disabled") + '>←</button><button type="button" class="ibtn" data-a="gord" data-id="' + g.id + '" data-x="1" title="Переставить позже" aria-label="Переставить позже"' + (gi < l.length - 1 ? "" : " disabled") + ">→</button></span>" : "";
       return '<a class="gcard" href="#goal-' + g.id + '" draggable="true" data-gid="' + g.id + '" style="--gc:' + col(g.c || 0) + '"><div class="gch"><span class="gic">' + (g.ic || "🎯") + '</span><b>' + esc(g.n) + "</b>" + mv + "</div>" + gDue(g) +
         '<div class="gpr">' + gBar(g, pr) + '<span>' + pr.pct + "%</span></div><small class=\"muted\">" + esc(pr.txt) + (ps.length ? " · " + ps.map(function (p) { return esc(p.n); }).join(", ") : "") + "</small>" +
-        (nx && g.st !== "done" ? '<div class="gnext">Следующий шаг: ' + esc(nx.t) + "</div>" : "") + "</a>";
+        (nx && g.st !== "done" ? '<div class="gnext">Следующий шаг: ' + esc(nx.t) + "</div>" : "") + (gdPending(g) ? '<div class="gdremc">🗂 проекты цели ещё в работе — разобрать</div>' : "") + "</a>";
     }).join("") + "</div>";
     if (GTAB === "active") h += '<div class="hadd"><span>＋</span><input type="text" class="inp" data-gnew="1" placeholder="Новая цель — напишите и нажмите Enter" aria-label="Новая цель"></div><div class="r" style="margin-top:6px"><button type="button" class="btn sm" data-a="svnew">🏦 Новая цель-накопление</button></div>';
     return h;
@@ -7660,6 +7662,7 @@ CREATE TABLE inbox (
     var pr = goalProg(g), ps = goalProjs(g), tl = live(S.tasks).filter(function (t) { return t.goal === g.id; }), open = tl.filter(function (t) { return !t.done; });
     var h = '<div class="crumbs"><a href="#goals">Цели</a> /</div><div class="bhd"><h1 class="bh1"><button type="button" class="gicb" data-a="gic" title="Сменить значок">' + (g.ic || "🎯") + '</button><input class="btitle" data-goal="' + g.id + '" data-gf="n" value="' + esc(g.n) + '" aria-label="Название цели" autocomplete="off"></h1>' +
       '<span class="r bbar">' + (g.st === "done" ? '<span class="gbadge">🎉 Достигнута</span><button type="button" class="btn sm" data-a="gst" data-x="active">Вернуть в работу</button>' : g.st === "drop" ? '<span class="gbadge">⏸ Отложена</span><button type="button" class="btn sm" data-a="gst" data-x="active">Вернуть в работу</button>' : '<button type="button" class="btn sm pri" data-a="gst" data-x="done">🎉 Цель достигнута</button><button type="button" class="btn sm" data-a="gst" data-x="drop">⏸ Отложить</button>') + '<button type="button" class="ibtn" data-a="gdel" title="Удалить цель">🗑</button></span></div>';
+    h += gdHTML(g);
     if (GNOTE) h += '<div class="icg gicons">' + GICONS.map(function (x) { return '<button type="button" data-a="gicv" data-v="' + x + '">' + x + "</button>"; }).join("") + "</div>";
     if (g.sv) h += svHTML(g); else h += '<div class="gtop" style="--gc:' + col(g.c || 0) + '"><div class="gring">' + gRing(pr.pct, col(g.c || 0)) + '</div><div class="gtopi"><b>' + esc(pr.txt) + "</b>" + gDue(g) + (goalNext(g, 1)[0] ? '<div class="gnext">Следующий шаг: <a href="#task-' + goalNext(g, 1)[0].id + '">' + esc(goalNext(g, 1)[0].t) + "</a></div>" : "") + "</div></div>";
     h += '<div class="card gset"><div class="wcr"><span>Срок</span><div class="r"><input type="date" class="inp" data-goal="' + g.id + '" data-gf="due" value="' + (g.due ? dKey(g.due) : "") + '">' + (g.due ? '<button type="button" class="ibtn" data-a="gdue0" title="Без срока">✕</button>' : "") + "</div></div>" +
@@ -11126,6 +11129,67 @@ CREATE TABLE inbox (
     S.opt.staples = staples().concat({ n: v.slice(0, 60), every: 7, last: 0 }); optTouch(); save(); render(); setTimeout(function () { var i = $("stnew"); if (i) i.focus(); }, 30);
   });
 
+  /* ---------- Цель достигнута или отложена — что с её проектами и задачами: в архив / заморозить / оставить / отвязать.
+     Отметки: p.archBy = id цели (архивировано из-за неё), p.frozen = 1 (заморожено при откладывании); вернули цель в работу — такие проекты возвращаются сами. ---------- */
+  var GDLG = null;
+  function gdOwn(g) { var pids = goalPids(g); return live(S.tasks).filter(function (t) { return t.goal === g.id && !t.done && !t.canc && !(t.pid && pids.indexOf(t.pid) >= 0); }); }
+  function gdStat(p) { var ids = pdesc(p.id), l = live(S.tasks).filter(function (t) { return ids.indexOf(t.pid) >= 0 && !t.canc; }); return { n: l.length, open: l.filter(function (t) { return !t.done; }).length }; }
+  function gdPending(g) { return (g.st === "done" || g.st === "drop") && !g.gdOk && goalProjs(g).some(function (p) { return !isArch(p.id); }); }
+  function gdOpen(g, mode) {
+    var ps = goalProjs(g).filter(function (p) { return !isArch(p.id); }), own = gdOwn(g); if (!ps.length && !own.length) return false;
+    var pc = {}; ps.forEach(function (p) { pc[p.id] = mode === "drop" ? "freeze" : gdStat(p).open ? "keep" : "arch"; });
+    GDLG = { gid: g.id, mode: mode, pc: pc, tm: "keep" }; return true;
+  }
+  function gdHTML(g) {
+    if (!GDLG || GDLG.gid !== g.id) return gdPending(g) ? '<div class="gdrem">🗂 ' + goalProjs(g).filter(function (p) { return !isArch(p.id); }).length + ' — столько проектов этой цели ещё в работе. <button type="button" class="btn sm" data-a="gdreopen">Разобрать</button><button type="button" class="ibtn" data-a="gdok" title="Оставить как есть и не напоминать">✕</button></div>' : "";
+    var D = GDLG, ps = goalProjs(g).filter(function (p) { return D.pc[p.id]; }), own = gdOwn(g), drop = D.mode === "drop";
+    var opts = drop ? [["freeze", "❄ Заморозить"], ["keep", "оставить"], ["unlink", "отвязать"]] : [["arch", "🗄 В архив"], ["keep", "оставить"], ["unlink", "отвязать"]];
+    var h = '<div class="card gdlg"><b>' + (drop ? "⏸ Цель отложена — что с проектами?" : "🎉 Цель достигнута — что с проектами?") + '</b><span class="muted">' + (drop ? "«Заморозить» — проект уходит в архив с пометкой «ждёт цели»: его задачи не видны и не напоминают. Вернёте цель в работу — проект вернётся сам." : "«В архив» — проект и его задачи больше не видны в списках и календаре, но всё сохраняется; вернуть можно в любой момент. «Отвязать» — проект остаётся в работе, но больше не числится за целью.") + "</span>";
+    h += ps.map(function (p) { var st = gdStat(p); return '<div class="gdr"><span><b>' + piconH(p) + " " + esc(p.n) + '</b> <small class="muted">' + (st.n ? (st.open ? st.open + " открытых из " + st.n : "все " + st.n + " " + plural(st.n, ["задача выполнена", "задачи выполнены", "задач выполнены"])) : "задач нет") + '</small></span><span class="seg">' + opts.map(function (o) { return '<button type="button" data-a="gdp" data-p="' + p.id + '" data-v="' + o[0] + '" class="' + (D.pc[p.id] === o[0] ? "on" : "") + '">' + o[1] + "</button>"; }).join("") + "</span></div>"; }).join("");
+    if (own.length) h += '<div class="gdr"><span><b>Задачи цели без проекта</b> <small class="muted">' + own.length + " · " + esc(own.slice(0, 4).map(function (t) { return "«" + t.t.slice(0, 30) + "»"; }).join(", ")) + (own.length > 4 ? " …" : "") + '</small></span><span class="seg">' + [["keep", "оставить"], ["done", "✓ закрыть"], ["some", "в «Когда-нибудь»"]].map(function (o) { return '<button type="button" data-a="gdt" data-v="' + o[0] + '" class="' + (D.tm === o[0] ? "on" : "") + '">' + o[1] + "</button>"; }).join("") + "</span></div>";
+    var ga = S.opt.goalAuto || "ask";
+    h += '<div class="r"><button type="button" class="btn sm pri" data-a="gdgo">Готово</button><button type="button" class="btn sm" data-a="gdlater">Решу потом</button></div>';
+    if (!drop) h += '<div class="r gdset"><span class="muted">Когда цель достигнута:</span><span class="seg">' + [["ask", "спрашивать"], ["auto", "выполненные — в архив сами"], ["none", "ничего не делать"]].map(function (o) { return '<button type="button" data-a="gdset" data-v="' + o[0] + '" class="' + (ga === o[0] ? "on" : "") + '">' + o[1] + "</button>"; }).join("") + "</span></div>";
+    return h + "</div>";
+  }
+  function gdApply(g, D) {
+    var now = Date.now(), undo = [];
+    goalProjs(g).forEach(function (p) {
+      var v = D.pc[p.id]; if (!v || v === "keep") return; undo.push({ p: p, arch: p.arch, archAt: p.archAt, archBy: p.archBy, frozen: p.frozen, goal: p.goal });
+      if (v === "arch" || v === "freeze") { p.arch = 1; p.archAt = now; p.archBy = g.id; if (v === "freeze") p.frozen = 1; else delete p.frozen; }
+      else if (v === "unlink") delete p.goal;
+      touch(p);
+    });
+    var tu = [];
+    if (D.tm !== "keep") gdOwn(g).forEach(function (t) { tu.push({ t: t, done: t.done, dt: t.dt, at: t.at, due: t.due, allday: t.allday, rep: t.rep, rem: t.rem, some: t.some });
+      if (D.tm === "done") { t.done = true; t.dt = now; } else { t.at = 0; t.due = 0; t.allday = false; t.rep = ""; t.rem = false; t.some = true; } touch(t); });
+    g.gdOk = 1; touch(g); save();
+    return function () { undo.forEach(function (u) { ["arch", "archAt", "archBy", "frozen", "goal"].forEach(function (k) { if (u[k] === undefined) delete u.p[k]; else u.p[k] = u[k]; }); touch(u.p); }); tu.forEach(function (u) { ["done", "dt", "at", "due", "allday", "rep", "rem", "some"].forEach(function (k) { if (u[k] === undefined) delete u.t[k]; else u.t[k] = u[k]; }); touch(u.t); }); delete g.gdOk; touch(g); };
+  }
+  // цель вернули в работу — проекты, убранные из-за неё, возвращаются
+  function gdRestore(g) { var n = 0; projects().forEach(function (p) { if (p.archBy === g.id) { delete p.arch; delete p.archAt; delete p.archBy; delete p.frozen; touch(p); n++; } }); delete g.gdOk; return n; }
+  // переход статуса цели (вызывается из «gst»)
+  function gdOnStatus(g) {
+    if (g.st === "active") { var n = gdRestore(g); GDLG = null; return n ? "Цель снова в работе — вернулось проектов: " + n : ""; }
+    var ga = S.opt.goalAuto || "ask";
+    if (ga === "none") return "";
+    if (g.st === "done" && ga === "auto") { var D = { pc: {}, tm: "keep" }, k = 0; goalProjs(g).forEach(function (p) { if (!isArch(p.id) && !gdStat(p).open) { D.pc[p.id] = "arch"; k++; } }); if (k) gdApply(g, D); return k ? "В архив отправлено проектов: " + k : ""; }
+    delete g.gdOk; gdOpen(g, g.st); return "";
+  }
+  function gdAct(a, el) {
+    var g = goal(ARG);
+    switch (a) {
+      case "gdp": if (GDLG) { GDLG.pc[el.dataset.p] = el.dataset.v; render(); } return true;
+      case "gdt": if (GDLG) { GDLG.tm = el.dataset.v; render(); } return true;
+      case "gdset": S.opt.goalAuto = el.dataset.v; optTouch(); save(); render(); return true;
+      case "gdgo": if (!g || !GDLG) return true; var D = GDLG; GDLG = null; var un = gdApply(g, D), na = Object.keys(D.pc).filter(function (k) { return D.pc[k] !== "keep"; }).length; render(); toastUndo(na || D.tm !== "keep" ? "Готово: проектов разобрано — " + na + (D.tm === "done" ? ", задачи закрыты" : D.tm === "some" ? ", задачи — в «Когда-нибудь»" : "") : "Всё оставлено как есть", un); return true;
+      case "gdlater": GDLG = null; render(); toast("Хорошо — напомню на странице цели и в «Целях»"); return true;
+      case "gdreopen": if (g && gdOpen(g, g.st)) render(); return true;
+      case "gdok": if (g) { g.gdOk = 1; touch(g); save(); render(); } return true;
+    }
+    return false;
+  }
+
   function vStats() {
     var days = +LS.get("zd-stdays") || 30, t0 = today0(), from = addDays(t0, -days + 1), ev = doneEvents().filter(function (e) { return e.d >= from; }), pom = live(S.acts).filter(function (a) { return a.k === "pomo" && a.d >= from; });
     var per = []; for (var i = 0; i < days; i++) { var d = addDays(from, i), e2 = addDays(d, 1); per.push({ l: days <= 14 ? WDS[new Date(d).getDay()] : String(new Date(d).getDate()), title: dayName(d), v: ev.filter(function (e) { return e.d >= d && e.d < e2; }).length }); }
@@ -11719,6 +11783,7 @@ CREATE TABLE inbox (
       "<b>Шаги по порядку</b> — на странице цели все её невыполненные задачи одним списком: из всех привязанных проектов (и подпроектов) и собственные задачи цели. Сначала порядок такой же, как в проектах: проекты друг за другом, внутри — как задачи стоят на странице проекта. Переставьте шаги стрелками ↑↓ или перетаскиванием — это и есть последовательность цели; «↺ Как в проектах» вернёт исходный порядок. Новые задачи встают в конец.",
       "<b>Следующий шаг</b> — первый в этом списке, который ничего не ждёт: задачи со связью «Сначала сделать» на невыполненную и задачи «Когда-нибудь» пропускаются. Он подсвечен в списке, показан на карточке цели, в виджете «Цели» и подсказывается при планировании дня.",
       "На карточке цели: срок с обратным отсчётом, следующий шаг, проекты с их прогрессом, «Зачем» и <b>дневник цели</b> — короткие записи о том, что приблизило к цели. «🎉 Цель достигнута» и «⏸ Отложить» убирают цель на соседние вкладки.",
+      "<b>Цель достигнута или отложена — что с проектами.</b> После «🎉 Цель достигнута» появляется окно: для каждого проекта цели — «🗄 В архив» (так по умолчанию, если все задачи выполнены), «оставить» или «отвязать»; для задач цели без проекта — оставить, закрыть или в «Когда-нибудь». После «⏸ Отложить» — то же, но вместо архива «❄ Заморозить» (так по умолчанию): проект уходит в архив с пометкой «ждёт цели». «Вернуть в работу» — проекты, убранные из-за цели, возвращаются сами. «Решу потом» — напомню на странице цели и на её карточке в «Целях». В окне можно выбрать, что делать при достижении цели: спрашивать, отправлять выполненные проекты в архив самим или ничего не делать.",
       "<b>Порядок целей</b> — на странице «Цели» перетащите карточку мышью или нажмите стрелки ← → на карточке (на компьютере они появляются при наведении, на телефоне видны всегда). Порядок общий для всех устройств и для виджета «Цели» на досках.",
       "Цели подсказывают следующие шаги при планировании дня, видны на странице проекта и в виджете доски «Цели»."]));
     h += sec("dash", "Доски (дашборды)", ul([
@@ -12827,6 +12892,7 @@ CREATE TABLE inbox (
     if (a && invAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && fcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
     switch (a) {
       case "add": addQuick(); return;
@@ -12917,7 +12983,7 @@ CREATE TABLE inbox (
       case "gsel": var gh = el.parentNode, gids = groupIds(gh), gall = gids.every(function (id) { return SELS[id]; }); gids.forEach(function (id) { if (gall) delete SELS[id]; else SELS[id] = 1; }); render(); return;
       case "jmood": var jr = dayRecOf(dKey(today0()), true), jx = +el.dataset.x; jr.mood = jr.mood === jx ? 0 : jx; touch(jr); save(); render(); return;
       case "gtab": GTAB = el.dataset.x; render(); return;
-      case "gst": var gs = goal(ARG); if (gs) { gs.st = el.dataset.x; if (gs.sv) svRemSync(gs); touch(gs); save(); render(); toast(gs.st === "done" ? "🎉 Поздравляю! Цель достигнута" : gs.st === "drop" ? "Цель отложена — её можно вернуть" : "Цель снова в работе"); } return;
+      case "gst": var gs = goal(ARG); if (gs) { gs.st = el.dataset.x; if (gs.sv) svRemSync(gs); var gmsg = gdOnStatus(gs); touch(gs); save(); render(); if (gmsg) toast(gmsg); else toast(gs.st === "done" ? "🎉 Поздравляю! Цель достигнута" : gs.st === "drop" ? "Цель отложена — её можно вернуть" : "Цель снова в работе"); } return;
       case "gdel": var gd = goal(ARG); if (gd) { gd.del = 1; gd.delAt = Date.now(); touch(gd); projects().forEach(function (pp) { if (pp.goal === gd.id) { delete pp.goal; touch(pp); } }); save(); go("goals"); toastUndo("Цель «" + gd.n + "» удалена", function () { delete gd.del; delete gd.delAt; touch(gd); save(); render(); }); } return;
       case "gic": GNOTE = !GNOTE; render(); return;
       case "gicv": var gi = goal(ARG); if (gi) { gi.ic = el.dataset.v; touch(gi); GNOTE = false; save(); render(); } return;
