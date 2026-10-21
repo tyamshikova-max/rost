@@ -448,6 +448,8 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .kpadd { padding: 6px 0 0 } .kcadd { display: grid; gap: 8px; padding: 12px 14px; margin: 10px 0 0 }
 .kclist { display: grid } .kcr { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; padding: 5px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; font-size: calc(13.5px * var(--fs)) } .kcr > span:nth-child(2), .kcr > span:nth-child(3) { flex: 1 1 auto; min-width: 0 }
 .kwhy button { padding: 1px 8px; font-size: calc(12px * var(--fs)) }
+.dptop2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; align-items: stretch; margin: 12px 0 4px } .dptop2 > .dptopbox { margin: 0; max-width: none; align-content: start }
+.dphab .htoday { margin: 2px 0 0 } .dptopbox.dphab a::before { content: none } .dptopbox.dphab .htoday > a { color: var(--muted) }
 .dptopbox a.mv { color: var(--muted) } .dptopbox a.mv::before { content: none } .dptopbox small { color: var(--muted) } .tmvr { margin-top: 4px }
 .dprow.mv .dpt { color: var(--muted) } .dprow.mv .dpstar { color: var(--muted) } .jtop .mv { color: var(--muted) } .wdtmv { flex: none; width: 18px; text-align: center; color: var(--muted) }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
@@ -2473,7 +2475,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-131";
+  var APPV = "zd-app-2026-10-16-132";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -3717,7 +3719,7 @@ CREATE TABLE inbox (
   function noteDel(n) { n.del = 1; n.delAt = Date.now(); touch(n); save(); var back = n.sec && nsec(n.sec) ? "nsec-" + n.sec : "notes"; go(back); toastUndo("Заметка удалена", function () { delete n.del; delete n.delAt; touch(n); save(); render(); }); }
   function vWaiting() { return std("Жду ответа", "Задачи, переданные кому-то. В день «спросить» задача появится в «Сегодня» — напомнить о себе. Пометить задачу: меню задачи → «⏳ Жду ответа…» или строка «Жду ответа» в карточке.", waitList(), { empty: "Ничего не ждёте — хорошо. Когда отдадите задачу кому-то, отметьте её «⏳ Жду ответа».", scope: function (t) { return !!t.wait; } }); }
   function vSomeday() { return std("Когда-нибудь", "Идеи и дела «не сейчас». Они не попадают во «Входящие» и «Сегодня», пока вы не назначите им дату.", somedayList(), { empty: "Пусто. Отправить задачу сюда — меню задачи → «Установить дату» → «Когда-нибудь» (Alt+O).", scope: isSome }); }
-  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: tbNowHTML() + todayLoadHTML() + aiBox() + todayPlanBox() + habitsToday(), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
+  function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: tbNowHTML() + todayLoadHTML() + aiBox() + todayPlanBox(), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
   var PDAY = 0, PFROM = 0;
   function pFrom() { if (!PFROM) PFROM = monday(Date.now()); return PFROM; }
   function onDay(t, d0) { return (t.at && sod(t.at) === d0) || (t.due && sod(t.due) === d0); }
@@ -4822,7 +4824,11 @@ CREATE TABLE inbox (
     var h = "";
     try { h += menuTodayHTML(); } catch (er) { /* меню не мешает */ }
     if (LS.get("zd-welcome") !== "off" && !live(S.projects).length && live(S.tasks).length <= 3 && !tstCount()) h += '<div class="card welcome"><button type="button" class="ibtn wx" data-a="welcome-off" title="Скрыть" aria-label="Скрыть">✕</button><b>👋 Добро пожаловать в «Задачи»!</b><p class="muted">С чего начать — выберите удобное:</p><div class="r"><button type="button" class="btn sm pri" data-a="tstload">🧪 Загрузить тестовые данные</button><a class="btn sm" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf">📘 Скачать учебный курс</a><a class="btn sm" href="#settings-sync">☁ Войти через Яндекс</a></div><p class="muted" style="margin:8px 0 0">Тестовые данные — готовые примеры для упражнений курса; удаляются одной кнопкой. Вход через Яндекс нужен, чтобы задачи были и на телефоне, и на компьютере.</p></div>';
+    var hab = habitsToday();
+    if (top.length || hab) h += '<div class="dptop2">';
     if (top.length) { var tmvN = 0; h += '<div class="dptopbox"><b>★ Главное на сегодня</b>' + top.map(function (t) { var mk = topMvKey(t); if (mk) { tmvN++; return '<a class="mv" href="#task-' + t.id + '">↷ ' + esc(t.t) + " <small>перенесена " + esc(topMvTxt(mk)) + "</small></a>"; } var dn = doneToday(t); return '<a class="' + (dn ? "dn" : "") + '" href="#task-' + t.id + '">' + (dn ? "✓ " : "") + esc(t.t) + "</a>"; }).join("") + (tmvN && top.length - tmvN < 3 ? '<span class="r tmvr"><button type="button" class="btn sm" data-a="tmrepl">Выбрать замену</button></span>' : "") + "</div>"; }
+    if (hab) h += '<div class="dptopbox dphab"><b>✓ Привычки на сегодня</b>' + hab + "</div>";
+    if (top.length || hab) h += "</div>";
     h += '<div class="r dpcta">' + (!dr || !dr.planned ? '<a class="btn sm pri" href="#daily">☀ Спланировать день</a>' : '<a class="btn sm" href="#daily">☀ План дня</a>') + '<button type="button" class="btn sm" data-a="nowgo" title="Одна задача на весь экран, таймер и подзадачи">◉ Сейчас</button><button type="button" class="btn sm" data-a="setpick" title="Добавить набор задач: утро, вечер, обзор недели">▤ Набор</button>' + (late || (dr && dr.planned) ? '<a class="btn sm" href="#daily-review">🌙 Итоги дня' + (dr && dr.review ? " ✓" : "") + "</a>" : "") + '<button type="button" class="btn sm" data-a="todaymore" title="Ещё: распечатать, поделиться' + (AI.ready() ? ", ИИ" : "") + '" aria-label="Ещё">⋯</button></div>';
     return h;
   }
