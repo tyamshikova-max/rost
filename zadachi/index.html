@@ -2450,7 +2450,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-122";
+  var APPV = "zd-app-2026-10-16-123";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -7172,7 +7172,7 @@ CREATE TABLE inbox (
     if (w.miss.length) h += '<p class="warnc">Нет данных за ' + w.miss.map(buPName).join(", ") + ' — «⟳ Обновить из файла».</p>';
     var mark = isCur ? (7 - w.dl + (w.dl ? 0.5 : 0)) / 7 * 100 : -1, T = w.tot;
     h += '<div class="butiles"><div class="butile"><small>Гибкие траты: лимит недели</small><span>' + buRub(T.lim) + '</span><small class="muted">обычно ' + buRub(T.norm) + "</small></div>" +
-      '<div class="butile"><small>Потрачено</small><span class="' + buCls(T.fact, T.lim, mark) + '">' + buRub(T.fact) + (T.lim > 0 ? " · " + Math.round(T.fact / T.lim * 100) + "%" : "") + "</span></div>" +
+      '<div class="butile"><small>Потрачено' + buPct(T.fact, T.lim) + '</small><span class="' + buCls(T.fact, T.lim, mark) + '">' + buRub(T.fact) + "</span></div>" +
       (isCur && w.dl ? '<div class="butile"><small>Можно в день до воскресенья</small><span class="' + (T.perDay < 0 ? "bad" : "ok") + '">' + buRub(Math.max(0, T.perDay)) + "</span>" + (T.perDay < 0 ? '<small class="bad">уже перерасход ' + buRub(-T.left) + "</small>" : "") + "</div>" : '<div class="butile"><small>Итог недели</small><span class="' + (T.left < 0 ? "bad" : "ok") + '">' + (T.left < 0 ? "перерасход " + buRub(-T.left) : "экономия " + buRub(T.left)) + "</span></div>") +
       (prev.cats.length && !prev.miss.length ? '<div class="butile"><small>Прошлая неделя</small><span class="' + (prev.tot.left < 0 ? "bad" : "ok") + '">' + (prev.tot.left < 0 ? "перерасход " + buRub(-prev.tot.left) : "экономия " + buRub(prev.tot.left)) + "</span></div>" : "") + "</div>";
     h += '<div class="card busec"><div class="bulab">Гибкие статьи — лимит недели из остатка плана периода' + (isCur ? " · черта — сколько «положено» к сегодня" : "") + "</div>" + (w.cats.length ? w.cats.map(function (x) {
@@ -7192,15 +7192,15 @@ CREATE TABLE inbox (
     var h = '<div class="r bunav"><button type="button" class="btn sm" data-a="buper" data-x="-1">‹</button><b>' + esc(buPName(pid)) + '</b><span class="muted">' + new Date(buPRange(pid).from).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + " – " + new Date(buPRange(pid).to).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + '</span><button type="button" class="btn sm" data-a="buper" data-x="1">›</button>' + (BUPER && BUPER !== buPid(today0()) ? '<button type="button" class="btn sm" data-a="buper" data-x="0">Текущий</button>' : "") + "</div>";
     if (!P) return h + '<p class="muted">За этот период данных нет — «⟳ Обновить из файла» → «Один период».</p>';
     var r = buPeriod(P), ep = r.el / r.pd * 100, ip = r.inc.plan - r.exp.plan, ifa = r.inc.fact - r.exp.fact;
-    h += '<div class="butiles"><div class="butile"><small>Доходы</small><span>' + buRub(r.inc.fact) + '</span><small class="muted">план ' + buRub(r.inc.plan) + "</small></div>" +
-      '<div class="butile"><small>Расходы</small><span class="' + (r.exp.fact > r.exp.plan ? "bad" : "") + '">' + buRub(r.exp.fact) + '</span><small class="muted">план ' + buRub(r.exp.plan) + "</small></div>" +
+    h += '<div class="butiles"><div class="butile"><small>Доходы' + buPct(r.inc.fact, r.inc.plan) + '</small><span>' + buRub(r.inc.fact) + '</span><small class="muted">план ' + buRub(r.inc.plan) + "</small></div>" +
+      '<div class="butile"><small>Расходы' + buPct(r.exp.fact, r.exp.plan) + '</small><span class="' + (r.exp.fact > r.exp.plan ? "bad" : "") + '">' + buRub(r.exp.fact) + '</span><small class="muted">план ' + buRub(r.exp.plan) + "</small></div>" +
       '<div class="butile"><small>Доход − расход</small><span class="' + (ifa < 0 ? "bad" : "ok") + '">' + buRub(ifa) + '</span><small class="muted">по плану ' + buRub(ip) + "</small></div>" +
       '<div class="butile"><small>Прошло дней</small><span>' + r.el + " из " + r.pd + '</span><small class="muted">' + Math.round(ep) + "% периода</small></div></div>";
     h += '<div class="card busec"><div class="bulab">Статьи — факт и план' + (r.el && r.el < r.pd ? " · черта — сколько «положено» к сегодня (план × " + Math.round(ep) + "%)" : "") + "</div>" + r.rows.map(function (x) {
       var fx = x.k === "flex", cls = fx ? buCls(x.fact, x.plan, r.el < r.pd ? ep : undefined) : x.fact > x.plan + 1 ? "bad" : "";
       return '<div class="burow" title="' + esc(fx ? buTip(x.fact, x.plan, r.el < r.pd ? ep : -1) : buTip(x.fact, x.plan)) + '"><span>' + esc(x.c) + buPct(x.fact, x.plan) + ' <small class="muted">' + BKN[x.k][0] + "</small></span>" + buBar(x.fact, x.plan, fx && r.el < r.pd ? ep : -1, fx ? cls : x.fact > x.plan + 1 ? "bad" : "pay") + '<span class="bunum ' + cls + '">' + buRub(x.fact) + " / " + buRub(x.plan) + "</span>" +
         (fx && r.el && r.el < r.pd && x.plan ? '<small class="muted buadj">прогноз на ' + new Date(P.to).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + ": " + buRub(x.fc) + (x.fc > x.plan * 1.03 ? ' · <span class="bad">выше плана</span>' : "") + " · чтобы уложиться — " + buRub(Math.max(0, x.perDay)) + " в день</small>" : "") + "</div>";
-    }).join("") + '<div class="burow butot"><span>Итого расходы</span>' + buBar(r.exp.fact, r.exp.plan, -1, r.exp.fact > r.exp.plan ? "bad" : "") + '<span class="bunum">' + buRub(r.exp.fact) + " / " + buRub(r.exp.plan) + "</span></div></div>";
+    }).join("") + '<div class="burow butot"><span>Итого расходы' + buPct(r.exp.fact, r.exp.plan) + '</span>' + buBar(r.exp.fact, r.exp.plan, -1, r.exp.fact > r.exp.plan ? "bad" : "") + '<span class="bunum">' + buRub(r.exp.fact) + " / " + buRub(r.exp.plan) + "</span></div></div>";
     if (r.off.length) h += '<p class="muted">Не входит в расходы: ' + r.off.map(function (x) { return esc(x.c) + " " + buRub(x.fact) + (x.plan ? " из " + buRub(x.plan) : ""); }).join(" · ") + "</p>";
     var inc = P.inc || { plan: {}, fact: {} }, srcs = Object.keys(Object.assign({}, inc.plan, inc.fact));
     if (srcs.length) h += '<div class="card busec"><div class="bulab">Доходы — факт и план</div>' + srcs.filter(function (s) { return (+inc.plan[s] || 0) || (+inc.fact[s] || 0); }).map(function (s) { var f = +inc.fact[s] || 0, pl = +inc.plan[s] || 0; return '<div class="burow"><span>' + esc(s) + "</span>" + buBar(f, pl, -1, "inc") + '<span class="bunum">' + buRub(f) + " / " + buRub(pl) + "</span></div>"; }).join("") + "</div>";
@@ -7271,8 +7271,8 @@ CREATE TABLE inbox (
   // виджет доски: неделя (гибкие) и итог периода
   function buWidget() {
     if (!buPers().length) return '<p class="wempty">Данных нет — откройте «Бюджет» и обновите из файла</p>';
-    var w = buWeek(monday(today0())), P = buPer(buPid(today0())), T = w.tot, h = '<div class="buw"><div class="buwl"><b>Неделя ' + esc(buWName(w.mon)) + '</b><span class="' + buCls(T.fact, T.lim) + '">' + buRub(T.fact) + " из " + buRub(T.lim) + "</span></div>" + buBar(T.fact, T.lim, -1, buCls(T.fact, T.lim)) + (w.dl ? '<small class="muted">можно в день до вс: ' + buRub(Math.max(0, T.perDay)) + "</small>" : "");
-    if (P) { var r = buPeriod(P), ifa = r.inc.fact - r.exp.fact; h += '<div class="buwl"><span class="muted">' + esc(buPName(P.id)) + ": доход − расход</span><span class=\"" + (ifa < 0 ? "bad" : "ok") + '">' + buRub(ifa) + "</span></div>"; }
+    var w = buWeek(monday(today0())), P = buPer(buPid(today0())), T = w.tot, h = '<div class="buw"><div class="buwl"><b>Неделя ' + esc(buWName(w.mon)) + buPct(T.fact, T.lim) + '</b><span class="' + buCls(T.fact, T.lim) + '">' + buRub(T.fact) + " из " + buRub(T.lim) + "</span></div>" + buBar(T.fact, T.lim, -1, buCls(T.fact, T.lim)) + (w.dl ? '<small class="muted">можно в день до вс: ' + buRub(Math.max(0, T.perDay)) + "</small>" : "");
+    if (P) { var r = buPeriod(P), ifa = r.inc.fact - r.exp.fact; h += '<div class="buwl"><span class="muted">Расходы периода' + buPct(r.exp.fact, r.exp.plan) + '</span><span class="' + (r.exp.fact > r.exp.plan ? "bad" : "") + '">' + buRub(r.exp.fact) + " из " + buRub(r.exp.plan) + "</span></div>" + '<div class="buwl"><span class="muted">' + esc(buPName(P.id)) + ": доход − расход</span><span class=\"" + (ifa < 0 ? "bad" : "ok") + '">' + buRub(ifa) + "</span></div>"; }
     return h + "</div>";
   }
 
