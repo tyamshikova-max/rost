@@ -442,6 +442,12 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .help .hgf { padding: 8px 12px; border-radius: 8px; background: var(--hover); font-weight: 600 }
 .gdlg { display: grid; gap: 8px; padding: 14px 16px; margin: 10px 0; border: 1px solid var(--acc) } .gdr { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; padding: 6px 0; border-top: 1px solid var(--line) } .gdr > span:first-child { flex: 1 1 220px; min-width: 0 } .gdlg .r { gap: 6px; align-items: center } .gdset { font-size: calc(12.5px * var(--fs)) }
 .gdrem { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding: 8px 12px; margin: 10px 0; border-radius: 10px; background: var(--acc-soft) } .gdremc { margin-top: 6px; font-size: calc(12.5px * var(--fs)); color: var(--acc) }
+.kpbar { margin: 8px 0 0 } .kpgrp { display: grid; gap: 0; padding: 10px 14px; margin: 10px 0 0 } .kph { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding-bottom: 6px }
+.kpr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 5px 0; border-top: 1px solid var(--line) } .kpr.kpoff .kpn { color: var(--muted) } .kpn { flex: 1 1 140px; min-width: 0 }
+.kpst button { padding: 2px 10px; font-size: calc(12.5px * var(--fs)) } .kpst button.on { color: var(--fg); font-weight: 600 } .kpn .bad { color: #c94a3a } .kpst button.on.v2 { background: color-mix(in srgb, var(--ok) 24%, transparent) } .kpst button.on.v1 { background: color-mix(in srgb, var(--buwarn) 24%, transparent) } .kpst button.on.v0 { background: color-mix(in srgb, #c94a3a 20%, transparent) }
+.kpadd { padding: 6px 0 0 } .kcadd { display: grid; gap: 8px; padding: 12px 14px; margin: 10px 0 0 }
+.kclist { display: grid } .kcr { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; padding: 5px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; font-size: calc(13.5px * var(--fs)) } .kcr > span:nth-child(2), .kcr > span:nth-child(3) { flex: 1 1 auto; min-width: 0 }
+.kwhy button { padding: 1px 8px; font-size: calc(12px * var(--fs)) }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -1915,7 +1921,7 @@ CREATE TABLE inbox (
     if (!ok && Date.now() - SAVEWARN > 60000) { SAVEWARN = Date.now(); toast("⚠ В браузере не хватает места для данных — они сохраняются на Яндекс Диск, но обратитесь к разработчику"); }
   }
   var S = (function () { try { var raw = LS.get("zd-state") || "null"; if (raw.charCodeAt(0) === 1) raw = lzUnpack(raw); return JSON.parse(raw); } catch (e) { return null; } })() || {};
-  S.recipes = S.recipes || []; S.menus = S.menus || []; S.prods = S.prods || []; S.chores = S.chores || []; S.chlog = S.chlog || []; S.tblog = S.tblog || []; S.sops = S.sops || []; S.bpers = S.bpers || []; S.bwk = S.bwk || []; S.bregs = S.bregs || []; S.chq = S.chq || []; S.ckr = S.ckr || []; S.dplaces = S.dplaces || []; S.dout = S.dout || []; S.debts = S.debts || []; S.dbal = S.dbal || []; S.wish = S.wish || []; S.nsd = S.nsd || []; S.mdiary = S.mdiary || []; S.fck = S.fck || []; S.env = S.env || [];
+  S.recipes = S.recipes || []; S.menus = S.menus || []; S.prods = S.prods || []; S.chores = S.chores || []; S.chlog = S.chlog || []; S.tblog = S.tblog || []; S.sops = S.sops || []; S.bpers = S.bpers || []; S.bwk = S.bwk || []; S.bregs = S.bregs || []; S.chq = S.chq || []; S.ckr = S.ckr || []; S.dplaces = S.dplaces || []; S.dout = S.dout || []; S.debts = S.debts || []; S.dbal = S.dbal || []; S.wish = S.wish || []; S.nsd = S.nsd || []; S.mdiary = S.mdiary || []; S.fck = S.fck || []; S.env = S.env || []; S.pantry = S.pantry || []; S.kchk = S.kchk || []; S.kwaste = S.kwaste || [];
   S.v = 2; S.tasks = S.tasks || []; S.projects = S.projects || []; S.tags = S.tags || []; S.filters = S.filters || []; S.sprints = S.sprints || []; S.comments = S.comments || []; S.habits = S.habits || []; S.hlog = S.hlog || []; S.acts = S.acts || []; S.tpls = S.tpls || []; S.flags = S.flags || []; S.notes = S.notes || []; S.nsecs = S.nsecs || []; S.ntags = S.ntags || []; S.boards = S.boards || []; S.goals = S.goals || []; S.days = S.days || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
   var VIEWS = (function () { try { return JSON.parse(LS.get("zd-views") || "{}") || {}; } catch (e) { return {}; } })();
   function save(quiet) { try { unScan(); } catch (er) { /* отмена не мешает сохранению */ } try { histScan(); } catch (er) { /* история не мешает сохранению */ } if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); DV++; saveLocal(); if (!quiet) { SYNC.later(); SRV.later(); } }
@@ -2465,7 +2471,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-127";
+  var APPV = "zd-app-2026-10-16-128";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -2504,7 +2510,7 @@ CREATE TABLE inbox (
     (b || []).forEach(function (x) { var y = m[x.id]; if (!y || (x.upd || 0) > (y.upd || 0)) m[x.id] = x; });
     return Object.keys(m).map(function (k) { return m[k]; });
   }
-  var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "flags", "notes", "nsecs", "ntags", "boards", "goals", "days", "recipes", "menus", "prods", "chores", "chlog", "tblog", "sops", "bpers", "bwk", "bregs", "chq", "ckr", "dplaces", "dout", "debts", "dbal", "wish", "nsd", "mdiary", "fck", "env"];
+  var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "flags", "notes", "nsecs", "ntags", "boards", "goals", "days", "recipes", "menus", "prods", "chores", "chlog", "tblog", "sops", "bpers", "bwk", "bregs", "chq", "ckr", "dplaces", "dout", "debts", "dbal", "wish", "nsd", "mdiary", "fck", "env", "pantry", "kchk", "kwaste"];
   function snapshot() { return { v: 2, tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, notes: S.notes, nsecs: S.nsecs, ntags: S.ntags, boards: S.boards, opt: S.opt }; }
   var SYNC = {
     st: "off", at: 0, msg: "", t: null, busy: false, seen: {}, lastPush: 0,
@@ -2901,7 +2907,7 @@ CREATE TABLE inbox (
     if ((m = h.match(/^share-(.+)$/))) return { v: "share", a: m[1] };
     if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board|goal|menu|recipe|shop|rimp)-(.+)$/))) return { v: m[1], a: m[2] };
     if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
-    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch", "menu", "menunew", "recipes", "rhave", "prods", "clean", "budget"].indexOf(h) >= 0) return { v: h, a: "" };
+    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch", "menu", "menunew", "recipes", "rhave", "prods", "clean", "budget", "kitchen"].indexOf(h) >= 0) return { v: h, a: "" };
     if ((m = h.match(/^daily-?(.*)$/))) return { v: "daily", a: m[1] };
     if ((m = h.match(/^report-?(.*)$/))) return { v: "report", a: m[1] || "w0" };
     return { v: "today", a: "" };
@@ -2928,7 +2934,7 @@ CREATE TABLE inbox (
   function go(h) { if (location.hash.slice(1) === h) route(); else location.hash = h; }
   /* ---------- вкладки открытых страниц (как в многооконной программе); хранятся на этом устройстве ---------- */
   var PTMAX = 8, PTCUR = "", PTJUMP = "", PTDRAG = null;
-  var PTICO = { budget: "budget", clean: "clean", inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
+  var PTICO = { kitchen: "food", budget: "budget", clean: "clean", inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
   var PTNAME = { done: "Сделано", tarch: "Архив задач", trash: "Корзина", archive: "Архив проектов", templates: "Шаблоны", settings: "Настройки", help: "Справка", report: "Отчёт", recipes: "Рецепты", prods: "Продукты и цены", menunew: "Новое меню", notes: "Заметки", sprints: "Все спринты", search: "Поиск" };
   function ptabsOn() { return innerWidth > 860 && LS.get("zd-ptabs") !== "off"; } // только на компьютере
   function ptabs() { try { var a = JSON.parse(LS.get("zd-tabs") || "[]"); return Array.isArray(a) ? a.filter(function (t) { return t && t.h; }) : []; } catch (e) { return []; } }
@@ -3128,7 +3134,7 @@ CREATE TABLE inbox (
   var NEWHIDE = ["gantt", "matrix", "sprint", "journal", "waiting", "someday", "flag"];
   function hiddenLists() { var l = LS.get("zd-hide"); if (l) { try { var a = JSON.parse(l); if (Array.isArray(a)) return a; } catch (e) { /* старый формат */ } } return S.opt.hideLists || (LS.get("zd-newdef") === "1" ? NEWHIDE : []); }
   function listsOrder() { var hid = hiddenLists(); return listsAll().filter(function (x) { return x === "inbox" || hid.indexOf(x) < 0; }); }
-  var LISTN = { menu: "Меню", clean: "План уборки", budget: "Бюджет", journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
+  var LISTN = { kitchen: "Кухня", menu: "Меню", clean: "План уборки", budget: "Бюджет", journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
   function setListHidden(id, hide) { if (id === "inbox") return; var h = hiddenLists().filter(function (x) { return x !== id; }); if (hide) h.push(id); S.opt.hideLists = h; LS.set("zd-hide", JSON.stringify(h)); optTouch(); save(); render(); }
   // блоки левой панели сворачиваются кликом по заголовку (запоминается на этом устройстве)
   function sideFold() { try { return JSON.parse(LS.get("zd-sfold") || "{}") || {}; } catch (e) { return {}; } }
@@ -5696,7 +5702,7 @@ CREATE TABLE inbox (
     h += '<div class="card mcard"><h2>Следующая неделя</h2>' + (nxt ? menuMini(nxt) : '<p class="muted">Меню ещё нет.</p><button type="button" class="btn" data-a="mnew" data-v="1">Составить заранее</button>') + "</div>";
     h += '<div class="card mcard"><h2>🎉 Праздничный стол</h2><p class="muted">Один день, много блюд: закуски, салаты, горячее, десерт — на нужное число гостей, с планом готовки.</p><button type="button" class="btn" data-a="fnew">＋ Праздничное меню</button></div>';
     h += "</div>";
-    h += '<div class="r mlinks"><a class="btn" href="#recipes">📖 Рецепты · ' + recipes().length + '</a><a class="btn" href="#rhave">🍳 Что приготовить из того, что есть</a><a class="btn" href="#prods">🧺 Продукты и цены</a><a class="hq lq" href="#help-food" title="Справка">?</a></div>';
+    h += '<div class="r mlinks"><a class="btn" href="#recipes">📖 Рецепты · ' + recipes().length + '</a><a class="btn" href="#kitchen">🧺 Кухня: кладовая и челлендж</a><a class="btn" href="#rhave">🍳 Что приготовить из того, что есть</a><a class="btn" href="#prods">🧺 Продукты и цены</a><a class="hq lq" href="#help-food" title="Справка">?</a></div>';
     h += wtplHTML();
     var all = menus().filter(function (m) { return m !== cur && m !== nxt; }).sort(function (a, b) { return (b.start || b.date || 0) - (a.start || a.date || 0); });
     if (all.length) h += "<h2>Все меню</h2><div class=\"gsheet mall\">" + all.map(function (m) { var T = menuTotals(m); return '<a class="mrow" href="#menu-' + m.id + '"><b>' + esc(menuTitle(m)) + '</b><span class="muted">' + esc(famTxt(m)) + " · ≈ " + rub(T.cost) + "</span></a>"; }).join("") + "</div>";
@@ -5788,27 +5794,27 @@ CREATE TABLE inbox (
   function feastPlanHTML(m) { return '<ul class="fplan">' + feastPlan(m).map(function (s) { return "<li><b>" + esc(dayName(s.at)) + ", " + hm(s.at) + "</b> — " + esc(s.t) + "</li>"; }).join("") + "</ul>"; }
   function vShop(m) {
     var N = menuNeeds(m), have = m.have || {}, by = {}, tot = 0, totH = 0, homeL = [];
-    N.list.forEach(function (e) { if (e.p.home) { homeL.push(e); return; } var a = AISLES.indexOf(e.p.a) >= 0 ? e.p.a : "Другое"; (by[a] = by[a] || []).push(e); tot += e.cost; if (!have[e.p.id]) totH += e.cost; });
+    N.list.forEach(function (e) { if (e.p.home) { homeL.push(e); return; } var a = AISLES.indexOf(e.p.a) >= 0 ? e.p.a : "Другое"; (by[a] = by[a] || []).push(e); tot += e.cost; if (!mHave(m, e.p)) totH += e.cost; });
     var h = '<div class="crumbs"><a href="#menu">Меню</a> / <a href="#menu-' + m.id + '">' + esc(menuTitle(m)) + "</a> /</div>" + head("Список покупок", esc(menuTitle(m)) + " · " + esc(famTxt(m)) + ". Отметьте то, что уже есть дома, — оно не попадёт в покупки.");
     h += '<div class="r mbar"><span class="mtot">Купить на ≈ <b>' + rub(totH) + "</b>" + (totH !== tot ? ' <span class="muted">(всего по меню ≈ ' + rub(tot) + ")</span>" : "") + '</span></div><div class="r mbar"><button type="button" class="btn sm pri" data-a="shoptask">✅ В задачу с чек-листом</button><button type="button" class="btn sm" data-a="shopshare">📤 Поделиться</button><button type="button" class="btn sm" data-a="shopcopy">📋 Скопировать текстом</button><button type="button" class="btn sm" data-a="print">🖨 Распечатать или PDF</button></div>';
     h += '<div class="gsheet shop">' + AISLES.filter(function (a) { return by[a]; }).map(function (a) {
-      return "<h2>" + esc(a) + ' <span class="c">' + by[a].length + "</span></h2>" + by[a].sort(function (x, y) { return x.p.n < y.p.n ? -1 : 1; }).map(function (e) { var hv = !!have[e.p.id]; return '<label class="shr' + (hv ? " hv" : "") + '"><input type="checkbox" data-mhave="' + esc(e.p.id) + '"' + (hv ? " checked" : "") + '><span class="sn">' + esc(e.p.n) + '</span><span class="sa">' + esc(amtTxt(e)) + '</span><span class="sc muted">' + (e.cost ? "≈ " + rub(e.cost) : "") + "</span></label>"; }).join("");
+      return "<h2>" + esc(a) + ' <span class="c">' + by[a].length + "</span></h2>" + by[a].sort(function (x, y) { return x.p.n < y.p.n ? -1 : 1; }).map(function (e) { var hv = mHave(m, e.p); return '<label class="shr' + (hv ? " hv" : "") + '"><input type="checkbox" data-mhave="' + esc(e.p.id) + '"' + (hv ? " checked" : "") + '><span class="sn">' + esc(e.p.n) + '</span><span class="sa">' + esc(amtTxt(e)) + '</span><span class="sc muted">' + (e.cost ? "≈ " + rub(e.cost) : "") + "</span></label>"; }).join("");
     }).join("") + "</div>";
     if (homeL.length) h += '<p class="muted shoph">Обычно есть дома: ' + esc(homeL.map(function (e) { return e.p.n.toLowerCase() + (e.g && e.p.u !== "шт" ? " (" + amtTxt(e) + ")" : ""); }).join(", ")) + ".</p>";
-    h += staplesHTML();
+    h += staplesHTML() + kpShopHTML(N);
     if (N.miss.length) h += '<p class="warnc shoph">Нет в справочнике продуктов (без цены и КБЖУ): ' + esc(N.miss.map(function (x) { return x.n + (x.q.length ? " " + x.q.join(" + ") : ""); }).join(", ")) + '. <a href="#prods">Добавить в справочник</a></p>';
     return h;
   }
   function shopText(m) {
     var N = menuNeeds(m), have = m.have || {}, by = {};
-    N.list.forEach(function (e) { if (e.p.home || have[e.p.id]) return; (by[e.p.a] = by[e.p.a] || []).push(e.p.n + " — " + amtTxt(e)); });
-    var sd = staples().filter(stDue);
-    return AISLES.filter(function (a) { return by[a]; }).map(function (a) { return { a: a, l: by[a] }; }).concat(sd.length ? [{ a: "Постоянные покупки", l: sd.map(function (x) { return x.n; }) }] : []);
+    N.list.forEach(function (e) { if (e.p.home || mHave(m, e.p)) return; (by[e.p.a] = by[e.p.a] || []).push(e.p.n + " — " + amtTxt(e)); });
+    var sd = staples().filter(stDue), kb = kpShopList(N);
+    return AISLES.filter(function (a) { return by[a]; }).map(function (a) { return { a: a, l: by[a] }; }).concat(sd.length ? [{ a: "Постоянные покупки", l: sd.map(function (x) { return x.n; }) }] : []).concat(kb.length ? [{ a: "Из кладовой: мало и нет", l: kb }] : []);
   }
   /* ---------- «Что приготовить из того, что есть» ---------- */
   var RHQ = "", RHBASE = ["Масло подсолнечное", "Сахар", "Мука пшеничная", "Уксус", "Сода", "Разрыхлитель", "Ванильный сахар", "Крахмал"];
   function rhBaseOn() { return LS.get("zd-rhbase") !== "0"; }
-  function rhHave() { try { var a = JSON.parse(LS.get("zd-rhave") || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function rhHave() { var a = []; try { a = JSON.parse(LS.get("zd-rhave") || "[]"); if (!Array.isArray(a)) a = []; } catch (e) { a = []; } var o = {}; a.forEach(function (n) { o[n] = 1; }); pantry().forEach(function (x) { if (x.st > 0) o[x.n] = 1; }); return Object.keys(o); }
   // какие продукты нужны для блюда: без воды, соли, специй, «по вкусу» и того, что обычно есть дома
   function recNeeds(r) { return memo("rn:" + r.id + ":" + (r.upd || 0), function () { var o = {}; recCalc(r).rows.forEach(function (x) { var pp = x.p; if (!pp || pp.hide || pp.home || pp.a === "Специи" || x.it.u === "по вкусу") return; o[pp.n] = 1; }); return Object.keys(o); }); }
   function rhProdsHTML(hv) {
@@ -5817,7 +5823,7 @@ CREATE TABLE inbox (
     return h || '<p class="muted">Такого продукта в справочнике нет.</p>';
   }
   function vRhave() {
-    foodSeed();
+    foodSeed(); kpMigrate();
     var have = rhHave(), hv = {}; have.forEach(function (n) { hv[n] = 1; });
     var h = '<div class="crumbs"><a href="#menu">Меню</a> / <a href="#recipes">Рецепты</a> /</div>' + head("Что приготовить из того, что есть", "Отметьте продукты, которые есть дома, — покажу блюда, для которых докупать меньше всего. Соль, специи и воду отмечать не нужно.");
     h += '<div class="r rbar"><input class="inp" id="rhq" type="search" placeholder="Найти продукт: картофель, творог, минтай…" value="' + esc(RHQ) + '" autocomplete="off">' + (have.length ? '<button type="button" class="btn sm" data-a="rhclear">Сбросить отмеченное (' + have.length + ")</button>" : "") + "</div>";
@@ -5902,7 +5908,7 @@ CREATE TABLE inbox (
       recSet(r, function (x) { if (ds.rf === "ing") x.ing = v.split("\n").map(function (s) { return s.trim(); }).filter(Boolean); else if (ds.rf === "s" || ds.rf === "t" || ds.rf === "out") { x[ds.rf] = Math.max(0, +v || 0); if (ds.rf === "s" && !x.s) x.s = 1; } else x[ds.rf] = ds.rf === "n" ? (v.trim() || "Без названия").slice(0, 120) : v; });
       render(); return; }
     if (ds.pp) { var id = ds.pp, k = ds.k, o = live(S.prods || []).filter(function (x) { return x.id === id; })[0]; if (!o) { o = { id: id }; (S.prods = S.prods || []).push(o); } o[k] = k === "a" || k === "u" || k === "n" ? t.value : (t.value === "" ? undefined : +t.value); touch(o); save(); render(); return; }
-    if (ds.mhave) { var m = menuObj(ARG); if (!m) return; m.have = Object.assign({}, m.have || {}); if (t.checked) m.have[ds.mhave] = 1; else delete m.have[ds.mhave]; touch(m); save(); render(); return; }
+    if (ds.mhave) { var m = menuObj(ARG); if (!m) return; m.have = Object.assign({}, m.have || {}); if (t.checked) m.have[ds.mhave] = 1; else m.have[ds.mhave] = 0; touch(m); save(); render(); return; }
     if (ds.mw && MW) { MW[ds.mw] = t.value; return; }
     if (ds.wt) { var wtr = wtpls().filter(function (x) { return x.id === ds.wt; })[0], wv = t.value.trim().slice(0, 60); if (wtr && wv && wv !== wtr.n) { wtr.n = wv; touch(wtr); save(); } return; }
   });
@@ -5951,8 +5957,8 @@ CREATE TABLE inbox (
         var tk = newTaskFrom("🛒 Купить продукты: " + menuTitle(m).replace(/^🎉 /, ""), {}); tk.body = body; tk.at = due; tk.allday = true; touch(tk); save(); render(); openTask(tk.id); toast("Задача со списком покупок создана — отмечайте прямо в магазине"); return true;
       case "shopshare": if (!m) return true; shareOut("Список покупок", menuTitle(m) + "\n\n" + shopText(m).map(function (g) { return g.a + ":\n" + g.l.map(function (x) { return "☐ " + x; }).join("\n"); }).join("\n\n"), "Список покупок"); return true;
       case "rshare": var rsh = recipe(ARG); if (!rsh) return true; shareOut(rsh.n, rsh.n + "\n" + (rsh.s ? rsh.s + " порц. · " : "") + (rsh.t ? rsh.t + " мин" : "") + "\n\nПродукты:\n" + (rsh.ing || []).map(function (x) { return "• " + x; }).join("\n") + (rsh.steps ? "\n\nКак готовить:\n" + String(rsh.steps).split("\n").filter(Boolean).map(function (x, i) { return (i + 1) + ". " + x; }).join("\n") : ""), "Рецепт"); return true;
-      case "rhv": var hva = rhHave(), hvn = el.dataset.v, hvi = hva.indexOf(hvn); if (hvi >= 0) hva.splice(hvi, 1); else hva.push(hvn); LS.set("zd-rhave", JSON.stringify(hva)); render(); return true;
-      case "rhclear": LS.del("zd-rhave"); render(); return true;
+      case "rhv": kpMigrate(); var hvp = kpFind(el.dataset.v); if (hvp && hvp.st > 0) { hvp.st = 0; hvp.at = Date.now(); touch(hvp); } else kpSet(el.dataset.v, 2); save(); render(); return true;
+      case "rhclear": kpMigrate(); var hvl = pantry().filter(function (x) { return x.st > 0; }); hvl.forEach(function (x) { x.st0 = x.st; x.st = 0; x.at = Date.now(); touch(x); }); save(); render(); toastUndo("Отмечено «нет» в кладовой: " + hvl.length, function () { hvl.forEach(function (x) { x.st = x.st0 || 2; delete x.st0; touch(x); }); }); return true;
       case "rhbase": LS.set("zd-rhbase", rhBaseOn() ? "0" : "1"); render(); return true;
       case "wtsave": if (!m || m.kind !== "week") return true; var wtn = menuTitle(m).replace(/^Меню на /, "Неделя ");
         var wt = newMenu({ kind: "wtpl", n: wtn, a: m.a, k: m.k, opts: JSON.parse(JSON.stringify(m.opts || {})), slots: JSON.parse(JSON.stringify(m.slots || {})) }); save(); render();
@@ -8341,12 +8347,294 @@ CREATE TABLE inbox (
   }
   /* --- карточка «Челленджи сегодня» для доски «Мой день» --- */
   function chalTaskStat(id) { var t = S.tasks.filter(function (x) { return x.id === id && !x.del; })[0]; if (!t) return null; TXTD.innerHTML = t.body || ""; var lis = TXTD.querySelectorAll("ul.todo > li"); return { n: lis.length, d: [].filter.call(lis, function (l) { return l.getAttribute("data-checked") === "1"; }).length }; }
+  /* ---------- Кухня: кладовая, чеки, выброшенное и челлендж «Готовлю из того, что есть» (8 недель) ----------
+     S.pantry — продукты дома {id, n, pl (место), st 2 есть / 1 мало / 0 нет, exp "ГГГГ-ММ-ДД", at}. «Что приготовить из того, что есть»
+     и списки покупок берут «что есть» отсюда (прежний список этого устройства переносится сюда сам).
+     S.kchk — чеки {id, d, sum, n} и дни без магазина {id "kn:ГГГГ-ММ-ДД", d, none: 1}; S.kwaste — выброшенное {id, d, n, why}.
+     Челлендж: S.opt.kch {start, on, after, rit}; задача дня «🍳 Кухня · день N» с чек-листом; будни до 15 минут, воскресенье — «кухонный час». ---------- */
+  var KPL = [["fr", "🧊 Холодильник"], ["fz", "❄ Морозилка"], ["gr", "🌾 Крупы и бакалея"], ["cn", "🥫 Консервы и соусы"], ["vg", "🥔 Овощи и фрукты"], ["sp", "🧂 Специи и чай"]];
+  var KPLA = { "Овощи и фрукты": "vg", "Мясо и птица": "fr", "Рыба": "fr", "Молочное и яйца": "fr", "Бакалея": "gr", "Хлеб": "gr", "Консервы и соусы": "cn", "Замороженное": "fz", "Специи": "sp" };
+  var KST = [[2, "есть"], [1, "мало"], [0, "нет"]];
+  var KWHY = [["forgot", "забыла"], ["extra", "купила лишнее"], ["spoil", "испортилось"], ["dislike", "не понравилось"]];
+  function pantry() { return live(S.pantry || []); }
+  function kpFind(n) { var k = fNorm(n); return pantry().filter(function (x) { return fNorm(x.n) === k; })[0] || null; }
+  function kpHas(n) { var x = kpFind(n); return !!(x && x.st === 2); }
+  function kpGuess(n) { var k = fNorm(n), p = prods().filter(function (pp) { return fNorm(pp.n) === k; })[0]; return p && KPLA[p.a] || "gr"; }
+  function kpSet(n, st, pl) {
+    var x = kpFind(n);
+    if (!x) { x = { id: uid(), n: String(n).trim().slice(0, 60), pl: pl || kpGuess(n), st: st, at: Date.now() }; (S.pantry = S.pantry || []).push(x); }
+    else { x.st = st; x.at = Date.now(); if (pl) x.pl = pl; }
+    touch(x); return x;
+  }
+  // прежний список «Что есть» и сроки этого устройства — в общую кладовую (один раз)
+  function kpMigrate() {
+    var a = []; try { a = JSON.parse(LS.get("zd-rhave") || "[]"); if (!Array.isArray(a)) a = []; } catch (e) { a = []; }
+    var ex = {}; try { ex = JSON.parse(LS.get("zd-rhexp") || "{}") || {}; } catch (e) { ex = {}; }
+    if (!a.length && !Object.keys(ex).length) return false;
+    a.forEach(function (n) { var x = kpFind(n); if (!x || x.st < 2) x = kpSet(n, 2); if (ex[n] && !x.exp) { x.exp = ex[n]; touch(x); } });
+    Object.keys(ex).forEach(function (n) { var x = kpFind(n); if (x && !x.exp) { x.exp = ex[n]; touch(x); } });
+    LS.del("zd-rhave"); LS.del("zd-rhexp"); save(); return true;
+  }
+  function kpLeft(x) { return x && x.exp ? Math.round((new Date(x.exp + "T00:00").getTime() - today0()) / DAY) : null; }
+  function kpBuy() { return pantry().filter(function (x) { return x.st < 2; }).sort(function (a, b) { return a.st - b.st || (a.n < b.n ? -1 : 1); }); }
+  // в списке покупок меню: отметка «есть дома» — своя у меню, иначе из кладовой
+  function mHave(m, p) { var h = m.have || {}; return h[p.id] !== undefined ? !!h[p.id] : kpHas(p.n); }
+
+  /* --- челлендж --- */
+  function kcOpt() { var o = S.opt.kch || {}; return { start: +o.start || 0, on: !!o.on, after: o.after !== false, rit: o.rit || "" }; }
+  function kcSet(k, v) { var o = S.opt.kch = Object.assign({}, S.opt.kch || {}); o[k] = v; optTouch(); save(); }
+  function kcDay(d0) {
+    var o = kcOpt(); if (!o.on || !o.start) return null; var k = Math.round((sod(d0) - sod(o.start)) / DAY); if (k < 0) return null;
+    var wk = Math.floor(k / 7) + 1, sun = new Date(d0).getDay() === 0, wd = 0;
+    if (!sun) for (var i = Math.floor(k / 7) * 7; i <= k; i++) if (new Date(addDays(sod(o.start), i)).getDay() !== 0) wd++;
+    var post = wk > 8; if (post && !o.after) return null;
+    return { n: k + 1, wk: wk, wd: wd, sun: sun, post: post, total: 8 };
+  }
+  var KCW = {
+    1: ["Смотрю, что есть", "Каждый день — одно место кухни: записываем продукты в «Кладовую» — есть, мало или нет. Ничего не планируем и не меняем, только смотрим. Чеки из магазина записываем с первого дня — это точка отсчёта."],
+    2: ["Готовлю из запасов", "Три ужина из того, что уже есть, — через «Что приготовить из того, что есть». Покупаем только свежее. Один день без магазина."],
+    3: ["Меню на 3 дня", "Маленький план: три дня, начиная с продуктов, которые скоро испортятся. Список покупок — только то, чего нет дома. Ужины — по плану."],
+    4: ["Покупаю по списку", "Один большой поход по списку и один маленький — только свежее. Всё, что хочется купить вне списка, записываем, а не кладём в корзину."],
+    5: ["Меню на неделю", "Мастер меню на неделю, сначала из запасов. Один день остатков. Готовим вдвое — на завтра."],
+    6: ["Заготовки", "Готовим впрок: в субботу 40–60 минут — база на неделю и два блюда в морозилку. У постоянных покупок — норма: сколько держать дома."],
+    7: ["Ничего не выбрасываю", "Старое — вперёд, новое — назад. Каждый выброшенный продукт — одной строкой: что и почему. Блюда «спасения» из того, что скоро испортится."],
+    8: ["Система", "Закрепляем: «кухонный час» по воскресеньям — кладовая, меню, список, чеки. Итоги: сколько тратим на еду, что выбрасываем, сколько ужинов по плану."]
+  };
+  // задания дня: [текст, мин, дорожка p кладовая | m меню | b покупки | c готовка | w без отходов, подсказка, ключ]
+  function kcItems(d0) {
+    var day = kcDay(d0); if (!day) return null; var it = [], hab = [], w = day.wk;
+    hab.push(["Чек из магазина — или «сегодня без магазина»", 1, "b", "Сумма чека одной строкой. Не были в магазине — отметьте «без магазина».", "chk"]);
+    if (w >= 3 || day.post) hab.push(["Ужин по плану", 0, "c", "Готовим то, что в меню на сегодня. Не получилось — просто не отмечайте.", ""]);
+    if (w >= 7 || day.post) hab.push(["Выбросили продукт — записать (или отметить, что нет)", 1, "w", "Что и почему: забыла, купила лишнее, испортилось. Ничего не выбрасывали — просто отметьте.", ""]);
+    if (day.sun) {
+      if (w === 1) { it.push(["Кухонный час: кладовая целиком", 15, "p", "Пройдитесь по всем местам: всё ли записано? Отметьте «мало» и «нет».", "pupd"]); it.push(["Чеки недели: сколько ушло на еду", 2, "b", "Сумма — в итогах недели ниже. Это точка отсчёта для следующих недель.", ""]); }
+      else {
+        it.push(["Кухонный час: обновить кладовую", 10, "p", "Пройдитесь по местам: есть, мало или нет; сроки.", "pupd"]);
+        it.push(["Что съесть первым на этой неделе", 3, "w", "Продукты со сроком — в начало меню.", ""]);
+        if (w >= 3 || day.post) { it.push([w >= 5 || day.post ? "Меню на неделю вперёд" : "Меню на 3 дня вперёд", 10, "m", "Сначала из того, что есть, особенно со сроком.", w >= 5 || day.post ? "menu7" : "menu3"]); it.push(["Список покупок по меню", 5, "b", "То, что есть в кладовой, в списке уже отмечено.", "shop"]); }
+        it.push(["Итоги недели: еда и чеки", 2, "b", "Ниже — траты на еду, дни без магазина, выброшенное.", ""]);
+      }
+      if (w === 8) it.push(["Итоги челленджа", 10, "m", "Сравните первую и последнюю неделю: траты на еду, выброшенное, ужины по плану. Что остаётся привычкой?", ""]);
+      return { day: day, it: it, hab: hab };
+    }
+    if (day.post) return { day: day, it: it, hab: hab };
+    var P = {
+      1: { 1: [["Кладовая: холодильник", 15, "p", "«Кухня» → «Кладовая» → 🧊 Холодильник: впишите всё, что там есть. Испорченное — сразу выбросить.", "pan:fr"]],
+        2: [["Кладовая: морозилка", 10, "p", "Всё, что заморожено. Непонятное без подписи — подписать или выбросить.", "pan:fz"]],
+        3: [["Кладовая: крупы, макароны, мука", 10, "p", "Шкаф с бакалеей: крупы, макароны, мука, сахар, хлопья.", "pan:gr"]],
+        4: [["Кладовая: консервы, соусы, масло", 10, "p", "Консервы, соусы, масло, варенье — и сроки на банках.", "pan:cn"]],
+        5: [["Кладовая: овощи, фрукты, специи и чай", 10, "p", "Овощи и фрукты вне холодильника, специи, чай, кофе.", "pan:vg"]],
+        6: [["Сроки и полка «съесть первым»", 10, "w", "У продуктов, которые скоро испортятся, поставьте срок (⏳). Сложите их на одну полку — с них начнём следующую неделю.", "exp"]] },
+      2: { 1: [["Ужин из того, что есть", 15, "c", "«Что приготовить из того, что есть» — блюда по вашей кладовой; сверху те, где продукты скоро испортятся.", "rh"]],
+        2: [["Отметить в кладовой, что закончилось", 3, "p", "Съели или закончилось — «нет» или «мало». Минута — и список покупок составится сам.", "pupd"]],
+        3: [["Ужин из запасов № 2", 15, "c", "Снова из того, что есть. Докупить можно только свежее.", "rh"]],
+        4: [["День без магазина", 0, "b", "Сегодня ничего не покупаем — обходимся запасами.", "ns"]],
+        5: [["Ужин из запасов № 3", 15, "c", "Третий ужин из запасов — дальше это станет привычкой.", "rh"]],
+        6: [["Блюдо «спасения»", 15, "w", "Из того, что скоро испортится: суп, омлет, запеканка, рагу.", "rh"]] },
+      3: { 1: [["Меню на 3 дня из запасов", 15, "m", "«Меню» → «Новое меню»: заполните 3 дня, начиная с продуктов «съесть первым». Остальные дни можно оставить пустыми.", "menu3"]],
+        2: [["Список покупок — только недостающее", 5, "b", "Откройте список покупок меню: то, что есть в кладовой, уже отмечено.", "shop"]],
+        3: [["Кладовая после покупок", 5, "p", "Новое — «есть», закончившееся — «нет».", "pupd"]],
+        4: [["Меню на следующие 3 дня", 10, "m", "Ещё три дня — снова с того, что есть.", "menu3"]],
+        5: [["День остатков", 0, "c", "Доедаем то, что осталось за неделю, — нового не готовим.", ""]],
+        6: [["Список на выходные — только свежее", 5, "b", "Хлеб, молоко, овощи — по списку.", ""]] },
+      4: { 1: [["Постоянные покупки: что всегда должно быть дома", 10, "b", "Список покупок любого меню → «Постоянные покупки»: молоко, яйца, хлеб… и как часто покупать.", "stap"]],
+        2: [["Меню на 3–4 дня и список", 15, "m", "Меню и список — до похода в магазин.", "menu3"]],
+        3: [["Большой поход — строго по списку", 0, "b", "Берём только то, что в списке. Хочется ещё что-то — записать в заметку «хотелось купить», а не в корзину. Чек — в челлендж.", ""]],
+        4: [["«Хотелось купить»: что правда было нужно?", 3, "b", "Посмотрите записи: что из этого действительно пригодилось бы?", ""]],
+        5: [["Кладовая после покупок", 5, "p", "Новое — «есть», закончившееся — «нет».", "pupd"]],
+        6: [["Маленький поход: только свежее по списку", 0, "b", "Молоко, хлеб, овощи — по списку.", ""]] },
+      5: { 1: [["Меню на неделю — мастером, сначала из запасов", 15, "m", "«Меню» → «Новое меню» → неделя. Замените блюда, чтобы первыми ушли продукты «съесть первым».", "menu7"]],
+        2: [["Список покупок по меню", 5, "b", "То, что есть в кладовой, уже отмечено.", "shop"]],
+        3: [["Готовим вдвое — на завтра", 5, "c", "Ужин с запасом: половина — на обед завтра.", ""]],
+        4: [["Кладовая после покупок", 5, "p", "Новое — «есть», закончившееся — «нет».", "pupd"]],
+        5: [["День остатков", 0, "c", "Доедаем то, что осталось за неделю.", ""]],
+        6: [["Черновик меню следующей недели", 10, "m", "Пара блюд из того, что останется к воскресенью.", ""]] },
+      6: { 1: [["Выбрать 2 блюда для заморозки", 10, "c", "Котлеты, голубцы, суп, блины — то, что хорошо замораживается.", "rh"]],
+        2: [["База на неделю: что приготовить заранее", 10, "c", "Крупа, соус, запечённые овощи, нарезка — список на субботу.", ""]],
+        3: [["Морозилка: подписать и разложить", 10, "p", "Контейнеры и пакеты — с названием и датой.", "pan:fz"]],
+        4: [["Постоянные покупки: норма", 10, "b", "Сколько держать дома: 2 пачки гречки, 10 яиц… Когда остаётся меньше — «мало».", "stap"]],
+        5: [["Купить для заготовок по списку", 5, "b", "Только то, что нужно для субботних блюд.", "shop"]],
+        6: [["Заготовки", 60, "c", "40–60 минут: база на неделю и 2 блюда в морозилку. Включите музыку или подкаст.", ""]] },
+      7: { 1: [["«Старое — вперёд»: холодильник", 10, "w", "Новое — назад, то, что раньше испортится, — вперёд и на уровень глаз.", ""]],
+        2: [["Блюдо «спасения»", 15, "w", "Из того, у чего скоро выйдет срок.", "rh"]],
+        3: [["Морозилка: что лежит дольше 3 месяцев", 10, "w", "Съесть в ближайшие дни или честно выбросить — и записать.", "pan:fz"]],
+        4: [["День остатков", 0, "c", "Доедаем то, что осталось за неделю.", ""]],
+        5: [["Сроки в кладовой", 5, "w", "Обновите сроки и отметки «мало» и «нет».", "pupd"]],
+        6: [["Выброшенное за неделю: одно правило", 3, "w", "Что выбросили и почему — одно правило на будущее (например, не брать зелень впрок).", "wsum"]] },
+      8: { 1: [["Поставить «кухонный час» по воскресеньям", 2, "m", "Одна кнопка — повторяющаяся задача на каждое воскресенье.", "rit"]],
+        2: [["Меню на неделю", 15, "m", "Сначала из запасов.", "menu7"]],
+        3: [["Список и поход по списку", 5, "b", "То, что есть в кладовой, уже отмечено.", "shop"]],
+        4: [["День остатков", 0, "c", "Доедаем то, что осталось за неделю.", ""]],
+        5: [["Кладовая после покупок", 5, "p", "Новое — «есть», закончившееся — «нет».", "pupd"]],
+        6: [["Что прижилось, а что нет", 10, "m", "Какие привычки остаются: кладовая, меню, список, заготовки? Что упростить?", ""]] }
+    };
+    (P[w] && P[w][day.wd] || []).forEach(function (x) { it.push(x); });
+    return { day: day, it: it, hab: hab };
+  }
+  function kMenuDays(ms) { var m = weekMenuFor(ms); if (!m) return 0; var d = {}; Object.keys(m.slots || {}).forEach(function (k) { if ((m.slots[k] || []).length) d[k.charAt(0)] = 1; }); return Object.keys(d).length; }
+  function kcAuto(x, d0) {
+    var k = x[4];
+    if (k && k.indexOf("pan:") === 0) return pantry().some(function (p) { return p.pl === k.slice(4); });
+    if (k === "exp") return pantry().some(function (p) { return p.exp && p.st > 0; });
+    if (k === "pupd") return pantry().some(function (p) { return p.at >= sod(d0) && p.at < sod(d0) + DAY; });
+    if (k === "chk") return kcChk(d0).length > 0;
+    if (k === "ns") return kcNoShop(d0);
+    if (k === "menu3") return Math.max(kMenuDays(d0), kMenuDays(addDays(d0, 1))) >= 3;
+    if (k === "menu7") return Math.max(kMenuDays(d0), kMenuDays(addDays(d0, 1))) >= 6;
+    if (k === "stap") return staples().length >= 3;
+    if (k === "rit") return !!kcOpt().rit;
+    return null;
+  }
+  function kcTid(d0) { return "kch-" + dKey(d0); }
+  function kcSync(d0) {
+    var c = kcItems(d0), t = S.tasks.filter(function (x) { return x.id === kcTid(d0); })[0];
+    if (!c) { if (t && !t.done && !t.del) { t.del = 1; t.delAt = Date.now(); touch(t); return true; } return false; }
+    var ck = cChecked(t), all = c.it.concat(c.hab), mins = all.reduce(function (s, x) { return s + (x[1] || 0); }, 0);
+    var body = '<ul class="todo">' + all.map(function (x) { var a = kcAuto(x, d0), on = a === null ? !!ck[x[0]] : a; return "<li" + (on ? ' data-checked="1"' : "") + ">" + esc(x[0]) + "</li>"; }).join("") + '</ul><p>Подсказки — <a href="#kitchen">Кухня → Челлендж</a>.</p>';
+    var title = "🍳 Кухня · день " + c.day.n + (c.day.post ? "" : " из 56") + (c.day.sun ? " · кухонный час" : "") + (mins ? " · " + mins + " мин" : "");
+    if (!t) { t = newTaskFrom(title, { day: d0 }); t.id = kcTid(d0); t.at = d0; t.allday = true; t.rem = false; t.rep = ""; t.tags = []; }
+    else if (t.del) { if (t.purged) return false; delete t.del; delete t.delAt; }
+    if (t.t === title && t.body === body) return false;
+    t.t = title; t.body = body; delete t.note;
+    TXTD.innerHTML = body; var lis = TXTD.querySelectorAll("ul.todo > li"), done = lis.length && [].every.call(lis, function (l) { return l.getAttribute("data-checked") === "1"; });
+    if (done && !t.done) { t.done = true; t.dt = Date.now(); } else if (!done && t.done) { t.done = false; delete t.dt; }
+    touch(t); return true;
+  }
+  function kcAutoRun() { if (!SETGATE || !kcOpt().on) return; var ch = kcSync(today0()); if (chOld("kch-")) ch = true; if (ch) save(); }
+  function kcToggle(txt, d0) {
+    var t = S.tasks.filter(function (x) { return x.id === kcTid(d0); })[0]; if (!t) { kcSync(d0); t = S.tasks.filter(function (x) { return x.id === kcTid(d0); })[0]; } if (!t) return;
+    TXTD.innerHTML = t.body || ""; [].forEach.call(TXTD.querySelectorAll("ul.todo > li"), function (li) { if (li.textContent.trim() === txt) { if (li.getAttribute("data-checked") === "1") li.removeAttribute("data-checked"); else li.setAttribute("data-checked", "1"); } });
+    t.body = TXTD.innerHTML; touch(t); kcSync(d0); save(); render();
+  }
+
+  /* --- чеки, дни без магазина, выброшенное --- */
+  function kcChk(d0) { return live(S.kchk || []).filter(function (x) { return sod(x.d) === sod(d0); }); }
+  function kcNoShop(d0) { return kcChk(d0).some(function (x) { return x.none; }); }
+  function kcSum(a, b) { return live(S.kchk || []).filter(function (x) { return !x.none && x.d >= a && x.d < b; }).reduce(function (s, x) { return s + (+x.sum || 0); }, 0); }
+  function kcWeekStat(mon) {
+    var a = mon, b = addDays(mon, 7), n = 0, dn = 0, tot = 0, ns = 0;
+    for (var d = a; d < b; d = addDays(d, 1)) { if (kcNoShop(d)) ns++; var t = S.tasks.filter(function (x) { return x.id === kcTid(d) && !x.del; })[0]; if (!t) continue; TXTD.innerHTML = t.body || ""; var lis = TXTD.querySelectorAll("ul.todo > li"); tot += lis.length; dn += [].filter.call(lis, function (l) { return l.getAttribute("data-checked") === "1"; }).length; n++; }
+    return { sum: kcSum(a, b), cnt: live(S.kchk || []).filter(function (x) { return !x.none && x.d >= a && x.d < b; }).length, ns: ns, waste: live(S.kwaste || []).filter(function (x) { return x.d >= a && x.d < b; }).length, tot: tot, dn: dn };
+  }
+  function kcWeekHTML(mon) {
+    var s = kcWeekStat(mon), p = kcWeekStat(addDays(mon, -7)), tile = function (t1, v, sub) { return '<div class="butile"><small>' + t1 + "</small><span>" + v + "</span>" + (sub ? '<small class="muted">' + sub + "</small>" : "") + "</div>"; };
+    var diff = p.sum ? s.sum - p.sum : null;
+    return '<div class="chsum"><b>🧾 Неделя ' + esc(buWName(mon)) + '</b><div class="butiles">' + tile("На еду", buRub(s.sum), s.cnt + " " + plural(s.cnt, ["чек", "чека", "чеков"]) + (diff !== null ? ' · <span class="' + (diff > 0 ? "bad" : "ok") + '">' + (diff > 0 ? "+" : "−") + buRub(Math.abs(diff)).replace("−", "") + "</span> к прошлой" : "")) + tile("Дней без магазина", s.ns + " из 7") + tile("Выброшено", s.waste, p.waste || s.waste ? "неделей раньше " + p.waste : "") + (s.tot ? tile("Заданий челленджа", Math.round(s.dn / s.tot * 100) + "%", s.dn + " из " + s.tot) : "") + "</div></div>";
+  }
+
+  /* --- экран «Кухня» --- */
+  var KTAB = LS.get("zd-ktab") || "chal", KCVIEW = 0, KCINTRO = "";
+  function vKitchen() {
+    foodSeed(); kpMigrate();
+    var h = '<div class="crumbs"><a href="#menu">Меню</a> /</div>' + head("🍳 Кухня", "Кладовая продуктов дома, чеки и челлендж «Готовлю из того, что есть»: от «что есть» — к меню и списку покупок.");
+    h += '<div class="htabs butabs">' + [["chal", kcOpt().on ? "🍳 Челлендж" : "Челлендж"], ["pan", "Кладовая · " + pantry().filter(function (x) { return x.st > 0; }).length], ["chk", "Чеки и выброшенное"]].map(function (t) { return '<button type="button" class="tb' + (KTAB === t[0] ? " on" : "") + '" data-a="ktab" data-x="' + t[0] + '">' + t[1] + "</button>"; }).join("") + "</div>";
+    return h + (KTAB === "pan" ? kpHTML() : KTAB === "chk" ? kcChkHTML() : kcHTML());
+  }
+  function kpHTML() {
+    var l = pantry(), soon = l.filter(function (x) { var d = kpLeft(x); return x.st > 0 && d !== null && d <= 2; }), buy = kpBuy();
+    var h = '<div class="butiles"><div class="butile"><small>Есть дома</small><span>' + l.filter(function (x) { return x.st === 2; }).length + '</span><small class="muted">из ' + l.length + ' в кладовой</small></div><div class="butile"><small>Мало и нет</small><span class="' + (buy.length ? "warn" : "ok") + '">' + buy.length + '</span><small class="muted">попадут в список покупок</small></div><div class="butile"><small>Скоро испортится</small><span class="' + (soon.length ? "bad" : "ok") + '">' + soon.length + '</span><small class="muted">≤ 2 дней</small></div></div>';
+    if (soon.length) h += '<p class="warnc">⏳ Съесть первым: ' + esc(soon.map(function (x) { return x.n + " (" + rhLeftTxt(kpLeft(x)) + ")"; }).join(", ")) + ' — <a href="#rhave">что из этого приготовить</a></p>';
+    h += '<div class="r kpbar"><a class="btn sm" href="#rhave">🍳 Что приготовить из того, что есть</a>' + (buy.length ? '<button type="button" class="btn sm" data-a="kpcopy">📋 Скопировать «купить» (' + buy.length + ")</button>" : "") + '</div><datalist id="kpdl">' + prods().filter(function (pp) { return !pp.hide; }).map(function (pp) { return '<option value="' + esc(pp.n) + '">'; }).join("") + "</datalist>";
+    h += '<p class="muted" style="margin:6px 0 0">Есть — продукт дома; мало — пора докупить; нет — закончился. «Мало» и «нет» попадают в списки покупок меню, «есть» — отмечается в них как «уже дома». ⏳ — срок годности.</p>';
+    KPL.forEach(function (pl) {
+      var g = l.filter(function (x) { return x.pl === pl[0]; }).sort(function (a, b) { var da = kpLeft(a), db = kpLeft(b); return (b.st > 0) - (a.st > 0) || (da === null ? 999 : da) - (db === null ? 999 : db) || (a.n < b.n ? -1 : 1); });
+      h += '<div class="card kpgrp"><div class="kph"><b>' + pl[1] + '</b><span class="muted">' + g.filter(function (x) { return x.st > 0; }).length + " есть" + (g.some(function (x) { return x.st < 2; }) ? " · " + g.filter(function (x) { return x.st < 2; }).length + " купить" : "") + "</span></div>";
+      h += g.map(function (x) {
+        var d = kpLeft(x);
+        return '<div class="kpr' + (x.st === 0 ? " kpoff" : "") + '"><span class="kpn">' + esc(x.n) + (d !== null && x.st > 0 ? ' <small class="' + (d <= 2 ? "bad" : "muted") + '">' + rhLeftTxt(d) + "</small>" : "") + '</span><span class="seg kpst">' + KST.map(function (s) { return '<button type="button" data-a="kpst" data-id="' + x.id + '" data-v="' + s[0] + '" class="' + (x.st === s[0] ? "on v" + s[0] : "") + '">' + s[1] + "</button>"; }).join("") + '</span><button type="button" class="ibtn" data-a="kpexp" data-id="' + x.id + '" title="Срок годности">⏳</button><button type="button" class="ibtn" data-a="kpmv" data-id="' + x.id + '" title="Другое место">↹</button><button type="button" class="ibtn" data-a="kpdel" data-id="' + x.id + '" title="Удалить из кладовой">🗑</button></div>';
+      }).join("");
+      h += '<div class="hadd kpadd"><span>＋</span><input type="text" class="inp" id="kp' + pl[0] + 'new" data-kpnew="' + pl[0] + '" list="kpdl" placeholder="Продукт — Enter" aria-label="Новый продукт: ' + esc(pl[1]) + '"></div></div>';
+    });
+    return h;
+  }
+  function kcChkHTML() {
+    var mon = monday(today0()), h = kcWeekHTML(mon) + kcWeekHTML(addDays(mon, -7));
+    var ns = kcNoShop(today0());
+    h += '<div class="card kcadd"><div class="bulab">Чек из магазина</div><div class="r"><input class="inp" id="kcamtnew" placeholder="Сумма, ₽" inputmode="decimal" style="width:120px"><input class="inp" id="kcnotenew" placeholder="Где или что (необязательно)" style="flex:1;min-width:160px"><button type="button" class="btn sm pri" data-a="kcadd">＋ Записать чек</button><button type="button" class="btn sm' + (ns ? " on" : "") + '" data-a="kcns" aria-pressed="' + ns + '">' + (ns ? "✓ Сегодня без магазина" : "Сегодня без магазина") + "</button></div>";
+    var last = live(S.kchk || []).filter(function (x) { return !x.none; }).sort(function (a, b) { return b.d - a.d; }).slice(0, 12);
+    h += last.length ? '<div class="kclist">' + last.map(function (x) { return '<div class="kcr"><span class="muted">' + esc(new Date(x.d).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", weekday: "short" })) + "</span><b>" + buRub(+x.sum || 0) + "</b><span>" + esc(x.n || "") + '</span><button type="button" class="ibtn" data-a="kcdel" data-id="' + x.id + '" title="Удалить">🗑</button></div>'; }).join("") + "</div>" : '<p class="muted" style="margin:0">Чеков пока нет. Записывайте сумму после каждого похода в магазин — через неделю будет видно, сколько уходит на еду.</p>';
+    h += "</div>";
+    var wl = live(S.kwaste || []).sort(function (a, b) { return b.d - a.d; }).slice(0, 15);
+    h += '<div class="card kcadd"><div class="bulab">Выброшенное</div><div class="hadd" style="padding-left:0"><span>🗑</span><input type="text" class="inp" id="kwnew" placeholder="Что выбросили: «полпачки творога» — Enter" aria-label="Выброшенный продукт"></div>' + (wl.length ? '<div class="kclist">' + wl.map(function (x) { return '<div class="kcr"><span class="muted">' + esc(new Date(x.d).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" })) + "</span><span>" + esc(x.n) + '</span><span class="seg kwhy">' + KWHY.map(function (y) { return '<button type="button" data-a="kwhy" data-id="' + x.id + '" data-v="' + y[0] + '" class="' + (x.why === y[0] ? "on" : "") + '">' + y[1] + "</button>"; }).join("") + '</span><button type="button" class="ibtn" data-a="kwdel" data-id="' + x.id + '" title="Удалить">✕</button></div>'; }).join("") + "</div>" : '<p class="muted" style="margin:0">Пусто — и это хорошо.</p>');
+    var why = {}; live(S.kwaste || []).forEach(function (x) { if (x.why) why[x.why] = (why[x.why] || 0) + 1; });
+    if (Object.keys(why).length) h += '<p class="muted" style="margin:0">Чаще всего: ' + KWHY.filter(function (y) { return why[y[0]]; }).sort(function (a, b) { return why[b[0]] - why[a[0]]; }).map(function (y) { return y[1] + " — " + why[y[0]]; }).join(", ") + "</p>";
+    return h + "</div>";
+  }
+  function kcHTML() {
+    var o = kcOpt(), h = "";
+    if (!o.on) {
+      var m = monday(addDays(today0(), 7));
+      return '<div class="card chstart"><h3 style="margin:0">🍳 Челлендж «Готовлю из того, что есть»</h3><p class="muted" style="margin:0">8 недель, по одной новой привычке в неделю: смотрю, что есть → готовлю из запасов → меню на 3 дня → покупаю по списку → меню на неделю → заготовки → ничего не выбрасываю → система. В будни — до 15 минут, в воскресенье — «кухонный час» на 30–40 минут, заготовки в 6-ю неделю — до часа. Чеки записываем с первого дня — к концу будет видно, сколько уходит на еду.</p>' +
+        '<div class="r"><span class="muted">Старт</span><input type="date" class="inp" id="kcstartd" value="' + iv("kcstartd", dKey(m)) + '"><button type="button" class="btn sm pri" data-a="kcstart">Начать челлендж</button><button type="button" class="btn sm" data-a="kcstart" data-x="today">Начать сегодня</button><a class="btn sm" href="#help-food">📖 Справка</a></div><p class="muted" style="margin:0">Удобнее с понедельника. До старта можно заполнить «Кладовую» — первая неделя пройдёт быстрее.</p></div>';
+    }
+    var d0 = addDays(today0(), KCVIEW), c = kcItems(d0), day = c && c.day;
+    h += '<div class="r chnav"><button type="button" class="btn sm" data-a="kcday" data-x="-1">‹</button><b>' + esc(new Date(d0).toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" })) + '</b><button type="button" class="btn sm" data-a="kcday" data-x="1">›</button>' + (KCVIEW ? '<button type="button" class="btn sm" data-a="kcday" data-x="0">Сегодня</button>' : "") + '<span class="muted chstop"><a href="#" data-a="kcstop">остановить челлендж</a></span></div>';
+    if (!c) return h + '<p class="muted">' + (d0 < sod(o.start) ? "Челлендж начнётся " + esc(new Date(o.start).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })) + "." : "Челлендж завершён.") + "</p>";
+    var pct = Math.min(100, Math.round(day.n / 56 * 100)), intro = day.post ? ["Система", "Челлендж пройден. Остаются привычки: чек или «без магазина», ужин по плану, а по воскресеньям — «кухонный час»."] : KCW[day.wk];
+    h += '<div class="card chday"><div class="chhd"><b>🍳 День ' + day.n + (day.post ? "" : " из 56") + '</b><span class="muted">' + (day.post ? "после челленджа" : "неделя " + day.wk + " из 8") + " · " + esc(intro[0]) + "</span></div>" + (day.post ? "" : '<div class="chprog"><i style="width:' + pct + '%"></i></div>');
+    if (day.wd === 1 || day.n === 1 || KCINTRO === String(day.wk)) h += '<div class="chintro"><b>Неделя ' + day.wk + ": " + esc(intro[0]) + "</b><span>" + esc(intro[1]) + "</span></div>";
+    else h += '<a href="#" class="chintrol muted" data-a="kcintro" data-x="' + day.wk + '">что на этой неделе?</a>';
+    var ck = cChecked(S.tasks.filter(function (x) { return x.id === kcTid(d0); })[0]), wm = weekMenuFor(d0) || weekMenuFor(addDays(d0, 1));
+    var row = function (x) {
+      var a = kcAuto(x, d0), on = a === null ? !!ck[x[0]] : a, ln = { p: ["кладовая", "cho"], m: ["меню", "chc"], b: ["покупки", "fcs"], c: ["готовка", "chd"], w: ["без отходов", "fcdl"] }[x[2]] || ["", ""], k = x[4] || "";
+      var act = k.indexOf("pan:") === 0 || k === "exp" || k === "pupd" ? '<button type="button" class="btn sm" data-a="ktab" data-x="pan">Открыть кладовую</button>' : k === "rh" ? '<a class="btn sm" href="#rhave">Что приготовить</a>' : k === "menu3" || k === "menu7" ? (wm ? '<a class="btn sm" href="#menu-' + wm.id + '">Открыть меню</a>' : '<a class="btn sm" href="#menunew">Новое меню</a>') : k === "shop" || k === "stap" ? (wm ? '<a class="btn sm" href="#shop-' + wm.id + '">Список покупок</a>' : '<a class="btn sm" href="#menu">К меню</a>') : k === "ns" ? '<button type="button" class="btn sm" data-a="kcns">' + (kcNoShop(d0) ? "✓ без магазина" : "Сегодня без магазина") + "</button>" : k === "chk" ? '<button type="button" class="btn sm" data-a="ktab" data-x="chk">Записать чек</button>' + (kcNoShop(d0) ? "" : '<button type="button" class="btn sm" data-a="kcns">Без магазина</button>') : k === "rit" && !kcOpt().rit ? '<button type="button" class="btn sm pri" data-a="kcrit">Поставить</button>' : k === "wsum" ? '<button type="button" class="btn sm" data-a="ktab" data-x="chk">Выброшенное</button>' : /^Выбросили/.test(x[0]) ? '<button type="button" class="btn sm" data-a="ktab" data-x="chk">Записать</button>' : "";
+      return '<div class="chit' + (on ? " dn" : "") + '"><button type="button" class="ck chck" data-a="kcchk" data-t="' + esc(x[0]) + '" aria-label="' + (on ? "Вернуть" : "Сделано") + '"' + (a !== null ? ' disabled title="Отметится само"' : "") + '></button><span class="chtt">' + esc(x[0]) + "</span>" + (ln[0] ? '<span class="chln ' + ln[1] + '">' + ln[0] + (x[1] ? " · " + x[1] + " мин" : "") + "</span>" : "") + '<span class="chh">' + esc(x[3]) + (act ? " " + act : "") + "</span></div>";
+    };
+    var mins = c.it.reduce(function (s, x) { return s + (x[1] || 0); }, 0);
+    if (c.it.length) h += '<div class="chsub">' + (day.sun ? "Кухонный час" : "Задание дня") + (mins ? " · " + mins + " мин" : "") + "</div>" + c.it.map(row).join("");
+    h += '<div class="chsub">Привычки — каждый день</div>' + c.hab.map(row).join("");
+    if (day.sun) h += kcWeekHTML(monday(d0));
+    var soon = pantry().filter(function (x) { var dd = kpLeft(x); return x.st > 0 && dd !== null && dd <= 2; });
+    if (soon.length) h += '<p class="warnc" style="margin:8px 0 0">⏳ Съесть первым: ' + esc(soon.map(function (x) { return x.n; }).join(", ")) + "</p>";
+    return h + "</div>";
+  }
+  function kcAct(a, el) {
+    var id = el.dataset.id;
+    switch (a) {
+      case "ktab": KTAB = el.dataset.x; LS.set("zd-ktab", KTAB); if (V !== "kitchen") go("kitchen"); else render(); return true;
+      case "kcgo": KTAB = "chal"; LS.set("zd-ktab", "chal"); go("kitchen"); return true;
+      case "kcstart": var sd = el.dataset.x === "today" ? dKey(today0()) : ($("kcstartd") || {}).value; delete INPV.kcstartd; if (!sd) { toast("Выберите дату старта"); return true; } kcSet("start", new Date(sd + "T00:00").getTime()); kcSet("on", true); KCVIEW = 0; kcAutoRun(); render(); toast("Челлендж начат — задание дня появится в «Сегодня»"); return true;
+      case "kcstop": kcSet("on", false); var tt = S.tasks.filter(function (x) { return x.id === kcTid(today0()) && !x.done && !x.del; })[0]; if (tt) { tt.del = 1; tt.delAt = Date.now(); touch(tt); save(); } render(); toast("Челлендж остановлен. Кладовая, чеки и выброшенное сохранены"); return true;
+      case "kcday": KCVIEW = el.dataset.x === "0" ? 0 : KCVIEW + (+el.dataset.x || 0); render(); return true;
+      case "kcintro": KCINTRO = el.dataset.x; render(); return true;
+      case "kcchk": if (KCVIEW > 0) { toast("Это задание будущего дня"); return true; } kcToggle(el.dataset.t, addDays(today0(), KCVIEW)); return true;
+      case "kcrit": var sun = today0(); while (new Date(sun).getDay() !== 0) sun = addDays(sun, 1); var t2 = newTaskFrom("🍳 Кухонный час · 30 мин", { day: sun }); t2.at = sun; t2.allday = true; t2.rem = false; t2.tags = []; t2.rep = "weekly"; t2.body = '<ul class="todo"><li>Кладовая: есть, мало или нет; сроки</li><li>Что съесть первым</li><li>Меню на неделю — сначала из запасов</li><li>Список покупок по меню</li><li>Чеки недели: сколько ушло на еду</li></ul><p><a href="#kitchen">Кухня</a></p>'; touch(t2); kcSet("rit", t2.id); kcSync(today0()); save(); render(); toast("«Кухонный час» поставлен на каждое воскресенье"); return true;
+      case "kpst": var p = pantry().filter(function (x) { return x.id === id; })[0]; if (p) { p.st = +el.dataset.v; p.at = Date.now(); touch(p); save(); render(); } return true;
+      case "kpdel": var p2 = pantry().filter(function (x) { return x.id === id; })[0]; if (p2) { p2.del = 1; p2.delAt = Date.now(); touch(p2); save(); render(); toastUndo("«" + p2.n + "» удалён из кладовой", function () { delete p2.del; delete p2.delAt; touch(p2); }); } return true;
+      case "kpexp": var rc = el.getBoundingClientRect(); ctxShow(rc.left, rc.bottom + 4, [[0, "Срок — сегодня"], [1, "Завтра"], [2, "Через 2 дня"], [3, "Через 3 дня"], [5, "Через 5 дней"], [7, "Через неделю"], [14, "Через 2 недели"], [30, "Через месяц"], [-1, "Без срока"]].map(function (x2) { return { c: String(x2[0]), i: "", l: x2[1] }; }), { k: "kpexp", id: id }); return true;
+      case "kpmv": var rc2 = el.getBoundingClientRect(), cur = (pantry().filter(function (x) { return x.id === id; })[0] || {}).pl; ctxShow(rc2.left, rc2.bottom + 4, KPL.map(function (x2) { return { c: x2[0], i: cur === x2[0] ? "✓" : "", l: x2[1] }; }), { k: "kpmv", id: id }); return true;
+      case "kpcopy": var txt = kpBuy().map(function (x) { return "• " + x.n + (x.st === 1 ? " (мало)" : ""); }).join("\n"); if (navigator.clipboard) navigator.clipboard.writeText("Купить:\n" + txt).then(function () { toast("Список скопирован"); }, function () { toast("Не удалось скопировать"); }); return true;
+      case "kcadd": var sm = svAmt(($("kcamtnew") || {}).value); if (!sm) { toast("Впишите сумму чека"); return true; } (S.kchk = S.kchk || []).push(touch({ id: uid(), d: Date.now(), sum: sm, n: String(($("kcnotenew") || {}).value || "").trim().slice(0, 80) })); var ia = $("kcamtnew"), ib = $("kcnotenew"); if (ia) ia.value = ""; if (ib) ib.value = ""; kcSync(today0()); save(); render(); toast("Чек записан: " + buRub(sm)); return true;
+      case "kcns": var d0 = addDays(today0(), KTAB === "chal" ? Math.min(0, KCVIEW) : 0), nid = "kn:" + dKey(d0), ex = live(S.kchk || []).filter(function (x) { return x.id === nid; })[0]; if (ex) { ex.del = 1; ex.delAt = Date.now(); touch(ex); } else { var old = (S.kchk || []).filter(function (x) { return x.id === nid; })[0]; if (old) { delete old.del; delete old.delAt; touch(old); } else (S.kchk = S.kchk || []).push(touch({ id: nid, d: d0, none: 1 })); } kcSync(d0); save(); render(); return true;
+      case "kcdel": var r = live(S.kchk || []).filter(function (x) { return x.id === id; })[0]; if (r) { r.del = 1; r.delAt = Date.now(); touch(r); kcSync(sod(r.d)); save(); render(); toastUndo("Чек удалён", function () { delete r.del; delete r.delAt; touch(r); }); } return true;
+      case "kwhy": var wx = live(S.kwaste || []).filter(function (x) { return x.id === id; })[0]; if (wx) { wx.why = wx.why === el.dataset.v ? "" : el.dataset.v; touch(wx); save(); render(); } return true;
+      case "kwdel": var wy = live(S.kwaste || []).filter(function (x) { return x.id === id; })[0]; if (wy) { wy.del = 1; wy.delAt = Date.now(); touch(wy); save(); render(); } return true;
+    }
+    return false;
+  }
+  document.addEventListener("keydown", function (e) {
+    var t = e.target; if (e.key !== "Enter" || !t || !t.dataset) return;
+    if (t.dataset.kpnew !== undefined) {
+      e.preventDefault(); var v = t.value.trim(); if (!v) return; var pl = t.dataset.kpnew, was = kpFind(v);
+      kpSet(v, 2, was ? null : pl); t.value = ""; save(); render(); if (was && was.pl !== pl) toast("«" + was.n + "» уже есть: " + (KPL.filter(function (x) { return x[0] === was.pl; })[0] || ["", ""])[1] + " — отмечено «есть»");
+      setTimeout(function () { var i = $("kp" + pl + "new"); if (i) i.focus(); }, 30); return;
+    }
+    if (t.id === "kwnew") { e.preventDefault(); var w = t.value.trim(); if (!w) return; (S.kwaste = S.kwaste || []).push(touch({ id: uid(), d: Date.now(), n: w.slice(0, 80), why: "" })); var px = kpFind(w); if (px && px.st > 0) { px.st = 0; px.at = Date.now(); touch(px); } t.value = ""; save(); render(); setTimeout(function () { var i = $("kwnew"); if (i) i.focus(); }, 30); return; }
+    if (t.id === "kcamtnew" || t.id === "kcnotenew") { e.preventDefault(); var b = document.querySelector('[data-a="kcadd"]'); if (b) b.click(); }
+  });
+  function kpShopHTML(N) {
+    var nd = {}; N.list.forEach(function (e) { nd[fNorm(e.p.n)] = 1; }); var l = kpBuy().filter(function (x) { return !nd[fNorm(x.n)]; }); if (!l.length) return "";
+    return '<div class="card stpl"><b>🧺 Из кладовой: мало и нет</b>' + l.map(function (x) { return '<div class="stpr"><span class="stpn">' + esc(x.n) + (x.st === 1 ? ' <small class="muted">мало</small>' : "") + '</span><button type="button" class="btn sm" data-a="kpst" data-id="' + x.id + '" data-v="2">✓ Купила</button></div>'; }).join("") + '<a class="muted" href="#kitchen" data-a="ktab" data-x="pan">Открыть кладовую</a></div>';
+  }
+  function kpShopList(N) { var nd = {}; N.list.forEach(function (e) { nd[fNorm(e.p.n)] = 1; }); return kpBuy().filter(function (x) { return !nd[fNorm(x.n)]; }).map(function (x) { return x.n; }); }
+
   function chalsWidget() {
     var h = "", t0 = today0(), any = false;
     if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
     if (fcOpt().on) { var f = fcItems(t0), s2 = chalTaskStat(fcTid(t0)); any = true; h += '<button type="button" class="chw" data-a="fcgo"><b>💰 Деньги</b><span>' + (f ? "день " + f.day.n + (s2 ? " · " + s2.d + " из " + s2.n : "") : "сегодня заданий нет") + "</span>" + (s2 && s2.n ? '<i style="--p:' + Math.round(s2.d / s2.n * 100) + '%"></i>' : "") + "</button>"; }
+    if (kcOpt().on) { var kc = kcItems(t0), s3 = chalTaskStat(kcTid(t0)); any = true; h += '<button type="button" class="chw" data-a="kcgo"><b>🍳 Кухня</b><span>' + (kc ? "день " + kc.day.n + (s3 ? " · " + s3.d + " из " + s3.n : "") : "сегодня заданий нет") + "</span>" + (s3 && s3.n ? '<i style="--p:' + Math.round(s3.d / s3.n * 100) + '%"></i>' : "") + "</button>"; }
     if (buPers().length) { var w = buWeek(monday(t0)); if (!w.miss.length && w.dl) h += '<div class="chwd"><small class="muted">можно в день до воскресенья</small><b class="' + (w.tot.perDay < 0 ? "bad" : "ok") + '">' + buRub(Math.max(0, w.tot.perDay)) + "</b></div>"; }
-    return any || h ? '<div class="chws">' + h + "</div>" : '<p class="wempty">Челленджи не запущены — «План уборки» → «Челлендж» и «Бюджет» → «Челлендж»</p>';
+    return any || h ? '<div class="chws">' + h + "</div>" : '<p class="wempty">Челленджи не запущены — «План уборки» → «Челлендж», «Бюджет» → «Челлендж», «Меню» → «Кухня»</p>';
   }
 
   /* ---------- Волна 3: фото «до/после» мест (только на этом устройстве), продажи из расхламления, меню и бюджет, сроки продуктов, постоянные покупки ---------- */
@@ -8384,7 +8672,7 @@ CREATE TABLE inbox (
     return '<span class="mtot mbud' + (cost > c.lim ? " over" : "") + '">Бюджет «Траты» на эту неделю: <b>' + buRub(c.lim) + "</b>" + (Math.abs(c.lim - c.norm) >= 50 ? ' <span class="muted">(обычно ' + buRub(c.norm) + ")</span>" : "") + " · меню ≈ " + pct + "%" + (cost > c.lim ? " — дороже лимита, замените пару блюд" : pct > 70 ? " — на остальное мало" : "") + "</span>";
   }
   /* --- сроки продуктов в «Из того, что есть» --- */
-  function rhExp() { try { var o = JSON.parse(LS.get("zd-rhexp") || "{}"); return o && typeof o === "object" ? o : {}; } catch (e) { return {}; } }
+  function rhExp() { var o = {}; try { o = JSON.parse(LS.get("zd-rhexp") || "{}") || {}; } catch (e) { o = {}; } pantry().forEach(function (x) { if (x.exp && x.st > 0) o[x.n] = x.exp; }); return o; }
   function rhLeft(n) { var e = rhExp()[n]; if (!e) return null; return Math.round((new Date(e + "T00:00").getTime() - today0()) / DAY); }
   function rhLeftTxt(d) { return d < 0 ? "срок вышел" : d === 0 ? "до сегодня" : d === 1 ? "до завтра" : "ещё " + d + " " + plural(d, ["день", "дня", "дней"]); }
   /* --- постоянные покупки: молоко, хлеб, яйца… — сами попадают в список, когда подходит срок --- */
@@ -9033,6 +9321,17 @@ CREATE TABLE inbox (
       "<b>🔄 Обновить цены</b> — свежие средние цены Росстата (обновляются каждую неделю): около 40 продуктов берутся из таблицы (филе и треска — оценкой по ценам кур и рыбы), остальные пересчитываются по общему изменению цен. Сначала показывается, что изменится, — «Применить» или «Отмена». «Мой регион дороже средних по России на … %» — поправка для вашего города (например, для Москвы +15–20 %). Через ваш сервер всё происходит одной кнопкой; без сервера — скачайте файл Росстата по ссылке и выберите его.",
       "<b>🔗 Рецепт по ссылке</b> — «Рецепты» → «🔗 По ссылке»: вставьте ссылку на страницу рецепта (eda.ru, povarenok.ru, 1000.menu и др.) — название, порции, время, ингредиенты и шаги загрузятся, категория и метки (вегетарианское, рыба, мясо) определятся сами. Ссылки загружаются через ваш сервер. Без сервера: кнопка-закладка «🍳 В «Задачи»» для браузера на компьютере или «Вставьте текст рецепта» — скопируйте со страницы ингредиенты и шаги.",
       "В «Сегодня» над задачами — строка «🍽 Завтрак … · Обед … · Ужин …» из меню этой недели."]));
+    h += sec("kitchen", "Кухня: кладовая, чеки и челлендж «Готовлю из того, что есть»", ul([
+      "<b>«Меню» → «🧺 Кухня»</b> — три вкладки: «Челлендж», «Кладовая», «Чеки и выброшенное».",
+      "<b>Кладовая</b> — продукты дома по местам: холодильник, морозилка, крупы и бакалея, консервы и соусы, овощи и фрукты, специи и чай. У каждого продукта — <b>есть / мало / нет</b> и срок ⏳ (по желанию). Новый продукт — в строке «＋» своего места, Enter; подсказки — из справочника продуктов.",
+      "Кладовая общая для всех ваших устройств. <b>«Что приготовить из того, что есть»</b> берёт продукты отсюда (прежний список этого устройства перенесётся сам), а сроки поднимают наверх блюда с тем, что скоро испортится.",
+      "<b>Списки покупок меню</b>: то, что в кладовой «есть», уже отмечено как «есть дома» (отметку можно снять); «мало» и «нет» — отдельной группой «Из кладовой». «✓ Купила» — продукт снова «есть».",
+      "<b>Чеки</b> — сумма после каждого похода в магазин (или «Сегодня без магазина», если не ходили). Итоги недели: сколько ушло на еду, разница с прошлой неделей, дни без магазина, выброшенное.",
+      "<b>Выброшенное</b> — одной строкой, Enter; причина — кнопкой: забыла, купила лишнее, испортилось, не понравилось. Продукт в кладовой сам станет «нет».",
+      "<b>Челлендж на 8 недель</b>: смотрю, что есть → готовлю из запасов → меню на 3 дня → покупаю по списку → меню на неделю → заготовки → ничего не выбрасываю → система. В будни — до 15 минут, в воскресенье — «кухонный час», заготовки в 6-ю неделю — до часа.",
+      "Задача дня <b>«🍳 Кухня · день N»</b> — в «Сегодня», с чек-листом. Многие пункты отмечаются сами: место кладовой заполнено, чек записан, меню на 3 или 7 дней составлено, постоянные покупки заведены.",
+      "В 8-ю неделю — кнопка «Поставить» для повторяющейся задачи «🍳 Кухонный час» по воскресеньям. Кладовая, чеки и выброшенное остаются и после челленджа."
+    ]));
     h += sec("report", "Отчёт за неделю или месяц", ul([
       "«Статистика» → <b>«📄 Отчёт»</b> или Ctrl+K → «Отчёт за неделю» / «Отчёт за месяц».",
       "Вверху — «Неделя / Месяц» и стрелки ‹ › к прошлым периодам.",
@@ -9514,7 +9813,7 @@ CREATE TABLE inbox (
   }
   var RTIMES = [], RWARN = false, RHOLD = null;
   // поля без своего хранилища (дата старта челленджа, дата пополнения, списки обновления бюджета): выбранное значение переживает перерисовку
-  var INPV = {}, INPVID = { fcstartd: 1, chstartd: 1, svdate: 1, bu1: 1, bu2a: 1, bu2b: 1, bu3: 1 };
+  var INPV = {}, INPVID = { kcstartd: 1, fcstartd: 1, chstartd: 1, svdate: 1, bu1: 1, bu2a: 1, bu2b: 1, bu3: 1 };
   function iv(id, def) { return INPV[id] !== undefined && INPV[id] !== "" ? INPV[id] : def; }
   ["input", "change"].forEach(function (ev) { document.addEventListener(ev, function (e) { var t = e.target; if (t && t.id && INPVID[t.id]) INPV[t.id] = t.value; }, true); });
   // выбрали в списке (или цвет в палитре) — поле отпускает фокус до обработчиков, и страница обновляется сразу
@@ -9528,6 +9827,7 @@ CREATE TABLE inbox (
     try { cleanAuto(); } catch (er) { /* план уборки не мешает */ }
     try { chAuto(); } catch (er) { /* челлендж не мешает */ }
     try { fcAutoRun(); } catch (er) { /* финансовый челлендж не мешает */ }
+    try { kcAutoRun(); } catch (er) { /* кухонный челлендж не мешает */ }
     try { if (SETGATE && bpaySync()) save(); } catch (er) { /* напоминания о платежах не мешают */ }
     try { applyLook(); } catch (er) { /* оформление не мешает работе */ }
     // пока пишете в редакторе на странице (текст заметки, описание проекта) — страницу вокруг не перерисовываем, только левую панель; остальное обновится, когда выйдете из редактора
@@ -9562,7 +9862,7 @@ CREATE TABLE inbox (
   document.addEventListener("mousedown", function (e) { if (!POP || !e.target.closest) return; if (e.target.closest(".pop, [data-a=pop], #ctx, #ctx2")) return; POP = null; setTimeout(render, 0); });
   // где какая страница справки
   function hq(id, title) { return '<a class="hq" href="#help-' + id + '" title="' + esc(title || "Справка по этому разделу") + '" aria-label="Справка">?</a>'; }
-  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", tarch: "tarch", report: "report", clean: "clean", budget: "budget", menu: "food", menunew: "food", recipes: "food", recipe: "food", rhave: "food", prods: "food", shop: "food", rimp: "food", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
+  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", tarch: "tarch", report: "report", clean: "clean", budget: "budget", menu: "food", menunew: "food", recipes: "food", recipe: "food", rhave: "food", kitchen: "kitchen", prods: "food", shop: "food", rimp: "food", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
   var SHELP = { "s-lists": "mini", "s-review": "focus", "s-flags": "flags", "s-srv": "srv", "s-digest": "digest", "s-ai": "ai", "s-sync": "sync", "s-backup": "backup", "s-diag": "diag", "s-wipe": "backup", "s-test": "backup" };
   function helpMarks() {
     var v = $("view");
@@ -9580,7 +9880,7 @@ CREATE TABLE inbox (
     try { ctxShowBtn(); if (NOW) renderNow(); } catch (er) { /* не мешает */ }
     $("side").innerHTML = sideHTML();
     try { $("bnav").innerHTML = bnavHTML(); document.documentElement.classList.toggle("nohq", !!S.opt.noHq); } catch (er) { /* не мешает */ }
-    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, rhave: vRhave, clean: vClean, budget: vBudget, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
+    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, rhave: vRhave, kitchen: vKitchen, clean: vClean, budget: vBudget, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
     var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
     $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "templates");
     try { ptTouch(location.hash.slice(1) || "today"); } catch (er) { /* вкладки не мешают */ }
@@ -10180,6 +10480,7 @@ CREATE TABLE inbox (
     if (a && chAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && invAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && fcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && kcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -11509,7 +11810,8 @@ CREATE TABLE inbox (
     if (k === "chtime") { if (c === "rem") chSet("rem", !chOpt().rem); else chSet("time", c === "-" ? "" : c); chSync(today0()); save(); render(); if (c === "rem" && chOpt().rem && !SRV.ready()) toast("Напоминания придут, когда настроен Telegram-бот («Настройки» → «Напоминания и Telegram»)"); return; }
     if (k === "svrday" && c === "x") { SVRDIN = id; render(); setTimeout(function () { var i = $("svrdin"); if (i) { i.focus(); i.select(); } }, 40); return; }
     if (k === "svrday") { var sg = goal(id); if (sg && sg.sv) { sg.sv = Object.assign({}, sg.sv, { rday: +c || 0 }); svRemSync(sg); touch(sg); save(); render(); toast(+c ? "Напоминание: каждое " + c + "-е число — задача «🏦 Отложить»" : "Напоминание выключено"); } return; }
-    if (k === "rhexp") { var ex = rhExp(); if (+c < 0) delete ex[id]; else ex[id] = dKey(addDays(today0(), +c)); LS.set("zd-rhexp", JSON.stringify(ex)); render(); return; }
+    if (k === "rhexp" || k === "kpexp") { var kpx = k === "kpexp" ? pantry().filter(function (x) { return x.id === id; })[0] : (kpMigrate(), kpFind(id)) || kpSet(id, 2); if (kpx) { if (+c < 0) delete kpx.exp; else kpx.exp = dKey(addDays(today0(), +c)); kpx.at = Date.now(); touch(kpx); save(); } render(); return; }
+    if (k === "kpmv") { var kpm = pantry().filter(function (x) { return x.id === id; })[0]; if (kpm) { kpm.pl = c; touch(kpm); save(); render(); } return; }
     if (k === "ckzone") { var cq = live(S.chq || []).filter(function (x) { return x.id === id; })[0]; if (cq) { cq.zone = c; touch(cq); save(); render(); } return; }
     if (k === "burcat") { var bg = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bg) { bg.cat = c; touch(bg); save(); render(); } return; }
     if (k === "tbpick") { var tl = tbList(); tl.forEach(function (b) { if (b.id === id) b.cat = c; }); tbSave(TBTAB, tl); render(); return; }
