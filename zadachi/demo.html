@@ -5504,7 +5504,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-129";
+  var APPV = "zd-app-2026-10-16-130";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -5997,7 +5997,12 @@ CREATE TABLE inbox (
     else if (v === "shop") { var ms = menuObj(a); if (!ms) return null; n = "Покупки: " + menuTitle(ms).replace(/^Меню на |^🎉 /, ""); }
     else if (v === "daily") n = h === "daily-review" ? "Итоги дня" : "План дня";
     else if (v === "sprint" && a) n = "Спринт";
-    else n = LISTN[v] || PTNAME[v] || v;
+    else if (v === "nsec") { var ns = nsec(a); if (!ns) return null; n = ns.n || ns.t || "Раздел заметок"; ico = ic("journal"); }
+    else if (v === "ntag") { n = "#" + a; ico = '<span class="pgtem">#</span>'; }
+    else if (v === "task") { var tk = task(a); if (!tk) return null; n = tk.t || "Задача"; }
+    else if (v === "report") n = /^m/.test(a || "") ? "Отчёт за месяц" : "Отчёт за неделю";
+    // служебный адрес во вкладке не показываем: неизвестная страница получает понятное общее имя
+    else n = LISTN[v] || PTNAME[v] || "Страница";
     return { n: n, ico: ico };
   }
   function ptHTML() {
