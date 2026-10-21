@@ -368,6 +368,15 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .bufxr { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap } .bufxr.bad { color: #c94a3a }
 .buchip { font-size: calc(11.5px * var(--fs)); padding: 1px 8px; border-radius: 10px; color: var(--buwarn); background: color-mix(in srgb, var(--buwarn) 14%, transparent) } .buchip.bad { color: #c94a3a; background: color-mix(in srgb, #c94a3a 14%, transparent) }
 .bufxs { display: flex; flex-wrap: wrap; gap: 2px 16px; font-size: calc(12.5px * var(--fs)); color: var(--muted); font-variant-numeric: tabular-nums } .bufxs b { color: var(--fg); font-weight: 500 }
+.burow.buzero { opacity: .5 }
+.bfxbar { margin: -2px 0 10px; gap: 8px; align-items: center; flex-wrap: wrap }
+.bfx { display: grid; gap: 10px; padding: 12px 14px; margin: 0 0 12px } .bfxtw { overflow-x: auto }
+.bfx table { width: 100%; border-collapse: collapse; font-size: calc(13.5px * var(--fs)); font-variant-numeric: tabular-nums }
+.bfx th, .bfx td { padding: 5px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap } .bfx th:first-child, .bfx td:first-child { text-align: left; white-space: normal } .bfx th { font-weight: 500; color: var(--muted); font-size: calc(12px * var(--fs)) }
+.bfx tr.bfxsec td { font-weight: 600; text-align: left; padding-top: 10px }
+.bfxin { width: 110px; text-align: right; padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--fg); font: inherit } .bfxin.bad { border-color: #c94a3a; outline-color: #c94a3a }
+.bfxtot { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: calc(13px * var(--fs)); font-variant-numeric: tabular-nums } .bfxch { margin: 0; padding-left: 18px; display: grid; gap: 3px }
+.bfxwarn { padding: 8px 12px; border-radius: 8px; font-size: calc(13px * var(--fs)); background: color-mix(in srgb, var(--buwarn) 12%, transparent) }
 .bupay { display: flex; gap: 10px; align-items: baseline; padding: 4px 0; border-top: 1px solid var(--line); font-size: calc(13.5px * var(--fs)) } .bupay .bud { width: 48px; flex: none; color: var(--muted); font-size: calc(12px * var(--fs)) } .bupay .bun { flex: 1; min-width: 0 }
 .butbl { overflow-x: auto } .butbl table { width: 100%; border-collapse: collapse; font-size: calc(13px * var(--fs)); font-variant-numeric: tabular-nums } .butbl th, .butbl td { padding: 5px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap } .butbl th:first-child, .butbl td:first-child { text-align: left } .butbl th { font-weight: 500; color: var(--muted); font-size: calc(12px * var(--fs)) } .butbl tr.cur td { background: var(--acc-soft) } .butbl tr.fut td { color: var(--muted) }
 .buregs { padding: 4px 12px } .bureg { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 7px 0 } .bureg + .bureg { border-top: 1px solid var(--line) } .bureg.off { opacity: .5 } .burgn { flex: 1 1 180px; min-width: 0 } .burd { width: 64px } .bura { width: 110px }
@@ -2456,7 +2465,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-125";
+  var APPV = "zd-app-2026-10-16-126";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -6906,6 +6915,7 @@ CREATE TABLE inbox (
       var sheets = [].map.call(xmlDoc(f["xl/workbook.xml"]).getElementsByTagName("sheet"), function (s) { var t = rel[s.getAttribute("r:id")] || ""; return { n: s.getAttribute("name"), p: t.charAt(0) === "/" ? t.slice(1) : "xl/" + t.replace(/^\.\//, "") }; });
       return {
         names: sheets.map(function (s) { return s.n; }),
+        path: function (name) { var sh = sheets.filter(function (s) { return s.n === name; })[0]; return sh ? sh.p : null; },
         grid: function (name) {
           var sh = sheets.filter(function (s) { return s.n === name; })[0]; if (!sh) return Promise.resolve(null);
           return unzip(buf, function (n) { return n === sh.p; }).then(function (g) { return buGrid(g[sh.p], ss); });
@@ -7204,6 +7214,7 @@ CREATE TABLE inbox (
   function buPerHTML() {
     var pid = BUPER || buPid(today0()), P = buPer(pid);
     var h = '<div class="r bunav"><button type="button" class="btn sm" data-a="buper" data-x="-1">‹</button><b>' + esc(buPName(pid)) + '</b><span class="muted">' + new Date(buPRange(pid).from).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + " – " + new Date(buPRange(pid).to).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + '</span><button type="button" class="btn sm" data-a="buper" data-x="1">›</button>' + (BUPER && BUPER !== buPid(today0()) ? '<button type="button" class="btn sm" data-a="buper" data-x="0">Текущий</button>' : "") + "</div>";
+    h += bfxHTML(pid);
     if (!P) return h + '<p class="muted">За этот период данных нет — «⟳ Обновить из файла» → «Один период».</p>';
     var r = buPeriod(P), ep = r.el / r.pd * 100, ip = r.inc.plan - r.exp.plan, ifa = r.inc.fact - r.exp.fact;
     h += '<div class="butiles"><div class="butile"><small>Доходы' + buPct(r.inc.fact, r.inc.plan) + '</small><span>' + buRub(r.inc.fact) + '</span><small class="muted">план ' + buRub(r.inc.plan) + "</small></div>" +
@@ -7217,7 +7228,7 @@ CREATE TABLE inbox (
     }).join("") + '<div class="burow butot"><span>Итого расходы' + buPct(r.exp.fact, r.exp.plan) + '</span>' + buBar(r.exp.fact, r.exp.plan, -1, r.exp.fact > r.exp.plan ? "bad" : "") + '<span class="bunum">' + buRub(r.exp.fact) + " / " + buRub(r.exp.plan) + "</span></div></div>";
     if (r.off.length) h += '<p class="muted">Не входит в расходы: ' + r.off.map(function (x) { return esc(x.c) + " " + buRub(x.fact) + (x.plan ? " из " + buRub(x.plan) : ""); }).join(" · ") + "</p>";
     var inc = P.inc || { plan: {}, fact: {} }, srcs = Object.keys(Object.assign({}, inc.plan, inc.fact));
-    if (srcs.length) h += '<div class="card busec"><div class="bulab">Доходы — факт и план</div>' + srcs.filter(function (s) { return (+inc.plan[s] || 0) || (+inc.fact[s] || 0); }).map(function (s) { var f = +inc.fact[s] || 0, pl = +inc.plan[s] || 0; return '<div class="burow"><span>' + esc(s) + "</span>" + buBar(f, pl, -1, "inc") + '<span class="bunum">' + buRub(f) + " / " + buRub(pl) + "</span></div>"; }).join("") + "</div>";
+    if (srcs.length) h += '<div class="card busec"><div class="bulab">Доходы — факт и план</div>' + srcs.map(function (s) { var f = +inc.fact[s] || 0, pl = +inc.plan[s] || 0; return '<div class="burow' + (f || pl ? "" : " buzero") + '"><span>' + esc(s) + "</span>" + buBar(f, pl, -1, "inc") + '<span class="bunum">' + buRub(f) + " / " + buRub(pl) + "</span></div>"; }).join("") + "</div>";
     var sl2 = soldIn(P.from, P.to + DAY - 1); if (sl2.length) h += '<p class="muted">🧺 Продано вещей из расхламления за период: ' + sl2.length + " на " + buRub(sl2.reduce(function (a2, x) { return a2 + (+x.price || 0); }, 0)) + " — если ещё не внесли, добавьте в 1С как доход «Продажи».</p>";
     // недели периода: лимит, факт, отклонение и накопленное отклонение (гибкие статьи)
     var rows = [], acc = 0;
@@ -7255,6 +7266,7 @@ CREATE TABLE inbox (
       '<div class="wcr"><span>Напоминать о платежах</span><div class="r"><div class="seg"><button type="button" data-a="bupayrem" data-v="1" class="' + ((S.opt.bud || {}).payrem === false ? "" : "on") + '">за 2 дня</button><button type="button" data-a="bupayrem" data-v="0" class="' + ((S.opt.bud || {}).payrem === false ? "on" : "") + '">не напоминать</button></div><span class="muted">по справочнику регулярных платежей: задача «💳 …» за 2 дня, закрывается сама, когда по статье видно оплату</span></div></div></section>';
   }
   function buAct(a, el) {
+    if (bfxAct(a, el)) return true;
     var id = el.dataset.id;
     switch (a) {
       case "butab": BUTAB = el.dataset.x; LS.set("zd-butab", BUTAB); render(); return true;
@@ -7282,6 +7294,241 @@ CREATE TABLE inbox (
     if (ds.bureg === "n") g.n = t.value.trim().slice(0, 80); else if (ds.bureg === "day") g.day = Math.max(1, Math.min(31, Math.round(+t.value || 1))); else g.amt = Math.max(0, Math.round(+String(t.value).replace(/[\s ₽]/g, "").replace(",", ".") || 0));
     touch(g); save();
   });
+  /* ---------- Корректировка плана: новые плановые суммы записываются прямо в файл Excel ----------
+     Расходы — столбец «План» листа месяца, доходы — строка «план» под «Зарплата …». Ячейки с формулами не меняются.
+     Запись — только Chrome/Edge на компьютере (доступ к файлу на запись). Меняются только эти ячейки; результаты формул
+     сбрасываются и книга помечается на пересчёт при открытии — так же, как делает выгрузка из 1С. Копия файла до записи
+     остаётся в браузере, «Вернуть прежний план» записывает прежние числа обратно. */
+  var BFX = null, BFXLAST;
+  function bfxColL(c) { var s = ""; c++; while (c > 0) { var m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = Math.floor((c - 1) / 26); } return s; }
+  function bfxNum(s) { s = String(s == null ? "" : s).replace(/[\s ₽]/g, "").replace(",", "."); if (s === "") return null; var n = +s; return isFinite(n) ? Math.round(n * 100) / 100 : NaN; }
+  function bfxRub(v) { return v === null || v === undefined ? "—" : buRub(v); }
+  // где на листе плановые суммы: расходы (столбец «План») и доходы (строка «план»)
+  function bfxMap(G, name) {
+    var all = Object.keys(G.cells).map(function (k) { var p = k.split(","); return [+p[0], +p[1]]; });
+    var find = function (txt, pred) { txt = buNorm(txt); return all.filter(function (rc) { return buNorm(G.txt(rc[0], rc[1])) === txt && (!pred || pred(rc)); }).sort(function (a, b) { return a[1] - b[1] || a[0] - b[0]; }); };
+    var cell = function (r, c, lab) { var x = G.get(r, c), v = x && (x.v !== null || x.f) ? buNum(G, r, c) : null; return { c: lab, ref: bfxColL(c) + (r + 1), f: !!(x && x.f), v: v === null || isNaN(v) ? null : Math.round(v * 100) / 100 }; };
+    var ph = find("План", function (rc) { for (var r = rc[0] + 1; r < rc[0] + 6; r++) if (buNorm(G.txt(r, rc[1] - 1)) === "траты") return true; return false; })[0];
+    if (!ph) throw new Error("на листе «" + name + "» не нашлась таблица «План» со статьёй «Траты»");
+    var exp = [], inc = [];
+    for (var r = ph[0] + 1; r < ph[0] + 30; r++) { var lb = G.txt(r, ph[1] - 1); if (!lb) { if (exp.length) break; continue; } if (/^остаток|^общий/i.test(lb)) break; exp.push(cell(r, ph[1], lb)); }
+    var zh = find("Зарплата")[0];
+    if (zh) for (var r3 = zh[0] + 1; r3 < zh[0] + 4; r3++) if (buNorm(G.txt(r3, zh[1] - 1)) === "план") {
+      for (var c3 = zh[1]; c3 < zh[1] + 12; c3++) { var h3 = G.txt(zh[0], c3); if (!h3 || /^всего|^к получ/i.test(h3)) break; inc.push(cell(r3, c3, h3)); }
+      break;
+    }
+    return { exp: exp, inc: inc };
+  }
+  function bfxVal(D, x) { var s = D.nv[x.ref]; if (x.f || s === undefined || String(s).trim() === "") return x.v; var n = bfxNum(s); return n === null || isNaN(n) ? x.v : n; }
+  function bfxChanges(D) {
+    if (D.chg) return D.chg;
+    var out = [];
+    D.exp.concat(D.inc).forEach(function (x) { var n = bfxVal(D, x); if (x.f || n === x.v || Math.abs((n || 0) - (x.v || 0)) < 0.005 && (n === null) === (x.v === null)) return; out.push({ ref: x.ref, c: x.c, from: x.v, to: n, inc: D.inc.indexOf(x) >= 0 }); });
+    return out;
+  }
+  function bfxBad(D) { return D.exp.concat(D.inc).filter(function (x) { var s = D.nv[x.ref]; if (x.f || s === undefined || String(s).trim() === "") return false; var n = bfxNum(s); return isNaN(n) || n < 0; }).map(function (x) { return x.c; }); }
+  function bfxTotHTML(D) {
+    var ex = D.exp.filter(function (x) { return buKind(x.c) !== "off"; }), sum = function (l, nw) { return l.reduce(function (a, x) { return a + ((nw ? bfxVal(D, x) : x.v) || 0); }, 0); };
+    var e0 = sum(ex), e1 = sum(ex, 1), i0 = sum(D.inc), i1 = sum(D.inc, 1), arr = function (a, b) { return Math.abs(a - b) < 0.5 ? buRub(a) : buRub(a) + " → <b>" + buRub(b) + "</b>"; };
+    return "<span>Расходы по плану: " + arr(e0, e1) + "</span><span>Доходы по плану: " + arr(i0, i1) + '</span><span>Доход − расход: <span class="' + (i1 - e1 < 0 ? "bad" : "ok") + '">' + arr(i0 - e0, i1 - e1) + "</span></span>";
+  }
+  function bfxHTML(pid) {
+    if (BFXLAST === undefined) { BFXLAST = null; buKV("fixlast").then(function (v) { if (v) { BFXLAST = v; if (V === "budget") render(); } }).catch(function () {}); }
+    if (!BFX || BFX.pid !== pid) {
+      var L = BFXLAST && BFXLAST.pid === pid ? BFXLAST : null;
+      return '<div class="r bfxbar"><button type="button" class="btn sm" data-a="bfxopen">✏️ Корректировка плана</button>' + (L ? '<span class="muted">Последняя: ' + esc(new Date(L.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) + " · " + L.ch.length + " " + plural(L.ch.length, ["статья", "статьи", "статей"]) + '</span><button type="button" class="btn sm" data-a="bfxundo">↶ Вернуть прежний план</button>' : "") + "</div>";
+    }
+    var D = BFX;
+    if (D.busy) return '<div class="card bfx"><p class="muted" style="margin:0">' + (D.step === "write" ? "Записываю в файл…" : "Читаю план из файла…") + "</p></div>";
+    var P = buPer(pid), h = '<div class="card bfx">';
+    if (D.step === "confirm") {
+      var ch = bfxChanges(D);
+      h += "<b>" + (D.undo ? "Вернуть прежний план" : "Проверьте и запишите") + " — лист «" + esc(D.sheet) + "»</b>";
+      h += '<ul class="bfxch">' + ch.map(function (c) { var d = (c.to || 0) - (c.from || 0); return "<li>" + (c.inc ? "доход " : "") + "«" + esc(c.c) + "»: " + bfxRub(c.from) + " → <b>" + bfxRub(c.to) + "</b>" + (c.from !== null && c.to !== null ? ' <small class="muted">(' + (d > 0 ? "+" : "−") + buRub(Math.abs(d)).replace("−", "") + ")</small>" : "") + ' <small class="muted">' + c.ref + "</small></li>"; }).join("") + "</ul>";
+      h += '<div class="bfxwarn">Если файл «' + esc(buOpt().fname || "Финансы") + "» сейчас открыт в Excel или LibreOffice — закройте его без сохранения: иначе при сохранении там эти изменения пропадут. Меняются только эти ячейки; формулы книга пересчитает при открытии. Копия файла до записи останется в браузере.</div>";
+      if (D.err) h += '<p class="bad" style="margin:0">' + esc(D.err) + "</p>";
+      return h + '<div class="r"><button type="button" class="btn sm pri" data-a="bfxwrite">' + (D.undo ? "↶ Вернуть в Excel" : "💾 Записать в Excel") + '</button><button type="button" class="btn sm" data-a="bfxback">' + (D.undo ? "Отмена" : "‹ Назад") + "</button></div></div>";
+    }
+    var row = function (x, inc) {
+      var fact = !P ? null : inc ? +((P.inc || {}).fact || {})[x.c] || 0 : buFact(P, x.c), s = D.nv[x.ref];
+      return '<tr><td>' + esc(x.c) + (inc || buKind(x.c) !== "off" ? "" : ' <small class="muted">не в расходах</small>') + "</td><td>" + bfxRub(fact) + "</td><td>" + bfxRub(x.v) + "</td><td>" +
+        (x.f ? '<small class="muted" title="План посчитан формулой — меняется в самом Excel">формула в Excel</small>' : '<input type="text" inputmode="decimal" class="bfxin' + (s !== undefined && bfxBad({ exp: [x], inc: [], nv: D.nv }).length ? " bad" : "") + '" id="bfx-' + x.ref + '" data-bfx="' + x.ref + '" value="' + esc(s === undefined ? "" : s) + '" placeholder="' + esc(x.v === null ? "" : String(x.v)) + '" aria-label="Новый план: ' + esc(x.c) + '">') + "</td></tr>";
+    };
+    h += "<b>✏️ Корректировка плана — " + esc(buPName(pid)) + '</b><span class="muted">Впишите новые суммы только там, где план меняется; пустое поле — без изменений. Статьи с формулой (например, «Ипотека») меняются в самом Excel.</span>';
+    h += '<div class="bfxtw"><table><thead><tr><th>Статья</th><th>Факт</th><th>План</th><th>Новый план</th></tr></thead><tbody>' +
+      '<tr class="bfxsec"><td colspan="4">Расходы</td></tr>' + D.exp.map(function (x) { return row(x, false); }).join("") +
+      (D.inc.length ? '<tr class="bfxsec"><td colspan="4">Доходы</td></tr>' + D.inc.map(function (x) { return row(x, true); }).join("") : "") + "</tbody></table></div>";
+    var n = bfxChanges(D).length, bad = bfxBad(D).length;
+    h += '<div class="bfxtot" id="bfxtot">' + bfxTotHTML(D) + "</div>";
+    return h + '<div class="r"><button type="button" class="btn sm pri" id="bfxnext" data-a="bfxnext"' + (!n || bad ? " disabled" : "") + '>Дальше: проверить</button><button type="button" class="btn sm" data-a="bfxclose">Отмена</button></div></div>';
+  }
+  document.addEventListener("input", function (e) {
+    var t = e.target; if (!t || !t.dataset || !t.dataset.bfx || !BFX || BFX.step !== "edit") return;
+    BFX.nv[t.dataset.bfx] = t.value;
+    var n = bfxNum(t.value); t.classList.toggle("bad", t.value.trim() !== "" && (isNaN(n) || n < 0));
+    var tot = $("bfxtot"); if (tot) tot.innerHTML = bfxTotHTML(BFX);
+    var nb = $("bfxnext"); if (nb) nb.disabled = !bfxChanges(BFX).length || bfxBad(BFX).length > 0;
+  });
+  function bfxOpen(pid) {
+    if (!buCanRemember()) { toast("Записать план в Excel можно на компьютере в Chrome или Edge — там приложение получает доступ к файлу"); return; }
+    BFX = { pid: pid, busy: 1, step: "read" }; render();
+    var file;
+    buFile().then(function (f) { file = f; return f.arrayBuffer(); }).then(buBook).then(function (bk) {
+      var nm = bk.names.filter(function (x) { return buNorm(x) === buNorm(buPName(pid)); })[0];
+      if (!nm) throw new Error("в файле нет листа «" + buPName(pid) + "»");
+      return bk.grid(nm).then(function (G) { var m = bfxMap(G, nm); BFX = { pid: pid, sheet: nm, exp: m.exp, inc: m.inc, nv: {}, step: "edit" }; render(); setTimeout(function () { var i = document.querySelector(".bfxin"); if (i) i.focus(); }, 60); });
+    }).catch(function (e) { BFX = null; render(); if (e && e.name === "AbortError") return; toast("Не удалось открыть файл: " + (e && e.message || e)); });
+  }
+
+  /* --- правка xlsx: ячейки листа, пересчёт книги, сборка zip --- */
+  function bfxSer(d, orig) {
+    var s = new XMLSerializer().serializeToString(d), m = /^<\?xml[^>]*\?>(\s*)/.exec(orig);
+    return m && s.indexOf("<?xml") !== 0 ? m[0] + s : s;
+  }
+  function bfxDoc(xml) { var d = xmlDoc(xml); if (d.getElementsByTagName("parsererror").length) throw new Error("не удалось разобрать часть книги"); return d; }
+  // sets: [{ref, to}] — число или null (очистить); затем у всех формул листа убираются устаревшие результаты
+  function bfxSheet(xml, sets) {
+    var d = bfxDoc(xml), NS = d.documentElement.namespaceURI, changed = false;
+    if (sets.length) {
+      var rows = {}; [].forEach.call(d.getElementsByTagNameNS(NS, "row"), function (r) { rows[+r.getAttribute("r")] = r; });
+      sets.forEach(function (s) {
+        var m = /^([A-Z]+)(\d+)$/.exec(s.ref), cn = colIdx(m[1]), row = rows[+m[2]];
+        if (!row) throw new Error("на листе нет строки " + m[2]);
+        var cs = [].filter.call(row.childNodes, function (n) { return n.localName === "c"; }), c = cs.filter(function (x) { return x.getAttribute("r") === s.ref; })[0];
+        if (!c) { if (s.to === null) return; c = d.createElementNS(NS, "c"); c.setAttribute("r", s.ref); row.insertBefore(c, cs.filter(function (x) { return colIdx(x.getAttribute("r")) > cn; })[0] || null); }
+        if (c.getElementsByTagNameNS(NS, "f").length) throw new Error("в ячейке " + s.ref + " формула — её не меняем");
+        while (c.firstChild) c.removeChild(c.firstChild); c.removeAttribute("t");
+        if (s.to !== null) { var v = d.createElementNS(NS, "v"); v.textContent = String(s.to); c.appendChild(v); }
+        changed = true;
+      });
+    }
+    [].forEach.call(d.getElementsByTagNameNS(NS, "c"), function (c) {
+      if (!c.getElementsByTagNameNS(NS, "f").length) return;
+      var vs = c.getElementsByTagNameNS(NS, "v"); if (!vs.length && !c.hasAttribute("t")) return;
+      while (vs.length) c.removeChild(vs[0]); c.removeAttribute("t"); changed = true;
+    });
+    return changed ? bfxSer(d, xml) : null;
+  }
+  function bfxCalc(xml) {
+    var d = bfxDoc(xml), NS = d.documentElement.namespaceURI, cp = d.getElementsByTagNameNS(NS, "calcPr")[0];
+    if (!cp) {
+      cp = d.createElementNS(NS, "calcPr"); cp.setAttribute("calcId", "124519");
+      var nx = ["oleSize", "customWorkbookViews", "pivotCaches", "smartTagPr", "smartTagTypes", "webPublishing", "fileRecoveryPr", "webPublishObjects", "extLst"].map(function (t) { return d.getElementsByTagNameNS(NS, t)[0]; }).filter(Boolean)[0];
+      d.documentElement.insertBefore(cp, nx || null);
+    }
+    cp.setAttribute("fullCalcOnLoad", "1");
+    return bfxSer(d, xml);
+  }
+  var CRCT = null;
+  function crc32(u8) {
+    if (!CRCT) { CRCT = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRCT[n] = c >>> 0; } }
+    var x = 0xFFFFFFFF; for (var i = 0; i < u8.length; i++) x = CRCT[(x ^ u8[i]) & 255] ^ (x >>> 8); return (x ^ 0xFFFFFFFF) >>> 0;
+  }
+  // новая книга: изменённые части сжимаются заново, остальные копируются байт в байт
+  function bfxZip(buf, edits) {
+    var dv = new DataView(buf), u8 = new Uint8Array(buf), e = -1;
+    for (var i = u8.length - 22; i >= Math.max(0, u8.length - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; }
+    if (e < 0) return Promise.reject(new Error("файл повреждён: нет оглавления zip"));
+    var n = dv.getUint16(e + 10, true), cdo = dv.getUint32(e + 16, true), off = cdo, ents = [];
+    for (var k = 0; k < n; k++) {
+      if (dv.getUint32(off, true) !== 0x02014b50) return Promise.reject(new Error("файл повреждён: оглавление zip"));
+      var nl = dv.getUint16(off + 28, true), len = 46 + nl + dv.getUint16(off + 30, true) + dv.getUint16(off + 32, true);
+      ents.push({ cd: u8.slice(off, off + len), name: new TextDecoder().decode(u8.subarray(off + 46, off + 46 + nl)), loc: dv.getUint32(off + 42, true) }); off += len;
+    }
+    var byLoc = ents.slice().sort(function (a, b) { return a.loc - b.loc; });
+    byLoc.forEach(function (x, j) { x.end = j + 1 < byLoc.length ? byLoc[j + 1].loc : cdo; });
+    var enc = new TextEncoder();
+    return Promise.all(ents.map(function (x) {
+      if (!Object.prototype.hasOwnProperty.call(edits, x.name)) return null;
+      var raw = enc.encode(edits[x.name]);
+      return new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer().then(function (ab) { x.nw = { crc: crc32(raw), us: raw.length, data: new Uint8Array(ab) }; });
+    })).then(function () {
+      var parts = [], pos = 0;
+      byLoc.forEach(function (x) {
+        x.nloc = pos;
+        if (!x.nw) { var seg = u8.subarray(x.loc, x.end); parts.push(seg); pos += seg.length; return; }
+        var nb = u8.slice(x.loc + 30, x.loc + 30 + dv.getUint16(x.loc + 26, true)), hd = new Uint8Array(30 + nb.length), hv = new DataView(hd.buffer);
+        hv.setUint32(0, 0x04034b50, true); hv.setUint16(4, 20, true); hv.setUint16(6, dv.getUint16(x.loc + 6, true) & 0xFFF6, true); hv.setUint16(8, 8, true);
+        hv.setUint16(10, dv.getUint16(x.loc + 10, true), true); hv.setUint16(12, dv.getUint16(x.loc + 12, true), true);
+        hv.setUint32(14, x.nw.crc, true); hv.setUint32(18, x.nw.data.length, true); hv.setUint32(22, x.nw.us, true); hv.setUint16(26, nb.length, true); hv.setUint16(28, 0, true); hd.set(nb, 30);
+        parts.push(hd, x.nw.data); pos += hd.length + x.nw.data.length;
+      });
+      var cds = pos;
+      ents.forEach(function (x) {
+        var c = x.cd.slice(), cv = new DataView(c.buffer); cv.setUint32(42, x.nloc, true);
+        if (x.nw) { cv.setUint16(8, cv.getUint16(8, true) & 0xFFF6, true); cv.setUint16(10, 8, true); cv.setUint32(16, x.nw.crc, true); cv.setUint32(20, x.nw.data.length, true); cv.setUint32(24, x.nw.us, true); }
+        parts.push(c); pos += c.length;
+      });
+      var eo = u8.slice(e), ev = new DataView(eo.buffer); ev.setUint32(12, pos - cds, true); ev.setUint32(16, cds, true); parts.push(eo); pos += eo.length;
+      var out = new Uint8Array(pos), p = 0; parts.forEach(function (q) { out.set(q, p); p += q.length; }); return out;
+    });
+  }
+  // собрать новую книгу (без записи): проверка «было», правка листа, пересчёт, контрольное чтение результата
+  function bfxBuild(buf, sheet, ch) {
+    var bk0, spath;
+    return buBook(buf).then(function (bk) {
+      bk0 = bk; spath = bk.path(sheet); if (!spath) throw new Error("в файле нет листа «" + sheet + "»");
+      return bk.grid(sheet);
+    }).then(function (G) {
+      var m = bfxMap(G, sheet), cur = {}; m.exp.concat(m.inc).forEach(function (x) { cur[x.ref] = x; });
+      ch.forEach(function (c) {
+        var x = cur[c.ref]; if (!x) throw new Error("ячейка " + c.ref + " («" + c.c + "») не найдена на листе");
+        if (x.f) throw new Error("в ячейке " + c.ref + " («" + c.c + "») теперь формула");
+        if ((x.v === null) !== (c.from === null) || Math.abs((x.v || 0) - (c.from || 0)) >= 0.005) throw new Error("«" + c.c + "» в файле уже " + bfxRub(x.v) + ", а не " + bfxRub(c.from) + " — файл изменился, откройте корректировку заново");
+      });
+      return unzip(buf, function (n) { return n === "xl/workbook.xml" || /^xl\/worksheets\/[^\/]+\.xml$/.test(n); });
+    }).then(function (tx) {
+      var edits = {};
+      Object.keys(tx).forEach(function (n) { if (n === "xl/workbook.xml") edits[n] = bfxCalc(tx[n]); else { var r = bfxSheet(tx[n], n === spath ? ch : []); if (r !== null) edits[n] = r; } });
+      if (!edits[spath]) throw new Error("лист «" + sheet + "» не изменился");
+      return bfxZip(buf, edits);
+    }).then(function (out) {
+      // контроль: новая книга читается, в ячейках — новые числа
+      var ab = out.buffer.slice(out.byteOffset, out.byteOffset + out.byteLength);
+      return buBook(ab).then(function (bk) { return bk.grid(sheet); }).then(function (G) {
+        var m = bfxMap(G, sheet), cur = {}; m.exp.concat(m.inc).forEach(function (x) { cur[x.ref] = x; });
+        ch.forEach(function (c) { var x = cur[c.ref]; if (!x || (x.v === null) !== (c.to === null) || Math.abs((x.v || 0) - (c.to || 0)) >= 0.005) throw new Error("контрольное чтение не сошлось («" + c.c + "») — файл не изменён"); });
+        return out;
+      });
+    });
+  }
+  function bfxWrite() {
+    var D = BFX, ch = bfxChanges(D), h0, file, src;
+    if (!ch.length) return;
+    D.busy = 1; D.step = "write"; delete D.err; render();
+    buHandle().then(function (h) {
+      if (!h || !h.createWritable || !h.requestPermission) throw new Error("нет доступа к файлу на запись — выберите файл заново (Chrome или Edge на компьютере)");
+      h0 = h; return h.requestPermission({ mode: "readwrite" });
+    }).then(function (p) {
+      if (p !== "granted") throw new Error("запись в файл не разрешена");
+      return h0.getFile();
+    }).then(function (f) { file = f; return f.arrayBuffer(); }).then(function (buf) {
+      src = buf; return bfxBuild(buf, D.sheet, ch);
+    }).then(function (out) {
+      return buKV("bak", { n: file.name, at: Date.now(), mt: file.lastModified, sheet: D.sheet, buf: src }).catch(function () { /* без копии всё равно пишем: отмена вернёт числа */ })
+        .then(function () { return h0.createWritable(); }).then(function (w) { return w.write(out).then(function () { return w.close(); }); });
+    }).then(function () {
+      BFX = null;
+      if (D.undo) { BFXLAST = null; buKV("fixlast", null).catch(function () {}); }
+      else { BFXLAST = { pid: D.pid, sheet: D.sheet, at: Date.now(), ch: ch }; buKV("fixlast", BFXLAST).catch(function () {}); }
+      toast(D.undo ? "Прежний план возвращён в Excel — пересчитываю" : "План записан в Excel — пересчитываю");
+      buUpdate({ k: "per", a: D.pid });
+    }).catch(function (e) {
+      D.busy = 0; D.step = "confirm"; D.err = e && e.name === "NotAllowedError" ? "Запись не разрешена браузером" : "Не записано: " + (e && e.message || e); if (BFX === D) render();
+    });
+  }
+  function bfxAct(a, el) {
+    switch (a) {
+      case "bfxopen": bfxOpen(BUPER || buPid(today0())); return true;
+      case "bfxclose": BFX = null; render(); return true;
+      case "bfxnext": if (BFX && bfxChanges(BFX).length && !bfxBad(BFX).length) { BFX.step = "confirm"; render(); } return true;
+      case "bfxback": if (BFX) { if (BFX.undo) BFX = null; else { BFX.step = "edit"; delete BFX.err; } render(); } return true;
+      case "bfxundo": if (BFXLAST) { BFX = { pid: BFXLAST.pid, sheet: BFXLAST.sheet, step: "confirm", undo: true, nv: {}, exp: [], inc: [], chg: BFXLAST.ch.map(function (c) { return { ref: c.ref, c: c.c, from: c.to, to: c.from, inc: c.inc }; }) }; render(); } return true;
+      case "bfxwrite": if (BFX && !BFX.busy) bfxWrite(); return true;
+    }
+    return false;
+  }
+
   // виджет доски: неделя (гибкие) и итог периода
   function buWidget() {
     if (!buPers().length) return '<p class="wempty">Данных нет — откройте «Бюджет» и обновите из файла</p>';
