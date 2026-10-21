@@ -5504,7 +5504,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-128";
+  var APPV = "zd-app-2026-10-16-129";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -5967,8 +5967,8 @@ CREATE TABLE inbox (
   function go(h) { if (location.hash.slice(1) === h) route(); else location.hash = h; }
   /* ---------- вкладки открытых страниц (как в многооконной программе); хранятся на этом устройстве ---------- */
   var PTMAX = 8, PTCUR = "", PTJUMP = "", PTDRAG = null;
-  var PTICO = { kitchen: "food", budget: "budget", clean: "clean", inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
-  var PTNAME = { done: "Сделано", tarch: "Архив задач", trash: "Корзина", archive: "Архив проектов", templates: "Шаблоны", settings: "Настройки", help: "Справка", report: "Отчёт", recipes: "Рецепты", prods: "Продукты и цены", menunew: "Новое меню", notes: "Заметки", sprints: "Все спринты", search: "Поиск" };
+  var PTICO = { kitchen: "food", rhave: "food", rimp: "food", budget: "budget", clean: "clean", inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
+  var PTNAME = { done: "Сделано", tarch: "Архив задач", trash: "Корзина", archive: "Архив проектов", templates: "Шаблоны", settings: "Настройки", help: "Справка", report: "Отчёт", recipes: "Рецепты", prods: "Продукты и цены", menunew: "Новое меню", rhave: "Из того, что есть", rimp: "Рецепт по ссылке", share: "Поделились", notes: "Заметки", sprints: "Все спринты", search: "Поиск" };
   function ptabsOn() { return innerWidth > 860 && LS.get("zd-ptabs") !== "off"; } // только на компьютере
   function ptabs() { try { var a = JSON.parse(LS.get("zd-tabs") || "[]"); return Array.isArray(a) ? a.filter(function (t) { return t && t.h; }) : []; } catch (e) { return []; } }
   function ptSave(a) { LS.set("zd-tabs", JSON.stringify(a.slice(0, 40))); }
