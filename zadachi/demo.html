@@ -515,6 +515,14 @@ html.nosheet .dptopbox.dphab { background: color-mix(in srgb, var(--ok) 15%, tra
 .mmsw { display: flex; flex-wrap: wrap; gap: 5px; align-items: center } .mmswb { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0 } .mmswb.on { box-shadow: 0 0 0 2px var(--acc) } .mmsw input[type=color] { width: 32px; height: 26px; padding: 0 2px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); cursor: pointer }
 .mmchk { display: inline-flex; gap: 6px; align-items: center; font-size: calc(13px * var(--fs)) } #mmthname { width: 220px; max-width: 100% } .mmvp.brush, .mmvp.brush .mmn { cursor: copy }
 .mmtw { position: relative; display: grid } .mmthd { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--muted); font-size: 11px; line-height: 18px; padding: 0; cursor: pointer; opacity: 0 } .mmtw:hover .mmthd, .mmthd:focus-visible { opacity: 1 } @media (hover: none) { .mmthd { opacity: 1 } }
+.mmmks { display: inline-flex; gap: 3px; margin-right: 3px; vertical-align: -0.18em } .mmmks svg { display: block }
+.mmprg { position: absolute; bottom: -10px; right: 8px; display: inline-flex; align-items: center; gap: 3px; padding: 0 6px 0 2px; height: 17px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); font: 600 10.5px/15px Arial, sans-serif; color: var(--muted); z-index: 2; white-space: nowrap } .mmprg.full { color: var(--ok); border-color: var(--ok) }
+.mmbdl { position: absolute; transform: translateY(-50%); padding: 0 9px; border-radius: 999px; font-size: 12px; line-height: 17px; font-weight: 600; background: var(--panel); border: 1.5px solid var(--bc); color: var(--bc); cursor: pointer; white-space: nowrap; z-index: 1 } .mmbdl.empty { opacity: .55; border-style: dashed; padding: 0 5px } .mmbdl.on, .mmsml.on { box-shadow: 0 0 0 2px var(--acc-soft); border-color: var(--acc) }
+.mmsml { position: absolute; height: 24px; padding: 0 10px; border-radius: 12px; font-size: 13px; line-height: 21px; font-weight: 600; background: var(--panel); border: 1.5px solid var(--muted); color: var(--fg); cursor: pointer; white-space: nowrap; z-index: 1; text-align: center; box-sizing: border-box }
+.mmvp .mmn.mmdim { opacity: .2 } .mmn.sel.ms { outline-style: dashed } .mmband { position: absolute; border: 1.5px dashed var(--acc); background: color-mix(in srgb, var(--acc) 10%, transparent); pointer-events: none; z-index: 6 }
+.mmmini { position: absolute; right: 10px; bottom: 10px; padding: 4px; border: 1px solid var(--line); border-radius: 8px; background: color-mix(in srgb, var(--panel) 92%, transparent); box-shadow: var(--shadow); cursor: pointer; z-index: 7; touch-action: none } .mmmini svg { display: block }
+.mmmkp { max-width: none } .mmmkr { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 6px 0 } .mmmkr > span:first-child { width: 86px; color: var(--muted); font-size: calc(12.5px * var(--fs)) } .mmmkb { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); display: inline-grid; place-items: center; padding: 0; cursor: pointer; font-size: 12px } .mmmkb:hover { border-color: var(--muted) } .mmmkb.on { border-color: var(--acc); box-shadow: 0 0 0 2px var(--acc-soft) } .mmmkb svg { display: block; pointer-events: none }
+#mmdect { flex: 1; min-width: 200px }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5717,7 +5725,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-145";
+  var APPV = "zd-app-2026-10-16-146";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -12373,8 +12381,9 @@ CREATE TABLE inbox (
   function mmWrap(txt, font, maxW) { var ws = String(txt || " ").split(/\s+/), out = [], cur = ""; ws.forEach(function (w) { var t = cur ? cur + " " + w : w; if (!cur || mmMeasure(t, font) <= maxW) cur = t; else { out.push(cur); cur = w; } }); out.push(cur || " "); return out; }
   function mmLayout(n, vroot) {
     var th = mmTh(n), DN = th.dens || 1, ff = MMFF[th.ff] || getComputedStyle(document.body).fontFamily || "sans-serif", root = vroot || mmRoot(n), N = {};
-    function size(x, d) { var st = x.st || {}, fs = Math.round((d === 0 ? 18 : d === 1 ? 15 : 14) * (th.fz || 1) * (st.fz || 1)), fw = st.b ? 700 : d <= 1 ? 600 : 400, font = (st.i ? "italic " : "") + fw + " " + fs + "px " + ff, maxW = (d === 0 ? 260 : d === 1 ? 220 : 200) * Math.max(1, st.fz || 1), lines = mmWrap((x.ic ? x.ic + " " : "") + (mmLabel(n, x) || " "), font, maxW), w = Math.max.apply(null, lines.map(function (l) { return mmMeasure(l, font); })), px = d === 0 ? 18 : d === 1 ? 12 : 6, py = d === 0 ? 11 : d === 1 ? 7 : 4, lh = Math.round(fs * 1.35); var iw = x.img ? Math.min(maxW, 180) : 0, ih = x.img ? Math.round(iw * (+x.imgr || 0.66)) : 0; return { w: Math.ceil(Math.max(28, iw + 4, Math.min(maxW + 4, w + 4)) + px * 2 + (x.nt ? 18 : 0)), h: lines.length * lh + py * 2 + (ih ? ih + 6 : 0), iw: iw, ih: ih, lines: lines, it: !!st.i, fs: fs, fw: fw, lh: lh, px: px, py: py }; }
+    function size(x, d) { var st = x.st || {}, fs = Math.round((d === 0 ? 18 : d === 1 ? 15 : 14) * (th.fz || 1) * (st.fz || 1)), fw = st.b ? 700 : d <= 1 ? 600 : 400, font = (st.i ? "italic " : "") + fw + " " + fs + "px " + ff, maxW = (d === 0 ? 260 : d === 1 ? 220 : 200) * Math.max(1, st.fz || 1), mkw = mmMkW(x, fs), lines = mmWrap((NUM[x.id] ? NUM[x.id] + " " : "") + (x.ic ? x.ic + " " : "") + (mmLabel(n, x) || " "), font, maxW), w = Math.max.apply(null, lines.map(function (l, li) { return mmMeasure(l, font) + (li ? 0 : mkw); })), px = d === 0 ? 18 : d === 1 ? 12 : 6, py = d === 0 ? 11 : d === 1 ? 7 : 4, lh = Math.round(fs * 1.35); var iw = x.img ? Math.min(maxW, 180) : 0, ih = x.img ? Math.round(iw * (+x.imgr || 0.66)) : 0; return { w: Math.ceil(Math.max(28, iw + 4, Math.min(maxW + 4, w + 4)) + px * 2 + (x.nt ? 18 : 0)), h: lines.length * lh + py * 2 + (ih ? ih + 6 : 0), iw: iw, ih: ih, mkw: mkw, lines: lines, it: !!st.i, fs: fs, fw: fw, lh: lh, px: px, py: py }; }
     function prep(x, d, par) { var s = size(x, d), kids = x.f ? [] : x.k || [], gy = (d === 0 ? 22 : d === 1 ? 12 : 6) * DN; N[x.id] = { x: x, s: s, d: d, p: par, gy: gy }; kids.forEach(function (c) { prep(c, d + 1, x); }); var sh = kids.reduce(function (a, c) { return a + N[c.id].sh; }, 0) + gy * Math.max(0, kids.length - 1); N[x.id].sh = Math.max(s.h, sh); }
+    var NUM = {}; if (n.mm && n.mm.num) (function nm(x, pre) { (x.k || []).forEach(function (c, i) { var t = pre + (i + 1); NUM[c.id] = pre ? t : t + "."; nm(c, t + "."); }); })(mmRoot(n), "");
     prep(root, 0, null);
     function kidsY(x) { var nx = N[x.id], kids = x.f ? [] : x.k || []; if (!kids.length) return; var tot = kids.reduce(function (a, c) { return a + N[c.id].sh; }, 0) + nx.gy * (kids.length - 1), y = nx.cy - tot / 2; kids.forEach(function (c) { var nc = N[c.id]; nc.side = nx.side; nc.cx = nx.cx + nx.side * (nx.s.w / 2 + 30 * DN + nc.s.w / 2); nc.cy = y + nc.sh / 2; y += nc.sh + nx.gy; kidsY(c); }); }
     var nr = N[root.id]; nr.cx = 0; nr.cy = 0; nr.side = 1;
@@ -12383,18 +12392,19 @@ CREATE TABLE inbox (
     if (n.mm && n.mm.lay === "down") mmPlaceDown(root, N, DN);
     // цвет: у ветки первого уровня — свой по порядку (или выбранный), дальше наследуется
     var PAL = th.pal; (function cw(x, c, d) { var own = x.st && x.st.c ? x.st.c : typeof x.c === "number" && d > 0 ? PAL[x.c % PAL.length] : c; N[x.id] && (N[x.id].col = own); (x.k || []).forEach(function (k, i) { cw(k, d === 0 ? PAL[i % PAL.length] : own, d + 1); }); })(mmRoot(n), th.root || "var(--fg)", 0);
+    (function pg(x) { var dn = 0, tt = 0; (x.k || []).forEach(function (c) { var r = pg(c), t = mmTask(c); dn += r[0]; tt += r[1]; if (t && !t.del) { tt++; if (t.done) dn++; } }); if (N[x.id]) N[x.id].prg = [dn, tt]; return [dn, tt]; })(mmRoot(n));
     return N;
   }
-  function mmBounds(N, n) { var b = { x0: 1e9, y0: 1e9, x1: -1e9, y1: -1e9 };
+  function mmBounds(N, n) { var b = { x0: 1e9, y0: 1e9, x1: -1e9, y1: -1e9 }; if (n && n.mm) mmDecoB(n, N, b);
     if (n) mmRels(n).forEach(function (r) { var g = mmRelGeo(N, r, 0, 0); if (!g) return; var lw = r.t ? r.t.length * 3.6 + 12 : 12; b.x0 = Math.min(b.x0, g.lx - lw); b.x1 = Math.max(b.x1, g.lx + lw); b.y0 = Math.min(b.y0, g.ly - 14); b.y1 = Math.max(b.y1, g.ly + 14); }); Object.keys(N).forEach(function (id) { var v = N[id]; if (v.cx === undefined) return; b.x0 = Math.min(b.x0, v.cx - v.s.w / 2 - 24); b.x1 = Math.max(b.x1, v.cx + v.s.w / 2 + 24); b.y0 = Math.min(b.y0, v.cy - v.s.h / 2); b.y1 = Math.max(b.y1, v.cy + v.s.h / 2); }); return b; }
   function mmEdge(a, b) { if (b.vert) { var X1 = a.cx, Y1 = a.cy + a.s.h / 2, X2 = b.cx, Y2 = b.cy - b.s.h / 2, dY = (Y2 - Y1) * 0.5; return "M" + X1.toFixed(1) + " " + Y1.toFixed(1) + " C" + X1.toFixed(1) + " " + (Y1 + dY).toFixed(1) + " " + X2.toFixed(1) + " " + (Y2 - dY).toFixed(1) + " " + X2.toFixed(1) + " " + Y2.toFixed(1); } var x1 = a.cx + b.side * a.s.w / 2, y1 = a.cy, x2 = b.cx - b.side * b.s.w / 2, y2 = b.cy + (b.d >= 2 ? b.s.h / 2 : 0), dx = (x2 - x1) * 0.5; return "M" + x1.toFixed(1) + " " + y1.toFixed(1) + " C" + (x1 + dx).toFixed(1) + " " + y1.toFixed(1) + " " + (x2 - dx).toFixed(1) + " " + y2.toFixed(1) + " " + x2.toFixed(1) + " " + y2.toFixed(1); }
   // экран карты
   function mmViewHTML(n, rd) {
-    var root = mmRoot(n); if (MMQNID !== n.id) { MMQNID = n.id; MMQ = NQ.trim(); MMQI = -1; MMFOC = ""; } var vr = mmVRoot(n); if (!MMSEL || !mmFind(n, MMSEL)) MMSEL = vr.id;
+    var root = mmRoot(n); if (MMQNID !== n.id) { MMQNID = n.id; MMQ = NQ.trim(); MMQI = -1; MMFOC = ""; MMFLT = ""; MMMS = {}; MMDECO = null; } var vr = mmVRoot(n); if (!MMSEL || !mmFind(n, MMSEL)) MMSEL = vr.id;
     var bar = '<div class="r mmbar"><span class="seg"><button type="button" data-a="mmview" data-x="map" class="' + (MMTXT === "list" ? "" : "on") + '">🧠 Карта</button><button type="button" data-a="mmview" data-x="list" class="' + (MMTXT === "list" ? "on" : "") + '">☰ Список</button></span>' +
-      (rd ? "" : '<button type="button" class="btn sm" data-a="mmadd" title="Tab">＋ Ветка</button><button type="button" class="btn sm" data-a="mmsib" title="Enter">＋ Рядом</button><button type="button" class="btn sm" data-a="mmren" title="F2 или пробел">✎</button><button type="button" class="btn sm" data-a="mmcol" title="Цвет ветки">🎨</button><button type="button" class="btn sm" data-a="mmic" title="Значок">☺</button><button type="button" class="btn sm" data-a="mmnote" title="Заметка к узлу">📝</button><button type="button" class="btn sm" data-a="mmdel" title="Delete">🗑</button><button type="button" class="btn sm" data-a="mmside" title="Ветку первого уровня — на другую сторону (Alt+← / Alt+→)">⇄</button><button type="button" class="btn sm" data-a="mmfocus" title="Фокус: показать только выбранную ветку">🔎 Фокус</button><button type="button" class="btn sm' + (MMREL ? " on" : "") + '" data-a="mmrelb" title="Стрелка-связь от выбранного узла к другому">↗ Связь</button><button type="button" class="btn sm" data-a="mmimg" title="Картинка в узел">🖼</button><button type="button" class="btn sm' + (MMTHP ? " on" : "") + '" data-a="mmthb" title="Тема оформления карты">🖌 Тема</button><button type="button" class="btn sm' + (MMSTP ? " on" : "") + '" data-a="mmstyle" title="Стиль выбранного узла: форма, цвет, текст, кисть">Аа Стиль</button><button type="button" class="btn sm" data-a="mmmore" title="Копировать, вставить, раскладка">⋯</button><button type="button" class="btn sm" data-a="mmlvl" title="Свернуть и развернуть по уровням">⊟ Уровни ▾</button><button type="button" class="btn sm" data-a="mmpaste" title="Вставить многоуровневый список">📋 Из списка</button><button type="button" class="btn sm" data-a="mmtask" title="Связать узел с задачей">☐ В задачу ▾</button><button type="button" class="btn sm" data-a="mmpage" title="Узел — страница базы знаний">📄 В страницу ▾</button>' + (n.mm.src ? '<button type="button" class="btn sm" data-a="mmsync" title="Добавить на карту новое из источника (проекта, цели, страницы)">🔄 Обновить</button>' : "") + (AI.ready() ? '<button type="button" class="btn sm" data-a="mmai" title="ИИ разложит выбранный узел на ветки">✨ Разложить</button>' : "")) +
+      (rd ? "" : '<button type="button" class="btn sm" data-a="mmadd" title="Tab">＋ Ветка</button><button type="button" class="btn sm" data-a="mmsib" title="Enter">＋ Рядом</button><button type="button" class="btn sm" data-a="mmren" title="F2 или пробел">✎</button><button type="button" class="btn sm" data-a="mmcol" title="Цвет ветки">🎨</button><button type="button" class="btn sm" data-a="mmic" title="Значок">☺</button><button type="button" class="btn sm" data-a="mmnote" title="Заметка к узлу">📝</button><button type="button" class="btn sm" data-a="mmdel" title="Delete">🗑</button><button type="button" class="btn sm" data-a="mmside" title="Ветку первого уровня — на другую сторону (Alt+← / Alt+→)">⇄</button><button type="button" class="btn sm" data-a="mmfocus" title="Фокус: показать только выбранную ветку">🔎 Фокус</button><button type="button" class="btn sm' + (MMREL ? " on" : "") + '" data-a="mmrelb" title="Стрелка-связь от выбранного узла к другому">↗ Связь</button><button type="button" class="btn sm" data-a="mmimg" title="Картинка в узел">🖼</button><button type="button" class="btn sm' + (MMTHP ? " on" : "") + '" data-a="mmthb" title="Тема оформления карты">🖌 Тема</button><button type="button" class="btn sm' + (MMSTP ? " on" : "") + '" data-a="mmstyle" title="Стиль выбранного узла: форма, цвет, текст, кисть">Аа Стиль</button><button type="button" class="btn sm' + (MMMKP ? " on" : "") + '" data-a="mmmkb" title="Метки, рамки, итоги, нумерация">🏷 Метки</button><button type="button" class="btn sm' + (MMFLT ? " on" : "") + '" data-a="mmflt" title="Показать только узлы с метками или задачами">⧩ ' + (MMFLT ? esc(MMFLTN[MMFLT]) : "Фильтр") + ' ▾</button><button type="button" class="btn sm" data-a="mmmore" title="Копировать, вставить, раскладка">⋯</button><button type="button" class="btn sm" data-a="mmlvl" title="Свернуть и развернуть по уровням">⊟ Уровни ▾</button><button type="button" class="btn sm" data-a="mmpaste" title="Вставить многоуровневый список">📋 Из списка</button><button type="button" class="btn sm" data-a="mmtask" title="Связать узел с задачей">☐ В задачу ▾</button><button type="button" class="btn sm" data-a="mmpage" title="Узел — страница базы знаний">📄 В страницу ▾</button>' + (n.mm.src ? '<button type="button" class="btn sm" data-a="mmsync" title="Добавить на карту новое из источника (проекта, цели, страницы)">🔄 Обновить</button>' : "") + (AI.ready() ? '<button type="button" class="btn sm" data-a="mmai" title="ИИ разложит выбранный узел на ветки">✨ Разложить</button>' : "")) +
       '<span class="mmqw"><input type="search" class="inp mmq" id="mmq" placeholder="Найти на карте — Enter" value="' + esc(MMQ) + '" autocomplete="off" aria-label="Найти на карте"><small class="muted" id="mmqc"></small></span><span class="mmz"><button type="button" class="btn sm" data-a="mmzoom" data-x="-1" aria-label="Мельче">−</button><button type="button" class="btn sm" data-a="mmzoom" data-x="0" title="Вписать в экран">⤢</button><button type="button" class="btn sm" data-a="mmzoom" data-x="1" aria-label="Крупнее">＋</button></span><button type="button" class="btn sm" data-a="mmexp">⤓ ▾</button></div>';
-    var h = '<div class="mmwrap">' + bar + (vr !== root ? '<div class="mmfocb">🔎 Фокус на ветке «' + esc(mmLabel(n, vr).slice(0, 60)) + '» — остальная карта скрыта <button type="button" class="btn sm" data-a="mmfocx">✕ Вся карта</button></div>' : "") + (MMRELED && !rd ? mmRelPanel(n) : "") + (MMTHP && !rd ? mmThPanel(n) : "") + (MMSTP && !rd ? mmStPanel(n) : "");
+    var h = '<div class="mmwrap">' + bar + (vr !== root ? '<div class="mmfocb">🔎 Фокус на ветке «' + esc(mmLabel(n, vr).slice(0, 60)) + '» — остальная карта скрыта <button type="button" class="btn sm" data-a="mmfocx">✕ Вся карта</button></div>' : "") + (MMRELED && !rd ? mmRelPanel(n) : "") + (MMTHP && !rd ? mmThPanel(n) : "") + (MMSTP && !rd ? mmStPanel(n) : "") + (MMMKP && !rd ? mmMkPanel(n) : "") + (MMDECO && !rd ? mmDecoPanel(n) : "") + (Object.keys(MMMS).length ? '<div class="mmfocb">Выделено узлов: ' + mmSelIds(n).length + ' — метки, цвет, стиль и Delete действуют на все <button type="button" class="btn sm" data-a="mmmsx">✕ Снять выделение</button></div>' : "");
     var sx = mmFind(n, MMSEL);
     if (MMNT && !rd) { var nx = mmFind(n, MMNT); if (nx) h += '<div class="npop mmntp"><div class="npoph"><b>📝 Заметка к «' + esc(mmLabel(n, nx.x).slice(0, 40)) + '»</b><button type="button" class="ibtn" data-a="mmnotex" aria-label="Закрыть">✕</button></div><textarea class="inp" id="mmnt" rows="3" placeholder="Пояснение, ссылка, мысль — видно при наведении на узел">' + esc(nx.x.nt || "") + "</textarea></div>"; }
     if (MMPASTE && !rd) h += '<div class="npop mmpp"><div class="npoph"><b>📋 Вставить список в «' + esc(sx ? mmLabel(n, sx.x).slice(0, 40) : "") + '»</b><button type="button" class="ibtn" data-a="mmpastex" aria-label="Закрыть">✕</button></div><textarea class="inp" id="mmpaste" rows="7" placeholder="Вставьте многоуровневый список: каждая строка — узел, отступ (Tab или пробелы) — уровень. Маркеры «-», «•», «1.» уберутся сами."></textarea><div class="r"><button type="button" class="btn sm pri" data-a="mmpasteok">Добавить ветки</button></div></div>';
@@ -12405,17 +12415,17 @@ CREATE TABLE inbox (
     }
     var N = mmLayout(n, vr), b = mmBounds(N, n), pad = 40, ox = -b.x0 + pad, oy = -b.y0 + pad, W = Math.ceil(b.x1 - b.x0 + pad * 2), H = Math.ceil(b.y1 - b.y0 + pad * 2); MMLAY = N;
     var vw = MMV[n.id] || (MMV[n.id] = { s: 1, rx: 0, ry: 0, fit: 1 });
-    var th = mmTh(n), svg = '<svg class="mmsvg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + " " + H + '">' + (th.glow ? MMGLOW : "") + Object.keys(N).map(function (id) { var v = N[id]; if (!v.p || v.cx === undefined) return ""; return mmEdgeEl(th, N, v, ox, oy, v.col); }).join("") + mmRelSVG(n, N, ox, oy) + "</svg>";
+    var th = mmTh(n), FK = mmFltKeep(n, N), svg = '<svg class="mmsvg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + " " + H + '">' + (th.glow ? MMGLOW : "") + mmDecoSVG(n, N, ox, oy, { fg: "var(--fg)", mu: "var(--muted)", bg: "var(--panel)", ff: MMFF[th.ff] || getComputedStyle(document.body).fontFamily || "sans-serif" }, false) + Object.keys(N).map(function (id) { var v = N[id]; if (!v.p || v.cx === undefined) return ""; var eh = mmEdgeEl(th, N, v, ox, oy, v.col); return FK && !FK[id] ? eh.replace("<path ", '<path opacity="0.18" ') : eh; }).join("") + mmRelSVG(n, N, ox, oy) + "</svg>";
     var nodes = Object.keys(N).map(function (id) {
       var v = N[id], x = v.x, s = v.s, ed = MMED === id && !rd, kc = (x.k || []).length;
       var st = "left:" + (v.cx + ox - s.w / 2).toFixed(1) + "px;top:" + (v.cy + oy - s.h / 2).toFixed(1) + "px;width:" + s.w + "px;height:" + s.h + "px;font-size:" + s.fs + "px;font-weight:" + s.fw + ";line-height:" + s.lh + "px;padding:" + s.py + "px " + s.px + "px;--bc:" + v.col + (/^(fill|fillr|pillf)$/.test(mmShp(th, v)) ? ";--mon:" + mmOnC(th, v.col) : "") + (x.st && x.st.tc ? ";color:" + x.st.tc : "") + (s.it ? ";font-style:italic" : "");
-      var inner = (x.img ? '<img class="mmimg" data-ydimg="' + esc(x.img) + '" alt="" style="width:' + s.iw + "px;height:" + s.ih + 'px">' : "") + (ed ? '<input class="mmin" id="mmin" value="' + esc(mmLabel(n, x)) + '" autocomplete="off" aria-label="Текст узла">' : s.lines.map(esc).join("<br>") + (x.nt ? '<span class="mmntb" title="' + esc(x.nt) + '">📝</span>' : ""));
+      var inner = (x.img ? '<img class="mmimg" data-ydimg="' + esc(x.img) + '" alt="" style="width:' + s.iw + "px;height:" + s.ih + 'px">' : "") + (ed ? '<input class="mmin" id="mmin" value="' + esc(mmLabel(n, x)) + '" autocomplete="off" aria-label="Текст узла">' : mmMkHTML(x, s) + s.lines.map(esc).join("<br>") + (x.nt ? '<span class="mmntb" title="' + esc(x.nt) + '">📝</span>' : ""));
       var fold = kc && v.d > 0 ? '<button type="button" class="mmf' + (x.f ? " on" : "") + '" data-a="mmfold" data-id="' + id + '" style="' + (v.vert ? "left:50%;top:auto;bottom:-22px;transform:translateX(-50%)" : v.side > 0 ? "right:-22px" : "left:-22px") + '" title="' + (x.f ? "Развернуть" : "Свернуть") + '">' + (x.f ? mmCount(x) : "−") + "</button>" : "";
-      var tk = mmTask(x), pgl = mmPage(x), bdg = (tk && !tk.del ? '<button type="button" class="mmtk' + (tk.done ? " on" : "") + '" data-a="mmck" data-id="' + id + '" title="' + (tk.done ? "Задача выполнена — вернуть" : "Задача — отметить выполненной") + '">' + (tk.done ? "✓" : "") + "</button>" : "") + (pgl ? '<button type="button" class="mmpg" data-a="mmpg" data-id="' + id + '" title="Открыть страницу «' + esc(nTitle(pgl)) + '»">📄</button>' : "") + (tk && !tk.del && !tk.done && (tk.at || tk.due) ? '<span class="mmdue' + (isLate(tk) ? " late" : mmDue(tk) === "сегодня" ? " tod" : "") + '">' + esc(mmDue(tk)) + "</span>" : "");
-      return '<div class="mmn d' + Math.min(v.d, 2) + " sh-" + mmShp(th, v) + (MMSEL === id ? " sel" : "") + (x.f ? " fld" : "") + (tk && tk.done ? " dn" : "") + (mmHit(n, x) ? " mmhit" : "") + '" data-mid="' + id + '" style="' + st + '"' + (x.nt ? ' title="' + esc(x.nt) + '"' : "") + ">" + inner + fold + bdg + "</div>";
-    }).join("") + mmRelLabels(n, N, ox, oy, rd);
+      var tk = mmTask(x), pgl = mmPage(x), bdg = mmPrgHTML(v) + (tk && !tk.del ? '<button type="button" class="mmtk' + (tk.done ? " on" : "") + '" data-a="mmck" data-id="' + id + '" title="' + (tk.done ? "Задача выполнена — вернуть" : "Задача — отметить выполненной") + '">' + (tk.done ? "✓" : "") + "</button>" : "") + (pgl ? '<button type="button" class="mmpg" data-a="mmpg" data-id="' + id + '" title="Открыть страницу «' + esc(nTitle(pgl)) + '»">📄</button>' : "") + (tk && !tk.del && !tk.done && (tk.at || tk.due) ? '<span class="mmdue' + (isLate(tk) ? " late" : mmDue(tk) === "сегодня" ? " tod" : "") + '">' + esc(mmDue(tk)) + "</span>" : "");
+      return '<div class="mmn d' + Math.min(v.d, 2) + " sh-" + mmShp(th, v) + (MMSEL === id ? " sel" : MMMS[id] ? " sel ms" : "") + (FK && !FK[id] ? " mmdim" : "") + (x.f ? " fld" : "") + (tk && tk.done ? " dn" : "") + (mmHit(n, x) ? " mmhit" : "") + '" data-mid="' + id + '" style="' + st + '"' + (x.nt ? ' title="' + esc(x.nt) + '"' : "") + ">" + inner + fold + bdg + "</div>";
+    }).join("") + mmRelLabels(n, N, ox, oy, rd) + mmDecoLabels(n, N, ox, oy, rd);
     var tr = "translate(" + (vw.rx - ox * vw.s).toFixed(1) + "px," + (vw.ry - oy * vw.s).toFixed(1) + "px) scale(" + vw.s + ")";
-    h += '<div class="mmvp' + (rd ? " ro" : "") + (n.mm.lay === "down" ? " down" : "") + (MMREL ? " relmode" : "") + mmThCls(th) + (MMBR ? " brush" : "") + '" style="' + mmThVars(th) + '" id="mmvp" tabindex="0" data-note="' + n.id + '" data-ox="' + ox.toFixed(1) + '" data-oy="' + oy.toFixed(1) + '" data-w="' + W + '" data-h="' + H + '"><div class="mmst" style="width:' + W + "px;height:" + H + "px;transform:" + tr + '">' + svg + nodes + "</div></div>";
+    h += '<div class="mmvp' + (rd ? " ro" : "") + (n.mm.lay === "down" ? " down" : "") + (MMREL ? " relmode" : "") + mmThCls(th) + (MMBR ? " brush" : "") + '" style="' + mmThVars(th) + '" id="mmvp" tabindex="0" data-note="' + n.id + '" data-ox="' + ox.toFixed(1) + '" data-oy="' + oy.toFixed(1) + '" data-w="' + W + '" data-h="' + H + '"><div class="mmst" style="width:' + W + "px;height:" + H + "px;transform:" + tr + '">' + svg + nodes + "</div>" + mmMiniHTML(n, N, ox, oy, W, H) + "</div>";
     if (!rd) h += '<p class="muted mmhint">Tab — ветка · Enter — рядом · F2 или пробел — переименовать · Delete — удалить · стрелки — по карте · двойной клик — править · перетащите узел на другой — перенести · колесо — прокрутка, Ctrl+колесо — масштаб · Ctrl+Z — отменить</p>';
     setTimeout(function () { mmAfter(n); if (MMQ.trim()) mmQMarks(n); }, 0);
     return h + "</div>";
@@ -12426,7 +12436,7 @@ CREATE TABLE inbox (
     if (vw && vw.fit) mmFit(n);
     var inp = $("mmin"); if (inp) { try { inp.focus({ preventScroll: true }); } catch (e) { inp.focus(); } inp.select(); } else if (document.activeElement === document.body) { try { vp.focus({ preventScroll: true }); } catch (e) { vp.focus(); } }
   }
-  function mmApply(n) { var vp = $("mmvp"), st = vp && vp.querySelector(".mmst"), vw = MMV[n.id]; if (!st || !vw) return; st.style.transform = "translate(" + (vw.rx - +vp.dataset.ox * vw.s).toFixed(1) + "px," + (vw.ry - +vp.dataset.oy * vw.s).toFixed(1) + "px) scale(" + vw.s + ")"; }
+  function mmApply(n) { setTimeout(function () { mmMiniUpd(n); }, 0); var vp = $("mmvp"), st = vp && vp.querySelector(".mmst"), vw = MMV[n.id]; if (!st || !vw) return; st.style.transform = "translate(" + (vw.rx - +vp.dataset.ox * vw.s).toFixed(1) + "px," + (vw.ry - +vp.dataset.oy * vw.s).toFixed(1) + "px) scale(" + vw.s + ")"; }
   function mmFit(n) { var vp = $("mmvp"); if (!vp) return; var W = +vp.dataset.w, H = +vp.dataset.h, cw = vp.clientWidth, ch = vp.clientHeight, s = Math.max(0.3, Math.min(1.2, (cw - 20) / W, (ch - 20) / H)); MMV[n.id] = { s: s, rx: (cw - W * s) / 2 + +vp.dataset.ox * s, ry: (ch - H * s) / 2 + +vp.dataset.oy * s }; mmApply(n); }
   function mmZoom(n, k, px, py) { var vp = $("mmvp"), vw = MMV[n.id]; if (!vp || !vw) return; if (px === undefined) { px = vp.clientWidth / 2; py = vp.clientHeight / 2; } var s2 = Math.max(0.25, Math.min(2.5, vw.s * k)); vw.rx = px - (px - vw.rx) * s2 / vw.s; vw.ry = py - (py - vw.ry) * s2 / vw.s; vw.s = s2; mmApply(n); }
   // действия с узлами
@@ -12440,7 +12450,7 @@ CREATE TABLE inbox (
   }
   function mmDel(n) {
     var f = mmFind(n, MMSEL); if (!f || !f.p) { toast("Центр карты не удаляется — это название страницы"); return; }
-    mmPush(n); var i = f.p.k.indexOf(f.x), cnt = mmCount(f.x) + 1; f.p.k.splice(i, 1); mmRelClean(n); MMSEL = (f.p.k[i] || f.p.k[i - 1] || f.p).id; mmSave(n);
+    mmPush(n); var i = f.p.k.indexOf(f.x), cnt = mmCount(f.x) + 1; f.p.k.splice(i, 1); mmRelClean(n); mmDecoClean(n); MMSEL = (f.p.k[i] || f.p.k[i - 1] || f.p).id; mmSave(n);
     toastUndo("Удалено узлов: " + cnt, function () { var u = MMU[n.id]; if (u && u.length) { n.mm = JSON.parse(u.pop()); touch(n); } });
   }
   function mmCommit(n, val, cancel) {
@@ -12508,7 +12518,7 @@ CREATE TABLE inbox (
   }
   function mmCtx(k, id, c) {
     var n = note(id); if (!mmIs(n)) return;
-    if (k === "mmcol" || k === "mmic") { var f = mmFind(n, MMSEL); if (!f) return; mmPush(n); if (k === "mmcol") { if (c === "~") delete f.x.c; else f.x.c = +c; } else { if (c === "~") delete f.x.ic; else f.x.ic = c; } mmSave(n); return; }
+    if (k === "mmcol" || k === "mmic") { var fl = mmSelIds(n).map(function (sid) { return mmFind(n, sid); }).filter(Boolean); if (!fl.length) return; mmPush(n); fl.forEach(function (f) { if (k === "mmcol") { if (c === "~") delete f.x.c; else f.x.c = +c; if (f.x.st) { delete f.x.st.c; if (!Object.keys(f.x.st).length) delete f.x.st; } } else { if (c === "~") delete f.x.ic; else f.x.ic = c; } }); mmSave(n); return; }
     if (k === "mmexp") {
       if (c === "png") mmPNG2(n); else if (c === "svg") mmSVGFile(n); else if (c === "pdf") mmPDF(n);
       else if (c === "md") { nDownload(nFname(n) + ".md", "# " + nTitle(n) + "\n\n" + mmMd(mmRoot(n)), "text/markdown;charset=utf-8"); toast("Markdown сохранён в «Загрузки»"); }
@@ -12529,6 +12539,8 @@ CREATE TABLE inbox (
     if (mod && /^[cсCС]$/.test(k)) { e.preventDefault(); e.stopPropagation(); mmClipSet(n, false); return; }
     if (mod && /^[xчXЧ]$/.test(k)) { e.preventDefault(); e.stopPropagation(); mmClipSet(n, true); return; }
     if (mod && /^[vмVМ]$/.test(k)) { clearTimeout(MMPV); MMPV = setTimeout(function () { MMPV = 0; mmPasteText(n); }, 150); return; }
+    if (mod && k === "Enter") { e.preventDefault(); e.stopPropagation(); mmAddParent(n); return; }
+    if (e.altKey && !mod && /^Digit[0-5]$/.test(e.code || "")) { e.preventDefault(); e.stopPropagation(); var dg = +e.code.slice(5); mmMkSet(n, "p", dg || ""); return; }
     if (k === "Escape" && MMBR) { e.preventDefault(); e.stopPropagation(); MMBR = null; render(); toast("Кисть выключена"); return; }
     if (mod && /^[bиBИ]$/.test(k)) { e.preventDefault(); e.stopPropagation(); var fb = mmFind(n, MMSEL); if (fb) mmStSet(n, "b", !(fb.x.st && fb.x.st.b)); return; }
     if (mod && /^[iшIШ]$/.test(k)) { e.preventDefault(); e.stopPropagation(); var fi = mmFind(n, MMSEL); if (fi) mmStSet(n, "i", !(fi.x.st && fi.x.st.i)); return; }
@@ -12538,9 +12550,10 @@ CREATE TABLE inbox (
     if (mod || e.altKey) return;
     if (k === "Tab") { e.preventDefault(); e.stopPropagation(); mmAdd(n, false); }
     else if (k === "Enter") { e.preventDefault(); e.stopPropagation(); mmAdd(n, MMSEL !== mmVRoot(n).id); }
-    else if (k === "Delete" || k === "Backspace") { e.preventDefault(); e.stopPropagation(); mmDel(n); }
+    else if (k === "Delete" || k === "Backspace") { e.preventDefault(); e.stopPropagation(); if (Object.keys(MMMS).length) mmDelMany(n); else mmDel(n); }
     else if (k === "F2" || k === " ") { e.preventDefault(); e.stopPropagation(); MMED = MMSEL; render(); }
     else if (/^Arrow/.test(k)) { e.preventDefault(); e.stopPropagation(); mmNav(n, k); }
+    else if (k === "Escape" && Object.keys(MMMS).length) { MMMS = {}; render(); }
     else if (k === "Escape") { if (MMFOC) { MMFOC = ""; if (MMV[n.id]) MMV[n.id].fit = 1; } else MMSEL = mmRoot(n).id; render(); }
   }, true);
   document.addEventListener("focusout", function (e) { var t = e.target; if (t && t.id === "mmin" && MMED) { var n = mmCur(); if (n) setTimeout(function () { if (MMED && $("mmin") === t) mmCommit(n, t.value); }, 120); } });
@@ -12605,7 +12618,7 @@ CREATE TABLE inbox (
     MMPT[e.pointerId] = { x: e.clientX, y: e.clientY }; try { vp.setPointerCapture(e.pointerId); } catch (er) { /* ok */ }
     var ids = Object.keys(MMPT);
     if (ids.length >= 2 && vw) { var a = MMPT[ids[0]], b = MMPT[ids[1]], r = vp.getBoundingClientRect(); if (MMDR && MMDR.el) { MMDR.el.classList.remove("mmdrag"); MMDR.el.style.transform = ""; } MMDR = null; MMPAN = null; MMPINCH = { d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, s0: vw.s, mx0: (a.x + b.x) / 2 - r.left, my0: (a.y + b.y) / 2 - r.top, rx0: vw.rx, ry0: vw.ry, l: r.left, t: r.top }; return; }
-    if (nd) MMDR = { id: nd.dataset.mid, el: nd, x0: e.clientX, y0: e.clientY, moved: false, ro: vp.classList.contains("ro") };
+    if (nd) MMDR = { id: nd.dataset.mid, el: nd, x0: e.clientX, y0: e.clientY, moved: false, ro: vp.classList.contains("ro"), add: e.shiftKey || e.ctrlKey || e.metaKey };
     else MMPAN = { x0: e.clientX, y0: e.clientY, rx: vw ? vw.rx : 0, ry: vw ? vw.ry : 0 };
   });
   document.addEventListener("pointermove", function (e) {
@@ -12623,6 +12636,8 @@ CREATE TABLE inbox (
   document.addEventListener("pointerup", function (e) {
     if (mmPtrEnd(e)) return;
     var n = mmCur(); if (MMPAN) { MMPAN = null; return; } var d = MMDR; MMDR = null; if (!d || !n) return;
+    if (!d.moved && d.add && !d.ro && !MMBR && !MMREL) { mmMsToggle(n, d.id); return; }
+    if (!d.moved && Object.keys(MMMS).length && !MMBR && !MMREL) { MMMS = {}; if (MMSEL === d.id) { render(); return; } }
     if (!d.moved && MMBR && !d.ro) { mmBrushTo(n, d.id); return; }
     if (!d.moved && MMREL && !d.ro) { mmRelAdd(n, MMREL, d.id); return; }
     if (!d.moved) { if (!d.ro && MMLC && MMLC.id === d.id && Date.now() - MMLC.t < 450) { MMLC = null; MMSEL = MMED = d.id; render(); return; } MMLC = { id: d.id, t: Date.now() }; if (MMSEL !== d.id) { MMSEL = d.id; render(); } return; }
@@ -12856,13 +12871,13 @@ CREATE TABLE inbox (
       case "mmreldel": mmPush(n); n.mm.rel = mmRels(n).filter(function (x) { return x.id !== MMRELED; }); MMRELED = ""; mmSave(n); toast("Связь удалена"); return true;
       case "mmimg": mmImgPick(n); return true;
       case "mmmore": var rm = el.getBoundingClientRect(), lay = n.mm.lay || "both", sel = mmFind(n, MMSEL), cl = mmClipGet();
-        ctxShow(rm.left, rm.bottom + 4, [{ c: "copy", i: "⧉", l: "Копировать ветку", k: "Ctrl+C" }, { c: "cut", i: "✂", l: "Вырезать ветку", k: "Ctrl+X" }, { c: "paste", i: "📥", l: cl ? "Вставить ветку в выбранный узел" : "Вставить ветку (буфер пуст)", k: "Ctrl+V" }, "-", { c: "lay:both", i: lay === "both" ? "✓" : "↔", l: "Раскладка: вправо и влево" }, { c: "lay:right", i: lay === "right" ? "✓" : "→", l: "Раскладка: всё вправо (дерево)" }, { c: "lay:down", i: lay === "down" ? "✓" : "↓", l: "Раскладка: сверху вниз (оргструктура)" }].concat(sel && sel.x.img ? ["-", { c: "noimg", i: "🖼", l: "Убрать картинку из узла" }] : []), { k: "mmmore", id: n.id }); return true;
+        ctxShow(rm.left, rm.bottom + 4, [{ c: "copy", i: "⧉", l: "Копировать ветку", k: "Ctrl+C" }, { c: "cut", i: "✂", l: "Вырезать ветку", k: "Ctrl+X" }, { c: "paste", i: "📥", l: cl ? "Вставить ветку в выбранный узел" : "Вставить ветку (буфер пуст)", k: "Ctrl+V" }, "-", { c: "par", i: "⤒", l: "Вставить родителя (обернуть узел)", k: "Ctrl+Enter" }, { c: "sort:az", i: "↧", l: "Сортировать ветки: А → Я" }, { c: "sort:za", i: "↥", l: "Сортировать ветки: Я → А" }, { c: "sort:p", i: "①", l: "Сортировать ветки: по приоритету" }, { c: "sort:due", i: "⏰", l: "Сортировать ветки: по сроку задачи" }, "-", { c: "lay:both", i: lay === "both" ? "✓" : "↔", l: "Раскладка: вправо и влево" }, { c: "lay:right", i: lay === "right" ? "✓" : "→", l: "Раскладка: всё вправо (дерево)" }, { c: "lay:down", i: lay === "down" ? "✓" : "↓", l: "Раскладка: сверху вниз (оргструктура)" }, "-", { c: "mini", i: LS.get("zd-mmmini") === "0" ? "▣" : "✓", l: "Мини-карта в углу" }].concat(sel && sel.x.img ? ["-", { c: "noimg", i: "🖼", l: "Убрать картинку из узла" }] : []), { k: "mmmore", id: n.id }); return true;
     }
     return false;
   }
   function mm4Ctx(k, id, c) {
     var n = note(id); if (!mmIs(n)) return;
-    if (k !== "mmmore") return;
+    if (k !== "mmmore") return; if (mm7More(n, c)) return;
     if (c === "copy") mmClipSet(n, false); else if (c === "cut") mmClipSet(n, true); else if (c === "paste") mmPasteText(n);
     else if (c.indexOf("lay:") === 0) { mmPush(n); n.mm.lay = c.slice(4); if (MMV[n.id]) MMV[n.id].fit = 1; mmSave(n); toast({ both: "Вправо и влево", right: "Всё вправо", down: "Сверху вниз" }[n.mm.lay] || ""); }
     else if (c === "noimg") { var f = mmFind(n, MMSEL); if (f && f.x.img) { mmPush(n); var p = f.x.img; delete f.x.img; delete f.x.imgr; mmSave(n); if (YD.token()) YD.api("/resources?path=" + encodeURIComponent(p), { method: "DELETE", ok: [202, 204, 404] }).catch(function () { /* уже нет */ }); } }
@@ -12953,14 +12968,16 @@ CREATE TABLE inbox (
     var fx = th.bg, bg = fx ? fx[0] : hex ? "#ffffff" : "var(--panel)", fg = fx ? fx[1] : hex ? "#1c211f" : "var(--fg)", mu = fx ? fx[2] : hex ? "#8a8f8c" : "var(--muted)";
     var ff = (MMFF[th.ff] || getComputedStyle(document.body).fontFamily || "sans-serif").replace(/"/g, "'"), col = function (c) { return c === "var(--fg)" ? fg : c; };
     var s = "<svg " + (hex ? 'xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" ' : 'class="mmw" preserveAspectRatio="xMidYMid meet"' + (fx ? ' style="--panel:' + fx[0] + ";--fg:" + fx[1] + ";--muted:" + fx[2] + '"' : "") + " ") + 'viewBox="0 0 ' + W + " " + H + '"><rect width="100%" height="100%" style="fill:' + bg + '"/>' + (th.glow ? MMGLOW : "");
+    var DC = { fg: fg, mu: mu, bg: bg, ff: ff }; s += mmDecoSVG(n, N, ox, oy, DC, false);
     Object.keys(N).forEach(function (id) { var v = N[id]; if (!v.p || v.cx === undefined) return; s += mmEdgeEl(th, N, v, ox, oy, col(v.col)); });
     s += mmRelSVG(n, N, ox, oy, hex ? { m: mu, bg: bg } : false);
     Object.keys(N).forEach(function (id) {
       var v = N[id]; if (v.cx === undefined) return; var c = col(v.col), sh = mmShp(th, v), x0 = v.cx + ox - v.s.w / 2, y0 = v.cy + oy - v.s.h / 2, t = mmTask(v.x), ty = y0 + v.s.py + (v.s.ih ? v.s.ih + 6 : 0), tc = (v.x.st && v.x.st.tc) || (/^(fill|fillr|pillf)$/.test(sh) ? mmOnC(th, c) : sh === "plainc" ? c : fg);
-      s += mmShapeSVG(sh, x0, y0, v.s.w, v.s.h, c, bg, th.tint || 16, th.glow);
+      s += mmShapeSVG(sh, x0, y0, v.s.w, v.s.h, c, bg, th.tint || 16, th.glow) + mmMkDraw(v, x0, ty, ff) + mmPrgSVG(v, x0, y0, DC);
       if (v.s.ih) s += '<rect x="' + mmF(x0 + (v.s.w - v.s.iw) / 2) + '" y="' + mmF(y0 + v.s.py) + '" width="' + v.s.iw + '" height="' + v.s.ih + '" rx="6" style="fill:' + mu + ';fill-opacity:.18"/><text x="' + mmF(x0 + v.s.w / 2) + '" y="' + mmF(y0 + v.s.py + v.s.ih / 2 + 7) + '" text-anchor="middle" font-size="20">🖼</text>';
-      v.s.lines.forEach(function (l, i) { s += '<text x="' + mmF(v.d === 0 ? x0 + v.s.w / 2 : x0 + v.s.px) + '" y="' + mmF(ty + v.s.lh * (i + 0.72)) + '"' + (v.d === 0 ? ' text-anchor="middle"' : "") + ' font-family="' + esc(ff) + '" font-size="' + v.s.fs + '" font-weight="' + v.s.fw + '"' + (v.s.it ? ' font-style="italic"' : "") + ' style="fill:' + tc + '"' + (t && t.done ? ' text-decoration="line-through" opacity="0.6"' : "") + ">" + (i === 0 && t ? (t.done ? "✓ " : "☐ ") : "") + esc(l) + "</text>"; });
+      v.s.lines.forEach(function (l, i) { s += '<text x="' + mmF(v.d === 0 ? x0 + v.s.w / 2 + (i ? 0 : v.s.mkw / 2) : x0 + v.s.px + (i ? 0 : v.s.mkw)) + '" y="' + mmF(ty + v.s.lh * (i + 0.72)) + '"' + (v.d === 0 ? ' text-anchor="middle"' : "") + ' font-family="' + esc(ff) + '" font-size="' + v.s.fs + '" font-weight="' + v.s.fw + '"' + (v.s.it ? ' font-style="italic"' : "") + ' style="fill:' + tc + '"' + (t && t.done ? ' text-decoration="line-through" opacity="0.6"' : "") + ">" + (i === 0 && t ? (t.done ? "✓ " : "☐ ") : "") + esc(l) + "</text>"; });
     });
+    s += mmDecoSVG(n, N, ox, oy, DC, true).replace(/<rect [^>]*stroke-dasharray[^>]*>/g, "");
     s += "</svg>";
     return hex ? { s: s, W: W, H: H } : s;
   }
@@ -13043,8 +13060,8 @@ CREATE TABLE inbox (
   // стиль узла
   function mmStTargets(n, x) { var l = [x]; if (MMSTB) mmWalk(x, function (y) { if (y !== x) l.push(y); }); return l; }
   function mmStSet(n, key, val) {
-    var f = mmFind(n, MMSEL); if (!f) return; mmPush(n);
-    (key === "c" ? [f.x] : mmStTargets(n, f.x)).forEach(function (x) { var st = x.st || {}; if (val === "" || val === null || val === undefined || val === false) delete st[key]; else st[key] = val; if (key === "c") delete x.c; if (Object.keys(st).length) x.st = st; else delete x.st; });
+    var fl = mmSelIds(n).map(function (id) { return mmFind(n, id); }).filter(Boolean); if (!fl.length) return; mmPush(n); var tg = []; fl.forEach(function (f) { (key === "c" ? [f.x] : mmStTargets(n, f.x)).forEach(function (x) { if (tg.indexOf(x) < 0) tg.push(x); }); });
+    tg.forEach(function (x) { var st = x.st || {}; if (val === "" || val === null || val === undefined || val === false) delete st[key]; else st[key] = val; if (key === "c") delete x.c; if (Object.keys(st).length) x.st = st; else delete x.st; });
     mmSave(n);
   }
   function mmStPanel(n) {
@@ -13086,6 +13103,194 @@ CREATE TABLE inbox (
       case "mmstrst": f = mmFind(n, MMSEL); if (!f) return true; mmPush(n); mmStTargets(n, f.x).forEach(function (x) { delete x.st; delete x.c; }); mmSave(n); toast(MMSTB ? "Стиль ветки сброшен к теме" : "Стиль узла сброшен к теме"); return true;
       case "mmbrush": if (MMBR) { MMBR = null; render(); toast("Кисть выключена"); return true; } f = mmFind(n, MMSEL); if (!f) return true; MMBR = { st: f.x.st ? JSON.parse(JSON.stringify(f.x.st)) : null, c: f.x.c }; render(); toast("Кисть: нажимайте узлы, чтобы перенести на них стиль; Esc — закончить"); return true;
     }
+    return false;
+  }
+
+  /* --- карта: метки (x.mk: p — приоритет 1–5, f — флажок, s — отметка, g — прогресс %), кольцо задач ветки, рамки (n.mm.bd) и скобки-итоги (n.mm.sum),
+     нумерация (n.mm.num), выделение нескольких узлов (MMMS), вставка родителя, сортировка, мини-карта, фильтр по меткам --- */
+  var MMMS = {}, MMMKP = false, MMDECO = null, MMFLT = "", MMBAND = null, MMMINID = false;
+  var MMPC = { 1: "#e5484d", 2: "#f76b15", 3: "#e2a400", 4: "#3e63dd", 5: "#8b8d98" }, MMFC = { r: "#e5484d", o: "#f76b15", g: "#30a46c", b: "#3e63dd", p: "#8e4ec6" };
+  var MMFN = { r: "красный", o: "оранжевый", g: "зелёный", b: "синий", p: "фиолетовый" }, MMSN = { ok: "Готово", no: "Нет", q: "Вопрос", ex: "Важно", star: "Звезда" };
+  var MMFLTN = { "": "Показать всё", p1: "Приоритет 1", p12: "Приоритет 1–2", flag: "С флажком", star: "Со звездой", ok: "Отмечено «готово»", open: "Незавершённые задачи", done: "Выполненные задачи", prg: "Прогресс меньше 100%" };
+  function mmSelIds(n) { var out = []; [MMSEL].concat(Object.keys(MMMS)).forEach(function (id) { if (id && out.indexOf(id) < 0 && mmFind(n, id)) out.push(id); }); return out; }
+  // значки меток: рисуются и на экране (внутри маленького svg), и в картинке
+  function mmMkSVG(k, v, x, y, z) {
+    var r = z / 2, cx = x + r, cy = y + r, F = mmF, T = function (t, c, fz) { return '<text x="' + F(cx) + '" y="' + F(cy + z * 0.33) + '" text-anchor="middle" font-family="Arial, sans-serif" font-size="' + F(fz || z * 0.72) + '" font-weight="700" style="fill:' + (c || "#ffffff") + '">' + t + "</text>"; }, C = function (c) { return '<circle cx="' + F(cx) + '" cy="' + F(cy) + '" r="' + F(r) + '" style="fill:' + c + '"/>'; };
+    if (k === "p") return C(MMPC[v] || "#8b8d98") + T(v);
+    if (k === "f") { var fc = MMFC[v] || "#e5484d"; return '<path d="M' + F(x + z * 0.27) + " " + F(y + z * 0.1) + " V" + F(y + z * 0.95) + '" style="stroke:' + fc + ';stroke-width:1.8;stroke-linecap:round"/><path d="M' + F(x + z * 0.27) + " " + F(y + z * 0.12) + " L" + F(x + z * 0.9) + " " + F(y + z * 0.32) + " L" + F(x + z * 0.27) + " " + F(y + z * 0.54) + ' Z" style="fill:' + fc + '"/>'; }
+    if (k === "s") {
+      if (v === "ok") return C("#30a46c") + '<path d="M' + F(x + z * 0.27) + " " + F(y + z * 0.52) + " L" + F(x + z * 0.44) + " " + F(y + z * 0.7) + " L" + F(x + z * 0.75) + " " + F(y + z * 0.33) + '" style="fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"/>';
+      if (v === "no") return C("#e5484d") + '<path d="M' + F(x + z * 0.32) + " " + F(y + z * 0.32) + " L" + F(x + z * 0.68) + " " + F(y + z * 0.68) + " M" + F(x + z * 0.68) + " " + F(y + z * 0.32) + " L" + F(x + z * 0.32) + " " + F(y + z * 0.68) + '" style="stroke:#fff;stroke-width:2;stroke-linecap:round"/>';
+      if (v === "q") return C("#e2a400") + T("?");
+      if (v === "ex") return C("#e5484d") + T("!");
+      var pts = []; for (var i = 0; i < 10; i++) { var a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r; pts.push(F(cx + rr * Math.cos(a)) + "," + F(cy + rr * Math.sin(a))); } return '<polygon points="' + pts.join(" ") + '" style="fill:#f5b301"/>';
+    }
+    if (k === "g") {
+      var p = Math.max(0, Math.min(100, +v || 0)), rp = r - 1.2; if (p >= 100) return C("#30a46c") + mmMkSVG("s", "ok", x, y, z).replace(/^<circle[^>]*>/, "");
+      var ang = 2 * Math.PI * p / 100, ex = cx + rp * Math.sin(ang), ey = cy - rp * Math.cos(ang);
+      return '<circle cx="' + F(cx) + '" cy="' + F(cy) + '" r="' + F(rp) + '" style="fill:#ffffff;stroke:#3e63dd;stroke-width:1.5"/>' + (p > 0 ? '<path d="M' + F(cx) + " " + F(cy) + " L" + F(cx) + " " + F(cy - rp) + " A" + F(rp) + " " + F(rp) + " 0 " + (p > 50 ? 1 : 0) + " 1 " + F(ex) + " " + F(ey) + ' Z" style="fill:#3e63dd"/>' : "");
+    }
+    return "";
+  }
+  function mmMkList(x) { var m = x.mk || {}, l = []; if (m.p) l.push(["p", m.p]); if (typeof m.g === "number") l.push(["g", m.g]); if (m.f) l.push(["f", m.f]); if (m.s) l.push(["s", m.s]); return l; }
+  function mmMkZ(fs) { return Math.round(Math.max(13, Math.min(26, fs * 1.02))); }
+  function mmMkW(x, fs) { var l = mmMkList(x).length; return l ? l * (mmMkZ(fs) + 3) : 0; }
+  function mmMkName(m) { return m[0] === "p" ? "Приоритет " + m[1] : m[0] === "f" ? "Флажок " + (MMFN[m[1]] || "") : m[0] === "s" ? MMSN[m[1]] || "" : "Прогресс " + m[1] + "%"; }
+  function mmMkHTML(x, s) { var l = mmMkList(x); if (!l.length) return ""; var z = mmMkZ(s.fs); return '<span class="mmmks" title="' + esc(l.map(mmMkName).join(" · ")) + '">' + l.map(function (m) { return '<svg width="' + z + '" height="' + z + '" viewBox="0 0 ' + z + " " + z + '" aria-hidden="true">' + mmMkSVG(m[0], m[1], 0, 0, z) + "</svg>"; }).join("") + "</span>"; }
+  function mmMkDraw(v, x0, ty, ff) {
+    var l = mmMkList(v.x); if (!l.length) return ""; var z = mmMkZ(v.s.fs), xs = x0 + v.s.px, out = "";
+    if (v.d === 0) { var tw = mmMeasure(v.s.lines[0] || "", (v.s.it ? "italic " : "") + v.s.fw + " " + v.s.fs + "px " + ff); xs = x0 + v.s.w / 2 - (tw + v.s.mkw) / 2; }
+    l.forEach(function (m, i) { out += mmMkSVG(m[0], m[1], xs + i * (z + 3), ty + (v.s.lh - z) / 2, z); });
+    return out;
+  }
+  function mmMkSet(n, key, val) {
+    var ids = mmSelIds(n); if (!ids.length) return; var xs = ids.map(function (id) { return mmFind(n, id).x; }), all = val !== "" && xs.every(function (x) { return x.mk && x.mk[key] === val; });
+    mmPush(n); xs.forEach(function (x) { var m = x.mk || {}; if (val === "" || all) delete m[key]; else m[key] = val; if (Object.keys(m).length) x.mk = m; else delete x.mk; }); mmSave(n);
+  }
+  // кольцо прогресса: сколько задач ветки выполнено
+  function mmPrgHTML(v) {
+    if (!v.prg || !v.prg[1] || !(v.x.k || []).length) return ""; var d = v.prg[0], t = v.prg[1], c = 2 * Math.PI * 4.6;
+    return '<span class="mmprg' + (d === t ? " full" : "") + '" title="Задачи в ветке: выполнено ' + d + " из " + t + '"><svg width="13" height="13" viewBox="0 0 13 13" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.6" style="fill:none;stroke:var(--line);stroke-width:2.2"/><circle cx="6.5" cy="6.5" r="4.6" transform="rotate(-90 6.5 6.5)" style="fill:none;stroke:var(--ok);stroke-width:2.2;stroke-dasharray:' + (c * d / t).toFixed(2) + " " + c.toFixed(2) + '"/></svg>' + d + "/" + t + "</span>";
+  }
+  function mmPrgSVG(v, x0, y0, C) {
+    if (!v.prg || !v.prg[1] || !(v.x.k || []).length) return ""; var d = v.prg[0], t = v.prg[1], txt = d + "/" + t, pw = 24 + txt.length * 6.2, px = x0 + v.s.w - 8 - pw, py = y0 + v.s.h - 7, cc = 2 * Math.PI * 4.6, ok = "#30a46c";
+    return '<rect x="' + mmF(px) + '" y="' + mmF(py) + '" width="' + mmF(pw) + '" height="17" rx="8.5" style="fill:' + C.bg + ";stroke:" + (d === t ? ok : C.mu) + ';stroke-width:1"/><circle cx="' + mmF(px + 9) + '" cy="' + mmF(py + 8.5) + '" r="4.6" style="fill:none;stroke:' + C.mu + ';stroke-opacity:.35;stroke-width:2.2"/><circle cx="' + mmF(px + 9) + '" cy="' + mmF(py + 8.5) + '" r="4.6" transform="rotate(-90 ' + mmF(px + 9) + " " + mmF(py + 8.5) + ')" style="fill:none;stroke:' + ok + ";stroke-width:2.2;stroke-dasharray:" + (cc * d / t).toFixed(2) + " " + cc.toFixed(2) + '"/><text x="' + mmF(px + 17) + '" y="' + mmF(py + 12.5) + '" font-family="Arial, sans-serif" font-size="10.5" font-weight="700" style="fill:' + (d === t ? ok : C.mu) + '">' + txt + "</text>";
+  }
+  // рамки и скобки-итоги: геометрия по узлам группы и всем их видимым веткам
+  function mmGrpBox(N, ids) {
+    var b = null; ids.forEach(function (id) { var v = N[id]; if (!v) return; mmWalk(v.x, function (y) { var u = N[y.id]; if (!u || u.cx === undefined) return; var x0 = u.cx - u.s.w / 2, x1 = u.cx + u.s.w / 2, y0 = u.cy - u.s.h / 2, y1 = u.cy + u.s.h / 2; if (!b) b = { x0: x0, y0: y0, x1: x1, y1: y1 }; else { b.x0 = Math.min(b.x0, x0); b.x1 = Math.max(b.x1, x1); b.y0 = Math.min(b.y0, y0); b.y1 = Math.max(b.y1, y1); } }); }); return b;
+  }
+  function mmBrace(a, b, at, sd, vert) {
+    var w = Math.min(9, Math.abs(b - a) / 4), m = (a + b) / 2, P = function (u, t) { return vert ? mmF(t) + " " + mmF(u) : mmF(u) + " " + mmF(t); }, u = function (k) { return at + sd * k; };
+    return "M" + P(at, a) + " Q" + P(u(w), a) + " " + P(u(w), a + w) + " L" + P(u(w), m - w) + " Q" + P(u(w), m) + " " + P(u(2 * w), m) + " Q" + P(u(w), m) + " " + P(u(w), m + w) + " L" + P(u(w), b - w) + " Q" + P(u(w), b) + " " + P(at, b);
+  }
+  function mmDecoGeo(n, N, ff) {
+    var out = [];
+    (n.mm.bd || []).forEach(function (o) { var bx = mmGrpBox(N, o.ids), v0 = N[o.ids.filter(function (id) { return N[id]; })[0]]; if (!bx || !v0) return; out.push({ k: "bd", o: o, x0: bx.x0 - 12, y0: bx.y0 - 12 - (o.t ? 8 : 0), x1: bx.x1 + 12, y1: bx.y1 + 12, col: v0.col }); });
+    (n.mm.sum || []).forEach(function (o) {
+      var bx = mmGrpBox(N, o.ids), v0 = N[o.ids.filter(function (id) { return N[id]; })[0]]; if (!bx || !v0) return;
+      var t = o.t || "Итог", lw = Math.ceil(mmMeasure(t, "600 13px " + ff)) + 24, lh = 24, g = { k: "sum", o: o, t: t, col: v0.col }, sd = v0.side < 0 ? -1 : 1;
+      if (v0.vert) { var at = bx.y1 + 8; g.d = mmBrace(bx.x0, bx.x1, at, 1, true); g.lx0 = (bx.x0 + bx.x1) / 2 - lw / 2; g.ly0 = at + 24; }
+      else { var ax = sd > 0 ? bx.x1 + 8 : bx.x0 - 8; g.d = mmBrace(bx.y0, bx.y1, ax, sd, false); g.lx0 = sd > 0 ? ax + 26 : ax - 26 - lw; g.ly0 = (bx.y0 + bx.y1) / 2 - lh / 2; }
+      g.lx1 = g.lx0 + lw; g.ly1 = g.ly0 + lh; g.x0 = Math.min(bx.x0, g.lx0); g.y0 = Math.min(bx.y0, g.ly0); g.x1 = Math.max(bx.x1, g.lx1); g.y1 = Math.max(bx.y1, g.ly1); out.push(g);
+    });
+    return out;
+  }
+  function mmDecoB(n, N, b) { mmDecoGeo(n, N, MMFF[mmTh(n).ff] || getComputedStyle(document.body).fontFamily || "sans-serif").forEach(function (g) { b.x0 = Math.min(b.x0, g.x0 - 4); b.y0 = Math.min(b.y0, g.y0 - 4); b.x1 = Math.max(b.x1, g.x1 + 4); b.y1 = Math.max(b.y1, g.y1 + 4); }); }
+  function mmDecoSVG(n, N, ox, oy, C, text) {
+    var out = "", F = mmF, col = function (c) { return c === "var(--fg)" ? C.fg : c; };
+    mmDecoGeo(n, N, C.ff).forEach(function (g) {
+      if (g.k === "bd") { var c = col(g.col); out += '<rect x="' + F(g.x0 + ox) + '" y="' + F(g.y0 + oy) + '" width="' + F(g.x1 - g.x0) + '" height="' + F(g.y1 - g.y0) + '" rx="14" style="fill:' + c + ";fill-opacity:.07;stroke:" + c + ';stroke-width:1.5;stroke-dasharray:7 5"/>'; if (text && g.o.t) { var tw = mmMeasure(g.o.t, "600 12px " + C.ff) + 18; out += '<rect x="' + F(g.x0 + ox + 12) + '" y="' + F(g.y0 + oy - 10) + '" width="' + F(tw) + '" height="20" rx="10" style="fill:' + C.bg + ";stroke:" + c + ';stroke-width:1.5"/><text x="' + F(g.x0 + ox + 21) + '" y="' + F(g.y0 + oy + 4) + '" font-family="' + esc(C.ff) + '" font-size="12" font-weight="600" style="fill:' + c + '">' + esc(g.o.t) + "</text>"; } }
+      else { out += '<path d="' + g.d + '" transform="translate(' + F(ox) + " " + F(oy) + ')" style="fill:none;stroke:' + C.mu + ';stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"/>'; if (text) out += '<rect x="' + F(g.lx0 + ox) + '" y="' + F(g.ly0 + oy) + '" width="' + F(g.lx1 - g.lx0) + '" height="' + F(g.ly1 - g.ly0) + '" rx="12" style="fill:' + C.bg + ";stroke:" + C.mu + ';stroke-width:1.5"/><text x="' + F((g.lx0 + g.lx1) / 2 + ox) + '" y="' + F(g.ly0 + oy + 16.5) + '" text-anchor="middle" font-family="' + esc(C.ff) + '" font-size="13" font-weight="600" style="fill:' + C.fg + '">' + esc(g.t) + "</text>"; }
+    });
+    return out;
+  }
+  function mmDecoLabels(n, N, ox, oy, rd) {
+    return mmDecoGeo(n, N, MMFF[mmTh(n).ff] || getComputedStyle(document.body).fontFamily || "sans-serif").map(function (g) {
+      var on = MMDECO && MMDECO.id === g.o.id ? " on" : "";
+      if (g.k === "bd") { if (rd && !g.o.t) return ""; return '<button type="button" class="mmbdl' + (g.o.t ? "" : " empty") + on + '" data-a="' + (rd ? "" : "mmdeco") + '" data-k="bd" data-id="' + g.o.id + '" style="left:' + mmF(g.x0 + ox + 12) + "px;top:" + mmF(g.y0 + oy) + "px;--bc:" + g.col + '" title="' + (rd ? "" : "Подпись рамки, удалить") + '">' + (g.o.t ? esc(g.o.t) : "▢") + "</button>"; }
+      return '<button type="button" class="mmsml' + on + '" data-a="' + (rd ? "" : "mmdeco") + '" data-k="sum" data-id="' + g.o.id + '" style="left:' + mmF(g.lx0 + ox) + "px;top:" + mmF(g.ly0 + oy) + "px;width:" + mmF(g.lx1 - g.lx0) + 'px" title="' + (rd ? "" : "Изменить итог, удалить") + '">' + esc(g.t) + "</button>";
+    }).join("");
+  }
+  function mmDecoClean(n) { var ids = {}; mmWalk(mmRoot(n), function (x) { ids[x.id] = 1; }); ["bd", "sum"].forEach(function (k) { if (!n.mm[k]) return; n.mm[k] = n.mm[k].map(function (o) { o.ids = o.ids.filter(function (id) { return ids[id]; }); return o; }).filter(function (o) { return o.ids.length; }); if (!n.mm[k].length) delete n.mm[k]; }); }
+  function mmDecoAdd(n, k) {
+    var root = mmRoot(n), ids = mmSelIds(n).filter(function (id) { return id !== root.id; }); if (!ids.length) { toast("Выберите ветку (не центр карты) — Shift+клик добавит ещё"); return; }
+    if (k === "sum") { var p = mmFind(n, ids[0]).p, l0 = ids.length; ids = ids.filter(function (id) { return mmFind(n, id).p === p; }).sort(function (a, b) { return p.k.indexOf(mmFind(n, a).x) - p.k.indexOf(mmFind(n, b).x); }); if (ids.length < l0) toast("Итог — для соседних веток одного уровня; остальные пропущены"); }
+    mmPush(n); var o = { id: uid(), ids: ids, t: k === "sum" ? "Итог" : "" }; n.mm[k] = (n.mm[k] || []).concat([o]); MMDECO = { k: k, id: o.id }; mmSave(n); setTimeout(function () { var i = $("mmdect"); if (i) { i.focus(); i.select(); } }, 40);
+  }
+  function mmDecoPanel(n) {
+    var o = (n.mm[MMDECO.k] || []).filter(function (x) { return x.id === MMDECO.id; })[0]; if (!o) return ""; var bd = MMDECO.k === "bd";
+    return '<div class="npop mmdecop"><div class="npoph"><b>' + (bd ? "▢ Рамка вокруг " : "} Итог для ") + o.ids.length + " " + (o.ids.length === 1 ? "ветки" : "веток") + '</b><button type="button" class="ibtn" data-a="mmdecx" aria-label="Закрыть">✕</button></div><div class="r"><input class="inp" id="mmdect" value="' + esc(o.t || "") + '" placeholder="' + (bd ? "Подпись рамки: «Этап 1», «Срочно» — можно без неё" : "Итог: вывод, сумма, общий смысл веток") + '" maxlength="120"><button type="button" class="btn sm pri" data-a="mmdecok">Готово</button><button type="button" class="btn sm" data-a="mmdecdel">🗑 Удалить ' + (bd ? "рамку" : "итог") + "</button></div></div>";
+  }
+  // метки: панель с плитками
+  function mmMkPanel(n) {
+    var f = mmFind(n, MMSEL), m = (f && f.x.mk) || {}, cnt = mmSelIds(n).length, B = function (k, v, tip) { var on = m[k] === v; return '<button type="button" class="mmmkb' + (on ? " on" : "") + '" data-a="mmmkset" data-x="' + k + ":" + v + '" title="' + esc(tip) + '"><svg width="18" height="18" viewBox="0 0 18 18">' + mmMkSVG(k, v, 0, 0, 18) + "</svg></button>"; }, X = function (k) { return '<button type="button" class="mmmkb" data-a="mmmkset" data-x="' + k + ':" title="Убрать">✕</button>'; };
+    return '<div class="npop mmmkp"><div class="npoph"><b>🏷 Метки' + (cnt > 1 ? " — для " + cnt + " узлов" : f ? " «" + esc(mmLabel(n, f.x).slice(0, 30)) + "»" : "") + '</b><button type="button" class="ibtn" data-a="mmmkx" aria-label="Закрыть">✕</button></div>' +
+      '<div class="mmmkr"><span>Приоритет</span>' + [1, 2, 3, 4, 5].map(function (v) { return B("p", v, "Приоритет " + v + " (Alt+" + v + ")"); }).join("") + X("p") + "</div>" +
+      '<div class="mmmkr"><span>Флажок</span>' + Object.keys(MMFC).map(function (v) { return B("f", v, "Флажок " + MMFN[v]); }).join("") + X("f") + "</div>" +
+      '<div class="mmmkr"><span>Отметка</span>' + Object.keys(MMSN).map(function (v) { return B("s", v, MMSN[v]); }).join("") + X("s") + "</div>" +
+      '<div class="mmmkr"><span>Прогресс</span>' + [0, 25, 50, 75, 100].map(function (v) { return B("g", v, "Прогресс " + v + "%"); }).join("") + X("g") + "</div>" +
+      '<div class="r"><button type="button" class="btn sm" data-a="mmbd" title="Пунктирная рамка вокруг выделенных веток">▢ Рамка</button><button type="button" class="btn sm" data-a="mmsum" title="Фигурная скобка с выводом для соседних веток">} Итог</button><button type="button" class="btn sm' + (n.mm.num ? " on" : "") + '" data-a="mmnum" title="1, 1.1, 1.2 …">№ Нумерация</button><button type="button" class="btn sm" data-a="mmmkclr">✕ Убрать все метки</button></div>' +
+      '<p class="muted mmhint">Метки ставятся на все выделенные узлы: Shift+клик — добавить узел, Shift+тянуть по фону — выделить рамкой. Alt+1…5 — приоритет, Alt+0 — убрать. «▢ Рамка» и «} Итог» — тоже для выделенных.</p></div>';
+  }
+  // фильтр: неподходящие узлы бледнеют, путь к подходящим остаётся ярким
+  function mmFltOk(x, v) {
+    var m = x.mk || {}, t = mmTask(x);
+    switch (MMFLT) { case "p1": return m.p === 1; case "p12": return m.p === 1 || m.p === 2; case "flag": return !!m.f; case "star": return m.s === "star"; case "ok": return m.s === "ok"; case "open": return !!(t && !t.del && !t.done); case "done": return !!(t && !t.del && t.done); case "prg": return (typeof m.g === "number" && m.g < 100) || !!(v.prg && v.prg[1] && v.prg[0] < v.prg[1]); }
+    return true;
+  }
+  function mmFltKeep(n, N) { if (!MMFLT) return null; var keep = {}, hit = 0; Object.keys(N).forEach(function (id) { var v = N[id]; if (!mmFltOk(v.x, v)) return; hit++; while (v) { keep[v.x.id] = 1; v = v.p ? N[v.p.id] : null; } }); keep._hit = hit; return keep; }
+  // несколько узлов
+  function mmMsToggle(n, id) { if (id === MMSEL) { var o = Object.keys(MMMS); if (o.length) { MMSEL = o[0]; delete MMMS[o[0]]; } } else if (MMMS[id]) delete MMMS[id]; else { MMMS[id] = 1; } render(); }
+  function mmDelMany(n) {
+    var root = mmRoot(n), ids = mmSelIds(n).filter(function (id) { return id !== root.id; }); if (!ids.length) { toast("Центр карты не удаляется"); return; }
+    var xs = ids.map(function (id) { return mmFind(n, id); }), top = xs.filter(function (f) { var p = f.p; while (p) { if (ids.indexOf(p.id) >= 0) return false; var fp = mmFind(n, p.id); p = fp && fp.p; } return true; });
+    mmPush(n); var cnt = 0; top.forEach(function (f) { cnt += mmCount(f.x) + 1; f.p.k.splice(f.p.k.indexOf(f.x), 1); }); mmRelClean(n); mmDecoClean(n); MMMS = {}; MMSEL = (top[0].p || root).id; mmSave(n);
+    toastUndo("Удалено узлов: " + cnt, function () { var u = MMU[n.id]; if (u && u.length) { n.mm = JSON.parse(u.pop()); touch(n); } });
+  }
+  function mmAddParent(n) {
+    var f = mmFind(n, MMSEL); if (!f || !f.p) { toast("У центра карты не может быть родителя"); return; }
+    mmPush(n); var np = { id: uid(), t: "Группа", k: [f.x] }, i = f.p.k.indexOf(f.x); f.p.k.splice(i, 1, np); if (f.p === mmRoot(n)) { if (f.x.side) np.side = f.x.side; delete f.x.side; }
+    MMMS = {}; MMSEL = MMED = np.id; mmSave(n);
+  }
+  function mmSortKids(n, mode) {
+    var f = mmFind(n, MMSEL); if (!f || !(f.x.k || []).length) { toast("У выбранного узла нет веток для сортировки"); return; }
+    var key = function (x) { var t = mmTask(x); return mode === "p" ? (x.mk && x.mk.p) || 9 : mode === "due" ? (t && !t.del && (t.due || t.at)) || Infinity : mmLabel(n, x).toLocaleLowerCase("ru"); };
+    mmPush(n); f.x.k.sort(function (a, b) { var A = key(a), B = key(b); if (mode === "az" || mode === "za") { var r = String(A).localeCompare(String(B), "ru", { numeric: true }); return mode === "za" ? -r : r; } return A - B; }); f.x.f = false; mmSave(n);
+    toast({ az: "Ветки — по алфавиту", za: "Ветки — по алфавиту, с конца", p: "Ветки — по приоритету", due: "Ветки — по сроку задачи" }[mode]);
+  }
+  // мини-карта
+  function mmMiniHTML(n, N, ox, oy, W, H) {
+    if (LS.get("zd-mmmini") === "0" || Object.keys(N).length < 6) return ""; var k = Math.min(180 / W, 120 / H), mw = Math.max(40, Math.round(W * k)), mh = Math.max(30, Math.round(H * k));
+    return '<div class="mmmini" id="mmmini" hidden title="Мини-карта: нажмите, чтобы перейти"><svg width="' + mw + '" height="' + mh + '" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none">' + Object.keys(N).map(function (id) { var v = N[id]; if (v.cx === undefined) return ""; return '<rect x="' + mmF(v.cx + ox - v.s.w / 2) + '" y="' + mmF(v.cy + oy - v.s.h / 2) + '" width="' + mmF(v.s.w) + '" height="' + mmF(v.s.h) + '" rx="4" style="fill:' + v.col + ';opacity:.75"/>'; }).join("") + '<rect id="mmminiv" x="0" y="0" width="1" height="1" style="fill:var(--acc);fill-opacity:.12;stroke:var(--acc);stroke-width:' + mmF(2 / k) + '"/></svg></div>';
+  }
+  function mmMiniUpd(n) {
+    var vp = $("mmvp"), mn = $("mmmini"), rv = $("mmminiv"), vw = n && MMV[n.id]; if (!vp || !mn || !rv || !vw) return;
+    var W = +vp.dataset.w, H = +vp.dataset.h, s = vw.s, X0 = -(vw.rx - +vp.dataset.ox * s) / s, Y0 = -(vw.ry - +vp.dataset.oy * s) / s, Wv = vp.clientWidth / s, Hv = vp.clientHeight / s;
+    rv.setAttribute("x", mmF(X0)); rv.setAttribute("y", mmF(Y0)); rv.setAttribute("width", mmF(Wv)); rv.setAttribute("height", mmF(Hv));
+    mn.hidden = X0 <= 4 && Y0 <= 4 && X0 + Wv >= W - 4 && Y0 + Hv >= H - 4;
+  }
+  function mmMiniGo(e) { var n = mmCur(), vp = $("mmvp"), sv = $("mmmini") && $("mmmini").querySelector("svg"), vw = n && MMV[n.id]; if (!sv || !vw) return; var r = sv.getBoundingClientRect(), X = (e.clientX - r.left) / r.width * +vp.dataset.w, Y = (e.clientY - r.top) / r.height * +vp.dataset.h; vw.fit = 0; vw.rx = vp.clientWidth / 2 - X * vw.s + +vp.dataset.ox * vw.s; vw.ry = vp.clientHeight / 2 - Y * vw.s + +vp.dataset.oy * vw.s; mmApply(n); }
+  // мышь раньше обработчиков карты: мини-карта и выделение рамкой (Shift + тянуть по фону)
+  document.addEventListener("pointerdown", function (e) {
+    var t = e.target; if (!t.closest || e.button > 0) return;
+    if (t.closest("#mmmini")) { e.stopImmediatePropagation(); e.preventDefault(); MMMINID = true; mmMiniGo(e); return; }
+    var vp = t.closest("#mmvp"); if (!vp || !e.shiftKey || vp.classList.contains("ro") || t.closest(".mmn, button, input, textarea")) return;
+    e.stopImmediatePropagation(); e.preventDefault(); var r = vp.getBoundingClientRect(), el = document.createElement("div"); el.className = "mmband"; vp.appendChild(el);
+    MMBAND = { x0: e.clientX, y0: e.clientY, l: r.left, t: r.top, el: el }; mmBandDraw(e);
+  }, true);
+  function mmBandDraw(e) { var B = MMBAND, x = Math.min(B.x0, e.clientX), y = Math.min(B.y0, e.clientY); B.x1 = Math.max(B.x0, e.clientX); B.y1 = Math.max(B.y0, e.clientY); B.xa = x; B.ya = y; B.el.style.cssText = "left:" + (x - B.l) + "px;top:" + (y - B.t) + "px;width:" + (B.x1 - x) + "px;height:" + (B.y1 - y) + "px"; }
+  document.addEventListener("pointermove", function (e) { if (MMMINID) { e.stopImmediatePropagation(); mmMiniGo(e); return; } if (MMBAND) { e.stopImmediatePropagation(); mmBandDraw(e); } }, true);
+  document.addEventListener("pointerup", function (e) {
+    if (MMMINID) { MMMINID = false; e.stopImmediatePropagation(); return; }
+    if (!MMBAND) return; e.stopImmediatePropagation(); var B = MMBAND, n = mmCur(); MMBAND = null; B.el.remove(); if (!n) return;
+    var hit = [].filter.call(document.querySelectorAll("#mmvp .mmn"), function (el) { var r = el.getBoundingClientRect(); return r.right > B.xa && r.left < B.x1 && r.bottom > B.ya && r.top < B.y1; }).map(function (el) { return el.dataset.mid; });
+    if (!hit.length) return; if (!MMSEL || !mmFind(n, MMSEL)) MMSEL = hit.shift(); hit.forEach(function (id) { if (id !== MMSEL) MMMS[id] = 1; }); render(); toast("Выделено узлов: " + mmSelIds(n).length);
+  }, true);
+  document.addEventListener("keydown", function (e) { if (e.target && e.target.id === "mmdect" && e.key === "Enter") { e.preventDefault(); mm7Act("mmdecok", e.target); } }, true);
+  function mm7Act(a, el) {
+    var n = mmCur(); if (!n) return false;
+    switch (a) {
+      case "mmmkb": MMMKP = !MMMKP; render(); return true;
+      case "mmmkx": MMMKP = false; render(); return true;
+      case "mmmkset": var kv = el.dataset.x.split(":"), vv = kv[1] === "" ? "" : kv[0] === "p" || kv[0] === "g" ? +kv[1] : kv[1]; mmMkSet(n, kv[0], vv); return true;
+      case "mmmkclr": mmPush(n); mmSelIds(n).forEach(function (id) { delete mmFind(n, id).x.mk; }); mmSave(n); return true;
+      case "mmnum": mmPush(n); if (n.mm.num) delete n.mm.num; else n.mm.num = true; mmSave(n); return true;
+      case "mmbd": mmDecoAdd(n, "bd"); return true;
+      case "mmsum": mmDecoAdd(n, "sum"); return true;
+      case "mmdeco": MMDECO = { k: el.dataset.k, id: el.dataset.id }; render(); setTimeout(function () { var i = $("mmdect"); if (i) i.focus(); }, 40); return true;
+      case "mmdecx": MMDECO = null; render(); return true;
+      case "mmdecok": if (!MMDECO) return true; var o = (n.mm[MMDECO.k] || []).filter(function (x) { return x.id === MMDECO.id; })[0], tv = (($("mmdect") || {}).value || "").trim().slice(0, 120); MMDECO = null; if (o && o.t !== tv) { mmPush(n); o.t = tv; mmSave(n); } else render(); return true;
+      case "mmdecdel": if (!MMDECO) return true; var dk = MMDECO.k, did = MMDECO.id; MMDECO = null; mmPush(n); n.mm[dk] = (n.mm[dk] || []).filter(function (x) { return x.id !== did; }); if (!n.mm[dk].length) delete n.mm[dk]; mmSave(n); toast(dk === "bd" ? "Рамка удалена" : "Итог удалён"); return true;
+      case "mmflt": var rf = el.getBoundingClientRect(); ctxShow(rf.left, rf.bottom + 4, Object.keys(MMFLTN).map(function (k) { return { c: k || "~", i: MMFLT === k ? "✓" : "", l: MMFLTN[k] }; }), { k: "mmflt", id: n.id }); return true;
+    }
+    return false;
+  }
+  function mm7Ctx(k, id, c) { var n = note(id); if (!mmIs(n)) return; if (k === "mmflt") { MMFLT = c === "~" ? "" : c; render(); if (MMFLT) { var N = mmLayout(n), kp = mmFltKeep(n, N); toast(kp._hit ? "Фильтр «" + MMFLTN[MMFLT] + "»: найдено " + kp._hit : "По фильтру «" + MMFLTN[MMFLT] + "» ничего нет"); } } }
+  function mm7More(n, c) {
+    if (c === "par") { mmAddParent(n); return true; }
+    if (c.indexOf("sort:") === 0) { mmSortKids(n, c.slice(5)); return true; }
+    if (c === "mini") { LS.set("zd-mmmini", LS.get("zd-mmmini") === "0" ? "1" : "0"); render(); toast(LS.get("zd-mmmini") === "0" ? "Мини-карта скрыта" : "Мини-карта — в правом нижнем углу, когда карта не помещается"); return true; }
     return false;
   }
 
@@ -13673,6 +13878,8 @@ CREATE TABLE inbox (
       "<b>🖌 Тема</b> — оформление карты: 10 готовых тем (классика, пастель, деловая, яркая, рукописная, минимал, ночь, неон, природа, контраст). Тема задаёт палитру веток, фон и узор, формы узлов, линии (плавные, прямые, уступом, сужающиеся) и шрифт; запоминается у карты и действует на виджет доски и экспорт. Тему можно сделать темой по умолчанию для всех карт.",
       "<b>⚙ Настроить</b> в панели тем — своя тема поверх выбранной: линии и их толщина, формы узлов центра, первого уровня и дальше, шрифт и размер текста, палитра (в том числе «одним цветом»), фон, узор, плотность, свечение. «💾 Сохранить как свою тему» — появится плиткой рядом с готовыми (✕ на плитке — удалить).",
       "<b>Аа Стиль</b> — оформление выбранного узла: форма, цвет ветки (любой), жирный и курсив (Ctrl+B, Ctrl+I), цвет и размер текста; галочка «для всей ветки» применяет форму и текст ко всем вложенным узлам. <b>🖌 Кисть</b> — скопировать стиль узла и нажимать другие узлы (Esc — закончить). «↺ Сбросить стиль» — вернуть к теме.",
+      "<b>🏷 Метки</b> — приоритет 1–5 (Alt+1…5, Alt+0 — убрать), флажки, отметки (✓ ✗ ? ! ★), прогресс в процентах. Там же: <b>▢ Рамка</b> — пунктирная рамка с подписью вокруг выделенных веток, <b>} Итог</b> — фигурная скобка с выводом для соседних веток, <b>№ Нумерация</b> — 1, 1.1, 1.2. У веток с задачами внизу — кольцо «выполнено 3/5». Подпись рамки или итога — клик по ней.",
+      "<b>Несколько узлов</b>: Shift+клик (или Ctrl+клик) — добавить узел к выделению, Shift+тянуть по пустому месту — выделить рамкой. Метки, цвет, стиль и Delete действуют на все выделенные; Esc — снять выделение. <b>⧩ Фильтр</b> — оставить яркими только узлы с приоритетом, флажком, звездой, незавершёнными задачами и т. п. В «⋯»: <b>вставить родителя</b> (Ctrl+Enter — обернуть узел новым уровнем), <b>сортировка</b> веток (по алфавиту, приоритету, сроку задачи), <b>мини-карта</b> в углу для больших карт.",
       "<b>↗ Связь</b> — стрелка между узлами разных веток: выберите узел, «↗ Связь», затем нажмите второй узел. Подпись («влияет на», «см. также») — клик по значку на стрелке; там же «⇄ Развернуть» и «Удалить». <b>🖼</b> — картинка в узел (с Яндекс Диска, уменьшается до 640 точек).",
       "<b>⋯</b> над картой: копировать, вырезать, вставить ветку (Ctrl+C / Ctrl+X / Ctrl+V — в том числе в другую карту; в Word ветка вставится списком, а многоуровневый список из Word или от ИИ вставится в карту ветками) и <b>раскладка</b>: вправо и влево, всё вправо (как дерево) или сверху вниз (как оргструктура; стрелки ↑↓ — уровни, ←→ — соседи). «⤓» — ещё SVG и PDF.",
       "<b>Карта ↔ задачи и страницы</b>: «☐ В задачу ▾» — выбранный узел или всю ветку (с подзадачами) — в задачи «Входящих» или проекта; на узле появляется кружок-отметка, он живой: отметили на карте — задача выполнена, и наоборот. «📄 В страницу ▾» — узел или ветку — во вложенные страницы карты (📄 на узле открывает страницу) или связать с уже существующей. Переименовали узел — переименуется и задача или страница.",
@@ -14996,6 +15203,8 @@ CREATE TABLE inbox (
     if (a && mm4Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && mm5Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && mm6Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a === "mmmsx") { MMMS = {}; render(); return; }
+    if (a && mm7Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -16381,6 +16590,7 @@ CREATE TABLE inbox (
     if (k === "mmcol" || k === "mmic" || k === "mmexp") { mmCtx(k, id, c); return; }
     if (k === "mmtask" || k === "mmpage" || k === "mmfrom") { mm2Ctx(k, id, c); return; }
     if (k === "mmmore") { mm4Ctx(k, id, c); return; }
+    if (k === "mmflt") { mm7Ctx(k, id, c); return; }
     if (k === "mmlvl") { var lm = note(id); if (mmIs(lm)) mmLevels(lm, c); return; }
     if (k === "nexp") { var en = note(id); if (en) nExport(en, c.replace("+", ""), c.indexOf("+") > 0); return; }
     if (k === "ntplset") { var tn = note(id); if (tn) { if (c === "~") delete tn.tpl; else tn.tpl = c; if (tn.tpl === "map" && !mmRoot(tn)) tn.mm = { r: { id: uid(), k: [] } }; touch(tn); save(); render(); } return; }
