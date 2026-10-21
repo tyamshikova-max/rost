@@ -445,7 +445,9 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .kclist { display: grid } .kcr { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; padding: 5px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; font-size: calc(13.5px * var(--fs)) } .kcr > span:nth-child(2), .kcr > span:nth-child(3) { flex: 1 1 auto; min-width: 0 }
 .kwhy button { padding: 1px 8px; font-size: calc(12px * var(--fs)) }
 .dptop2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; align-items: stretch; margin: 12px 0 4px } .dptop2 > .dptopbox { margin: 0; max-width: none; align-content: start }
-.dphab .htoday { margin: 2px 0 0 } .dptopbox.dphab a::before { content: none } .dptopbox.dphab .htoday > a { color: var(--muted) }
+.dphab .htoday { margin: 2px 0 0 } .dptopbox.dphab { border-color: #9fcfb1; border-color: color-mix(in srgb, var(--ok) 45%, transparent); background: #d9eee1; background: color-mix(in srgb, color-mix(in srgb, var(--ok) 22%, var(--solid, #fff)) var(--sheet, 86%), transparent) }
+html.nosheet .dptopbox.dphab { background: color-mix(in srgb, var(--ok) 15%, transparent) } .dptopbox.dphab > b { color: var(--ok) }
+.dptopbox.dphab a::before { content: none } .dptopbox.dphab .htoday > a { color: var(--muted) }
 .dptopbox a.mv { color: var(--muted) } .dptopbox a.mv::before { content: none } .dptopbox small { color: var(--muted) } .tmvr { margin-top: 4px }
 .dprow.mv .dpt { color: var(--muted) } .dprow.mv .dpstar { color: var(--muted) } .jtop .mv { color: var(--muted) } .wdtmv { flex: none; width: 18px; text-align: center; color: var(--muted) }
 .rqsaved { gap: 6px; flex-wrap: wrap; align-items: center; margin: 4px 0 10px } .rqbuild { display: grid; gap: 10px; padding: 12px 14px; margin: 0 0 12px }
@@ -5520,7 +5522,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-135";
+  var APPV = "zd-app-2026-10-16-136";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
