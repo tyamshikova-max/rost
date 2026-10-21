@@ -415,6 +415,10 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .buchart { width: 100%; height: auto; display: block } .buchart text { font-size: 11px; fill: var(--muted) } .buchart .bcp { fill: var(--ok); font-weight: 700 } .buchart .bcn { fill: #c94a3a; font-weight: 700 } .buchart .bcax { stroke: var(--line) } .bci { fill: #378add } .bce { fill: #e9a83a } .buleg { gap: 12px; font-size: calc(12px * var(--fs)); color: var(--muted) } .buleg i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px } .buleg i.bci { background: #378add } .buleg i.bce { background: #e9a83a }
 .chws { display: grid; gap: 6px } .chw { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: baseline; text-align: left; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 80%, transparent); color: var(--fg); font: inherit; cursor: pointer; position: relative; overflow: hidden }
 .chw > i { grid-column: 1 / -1; height: 4px; border-radius: 3px; background: linear-gradient(90deg, var(--ok) var(--p), var(--hover) var(--p)) } .chw:hover { border-color: var(--acc) } .chwd { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 2px } .chwd b { font-size: calc(18px * var(--fs)); font-variant-numeric: tabular-nums } .chwd .ok { color: var(--ok) } .chwd .bad { color: #c94a3a }
+.dqph { display: inline-flex; gap: 4px; align-items: center } .dqph img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; cursor: zoom-in; border: 1px solid var(--line) } .dqph img.big { position: fixed; inset: 5vh 5vw; width: 90vw; height: 90vh; object-fit: contain; z-index: 80; background: rgba(0, 0, 0, .85); border: 0; border-radius: 12px; cursor: zoom-out }
+.mtot.mbud { display: block; margin-top: 4px } .mtot.mbud.over { color: #c94a3a }
+.stpl { display: grid; gap: 6px; padding: 12px 14px; margin: 12px 0 } .stpr { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding: 4px 0; border-top: 1px solid var(--line) } .stpr.due .stpn { font-weight: 700 } .stpn { flex: 1 1 140px; min-width: 0 }
+.rhch { display: inline-flex; gap: 2px } .chip.soon { box-shadow: inset 0 0 0 1.5px #e9a83a } .chip.rhx { padding: 2px 6px }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5475,7 +5479,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-113";
+  var APPV = "zd-app-2026-10-16-114";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -8714,7 +8718,7 @@ CREATE TABLE inbox (
   function menuMini(m) {
     var T = menuTotals(m), dToday = Math.floor((today0() - m.start) / DAY), ln = "";
     if (dToday >= 0 && dToday < 7) ln = '<div class="mtd"><b>Сегодня:</b> ' + MEALS.map(function (ml) { var it = slotItems(m, slotKey(dToday, ml)); if (!it.length) return ""; return "<span>" + MEALN[ml] + " — " + esc(it.map(dishName.bind(null, m)).join(", ")) + "</span>"; }).filter(Boolean).join(" · ") + "</div>";
-    return '<a class="mlink" href="#menu-' + m.id + '">' + esc(menuTitle(m)) + "</a>" + ln + '<p class="muted">≈ ' + rub(T.cost) + " на неделю · ≈ " + n0(T.avg.k) + ' ккал в день на взрослого</p><div class="r"><a class="btn sm" href="#menu-' + m.id + '">Открыть</a><a class="btn sm" href="#shop-' + m.id + '">🛒 Список покупок</a></div>';
+    return '<a class="mlink" href="#menu-' + m.id + '">' + esc(menuTitle(m)) + "</a>" + ln + '<p class="muted">≈ ' + rub(T.cost) + " на неделю · ≈ " + n0(T.avg.k) + ' ккал в день на взрослого</p>' + (menuBudHTML(m) ? "<p>" + menuBudHTML(m) + "</p>" : "") + '<div class="r"><a class="btn sm" href="#menu-' + m.id + '">Открыть</a><a class="btn sm" href="#shop-' + m.id + '">🛒 Список покупок</a></div>';
   }
   function dishName(m, id) { if (id.charAt(0) === "@") { var src = slotItems(m, id.slice(1)).filter(function (x) { return x.charAt(0) !== "@"; }).map(function (x) { var r = recipe(x); return r ? r.n : ""; }).filter(Boolean); return "остатки: " + (src.join(", ") || "вчерашний ужин"); } var r = recipe(id); return r ? r.n : "удалённый рецепт"; }
   function vMenuNew() {
@@ -8745,7 +8749,7 @@ CREATE TABLE inbox (
   }
   function vMenuPage(m) {
     var T = menuTotals(m), h = '<div class="crumbs"><a href="#menu">Меню</a> /</div>' + head(esc(menuTitle(m)), "");
-    h += '<div class="r mbar"><span class="mtot">≈ <b>' + rub(T.cost) + "</b>" + (m.kind === "week" ? " на неделю" : " · ≈ " + rub(T.cost / Math.max(1, (+m.a || 0) + (+m.k || 0))) + " на гостя") + " · " + esc(famTxt(m)) + "</span>" +
+    h += '<div class="r mbar"><span class="mtot">≈ <b>' + rub(T.cost) + "</b>" + (m.kind === "week" ? " на неделю" : " · ≈ " + rub(T.cost / Math.max(1, (+m.a || 0) + (+m.k || 0))) + " на гостя") + " · " + esc(famTxt(m)) + "</span>" + menuBudHTML(m) +
       (m.kind === "week" ? '<span class="mtot">В день на взрослого ≈ <b>' + n0(T.avg.k) + " ккал</b> · Б " + n0(T.avg.p) + " / Ж " + n0(T.avg.f) + " / У " + n0(T.avg.c) + ' г <span class="muted" title="Хлеб, фрукты, чай и перекусы сюда не входят">(без хлеба и напитков)</span></span>' : "") + "</div>";
     h += '<div class="r mbar"><button type="button" class="btn sm" data-a="mrefill" title="Подобрать заново всё, кроме закреплённого 🔒">🎲 Подобрать заново</button><a class="btn sm pri" href="#shop-' + m.id + '">🛒 Список покупок</a>' + (m.kind === "feast" ? '<button type="button" class="btn sm" data-a="fplan">📋 План готовки → задачи</button>' : '<button type="button" class="btn sm" data-a="wtsave" title="Сохранить блюда этой недели, чтобы потом повторить одной кнопкой">★ В шаблоны</button>') + '<span class="stp sm">' + famEditor(m, "menu").replace(/<span class="muted">\(.*?\)<\/span>/, "") + '</span><button type="button" class="ibtn" data-a="mdel" title="Удалить меню">🗑</button></div>';
     if (m.kind === "feast") {
@@ -8804,13 +8808,15 @@ CREATE TABLE inbox (
       return "<h2>" + esc(a) + ' <span class="c">' + by[a].length + "</span></h2>" + by[a].sort(function (x, y) { return x.p.n < y.p.n ? -1 : 1; }).map(function (e) { var hv = !!have[e.p.id]; return '<label class="shr' + (hv ? " hv" : "") + '"><input type="checkbox" data-mhave="' + esc(e.p.id) + '"' + (hv ? " checked" : "") + '><span class="sn">' + esc(e.p.n) + '</span><span class="sa">' + esc(amtTxt(e)) + '</span><span class="sc muted">' + (e.cost ? "≈ " + rub(e.cost) : "") + "</span></label>"; }).join("");
     }).join("") + "</div>";
     if (homeL.length) h += '<p class="muted shoph">Обычно есть дома: ' + esc(homeL.map(function (e) { return e.p.n.toLowerCase() + (e.g && e.p.u !== "шт" ? " (" + amtTxt(e) + ")" : ""); }).join(", ")) + ".</p>";
+    h += staplesHTML();
     if (N.miss.length) h += '<p class="warnc shoph">Нет в справочнике продуктов (без цены и КБЖУ): ' + esc(N.miss.map(function (x) { return x.n + (x.q.length ? " " + x.q.join(" + ") : ""); }).join(", ")) + '. <a href="#prods">Добавить в справочник</a></p>';
     return h;
   }
   function shopText(m) {
     var N = menuNeeds(m), have = m.have || {}, by = {};
     N.list.forEach(function (e) { if (e.p.home || have[e.p.id]) return; (by[e.p.a] = by[e.p.a] || []).push(e.p.n + " — " + amtTxt(e)); });
-    return AISLES.filter(function (a) { return by[a]; }).map(function (a) { return { a: a, l: by[a] }; });
+    var sd = staples().filter(stDue);
+    return AISLES.filter(function (a) { return by[a]; }).map(function (a) { return { a: a, l: by[a] }; }).concat(sd.length ? [{ a: "Постоянные покупки", l: sd.map(function (x) { return x.n; }) }] : []);
   }
   /* ---------- «Что приготовить из того, что есть» ---------- */
   var RHQ = "", RHBASE = ["Масло подсолнечное", "Сахар", "Мука пшеничная", "Уксус", "Сода", "Разрыхлитель", "Ванильный сахар", "Крахмал"];
@@ -8828,17 +8834,18 @@ CREATE TABLE inbox (
     var have = rhHave(), hv = {}; have.forEach(function (n) { hv[n] = 1; });
     var h = '<div class="crumbs"><a href="#menu">Меню</a> / <a href="#recipes">Рецепты</a> /</div>' + head("Что приготовить из того, что есть", "Отметьте продукты, которые есть дома, — покажу блюда, для которых докупать меньше всего. Соль, специи и воду отмечать не нужно.");
     h += '<div class="r rbar"><input class="inp" id="rhq" type="search" placeholder="Найти продукт: картофель, творог, минтай…" value="' + esc(RHQ) + '" autocomplete="off">' + (have.length ? '<button type="button" class="btn sm" data-a="rhclear">Сбросить отмеченное (' + have.length + ")</button>" : "") + "</div>";
-    if (have.length) h += '<div class="chips rhsel"><span class="muted">Есть дома:</span>' + have.map(function (n) { return '<button type="button" class="chip on" data-a="rhv" data-v="' + esc(n) + '" title="Убрать">' + esc(n) + " ✕</button>"; }).join("") + "</div>";
+    if (have.length) h += '<div class="chips rhsel"><span class="muted">Есть дома:</span>' + have.map(function (n) { var lf = rhLeft(n); return '<span class="rhch"><button type="button" class="chip on' + (lf !== null && lf <= 2 ? " soon" : "") + '" data-a="rhv" data-v="' + esc(n) + '" title="Убрать">' + esc(n) + (lf !== null ? " <small>· " + rhLeftTxt(lf) + "</small>" : "") + ' ✕</button><button type="button" class="chip rhx" data-a="rhexp" data-v="' + esc(n) + '" title="Срок годности">⏳</button></span>'; }).join("") + "</div>";
+    var soon = have.filter(function (n) { var dl = rhLeft(n); return dl !== null && dl <= 2; }); if (soon.length) h += '<p class="warnc">⏳ Скоро испортится: ' + esc(soon.map(function (n) { return n + " (" + rhLeftTxt(rhLeft(n)) + ")"; }).join(", ")) + " — блюда с ними наверху списка.</p>";
     h += '<div class="r"><button type="button" class="chip' + (rhBaseOn() ? " on" : "") + '" data-a="rhbase" aria-pressed="' + (rhBaseOn() ? "true" : "false") + '" title="Растительное масло, сахар, мука, уксус, сода, разрыхлитель, крахмал">' + (rhBaseOn() ? "✓ " : "") + "Масло, сахар, мука и т. п. есть всегда</button></div>";
     h += '<div class="rhprods" id="rhprods">' + rhProdsHTML(hv) + "</div>";
     if (!have.length) return h + '<p class="empty">Отметьте хотя бы пару продуктов — например, «Картофель» и «Яйца».</p>';
     var base = {}; if (rhBaseOn()) RHBASE.forEach(function (n) { base[n] = 1; });
-    var res = recipes().map(function (r) { var nd = recNeeds(r).filter(function (n) { return !base[n]; }), got = nd.filter(function (n) { return hv[n]; }); return { r: r, nd: nd, got: got, miss: nd.filter(function (n) { return !hv[n]; }) }; })
+    var res = recipes().map(function (r) { var nd = recNeeds(r).filter(function (n) { return !base[n]; }), got = nd.filter(function (n) { return hv[n]; }); return { r: r, nd: nd, got: got, miss: nd.filter(function (n) { return !hv[n]; }), urg: got.filter(function (n) { var dl = rhLeft(n); return dl !== null && dl <= 2; }).length }; })
       .filter(function (x) { return x.got.length && x.nd.length; })
-      .sort(function (a, b) { return a.miss.length - b.miss.length || b.got.length - a.got.length || (b.r.fav ? 1 : 0) - (a.r.fav ? 1 : 0) || (a.r.n < b.r.n ? -1 : 1); }).slice(0, 40);
+      .sort(function (a, b) { return b.urg - a.urg || a.miss.length - b.miss.length || b.got.length - a.got.length || (b.r.fav ? 1 : 0) - (a.r.fav ? 1 : 0) || (a.r.n < b.r.n ? -1 : 1); }).slice(0, 40);
     h += "<h2>Можно приготовить</h2>";
     if (!res.length) return h + '<p class="empty">Пока ни одно блюдо не подходит — отметьте ещё продукты.</p>';
-    h += '<div class="gsheet rhres">' + res.map(function (x) { return '<a class="mrow" href="#recipe-' + x.r.id + '"><b>' + (x.r.fav ? "★ " : "") + esc(x.r.n) + '</b><span class="muted">' + FCAT1[x.r.cat] + " · есть " + x.got.length + " из " + x.nd.length + (x.miss.length ? " · докупить: " + esc(x.miss.join(", ")) : ' · <span class="rhok">всё есть</span>') + "</span></a>"; }).join("") + "</div>";
+    h += '<div class="gsheet rhres">' + res.map(function (x) { return '<a class="mrow" href="#recipe-' + x.r.id + '"><b>' + (x.r.fav ? "★ " : "") + esc(x.r.n) + '</b><span class="muted">' + (x.urg ? '<span class="warnc">⏳ срочно</span> · ' : "") + FCAT1[x.r.cat] + " · есть " + x.got.length + " из " + x.nd.length + (x.miss.length ? " · докупить: " + esc(x.miss.join(", ")) : ' · <span class="rhok">всё есть</span>') + "</span></a>"; }).join("") + "</div>";
     return h;
   }
   /* ---------- шаблоны недели: удачное меню — снова одной кнопкой (стоимость считается по текущим ценам) ---------- */
@@ -9999,7 +10006,7 @@ CREATE TABLE inbox (
 
   /* --- файл: запоминаем (Chrome, Edge на компьютере) или выбираем каждый раз --- */
   var BUFH = null, BUFINFO = null;
-  function buDB() { return new Promise(function (ok, no) { var r = indexedDB.open("zd-bud", 1); r.onupgradeneeded = function () { r.result.createObjectStore("kv"); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); }; }); }
+  function buDB() { return new Promise(function (ok, no) { var r = indexedDB.open("zdemo-zd-bud", 1); r.onupgradeneeded = function () { r.result.createObjectStore("kv"); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); }; }); }
   function buKV(k, v) { return buDB().then(function (db) { return new Promise(function (ok, no) { var tx = db.transaction("kv", v === undefined ? "readonly" : "readwrite"), st = tx.objectStore("kv"), rq = v === undefined ? st.get(k) : v === null ? st.delete(k) : st.put(v, k); rq.onsuccess = function () { ok(rq.result); }; rq.onerror = function () { no(rq.error); }; }); }); }
   function buCanRemember() { return typeof window.showOpenFilePicker === "function"; }
   function buHandle() { return BUFH ? Promise.resolve(BUFH) : buKV("fh").then(function (h) { BUFH = h || null; return BUFH; }).catch(function () { return null; }); }
@@ -10210,6 +10217,7 @@ CREATE TABLE inbox (
     if (r.off.length) h += '<p class="muted">Не входит в расходы: ' + r.off.map(function (x) { return esc(x.c) + " " + buRub(x.fact) + (x.plan ? " из " + buRub(x.plan) : ""); }).join(" · ") + "</p>";
     var inc = P.inc || { plan: {}, fact: {} }, srcs = Object.keys(Object.assign({}, inc.plan, inc.fact));
     if (srcs.length) h += '<div class="card busec"><div class="bulab">Доходы — факт и план</div>' + srcs.filter(function (s) { return (+inc.plan[s] || 0) || (+inc.fact[s] || 0); }).map(function (s) { var f = +inc.fact[s] || 0, pl = +inc.plan[s] || 0; return '<div class="burow"><span>' + esc(s) + "</span>" + buBar(f, pl, -1, "inc") + '<span class="bunum">' + buRub(f) + " / " + buRub(pl) + "</span></div>"; }).join("") + "</div>";
+    var sl2 = soldIn(P.from, P.to + DAY - 1); if (sl2.length) h += '<p class="muted">🧺 Продано вещей из расхламления за период: ' + sl2.length + " на " + buRub(sl2.reduce(function (a2, x) { return a2 + (+x.price || 0); }, 0)) + " — если ещё не внесли, добавьте в 1С как доход «Продажи».</p>";
     // недели периода: лимит, факт, отклонение и накопленное отклонение (гибкие статьи)
     var rows = [], acc = 0;
     for (var m = monday(P.from); m <= P.to; m = addDays(m, 7)) {
@@ -10600,17 +10608,18 @@ CREATE TABLE inbox (
   function dqHTML() {
     var l = live(S.dplaces || []), ok = l.filter(function (p) { return p.st === 2 && !dqDue(p); }).length, mon = new Date(); mon = new Date(mon.getFullYear(), mon.getMonth(), 1).getTime();
     var out = live(S.dout || []), gone = out.filter(function (x) { return x.gone && x.gone >= mon && x.dec !== "move" && x.dec !== "nohome"; }).length, wait = out.filter(function (x) { return !x.gone && ["give", "sell", "trash"].indexOf(x.dec) >= 0; }), nohome = out.filter(function (x) { return !x.gone && x.dec === "nohome"; });
-    var h = '<div class="butiles"><div class="butile"><small>Мест в порядке</small><span>' + (l.length ? Math.round(ok / l.length * 100) + "%" : "—") + '</span><small class="muted">' + ok + " из " + l.length + '</small></div><div class="butile"><small>Ушло вещей в этом месяце</small><span>' + gone + '</span></div><div class="butile"><small>Ждут выхода</small><span>' + wait.length + "</span>" + (wait.length ? '<small class="muted">самой давней ' + Math.floor((Date.now() - Math.min.apply(null, wait.map(function (x) { return x.at || Date.now(); }))) / DAY) + " дн.</small>" : "") + '</div><div class="butile"><small>Без места</small><span>' + nohome.length + "</span></div></div>";
+    var h = '<div class="butiles"><div class="butile"><small>Мест в порядке</small><span>' + (l.length ? Math.round(ok / l.length * 100) + "%" : "—") + '</span><small class="muted">' + ok + " из " + l.length + '</small></div><div class="butile"><small>Ушло вещей в этом месяце</small><span>' + gone + '</span></div><div class="butile"><small>Ждут выхода</small><span>' + wait.length + "</span>" + (wait.length ? '<small class="muted">самой давней ' + Math.floor((Date.now() - Math.min.apply(null, wait.map(function (x) { return x.at || Date.now(); }))) / DAY) + " дн.</small>" : "") + '</div><div class="butile"><small>Без места</small><span>' + nohome.length + "</span></div>" + (function () { var sl = soldIn(mon, Date.now()); return sl.length ? '<div class="butile"><small>Продано в этом месяце</small><span>' + buRub(sl.reduce(function (a2, x) { return a2 + (+x.price || 0); }, 0)) + '</span><small class="muted">' + sl.length + " шт. — внесите в 1С как доход «Продажи»</small></div>" : ""; })() + "</div>";
     var q = dqQueue("").slice(0, 5); if (q.length) h += '<div class="card busec"><div class="bulab">Что разбирать дальше</div>' + q.map(function (p, i) { return '<div class="dqq"><b>' + (i + 1) + "</b><span>" + esc(p.n) + ' <small class="muted">· ' + esc(CZONES[p.zone] || "") + "</small></span><small class=\"muted\">" + (p.vis ? "на виду · " : "") + esc((DQSZ.filter(function (s) { return s[0] === (+p.size || 15); })[0] || DQSZ[0])[1]) + (dqDue(p) ? " · пора пересмотреть" : "") + '</small><button type="button" class="btn sm" data-a="chsess" data-p="' + p.id + '">Начать · 15 мин</button></div>'; }).join("") + "</div>";
     if (CHSESS) h += chSessHTML();
+    setTimeout(phFill, 0);
     h += '<div class="gsheet dqplaces">' + chZones().concat(Object.keys(CZONES).filter(function (z) { return z && CZOFF[z]; })).map(function (z) {
       var pz = l.filter(function (p) { return p.zone === z; });
       return '<div class="clzh">' + esc(CZONES[z]) + ' <span class="c">' + pz.length + "</span></div>" + pz.map(function (p) {
         var seg = function (k, arr, cur) { return '<span class="seg dqseg">' + arr.map(function (a) { return '<button type="button" data-a="dqset" data-id="' + p.id + '" data-k="' + k + '" data-v="' + a[0] + '" class="' + (cur === a[0] ? "on dqs" + (k === "st" ? a[0] : "") : "") + '">' + a[1] + "</button>"; }).join("") + "</span>"; };
-        return '<div class="dqp"><input class="inp dqn" data-dqf="n" data-id="' + p.id + '" value="' + esc(p.n) + '" aria-label="Место">' + seg("st", DQST, +p.st) + seg("size", DQSZ, +p.size || 15) + '<button type="button" class="btn sm' + (p.vis ? " on" : "") + '" data-a="dqvis" data-id="' + p.id + '" aria-pressed="' + !!p.vis + '" title="На виду — разбирать раньше">👁 на виду</button>' + '<span class="muted dqlast">' + (p.last ? "разбирали " + esc(new Date(p.last).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "2-digit" })) : "не разбирали") + "</span>" + seg("every", DQEV, +p.every || 6) + '<input class="inp dql" data-dqf="lim" data-id="' + p.id + '" value="' + esc(p.lim || "") + '" placeholder="лимит: «одна полка обуви»" aria-label="Лимит"><button type="button" class="ibtn" data-a="dqdel" data-id="' + p.id + '" title="Удалить место">🗑</button></div>';
+        return '<div class="dqp"><input class="inp dqn" data-dqf="n" data-id="' + p.id + '" value="' + esc(p.n) + '" aria-label="Место">' + seg("st", DQST, +p.st) + seg("size", DQSZ, +p.size || 15) + '<button type="button" class="btn sm' + (p.vis ? " on" : "") + '" data-a="dqvis" data-id="' + p.id + '" aria-pressed="' + !!p.vis + '" title="На виду — разбирать раньше">👁 на виду</button>' + '<span class="muted dqlast">' + (p.last ? "разбирали " + esc(new Date(p.last).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "2-digit" })) : "не разбирали") + "</span>" + seg("every", DQEV, +p.every || 6) + '<input class="inp dql" data-dqf="lim" data-id="' + p.id + '" value="' + esc(p.lim || "") + '" placeholder="лимит: «одна полка обуви»" aria-label="Лимит">' + phHTML(p) + '<button type="button" class="ibtn" data-a="dqdel" data-id="' + p.id + '" title="Удалить место">🗑</button></div>';
       }).join("") + '<div class="hadd dqadd"><span>＋</span><input type="text" class="inp" data-dqnew="' + z + '" placeholder="Место в зоне «' + esc(CZONES[z]) + '»: шкаф, полка, ящик, антресоль…" aria-label="Новое место"></div>';
     }).join("") + "</div>";
-    if (wait.length || nohome.length) h += '<div class="card busec"><div class="bulab">На выход и без места</div>' + wait.concat(nohome).map(function (x) { var pl = live(S.dplaces || []).filter(function (p) { return p.id === x.place; })[0]; return '<div class="dqo"><span>' + esc(x.n) + ' <small class="muted">' + esc((DQDEC.filter(function (d) { return d[0] === x.dec; })[0] || ["", ""])[1]) + (x.price ? " · " + rub(x.price) : "") + (pl ? " · " + esc(pl.n) : "") + " · " + Math.floor((Date.now() - (x.at || Date.now())) / DAY) + ' дн.</small></span><button type="button" class="btn sm" data-a="dqgone" data-id="' + x.id + '">' + (x.dec === "nohome" ? "✓ место нашлось" : x.dec === "sell" ? "✓ продано" : x.dec === "give" ? "✓ отдано" : "✓ выброшено") + '</button><button type="button" class="ibtn" data-a="dqodel" data-id="' + x.id + '" title="Удалить">×</button></div>'; }).join("") + "</div>";
+    if (wait.length || nohome.length) h += '<div class="card busec"><div class="bulab">На выход и без места</div>' + wait.concat(nohome).map(function (x) { var pl = live(S.dplaces || []).filter(function (p) { return p.id === x.place; })[0]; return '<div class="dqo"><span>' + esc(x.n) + ' <small class="muted">' + esc((DQDEC.filter(function (d) { return d[0] === x.dec; })[0] || ["", ""])[1]) + (x.price ? " · " + rub(x.price) : "") + (pl ? " · " + esc(pl.n) : "") + " · " + Math.floor((Date.now() - (x.at || Date.now())) / DAY) + ' дн.</small></span><button type="button" class="btn sm" data-a="dqgone" data-id="' + x.id + '">' + (x.dec === "nohome" ? "✓ место нашлось" : x.dec === "sell" ? "✓ продано" : x.dec === "give" ? "✓ отдано" : "✓ выброшено") + '</button>' + (x.dec === "sell" ? '<button type="button" class="btn sm" data-a="dqavito" data-id="' + x.id + '">📋 Текст объявления</button>' : "") + '<button type="button" class="ibtn" data-a="dqodel" data-id="' + x.id + '" title="Удалить">×</button></div>'; }).join("") + "</div>";
     return h;
   }
   function chAct(a, el) {
@@ -11049,6 +11058,70 @@ CREATE TABLE inbox (
     if (buPers().length) { var w = buWeek(monday(t0)); if (!w.miss.length && w.dl) h += '<div class="chwd"><small class="muted">можно в день до воскресенья</small><b class="' + (w.tot.perDay < 0 ? "bad" : "ok") + '">' + buRub(Math.max(0, w.tot.perDay)) + "</b></div>"; }
     return any || h ? '<div class="chws">' + h + "</div>" : '<p class="wempty">Челленджи не запущены — «План уборки» → «Челлендж» и «Бюджет» → «Челлендж»</p>';
   }
+
+  /* ---------- Волна 3: фото «до/после» мест (только на этом устройстве), продажи из расхламления, меню и бюджет, сроки продуктов, постоянные покупки ---------- */
+  function phDB() { return new Promise(function (ok, no) { var r = indexedDB.open("zdemo-zd-photo", 1); r.onupgradeneeded = function () { r.result.createObjectStore("ph"); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); }; }); }
+  function phOp(k, v) { return phDB().then(function (db) { return new Promise(function (ok, no) { var tx = db.transaction("ph", v === undefined ? "readonly" : "readwrite"), st = tx.objectStore("ph"), rq = v === undefined ? st.get(k) : v === null ? st.delete(k) : st.put(v, k); rq.onsuccess = function () { ok(rq.result); }; rq.onerror = function () { no(rq.error); }; }); }); }
+  var PHURL = {};
+  // уменьшить фото до 1000 px по длинной стороне — фото с телефона весят 3–8 МБ
+  function phShrink(file) {
+    return new Promise(function (ok, no) {
+      var img = new Image(), u = URL.createObjectURL(file);
+      img.onload = function () { var k = Math.min(1, 1000 / Math.max(img.width, img.height)), c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u); c.toBlob(function (b) { b ? ok(b) : no(new Error("не удалось сжать фото")); }, "image/jpeg", 0.82); };
+      img.onerror = function () { URL.revokeObjectURL(u); no(new Error("это не картинка")); }; img.src = u;
+    });
+  }
+  function phPick(key) {
+    var i = document.createElement("input"); i.type = "file"; i.accept = "image/*"; i.setAttribute("capture", "environment"); i.style.display = "none"; document.body.appendChild(i);
+    i.addEventListener("change", function () { var f = i.files && i.files[0]; i.remove(); if (!f) return; phShrink(f).then(function (b) { return phOp(key, b); }).then(function () { if (PHURL[key]) { URL.revokeObjectURL(PHURL[key]); delete PHURL[key]; } render(); toast("Фото сохранено на этом устройстве"); }).catch(function (e) { toast("Фото не сохранилось: " + (e && e.message || e)); }); });
+    i.click();
+  }
+  // после отрисовки: подставить сохранённые фото
+  function phFill() {
+    [].forEach.call(document.querySelectorAll("img[data-phk]"), function (im) {
+      var k = im.getAttribute("data-phk"); if (PHURL[k]) { im.src = PHURL[k]; im.hidden = false; return; }
+      phOp(k).then(function (b) { if (!b) return; PHURL[k] = URL.createObjectURL(b); im.src = PHURL[k]; im.hidden = false; var bt = document.querySelector('[data-a="dqphoto"][data-k="' + k + '"]'); if (bt) bt.classList.add("has"); }).catch(function () { /* нет фото */ });
+    });
+  }
+  function phHTML(p) { return '<span class="dqph">' + ["b", "a"].map(function (s) { var k = p.id + ":" + s; return '<button type="button" class="btn sm" data-a="dqphoto" data-k="' + k + '" title="' + (s === "b" ? "Фото до разбора" : "Фото после") + '">📷 ' + (s === "b" ? "до" : "после") + '</button><img data-phk="' + k + '" alt="' + (s === "b" ? "до" : "после") + '" hidden data-a="phbig">'; }).join("") + "</span>"; }
+  /* --- продажи: текст объявления, проданное за месяц --- */
+  function avitoText(x) { var pl = live(S.dplaces || []).filter(function (p) { return p.id === x.place; })[0]; return x.n.charAt(0).toUpperCase() + x.n.slice(1) + "\n\nСостояние: хорошее, есть следы использования — смотрите фото.\n" + (x.price ? "Цена: " + Math.round(x.price).toLocaleString("ru-RU") + " ₽. Торг уместен.\n" : "") + "Самовывоз; доставка — по договорённости.\nОтвечу в сообщениях."; }
+  function soldIn(a, b) { return live(S.dout || []).filter(function (x) { return x.dec === "sell" && x.gone && x.gone >= a && x.gone <= b; }); }
+  /* --- меню против бюджета «Траты» --- */
+  function menuBudHTML(m) {
+    if (!m || m.kind !== "week" || !buPers().length) return ""; var w = buWeek(sod(m.start)); if (w.miss.length) return "";
+    var c = w.cats.filter(function (x) { return buNorm(x.c) === "траты"; })[0]; if (!c) return ""; var cost = menuTotals(m).cost, pct = c.lim > 0 ? Math.round(cost / c.lim * 100) : 0;
+    return '<span class="mtot mbud' + (cost > c.lim ? " over" : "") + '">Бюджет «Траты» на эту неделю: <b>' + buRub(c.lim) + "</b>" + (Math.abs(c.lim - c.norm) >= 50 ? ' <span class="muted">(обычно ' + buRub(c.norm) + ")</span>" : "") + " · меню ≈ " + pct + "%" + (cost > c.lim ? " — дороже лимита, замените пару блюд" : pct > 70 ? " — на остальное мало" : "") + "</span>";
+  }
+  /* --- сроки продуктов в «Из того, что есть» --- */
+  function rhExp() { try { var o = JSON.parse(LS.get("zd-rhexp") || "{}"); return o && typeof o === "object" ? o : {}; } catch (e) { return {}; } }
+  function rhLeft(n) { var e = rhExp()[n]; if (!e) return null; return Math.round((new Date(e + "T00:00").getTime() - today0()) / DAY); }
+  function rhLeftTxt(d) { return d < 0 ? "срок вышел" : d === 0 ? "до сегодня" : d === 1 ? "до завтра" : "ещё " + d + " " + plural(d, ["день", "дня", "дней"]); }
+  /* --- постоянные покупки: молоко, хлеб, яйца… — сами попадают в список, когда подходит срок --- */
+  function staples() { return (S.opt.staples || []).slice(); }
+  function stDue(x) { return !x.last || x.last + (+x.every || 7) * DAY <= addDays(today0(), 2); }
+  function staplesHTML() {
+    var l = staples(), due = l.filter(stDue);
+    return '<div class="card stpl"><div class="bulab">Постоянные покупки' + (due.length ? " · пора купить: " + due.length : "") + '</div>' + (l.length ? l.map(function (x, i) { var d = stDue(x); return '<div class="stpr' + (d ? " due" : "") + '"><span class="stpn">' + esc(x.n) + '</span><span class="seg">' + [[7, "раз в неделю"], [14, "раз в 2 недели"], [30, "раз в месяц"]].map(function (e) { return '<button type="button" data-a="stev" data-i="' + i + '" data-v="' + e[0] + '" class="' + ((+x.every || 7) === e[0] ? "on" : "") + '">' + e[1] + "</button>"; }).join("") + '</span><span class="muted">' + (x.last ? "куплено " + esc(new Date(x.last).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })) : "ещё не покупали") + '</span><button type="button" class="btn sm' + (d ? " pri" : "") + '" data-a="stbuy" data-i="' + i + '">✓ куплено</button><button type="button" class="ibtn" data-a="stdel" data-i="' + i + '" title="Убрать">×</button></div>'; }).join("") : '<p class="muted" style="margin:0">Молоко, хлеб, яйца, корм для кота — то, что покупаете регулярно. Когда подходит срок, они сами попадают в список покупок и в задачу.</p>') +
+      '<div class="r"><input class="inp" id="stnew" placeholder="Что покупаете регулярно — Enter" style="max-width:300px"></div></div>';
+  }
+  function wcAct(a, el) {
+    var i = +el.dataset.i, l = staples();
+    switch (a) {
+      case "dqphoto": phPick(el.dataset.k); return true;
+      case "phbig": el.classList.toggle("big"); return true;
+      case "dqavito": var x = live(S.dout || []).filter(function (y) { return y.id === el.dataset.id; })[0]; if (x) copyText(avitoText(x), "Текст объявления скопирован — вставьте на Авито и добавьте фото"); return true;
+      case "stbuy": if (l[i]) { l[i] = Object.assign({}, l[i], { last: today0() }); S.opt.staples = l; optTouch(); save(); render(); } return true;
+      case "stev": if (l[i]) { l[i] = Object.assign({}, l[i], { every: +el.dataset.v }); S.opt.staples = l; optTouch(); save(); render(); } return true;
+      case "stdel": l.splice(i, 1); S.opt.staples = l; optTouch(); save(); render(); return true;
+      case "rhexp": var rc = el.getBoundingClientRect(); ctxShow(rc.left, rc.bottom + 4, [[0, "Срок — сегодня"], [1, "Завтра"], [3, "Через 3 дня"], [7, "Через неделю"], [-1, "Без срока"]].map(function (x2) { return { c: String(x2[0]), i: "", l: x2[1] }; }), { k: "rhexp", id: el.dataset.v }); return true;
+    }
+    return false;
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" || e.target.id !== "stnew") return; e.preventDefault(); var v = e.target.value.trim(); if (!v) return;
+    S.opt.staples = staples().concat({ n: v.slice(0, 60), every: 7, last: 0 }); optTouch(); save(); render(); setTimeout(function () { var i = $("stnew"); if (i) i.focus(); }, 30);
+  });
 
   function vStats() {
     var days = +LS.get("zd-stdays") || 30, t0 = today0(), from = addDays(t0, -days + 1), ev = doneEvents().filter(function (e) { return e.d >= from; }), pom = live(S.acts).filter(function (a) { return a.k === "pomo" && a.d >= from; });
@@ -12735,6 +12808,7 @@ CREATE TABLE inbox (
     if (a && chAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && invAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && fcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
     switch (a) {
       case "add": addQuick(); return;
@@ -14062,6 +14136,7 @@ CREATE TABLE inbox (
     if (k === "chtime") { if (c === "rem") chSet("rem", !chOpt().rem); else chSet("time", c === "-" ? "" : c); chSync(today0()); save(); render(); if (c === "rem" && chOpt().rem && !SRV.ready()) toast("Напоминания придут, когда настроен Telegram-бот («Настройки» → «Напоминания и Telegram»)"); return; }
     if (k === "svrday" && c === "x") { SVRDIN = id; render(); setTimeout(function () { var i = $("svrdin"); if (i) { i.focus(); i.select(); } }, 40); return; }
     if (k === "svrday") { var sg = goal(id); if (sg && sg.sv) { sg.sv = Object.assign({}, sg.sv, { rday: +c || 0 }); svRemSync(sg); touch(sg); save(); render(); toast(+c ? "Напоминание: каждое " + c + "-е число — задача «🏦 Отложить»" : "Напоминание выключено"); } return; }
+    if (k === "rhexp") { var ex = rhExp(); if (+c < 0) delete ex[id]; else ex[id] = dKey(addDays(today0(), +c)); LS.set("zd-rhexp", JSON.stringify(ex)); render(); return; }
     if (k === "ckzone") { var cq = live(S.chq || []).filter(function (x) { return x.id === id; })[0]; if (cq) { cq.zone = c; touch(cq); save(); render(); } return; }
     if (k === "burcat") { var bg = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bg) { bg.cat = c; touch(bg); save(); render(); } return; }
     if (k === "tbpick") { var tl = tbList(); tl.forEach(function (b) { if (b.id === id) b.cat = c; }); tbSave(TBTAB, tl); render(); return; }
