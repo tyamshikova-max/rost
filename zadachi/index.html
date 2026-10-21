@@ -482,6 +482,11 @@ html.nosheet .dptopbox.dphab { background: color-mix(in srgb, var(--ok) 15%, tra
 .ncardcov { height: 54px; margin: -12px -14px 4px; border-radius: 11px 11px 0 0 } .nsubcov { display: block; height: 30px; margin: -9px -11px 4px; border-radius: 9px 9px 0 0 }
 .nviewr { justify-content: flex-end; margin: 0 0 8px } .nlist { display: grid; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden }
 .nlrow { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 12px; border-top: 1px solid var(--line); color: var(--fg); text-decoration: none } .nlrow:first-child { border-top: 0 } .nlrow:hover { background: var(--hover) } .nlic { font-size: 18px; text-align: center } .nlt { display: grid; min-width: 0 } .nlt b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .nlt small { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.ntplst { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 12px } .nprv { display: flex; align-items: center; gap: 6px; flex-wrap: wrap } .nprv .inp { min-width: 0; width: 260px; max-width: 100% } .nprx { opacity: .35 } .nprv:hover .nprx { opacity: 1 }
+.nstars { display: inline-flex; gap: 0 } .nstars button { border: 0; background: none; cursor: pointer; font-size: calc(18px * var(--fs)); color: var(--line); padding: 0 1px } .nstars button.on { color: var(--star) } .nstars:hover button { color: var(--star) } .nstars button:hover ~ button { color: var(--line) }
+.nprchips { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: -8px 0 18px; font-size: calc(14px * var(--fs)) } .nprc { display: inline-flex; gap: 6px; align-items: baseline } .nprc small { color: var(--muted); font-size: calc(12px * var(--fs)) } .nprc a { color: var(--acc) }
+.ntype { white-space: nowrap } .nstc { padding: 0 7px; border-radius: 999px; background: var(--acc-soft); color: var(--fg); white-space: nowrap } .nrate { color: var(--star); letter-spacing: 1px } .nlprops { display: flex; gap: 4px 10px; flex-wrap: wrap; font-size: calc(12px * var(--fs)); color: var(--muted) }
+.nflt { display: inline-flex; gap: 6px; flex-wrap: wrap; margin-right: auto }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -2290,6 +2295,58 @@ CREATE TABLE inbox (
   var NICS = ["📄", "📘", "📗", "📕", "📙", "📓", "📒", "📚", "🧠", "💡", "🎯", "📌", "🗂", "🗃", "🧩", "🛠", "⚙️", "💻", "🧮", "📊", "📈", "🗓", "✅", "🏠", "🍳", "🌿", "🩺", "💆", "💪", "🧘", "✈️", "🎓", "✍️", "🎨", "🎵", "📷", "💰", "🧾", "❤️", "⭐", "🔥", "🌙", "☀️", "🐾", "🌸", "🔑"];
   function nIc(n) { return n && n.ic || "📄"; }
   function nCovCss(n) { var c = n && n.cov; if (!c) return ""; if (NCOV[c]) return "background:" + NCOV[c][1]; var m = /^url:(https:\/\/[^\s"'()<>\\]+)$/.exec(c); return m ? "background:#d8d8d8 url(" + m[1] + ") center/cover no-repeat" : ""; }
+  /* шаблоны и свойства страницы: n.tpl — тип (ключ шаблона), n.pr — значения свойств, n.prk — добавленные вручную свойства.
+     Свои шаблоны — S.opt.ntpls [{id, n, ic, cov, base, pr, body}], синхронизируются вместе с настройками. */
+  var NPR = { status: { n: "Статус", t: "sel" }, author: { n: "Автор", t: "text" }, course: { n: "Курс", t: "text" }, people: { n: "Участники", t: "text" }, src: { n: "Источник", t: "url" }, date: { n: "Дата", t: "date" }, rate: { n: "Оценка", t: "stars" }, time: { n: "Время", t: "text" }, port: { n: "Порции", t: "text" } };
+  var NSTAT0 = ["💡 Идея", "🔄 В работе", "✅ Готово", "⏸ Отложено"];
+  var NTPL = {
+    lesson: { n: "Конспект урока", ic: "🎓", cov: "sky", pr: ["course", "date", "status", "src"], st: ["📚 Изучаю", "🔁 Повторить", "✅ Освоено"], today: 1, body: '<div class="callout"><b>Главное:</b> </div><h2>Конспект</h2><p><br></p><h2>Примеры</h2><p><br></p><h2>Вопросы</h2><ul class="todo"><li><br></li></ul><h2>Что применить</h2><ul class="todo"><li><br></li></ul>' },
+    book: { n: "Книга", ic: "📚", cov: "paper", pr: ["author", "status", "rate", "date"], st: ["📖 Хочу прочитать", "👀 Читаю", "✔ Прочитано", "✖ Бросила"], body: "<h2>О чём книга</h2><p><br></p><h2>Главные идеи</h2><ol><li><br></li></ol><h2>Цитаты</h2><blockquote><br></blockquote><h2>Что применю</h2><ul class=\"todo\"><li><br></li></ul>" },
+    recipe: { n: "Рецепт", ic: "🍲", cov: "peach", pr: ["time", "port", "rate", "src"], st: ["🧪 Попробовать", "👍 Готовлю", "⭐ Любимое"], body: "<h2>Ингредиенты</h2><ul><li><br></li></ul><h2>Приготовление</h2><ol><li><br></li></ol><h2>Заметки</h2><p><br></p>" },
+    howto: { n: "Инструкция", ic: "🛠", cov: "graphite", pr: ["status", "date", "src"], st: ["📝 Черновик", "✅ Актуально", "⚠ Устарело"], body: '<div class="callout">Когда это нужно: </div><h2>Шаги</h2><ol><li><br></li></ol><h2>Как проверить</h2><p><br></p><h2>Частые ошибки</h2><ul><li><br></li></ul>' },
+    meet: { n: "Встреча", ic: "🤝", cov: "lav", pr: ["date", "people", "status"], st: ["📅 Запланирована", "✔ Прошла"], today: 1, body: '<h2>Повестка</h2><ul><li><br></li></ul><h2>Обсудили</h2><p><br></p><h2>Решения</h2><ul><li><br></li></ul><h2>Задачи</h2><ul class="todo"><li><br></li></ul>' },
+    idea: { n: "Идея", ic: "💡", cov: "sun", pr: ["status", "rate"], st: ["💡 Идея", "🔎 Проверяю", "🔄 В работе", "⏸ Отложено", "✅ Готово"], body: '<h2>Суть</h2><p><br></p><h2>Зачем</h2><p><br></p><h2>Следующий шаг</h2><ul class="todo"><li><br></li></ul>' }
+  };
+  function nOwnTpls() { return (S.opt.ntpls || []).slice(); }
+  function nTplOf(n) { return n && n.tpl && NTPL[n.tpl] ? NTPL[n.tpl] : null; }
+  function nStatOpts(n) { var t = nTplOf(n); return t && t.st || NSTAT0; }
+  function nPrKeys(n) { var k = [], t = nTplOf(n); (t ? t.pr : []).concat(n.prk || [], Object.keys(n.pr || {})).forEach(function (x) { if (NPR[x] && k.indexOf(x) < 0) k.push(x); }); return k; }
+  function nPrTxt(k, v) { if (v === undefined || v === null || v === "") return ""; if (NPR[k].t === "stars") return "★★★★★".slice(0, +v) + "☆☆☆☆☆".slice(0, 5 - +v); if (NPR[k].t === "date") return new Date(v + "T00:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" }); return String(v); }
+  // применить шаблон: тип, значок, обложка, свойства и заготовка текста (если текст пуст)
+  function nApplyTpl(n, key) {
+    var own = nOwnTpls().filter(function (x) { return x.id === key; })[0], t = own || NTPL[key]; if (!t) return;
+    n.tpl = own ? own.base || "" : key; if (!n.tpl) delete n.tpl;
+    if (t.ic && !n.ic) n.ic = t.ic; if (t.cov && !n.cov) n.cov = t.cov;
+    var base = NTPL[n.tpl]; if (own && own.pr) n.prk = own.pr.filter(function (x) { return !base || base.pr.indexOf(x) < 0; });
+    n.pr = n.pr || {}; if ((base && base.today) && !n.pr.date) n.pr.date = dKey(today0());
+    if (!noteText(n) && !/<(img|table|hr)/i.test(n.body || "")) n.body = t.body || "";
+    touch(n);
+  }
+  function nTplMenu(withEmpty) {
+    var it = withEmpty ? [{ c: "~", i: "📄", l: "Пустая страница" }, "-"] : [];
+    Object.keys(NTPL).forEach(function (k) { it.push({ c: k, i: NTPL[k].ic, l: NTPL[k].n }); });
+    var own = nOwnTpls(); if (own.length) { it.push("-"); own.forEach(function (x) { it.push({ c: x.id, i: x.ic || "📄", l: x.n + " · свой" }); }); it.push({ i: "🗑", l: "Удалить свой шаблон", sub: own.map(function (x) { return { c: "del:" + x.id, i: x.ic || "📄", l: x.n }; }) }); }
+    return it;
+  }
+  // строки свойств в шапке страницы (режим правки)
+  function nPropsRows(n) {
+    var t = nTplOf(n), h = '<span>Тип</span><div class="v"><button type="button" class="ddb" data-a="ntplset">' + (t ? t.ic + " " + esc(t.n) : "📄 Обычная страница") + '<span class="dda">▾</span></button></div>', pr = n.pr || {};
+    nPrKeys(n).forEach(function (k) {
+      var d = NPR[k], v = pr[k], ed;
+      if (d.t === "sel") ed = '<button type="button" class="ddb" data-a="nprsel" data-k="' + k + '">' + (v ? esc(v) : '<span class="muted">не выбран</span>') + '<span class="dda">▾</span></button>';
+      else if (d.t === "stars") ed = '<span class="nstars">' + [1, 2, 3, 4, 5].map(function (i) { return '<button type="button" data-a="nprstar" data-k="' + k + '" data-v="' + i + '" class="' + (+v >= i ? "on" : "") + '" aria-label="' + i + ' из 5">★</button>'; }).join("") + "</span>";
+      else if (d.t === "date") ed = '<input type="date" class="inp" data-npr="' + k + '" value="' + esc(v || "") + '">';
+      else ed = '<input type="text" class="inp nprin" data-npr="' + k + '" value="' + esc(v || "") + '" placeholder="' + (d.t === "url" ? "https://… или название" : "—") + '" autocomplete="off">' + (d.t === "url" && /^https?:\/\//i.test(v || "") ? '<a class="btn sm" href="' + esc(v) + '" target="_blank" rel="noopener" title="Открыть">↗</a>' : "");
+      h += "<span>" + esc(d.n) + '</span><div class="v nprv">' + ed + '<button type="button" class="ibtn nprx" data-a="nprdel" data-k="' + k + '" title="Убрать свойство">×</button></div>';
+    });
+    return h + '<span></span><div class="v"><button type="button" class="btn sm" data-a="npradd">＋ Свойство</button></div>';
+  }
+  // свойства строкой (режим чтения) и на карточках
+  function nPropsChips(n) { var pr = n.pr || {}, l = nPrKeys(n).filter(function (k) { return pr[k] !== undefined && pr[k] !== ""; }); return l.length ? '<div class="nprchips">' + l.map(function (k) { var v = nPrTxt(k, pr[k]); return '<span class="nprc"><small>' + esc(NPR[k].n) + "</small>" + (NPR[k].t === "url" && /^https?:\/\//i.test(pr[k]) ? '<a href="' + esc(pr[k]) + '" target="_blank" rel="noopener">' + esc(v.replace(/^https?:\/\/(www\.)?/i, "").slice(0, 40)) + "</a>" : esc(v)) + "</span>"; }).join("") + "</div>" : ""; }
+  function nCardProps(n) { var pr = n.pr || {}, t = nTplOf(n); return (t ? '<span class="ntype">' + t.ic + " " + esc(t.n) + "</span>" : "") + (pr.status ? '<span class="nstc">' + esc(pr.status) + "</span>" : "") + (+pr.rate ? '<span class="nrate">' + "★★★★★".slice(0, +pr.rate) + "</span>" : ""); }
+  var NFLT = {};
+  function nFltOn() { return !!(NFLT.tpl || NFLT.st); }
+  function nFltOk(n) { if (NFLT.tpl && (NFLT.tpl === "~" ? !!n.tpl : n.tpl !== NFLT.tpl)) return false; if (NFLT.st && ((n.pr || {}).status || "") !== NFLT.st) return false; return true; }
   var NPOP = null;
   function nPopHTML(n) {
     if (NPOP === "ic") return '<div class="npop"><div class="npoph"><b>Значок страницы</b><button type="button" class="ibtn" data-a="npopx" aria-label="Закрыть">✕</button></div><div class="nicg">' + NICS.map(function (e) { return '<button type="button" data-a="nicset" data-v="' + e + '" class="' + (n.ic === e ? "on" : "") + '">' + e + "</button>"; }).join("") + '</div><div class="r"><input class="inp" id="nicin" placeholder="Свой: вставьте эмодзи" style="width:200px" autocomplete="off"><button type="button" class="btn sm" data-a="nicown">Поставить</button>' + (n.ic ? '<button type="button" class="btn sm" data-a="nicset" data-v="">Убрать значок</button>' : "") + "</div></div>";
@@ -2299,9 +2356,13 @@ CREATE TABLE inbox (
   // оглавление по заголовкам текста (обновляется само, пока вы пишете)
   function nTocItems(html) { TXTD.innerHTML = html || ""; return [].map.call(TXTD.querySelectorAll("h1, h2, h3"), function (h, i) { return { i: i, l: +h.tagName.charAt(1), t: h.textContent.replace(/\s+/g, " ").trim() }; }).filter(function (x) { return x.t; }); }
   function nTocHTML(items) { if (items.length < 2) return ""; return '<div class="ntoch">На странице</div>' + items.map(function (x) { return '<a href="#" class="ntl l' + x.l + '" data-a="ntoc" data-i="' + x.i + '">' + esc(x.t.slice(0, 80)) + "</a>"; }).join(""); }
+  document.addEventListener("change", function (e) { var t = e.target, k = t && t.dataset && t.dataset.npr; if (!k || V !== "note") return; var n = note(ARG); if (!n) return; n.pr = n.pr || {}; var v = String(t.value || "").trim(); if (v) n.pr[k] = v.slice(0, 300); else delete n.pr[k]; touch(n); save(); render(); });
+  // фильтр раздела: какие типы и статусы вообще встречаются
+  function nFltScope() { var sx = V === "nsec" ? nsec(ARG) : null, ids = sx ? nsDesc(sx.id) : null, tg = V === "ntag" ? ARG : ""; return notes().filter(function (n) { return (!ids || ids.indexOf(n.sec) >= 0) && (!tg || (n.tags || []).indexOf(tg) >= 0); }); }
+  function nFltStats(sc) { var o = []; sc.forEach(function (n) { var v = (n.pr || {}).status; if (v && o.indexOf(v) < 0) o.push(v); }); return o; }
   var NTOCT = 0;
   document.addEventListener("input", function (e) { if (!e.target || e.target.id !== "nrte") return; clearTimeout(NTOCT); NTOCT = setTimeout(function () { var r = $("nrte"), el = $("ntoc"); if (!r || !el) return; var it = nTocItems(r.innerHTML); el.innerHTML = nTocHTML(it); var pg = el.closest(".npage"); if (pg) pg.classList.toggle("hastoc", it.length >= 2); }, 500); });
-  function nRowHTML(n) { var sx = nsec(n.sec), k = nKids(n.id).length; return '<a class="nlrow" href="#note-' + n.id + '"><span class="nlic">' + esc(nIc(n)) + '</span><span class="nlt"><b>' + esc(nTitle(n)) + "</b><small>" + esc((sx ? nsPath(sx).map(function (y) { return y.n; }) : []).concat(nPath(n).map(nTitle)).join(" / ") || "без раздела") + (k ? " · " + k + " " + plural(k, ["вложенная", "вложенные", "вложенных"]) : "") + '</small></span><small class="muted">' + esc(dayName(n.upd || n.created).toLowerCase()) + "</small></a>"; }
+  function nRowHTML(n) { var sx = nsec(n.sec), k = nKids(n.id).length; return '<a class="nlrow" href="#note-' + n.id + '"><span class="nlic">' + esc(nIc(n)) + '</span><span class="nlt"><b>' + esc(nTitle(n)) + "</b><small>" + esc((sx ? nsPath(sx).map(function (y) { return y.n; }) : []).concat(nPath(n).map(nTitle)).join(" / ") || "без раздела") + (k ? " · " + k + " " + plural(k, ["вложенная", "вложенные", "вложенных"]) : "") + "</small>" + (nCardProps(n) ? '<span class="nlprops">' + nCardProps(n) + "</span>" : "") + '</span><small class="muted">' + esc(dayName(n.upd || n.created).toLowerCase()) + "</small></a>"; }
   // дерево страниц раздела в левой панели
   function nSideHTML(sec, d, pid) {
     var l = pid ? nKids(pid) : nRoots(sec), op = nOpen(), lim = pid ? 40 : sec ? 40 : 12, h = "";
@@ -2332,6 +2393,16 @@ CREATE TABLE inbox (
       case "nread": LS.set("zd-nread", LS.get("zd-nread") === "1" ? "0" : "1"); NPOP = null; render(); return true;
       case "ntoc": var hs = $("nrte") ? $("nrte").querySelectorAll("h1, h2, h3") : [], hx = hs[+el.dataset.i]; if (hx) hx.scrollIntoView({ behavior: "smooth", block: "start" }); return true;
       case "nview": LS.set("zd-nview", el.dataset.x); render(); return true;
+      case "ntplapply": if (n) { nApplyTpl(n, el.dataset.v); save(); render(); toast("Шаблон «" + (NTPL[el.dataset.v] || nOwnTpls().filter(function (x) { return x.id === el.dataset.v; })[0] || { n: "" }).n + "» применён"); } return true;
+      case "ntplset": if (!n) return true; var rt = el.getBoundingClientRect(); ctxShow(rt.left, rt.bottom + 4, [{ c: "~", i: n.tpl ? "" : "✓", l: "📄 Обычная страница" }, "-"].concat(Object.keys(NTPL).map(function (k) { return { c: k, i: n.tpl === k ? "✓" : NTPL[k].ic, l: NTPL[k].n }; })), { k: "ntplset", id: n.id }); return true;
+      case "nprsel": if (!n) return true; var rs = el.getBoundingClientRect(), kk = el.dataset.k, cur = (n.pr || {})[kk]; ctxShow(rs.left, rs.bottom + 4, nStatOpts(n).map(function (o) { return { c: o, i: cur === o ? "✓" : "", l: o }; }).concat(cur ? ["-", { c: "~", i: "", l: "— очистить —" }] : []), { k: "nprsel", id: n.id + "|" + kk }); return true;
+      case "nprstar": if (n) { n.pr = n.pr || {}; var sv = +el.dataset.v; if (+n.pr[el.dataset.k] === sv) delete n.pr[el.dataset.k]; else n.pr[el.dataset.k] = sv; touch(n); save(); render(); } return true;
+      case "npradd": if (!n) return true; var ra = el.getBoundingClientRect(), have = nPrKeys(n), add = Object.keys(NPR).filter(function (k) { return have.indexOf(k) < 0; }); if (!add.length) { toast("Все свойства уже добавлены"); return true; } ctxShow(ra.left, ra.bottom + 4, add.map(function (k) { return { c: k, i: "", l: NPR[k].n }; }), { k: "npradd", id: n.id }); return true;
+      case "nprdel": if (n) { var dk = el.dataset.k; if (n.pr) delete n.pr[dk]; n.prk = (n.prk || []).filter(function (x) { return x !== dk; }); var tt = nTplOf(n); if (tt && tt.pr.indexOf(dk) >= 0) toast("Это свойство входит в тип «" + tt.n + "» — значение очищено"); touch(n); save(); render(); } return true;
+      case "ntplsave": if (!n) return true; S.opt.ntpls = nOwnTpls().concat([{ id: "u" + uid(), n: nTitle(n).slice(0, 60), ic: n.ic || "", cov: n.cov || "", base: n.tpl || "", pr: nPrKeys(n), body: n.body || "" }]); optTouch(); save(); toast("Шаблон «" + nTitle(n) + "» сохранён — он в «📋 Из шаблона» и в выборе шаблона на пустой странице"); return true;
+      case "ntplnew": var rn = el.getBoundingClientRect(); ctxShow(rn.left, rn.bottom + 4, nTplMenu(true), { k: "ntplnew", id: "" }); return true;
+      case "nfltd": var rf = el.getBoundingClientRect(), fk = el.dataset.k, sc = nFltScope(), it = fk === "tpl" ? [{ c: "", i: NFLT.tpl ? "" : "✓", l: "Все типы" }, { c: "~", i: NFLT.tpl === "~" ? "✓" : "", l: "С любым типом" }, "-"].concat(Object.keys(NTPL).filter(function (k) { return sc.some(function (x) { return x.tpl === k; }); }).map(function (k) { return { c: k, i: NFLT.tpl === k ? "✓" : NTPL[k].ic, l: NTPL[k].n }; })) : [{ c: "", i: NFLT.st ? "" : "✓", l: "Все статусы" }, "-"].concat(nFltStats(sc).map(function (o) { return { c: o, i: NFLT.st === o ? "✓" : "", l: o }; })); ctxShow(rf.left, rf.bottom + 4, it, { k: "nflt", id: fk }); return true;
+      case "nfltx": NFLT = {}; render(); return true;
       case "nup": if (n && nParent(n)) { var pp = nParent(n), gp = nParent(pp); n.parent = gp ? gp.id : ""; touch(n); save(); render(); toast(gp ? "Теперь внутри «" + nTitle(gp) + "»" : "Теперь на верхнем уровне раздела"); } return true;
       case "nnest": if (!n) return true; var bad = nDesc(n.id), rc = el.getBoundingClientRect(), cand = notes().filter(function (x) { return bad.indexOf(x.id) < 0; }).sort(function (x, y) { return (x.sec === n.sec ? 0 : 1) - (y.sec === n.sec ? 0 : 1) || (y.upd || 0) - (x.upd || 0); }).slice(0, 40);
         ctxShow(rc.left, rc.bottom + 4, [{ c: "~", i: nParent(n) ? "" : "✓", l: "— верхний уровень раздела —" }, "-"].concat(cand.map(function (x) { var sx = nsec(x.sec); return { c: x.id, i: n.parent === x.id ? "✓" : "📄", l: nTitle(x).slice(0, 50) + (sx ? " · " + sx.n : "") }; })), { k: "nnest", id: n.id }); return true;
@@ -2578,7 +2649,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-138";
+  var APPV = "zd-app-2026-10-16-139";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -3145,7 +3216,7 @@ CREATE TABLE inbox (
     if (r.v === "help" && (V !== "help" || r.a !== ARG)) HQ = "";
     if (r.v !== "settings" && r.v !== "help") LASTH = location.hash.slice(1) || "today";
     else if (OPEN) { flushBody(); OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); }
-    if (r.v !== V || r.a !== ARG) { if (!(RNX && RNX.k === "nsec" && r.v === "nsec" && r.a === RNX.id)) RNX = null; SECADD = null; TPICK = false; NPOP = null; }
+    if (r.v !== V || r.a !== ARG) { if (!(RNX && RNX.k === "nsec" && r.v === "nsec" && r.a === RNX.id)) RNX = null; SECADD = null; TPICK = false; NPOP = null; NFLT = {}; }
     V = r.v; ARG = r.a; if (!same) { CONF = null; POP = null; SUB = null; if (RN && RN.where === "page" && RN.id !== r.a) RN = null; }
     document.body.classList.remove("menu");
     render();
@@ -3786,14 +3857,14 @@ CREATE TABLE inbox (
   function ncard(n) {
     var sx = nsec(n.sec), txt = noteText(n), tl = (n.tasks || []).filter(function (id) { return task(id); }).length;
     return '<div class="ncard" draggable="true" data-nid="' + n.id + '" data-a="nopen" data-id="' + n.id + '">' + (nCovCss(n) ? '<div class="ncardcov" style="' + nCovCss(n) + '"></div>' : "") + '<div class="nt">' + (n.ic ? esc(n.ic) + " " : "") + (n.t ? esc(n.t) : '<span class="muted">Без названия</span>') + "</div>" + (txt ? '<div class="nx">' + esc(txt.slice(0, 180)) + "</div>" : "") +
-      '<div class="nm">' + (sx ? "<span>" + ic("folder") + esc(nsPath(sx).map(function (y) { return y.n; }).join(" / ")) + "</span>" : "") + (nParent(n) ? "<span>↳ " + esc(nPath(n).map(nTitle).join(" / ")) + "</span>" : "") + (nKids(n.id).length ? "<span>📄 " + nKids(n.id).length + " " + plural(nKids(n.id).length, ["вложенная", "вложенные", "вложенных"]) + "</span>" : "") + (n.tags || []).map(function (g) { var gg = ntagObj(g); return '<span class="ntg" style="color:' + col(gg ? gg.c : 3) + '">◆' + esc(g) + "</span>"; }).join("") + (tl ? "<span>☐ " + tl + " " + plural(tl, ["задача", "задачи", "задач"]) + "</span>" : "") + '<span class="muted">' + esc(dayName(n.upd || n.created).toLowerCase()) + "</span></div></div>";
+      '<div class="nm">' + nCardProps(n) + (sx ? "<span>" + ic("folder") + esc(nsPath(sx).map(function (y) { return y.n; }).join(" / ")) + "</span>" : "") + (nParent(n) ? "<span>↳ " + esc(nPath(n).map(nTitle).join(" / ")) + "</span>" : "") + (nKids(n.id).length ? "<span>📄 " + nKids(n.id).length + " " + plural(nKids(n.id).length, ["вложенная", "вложенные", "вложенных"]) + "</span>" : "") + (n.tags || []).map(function (g) { var gg = ntagObj(g); return '<span class="ntg" style="color:' + col(gg ? gg.c : 3) + '">◆' + esc(g) + "</span>"; }).join("") + (tl ? "<span>☐ " + tl + " " + plural(tl, ["задача", "задачи", "задач"]) + "</span>" : "") + '<span class="muted">' + esc(dayName(n.upd || n.created).toLowerCase()) + "</span></div></div>";
   }
   function vNotes() {
     var sx = V === "nsec" ? nsec(ARG) : null, tg = V === "ntag" ? ntagObj(ARG) : null;
     if (V === "nsec" && !sx) return head("Раздел не найден", '<a href="#notes">Все заметки</a>');
     if (V === "ntag" && !tg) return head("Тег не найден", '<a href="#notes">Все заметки</a>');
     var ids = sx ? nsDesc(sx.id) : null, q = NQ.trim().toLowerCase();
-    var l = notes().filter(function (n) { return (!ids || ids.indexOf(n.sec) >= 0) && (!tg || (n.tags || []).indexOf(tg.n) >= 0) && (!q || (n.t + " " + noteText(n)).toLowerCase().indexOf(q) >= 0) && (!sx || q || !nParent(n) || ids.indexOf(nParent(n).sec) < 0); }).sort(function (a, b) { return (b.upd || 0) - (a.upd || 0); });
+    var l = notes().filter(function (n) { return (!ids || ids.indexOf(n.sec) >= 0) && (!tg || (n.tags || []).indexOf(tg.n) >= 0) && (!q || (n.t + " " + noteText(n)).toLowerCase().indexOf(q) >= 0) && nFltOk(n) && (!sx || q || nFltOn() || !nParent(n) || ids.indexOf(nParent(n).sec) < 0); }).sort(function (a, b) { return (b.upd || 0) - (a.upd || 0); });
     var h = "";
     if (sx) {
       var path = nsPath(sx).slice(0, -1), rn = RNX && RNX.k === "nsec" && RNX.id === sx.id;
@@ -3801,14 +3872,15 @@ CREATE TABLE inbox (
       h += '<div class="phead"><span class="picb">' + ic("folder") + "</span>" + (rn ? '<input class="rnx" data-rnxk="nsec" data-rnxid="' + sx.id + '" value="' + esc(sx.n) + '">' : '<h1 class="ttl" data-a="nsecren" data-id="' + sx.id + '" title="Нажмите, чтобы переименовать">' + esc(sx.n) + "</h1>") + "</div>";
     } else if (tg) h += '<div class="crumbs"><a href="#notes">Заметки</a> /</div><div class="phead"><h1><span class="ntg" style="color:' + col(tg.c) + '">◆</span> ' + esc(tg.n) + "</h1></div>";
     else h += head("Заметки", "Свои записи: конспекты, идеи, инструкции. Разделы вкладываются друг в друга, у заметок свои теги, заметку можно привязать к одной или нескольким задачам.");
-    h += '<div class="r nbar"><button type="button" class="btn pri sm" data-a="note-new">＋ Заметка</button><button type="button" class="btn sm" data-a="nsec-new">' + ic("folder") + (sx ? " Подраздел" : " Раздел") + "</button>" + (sx ? '<button type="button" class="btn sm warn" data-a="nsec-del">🗑 Удалить раздел</button>' : "") + (tg ? '<button type="button" class="btn sm warn" data-a="ntag-del">🗑 Удалить тег</button>' : "") + '<input type="search" id="nq" class="inp" placeholder="Найти в заметках" value="' + esc(NQ) + '" autocomplete="off"></div>';
+    h += '<div class="r nbar"><button type="button" class="btn pri sm" data-a="note-new">＋ Заметка</button><button type="button" class="btn sm" data-a="ntplnew">📋 Из шаблона ▾</button><button type="button" class="btn sm" data-a="nsec-new">' + ic("folder") + (sx ? " Подраздел" : " Раздел") + "</button>" + (sx ? '<button type="button" class="btn sm warn" data-a="nsec-del">🗑 Удалить раздел</button>' : "") + (tg ? '<button type="button" class="btn sm warn" data-a="ntag-del">🗑 Удалить тег</button>' : "") + '<input type="search" id="nq" class="inp" placeholder="Найти в заметках" value="' + esc(NQ) + '" autocomplete="off"></div>';
     var kids = sx ? nsKids(sx.id) : !tg ? nsKids("") : [];
     if (kids.length) h += '<div class="chips">' + kids.map(function (c) { return '<a class="chip" href="#nsec-' + c.id + '">' + ic("folder") + " " + esc(c.n) + ' <span class="muted">' + notes().filter(function (n) { return nsDesc(c.id).indexOf(n.sec) >= 0; }).length + "</span></a>"; }).join("") + "</div>";
     var rec = !sx && !tg && !q ? nRecent().slice(0, 8) : [];
     if (rec.length) h += '<div class="chips nrec"><span class="muted">Недавние:</span>' + rec.map(function (n) { return '<a class="chip" href="#note-' + n.id + '">' + esc(nIc(n)) + " " + esc(nTitle(n).slice(0, 40)) + "</a>"; }).join("") + "</div>";
-    if (!l.length) return h + '<p class="empty">' + (q ? "Ничего не нашлось." : "Заметок пока нет — «＋ Заметка».") + "</p>";
-    var nv = LS.get("zd-nview") === "list" ? "list" : "cards";
-    h += '<div class="r nviewr"><div class="seg">' + [["cards", "▦ Плитки"], ["list", "☰ Список"]].map(function (x) { return '<button type="button" data-a="nview" data-x="' + x[0] + '" class="' + (nv === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></div>";
+    if (!l.length && !nFltOn()) return h + '<p class="empty">' + (q ? "Ничего не нашлось." : "Заметок пока нет — «＋ Заметка».") + "</p>";
+    var nv = LS.get("zd-nview") === "list" ? "list" : "cards", fsc = nFltScope(), hasT = fsc.some(function (x) { return x.tpl; }), hasS = nFltStats(fsc).length;
+    h += '<div class="r nviewr">' + (hasT || hasS || nFltOn() ? '<span class="nflt">' + (hasT ? '<button type="button" class="ddb sm" data-a="nfltd" data-k="tpl">Тип: ' + esc(NFLT.tpl === "~" ? "с любым" : NFLT.tpl ? NTPL[NFLT.tpl].n : "все") + '<span class="dda">▾</span></button>' : "") + (hasS ? '<button type="button" class="ddb sm" data-a="nfltd" data-k="st">Статус: ' + esc(NFLT.st || "все") + '<span class="dda">▾</span></button>' : "") + (nFltOn() ? '<button type="button" class="btn sm" data-a="nfltx">✕ Сбросить</button>' : "") + "</span>" : "") + '<div class="seg">' + [["cards", "▦ Плитки"], ["list", "☰ Список"]].map(function (x) { return '<button type="button" data-a="nview" data-x="' + x[0] + '" class="' + (nv === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></div>";
+    if (!l.length) return h + '<p class="empty">По этому фильтру страниц нет.</p>';
     return h + (nv === "list" ? '<div class="nlist">' + l.map(nRowHTML).join("") + "</div>" : '<div class="ngrid">' + l.map(ncard).join("") + "</div>");
   }
   function noteTaskPick(n, q) {
@@ -3825,16 +3897,19 @@ CREATE TABLE inbox (
     if (!rd && (!n.ic || !cov)) h += '<div class="nadd">' + (n.ic ? "" : '<button type="button" data-a="npop" data-x="ic">☺ Значок</button>') + (cov ? "" : '<button type="button" data-a="npop" data-x="cov">🖼 Обложка</button>') + "</div>";
     if (!rd) h += nPopHTML(n);
     h += rd ? '<div class="ntitleR" role="heading" aria-level="1">' + esc(nTitle(n)) + "</div>" : '<input id="ntitle" class="ntitle" data-note="' + n.id + '" value="' + esc(n.t || "") + '" placeholder="Название заметки" autocomplete="off">';
+    if (rd) h += nPropsChips(n);
+    if (!rd && !n.tpl && !noteText(n)) h += '<div class="ntplst"><span class="muted">Начать с шаблона:</span>' + Object.keys(NTPL).map(function (k) { return '<button type="button" class="chip" data-a="ntplapply" data-v="' + k + '">' + NTPL[k].ic + " " + esc(NTPL[k].n) + "</button>"; }).join("") + nOwnTpls().map(function (x) { return '<button type="button" class="chip" data-a="ntplapply" data-v="' + esc(x.id) + '">' + esc(x.ic || "📄") + " " + esc(x.n) + "</button>"; }).join("") + "</div>";
     if (!rd) h += '<div class="props nprops"><span>Раздел</span><div class="v"><button type="button" class="ddb" data-a="nsecpick">' + ic("folder") + esc(sx ? nsPath(sx).map(function (y) { return y.n; }).join(" / ") : "— без раздела —") + '<span class="dda">▾</span></button></div>' +
       '<span>Теги</span><div class="v tagv">' + (n.tags || []).filter(function (x) { return ntagObj(x); }).map(function (x) { return '<span class="tchip nt" style="--tc:' + col(ntagObj(x).c) + '"><a href="#ntag-' + esc(x) + '" title="Открыть тег">◆ ' + esc(x) + '</a><button type="button" class="tx" data-a="ntagt" data-v="' + esc(x) + '" title="Убрать тег" aria-label="Убрать тег">×</button></span>'; }).join("") + '<input type="text" id="ntagin" class="tagin" placeholder="' + ((n.tags || []).length ? "+ тег" : "Добавить тег…") + '" size="12" autocomplete="off" spellcheck="false"></div>' +
       '<span>Страница</span><div class="v"><button type="button" class="btn sm" data-a="nnest" title="Сделать вложенной страницей другой заметки">↳ ' + (npa.length ? "Внутри «" + esc(nTitle(npa[npa.length - 1]).slice(0, 40)) + "»" : "Вложить в страницу…") + "</button>" + (npa.length ? '<button type="button" class="btn sm" data-a="nup">⇡ На уровень выше</button>' : "") + "</div>" +
+      nPropsRows(n) +
       '<span>Задачи</span><div class="v">' + tl.map(function (t) { return '<span class="chip ntk' + (t.done ? " dn" : "") + '"><a href="#task-' + t.id + '">' + (t.done ? "✓ " : "☐ ") + esc(t.t.slice(0, 60)) + '</a><button type="button" data-a="nunlink" data-v="' + t.id + '" title="Отвязать">×</button></span>'; }).join("") +
       '<button type="button" class="btn sm" data-a="ntpick">' + (TPICK ? "Готово" : "＋ Привязать к задаче") + "</button>" + (TPICK ? '<div class="npick"><input type="search" id="tpq" placeholder="Найти задачу" autocomplete="off"><div id="tpres">' + noteTaskPick(n, "") + "</div></div>" : "") + "</div></div>";
     h += '<div id="nrte" class="rte' + (n.body ? "" : " empty") + '" data-note="' + n.id + '" contenteditable="' + (rd ? "false" : "true") + '" spellcheck="true" data-ph="Текст заметки… «/» — заголовок, чек-лист, спойлер, таблица, код; [[ — ссылка на страницу">' + (clean(n.body || "") || "<p><br></p>") + "</div>";
     var nk = nKids(n.id), nbl = nBacklinks(n.id);
     if (!rd || nk.length) h += '<div class="nsub"><div class="nsubh"><b>Вложенные страницы' + (nk.length ? " · " + nk.length : "") + "</b>" + (rd ? "" : '<button type="button" class="btn sm" data-a="note-sub">＋ Вложенная страница</button>') + "</div>" + (nk.length ? '<div class="nsubg">' + nk.map(function (k) { var kk = nKids(k.id).length, tx = noteText(k); return '<a class="nsubc" href="#note-' + k.id + '">' + (nCovCss(k) ? '<span class="nsubcov" style="' + nCovCss(k) + '"></span>' : "") + "<b>" + esc(nIc(k)) + " " + esc(nTitle(k)) + "</b>" + (tx ? "<small>" + esc(tx.slice(0, 90)) + "</small>" : "") + (kk ? '<small class="muted">' + kk + " " + plural(kk, ["вложенная", "вложенные", "вложенных"]) + "</small>" : "") + "</a>"; }).join("") + "</div>" : '<p class="muted" style="margin:0">Страницы внутри этой — для подробностей, примеров, уроков. Или наберите в тексте <code>[[</code> и название.</p>') + "</div>";
     if (nbl.length) h += '<div class="nback"><b>Ссылаются сюда · ' + nbl.length + "</b>" + nbl.map(function (x) { return x.k === "n" ? '<a href="#note-' + x.o.id + '">' + esc(nIc(x.o)) + " " + esc(nTitle(x.o)) + "</a>" : '<a href="#task-' + x.o.id + '">' + (x.o.done ? "✓ " : "☐ ") + esc(x.o.t) + "</a>"; }).join("") + "</div>";
-    if (!rd) h += '<p class="muted nfoot"><button type="button" class="btn sm" data-a="notepin">📌 На доску</button> · Создана ' + new Date(n.created || n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) + (n.upd ? " · изменена " + new Date(n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : "") + ' · <button type="button" class="btn sm warn" data-a="note-del">🗑 Удалить заметку</button></p>';
+    if (!rd) h += '<p class="muted nfoot"><button type="button" class="btn sm" data-a="notepin">📌 На доску</button><button type="button" class="btn sm" data-a="ntplsave" title="Тип, значок, обложка, свойства и текст этой страницы станут шаблоном">⧉ Сохранить как шаблон</button> · Создана ' + new Date(n.created || n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) + (n.upd ? " · изменена " + new Date(n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : "") + ' · <button type="button" class="btn sm warn" data-a="note-del">🗑 Удалить заметку</button></p>';
     return '<div class="npage' + (tocI.length >= 2 ? " hastoc" : "") + (rd ? " nread" : "") + '"><aside class="ntoc" id="ntoc">' + nTocHTML(tocI) + '</aside><div class="nmain">' + h + "</div></div>";
   }
   function noteDel(n) { n.del = 1; n.delAt = Date.now(); touch(n); save(); var back = n.sec && nsec(n.sec) ? "nsec-" + n.sec : "notes"; go(back); toastUndo("Заметка удалена", function () { delete n.del; delete n.delAt; touch(n); save(); render(); }); }
@@ -9584,6 +9659,9 @@ CREATE TABLE inbox (
       "<b>Значок и обложка</b> — наведите на страницу над названием: «☺ Значок» (эмодзи из набора или свой) и «🖼 Обложка» (12 готовых или картинка по ссылке https://…). Значок виден в дереве, избранном, ссылках и карточках; обложка — на странице и карточках.",
       "<b>Оглавление</b> — справа на широком экране, если в тексте два заголовка и больше; строится само по заголовкам и обновляется, пока вы пишете. Клик — к разделу.",
       "<b>📖 Читать</b> — режим чтения (справа от пути): крупный текст по центру, без полей и кнопок; ссылки на сайты открываются в новой вкладке. «✎ Править» — назад. Запоминается на этом устройстве.",
+      "<b>Шаблоны страниц</b>: «📋 Из шаблона ▾» в заметках или кнопки «Начать с шаблона» на пустой странице — 🎓 Конспект урока, 📚 Книга, 🍲 Рецепт, 🛠 Инструкция, 🤝 Встреча, 💡 Идея. Шаблон ставит тип, значок, обложку, свойства и заготовку текста с разделами. «⧉ Сохранить как шаблон» внизу страницы — свой шаблон из любой страницы (удалить — в том же меню «Из шаблона»).",
+      "<b>Свойства страницы</b> — в шапке: <b>Тип</b> и свойства типа (у книги — автор, статус «хочу прочитать / читаю / прочитано», оценка ★, дата; у конспекта — курс, дата, статус «изучаю / повторить / освоено», источник). «＋ Свойство» — добавить любое: статус, автор, курс, участники, источник (ссылка открывается ↗), дата, оценка, время, порции; × — убрать. В режиме чтения свойства — строкой под названием.",
+      "<b>Фильтр раздела</b> — «Тип» и «Статус» над списком (появляются, когда у страниц есть тип или статус): например, все книги со статусом «👀 Читаю». С фильтром видны и вложенные страницы. На карточках и в списке — тип, статус и оценка.",
       "Раздел и «Все заметки» — <b>▦ Плитки</b> (карточки с обложками) или <b>☰ Список</b> (строки: значок, название, путь, дата).",
       "Удалённые заметки 30 дней лежат в Корзине. Заметки синхронизируются между устройствами вместе с задачами."]));
     /* ================= Теги, флажки, фильтры ================= */
@@ -11624,7 +11702,7 @@ CREATE TABLE inbox (
         if (!ALLOW[tag]) { while (n.firstChild) n.parentNode.insertBefore(n.firstChild, n); n.parentNode.removeChild(n); return; }
         [].slice.call(n.attributes).forEach(function (at) {
           var k = at.name, v = at.value;
-          var keep = (tag === "A" && k === "href" && /^(https?:|mailto:|#(task|note)-[\w-]+$)/i.test(v)) || ((k === "data-c" || k === "data-bg") && /^[a-z]{2,8}$/.test(v)) || (k === "class" && ((tag === "UL" && v === "todo") || (tag === "DIV" && v === "callout"))) || (tag === "LI" && k === "data-checked") || (tag === "DETAILS" && k === "open");
+          var keep = (tag === "A" && k === "href" && /^(https?:|mailto:|#(task|note|proj)-[\w-]+$)/i.test(v)) || ((k === "data-c" || k === "data-bg") && /^[a-z]{2,8}$/.test(v)) || (k === "class" && ((tag === "UL" && v === "todo") || (tag === "DIV" && v === "callout"))) || (tag === "LI" && k === "data-checked") || (tag === "DETAILS" && k === "open");
           if (!keep) n.removeAttribute(k);
         });
         if (tag === "A" && !/^#/.test(n.getAttribute("href") || "")) { n.setAttribute("target", "_blank"); n.setAttribute("rel", "noopener"); }
@@ -12274,6 +12352,14 @@ CREATE TABLE inbox (
       render(); return;
     }
     if (k === "nsecpick") { var nsn = note(id); if (nsn) { nsn.parent = ""; touch(nsn); nSetSec(nsn, c.slice(3)); save(); render(); } return; }
+    if (k === "ntplset") { var tn = note(id); if (tn) { if (c === "~") delete tn.tpl; else tn.tpl = c; touch(tn); save(); render(); } return; }
+    if (k === "nprsel") { var pp = id.split("|"), sn = note(pp[0]); if (sn) { sn.pr = sn.pr || {}; if (c === "~") delete sn.pr[pp[1]]; else sn.pr[pp[1]] = c; touch(sn); save(); render(); } return; }
+    if (k === "npradd") { var an = note(id); if (an) { an.prk = (an.prk || []).concat([c]); touch(an); save(); render(); setTimeout(function () { var i = document.querySelector('[data-npr="' + c + '"]'); if (i) i.focus(); }, 40); } return; }
+    if (k === "nflt") { NFLT[id] = c; render(); return; }
+    if (k === "ntplnew") {
+      if (c.indexOf("del:") === 0) { var did = c.slice(4), dt = nOwnTpls().filter(function (x) { return x.id === did; })[0]; S.opt.ntpls = nOwnTpls().filter(function (x) { return x.id !== did; }); optTouch(); save(); render(); if (dt) toast("Шаблон «" + dt.n + "» удалён"); return; }
+      var ns = newNote({ sec: V === "nsec" ? ARG : V === "note" && note(ARG) ? note(ARG).sec : "", tags: V === "ntag" ? [ARG] : [] }); if (c !== "~") nApplyTpl(ns, c); save(); NFOCUS = true; TPICK = false; go("note-" + ns.id); return;
+    }
     if (k === "nnest") { var nnn = note(id); if (nnn) { if (c === "~") { nnn.parent = ""; touch(nnn); } else if (!nMoveInto(nnn, note(c))) { toast("Нельзя вложить страницу саму в себя"); return; } save(); render(); toast(c === "~" ? "Страница — на верхнем уровне раздела" : "Страница вложена в «" + nTitle(note(c)) + "»"); } return; }
     if (k === "blk") { if (BHM) blockCmd(c, BHM.r, BHM.b); return; }
     if (k === "flagcol") { var fcc = flagObj(id); if (fcc) { fcc.c = +c.slice(2); touch(fcc); save(); render(); } return; }
