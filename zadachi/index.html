@@ -17,7 +17,7 @@
 <style>
 :root {
   --bg: #f4f5f1; --panel: #ffffff; --side: #eceee8; --fg: #1c211f; --muted: #67706b; --line: #dde1da; --hover: #e6e9e2;
-  --acc: #1d6b5a; --acc-soft: #dcefe8; --warn: #b5432f; --ok: #2b7351; --star: #d49a12; --flag: #d1453b;
+  --acc: #1d6b5a; --acc-soft: #dcefe8; --warn: #b5432f; --buwarn: #c46a12; --ok: #2b7351; --star: #d49a12; --flag: #d1453b;
   --p1: #d1453b; --p2: #df8a1c; --p3: #3b78d0;
   --sans: "Onest", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", Consolas, monospace;
   --shadow: 0 6px 24px rgba(20, 30, 25, .12);
@@ -26,11 +26,11 @@
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #141816; --panel: #1b201d; --side: #171c19; --fg: #e8ece8; --muted: #9aa49e; --line: #2c332f; --hover: #232a26;
-  --acc: #5fc4a6; --acc-soft: #1d3a31; --warn: #ff8a72; --ok: #6cc497; --star: #f0be4a; --flag: #ff6b5e; --p1: #ff6b5e; --p2: #f2a640; --p3: #6ea2f0;
+  --acc: #5fc4a6; --acc-soft: #1d3a31; --warn: #ff8a72; --buwarn: #f2a650; --ok: #6cc497; --star: #f0be4a; --flag: #ff6b5e; --p1: #ff6b5e; --p2: #f2a640; --p3: #6ea2f0;
   --shadow: 0 6px 24px rgba(0, 0, 0, .45); color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #141816; --panel: #1b201d; --side: #171c19; --fg: #e8ece8; --muted: #9aa49e; --line: #2c332f; --hover: #232a26;
-  --acc: #5fc4a6; --acc-soft: #1d3a31; --warn: #ff8a72; --ok: #6cc497; --star: #f0be4a; --flag: #ff6b5e; --p1: #ff6b5e; --p2: #f2a640; --p3: #6ea2f0;
+  --acc: #5fc4a6; --acc-soft: #1d3a31; --warn: #ff8a72; --buwarn: #f2a650; --ok: #6cc497; --star: #f0be4a; --flag: #ff6b5e; --p1: #ff6b5e; --p2: #f2a640; --p3: #6ea2f0;
   --shadow: 0 6px 24px rgba(0, 0, 0, .45); color-scheme: dark }
 * { box-sizing: border-box }
 [hidden] { display: none !important }
@@ -360,8 +360,8 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .burow { display: grid; grid-template-columns: minmax(110px, 190px) minmax(60px, 1fr) auto; gap: 2px 10px; align-items: center; font-size: calc(13.5px * var(--fs)) } .burow .buadj { grid-column: 1 / -1 } .butot { border-top: 1px solid var(--line); padding-top: 6px; font-weight: 600 }
 .bunum { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap }
 .bubr { position: relative; height: 9px; border-radius: 5px; background: var(--hover); overflow: hidden } .bubr > i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: var(--ok) } .bubr > u { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--fg) }
-.bubr > i.warn { background: var(--warn) } .bubr > i.bad { background: #d4574a } .bubr > i.pay { background: var(--acc) } .bubr > i.inc { background: #378add }
-.bunum.ok, .butile .ok, .buw .ok, .bupay .ok, .butbl td.ok { color: var(--ok) } .bunum.warn, .butile .warn { color: var(--warn) } .bunum.bad, .butile .bad, .buw .bad, .bupay .bad, .butbl td.bad, .buadj .bad { color: #c94a3a }
+.bubr > i.warn { background: var(--buwarn) } .bubr > i.bad { background: #d4574a } .bubr > i.pay { background: var(--acc) } .bubr > i.inc { background: #378add }
+.bunum.ok, .butile .ok, .buw .ok, .bupay .ok, .butbl td.ok { color: var(--ok) } .bunum.warn, .butile .warn, .buadj .warn { color: var(--buwarn) } .bunum.bad, .butile .bad, .buw .bad, .bupay .bad, .butbl td.bad, .buadj .bad { color: #c94a3a }
 .bupay { display: flex; gap: 10px; align-items: baseline; padding: 4px 0; border-top: 1px solid var(--line); font-size: calc(13.5px * var(--fs)) } .bupay .bud { width: 48px; flex: none; color: var(--muted); font-size: calc(12px * var(--fs)) } .bupay .bun { flex: 1; min-width: 0 }
 .butbl { overflow-x: auto } .butbl table { width: 100%; border-collapse: collapse; font-size: calc(13px * var(--fs)); font-variant-numeric: tabular-nums } .butbl th, .butbl td { padding: 5px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap } .butbl th:first-child, .butbl td:first-child { text-align: left } .butbl th { font-weight: 500; color: var(--muted); font-size: calc(12px * var(--fs)) } .butbl tr.cur td { background: var(--acc-soft) } .butbl tr.fut td { color: var(--muted) }
 .buregs { padding: 4px 12px } .bureg { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 7px 0 } .bureg + .bureg { border-top: 1px solid var(--line) } .bureg.off { opacity: .5 } .burgn { flex: 1 1 180px; min-width: 0 } .burd { width: 64px } .bura { width: 110px }
@@ -2450,7 +2450,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-118";
+  var APPV = "zd-app-2026-10-16-119";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -7157,7 +7157,14 @@ CREATE TABLE inbox (
       '<p class="muted" style="margin:0">Заменяются только выбранные дни: суммы по статьям и (для периода) план и доходы. Остальное в «Задачах» не трогается. ' + (buCanRemember() ? "Файл берётся запомненный — Chrome может спросить разрешение на чтение." : "В этом браузере файл нужно выбирать при каждом обновлении.") + "</p></div>";
   }
   function buBar(fact, lim, mark, cls) { var p = lim > 0 ? Math.min(100, fact / lim * 100) : fact > 0 ? 100 : 0; return '<div class="bubr"><i class="' + (cls || "") + '" style="width:' + p.toFixed(1) + '%"></i>' + (mark !== undefined && mark >= 0 ? '<u style="left:' + Math.min(100, mark).toFixed(1) + '%"></u>' : "") + "</div>"; }
-  function buCls(fact, lim, mark) { if (lim <= 0) return fact > 0 ? "bad" : ""; var p = fact / lim * 100; return p > 100 ? "bad" : mark !== undefined && p > mark + 8 ? "warn" : "ok"; }
+  function buCls(fact, lim, mark) { if (lim <= 0) return fact > 0 ? "bad" : ""; var p = fact / lim * 100; return p > 100 ? "bad" : mark !== undefined && mark >= 0 && p > mark + 8 ? "warn" : "ok"; }
+  // подсказка к строке статьи: доля лимита, сколько положено к сегодня, вывод
+  function buTip(fact, lim, mark) {
+    if (lim <= 0) return fact > 0 ? "Лимита нет, потрачено " + buRub(fact) : "";
+    var p = Math.round(fact / lim * 100), m = mark !== undefined && mark >= 0 ? Math.round(mark) : -1;
+    var t = p + "% лимита" + (m >= 0 ? " · к сегодня положено ≈" + m + "%" : "");
+    return t + (p > 100 ? " · лимит превышен на " + buRub(fact - lim) : m >= 0 ? (p > m + 8 ? " · тратите быстрее графика" : " · в графике") + ", осталось " + buRub(lim - fact) : " · осталось " + buRub(lim - fact));
+  }
   function buWeekHTML() {
     var mon = addDays(monday(today0()), 7 * BUWK), w = buWeek(mon), t0 = today0(), isCur = BUWK === 0, prev = buWeek(addDays(mon, -7));
     var h = '<div class="r bunav"><button type="button" class="btn sm" data-a="buwk" data-x="-1">‹</button><b>Неделя ' + esc(buWName(mon)) + "</b>" + '<button type="button" class="btn sm" data-a="buwk" data-x="1">›</button>' + (BUWK ? '<button type="button" class="btn sm" data-a="buwk" data-x="0">Эта неделя</button>' : "") + '<span class="muted">' + w.pids.map(buPName).join(" + ") + "</span></div>";
@@ -7168,7 +7175,8 @@ CREATE TABLE inbox (
       (isCur && w.dl ? '<div class="butile"><small>Можно в день до воскресенья</small><span class="' + (T.perDay < 0 ? "bad" : "ok") + '">' + buRub(Math.max(0, T.perDay)) + "</span>" + (T.perDay < 0 ? '<small class="bad">уже перерасход ' + buRub(-T.left) + "</small>" : "") + "</div>" : '<div class="butile"><small>Итог недели</small><span class="' + (T.left < 0 ? "bad" : "ok") + '">' + (T.left < 0 ? "перерасход " + buRub(-T.left) : "экономия " + buRub(T.left)) + "</span></div>") +
       (prev.cats.length && !prev.miss.length ? '<div class="butile"><small>Прошлая неделя</small><span class="' + (prev.tot.left < 0 ? "bad" : "ok") + '">' + (prev.tot.left < 0 ? "перерасход " + buRub(-prev.tot.left) : "экономия " + buRub(prev.tot.left)) + "</span></div>" : "") + "</div>";
     h += '<div class="card busec"><div class="bulab">Гибкие статьи — лимит недели из остатка плана периода' + (isCur ? " · черта — сколько «положено» к сегодня" : "") + "</div>" + (w.cats.length ? w.cats.map(function (x) {
-      return '<div class="burow"><span>' + esc(x.c) + "</span>" + buBar(x.fact, x.lim, mark, buCls(x.fact, x.lim, mark)) + '<span class="bunum ' + buCls(x.fact, x.lim, mark) + '">' + buRub(x.fact) + " / " + buRub(x.lim) + "</span>" + (Math.abs(x.lim - x.norm) >= 50 ? '<small class="muted buadj">обычно ' + buRub(x.norm) + (x.lim < x.norm ? " — урезано за прошлый перерасход" : " — больше за прошлую экономию") + "</small>" : "") + "</div>";
+      var cw = buCls(x.fact, x.lim, mark);
+      return '<div class="burow" title="' + esc(buTip(x.fact, x.lim, mark)) + '"><span>' + esc(x.c) + "</span>" + buBar(x.fact, x.lim, mark, cw) + '<span class="bunum ' + buCls(x.fact, x.lim, mark) + '">' + buRub(x.fact) + " / " + buRub(x.lim) + "</span>" + (Math.abs(x.lim - x.norm) >= 50 ? '<small class="muted buadj">обычно ' + buRub(x.norm) + (x.lim < x.norm ? " — урезано за прошлый перерасход" : " — больше за прошлую экономию") + "</small>" : "") + (cw === "warn" ? '<small class="buadj"><span class="warn">быстрее графика: ' + Math.round(x.fact / x.lim * 100) + "% лимита, к сегодня положено ≈" + Math.round(mark) + "%</span></small>" : "") + "</div>";
     }).join("") : '<p class="muted">Нет гибких статей — отметьте их в «Настройки» → «Бюджет».</p>') + "</div>";
     if (w.snap) { var sf = buSum(w.snap.fact), sl = buSum(w.snap.lim); h += '<p class="muted busnap">Итог на момент закрытия недели (' + esc(new Date(w.snap.at).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })) + "): потрачено " + buRub(sf) + " из " + buRub(sl) + (Math.abs(sf - Math.round(T.fact)) >= 1 ? " · сейчас по файлу " + buRub(T.fact) : " · совпадает с файлом") + "</p>"; }
     // платежи этой недели (справочник) и платежи периода
@@ -7189,7 +7197,7 @@ CREATE TABLE inbox (
       '<div class="butile"><small>Прошло дней</small><span>' + r.el + " из " + r.pd + '</span><small class="muted">' + Math.round(ep) + "% периода</small></div></div>";
     h += '<div class="card busec"><div class="bulab">Статьи — факт и план' + (r.el && r.el < r.pd ? " · черта — сколько «положено» к сегодня (план × " + Math.round(ep) + "%)" : "") + "</div>" + r.rows.map(function (x) {
       var fx = x.k === "flex", cls = fx ? buCls(x.fact, x.plan, r.el < r.pd ? ep : undefined) : x.fact > x.plan + 1 ? "bad" : "";
-      return '<div class="burow"><span>' + esc(x.c) + ' <small class="muted">' + BKN[x.k][0] + "</small></span>" + buBar(x.fact, x.plan, fx && r.el < r.pd ? ep : -1, fx ? cls : x.fact > x.plan + 1 ? "bad" : "pay") + '<span class="bunum ' + cls + '">' + buRub(x.fact) + " / " + buRub(x.plan) + "</span>" +
+      return '<div class="burow" title="' + esc(fx ? buTip(x.fact, x.plan, r.el < r.pd ? ep : -1) : buTip(x.fact, x.plan)) + '"><span>' + esc(x.c) + ' <small class="muted">' + BKN[x.k][0] + "</small></span>" + buBar(x.fact, x.plan, fx && r.el < r.pd ? ep : -1, fx ? cls : x.fact > x.plan + 1 ? "bad" : "pay") + '<span class="bunum ' + cls + '">' + buRub(x.fact) + " / " + buRub(x.plan) + "</span>" +
         (fx && r.el && r.el < r.pd && x.plan ? '<small class="muted buadj">прогноз на ' + new Date(P.to).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + ": " + buRub(x.fc) + (x.fc > x.plan * 1.03 ? ' · <span class="bad">выше плана</span>' : "") + " · чтобы уложиться — " + buRub(Math.max(0, x.perDay)) + " в день</small>" : "") + "</div>";
     }).join("") + '<div class="burow butot"><span>Итого расходы</span>' + buBar(r.exp.fact, r.exp.plan, -1, r.exp.fact > r.exp.plan ? "bad" : "") + '<span class="bunum">' + buRub(r.exp.fact) + " / " + buRub(r.exp.plan) + "</span></div></div>";
     if (r.off.length) h += '<p class="muted">Не входит в расходы: ' + r.off.map(function (x) { return esc(x.c) + " " + buRub(x.fact) + (x.plan ? " из " + buRub(x.plan) : ""); }).join(" · ") + "</p>";
