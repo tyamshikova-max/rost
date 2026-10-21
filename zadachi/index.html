@@ -2450,7 +2450,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-120";
+  var APPV = "zd-app-2026-10-16-121";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -7184,7 +7184,7 @@ CREATE TABLE inbox (
     var rg = buRegsIn(mon, addDays(mon, 6));
     h += '<div class="card busec"><div class="bulab">Регулярные платежи этой недели</div>' + (rg.length ? rg.map(function (x) { return '<div class="bupay"><span class="bud">' + new Date(x.d).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" }) + '</span><span class="bun">' + esc(x.g.n) + ' <small class="muted">' + esc(x.g.cat || "") + '</small></span><span class="bunum ' + (x.st === "ok" ? "ok" : x.st === "late" ? "bad" : "") + '">' + buRub(+x.g.amt || 0) + (x.st === "ok" ? " ✓ похоже, оплачено" : x.st === "late" ? " · не видно оплаты" : x.st === "nodata" ? "" : x.d === t0 ? " · сегодня" : " · ожидается") + "</span></div>"; }).join("") : '<p class="muted" style="margin:0">На этой неделе по справочнику ничего — <a href="#" data-a="butab" data-x="regs">справочник платежей</a>.</p>') + "</div>";
     var P = buPer(buPid(Math.min(Math.max(t0, mon), addDays(mon, 6))));
-    if (P) { var pr = buPeriod(P), pays = pr.rows.filter(function (x) { return x.k === "pay"; }); if (pays.length) h += '<div class="card busec"><div class="bulab">Платежи периода ' + esc(buPName(P.id)) + " — план и факт</div>" + pays.map(function (x) { return '<div class="burow"><span>' + esc(x.c) + "</span>" + buBar(x.fact, x.plan, -1, x.fact > x.plan + 1 ? "bad" : "pay") + '<span class="bunum' + (x.fact > x.plan + 1 ? " bad" : "") + '">' + buRub(x.fact) + " / " + buRub(x.plan) + buPct(x.fact, x.plan) + (x.fact > x.plan + 1 ? " · сверх плана" : x.plan - x.fact >= 1 ? " · осталось " + buRub(x.plan - x.fact) : " ✓") + "</span></div>"; }).join("") + "</div>"; }
+    if (P) { var pr = buPeriod(P), pays = pr.rows.filter(function (x) { return x.k === "pay"; }); if (pays.length) h += '<div class="card busec"><div class="bulab">Платежи периода ' + esc(buPName(P.id)) + " — план и факт</div>" + pays.map(function (x) { return '<div class="burow"><span>' + esc(x.c) + (x.plan > 0 ? " (" + Math.round(x.fact / x.plan * 100) + "%)" : "") + "</span>" + buBar(x.fact, x.plan, -1, x.fact > x.plan + 1 ? "bad" : "pay") + '<span class="bunum' + (x.fact > x.plan + 1 ? " bad" : "") + '">' + buRub(x.fact) + " / " + buRub(x.plan) + (x.fact > x.plan + 1 ? " · сверх плана" : x.plan - x.fact >= 1 ? " · осталось " + buRub(x.plan - x.fact) : " ✓") + "</span></div>"; }).join("") + "</div>"; }
     return h;
   }
   function buPerHTML() {
