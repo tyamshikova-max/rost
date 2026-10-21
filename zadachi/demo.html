@@ -483,6 +483,11 @@ html.nosheet .dptopbox.dphab { background: color-mix(in srgb, var(--ok) 15%, tra
 .nprchips { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: -8px 0 18px; font-size: calc(14px * var(--fs)) } .nprc { display: inline-flex; gap: 6px; align-items: baseline } .nprc small { color: var(--muted); font-size: calc(12px * var(--fs)) } .nprc a { color: var(--acc) }
 .ntype { white-space: nowrap } .nstc { padding: 0 7px; border-radius: 999px; background: var(--acc-soft); color: var(--fg); white-space: nowrap } .nrate { color: var(--star); letter-spacing: 1px } .nlprops { display: flex; gap: 4px 10px; flex-wrap: wrap; font-size: calc(12px * var(--fs)); color: var(--muted) }
 .nflt { display: inline-flex; gap: 6px; flex-wrap: wrap; margin-right: auto }
+.rte img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 6px 0 } .rte img:not([src]) { min-height: 60px; min-width: 120px; background: var(--hover) } #nrte.nfdrop { outline: 2px dashed var(--acc); outline-offset: 4px }
+.nfiles { margin: 14px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; display: grid; gap: 6px } .nfrow { display: flex; gap: 10px; align-items: center; padding: 4px 0; border-top: 1px solid var(--line) } .nfrow a { color: var(--fg); text-decoration: none; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .nfrow a:hover { color: var(--acc) } .nfic { font-size: 18px }
+.nhist { max-width: none } .nhl { display: grid; max-height: 320px; overflow: auto } .nhr { display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 6px 0; border-top: 1px solid var(--line) } .nhr.on { background: var(--hover) } .nhpv { max-height: 360px; overflow: auto; border: 1px dashed var(--line); border-radius: 10px; padding: 10px 14px; background: var(--bg) }
+::highlight(nq) { background-color: #ffe27a; color: #111 } .ncard .nx mark { background: #ffe27a; color: #111; border-radius: 3px; padding: 0 2px }
+.ngwrap { padding: 8px; overflow: hidden } .ngraph { width: 100%; height: auto; max-height: calc(100vh - 260px); display: block } .ngraph line.ngp { stroke: var(--line); stroke-width: 1.4 } .ngraph line.ngl { stroke: var(--acc); stroke-width: 1.6; opacity: .65 } .ngraph .ngn { cursor: pointer } .ngraph .ngn circle { stroke: var(--panel); stroke-width: 2 } .ngraph .ngn:hover circle { stroke: var(--acc) } .ngraph text { font-size: 12px; fill: var(--fg); paint-order: stroke; stroke: var(--bg); stroke-width: 3px }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5682,7 +5687,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-139";
+  var APPV = "zd-app-2026-10-16-140";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -6118,7 +6123,7 @@ CREATE TABLE inbox (
     if ((m = h.match(/^share-(.+)$/))) return { v: "share", a: m[1] };
     if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board|goal|menu|recipe|shop|rimp|rpt)-(.+)$/))) return { v: m[1], a: m[2] };
     if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
-    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch", "menu", "menunew", "recipes", "rhave", "prods", "clean", "budget", "kitchen", "rpt"].indexOf(h) >= 0) return { v: h, a: "" };
+    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch", "menu", "menunew", "recipes", "rhave", "prods", "clean", "budget", "kitchen", "rpt", "ngraph"].indexOf(h) >= 0) return { v: h, a: "" };
     if ((m = h.match(/^daily-?(.*)$/))) return { v: "daily", a: m[1] };
     if ((m = h.match(/^report-?(.*)$/))) return { v: "report", a: m[1] || "w0" };
     return { v: "today", a: "" };
@@ -6145,7 +6150,7 @@ CREATE TABLE inbox (
   function go(h) { if (location.hash.slice(1) === h) route(); else location.hash = h; }
   /* ---------- вкладки открытых страниц (как в многооконной программе); хранятся на этом устройстве ---------- */
   var PTMAX = 8, PTCUR = "", PTJUMP = "", PTDRAG = null;
-  var PTICO = { rpt: "stats", kitchen: "food", rhave: "food", rimp: "food", budget: "budget", clean: "clean", inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
+  var PTICO = { ngraph: "note", rpt: "stats", kitchen: "food", rhave: "food", rimp: "food", budget: "budget", clean: "clean", inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
   var PTNAME = { done: "Сделано", tarch: "Архив задач", trash: "Корзина", archive: "Архив проектов", templates: "Шаблоны", settings: "Настройки", help: "Справка", report: "Отчёт", recipes: "Рецепты", prods: "Продукты и цены", menunew: "Новое меню", rhave: "Из того, что есть", rimp: "Рецепт по ссылке", share: "Поделились", notes: "Заметки", sprints: "Все спринты", search: "Поиск" };
   function ptabsOn() { return innerWidth > 860 && LS.get("zd-ptabs") !== "off"; } // только на компьютере
   function ptabs() { try { var a = JSON.parse(LS.get("zd-tabs") || "[]"); return Array.isArray(a) ? a.filter(function (t) { return t && t.h; }) : []; } catch (e) { return []; } }
@@ -6351,7 +6356,7 @@ CREATE TABLE inbox (
   var NEWHIDE = ["gantt", "matrix", "sprint", "journal", "waiting", "someday", "flag"];
   function hiddenLists() { var l = LS.get("zd-hide"); if (l) { try { var a = JSON.parse(l); if (Array.isArray(a)) return a; } catch (e) { /* старый формат */ } } return S.opt.hideLists || (LS.get("zd-newdef") === "1" ? NEWHIDE : []); }
   function listsOrder() { var hid = hiddenLists(); return listsAll().filter(function (x) { return x === "inbox" || hid.indexOf(x) < 0; }); }
-  var LISTN = { rpt: "Отчёты", kitchen: "Кухня", menu: "Меню", clean: "План уборки", budget: "Бюджет", journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
+  var LISTN = { ngraph: "Граф заметок", rpt: "Отчёты", kitchen: "Кухня", menu: "Меню", clean: "План уборки", budget: "Бюджет", journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
   function setListHidden(id, hide) { if (id === "inbox") return; var h = hiddenLists().filter(function (x) { return x !== id; }); if (hide) h.push(id); S.opt.hideLists = h; LS.set("zd-hide", JSON.stringify(h)); optTouch(); save(); render(); }
   // блоки левой панели сворачиваются кликом по заголовку (запоминается на этом устройстве)
   function sideFold() { try { return JSON.parse(LS.get("zd-sfold") || "{}") || {}; } catch (e) { return {}; } }
@@ -6889,7 +6894,7 @@ CREATE TABLE inbox (
   }
   function ncard(n) {
     var sx = nsec(n.sec), txt = noteText(n), tl = (n.tasks || []).filter(function (id) { return task(id); }).length;
-    return '<div class="ncard" draggable="true" data-nid="' + n.id + '" data-a="nopen" data-id="' + n.id + '">' + (nCovCss(n) ? '<div class="ncardcov" style="' + nCovCss(n) + '"></div>' : "") + '<div class="nt">' + (n.ic ? esc(n.ic) + " " : "") + (n.t ? esc(n.t) : '<span class="muted">Без названия</span>') + "</div>" + (txt ? '<div class="nx">' + esc(txt.slice(0, 180)) + "</div>" : "") +
+    return '<div class="ncard" draggable="true" data-nid="' + n.id + '" data-a="nopen" data-id="' + n.id + '">' + (nCovCss(n) ? '<div class="ncardcov" style="' + nCovCss(n) + '"></div>' : "") + '<div class="nt">' + (n.ic ? esc(n.ic) + " " : "") + (n.t ? esc(n.t) : '<span class="muted">Без названия</span>') + "</div>" + (txt ? '<div class="nx">' + (NQ.trim() ? nSnip(txt, NQ) : esc(txt.slice(0, 180))) + "</div>" : "") +
       '<div class="nm">' + nCardProps(n) + (sx ? "<span>" + ic("folder") + esc(nsPath(sx).map(function (y) { return y.n; }).join(" / ")) + "</span>" : "") + (nParent(n) ? "<span>↳ " + esc(nPath(n).map(nTitle).join(" / ")) + "</span>" : "") + (nKids(n.id).length ? "<span>📄 " + nKids(n.id).length + " " + plural(nKids(n.id).length, ["вложенная", "вложенные", "вложенных"]) + "</span>" : "") + (n.tags || []).map(function (g) { var gg = ntagObj(g); return '<span class="ntg" style="color:' + col(gg ? gg.c : 3) + '">◆' + esc(g) + "</span>"; }).join("") + (tl ? "<span>☐ " + tl + " " + plural(tl, ["задача", "задачи", "задач"]) + "</span>" : "") + '<span class="muted">' + esc(dayName(n.upd || n.created).toLowerCase()) + "</span></div></div>";
   }
   function vNotes() {
@@ -6905,7 +6910,7 @@ CREATE TABLE inbox (
       h += '<div class="phead"><span class="picb">' + ic("folder") + "</span>" + (rn ? '<input class="rnx" data-rnxk="nsec" data-rnxid="' + sx.id + '" value="' + esc(sx.n) + '">' : '<h1 class="ttl" data-a="nsecren" data-id="' + sx.id + '" title="Нажмите, чтобы переименовать">' + esc(sx.n) + "</h1>") + "</div>";
     } else if (tg) h += '<div class="crumbs"><a href="#notes">Заметки</a> /</div><div class="phead"><h1><span class="ntg" style="color:' + col(tg.c) + '">◆</span> ' + esc(tg.n) + "</h1></div>";
     else h += head("Заметки", "Свои записи: конспекты, идеи, инструкции. Разделы вкладываются друг в друга, у заметок свои теги, заметку можно привязать к одной или нескольким задачам.");
-    h += '<div class="r nbar"><button type="button" class="btn pri sm" data-a="note-new">＋ Заметка</button><button type="button" class="btn sm" data-a="ntplnew">📋 Из шаблона ▾</button><button type="button" class="btn sm" data-a="nsec-new">' + ic("folder") + (sx ? " Подраздел" : " Раздел") + "</button>" + (sx ? '<button type="button" class="btn sm warn" data-a="nsec-del">🗑 Удалить раздел</button>' : "") + (tg ? '<button type="button" class="btn sm warn" data-a="ntag-del">🗑 Удалить тег</button>' : "") + '<input type="search" id="nq" class="inp" placeholder="Найти в заметках" value="' + esc(NQ) + '" autocomplete="off"></div>';
+    h += '<div class="r nbar"><button type="button" class="btn pri sm" data-a="note-new">＋ Заметка</button><button type="button" class="btn sm" data-a="ntplnew">📋 Из шаблона ▾</button><a class="btn sm" href="#ngraph">🕸 Граф связей</a><button type="button" class="btn sm" data-a="nsec-new">' + ic("folder") + (sx ? " Подраздел" : " Раздел") + "</button>" + (sx ? '<button type="button" class="btn sm warn" data-a="nsec-del">🗑 Удалить раздел</button>' : "") + (tg ? '<button type="button" class="btn sm warn" data-a="ntag-del">🗑 Удалить тег</button>' : "") + '<input type="search" id="nq" class="inp" placeholder="Найти в заметках" value="' + esc(NQ) + '" autocomplete="off"></div>';
     var kids = sx ? nsKids(sx.id) : !tg ? nsKids("") : [];
     if (kids.length) h += '<div class="chips">' + kids.map(function (c) { return '<a class="chip" href="#nsec-' + c.id + '">' + ic("folder") + " " + esc(c.n) + ' <span class="muted">' + notes().filter(function (n) { return nsDesc(c.id).indexOf(n.sec) >= 0; }).length + "</span></a>"; }).join("") + "</div>";
     var rec = !sx && !tg && !q ? nRecent().slice(0, 8) : [];
@@ -6924,7 +6929,7 @@ CREATE TABLE inbox (
   function vNote() {
     var n = note(ARG); if (!n) return head("Заметка не найдена", '<a href="#notes">Все заметки</a>');
     var sx = nsec(n.sec), tl = (n.tasks || []).map(task).filter(Boolean), npa = nPath(n), rd = LS.get("zd-nread") === "1", cov = nCovCss(n), tocI = nTocItems(n.body); nRecent(n.id);
-    var h = '<div class="crumbs ncrumbs"><span><a href="#notes">Заметки</a> / ' + (sx ? nsPath(sx).map(function (y) { return '<a href="#nsec-' + y.id + '">' + esc(y.n) + "</a> / "; }).join("") : "") + npa.map(function (y) { return '<a href="#note-' + y.id + '">' + esc(nTitle(y)) + "</a> / "; }).join("") + '</span><button type="button" class="nfavb' + (n.fav ? " on" : "") + '" data-a="nfav" title="' + (n.fav ? "Убрать из избранного" : "В избранное — появится в левой панели") + '">' + (n.fav ? "★" : "☆") + '</button><button type="button" class="nreadb" data-a="nread" title="' + (rd ? "Вернуться к редактированию" : "Режим чтения: крупный текст, без кнопок") + '">' + (rd ? "✎ Править" : "📖 Читать") + "</button></div>";
+    var h = '<div class="crumbs ncrumbs"><span><a href="#notes">Заметки</a> / ' + (sx ? nsPath(sx).map(function (y) { return '<a href="#nsec-' + y.id + '">' + esc(y.n) + "</a> / "; }).join("") : "") + npa.map(function (y) { return '<a href="#note-' + y.id + '">' + esc(nTitle(y)) + "</a> / "; }).join("") + '</span><button type="button" class="nfavb' + (n.fav ? " on" : "") + '" data-a="nfav" title="' + (n.fav ? "Убрать из избранного" : "В избранное — появится в левой панели") + '">' + (n.fav ? "★" : "☆") + '</button><button type="button" class="nreadb" data-a="nexp" title="Сохранить страницу в Markdown, Word или PDF">⤓ Экспорт</button><button type="button" class="nreadb" data-a="nread" title="' + (rd ? "Вернуться к редактированию" : "Режим чтения: крупный текст, без кнопок") + '">' + (rd ? "✎ Править" : "📖 Читать") + "</button></div>";
     if (cov) h += '<div class="ncov" style="' + cov + '">' + (rd ? "" : '<span class="ncovb"><button type="button" data-a="npop" data-x="cov">Сменить обложку</button><button type="button" data-a="ncovset" data-v="">Убрать</button></span>') + "</div>";
     if (n.ic) h += '<button type="button" class="nicon' + (cov ? " oncov" : "") + '" data-a="npop" data-x="ic" title="Сменить значок"' + (rd ? " disabled" : "") + ">" + esc(n.ic) + "</button>";
     if (!rd && (!n.ic || !cov)) h += '<div class="nadd">' + (n.ic ? "" : '<button type="button" data-a="npop" data-x="ic">☺ Значок</button>') + (cov ? "" : '<button type="button" data-a="npop" data-x="cov">🖼 Обложка</button>') + "</div>";
@@ -6942,7 +6947,10 @@ CREATE TABLE inbox (
     var nk = nKids(n.id), nbl = nBacklinks(n.id);
     if (!rd || nk.length) h += '<div class="nsub"><div class="nsubh"><b>Вложенные страницы' + (nk.length ? " · " + nk.length : "") + "</b>" + (rd ? "" : '<button type="button" class="btn sm" data-a="note-sub">＋ Вложенная страница</button>') + "</div>" + (nk.length ? '<div class="nsubg">' + nk.map(function (k) { var kk = nKids(k.id).length, tx = noteText(k); return '<a class="nsubc" href="#note-' + k.id + '">' + (nCovCss(k) ? '<span class="nsubcov" style="' + nCovCss(k) + '"></span>' : "") + "<b>" + esc(nIc(k)) + " " + esc(nTitle(k)) + "</b>" + (tx ? "<small>" + esc(tx.slice(0, 90)) + "</small>" : "") + (kk ? '<small class="muted">' + kk + " " + plural(kk, ["вложенная", "вложенные", "вложенных"]) + "</small>" : "") + "</a>"; }).join("") + "</div>" : '<p class="muted" style="margin:0">Страницы внутри этой — для подробностей, примеров, уроков. Или наберите в тексте <code>[[</code> и название.</p>') + "</div>";
     if (nbl.length) h += '<div class="nback"><b>Ссылаются сюда · ' + nbl.length + "</b>" + nbl.map(function (x) { return x.k === "n" ? '<a href="#note-' + x.o.id + '">' + esc(nIc(x.o)) + " " + esc(nTitle(x.o)) + "</a>" : '<a href="#task-' + x.o.id + '">' + (x.o.done ? "✓ " : "☐ ") + esc(x.o.t) + "</a>"; }).join("") + "</div>";
-    if (!rd) h += '<p class="muted nfoot"><button type="button" class="btn sm" data-a="notepin">📌 На доску</button><button type="button" class="btn sm" data-a="ntplsave" title="Тип, значок, обложка, свойства и текст этой страницы станут шаблоном">⧉ Сохранить как шаблон</button> · Создана ' + new Date(n.created || n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) + (n.upd ? " · изменена " + new Date(n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : "") + ' · <button type="button" class="btn sm warn" data-a="note-del">🗑 Удалить заметку</button></p>';
+    h += nfListHTML(n, rd);
+    if (!rd) h += '<p class="muted nfoot"><button type="button" class="btn sm" data-a="notepin">📌 На доску</button><button type="button" class="btn sm" data-a="nhist">🕘 История</button><button type="button" class="btn sm" data-a="ntplsave" title="Тип, значок, обложка, свойства и текст этой страницы станут шаблоном">⧉ Сохранить как шаблон</button> · Создана ' + new Date(n.created || n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) + (n.upd ? " · изменена " + new Date(n.upd).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : "") + ' · <button type="button" class="btn sm warn" data-a="note-del">🗑 Удалить заметку</button></p>';
+    if (NPOP === "hist" && !rd) h += nhHTML(n);
+    if (NQ.trim()) setTimeout(nHiApply, 0);
     return '<div class="npage' + (tocI.length >= 2 ? " hastoc" : "") + (rd ? " nread" : "") + '"><aside class="ntoc" id="ntoc">' + nTocHTML(tocI) + '</aside><div class="nmain">' + h + "</div></div>";
   }
   function noteDel(n) { n.del = 1; n.delAt = Date.now(); touch(n); save(); var back = n.sec && nsec(n.sec) ? "nsec-" + n.sec : "notes"; go(back); toastUndo("Заметка удалена", function () { delete n.del; delete n.delAt; touch(n); save(); render(); }); }
@@ -12122,6 +12130,181 @@ CREATE TABLE inbox (
     return h + "</div>";
   }
 
+  /* ---------- База знаний, волна 5: картинки и файлы (на Яндекс Диске), история версий (на этом устройстве), экспорт, подсветка поиска, граф связей ---------- */
+  // --- картинки и файлы: app:/tasks/files/notes/<id заметки>/<id>_<имя>; в тексте — <img data-ydimg="путь">, файлы — списком n.files
+  function nfPath(n, f) { return "app:/tasks/files/notes/" + n.id + "/" + f.id + "_" + f.n.replace(/[\\/:*?"<>|]+/g, "_").slice(0, 80); }
+  function nfShrink(file) {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type || "") || file.size < 900 * 1024) return Promise.resolve(file);
+    return new Promise(function (ok) {
+      var img = new Image(), u = URL.createObjectURL(file);
+      img.onload = function () { var k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u); c.toBlob(function (b) { ok(b && b.size < file.size ? new File([b], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }) : file); }, "image/jpeg", 0.85); };
+      img.onerror = function () { URL.revokeObjectURL(u); ok(file); }; img.src = u;
+    });
+  }
+  var NFUP = "";
+  // загрузить файлы заметки; картинки — в текст (где стоял курсор), остальное — в «Файлы»
+  function nfUpload(n, files, rg) {
+    if (!YD.on || !YD.token()) { toast("Картинки и файлы заметок хранятся на вашем Яндекс Диске — войдите в «Настройки» → «Синхронизация»"); return; }
+    var list = [].slice.call(files || []).filter(function (f) { if (f.size > 100 * 1048576) { toast("«" + f.name + "» больше 100 МБ — не загружаю"); return false; } return true; }); if (!list.length) return;
+    var base = "app:/tasks/files/notes/" + n.id, chain = YD.folder("app:/tasks").then(function () { return YD.folder("app:/tasks/files"); }).then(function () { return YD.folder("app:/tasks/files/notes"); }).then(function () { return YD.folder(base); }), imgs = [];
+    list.forEach(function (file0) {
+      chain = chain.then(function () { NFUP = file0.name; toast("Загружаю на Диск: " + file0.name); return nfShrink(file0); }).then(function (file) {
+        var meta = { id: uid(), n: (file.name || "файл").slice(0, 120), sz: file.size, ty: file.type || "" }; meta.p = nfPath(n, meta);
+        return YD.api("/resources/upload?overwrite=true&path=" + encodeURIComponent(meta.p)).then(function (j) { return fetch(j.href, { method: "PUT", body: file }); }).then(function (r) {
+          if (!r.ok && r.status !== 201 && r.status !== 202) throw { msg: "ошибка " + r.status };
+          var nn = note(n.id); if (!nn) return;
+          if (/^image\//.test(meta.ty)) imgs.push(meta); else { nn.files = (nn.files || []).concat(meta); touch(nn); }
+        });
+      });
+    });
+    chain.then(function () {
+      NFUP = ""; var nn = note(n.id); if (!nn) return;
+      if (imgs.length) {
+        var html = imgs.map(function (m) { return '<p><img data-ydimg="' + esc(m.p) + '" alt="' + esc(m.n) + '"></p>'; }).join(""), r = $("nrte");
+        if (r && r.dataset.note === nn.id && r.isContentEditable) { r.focus(); var s = getSelection(); if (rg && document.contains(rg.startContainer) && r.contains(rg.startContainer)) { s.removeAllRanges(); s.addRange(rg); } else caretEnd(r); exc("insertHTML", html); BTE = r; saveBody(); attImgs(); }
+        else { nn.body = (nn.body || "") + html; touch(nn); }
+      }
+      save(); render(); toast(imgs.length && list.length === imgs.length ? "Картинка вставлена" : "Загружено файлов: " + list.length);
+    }).catch(function (e) { NFUP = ""; toast("Не удалось загрузить: " + ((e && e.msg) || "нет связи с Диском")); });
+  }
+  function nfPick(n, accept) { var rg = null, s = getSelection(), r = $("nrte"); if (r && s.rangeCount && r.contains(s.anchorNode)) rg = s.getRangeAt(0).cloneRange(); var i = document.createElement("input"); i.type = "file"; i.multiple = true; if (accept) i.accept = accept; i.style.display = "none"; document.body.appendChild(i); i.addEventListener("change", function () { var f = i.files; i.remove(); if (f && f.length) nfUpload(n, f, rg); }); i.click(); }
+  function nfOpen(path) { if (!YD.token()) { toast("Войдите через Яндекс, чтобы открыть файл"); return; } var w = window.open("", "_blank"); attHref(path).then(function (h) { if (w) w.location = h; else location.href = h; }).catch(function (e) { if (w) w.close(); toast("Не удалось открыть: " + ((e && e.msg) || "файл не найден на Диске")); }); }
+  function nfDel(n, id) { var f = (n.files || []).filter(function (x) { return x.id === id; })[0]; if (!f) return; n.files = n.files.filter(function (x) { return x.id !== id; }); touch(n); save(); render(); if (YD.token()) YD.api("/resources?path=" + encodeURIComponent(f.p), { method: "DELETE", ok: [202, 204, 404] }).catch(function () { /* уже нет */ }); toast("Файл удалён (на Диске — в корзине)"); }
+  function nfSize(b) { return b > 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " МБ" : Math.max(1, Math.round(b / 1024)) + " КБ"; }
+  function nfListHTML(n, rd) {
+    var fl = n.files || []; if (!fl.length && rd) return "";
+    return '<div class="nfiles"><div class="nsubh"><b>Файлы' + (fl.length ? " · " + fl.length : "") + "</b>" + (rd ? "" : '<span class="r"><button type="button" class="btn sm" data-a="nfimg">🖼 Картинка в текст</button><button type="button" class="btn sm" data-a="nfadd">📎 Прикрепить файл</button></span>') + "</div>" +
+      (fl.length ? fl.map(function (f) { return '<div class="nfrow"><span class="nfic">' + (/pdf/.test(f.ty) ? "📕" : /sheet|excel|csv/.test(f.ty) ? "📊" : /word|document/.test(f.ty) ? "📘" : /zip|rar/.test(f.ty) ? "🗜" : "📄") + '</span><a href="#" data-a="nfopen" data-v="' + esc(f.p) + '">' + esc(f.n) + '</a><small class="muted">' + nfSize(f.sz || 0) + "</small>" + (rd ? "" : '<button type="button" class="ibtn" data-a="nfdel" data-v="' + f.id + '" title="Удалить файл">🗑</button>') + "</div>"; }).join("") : '<p class="muted" style="margin:0">Картинки и файлы хранятся в папке приложения на вашем Яндекс Диске. Картинку можно просто вставить в текст (Ctrl+V) или перетащить в него.' + (NFUP ? " Загружаю: " + esc(NFUP) + "…" : "") + "</p>") + "</div>";
+  }
+
+  // --- история версий: IndexedDB этого устройства; снимок — перед правкой, затем не чаще раза в 10 минут
+  function nhDB() { return new Promise(function (ok, no) { var r = indexedDB.open("zdemo-zd-nhist", 1); r.onupgradeneeded = function () { r.result.createObjectStore("h"); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); }; }); }
+  function nhGet(id) { return nhDB().then(function (db) { return new Promise(function (ok) { var q = db.transaction("h").objectStore("h").get(id); q.onsuccess = function () { ok(q.result || []); }; q.onerror = function () { ok([]); }; }); }).catch(function () { return []; }); }
+  function nhPut(id, l) { return nhDB().then(function (db) { return new Promise(function (ok) { var tx = db.transaction("h", "readwrite"); tx.objectStore("h").put(l, id); tx.oncomplete = function () { ok(); }; tx.onerror = function () { ok(); }; }); }).catch(function () { /* без истории */ }); }
+  var NHSES = {}, NHIST = null;
+  function nhSnap(n, force) {
+    if (!n || (!force && NHSES[n.id] && Date.now() - NHSES[n.id] < 10 * 60000)) return; NHSES[n.id] = Date.now();
+    var v = { at: n.upd || Date.now(), t: n.t || "", body: n.body || "" };
+    nhGet(n.id).then(function (l) { if (l.length && l[0].body === v.body && l[0].t === v.t) return; l.unshift(v); nhPut(n.id, l.slice(0, 60)); if (NHIST && NHIST.id === n.id) NHIST.l = l.slice(0, 60); });
+  }
+  function nhHTML(n) {
+    if (!NHIST || NHIST.id !== n.id) { NHIST = { id: n.id, l: null, pv: -1 }; nhGet(n.id).then(function (l) { if (NHIST && NHIST.id === n.id) { NHIST.l = l; render(); } }); }
+    var l = NHIST.l, h = '<div class="npop nhist"><div class="npoph"><b>🕘 История версий</b><button type="button" class="ibtn" data-a="npopx" aria-label="Закрыть">✕</button></div><p class="muted" style="margin:0">Версии сохраняются на этом устройстве: перед правкой и дальше не чаще раза в 10 минут, последние 60.</p>';
+    if (!l) return h + '<p class="muted">Загружаю…</p></div>';
+    if (!l.length) return h + '<p class="muted" style="margin:0">Пока нет сохранённых версий — они появятся, когда вы начнёте править текст.</p></div>';
+    h += '<div class="nhl">' + l.map(function (v, i) { var tx = noteText({ body: v.body }); return '<div class="nhr' + (NHIST.pv === i ? " on" : "") + '"><span><b>' + esc(new Date(v.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) + '</b> <small class="muted">' + esc((v.t ? "«" + v.t.slice(0, 40) + "» · " : "") + tx.length + " симв.") + '</small></span><span class="r"><button type="button" class="btn sm" data-a="nhpv" data-v="' + i + '">' + (NHIST.pv === i ? "Скрыть" : "Посмотреть") + '</button><button type="button" class="btn sm" data-a="nhback" data-v="' + i + '">↶ Вернуть</button></span></div>'; }).join("") + "</div>";
+    if (NHIST.pv >= 0 && l[NHIST.pv]) h += '<div class="nhpv rte">' + clean(l[NHIST.pv].body || "<p><i>пусто</i></p>") + "</div>";
+    return h + "</div>";
+  }
+
+  // --- экспорт: Markdown, Word (.doc), PDF (печать браузера); страница или вместе с вложенными
+  function nMd(html) {
+    TXTD.innerHTML = html || "";
+    function inl(el) { return [].map.call(el.childNodes, function (c) { if (c.nodeType === 3) return c.data.replace(/ /g, " "); if (c.nodeType !== 1) return ""; var t = c.tagName, x = inl(c); if (t === "B" || t === "STRONG") return x.trim() ? "**" + x + "**" : x; if (t === "I" || t === "EM") return x.trim() ? "*" + x + "*" : x; if (t === "S" || t === "STRIKE" || t === "DEL") return "~~" + x + "~~"; if (t === "CODE") return "`" + x + "`"; if (t === "A") { var hr = c.getAttribute("href") || ""; return /^https?:|^mailto:/.test(hr) ? "[" + x + "](" + hr + ")" : x; } if (t === "BR") return "  \n"; if (t === "IMG") return "![" + (c.getAttribute("alt") || "картинка") + "]"; return x; }).join(""); }
+    function blk(el, pre) {
+      return [].map.call(el.childNodes, function (c) {
+        if (c.nodeType === 3) return c.data.trim() ? c.data.trim() + "\n\n" : ""; if (c.nodeType !== 1) return ""; var t = c.tagName;
+        if (/^H[1-3]$/.test(t)) return "#".repeat(+t[1] + (pre || 0)) + " " + inl(c).trim() + "\n\n";
+        if (t === "UL" || t === "OL") { var todo = c.classList.contains("todo"); return [].map.call(c.children, function (li, i) { return (t === "OL" ? (i + 1) + ". " : todo ? "- [" + (li.getAttribute("data-checked") === "1" ? "x" : " ") + "] " : "- ") + inl(li).trim(); }).join("\n") + "\n\n"; }
+        if (t === "BLOCKQUOTE") return inl(c).trim().split("\n").map(function (x) { return "> " + x; }).join("\n") + "\n\n";
+        if (t === "PRE") return "```\n" + c.textContent + "\n```\n\n";
+        if (t === "HR") return "---\n\n";
+        if (t === "TABLE") { var rows = [].map.call(c.querySelectorAll("tr"), function (tr) { return "| " + [].map.call(tr.children, function (td) { return inl(td).trim().replace(/\|/g, "\\|"); }).join(" | ") + " |"; }); if (rows.length) rows.splice(1, 0, "|" + rows[0].split("|").slice(1, -1).map(function () { return " --- "; }).join("|") + "|"); return rows.join("\n") + "\n\n"; }
+        if (t === "DETAILS") { var sm = c.querySelector("summary"), rest = c.cloneNode(true); var s2 = rest.querySelector("summary"); if (s2) s2.remove(); return "**" + (sm ? inl(sm).trim() : "Спойлер") + "**\n\n" + blk(rest, pre); }
+        if (t === "DIV" && c.classList.contains("callout")) return "> 💡 " + inl(c).trim() + "\n\n";
+        if (t === "DIV") return blk(c, pre);
+        var x = inl(c).trim(); return x ? x + "\n\n" : "";
+      }).join("");
+    }
+    return blk(TXTD, 1).replace(/\n{3,}/g, "\n\n").trim() + "\n";
+  }
+  function nExpPages(n, deep) { var out = [{ n: n, d: 0 }]; if (deep) (function walk(id, d) { nKids(id).forEach(function (k) { out.push({ n: k, d: d }); walk(k.id, d + 1); }); })(n.id, 1); return out; }
+  function nPropsTxt(n) { var pr = n.pr || {}; return nPrKeys(n).filter(function (k) { return pr[k] !== undefined && pr[k] !== ""; }).map(function (k) { return NPR[k].n + ": " + nPrTxt(k, pr[k]); }).join(" · "); }
+  function nDownload(name, data, mime) { var b = new Blob([data], { type: mime }), a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+  function nFname(n) { return (nTitle(n).replace(/[\\/:*?"<>|]+/g, " ").trim() || "Заметка").slice(0, 80); }
+  // HTML для Word и печати: картинки — по временным ссылкам, уже загруженным на экране
+  function nExpHTML(pages) {
+    var live = {}; [].forEach.call(document.querySelectorAll("img[data-ydimg][src]"), function (im) { live[im.getAttribute("data-ydimg")] = im.src; });
+    return pages.map(function (x, i) { var p = nPropsTxt(x.n), b = clean(x.n.body || "").replace(/<img data-ydimg="([^"]+)"([^>]*)>/g, function (m, path, rest) { var src = live[path] || (ATTH[path] && ATTH[path].h); return src ? '<img src="' + esc(src) + '"' + rest + ' style="max-width:100%">' : "[картинка]"; }); return (i ? '<hr style="page-break-after:always;border:0">' : "") + "<h1>" + esc((x.n.ic ? x.n.ic + " " : "") + nTitle(x.n)) + "</h1>" + (p ? '<p style="color:#666">' + esc(p) + "</p>" : "") + b; }).join("");
+  }
+  var NEXPCSS = "body{font-family:'Segoe UI',Arial,sans-serif;font-size:11.5pt;line-height:1.55;color:#222;max-width:780px;margin:24px auto;padding:0 16px}h1{font-size:22pt;margin:18pt 0 6pt}h2{font-size:15pt;margin:14pt 0 4pt}h3{font-size:12.5pt}blockquote{border-left:3px solid #ccc;margin:8pt 0;padding:2pt 10pt;color:#555}.callout{background:#f6f1e1;border-radius:8px;padding:8pt 12pt}pre{background:#f4f4f4;padding:8pt;white-space:pre-wrap}table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:4pt 8pt}ul.todo{list-style:none;padding-left:4pt}ul.todo li::before{content:'☐ '}ul.todo li[data-checked='1']::before{content:'☑ '}img{max-width:100%}";
+  function nExport(n, kind, deep) {
+    var pages = nExpPages(n, deep);
+    if (kind === "md") { nDownload(nFname(n) + ".md", pages.map(function (x) { var p = nPropsTxt(x.n); return "#".repeat(Math.min(6, x.d + 1)) + " " + (x.n.ic ? x.n.ic + " " : "") + nTitle(x.n) + "\n\n" + (p ? "_" + p + "_\n\n" : "") + nMd(x.n.body).replace(/^(#+) /gm, function (m, s) { return "#".repeat(Math.min(6, s.length + x.d)) + " "; }); }).join("\n"), "text/markdown;charset=utf-8"); toast("Markdown сохранён в «Загрузки»"); return; }
+    var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>' + esc(nTitle(n)) + "</title><style>" + NEXPCSS + "</style></head><body>" + nExpHTML(pages) + "</bo" + "dy></ht" + "ml>";
+    if (kind === "doc") { nDownload(nFname(n) + ".doc", "﻿" + html, "application/msword"); toast("Файл Word сохранён в «Загрузки»"); return; }
+    var w = window.open("", "_blank"); if (!w) { toast("Браузер не дал открыть окно печати — разрешите всплывающие окна"); return; }
+    w.document.open(); w.document.write(html.replace("</bo" + "dy>", "<scr" + "ipt>window.onload=function(){setTimeout(function(){window.print()},400)}<\/scr" + "ipt></bo" + "dy>")); w.document.close();
+  }
+
+  // --- подсветка найденного: в карточках — отрывок с совпадением, на странице — выделение в тексте
+  function nSnip(txt, q) { q = String(q || "").trim(); var i = q ? txt.toLowerCase().indexOf(q.toLowerCase()) : -1; if (i < 0) return esc(txt.slice(0, 180)); var a = Math.max(0, i - 60), part = txt.slice(a, i + q.length + 110); var j = i - a; return (a ? "…" : "") + esc(part.slice(0, j)) + "<mark>" + esc(part.slice(j, j + q.length)) + "</mark>" + esc(part.slice(j + q.length)) + "…"; }
+  function nHiApply() {
+    try { if (!window.Highlight || !CSS.highlights) return; CSS.highlights.delete("nq"); var q = NQ.trim().toLowerCase(), r = $("nrte"); if (!q || V !== "note" || !r) return; var rs = [], w = document.createTreeWalker(r, NodeFilter.SHOW_TEXT), nd;
+      while ((nd = w.nextNode())) { var s = nd.data.toLowerCase(), i = s.indexOf(q); while (i >= 0 && rs.length < 300) { var rg = new Range(); rg.setStart(nd, i); rg.setEnd(nd, i + q.length); rs.push(rg); i = s.indexOf(q, i + q.length); } }
+      if (rs.length) { CSS.highlights.set("nq", new Highlight(rs[0])); rs.slice(1).forEach(function (x) { CSS.highlights.get("nq").add(x); }); var top = rs[0].getBoundingClientRect(); if (top.top > innerHeight - 80 || top.top < 60) window.scrollBy(0, top.top - innerHeight / 3); }
+    } catch (e) { /* подсветка не мешает */ }
+  }
+
+  // --- граф связей: страницы, вложенность (серые линии) и ссылки [[…]] (цветные)
+  var NGALL = false;
+  function vNGraph() {
+    var ns = notes(), idx = {}, E = [], seen = {};
+    ns.forEach(function (n, i) { idx[n.id] = i; });
+    ns.forEach(function (n) { var p = nParent(n); if (p && idx[p.id] !== undefined) E.push([idx[n.id], idx[p.id], "p"]); });
+    var lm = nLinksMap(); Object.keys(lm).forEach(function (to) { (lm[to] || []).forEach(function (x) { if (x.k !== "n" || idx[to] === undefined || idx[x.o.id] === undefined || x.o.id === to) return; var key = [idx[x.o.id], idx[to]].sort().join("-"); if (seen[key]) return; seen[key] = 1; E.push([idx[x.o.id], idx[to], "l"]); }); });
+    var deg = ns.map(function () { return 0; }); E.forEach(function (e) { deg[e[0]]++; deg[e[1]]++; });
+    var keep = ns.map(function (n, i) { return NGALL || deg[i] > 0; }), V0 = [], map = {};
+    ns.forEach(function (n, i) { if (keep[i]) { map[i] = V0.length; V0.push({ n: n, d: deg[i] }); } });
+    var Ed = E.filter(function (e) { return keep[e[0]] && keep[e[1]]; }).map(function (e) { return [map[e[0]], map[e[1]], e[2]]; });
+    var h = '<div class="crumbs"><a href="#notes">Заметки</a> /</div>' + head("🕸 Граф связей", "Страницы и связи между ними: серые линии — вложенность, цветные — ссылки [[…]]. Цвет точки — раздел, размер — число связей. Нажмите точку — откроется страница.");
+    h += '<div class="r nbar"><button type="button" class="btn sm' + (NGALL ? " on" : "") + '" data-a="ngall">' + (NGALL ? "✓ " : "") + "Показывать страницы без связей</button><span class=\"muted\">страниц: " + V0.length + " · связей: " + Ed.length + "</span></div>";
+    if (!V0.length) return h + '<p class="empty">Связей пока нет — вложите страницы друг в друга или поставьте ссылки <code>[[</code>.</p>';
+    // раскладка: отталкивание точек, пружины связей, притяжение к центру; начальные места — по кругу (одинаково при каждом открытии)
+    var N = V0.length, W = 1000, H = 640, P = V0.map(function (v, i) { var a = i / N * Math.PI * 2, r = 200 + (i % 7) * 18; return { x: W / 2 + Math.cos(a) * r, y: H / 2 + Math.sin(a) * r * 0.7 }; }), it = N > 250 ? 120 : 260;
+    for (var s = 0; s < it; s++) {
+      var F = P.map(function () { return { x: 0, y: 0 }; }), kr = 2600;
+      for (var i = 0; i < N; i++) for (var j = i + 1; j < N; j++) { var dx = P[i].x - P[j].x, dy = P[i].y - P[j].y, d2 = dx * dx + dy * dy + 0.01, f = kr / d2, d = Math.sqrt(d2); F[i].x += f * dx / d; F[i].y += f * dy / d; F[j].x -= f * dx / d; F[j].y -= f * dy / d; }
+      Ed.forEach(function (e) { var a = P[e[0]], b = P[e[1]], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1, f = (d - (e[2] === "p" ? 60 : 90)) * 0.04; F[e[0]].x += f * dx / d; F[e[0]].y += f * dy / d; F[e[1]].x -= f * dx / d; F[e[1]].y -= f * dy / d; });
+      var step = 1 - s / it;
+      P.forEach(function (p, i) { F[i].x += (W / 2 - p.x) * 0.012; F[i].y += (H / 2 - p.y) * 0.012; p.x += Math.max(-20, Math.min(20, F[i].x)) * step; p.y += Math.max(-20, Math.min(20, F[i].y)) * step; });
+    }
+    var xs = P.map(function (p) { return p.x; }), ys = P.map(function (p) { return p.y; }), x0 = Math.min.apply(null, xs) - 60, x1 = Math.max.apply(null, xs) + 60, y0 = Math.min.apply(null, ys) - 40, y1 = Math.max.apply(null, ys) + 40;
+    if (x1 - x0 < 900) { var cx = (x0 + x1) / 2; x0 = cx - 450; x1 = cx + 450; } if (y1 - y0 < 520) { var cy = (y0 + y1) / 2; y0 = cy - 260; y1 = cy + 260; }
+    var secI = {}; nsecs().forEach(function (x, i) { secI[x.id] = i; });
+    var svg = '<svg class="ngraph" viewBox="' + x0.toFixed(0) + " " + y0.toFixed(0) + " " + (x1 - x0).toFixed(0) + " " + (y1 - y0).toFixed(0) + '" role="img" aria-label="Граф связей заметок">';
+    Ed.forEach(function (e) { var a = P[e[0]], b = P[e[1]]; svg += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '" class="' + (e[2] === "p" ? "ngp" : "ngl") + '"/>'; });
+    V0.forEach(function (v, i) { var p = P[i], r = 5 + Math.min(10, v.d * 1.6), c = v.n.sec && secI[v.n.sec] !== undefined ? col(secI[v.n.sec] + 2) : "var(--muted)", lab = N <= 70 || v.d >= 3; svg += '<g class="ngn" data-a="nopen" data-id="' + v.n.id + '"><title>' + esc(nTitle(v.n)) + "</title><circle cx=\"" + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' + r.toFixed(1) + '" style="fill:' + c + '"/>' + (lab ? '<text x="' + p.x.toFixed(1) + '" y="' + (p.y + r + 13).toFixed(1) + '" text-anchor="middle">' + esc(nTitle(v.n).slice(0, 28)) + "</text>" : "") + "</g>"; });
+    return h + '<div class="card ngwrap">' + svg + "</svg></div>";
+  }
+  function nb5Act(a, el) {
+    var n = note(ARG);
+    switch (a) {
+      case "nfadd": if (n) nfPick(n, ""); return true;
+      case "nfimg": if (n) nfPick(n, "image/*"); return true;
+      case "nfopen": nfOpen(el.dataset.v); return true;
+      case "nfdel": if (n) nfDel(n, el.dataset.v); return true;
+      case "nhist": NPOP = NPOP === "hist" ? null : "hist"; NHIST = null; render(); setTimeout(function () { var pp = document.querySelector(".nhist"); if (pp) pp.scrollIntoView({ block: "nearest", behavior: "smooth" }); }, 60); return true;
+      case "nhpv": if (NHIST) { NHIST.pv = NHIST.pv === +el.dataset.v ? -1 : +el.dataset.v; render(); } return true;
+      case "nhback": if (!n || !NHIST || !NHIST.l) return true; var v = NHIST.l[+el.dataset.v]; if (!v) return true; flushBody(); nhSnap(n, true); var old = { t: n.t, body: n.body }; n.body = v.body; if (v.t) n.t = v.t; touch(n); save(); NPOP = null; NHIST = null; render(); toastUndo("Возвращена версия от " + new Date(v.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }), function () { n.body = old.body; n.t = old.t; touch(n); }); return true;
+      case "nexp": if (!n) return true; var rc = el.getBoundingClientRect(), hk = nKids(n.id).length; ctxShow(rc.left, rc.bottom + 4, [{ c: "md", i: "Ⓜ", l: "Markdown (.md)" }, { c: "doc", i: "📘", l: "Word (.doc)" }, { c: "pdf", i: "📕", l: "PDF — через печать" }].concat(hk ? ["-", { c: "md+", i: "Ⓜ", l: "Markdown — со вложенными (" + nDesc(n.id).length + " стр.)" }, { c: "doc+", i: "📘", l: "Word — со вложенными" }, { c: "pdf+", i: "📕", l: "PDF — со вложенными" }] : []), { k: "nexp", id: n.id }); return true;
+      case "ngall": NGALL = !NGALL; render(); return true;
+    }
+    return false;
+  }
+  // вставка и перетаскивание картинок и файлов прямо в текст заметки
+  document.addEventListener("paste", function (e) {
+    var r = e.target.closest && e.target.closest("#nrte"); if (!r || !r.isContentEditable) return; var cd = e.clipboardData; if (!cd || !cd.files || !cd.files.length) return;
+    var n = note(r.dataset.note); if (!n) return; e.preventDefault(); e.stopImmediatePropagation(); var s = getSelection(); nfUpload(n, cd.files, s.rangeCount ? s.getRangeAt(0).cloneRange() : null);
+  }, true);
+  document.addEventListener("dragover", function (e) { var r = e.target.closest && e.target.closest("#nrte"); if (r && r.isContentEditable && e.dataTransfer && [].indexOf.call(e.dataTransfer.types || [], "Files") >= 0) { e.preventDefault(); r.classList.add("nfdrop"); } }, true);
+  document.addEventListener("dragleave", function (e) { var r = e.target.closest && e.target.closest("#nrte"); if (r) r.classList.remove("nfdrop"); }, true);
+  document.addEventListener("drop", function (e) {
+    var r = e.target.closest && e.target.closest("#nrte"); if (!r || !r.isContentEditable || !e.dataTransfer || !e.dataTransfer.files || !e.dataTransfer.files.length) return;
+    r.classList.remove("nfdrop"); var n = note(r.dataset.note); if (!n) return; e.preventDefault(); e.stopImmediatePropagation();
+    var rg = null; try { if (document.caretRangeFromPoint) rg = document.caretRangeFromPoint(e.clientX, e.clientY); } catch (er) { rg = null; } nfUpload(n, e.dataTransfer.files, rg);
+  }, true);
+
   function chalsWidget() {
     var h = "", t0 = today0(), any = false;
     if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
@@ -12695,6 +12878,11 @@ CREATE TABLE inbox (
       "<b>Шаблоны страниц</b>: «📋 Из шаблона ▾» в заметках или кнопки «Начать с шаблона» на пустой странице — 🎓 Конспект урока, 📚 Книга, 🍲 Рецепт, 🛠 Инструкция, 🤝 Встреча, 💡 Идея. Шаблон ставит тип, значок, обложку, свойства и заготовку текста с разделами. «⧉ Сохранить как шаблон» внизу страницы — свой шаблон из любой страницы (удалить — в том же меню «Из шаблона»).",
       "<b>Свойства страницы</b> — в шапке: <b>Тип</b> и свойства типа (у книги — автор, статус «хочу прочитать / читаю / прочитано», оценка ★, дата; у конспекта — курс, дата, статус «изучаю / повторить / освоено», источник). «＋ Свойство» — добавить любое: статус, автор, курс, участники, источник (ссылка открывается ↗), дата, оценка, время, порции; × — убрать. В режиме чтения свойства — строкой под названием.",
       "<b>Фильтр раздела</b> — «Тип» и «Статус» над списком (появляются, когда у страниц есть тип или статус): например, все книги со статусом «👀 Читаю». С фильтром видны и вложенные страницы. На карточках и в списке — тип, статус и оценка.",
+      "<b>Картинки и файлы</b>: вставьте картинку в текст (Ctrl+V) или перетащите её в текст; «🖼 Картинка в текст» и «📎 Прикрепить файл» — в блоке «Файлы» внизу страницы. Хранятся в папке приложения на вашем Яндекс Диске (нужен вход в «Синхронизации»); большие фото сжимаются до 1600 точек. Файлы открываются по клику, 🗑 — удалить (на Диске — в корзину).",
+      "<b>🕘 История</b> — внизу страницы: версии сохраняются на этом устройстве перед правкой и дальше не чаще раза в 10 минут (последние 60). «Посмотреть» — текст версии, «↶ Вернуть» — восстановить (текущий вариант при этом тоже сохранится в истории, и есть «Вернуть» в подсказке).",
+      "<b>⤓ Экспорт</b> — справа от пути: Markdown (.md), Word (.doc) или PDF через печать браузера («Сохранить как PDF»); у страниц с вложенными — вариант «со вложенными» (одним файлом, по порядку).",
+      "<b>Поиск</b> по заметкам показывает в карточках отрывок с найденным, а на открытой странице подсвечивает совпадения в тексте.",
+      "<b>🕸 Граф связей</b> — кнопка в «Заметках»: точки — страницы (цвет — раздел, размер — сколько связей), серые линии — вложенность, цветные — ссылки [[…]]. Клик по точке — открыть страницу.",
       "Раздел и «Все заметки» — <b>▦ Плитки</b> (карточки с обложками) или <b>☰ Список</b> (строки: значок, название, путь, дата).",
       "Удалённые заметки 30 дней лежат в Корзине. Заметки синхронизируются между устройствами вместе с задачами."]));
     /* ================= Теги, флажки, фильтры ================= */
@@ -13383,7 +13571,7 @@ CREATE TABLE inbox (
   document.addEventListener("mousedown", function (e) { if (!POP || !e.target.closest) return; if (e.target.closest(".pop, [data-a=pop], #ctx, #ctx2")) return; POP = null; setTimeout(render, 0); });
   // где какая страница справки
   function hq(id, title) { return '<a class="hq" href="#help-' + id + '" title="' + esc(title || "Справка по этому разделу") + '" aria-label="Справка">?</a>'; }
-  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", tarch: "tarch", report: "report", clean: "clean", budget: "budget", menu: "food", menunew: "food", recipes: "food", recipe: "food", rhave: "food", kitchen: "kitchen", rpt: "reports", prods: "food", shop: "food", rimp: "food", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
+  var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", tarch: "tarch", report: "report", clean: "clean", budget: "budget", menu: "food", menunew: "food", recipes: "food", recipe: "food", rhave: "food", kitchen: "kitchen", rpt: "reports", ngraph: "notes", prods: "food", shop: "food", rimp: "food", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
   var SHELP = { "s-lists": "mini", "s-review": "focus", "s-flags": "flags", "s-srv": "srv", "s-digest": "digest", "s-ai": "ai", "s-sync": "sync", "s-backup": "backup", "s-diag": "diag", "s-wipe": "backup", "s-test": "backup" };
   function helpMarks() {
     var v = $("view");
@@ -13401,7 +13589,7 @@ CREATE TABLE inbox (
     try { ctxShowBtn(); if (NOW) renderNow(); } catch (er) { /* не мешает */ }
     $("side").innerHTML = sideHTML();
     try { $("bnav").innerHTML = bnavHTML(); document.documentElement.classList.toggle("nohq", !!S.opt.noHq); } catch (er) { /* не мешает */ }
-    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, rhave: vRhave, kitchen: vKitchen, rpt: vRpt, clean: vClean, budget: vBudget, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
+    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, rhave: vRhave, kitchen: vKitchen, rpt: vRpt, ngraph: vNGraph, clean: vClean, budget: vBudget, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
     var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
     $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "templates");
     try { ptTouch(location.hash.slice(1) || "today"); } catch (er) { /* вкладки не мешают */ }
@@ -14006,6 +14194,7 @@ CREATE TABLE inbox (
     if (a && tmAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && rqAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && nbAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && nb5Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -14607,7 +14796,7 @@ CREATE TABLE inbox (
   function saveBody() {
     clearTimeout(BT); BT = null; var be = BTE; BTE = null;
     // описание проекта: сохраняем без перерисовки страницы, чтобы не сбить курсор
-    if (be && be.id === "nrte") { var nb = note(be.dataset.note); if (nb && document.contains(be)) { var nbb = bodyEmpty(be) ? "" : clean(be.innerHTML); if (nbb !== (nb.body || "")) { nb.body = nbb; touch(nb); save(); } } return; }
+    if (be && be.id === "nrte") { var nb = note(be.dataset.note); if (nb && document.contains(be)) { var nbb = bodyEmpty(be) ? "" : clean(be.innerHTML); if (nbb !== (nb.body || "")) { nhSnap(nb); nb.body = nbb; touch(nb); save(); } } return; }
     if (be && be.id === "prte") { var pp = proj(be.dataset.proj); if (pp && document.contains(be)) { var pb = bodyEmpty(be) ? "" : clean(be.innerHTML); if (pb !== (pp.body || "")) { pp.body = pb; touch(pp); save(); } } return; }
     var t = task(OPEN), r = $("rte"); if (!t || !r) return; var b = bodyEmpty(r) ? "" : clean(r.innerHTML); if (b !== (t.body || "")) { t.body = b; delete t.note; touch(t); save(); render(); } }
   function flushBody() { if (BT) saveBody(); if (TT) saveTitle(); }
@@ -14674,6 +14863,7 @@ CREATE TABLE inbox (
   $("panel").addEventListener("dragleave", function (e) { var tz = e.target.closest && e.target.closest(".pn-tabs"); if (tz && !tz.contains(e.relatedTarget)) { var z = tz.querySelector(".pn-files"); if (z) z.classList.remove("dropin"); } });
   $("panel").addEventListener("drop", function (e) { var z = e.target.closest && (e.target.closest(".pn-files") || (e.target.closest(".pn-tabs") || { querySelector: function () { return null; } }).querySelector(".pn-files")); if (!z || !e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); e.stopPropagation(); z.classList.remove("dropin"); var tf = task(OPEN); if (tf) attUpload(tf, e.dataTransfer.files); });
   new MutationObserver(function () { attImgs(); }).observe($("panel"), { childList: true });
+  new MutationObserver(function () { attImgs(); }).observe($("view"), { childList: true });
   $("panel").addEventListener("change", function (e) {
     var rk = e.target.dataset && e.target.dataset.rr;
     if (rk) { setTask(function (x) { var r = JSON.parse(JSON.stringify(x.rr || ruleOf(x) || { f: "w", n: 1 })); if (rk === "n") r.n = Math.max(1, Math.min(99, +e.target.value || 1)); else if (rk === "f") { r.f = e.target.value; if (r.f === "w" && !(r.wd || []).length) r.wd = [new Date(x.at).getDay()]; if (r.f === "m" && !r.md) r.md = new Date(x.at).getDate(); } else if (rk === "md") { r.md = +e.target.value; if (r.mds && r.mds.length) r.mds[0] = r.md; } else if (rk === "after") r.after = e.target.checked ? 1 : 0;
@@ -14719,8 +14909,8 @@ CREATE TABLE inbox (
   $("panel").addEventListener("focusout", function (e) { if (e.target.id === "pn-t") saveTitle(); });
 
   /* ---------- блочный редактор описания ---------- */
-  var ALLOW = { SPAN: 1, P: 1, H1: 1, H2: 1, H3: 1, UL: 1, OL: 1, LI: 1, BLOCKQUOTE: 1, PRE: 1, CODE: 1, HR: 1, B: 1, STRONG: 1, I: 1, EM: 1, U: 1, S: 1, STRIKE: 1, DEL: 1, A: 1, MARK: 1, BR: 1, DETAILS: 1, SUMMARY: 1, DIV: 1, TABLE: 1, TBODY: 1, THEAD: 1, TR: 1, TD: 1, TH: 1 };
-  var DROPT = { SCRIPT: 1, STYLE: 1, IFRAME: 1, OBJECT: 1, EMBED: 1, LINK: 1, META: 1, TITLE: 1, NOSCRIPT: 1, TEMPLATE: 1, SVG: 1, MATH: 1, FORM: 1, INPUT: 1, BUTTON: 1, SELECT: 1, TEXTAREA: 1, IMG: 1, VIDEO: 1, AUDIO: 1, CANVAS: 1 };
+  var ALLOW = { IMG: 1, SPAN: 1, P: 1, H1: 1, H2: 1, H3: 1, UL: 1, OL: 1, LI: 1, BLOCKQUOTE: 1, PRE: 1, CODE: 1, HR: 1, B: 1, STRONG: 1, I: 1, EM: 1, U: 1, S: 1, STRIKE: 1, DEL: 1, A: 1, MARK: 1, BR: 1, DETAILS: 1, SUMMARY: 1, DIV: 1, TABLE: 1, TBODY: 1, THEAD: 1, TR: 1, TD: 1, TH: 1 };
+  var DROPT = { SCRIPT: 1, STYLE: 1, IFRAME: 1, OBJECT: 1, EMBED: 1, LINK: 1, META: 1, TITLE: 1, NOSCRIPT: 1, TEMPLATE: 1, SVG: 1, MATH: 1, FORM: 1, INPUT: 1, BUTTON: 1, SELECT: 1, TEXTAREA: 1, VIDEO: 1, AUDIO: 1, CANVAS: 1 };
   // только безопасные теги и атрибуты: описание приходит и из буфера обмена, и с других устройств
   function clean(html) {
     var doc = new DOMParser().parseFromString("<div>" + (html || "") + "</div>", "text/html"), root = doc.body.firstChild;
@@ -14732,10 +14922,11 @@ CREATE TABLE inbox (
         var tag = n.tagName;
         if (DROPT[tag]) { n.parentNode.removeChild(n); return; }
         walk(n);
+        if (tag === "IMG" && !/^app:\/tasks\/files\/[^"<>]+$/.test(n.getAttribute("data-ydimg") || "")) { n.parentNode.removeChild(n); return; }
         if (!ALLOW[tag]) { while (n.firstChild) n.parentNode.insertBefore(n.firstChild, n); n.parentNode.removeChild(n); return; }
         [].slice.call(n.attributes).forEach(function (at) {
           var k = at.name, v = at.value;
-          var keep = (tag === "A" && k === "href" && /^(https?:|mailto:|#(task|note|proj)-[\w-]+$)/i.test(v)) || ((k === "data-c" || k === "data-bg") && /^[a-z]{2,8}$/.test(v)) || (k === "class" && ((tag === "UL" && v === "todo") || (tag === "DIV" && v === "callout"))) || (tag === "LI" && k === "data-checked") || (tag === "DETAILS" && k === "open");
+          var keep = (tag === "A" && k === "href" && /^(https?:|mailto:|#(task|note|proj)-[\w-]+$)/i.test(v)) || ((k === "data-c" || k === "data-bg") && /^[a-z]{2,8}$/.test(v)) || (k === "class" && ((tag === "UL" && v === "todo") || (tag === "DIV" && v === "callout"))) || (tag === "LI" && k === "data-checked") || (tag === "DETAILS" && k === "open") || (tag === "IMG" && ((k === "data-ydimg" && /^app:\/tasks\/files\/[^"<>]+$/.test(v)) || k === "alt"));
           if (!keep) n.removeAttribute(k);
         });
         if (tag === "A" && !/^#/.test(n.getAttribute("href") || "")) { n.setAttribute("target", "_blank"); n.setAttribute("rel", "noopener"); }
@@ -15385,6 +15576,7 @@ CREATE TABLE inbox (
       render(); return;
     }
     if (k === "nsecpick") { var nsn = note(id); if (nsn) { nsn.parent = ""; touch(nsn); nSetSec(nsn, c.slice(3)); save(); render(); } return; }
+    if (k === "nexp") { var en = note(id); if (en) nExport(en, c.replace("+", ""), c.indexOf("+") > 0); return; }
     if (k === "ntplset") { var tn = note(id); if (tn) { if (c === "~") delete tn.tpl; else tn.tpl = c; touch(tn); save(); render(); } return; }
     if (k === "nprsel") { var pp = id.split("|"), sn = note(pp[0]); if (sn) { sn.pr = sn.pr || {}; if (c === "~") delete sn.pr[pp[1]]; else sn.pr[pp[1]] = c; touch(sn); save(); render(); } return; }
     if (k === "npradd") { var an = note(id); if (an) { an.prk = (an.prk || []).concat([c]); touch(an); save(); render(); setTimeout(function () { var i = document.querySelector('[data-npr="' + c + '"]'); if (i) i.focus(); }, 40); } return; }
