@@ -556,6 +556,9 @@ html.nosheet .dptopbox.dphab { background: color-mix(in srgb, var(--ok) 15%, tra
 .mmsheets { display: flex; gap: 4px; flex-wrap: wrap; align-items: flex-end; border-bottom: 1px solid var(--line); margin-bottom: -8px } .mmsht { display: inline-flex; align-items: center; border: 1px solid var(--line); border-bottom: 0; background: var(--hover); padding: 4px 12px; border-radius: 8px 8px 0 0; cursor: pointer; font: inherit; font-size: calc(13px * var(--fs)); color: var(--fg) } .mmsht.on { background: var(--panel); font-weight: 600; cursor: default } .mmsht.add { color: var(--muted); background: transparent; border-style: dashed } .mmsht button { border: 0; background: transparent; color: var(--muted); cursor: pointer; margin-left: 6px; padding: 0 }
 .mmfl { position: absolute; width: 160px; min-height: 40px; padding: 8px 10px; box-sizing: border-box; background: #fff3b0; color: #3a3200; border: 1px solid #e8d77a; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,.12); font-size: 13px; line-height: 17px; white-space: pre-wrap; word-break: break-word; cursor: grab; z-index: 4; transform: rotate(-1.2deg); user-select: none } .mmfl.drag { opacity: .85; cursor: grabbing; z-index: 8 } .mmfl.ed { transform: none } .mmflin { width: 100%; border: 0; background: transparent; font: inherit; color: inherit; resize: none; outline: none; padding: 0 } .mmflx { position: absolute; top: -8px; right: -8px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid #e8d77a; background: #fff3b0; color: #3a3200; font-size: 11px; line-height: 14px; padding: 0; cursor: pointer; opacity: 0 } .mmfl:hover .mmflx { opacity: 1 }
 .mmtouch { display: none } @media (hover: none) { .mmtouch { display: inline-flex } .mmflx { opacity: 1 } }
+.nsk { position: relative; margin: 10px 0; border: 1px dashed var(--line); border-radius: 10px; background: var(--panel); min-height: 60px; user-select: none } .nsksvg { width: 100%; height: auto; display: block; max-height: 560px } .nskb { position: absolute; top: 6px; right: 6px; display: none; gap: 4px } .nsk:hover .nskb { display: inline-flex } .nskb button { border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 6px; padding: 2px 8px; cursor: pointer; font: inherit; font-size: 12px } .nskempty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 13px; pointer-events: none } @media (hover: none) { .nskb { display: inline-flex } }
+#nskov { position: fixed; inset: 0; z-index: 70; background: var(--bg); display: flex; flex-direction: column; padding: calc(10px + env(safe-area-inset-top, 0px)) 12px calc(10px + env(safe-area-inset-bottom, 0px)); gap: 8px } .nskbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap } .nskcs { display: inline-flex; gap: 6px } .nskc { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0 } .nskc.on { box-shadow: 0 0 0 2px var(--acc) } .nskbar .btn.on { background: var(--acc-soft); border-color: var(--acc) } .nskarea { flex: 1; min-height: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); touch-action: none; overflow: hidden } .nskedsvg { width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; background-image: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--muted) 25%, transparent) 1px, transparent 1.5px); background-size: 20px 20px }
+.nkx.nkxb { display: block; text-align: center; margin: 8px 0; overflow-x: auto } .nmmd { margin: 10px 0; text-align: center; overflow-x: auto } .nmmd svg { max-width: 100%; height: auto }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5768,7 +5771,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-152";
+  var APPV = "zd-app-2026-10-16-153";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -14068,6 +14071,77 @@ CREATE TABLE inbox (
     return false;
   }
 
+  /* --- заметки, волна «захват»: рисунок от руки (<div class="nsk" data-sk>, штрихи — n.sk[id] = {w, h, s: [{c, w, p: [x, y, …]}]}),
+     формулы LaTeX ($$ … $$, \( … \)) и диаграммы mermaid (блок кода с первой строкой «mermaid») — в режиме чтения --- */
+  var NSK = null, NSKC = ["#222222", "#e5484d", "#3e63dd", "#30a46c", "#f5b301", "#8e4ec6"], NLIB = {};
+  function nSkPath(st) { var p = st.p, d = ""; for (var i = 0; i < p.length; i += 2) d += (i ? " L" : "M") + p[i] + " " + p[i + 1]; if (p.length === 2) d += " L" + (p[0] + 0.5) + " " + p[1]; return d; }
+  function nSkSVG(d, cls) { return '<svg class="' + (cls || "nsksvg") + '" viewBox="0 0 ' + d.w + " " + d.h + '" preserveAspectRatio="xMidYMid meet">' + (d.s || []).map(function (st, i) { return '<path data-i="' + i + '" d="' + nSkPath(st) + '" style="fill:none;stroke:' + (st.c === "#222222" ? "var(--fg)" : st.c) + ";stroke-width:" + st.w + ';stroke-linecap:round;stroke-linejoin:round"/>'; }).join("") + "</svg>"; }
+  function nSkFill() {
+    [].forEach.call(document.querySelectorAll("#view .nsk[data-sk]:not([data-f]), #panel .nsk[data-sk]:not([data-f])"), function (b) {
+      var host = b.closest("[data-note]"), n = host && note(host.dataset.note), id = b.getAttribute("data-sk"), d = n && n.sk && n.sk[id], ed = host && host.isContentEditable; b.setAttribute("data-f", "1"); b.setAttribute("contenteditable", "false");
+      if (!d) { b.innerHTML = '<div class="nembh">✏ Рисунок не найден' + (ed ? ' <button type="button" data-a="nskdel">Убрать</button>' : "") + "</div>"; return; }
+      b.innerHTML = nSkSVG(d) + (d.s && d.s.length ? "" : '<div class="nskempty">' + (ed ? "Пустой рисунок — нажмите, чтобы рисовать" : "Пустой рисунок") + "</div>") + (ed ? '<span class="nskb"><button type="button" data-a="nskedit" data-sk="' + id + '" data-note="' + n.id + '">✏ Рисовать</button><button type="button" data-a="nskdel" title="Убрать рисунок">✕</button></span>' : "");
+    });
+  }
+  function nSkInsert() { var r = rteEl(), n = r && r.id === "nrte" ? note(r.dataset.note) : null; if (!n) { toast("Рисунок можно вставить в заметку"); return; } var id = uid().slice(0, 8); n.sk = n.sk || {}; n.sk[id] = { w: 800, h: 400, s: [] }; touch(n); exc("insertHTML", '<div class="nsk" data-sk="' + id + '"></div><p><br></p>'); bodyLater(); setTimeout(function () { nSkFill(); nSkOpen(n.id, id); }, 60); }
+  // редактор рисунка — поверх страницы
+  function nSkOpen(nid, id) {
+    var n = note(nid), d = n && n.sk && n.sk[id]; if (!d) return; flushBody();
+    NSK = { nid: nid, id: id, d: JSON.parse(JSON.stringify(d)), c: NSKC[0], w: 3, er: false, und: [], cur: null };
+    var ov = document.createElement("div"); ov.id = "nskov"; ov.innerHTML = '<div class="nskbar"><b>✏ Рисунок</b><span class="nskcs">' + NSKC.map(function (c, i) { return '<button type="button" class="nskc' + (i ? "" : " on") + '" data-skc="' + c + '" style="background:' + c + '" aria-label="Цвет"></button>'; }).join("") + '</span><span class="seg">' + [[2, "тонко"], [4, "средне"], [9, "толсто"]].map(function (w, i) { return '<button type="button" data-skw="' + w[0] + '" class="' + (i === 1 ? "on" : "") + '">' + w[1] + "</button>"; }).join("") + '</span><button type="button" class="btn sm" data-sko="er">🧽 Ластик</button><button type="button" class="btn sm" data-sko="undo">↶ Отменить</button><button type="button" class="btn sm" data-sko="tall">↕ Выше</button><button type="button" class="btn sm" data-sko="clear">Очистить</button><button type="button" class="btn sm pri" data-sko="done">Готово</button></div><div class="nskarea" id="nskarea">' + nSkSVG(NSK.d, "nskedsvg") + "</div>";
+    document.body.appendChild(ov); NSK.w = 4;
+  }
+  function nSkRedraw() { var a = $("nskarea"); if (a && NSK) a.innerHTML = nSkSVG(NSK.d, "nskedsvg"); }
+  function nSkClose(keep) {
+    if (!NSK) return; var K = NSK; NSK = null; var ov = $("nskov"); if (ov) ov.remove(); var n = note(K.nid); if (!n || !keep) return;
+    n.sk = n.sk || {}; n.sk[K.id] = K.d; touch(n); save(); [].forEach.call(document.querySelectorAll('.nsk[data-sk="' + K.id + '"]'), function (b) { b.removeAttribute("data-f"); b.innerHTML = ""; }); nSkFill();
+  }
+  function nSkPt(e) { var sv = document.querySelector("#nskarea svg"), r = sv.getBoundingClientRect(), k = Math.min(r.width / NSK.d.w, r.height / NSK.d.h), ox = (r.width - NSK.d.w * k) / 2, oy = (r.height - NSK.d.h * k) / 2; return [Math.round((e.clientX - r.left - ox) / k), Math.round((e.clientY - r.top - oy) / k)]; }
+  function nSkErase(e) { var t = document.elementFromPoint(e.clientX, e.clientY); if (t && t.tagName === "path" && t.closest("#nskarea") && t.dataset.i !== undefined) { NSK.und.push(JSON.stringify(NSK.d.s)); NSK.d.s.splice(+t.dataset.i, 1); nSkRedraw(); } }
+  document.addEventListener("pointerdown", function (e) {
+    if (!NSK) return; var b = e.target.closest && e.target.closest("[data-skc], [data-skw], [data-sko]"); if (b) { e.preventDefault();
+      if (b.dataset.skc) { NSK.c = b.dataset.skc; NSK.er = false; [].forEach.call(document.querySelectorAll("[data-skc]"), function (x) { x.classList.toggle("on", x === b); }); document.querySelector('[data-sko="er"]').classList.remove("on"); }
+      else if (b.dataset.skw) { NSK.w = +b.dataset.skw; [].forEach.call(document.querySelectorAll("[data-skw]"), function (x) { x.classList.toggle("on", x === b); }); }
+      else { var o = b.dataset.sko; if (o === "er") { NSK.er = !NSK.er; b.classList.toggle("on", NSK.er); } else if (o === "undo") { if (NSK.und.length) { NSK.d.s = JSON.parse(NSK.und.pop()); nSkRedraw(); } } else if (o === "clear") { if (NSK.d.s.length) { NSK.und.push(JSON.stringify(NSK.d.s)); NSK.d.s = []; nSkRedraw(); } } else if (o === "tall") { NSK.d.h = Math.min(2400, NSK.d.h + 200); nSkRedraw(); } else if (o === "done") nSkClose(true); }
+      return; }
+    if (!e.target.closest || !e.target.closest("#nskarea")) return; e.preventDefault(); try { e.target.setPointerCapture(e.pointerId); } catch (er) { /* ok */ }
+    if (NSK.er) { NSK.erasing = true; nSkErase(e); return; }
+    var p = nSkPt(e); NSK.und.push(JSON.stringify(NSK.d.s)); NSK.cur = { c: NSK.c, w: NSK.w, p: [p[0], p[1]] }; NSK.d.s.push(NSK.cur); nSkRedraw();
+  }, true);
+  document.addEventListener("pointermove", function (e) {
+    if (!NSK) return; if (NSK.erasing) { nSkErase(e); return; } if (!NSK.cur) return; var p = nSkPt(e), q = NSK.cur.p; if (Math.abs(p[0] - q[q.length - 2]) + Math.abs(p[1] - q[q.length - 1]) < 2) return; q.push(p[0], p[1]);
+    var last = document.querySelector("#nskarea svg path:last-child"); if (last) last.setAttribute("d", nSkPath(NSK.cur));
+  }, true);
+  document.addEventListener("pointerup", function () { if (!NSK) return; NSK.cur = null; NSK.erasing = false; }, true);
+  document.addEventListener("keydown", function (e) { if (!NSK) return; if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); nSkClose(true); } else if ((e.ctrlKey || e.metaKey) && /^[zя]$/i.test(e.key)) { e.preventDefault(); e.stopPropagation(); if (NSK.und.length) { NSK.d.s = JSON.parse(NSK.und.pop()); nSkRedraw(); } } }, true);
+  // формулы и диаграммы: библиотеки подгружаются только когда нужны
+  function nLib(src, css) { if (NLIB[src]) return NLIB[src]; return (NLIB[src] = new Promise(function (ok, no) { if (css) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = css; document.head.appendChild(l); } var s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = function () { delete NLIB[src]; no(new Error("нет связи")); }; document.head.appendChild(s); })); }
+  function nRichRender() {
+    var r = document.querySelector('#view #nrte[contenteditable="false"]:not([data-rich]), #view .nembc:not([data-rich])'); if (!r) return;
+    [].forEach.call(document.querySelectorAll('#view #nrte[contenteditable="false"]:not([data-rich]), #view .nembc:not([data-rich])'), function (box) {
+      box.setAttribute("data-rich", "1"); var txt = box.textContent || "";
+      if (/\$\$[\s\S]+?\$\$|\\\(.+?\\\)/.test(txt)) nLib("https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js", "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css").then(function () {
+        var walker = document.createTreeWalker(box, NodeFilter.SHOW_TEXT, { acceptNode: function (t) { return t.parentElement && t.parentElement.closest("pre, code, .nkx") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } }), list = [], t;
+        while ((t = walker.nextNode())) if (/\$\$[\s\S]+?\$\$|\\\(.+?\\\)/.test(t.data)) list.push(t);
+        list.forEach(function (tn) { var frag = document.createDocumentFragment(), re = /\$\$([\s\S]+?)\$\$|\\\((.+?)\\\)/g, s = tn.data, last = 0, m; while ((m = re.exec(s))) { if (m.index > last) frag.appendChild(document.createTextNode(s.slice(last, m.index))); var sp = document.createElement("span"), blk = m[1] !== undefined && s.trim() === m[0].trim(); sp.className = "nkx" + (blk ? " nkxb" : ""); try { sp.innerHTML = window.katex.renderToString(m[1] !== undefined ? m[1] : m[2], { throwOnError: false, displayMode: blk }); } catch (er) { sp.textContent = m[0]; } frag.appendChild(sp); last = re.lastIndex; } if (last < s.length) frag.appendChild(document.createTextNode(s.slice(last))); tn.parentNode.replaceChild(frag, tn); });
+      }).catch(function () { /* без связи — формулы остаются текстом */ });
+      var pres = [].filter.call(box.querySelectorAll("pre"), function (p) { return /^\s*mermaid\s*\n/i.test(p.textContent); });
+      if (pres.length) nLib("https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js").then(function () {
+        var dark = document.documentElement.getAttribute("data-theme") === "dark" || (document.body.classList.contains("dark")) || matchMedia("(prefers-color-scheme: dark)").matches && document.documentElement.getAttribute("data-theme") !== "light";
+        window.mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: dark ? "dark" : "default", fontFamily: getComputedStyle(document.body).fontFamily });
+        pres.forEach(function (p, i) { var code = p.textContent.replace(/^\s*mermaid\s*\n/i, ""); window.mermaid.render("nmmd" + uid().slice(0, 6) + i, code).then(function (res) { var d = document.createElement("div"); d.className = "nmmd"; d.innerHTML = res.svg; p.replaceWith(d); }).catch(function (er) { p.insertAdjacentHTML("afterend", '<p class="muted">Диаграмма не нарисовалась: ' + esc(String((er && er.message) || er).slice(0, 160)) + "</p>"); }); });
+      }).catch(function () { /* без связи — диаграмма остаётся кодом */ });
+    });
+  }
+  new MutationObserver(function () { try { nSkFill(); nRichRender(); } catch (e) { /* дополнения не мешают странице */ } }).observe($("view"), { childList: true, subtree: true });
+  function ndeAct(a, el) {
+    switch (a) {
+      case "nskedit": nSkOpen(el.dataset.note, el.dataset.sk); return true;
+      case "nskdel": var b = el.closest(".nsk"), host = b && b.closest("#nrte"); if (!b) return true; b.remove(); if (host) { BTE = host; saveBody(); } toast("Рисунок убран из текста"); return true;
+    }
+    return false;
+  }
+
   function chalsWidget() {
     var h = "", t0 = today0(), any = false;
     if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
@@ -14666,6 +14740,7 @@ CREATE TABLE inbox (
       "<b>Карту можно построить</b>: из страницы — «🧠 Карта из страницы ▾» внизу (из заголовков и списков текста или из вложенных страниц); из проекта — правый клик по проекту → «🧠 Карта мыслей проекта» (подпроекты и открытые задачи); из цели — «🧠 Карта» на странице цели (проекты и шаги). «🔄 Обновить» на такой карте добавит новое из источника, ничего не удаляя. <b>✨ Разложить</b> — ИИ (если подключён) предложит ветки для выбранного узла. «📌 На доску» с карты — виджет «Карта мыслей».",
       "<b>Представления</b> списка заметок: плитки, список, <b>таблица</b> (столбцы — свойства, клик по заголовку — сортировка и скрытие, «＋» — показать или создать своё свойство: текст, число, дата, флажок, список вариантов, ссылка, оценка; ячейки правятся прямо в таблице, Enter — к строке ниже, у чисел внизу сумма), <b>доска</b> (колонки по статусу, типу или своему списку — карточки перетаскиваются), <b>календарь</b> (по свойству-дате, страницы перетаскиваются на дни) и <b>галерея</b> с обложками. Вложенные страницы тоже показываются таблицей, доской или календарём — переключатель рядом с заголовком «Вложенные страницы».",
       "<b>💾 Мои виды</b> — запомнить раздел, фильтр, поиск, представление и сортировку; вид открывается одним нажатием и выводится на доску виджетом «Вид заметок».",
+      "<b>Рисунок от руки</b>: «/» → «Рисунок от руки» — холст на весь экран для мыши, пера или пальца: цвета, толщина, ластик (стирает штрих целиком), «↶ Отменить» (Ctrl+Z), «↕ Выше» — удлинить холст. Рисунок хранится в самой заметке и синхронизируется. <b>Формулы</b>: LaTeX между <code>$$ … $$</code> (или <code>\\( … \\)</code> внутри строки) и <b>диаграммы mermaid</b> (блок кода, первая строка — <code>mermaid</code>) рисуются в режиме чтения «📖 Читать»; нужен интернет при первом показе.",
       "<b>Встроить страницу</b>: в тексте наберите <code>![[</code> и выберите страницу — появится живой блок с её текстом (правите исходную страницу — меняется и здесь). «§ Раздел ▾» на блоке — встроить только раздел под заголовком, ✕ — убрать блок. Встроенная <b>карта мыслей</b> показывается картинкой, клик — открыть карту.",
       "<b>Упоминается без ссылки</b> — внизу страницы: где название этой страницы встречается в тексте других, без ссылки; «🔗 Сделать ссылкой» превратит упоминание в ссылку. <b>Вложенные теги</b>: тег <code>курс/1С/урок</code> входит в <code>курс/1С</code> и <code>курс</code> — в левой панели они лесенкой, на странице тега видны все вложенные. <b>Умные папки</b> над списком заметок: изменённые за неделю, избранное, без тегов, без раздела, с задачами, карты мыслей, с карточками.",
       "<b>🔁 Повторение</b> (в левой панели): строка <code>вопрос :: ответ</code> в заметке, пропуск <code>{{слово}}</code> или узел карты, который заканчивается на «?», — карточка. Раз в день — повторить: «Показать ответ» (пробел), затем «Снова / Трудно / Хорошо / Легко» (1–4); интервал до следующего повтора растёт, когда помните. Виджеты «Повторить сегодня» и «Вспомнить старое» (три давние заметки каждый день).",
@@ -15997,6 +16072,7 @@ CREATE TABLE inbox (
     if (a && ndbAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && srsAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && ndcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && ndeAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -16734,9 +16810,10 @@ CREATE TABLE inbox (
         if (!ALLOW[tag]) { while (n.firstChild) n.parentNode.insertBefore(n.firstChild, n); n.parentNode.removeChild(n); return; }
         [].slice.call(n.attributes).forEach(function (at) {
           var k = at.name, v = at.value;
-          var keep = (tag === "A" && k === "href" && /^(https?:|mailto:|#(task|note|proj)-[\w-]+$)/i.test(v)) || ((k === "data-c" || k === "data-bg") && /^[a-z]{2,8}$/.test(v)) || (k === "class" && ((tag === "UL" && v === "todo") || (tag === "DIV" && (v === "callout" || v === "nemb")))) || (tag === "DIV" && ((k === "data-emb" && /^[\w-]{1,40}$/.test(v)) || (k === "data-sec" && v.length <= 120))) || (tag === "LI" && k === "data-checked") || (tag === "DETAILS" && k === "open") || (tag === "IMG" && ((k === "data-ydimg" && /^app:\/tasks\/files\/[^"<>]+$/.test(v)) || k === "alt"));
+          var keep = (tag === "A" && k === "href" && /^(https?:|mailto:|#(task|note|proj)-[\w-]+$)/i.test(v)) || ((k === "data-c" || k === "data-bg") && /^[a-z]{2,8}$/.test(v)) || (k === "class" && ((tag === "UL" && v === "todo") || (tag === "DIV" && (v === "callout" || v === "nemb" || v === "nsk")))) || (tag === "DIV" && ((k === "data-sk" && /^[\w-]{1,40}$/.test(v)) || (k === "data-emb" && /^[\w-]{1,40}$/.test(v)) || (k === "data-sec" && v.length <= 120))) || (tag === "LI" && k === "data-checked") || (tag === "DETAILS" && k === "open") || (tag === "IMG" && ((k === "data-ydimg" && /^app:\/tasks\/files\/[^"<>]+$/.test(v)) || k === "alt"));
           if (!keep) n.removeAttribute(k);
         });
+        if (tag === "DIV" && n.getAttribute("class") === "nsk") { if (n.getAttribute("data-sk")) n.innerHTML = ""; else { n.parentNode.removeChild(n); return; } }
         if (tag === "DIV" && n.getAttribute("class") === "nemb") { if (n.getAttribute("data-emb")) n.innerHTML = ""; else { n.parentNode.removeChild(n); return; } }
         if (tag === "A" && !/^#/.test(n.getAttribute("href") || "")) { n.setAttribute("target", "_blank"); n.setAttribute("rel", "noopener"); }
         if (tag === "SPAN" && !n.attributes.length) { while (n.firstChild) n.parentNode.insertBefore(n.firstChild, n); n.parentNode.removeChild(n); }
@@ -16768,11 +16845,19 @@ CREATE TABLE inbox (
     ["Блоки", "code", "&lt;/&gt;", "Код", "Моноширинный блок", "Ctrl+Shift+9", "код code"],
     ["Блоки", "table", "▦", "Таблица", "Таблица 3 × 2", "", "таблица table"],
     ["Блоки", "hr", "—", "Разделитель", "Горизонтальная линия", "", "разделитель линия divider"],
-    ["Вставка", "mention", "@", "Ссылка на задачу или заметку", "Упоминание — или наберите @", "@", "ссылка упоминание задача заметка mention link"]
+    ["Вставка", "mention", "@", "Ссылка на задачу или заметку", "Упоминание — или наберите @", "@", "ссылка упоминание задача заметка mention link"],
+    ["Вставка", "embed", "↪", "Встроить страницу", "Живой блок другой страницы — или наберите ![[", "", "встроить страницу embed раздел карта"],
+    ["Вставка", "sketch", "✏", "Рисунок от руки", "Холст для мыши, пера или пальца", "", "рисунок рисовать скетч sketch draw схема от руки"],
+    ["Вставка", "formula", "∑", "Формула", "LaTeX между $$ … $$ — видна в режиме чтения", "", "формула latex математика уравнение"],
+    ["Вставка", "mermaid", "◇", "Диаграмма из текста", "mermaid: схема, процесс, гант — видна в режиме чтения", "", "диаграмма mermaid схема блок-схема процесс"]
   ];
   var HOTK = { Digit0: "text", Digit1: "h1", Digit2: "h2", Digit3: "h3", Digit4: "todo", Digit5: "ul", Digit6: "ol", Digit7: "spoiler", Digit8: "quote", Digit9: "code" };
   function applyBlock(type) {
     var r = rteEl(); if (!r) return;
+    if (type === "sketch") { nSkInsert(); return; }
+    if (type === "embed") { if (r.id !== "nrte") { toast("Встроить страницу можно в заметке"); return; } exc("insertText", "!["); exc("insertText", "["); return; }
+    if (type === "formula") { exc("insertText", "$$ E = mc^2 $$"); bodyLater(); toast("Формула покажется красиво в режиме чтения (📖 Читать)"); return; }
+    if (type === "mermaid") { applyBlock("code"); exc("insertText", "mermaid\ngraph LR\n  A[Идея] --> B[План] --> C[Результат]"); bodyLater(); toast("Диаграмма нарисуется в режиме чтения (📖 Читать)"); return; }
     if (!inRte(anchor())) { r.focus(); caretEnd(r); }
     if (!blockOf(anchor())) exc("formatBlock", "<p>");
     var n = anchor(), ul = closestTag(n, "UL"), ol = closestTag(n, "OL");
