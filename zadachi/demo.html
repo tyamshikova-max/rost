@@ -569,6 +569,9 @@ html.nosheet .dptopbox.dphab { background: color-mix(in srgb, var(--ok) 15%, tra
 .cvsvg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none } .cvsvg path { stroke: var(--muted); stroke-width: 2; fill: none } .cvsvg marker path { fill: var(--muted); stroke: none }
 .cvll { position: absolute; transform: translate(-50%, -50%); border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 999px; padding: 0 8px; font-size: 12px; line-height: 18px; cursor: pointer; white-space: nowrap; z-index: 2 } .cvll.empty { color: var(--muted); padding: 0 6px } .cvll.on { border-color: var(--acc) }
 .cvempty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 30px; color: var(--muted); pointer-events: none; font-size: 14px } .cvaddp .cvaddl { display: grid; gap: 2px; max-height: 260px; overflow: auto; margin: 6px 0 } #cvq { width: 100%; box-sizing: border-box }
+.ntphb { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer; margin-left: 6px; font-weight: 700; font-size: 12.5px; padding: 0; flex: none } .ntphb:hover, .ntphb.on { color: var(--acc); border-color: var(--acc) }
+.ntph { max-width: 780px } .ntph h4 { margin: 14px 0 4px; font-size: calc(14px * var(--fs)) } .ntph ul { margin: 0; padding-left: 20px } .ntph li { margin: 4px 0; line-height: 1.45 } .ntphf { font-size: calc(15px * var(--fs)); margin: 6px 0 0 } .ntph code { background: var(--hover); padding: 1px 5px; border-radius: 4px }
+.ntphc { margin: 14px 0 6px } .ntphc summary { cursor: pointer; font-weight: 600 } .ntphw { overflow-x: auto } .ntphw table { border-collapse: collapse; width: 100%; font-size: calc(13px * var(--fs)); margin-top: 6px } .ntphw td, .ntphw th { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top } .ntphw th { color: var(--muted); font-weight: 600 } .ntphw tr.on td { background: var(--acc-soft) } .ntphw td:first-child { white-space: nowrap; font-weight: 600 }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -5462,7 +5465,7 @@ CREATE TABLE inbox (
   }
   // строки свойств в шапке страницы (режим правки)
   function nPropsRows(n) {
-    var t = nTplOf(n), h = '<span>Тип</span><div class="v"><button type="button" class="ddb" data-a="ntplset">' + (t ? t.ic + " " + esc(t.n) : "📄 Обычная страница") + '<span class="dda">▾</span></button></div>', pr = n.pr || {};
+    var t = nTplOf(n), h = '<span>Тип</span><div class="v"><button type="button" class="ddb" data-a="ntplset">' + (t ? t.ic + " " + esc(t.n) : "📄 Обычная страница") + '<span class="dda">▾</span></button><button type="button" class="ntphb' + (NPOP === "tph" ? " on" : "") + '" data-a="npop" data-x="tph" title="Как работать с этим типом страницы и чем он отличается от других" aria-label="Справка по типу страницы">?</button></div>', pr = n.pr || {};
     nPrKeys(n).forEach(function (k) {
       var d = NPR[k], v = pr[k], ed;
       if (d.t === "check") ed = '<input type="checkbox" class="nprck" data-nid="' + n.id + '" data-dbk="' + k + '"' + (v ? " checked" : "") + ' aria-label="' + esc(d.n) + '">';
@@ -5483,6 +5486,7 @@ CREATE TABLE inbox (
   function nFltOk(n) { if (NFLT.sm && !nSmartOk(n, NFLT.sm)) return false; if (NFLT.tpl && (NFLT.tpl === "~" ? !!n.tpl : n.tpl !== NFLT.tpl)) return false; if (NFLT.st && ((n.pr || {}).status || "") !== NFLT.st) return false; return true; }
   var NPOP = null;
   function nPopHTML(n) {
+    if (NPOP === "tph") return "";
     if (NPOP === "ic") return '<div class="npop"><div class="npoph"><b>Значок страницы</b><button type="button" class="ibtn" data-a="npopx" aria-label="Закрыть">✕</button></div><div class="nicg">' + NICS.map(function (e) { return '<button type="button" data-a="nicset" data-v="' + e + '" class="' + (n.ic === e ? "on" : "") + '">' + e + "</button>"; }).join("") + '</div><div class="r"><input class="inp" id="nicin" placeholder="Свой: вставьте эмодзи" style="width:200px" autocomplete="off"><button type="button" class="btn sm" data-a="nicown">Поставить</button>' + (n.ic ? '<button type="button" class="btn sm" data-a="nicset" data-v="">Убрать значок</button>' : "") + "</div></div>";
     if (NPOP === "cov") return '<div class="npop"><div class="npoph"><b>Обложка</b><button type="button" class="ibtn" data-a="npopx" aria-label="Закрыть">✕</button></div><div class="ncovg">' + Object.keys(NCOV).map(function (k) { return '<button type="button" class="ncovt' + (n.cov === k ? " on" : "") + '" data-a="ncovset" data-v="' + k + '" title="' + NCOV[k][0] + '" style="background:' + NCOV[k][1] + '"></button>'; }).join("") + '</div><div class="r"><input class="inp" id="ncovurl" placeholder="Или ссылка на картинку: https://…" style="flex:1;min-width:220px" autocomplete="off"><button type="button" class="btn sm" data-a="ncovurl">Поставить</button>' + (n.cov ? '<button type="button" class="btn sm" data-a="ncovset" data-v="">Убрать обложку</button>' : "") + "</div></div>";
     return "";
@@ -5783,7 +5787,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-154";
+  var APPV = "zd-app-2026-10-16-155";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -7043,6 +7047,7 @@ CREATE TABLE inbox (
       nPropsRows(n) +
       '<span>Задачи</span><div class="v">' + tl.map(function (t) { return '<span class="chip ntk' + (t.done ? " dn" : "") + '"><a href="#task-' + t.id + '">' + (t.done ? "✓ " : "☐ ") + esc(t.t.slice(0, 60)) + '</a><button type="button" data-a="nunlink" data-v="' + t.id + '" title="Отвязать">×</button></span>'; }).join("") +
       '<button type="button" class="btn sm" data-a="ntpick">' + (TPICK ? "Готово" : "＋ Привязать к задаче") + "</button>" + (TPICK ? '<div class="npick"><input type="search" id="tpq" placeholder="Найти задачу" autocomplete="off"><div id="tpres">' + noteTaskPick(n, "") + "</div></div>" : "") + "</div></div>";
+    if (!rd && NPOP === "tph") h += nTphHTML(n);
     if (mmIs(n)) h += mmViewHTML(n, rd); else if (cvIs(n)) h += cvViewHTML(n, rd);
     h += '<div id="nrte" class="rte' + (n.body ? "" : " empty") + '" data-note="' + n.id + '" contenteditable="' + (rd ? "false" : "true") + '" spellcheck="true" data-ph="Текст заметки… «/» — заголовок, чек-лист, спойлер, таблица, код; [[ — ссылка на страницу, ![[ — встроить страницу">' + (clean(n.body || "") || "<p><br></p>") + "</div>";
     var nk = nKids(n.id), nbl = nBacklinks(n.id);
@@ -14281,6 +14286,53 @@ CREATE TABLE inbox (
       case "cvledel": cvPush(n); cvData(n).ln = cvData(n).ln.filter(function (x) { return x.id !== CVLE; }); CVLE = ""; cvSave(n); return true;
     }
     return false;
+  }
+
+  /* --- справка по типу страницы: «?» рядом с «Тип» — для чего тип, что даёт, как работать, чем отличается; внизу — сравнение всех типов --- */
+  var NTPH = {
+    "": { n: "Обычная страница", ic: "📄", for: "Свободный текст: мысли, черновики, заметки на ходу, всё, что не подходит под шаблон.",
+      gives: ["Без заготовки и без обязательных свойств — чистый лист.", "Свойства можно добавить вручную: «＋ Свойство» (статус, дата, автор, оценка или своё — число, флажок, список вариантов)."],
+      how: ["«/» — меню блоков: заголовки, чек-лист, таблица, спойлер, выноска, код, рисунок от руки, формула, диаграмма.", "<code>[[</code> — ссылка на страницу, задачу или проект; <code>![[</code> — встроить другую страницу живым блоком; <code>@</code> — упоминание.", "Markdown-сокращения в начале строки: <code>#</code> заголовок, <code>-</code> список, <code>[ ]</code> чек-лист, <code>&gt;</code> цитата.", "Картинки и файлы — перетащите в текст или «Картинка в текст» (хранятся на вашем Яндекс Диске).", "Внизу — вложенные страницы, ссылки сюда, неявные упоминания, «📌 На доску», «🕘 История»."],
+      diff: "Единственный тип без заготовки и статусов. Тип можно выбрать в любой момент — набранный текст не пропадёт, а заготовка добавится только на пустую страницу." },
+    lesson: { n: "Конспект урока", for: "Конспект занятия, лекции, вебинара или главы курса — с прицелом на повторение.",
+      gives: ["Заготовка: «Главное» (выноска), «Конспект», «Примеры», «Вопросы», «Что применить» (чек-лист).", "Свойства: Курс, Дата (ставится сегодняшняя), Статус — 📚 Изучаю → 🔁 Повторить → ✅ Освоено, Источник (ссылка на запись или материалы)."],
+      how: ["Вопросы пишите карточками: <code>Что такое регистр :: таблица движений</code> или с пропуском <code>{{слово}}</code> — они попадут в «🔁 Повторение» с интервалами.", "Пункты «Что применить» — чек-лист; важное привяжите к задаче («＋ Привязать к задаче»).", "Все уроки курса — одной таблицей или доской: «Заметки» → фильтр «Тип: Конспект урока» → ▤ Таблица или ▥ Доска по статусу. Сохраните как «💾 Вид».", "Уроки удобно вкладывать в страницу курса — там переключите «Вложенные страницы» на таблицу.", "«🧠 Карта из страницы» превратит заголовки и списки конспекта в карту мыслей."],
+      diff: "От обычной страницы — статусы обучения, дата урока и поле курса: видно, что изучено, а что пора повторить. От «Книги» — привязка к курсу и дате, а не к автору и оценке." },
+    book: { n: "Книга", for: "Заметки о прочитанной (или будущей) книге: идеи, цитаты, что применить.",
+      gives: ["Заготовка: «О чём книга», «Главные идеи» (нумерованный список), «Цитаты», «Что применю» (чек-лист).", "Свойства: Автор, Статус — 📖 Хочу прочитать → 👀 Читаю → ✔ Прочитано (или ✖ брошено), Оценка ★, Дата."],
+      how: ["Список чтения — «Заметки» → тип «Книга» → ▥ Доска по статусу (перетаскивайте книги из колонки в колонку) или 🖼 Галерея с обложками.", "Обложка книги: «🖼 Обложка» → ссылка на картинку.", "Цитату можно встроить в другую страницу: <code>![[Название книги</code> → «§ Раздел» → «Цитаты».", "Ключевые мысли — карточками <code>идея :: смысл</code> для повторения; «🕰 Вспомнить старое» иногда сам вернёт давно прочитанное."],
+      diff: "Единственный тип с автором и оценкой ★ — удобен для библиотеки и рейтинга. От «Конспекта урока» — нет курса и учебного статуса." },
+    recipe: { n: "Рецепт", for: "Свой рецепт или рецепт из интернета, с пометками «как получилось».",
+      gives: ["Заготовка: «Ингредиенты» (список), «Приготовление» (нумерованные шаги), «Заметки».", "Свойства: Время, Порции, Оценка ★, Источник; статусы 🧪 Попробовать → 👍 Готовлю → ⭐ Любимое."],
+      how: ["Коллекция — 🖼 Галерея с обложками (фото блюда) или доска по статусу «попробовать / любимое».", "Фото шагов — перетащите картинки прямо в текст.", "Если рецепт нужен в меню на неделю и в списке покупок — добавьте его в раздел «Меню» → «Рецепты»: там считаются продукты. Здесь — свободные записи и пометки."],
+      diff: "Свойства «Время» и «Порции» и статусы «попробовать / любимое». От раздела «Рецепты» в «Меню» отличается тем, что это обычная страница базы знаний — без расчёта продуктов и покупок." },
+    howto: { n: "Инструкция", for: "Пошаговая инструкция «как сделать»: рабочий процесс, настройка, памятка для себя.",
+      gives: ["Заготовка: выноска «Когда это нужно», «Шаги» (нумерованный список), «Как проверить», «Частые ошибки».", "Свойства: Статус — 📝 Черновик → ✅ Актуально → ⚠ Устарело, Дата, Источник."],
+      how: ["Помечайте устаревшие инструкции статусом «⚠ Устарело» — их легко найти фильтром.", "Схему процесса — «/» → «Диаграмма из текста» (mermaid) или «Рисунок от руки».", "Шаги одной инструкции можно встроить в другую: <code>![[Название</code> → «§ Раздел» → «Шаги».", "Для кода — блок «/» → «Код»."],
+      diff: "Статус актуальности (черновик / актуально / устарело) вместо учебного или читательского. Заготовка заточена под шаги и проверку результата." },
+    meet: { n: "Встреча", for: "Протокол встречи, созвона, консультации: повестка, решения, задачи.",
+      gives: ["Заготовка: «Повестка», «Обсудили», «Решения», «Задачи» (чек-лист).", "Свойства: Дата (сегодняшняя), Участники, Статус — 📅 Запланирована → ✔ Прошла."],
+      how: ["Задачи из встречи — «＋ Привязать к задаче» или ссылка <code>[[</code> на задачу; поручение человеку — задача со статусом «Жду ответа».", "Все встречи на календаре: «Заметки» → тип «Встреча» → 📅 Календарь по дате.", "Участников пишите одинаково — тогда поиск по имени найдёт все встречи с человеком."],
+      diff: "Дата и участники, статус «запланирована / прошла», блок решений и задач. От «Конспекта урока» — нацелен на договорённости, а не на запоминание." },
+    idea: { n: "Идея", for: "Идея, которую стоит не потерять и дорастить до дела.",
+      gives: ["Заготовка: «Суть», «Зачем», «Следующий шаг» (чек-лист).", "Свойства: Статус — 💡 Идея → 🔎 Проверяю → 🔄 В работе → ⏸ Отложено → ✅ Готово, Оценка ★ (насколько нравится)."],
+      how: ["Банк идей — ▥ Доска по статусу: перетаскивайте идеи по мере роста.", "Следующий шаг сразу превращайте в задачу — «＋ Привязать к задаче».", "Разложить идею по веткам — «🧠 Карта из страницы»; сравнить несколько — на «🧩 Холсте»."],
+      diff: "Самая длинная цепочка статусов — от «идеи» до «готово», чтобы видеть, что движется. Оценка помогает выбрать, за что взяться." },
+    map: { n: "Карта мыслей", for: "Структура темы ветками: план, мозговой штурм, разбор книги, проект.",
+      gives: ["Сверху — сама карта: центр — название страницы. Текст страницы ниже карты — для пояснений.", "Свойства не обязательны; есть темы оформления, метки, рамки, итоги, листы, стикеры."],
+      how: ["Tab — ветка, Enter — рядом, F2 или двойной клик — править, Delete — удалить, стрелки — по карте, Ctrl+Z — отменить.", "«🖌 Тема» и «Аа Стиль» — оформление; «🏷 Метки» — приоритет, флажки, прогресс; «↗ Связь» — стрелка между ветками.", "«☐ В задачу» — узел становится задачей с живой отметкой; «▶ Режим» — презентация, мозговой штурм, тренажёр; «⋯» — раскладки, шаблоны, импорт XMind, суммы, листы.", "Узел, который кончается на «?», с ветками — карточка для «🔁 Повторения»."],
+      diff: "Иерархия: всё растёт от центра ветками. От «Холста» — строгое дерево и автоматическая раскладка, а на холсте карточки лежат свободно. Карту можно встроить в другую страницу или положить на холст." },
+    canvas: { n: "Холст", for: "Свободная доска для исследования темы: разложить рядом страницы, мысли, источники и связать их стрелками.",
+      gives: ["Бесконечное поле с карточками трёх видов: текст, страница базы знаний (с началом текста, обложкой, у карты — сама карта) и группа-рамка.", "Стрелки между карточками с подписями, цвета карточек."],
+      how: ["«＋ Текст» или двойной клик по пустому месту — текстовая карточка; двойной клик по карточке — править (у страницы — открыть).", "«📄 Страница ▾» — положить заметку; «＋ Все вложенные страницы» — разложить вложенные сеткой.", "«▢ Группа» — рамка: двигаете рамку — двигаются карточки внутри.", "Тяните карточку — переместить, уголок — размер; выберите карточку → «↗ Связь» → другая карточка; правый клик — цвет, на передний план, убрать.", "Фон тянется, Ctrl+колесо — масштаб, «⤢» — вписать всё, Delete — удалить, Ctrl+Z — отменить."],
+      diff: "Нет иерархии и авто-раскладки, как у карты мыслей: всё лежит там, куда положили. В отличие от доски заметок (колонки по статусу) — свободное поле и связи. Страницы на холсте — живые: правите страницу — меняется карточка." }
+  };
+  function nTphHTML(n) {
+    var k = n.tpl && NTPH[n.tpl] ? n.tpl : "", t = NTPH[k], ic = k ? (NTPL[k] || {}).ic || "" : "📄", ul = function (l) { return "<ul>" + l.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>"; };
+    var cmp = '<details class="ntphc"><summary>Сравнить все типы</summary><div class="ntphw"><table><thead><tr><th>Тип</th><th>Для чего</th><th>Особое</th></tr></thead><tbody>' + Object.keys(NTPH).map(function (kk) { var x = NTPH[kk]; return '<tr' + (kk === k ? ' class="on"' : "") + "><td>" + (kk ? (NTPL[kk] || {}).ic || "" : "📄") + " " + esc(x.n) + "</td><td>" + esc(x.for) + "</td><td>" + esc(x.diff.split(". ")[0].replace(/\.$/, "")) + ".</td></tr>"; }).join("") + "</tbody></table></div></details>";
+    return '<div class="npop ntph"><div class="npoph"><b>' + ic + " " + esc(t.n) + ' — как работать</b><button type="button" class="ibtn" data-a="npopx" aria-label="Закрыть">✕</button></div>' +
+      '<p class="ntphf">' + esc(t.for) + "</p><h4>Что даёт тип</h4>" + ul(t.gives) + "<h4>Как работать</h4>" + ul(t.how) + '<h4>Чем отличается</h4><p>' + esc(t.diff) + "</p>" + cmp +
+      '<div class="r"><button type="button" class="btn sm" data-a="ntplset">Сменить тип ▾</button><a class="btn sm" href="#help-notes">Вся справка по заметкам</a></div></div>';
   }
 
   function chalsWidget() {
