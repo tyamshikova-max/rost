@@ -591,6 +591,10 @@ html.mmfullon, html.mmfullon body { overflow: hidden }
 .xpc { padding: 14px 18px } .xph { display: flex; gap: 18px; align-items: center; flex-wrap: wrap } .xplv { display: grid; place-items: center; width: 80px; height: 80px; border-radius: 50%; background: var(--acc-soft); color: var(--acc); font-size: 14px } .xplv b { font-size: 30px; line-height: 1 } .xpm { flex: 1; min-width: 220px; display: grid; gap: 6px }
 .hmw { overflow-x: auto } .hmap { width: 100%; min-width: 600px; height: auto } .hm0 { fill: var(--hover) } .hm1 { fill: color-mix(in srgb, var(--ok) 30%, var(--panel)) } .hm2 { fill: color-mix(in srgb, var(--ok) 55%, var(--panel)) } .hm3 { fill: color-mix(in srgb, var(--ok) 78%, var(--panel)) } .hm4 { fill: var(--ok) }
 .achg { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px } .ach { display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; opacity: .45; filter: grayscale(1) } .ach.on { opacity: 1; filter: none; border-color: var(--acc); background: var(--acc-soft) } .ach span { font-size: 26px } .ach small { color: var(--muted) }
+.appbar { gap: 8px; margin: 0 0 6px; flex-wrap: wrap } #appq { flex: 1; min-width: 220px } .apph { margin: 18px 0 8px; font-size: calc(14px * var(--fs)); color: var(--ac, var(--muted)); text-transform: uppercase; letter-spacing: .04em }
+.aptg { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px } .apt { position: relative; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); transition: border-color .15s, transform .15s } .apt:hover { border-color: var(--ac); transform: translateY(-1px) }
+.aptl { display: grid; gap: 4px; padding: 12px 14px 12px; color: var(--fg); text-decoration: none; height: 100%; box-sizing: border-box } .apti { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; font-size: 21px; background: color-mix(in srgb, var(--ac) 14%, var(--panel)) } .aptl b { display: flex; gap: 6px; align-items: center; font-size: calc(14.5px * var(--fs)) } .aptl small { color: var(--muted); font-size: calc(12.5px * var(--fs)); line-height: 1.35 } .aptn { margin-left: auto; min-width: 20px; padding: 0 7px; border-radius: 999px; background: var(--ac); color: #fff; font-size: 11.5px; text-align: center; line-height: 18px }
+.aptp { position: absolute; top: 8px; right: 8px; border: 0; background: transparent; color: var(--muted); font-size: 17px; cursor: pointer; padding: 2px 4px; line-height: 1 } .aptp.on { color: #e2a400 } .aptp:disabled { opacity: .5; cursor: default } .apt:has(.aptn) .aptp { top: auto; bottom: 8px } .appsb { text-decoration: none; font-size: 18px; display: inline-grid; place-items: center } .appsl { font-weight: 600 }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -4578,6 +4582,7 @@ h2[data-col].dropin { outline: 2px dashed var(--acc); outline-offset: 2px; borde
 <header class="top">
   <button class="ibtn" id="menuBtn" type="button" aria-label="Меню"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <a class="brand" href="#today" id="brand"><i>✓</i><span>Задачи</span></a>
+  <a class="ibtn appsb" href="#apps" title="Все разделы" aria-label="Все разделы">▦</a>
   <input class="q" id="q" type="search" placeholder="Поиск · Ctrl+K — команды" aria-label="Поиск по задачам">
   <span id="xpSlot"></span><button class="ibtn" id="fsBtn" type="button" data-a="fsnd" title="Звуки для фокуса">🎧</button><button class="ibtn" id="enBtn" type="button" data-a="enf" title="Сколько сил сейчас: показать только подходящие задачи">🔋</button><button class="ibtn ctxb" id="ctxBtn" type="button" hidden title="Где я сейчас: показывать только задачи для этого места (и задачи без контекста)"></button>
   <button class="ibtn sync" id="syncBtn" type="button" hidden></button>
@@ -5886,7 +5891,7 @@ CREATE TABLE push (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-159";
+  var APPV = "zd-app-2026-10-16-160";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -6324,7 +6329,7 @@ CREATE TABLE push (
     if ((m = h.match(/^share-(.+)$/))) return { v: "share", a: m[1] };
     if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board|goal|menu|recipe|shop|rimp|rpt|srs)-(.+)$/))) return { v: m[1], a: m[2] };
     if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
-    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch", "menu", "menunew", "recipes", "rhave", "prods", "clean", "budget", "kitchen", "rpt", "ngraph", "srs", "weekly", "health", "people", "docs"].indexOf(h) >= 0) return { v: h, a: "" };
+    if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch", "menu", "menunew", "recipes", "rhave", "prods", "clean", "budget", "kitchen", "rpt", "ngraph", "srs", "weekly", "health", "people", "docs", "apps"].indexOf(h) >= 0) return { v: h, a: "" };
     if ((m = h.match(/^daily-?(.*)$/))) return { v: "daily", a: m[1] };
     if ((m = h.match(/^report-?(.*)$/))) return { v: "report", a: m[1] || "w0" };
     return { v: "today", a: "" };
@@ -6351,7 +6356,7 @@ CREATE TABLE push (
   function go(h) { if (location.hash.slice(1) === h) route(); else location.hash = h; }
   /* ---------- вкладки открытых страниц (как в многооконной программе); хранятся на этом устройстве ---------- */
   var PTMAX = 8, PTCUR = "", PTJUMP = "", PTDRAG = null;
-  var PTICO = { weekly: "cal", health: "journal", people: "note", docs: "note", srs: "journal", ngraph: "note", rpt: "stats", kitchen: "food", rhave: "food", rimp: "food", budget: "budget", clean: "clean", inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
+  var PTICO = { apps: "plans", weekly: "cal", health: "journal", people: "note", docs: "note", srs: "journal", ngraph: "note", rpt: "stats", kitchen: "food", rhave: "food", rimp: "food", budget: "budget", clean: "clean", inbox: "inbox", today: "today", plans: "plans", cal: "cal", gantt: "gantt", matrix: "matrix", journal: "journal", goals: "goal", menu: "food", recipes: "food", recipe: "food", prods: "food", shop: "food", menunew: "food", stats: "stats", report: "stats", someday: "someday", flag: "flag", all: "all", done: "done", tarch: "archive", sprint: "sprint", sprints: "sprint", waiting: "wait", habits: "habits", trash: "trash", archive: "archive", templates: "tpl", settings: "settings", help: "help", daily: "today", notes: "journal", note: "journal", nsec: "journal", ntag: "journal", board: "board" };
   var PTNAME = { done: "Сделано", tarch: "Архив задач", trash: "Корзина", archive: "Архив проектов", templates: "Шаблоны", settings: "Настройки", help: "Справка", report: "Отчёт", recipes: "Рецепты", prods: "Продукты и цены", menunew: "Новое меню", rhave: "Из того, что есть", rimp: "Рецепт по ссылке", share: "Поделились", notes: "Заметки", sprints: "Все спринты", search: "Поиск" };
   function ptabsOn() { return innerWidth > 860 && LS.get("zd-ptabs") !== "off"; } // только на компьютере
   function ptabs() { try { var a = JSON.parse(LS.get("zd-tabs") || "[]"); return Array.isArray(a) ? a.filter(function (t) { return t && t.h; }) : []; } catch (e) { return []; } }
@@ -6440,7 +6445,7 @@ CREATE TABLE push (
     if (hx === "new") { history.replaceState(null, "", "#today"); route(); setTimeout(qOpen, 60); return; }
     if (hx === "newnote") { var qn = newNote({ t: "" }); save(); NFOCUS = true; history.replaceState(null, "", "#note-" + qn.id); route(); return; }
     if (hx === "shopnow") { var wmn = weekMenuFor(Date.now()); history.replaceState(null, "", wmn ? "#shop-" + wmn.id : "#menu"); route(); if (!wmn) toast("Меню на эту неделю ещё не составлено — список покупок появится после него"); return; }
-    var r = parse(), nh = location.hash.slice(1) || "today", restore = null;
+    var r = parse(), nh = location.hash.slice(1) || "today", restore = null; try { appUse(r.v); } catch (er) { /* счётчик не важен */ }
     if (r.v === "task") { render(); if (task(r.a)) openTask(r.a); else toast("Задача не найдена — возможно, удалена"); return; }
     var toAux = r.v === "settings" || r.v === "help", wasAux = V === "settings" || V === "help";
     if (CURH && nh !== CURH) {
@@ -6558,7 +6563,7 @@ CREATE TABLE push (
   var NEWHIDE = ["gantt", "matrix", "sprint", "journal", "waiting", "someday", "flag"];
   function hiddenLists() { var l = LS.get("zd-hide"); if (l) { try { var a = JSON.parse(l); if (Array.isArray(a)) return a; } catch (e) { /* старый формат */ } } return S.opt.hideLists || (LS.get("zd-newdef") === "1" ? NEWHIDE : []); }
   function listsOrder() { var hid = hiddenLists(); return listsAll().filter(function (x) { return x === "inbox" || hid.indexOf(x) < 0; }); }
-  var LISTN = { weekly: "Обзор недели", health: "Самочувствие", people: "Люди", docs: "Документы", srs: "Повторение", ngraph: "Граф заметок", rpt: "Отчёты", kitchen: "Кухня", menu: "Меню", clean: "План уборки", budget: "Бюджет", journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
+  var LISTN = { apps: "Все разделы", weekly: "Обзор недели", health: "Самочувствие", people: "Люди", docs: "Документы", srs: "Повторение", ngraph: "Граф заметок", rpt: "Отчёты", kitchen: "Кухня", menu: "Меню", clean: "План уборки", budget: "Бюджет", journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
   function setListHidden(id, hide) { if (id === "inbox") return; var h = hiddenLists().filter(function (x) { return x !== id; }); if (hide) h.push(id); S.opt.hideLists = h; LS.set("zd-hide", JSON.stringify(h)); optTouch(); save(); render(); }
   // блоки левой панели сворачиваются кликом по заголовку (запоминается на этом устройстве)
   function sideFold() { try { return JSON.parse(LS.get("zd-sfold") || "{}") || {}; } catch (e) { return {}; } }
@@ -6602,7 +6607,7 @@ CREATE TABLE push (
       done: function () { return itemHTML("smart", "done", "done", ic("done"), "Сделано", 0, { drag: true }); }
     };
     var nhid = hiddenLists().filter(function (x) { return LISTS_DEF.indexOf(x) >= 0; }).length;
-    B.lists = blockHead("lists", "Списки") + '<nav class="nav" data-lists="1">' + listsOrder().map(function (k) { return L[k](); }).join("") + "</nav>" + '<a href="#" class="lcfg" data-a="lists-cfg">' + (nhid ? "＋ ещё " + nhid + " " + plural(nhid, ["пункт", "пункта", "пунктов"]) + " — показать…" : "Настроить пункты…") + "</a>";
+    B.lists = blockHead("lists", "Списки") + '<nav class="nav" data-lists="1">' + listsOrder().map(function (k) { return L[k](); }).join("") + "</nav>" + '<a href="#apps" class="lcfg appsl">▦ Все разделы' + (nhid ? ' <span class="muted">· ещё ' + nhid + "</span>" : "") + "</a>";
     var ph = blockHead("projects", "Проекты", '<button type="button" data-a="rev-on" title="Проверка проектов: пройтись по проектам, которые пора пересмотреть" aria-label="Проверка проектов">↻</button><button type="button" data-a="newproj" title="Новый проект" aria-label="Новый проект">+</button>') + '<nav class="nav">';
     var tr = ptree(), hidden = {};
     if (!tr.length) ph += '<div class="none">Пока нет. «+» — создать</div>';
@@ -14973,6 +14978,47 @@ CREATE TABLE push (
     return false;
   }
 
+  /* --- «Все разделы» (#apps): плитки по группам, поиск, «Часто открываете», ☆ — показать раздел в левой панели --- */
+  var APPG = [
+    ["Каждый день", "#1d6b5a", [["today", "☀", "Сегодня", "Задачи на сегодня и просроченные"], ["inbox", "📥", "Входящие", "Всё новое, что ещё не разобрано"], ["plans", "🗓", "Планы", "Ближайшие 14 дней по дням"], ["cal", "📅", "Календарь", "Неделя и месяц, задачи со временем"], ["weekly", "🧭", "Обзор недели", "8 шагов раз в неделю — голова свободна"]]],
+    ["Задачи и проекты", "#3e63dd", [["all", "☰", "Все задачи", "Все открытые задачи"], ["sprint", "🏃", "Спринт", "Недельный спринт и доска"], ["gantt", "📊", "Таймлайн", "Сроки, связи, критический путь"], ["matrix", "⊞", "Матрица", "Важное и срочное"], ["waiting", "⏳", "Жду ответа", "Поручения и ответы, которых ждёте"], ["someday", "💭", "Когда-нибудь", "Идеи и дела на потом"], ["flag", "🚩", "С флажком", "Отмеченные флажком"], ["done", "✅", "Сделано", "Выполненные задачи"]]],
+    ["Цели и развитие", "#8e4ec6", [["goals", "🎯", "Цели", "Цели, шаги и прогресс"], ["habits", "🌱", "Привычки", "Привычки и челлендж «Осанка и лицо»"], ["journal", "📔", "Дневник", "Записи дня и настроение"], ["srs", "🔁", "Повторение", "Карточки из заметок и карт"], ["health", "🌿", "Самочувствие", "Сон, энергия, боль — и что с чем связано"]]],
+    ["Знания", "#b07a12", [["notes", "📝", "Заметки", "База знаний: страницы, таблицы, карты, холсты", 1], ["ngraph", "🕸", "Граф заметок", "Как страницы связаны ссылками", 1]]],
+    ["Дом, люди, деньги", "#d0551f", [["menu", "🍲", "Меню", "Меню на неделю, рецепты, покупки"], ["kitchen", "🍳", "Кухня", "Кладовая, чеки, челлендж готовки", 1], ["clean", "🧹", "План уборки", "Уборка по зонам и челлендж"], ["budget", "💰", "Бюджет", "Неделя, период, выписка банка"], ["people", "👥", "Люди", "Дни рождения и «пора связаться»"], ["docs", "📑", "Документы", "Сроки документов и подписки"]]],
+    ["Аналитика", "#5b6b6e", [["stats", "📈", "Статистика", "Сделано, время, баланс, уровень"], ["rpt", "🧮", "Отчёты", "Конструктор отчётов"]]]
+  ];
+  function appUse(v) { var all = {}; APPG.forEach(function (g) { g[2].forEach(function (x) { all[x[0]] = 1; }); }); if (!all[v]) return; var u = {}; try { u = JSON.parse(LS.get("zd-appuse") || "{}") || {}; } catch (e) { u = {}; } u[v] = (u[v] || 0) + 1; LS.set("zd-appuse", JSON.stringify(u)); }
+  function appCnt(k) {
+    try {
+      if (k === "inbox") return inboxList().length; if (k === "today") return todayList().length; if (k === "srs") return srsDueCount(); if (k === "waiting") return waitList().length;
+      if (k === "people") { var t0 = today0(); return nOfTpl("person").filter(function (x) { var c = pContactDue(x), b = (x.pr || {}).bday ? nextBday(x.pr.bday) : 0; return (c && c <= t0) || (b && b - t0 <= 7 * DAY); }).length; }
+      if (k === "weekly") { var w = (S.opt.wrev || {})[wrKey()]; return w && w.done ? "✓" : ""; } if (k === "goals") return live(S.goals || []).filter(function (g) { return (g.st || "active") === "active"; }).length;
+      if (k === "flag") return tasks().filter(function (t) { return t.flag && !t.done; }).length; if (k === "notes") return notes().length;
+    } catch (e) { /* счётчик не важен */ }
+    return "";
+  }
+  function vApps() {
+    var hid = hiddenLists(), q = String(INPV.appq || "").toLowerCase().trim(), u = {}; try { u = JSON.parse(LS.get("zd-appuse") || "{}") || {}; } catch (e) { u = {}; }
+    var tile = function (x, c) { var k = x[0], side = !x[4], on = side && (k === "inbox" || hid.indexOf(k) < 0), n = appCnt(k); return '<div class="apt" style="--ac:' + c + '"><a class="aptl" href="#' + k + '"><span class="apti">' + x[1] + '</span><b>' + esc(x[2]) + (n !== "" && n !== 0 ? '<span class="aptn">' + esc(String(n)) + "</span>" : "") + "</b><small>" + esc(x[3]) + "</small></a>" + (side ? '<button type="button" class="aptp' + (on ? " on" : "") + '" data-a="apppin" data-x="' + k + '" title="' + (on ? "Убрать из левой панели" : "Показать в левой панели") + '" aria-label="' + (on ? "Убрать из левой панели" : "Показать в левой панели") + '"' + (k === "inbox" ? " disabled" : "") + ">" + (on ? "★" : "☆") + "</button>" : "") + "</div>"; };
+    var h = head("▦ Все разделы", "Всё, что есть в приложении, — плитками. ★ — раздел виден в левой панели, ☆ — только здесь (и в поиске Ctrl+K). Так панель остаётся короткой.");
+    h += '<div class="r appbar"><input type="search" class="inp" id="appq" placeholder="Найти раздел: «уборка», «деньги», «повтор»…" value="' + esc(INPV.appq || "") + '" autocomplete="off"><button type="button" class="btn sm" data-a="appmin" title="В левой панели останутся: Входящие, Сегодня, Планы, Календарь">Панель — только основное</button><button type="button" class="btn sm" data-a="appall">Показать в панели всё</button></div>';
+    var flat = []; APPG.forEach(function (g) { g[2].forEach(function (x) { flat.push([x, g[1], g[0]]); }); });
+    if (q) { var f = flat.filter(function (z) { return (z[0][2] + " " + z[0][3] + " " + z[2]).toLowerCase().indexOf(q) >= 0; }); return h + (f.length ? '<div class="aptg">' + f.map(function (z) { return tile(z[0], z[1]); }).join("") + "</div>" : '<p class="empty">Ничего не нашлось.</p>'); }
+    var top = flat.filter(function (z) { return u[z[0][0]]; }).sort(function (a, b) { return u[b[0][0]] - u[a[0][0]]; }).slice(0, 6);
+    if (top.length >= 3) h += '<h3 class="apph">Часто открываете</h3><div class="aptg">' + top.map(function (z) { return tile(z[0], z[1]); }).join("") + "</div>";
+    APPG.forEach(function (g) { h += '<h3 class="apph" style="--ac:' + g[1] + '">' + esc(g[0]) + '</h3><div class="aptg">' + g[2].map(function (x) { return tile(x, g[1]); }).join("") + "</div>"; });
+    return h;
+  }
+  document.addEventListener("input", function (e) { if (!e.target || e.target.id !== "appq") return; INPV.appq = e.target.value; var pos = e.target.selectionStart; render(); var i = $("appq"); if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (er) { /* ок */ } } });
+  function appsAct(a, el) {
+    switch (a) {
+      case "apppin": var k = el.dataset.x, on = k === "inbox" || hiddenLists().indexOf(k) < 0; setListHidden(k, on); toast(on ? "Раздел убран из левой панели — он остаётся здесь" : "Раздел добавлен в левую панель"); return true;
+      case "appmin": var keep = ["inbox", "today", "plans", "cal"], h = LISTS_DEF.filter(function (x) { return keep.indexOf(x) < 0; }); S.opt.hideLists = h; LS.set("zd-hide", JSON.stringify(h)); optTouch(); save(); render(); toast("В панели — только основное; остальное — в «▦ Все разделы»"); return true;
+      case "appall": S.opt.hideLists = []; LS.set("zd-hide", "[]"); optTouch(); save(); render(); toast("В панели показаны все разделы"); return true;
+    }
+    return false;
+  }
+
   function chalsWidget() {
     var h = "", t0 = today0(), any = false;
     if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
@@ -16294,7 +16340,7 @@ CREATE TABLE push (
     try { enShowBtn(); fsBtn(); var xs = $("xpSlot"); if (xs) xs.innerHTML = xpBadge(); var sw = $("shrwrap"); if (!sw) { sw = document.createElement("div"); sw.id = "shrwrap"; document.body.appendChild(sw); } sw.innerHTML = shareHTML(); } catch (er) { /* не мешает */ }
     $("side").innerHTML = sideHTML();
     try { $("bnav").innerHTML = bnavHTML(); document.documentElement.classList.toggle("nohq", !!S.opt.noHq); } catch (er) { /* не мешает */ }
-    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, rhave: vRhave, kitchen: vKitchen, rpt: vRpt, ngraph: vNGraph, srs: vSrs, weekly: vWeekly, health: vHealth, people: vPeople, docs: vDocs, clean: vClean, budget: vBudget, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
+    var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, rhave: vRhave, kitchen: vKitchen, rpt: vRpt, ngraph: vNGraph, srs: vSrs, weekly: vWeekly, health: vHealth, people: vPeople, docs: vDocs, apps: vApps, clean: vClean, budget: vBudget, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
     var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
     $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "templates");
     try { ptTouch(location.hash.slice(1) || "today"); } catch (er) { /* вкладки не мешают */ }
@@ -16923,6 +16969,7 @@ CREATE TABLE push (
     if (a && restAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && w12Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && w345Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && appsAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
