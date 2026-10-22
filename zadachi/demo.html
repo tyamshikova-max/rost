@@ -595,6 +595,16 @@ html.mmfullon, html.mmfullon body { overflow: hidden }
 .aptg { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px } .apt { position: relative; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); transition: border-color .15s, transform .15s } .apt:hover { border-color: var(--ac); transform: translateY(-1px) }
 .aptl { display: grid; gap: 4px; padding: 12px 14px 12px; color: var(--fg); text-decoration: none; height: 100%; box-sizing: border-box } .apti { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; font-size: 21px; background: color-mix(in srgb, var(--ac) 14%, var(--panel)) } .aptl b { display: flex; gap: 6px; align-items: center; font-size: calc(14.5px * var(--fs)) } .aptl small { color: var(--muted); font-size: calc(12.5px * var(--fs)); line-height: 1.35 } .aptn { margin-left: auto; min-width: 20px; padding: 0 7px; border-radius: 999px; background: var(--ac); color: #fff; font-size: 11.5px; text-align: center; line-height: 18px }
 .aptp { position: absolute; top: 8px; right: 8px; border: 0; background: transparent; color: var(--muted); font-size: 17px; cursor: pointer; padding: 2px 4px; line-height: 1 } .aptp.on { color: #e2a400 } .aptp:disabled { opacity: .5; cursor: default } .apt:has(.aptn) .aptp { top: auto; bottom: 8px } .appsb { text-decoration: none; font-size: 18px; display: inline-grid; place-items: center } .appsl { font-weight: 600 }
+.aptm { display: grid; gap: 4px; margin-top: 6px } .aptm em { font-style: normal; font-size: calc(12px * var(--fs)); color: var(--fg); opacity: .78; white-space: nowrap; overflow: hidden; text-overflow: ellipsis } .apbar { display: block; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--ac) 16%, var(--line)); overflow: hidden } .apbar i { display: block; height: 100%; border-radius: 3px; background: var(--ac) } .apbar i.warn { background: #e2a400 } .apbar i.bad { background: #d14343 }
+.apt.ed { cursor: grab; border-style: dashed } .apt.ed .aptl { pointer-events: none; padding-top: 38px } .apt.drg { opacity: .4 } .apt.drop { outline: 2px solid var(--ac); outline-offset: 2px } .aptg.drop { outline: 2px dashed var(--line); outline-offset: 4px; border-radius: 14px }
+.aped { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px } .aped .ibtn { width: 28px; height: 28px; font-size: 15px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; display: grid; place-items: center } .aped .ibtn:disabled { opacity: .35 }
+.aphe { display: flex; gap: 6px; align-items: center; text-transform: none; letter-spacing: 0 } .apgn { max-width: 280px; font-weight: 600; color: var(--ac) } .apcol { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0 } .aphe .ibtn:disabled { opacity: .35 }
+.apempty { grid-column: 1 / -1; padding: 18px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); text-align: center } .aphint { margin: 4px 0 0; font-size: calc(13px * var(--fs)) }
+.apsh { position: fixed; inset: 0; z-index: 89 } .apshbg { position: absolute; inset: 0; background: rgba(0, 0, 0, .35); opacity: 0; transition: opacity .22s } .apsh.on .apshbg { opacity: 1 }
+.apshp { position: absolute; left: 0; right: 0; bottom: 0; max-height: 82vh; overflow: auto; overscroll-behavior: contain; background: var(--bg); border-radius: 18px 18px 0 0; padding: 4px 14px calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateY(100%); transition: transform .24s ease; box-shadow: 0 -8px 30px rgba(0, 0, 0, .18) } .apsh.on .apshp { transform: none }
+.apshgrip { width: 44px; height: 5px; border-radius: 3px; background: var(--line); margin: 6px auto 12px; cursor: pointer } .apshh { gap: 8px; flex-wrap: nowrap } .apshh .inp { flex: 1; min-width: 0 }
+.apsht { margin: 16px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted) } .apshg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 6px }
+.apsc { display: grid; justify-items: center; gap: 5px; text-align: center; color: var(--fg); text-decoration: none; font-size: 12px; line-height: 1.2; min-width: 0 } .apsc .apti { position: relative; width: 52px; height: 52px; border-radius: 16px; font-size: 26px } .apscn { position: absolute; top: -5px; right: -7px; font-style: normal; min-width: 18px; padding: 0 5px; border-radius: 999px; background: var(--ac); color: #fff; font-size: 11px; line-height: 18px }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -1236,6 +1246,7 @@ li.task { transition: transform .15s }
   .sidetop { display: none }
 }
 @media (max-width: 480px) { .top .sync span { display: none } }
+@media (max-width: 480px) { .top { gap: 5px; padding-left: 8px; padding-right: 8px } #ctxBtn span { display: none } .top .ibtn { min-width: 30px; padding-left: 3px; padding-right: 3px } .top .q { min-width: 44px; padding: 7px 8px } }
 @keyframes zdspin { 50% { opacity: .35 } } .top .sync.spin svg { animation: zdspin 1s ease-in-out infinite }
 /* служебная строка: два ряда по четыре значка */
 .svcbar { display: grid; grid-template-columns: repeat(4, 1fr); justify-items: center; row-gap: 2px }
@@ -5891,7 +5902,7 @@ CREATE TABLE push (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-160";
+  var APPV = "zd-app-2026-10-16-161";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -14978,7 +14989,9 @@ CREATE TABLE push (
     return false;
   }
 
-  /* --- «Все разделы» (#apps): плитки по группам, поиск, «Часто открываете», ☆ — показать раздел в левой панели --- */
+  /* --- «Все разделы» (#apps): плитки по папкам, поиск, «Часто открываете», мини-виджеты, ☆ — раздел в левой панели.
+     Свой порядок и папки — S.opt.appl [{ id, n, c, it: [ключ раздела] }]; «✎ Порядок и папки» — перетаскивание, ‹ ›, ⇄ «в папку».
+     На телефоне ▦ в шапке открывает шторку снизу. --- */
   var APPG = [
     ["Каждый день", "#1d6b5a", [["today", "☀", "Сегодня", "Задачи на сегодня и просроченные"], ["inbox", "📥", "Входящие", "Всё новое, что ещё не разобрано"], ["plans", "🗓", "Планы", "Ближайшие 14 дней по дням"], ["cal", "📅", "Календарь", "Неделя и месяц, задачи со временем"], ["weekly", "🧭", "Обзор недели", "8 шагов раз в неделю — голова свободна"]]],
     ["Задачи и проекты", "#3e63dd", [["all", "☰", "Все задачи", "Все открытые задачи"], ["sprint", "🏃", "Спринт", "Недельный спринт и доска"], ["gantt", "📊", "Таймлайн", "Сроки, связи, критический путь"], ["matrix", "⊞", "Матрица", "Важное и срочное"], ["waiting", "⏳", "Жду ответа", "Поручения и ответы, которых ждёте"], ["someday", "💭", "Когда-нибудь", "Идеи и дела на потом"], ["flag", "🚩", "С флажком", "Отмеченные флажком"], ["done", "✅", "Сделано", "Выполненные задачи"]]],
@@ -14987,7 +15000,18 @@ CREATE TABLE push (
     ["Дом, люди, деньги", "#d0551f", [["menu", "🍲", "Меню", "Меню на неделю, рецепты, покупки"], ["kitchen", "🍳", "Кухня", "Кладовая, чеки, челлендж готовки", 1], ["clean", "🧹", "План уборки", "Уборка по зонам и челлендж"], ["budget", "💰", "Бюджет", "Неделя, период, выписка банка"], ["people", "👥", "Люди", "Дни рождения и «пора связаться»"], ["docs", "📑", "Документы", "Сроки документов и подписки"]]],
     ["Аналитика", "#5b6b6e", [["stats", "📈", "Статистика", "Сделано, время, баланс, уровень"], ["rpt", "🧮", "Отчёты", "Конструктор отчётов"]]]
   ];
-  function appUse(v) { var all = {}; APPG.forEach(function (g) { g[2].forEach(function (x) { all[x[0]] = 1; }); }); if (!all[v]) return; var u = {}; try { u = JSON.parse(LS.get("zd-appuse") || "{}") || {}; } catch (e) { u = {}; } u[v] = (u[v] || 0) + 1; LS.set("zd-appuse", JSON.stringify(u)); }
+  var APCOL = ["#1d6b5a", "#3e63dd", "#8e4ec6", "#b07a12", "#d0551f", "#5b6b6e", "#c2185b", "#00838f"], APPED = false, APDRAG = "";
+  function appDef() { var o = {}; APPG.forEach(function (g) { g[2].forEach(function (x) { o[x[0]] = x; }); }); return o; }
+  // раскладка: своя (S.opt.appl) или исходная; разделы, которых в своей нет (появились в новой версии), — в их родную папку или в первую
+  function appLayout() {
+    var D = appDef(), seen = {}, src = Array.isArray(S.opt.appl) && S.opt.appl.length ? S.opt.appl : APPG.map(function (g, i) { return { id: "g" + i, n: g[0], c: g[1], it: g[2].map(function (x) { return x[0]; }) }; });
+    var L = src.map(function (g) { return { id: g.id, n: g.n || "Папка", c: g.c || APCOL[0], it: (g.it || []).filter(function (k) { if (!D[k] || seen[k]) return false; seen[k] = 1; return true; }) }; });
+    APPG.forEach(function (g, i) { g[2].forEach(function (x) { if (seen[x[0]]) return; var t = L.filter(function (z) { return z.id === "g" + i; })[0] || L[0]; if (!t) { t = { id: "g" + i, n: g[0], c: g[1], it: [] }; L.push(t); } t.it.push(x[0]); seen[x[0]] = 1; }); });
+    return L;
+  }
+  function appSaveL(L) { S.opt.appl = L.map(function (g) { return { id: g.id, n: g.n, c: g.c, it: g.it.slice() }; }); optTouch(); save(); render(); }
+  function appUseMap() { var u = {}; try { u = JSON.parse(LS.get("zd-appuse") || "{}") || {}; } catch (e) { u = {}; } return u; }
+  function appUse(v) { if (!appDef()[v]) return; var u = appUseMap(); u[v] = (u[v] || 0) + 1; LS.set("zd-appuse", JSON.stringify(u)); }
   function appCnt(k) {
     try {
       if (k === "inbox") return inboxList().length; if (k === "today") return todayList().length; if (k === "srs") return srsDueCount(); if (k === "waiting") return waitList().length;
@@ -14997,26 +15021,155 @@ CREATE TABLE push (
     } catch (e) { /* счётчик не важен */ }
     return "";
   }
+  // мини-виджет на плитке: одна строка живых данных и (где есть доля) полоска
+  function appBar(p, cls) { return '<span class="apbar"><i class="' + (cls || "") + '" style="width:' + Math.max(0, Math.min(100, p || 0)).toFixed(0) + '%"></i></span>'; }
+  function appMini(k) {
+    if (S.opt.appmini === false) return "";
+    var x = "";
+    try {
+      var t0 = today0(), now = Date.now(), em = function (s) { return "<em>" + s + "</em>"; };
+      if (k === "today") { var dn = tasks().filter(function (t) { return t.done && (t.dt || 0) >= t0; }).length, all = dn + todayList().length; if (all) x = appBar(dn / all * 100) + em("сделано " + dn + " из " + all); }
+      else if (k === "cal") { var nx = tasks().filter(function (t) { return !t.done && t.at && !t.allday && t.at > now && t.at < t0 + DAY; }).sort(function (a, b) { return a.at - b.at; })[0]; x = em(nx ? "далее " + new Date(nx.at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) + " · " + esc(String(nx.t || "").slice(0, 48)) : "сегодня больше нет дел со временем"); }
+      else if (k === "plans") { var wk = tasks().filter(function (t) { var d = t.at || t.due; return !t.done && d >= t0 + DAY && d < t0 + 8 * DAY; }).length; x = em(wk ? "на 7 дней вперёд: " + wk + " " + plural(wk, ["задача", "задачи", "задач"]) : "следующая неделя пока свободна"); }
+      else if (k === "habits") { var hs = habits().filter(function (h) { return !h.arch && hDue(h, t0); }); if (hs.length) { var hd = hs.filter(function (h) { return hDone(h, t0); }).length; x = appBar(hd / hs.length * 100) + em("сегодня " + hd + " из " + hs.length); } }
+      else if (k === "goals") { var gs = live(S.goals || []).filter(function (g) { return (g.st || "active") === "active"; }); if (gs.length) { var avg = gs.reduce(function (s, g) { return s + goalProg(g).pct; }, 0) / gs.length; x = appBar(avg) + em("в среднем " + Math.round(avg) + " %"); } }
+      else if (k === "budget") { if (buPers().length) { var T = buWeek(monday(t0)).tot; x = appBar(T.lim > 0 ? T.fact / T.lim * 100 : 0, buCls(T.fact, T.lim)) + em("неделя: " + buRub(T.fact) + " из " + buRub(T.lim)); } }
+      else if (k === "people") { var bp = nOfTpl("person").filter(function (n) { return (n.pr || {}).bday; }).map(function (n) { return { n: n, d: nextBday(n.pr.bday) }; }).sort(function (a, b) { return a.d - b.d; })[0]; if (bp) { var dd = Math.round((bp.d - t0) / DAY); x = em("🎂 " + esc(nTitle(bp.n)) + " — " + (dd === 0 ? "сегодня" : dd === 1 ? "завтра" : "через " + dd + " " + plural(dd, ["день", "дня", "дней"]))); } }
+      else if (k === "docs") { var dx = nOfTpl("doc").filter(function (n) { return (n.pr || {}).exp; }).map(function (n) { return { n: n, d: new Date(n.pr.exp + "T00:00").getTime() }; }).filter(function (z) { return z.d >= t0; }).sort(function (a, b) { return a.d - b.d; })[0]; if (dx) x = em("⏰ " + esc(nTitle(dx.n)) + " — до " + new Date(dx.d).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })); }
+      else if (k === "health") { var hr = dayRecOf(dKey(t0)), hk = hr && hr.h ? Object.keys(hr.h).filter(function (f) { return f !== "at"; }).length : 0; x = em(hk ? "сегодня отмечено ✓" : "сегодня ещё не отмечено"); }
+      else if (k === "weekly") { var wr = (S.opt.wrev || {})[wrKey()]; x = em(wr && wr.done ? "на этой неделе пройден ✓" : "на этой неделе ещё не пройден"); }
+      else if (k === "srs") { var sc = srsDueCount(); x = em(sc ? "на сегодня " + sc + " " + plural(sc, ["карточка", "карточки", "карточек"]) : "на сегодня всё повторено ✓"); }
+      else if (k === "notes") { var ln = notes().slice().sort(function (a, b) { return (b.upd || b.created || 0) - (a.upd || a.created || 0); })[0]; if (ln) x = em("последняя: " + esc(nTitle(ln).slice(0, 40))); }
+      else if (k === "stats") { if (xpOn()) { var xs = xpStats(); x = appBar(xs.next ? xs.cur / xs.next * 100 : 0) + em("⭐ уровень " + xs.lvl + " · " + xs.xp + " очков"); } }
+    } catch (e) { x = ""; }
+    return x ? '<span class="aptm">' + x + "</span>" : "";
+  }
   function vApps() {
-    var hid = hiddenLists(), q = String(INPV.appq || "").toLowerCase().trim(), u = {}; try { u = JSON.parse(LS.get("zd-appuse") || "{}") || {}; } catch (e) { u = {}; }
-    var tile = function (x, c) { var k = x[0], side = !x[4], on = side && (k === "inbox" || hid.indexOf(k) < 0), n = appCnt(k); return '<div class="apt" style="--ac:' + c + '"><a class="aptl" href="#' + k + '"><span class="apti">' + x[1] + '</span><b>' + esc(x[2]) + (n !== "" && n !== 0 ? '<span class="aptn">' + esc(String(n)) + "</span>" : "") + "</b><small>" + esc(x[3]) + "</small></a>" + (side ? '<button type="button" class="aptp' + (on ? " on" : "") + '" data-a="apppin" data-x="' + k + '" title="' + (on ? "Убрать из левой панели" : "Показать в левой панели") + '" aria-label="' + (on ? "Убрать из левой панели" : "Показать в левой панели") + '"' + (k === "inbox" ? " disabled" : "") + ">" + (on ? "★" : "☆") + "</button>" : "") + "</div>"; };
-    var h = head("▦ Все разделы", "Всё, что есть в приложении, — плитками. ★ — раздел виден в левой панели, ☆ — только здесь (и в поиске Ctrl+K). Так панель остаётся короткой.");
-    h += '<div class="r appbar"><input type="search" class="inp" id="appq" placeholder="Найти раздел: «уборка», «деньги», «повтор»…" value="' + esc(INPV.appq || "") + '" autocomplete="off"><button type="button" class="btn sm" data-a="appmin" title="В левой панели останутся: Входящие, Сегодня, Планы, Календарь">Панель — только основное</button><button type="button" class="btn sm" data-a="appall">Показать в панели всё</button></div>';
-    var flat = []; APPG.forEach(function (g) { g[2].forEach(function (x) { flat.push([x, g[1], g[0]]); }); });
-    if (q) { var f = flat.filter(function (z) { return (z[0][2] + " " + z[0][3] + " " + z[2]).toLowerCase().indexOf(q) >= 0; }); return h + (f.length ? '<div class="aptg">' + f.map(function (z) { return tile(z[0], z[1]); }).join("") + "</div>" : '<p class="empty">Ничего не нашлось.</p>'); }
-    var top = flat.filter(function (z) { return u[z[0][0]]; }).sort(function (a, b) { return u[b[0][0]] - u[a[0][0]]; }).slice(0, 6);
-    if (top.length >= 3) h += '<h3 class="apph">Часто открываете</h3><div class="aptg">' + top.map(function (z) { return tile(z[0], z[1]); }).join("") + "</div>";
-    APPG.forEach(function (g) { h += '<h3 class="apph" style="--ac:' + g[1] + '">' + esc(g[0]) + '</h3><div class="aptg">' + g[2].map(function (x) { return tile(x, g[1]); }).join("") + "</div>"; });
+    var hid = hiddenLists(), q = String(INPV.appq || "").toLowerCase().trim(), u = appUseMap(), L = appLayout(), D = appDef();
+    var tile = function (k, c, gid, i, n) {
+      var x = D[k], side = !x[4], on = side && (k === "inbox" || hid.indexOf(k) < 0), cnt = appCnt(k);
+      var h = '<div class="apt' + (APPED ? " ed" : "") + '" style="--ac:' + c + '"' + (APPED ? ' draggable="true" data-apk="' + k + '"' : "") + '><a class="aptl" href="#' + k + '"' + (APPED ? ' tabindex="-1"' : "") + '><span class="apti">' + x[1] + "</span><b>" + esc(x[2]) + (cnt !== "" && cnt !== 0 ? '<span class="aptn">' + esc(String(cnt)) + "</span>" : "") + "</b><small>" + esc(x[3]) + "</small>" + (APPED ? "" : appMini(k)) + "</a>";
+      if (APPED) h += '<span class="aped"><button type="button" class="ibtn" data-a="apmv" data-x="' + k + '" data-d="-1" title="Левее" aria-label="Левее"' + (i ? "" : " disabled") + '>‹</button><button type="button" class="ibtn" data-a="apmv" data-x="' + k + '" data-d="1" title="Правее" aria-label="Правее"' + (i < n - 1 ? "" : " disabled") + '>›</button><button type="button" class="ibtn" data-a="apto" data-x="' + k + '" title="В другую папку" aria-label="В другую папку">⇄</button></span>';
+      else if (side) h += '<button type="button" class="aptp' + (on ? " on" : "") + '" data-a="apppin" data-x="' + k + '" title="' + (on ? "Убрать из левой панели" : "Показать в левой панели") + '" aria-label="' + (on ? "Убрать из левой панели" : "Показать в левой панели") + '"' + (k === "inbox" ? " disabled" : "") + ">" + (on ? "★" : "☆") + "</button>";
+      return h + "</div>";
+    };
+    var h = head("▦ Все разделы", "Всё, что есть в приложении, — плитками. ★ — раздел виден в левой панели, ☆ — только здесь (и в поиске Ctrl+K). Порядок и папки — свои: «✎ Порядок и папки».");
+    h += '<div class="r appbar"><input type="search" class="inp" id="appq" placeholder="Найти раздел: «уборка», «деньги», «повтор»…" value="' + esc(INPV.appq || "") + '" autocomplete="off"' + (APPED ? " disabled" : "") + '><button type="button" class="btn sm' + (APPED ? " pri" : "") + '" data-a="apped">' + (APPED ? "✓ Готово" : "✎ Порядок и папки") + "</button>" + (S.opt.start === "apps" ? '<span class="bstartb" title="Открывается при запуске приложения">🏠 стартовая</span>' : "") + '<button type="button" class="ibtn" data-a="appmenu" title="Ещё: панель, мини-виджеты, стартовый экран" aria-label="Ещё">⋯</button></div>';
+    if (q && !APPED) {
+      var f = []; L.forEach(function (g) { g.it.forEach(function (k) { if ((D[k][2] + " " + D[k][3] + " " + g.n).toLowerCase().indexOf(q) >= 0) f.push([k, g.c]); }); });
+      return h + (f.length ? '<div class="aptg">' + f.map(function (z) { return tile(z[0], z[1]); }).join("") + "</div>" : '<p class="empty">Ничего не нашлось.</p>');
+    }
+    if (APPED) h += '<p class="muted aphint">Перетаскивайте плитки мышью (и между папками) или двигайте кнопками ‹ ›; ⇄ — в другую папку. Название папки — щёлкните и впишите своё; кружок — цвет.</p>';
+    else {
+      var col = {}; L.forEach(function (g) { g.it.forEach(function (k) { col[k] = g.c; }); });
+      var top = Object.keys(u).filter(function (k) { return D[k]; }).sort(function (a, b) { return u[b] - u[a]; }).slice(0, 6);
+      if (top.length >= 3) h += '<h3 class="apph">Часто открываете</h3><div class="aptg">' + top.map(function (k) { return tile(k, col[k]); }).join("") + "</div>";
+    }
+    L.forEach(function (g, gi) {
+      if (!g.it.length && !APPED) return;
+      h += APPED ? '<div class="apph aphe" style="--ac:' + g.c + '"><button type="button" class="apcol" data-a="apcol" data-g="' + g.id + '" title="Цвет папки" aria-label="Цвет папки" style="background:' + g.c + '"></button><input class="inp apgn" data-g="' + g.id + '" value="' + esc(g.n) + '" maxlength="40" aria-label="Название папки"><button type="button" class="ibtn" data-a="apgmv" data-g="' + g.id + '" data-d="-1" title="Папку выше" aria-label="Папку выше"' + (gi ? "" : " disabled") + '>↑</button><button type="button" class="ibtn" data-a="apgmv" data-g="' + g.id + '" data-d="1" title="Папку ниже" aria-label="Папку ниже"' + (gi < L.length - 1 ? "" : " disabled") + '>↓</button><button type="button" class="ibtn" data-a="apgdel" data-g="' + g.id + '" title="Удалить папку — плитки перейдут в соседнюю" aria-label="Удалить папку"' + (L.length > 1 ? "" : " disabled") + ">✕</button></div>"
+        : '<h3 class="apph" style="--ac:' + g.c + '">' + esc(g.n) + "</h3>";
+      h += '<div class="aptg"' + (APPED ? ' data-apgrid="' + g.id + '"' : "") + ">" + g.it.map(function (k, i) { return tile(k, g.c, g.id, i, g.it.length); }).join("") + (APPED && !g.it.length ? '<div class="apempty">Пустая папка — перетащите сюда плитки или нажмите ⇄ на плитке</div>' : "") + "</div>";
+    });
+    if (APPED) h += '<div class="r" style="margin-top:14px;gap:8px"><button type="button" class="btn sm" data-a="apgnew">＋ Новая папка</button><button type="button" class="btn sm" data-a="apreset">↺ Вернуть исходные папки</button></div>';
     return h;
   }
-  document.addEventListener("input", function (e) { if (!e.target || e.target.id !== "appq") return; INPV.appq = e.target.value; var pos = e.target.selectionStart; render(); var i = $("appq"); if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (er) { /* ок */ } } });
+  function appMove(L, k, gid, before) {
+    var it = null; L.forEach(function (g) { var i = g.it.indexOf(k); if (i >= 0) { g.it.splice(i, 1); it = k; } }); if (!it) return;
+    var t = L.filter(function (g) { return g.id === gid; })[0] || L[0], j = before ? t.it.indexOf(before) : -1; if (j < 0) t.it.push(k); else t.it.splice(j, 0, k);
+  }
+  function appGroupOf(L, k) { return L.filter(function (g) { return g.it.indexOf(k) >= 0; })[0]; }
+  document.addEventListener("input", function (e) {
+    if (!e.target) return;
+    if (e.target.id === "apshq") { var l = $("apshl"); if (l) l.innerHTML = appSheetList(e.target.value); return; }
+    if (e.target.id !== "appq") return; INPV.appq = e.target.value; var pos = e.target.selectionStart; render(); var i = $("appq"); if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (er) { /* ок */ } }
+  });
+  document.addEventListener("change", function (e) { var t = e.target; if (!t || !t.classList || !t.classList.contains("apgn")) return; var L = appLayout(), g = L.filter(function (z) { return z.id === t.dataset.g; })[0]; if (!g) return; g.n = t.value.trim().slice(0, 40) || "Папка"; appSaveL(L); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target && e.target.classList && e.target.classList.contains("apgn")) { e.preventDefault(); e.target.blur(); return; }
+    if (e.key === "Escape" && $("appsh")) { e.preventDefault(); appSheet(false); }
+  });
+  // перетаскивание плиток в режиме правки: на плитку — встать перед/после неё, на пустое место папки — в конец
+  document.addEventListener("dragstart", function (e) { if (!APPED) return; var t = e.target.closest && e.target.closest("[data-apk]"); if (!t) return; APDRAG = t.dataset.apk; t.classList.add("drg"); try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", APDRAG); } catch (er) { /* ок */ } });
+  document.addEventListener("dragover", function (e) {
+    if (!APDRAG) return; var t = e.target.closest && (e.target.closest("[data-apk]") || e.target.closest("[data-apgrid]")); if (!t) return; e.preventDefault();
+    [].forEach.call(document.querySelectorAll(".apt.drop, .aptg.drop"), function (x) { x.classList.remove("drop"); }); t.classList.add("drop");
+  });
+  document.addEventListener("drop", function (e) {
+    if (!APDRAG) return; var k = APDRAG; APDRAG = ""; var t = e.target.closest && e.target.closest("[data-apk]"), gr = e.target.closest && e.target.closest("[data-apgrid]"); if (!gr) { render(); return; }
+    e.preventDefault(); var L = appLayout();
+    if (t && t.dataset.apk !== k) { var g = appGroupOf(L, t.dataset.apk), r = t.getBoundingClientRect(), it = g.it.filter(function (z) { return z !== k; }), j = it.indexOf(t.dataset.apk) + (e.clientX > r.left + r.width / 2 ? 1 : 0); appMove(L, k, g.id, it[j] || null); }
+    else if (!t) appMove(L, k, gr.dataset.apgrid, null);
+    appSaveL(L);
+  });
+  document.addEventListener("dragend", function () { if (APDRAG) { APDRAG = ""; render(); } });
+  // шторка «Все разделы» на телефоне
+  function appSheetList(q) {
+    var D = appDef(), L = appLayout(), u = appUseMap(), h = "", col = {}; q = String(q || "").toLowerCase().trim();
+    L.forEach(function (g) { g.it.forEach(function (k) { col[k] = g.c; }); });
+    var cell = function (k) { var x = D[k], n = appCnt(k); return '<a class="apsc" href="#' + k + '" style="--ac:' + col[k] + '"><span class="apti">' + x[1] + (n !== "" && n !== 0 ? '<i class="apscn">' + esc(String(n)) + "</i>" : "") + "</span><span>" + esc(x[2]) + "</span></a>"; };
+    if (q) { var f = []; L.forEach(function (g) { g.it.forEach(function (k) { if ((D[k][2] + " " + D[k][3] + " " + g.n).toLowerCase().indexOf(q) >= 0) f.push(k); }); }); return f.length ? '<div class="apshg">' + f.map(cell).join("") + "</div>" : '<p class="empty">Ничего не нашлось.</p>'; }
+    var top = Object.keys(u).filter(function (k) { return D[k]; }).sort(function (a, b) { return u[b] - u[a]; }).slice(0, 4);
+    if (top.length >= 3) h += '<h4 class="apsht">Часто</h4><div class="apshg">' + top.map(cell).join("") + "</div>";
+    L.forEach(function (g) { if (g.it.length) h += '<h4 class="apsht" style="color:' + g.c + '">' + esc(g.n) + '</h4><div class="apshg">' + g.it.map(cell).join("") + "</div>"; });
+    return h;
+  }
+  function appSheet(on) {
+    var w = $("appsh");
+    if (!on) { if (w) { w.classList.remove("on"); setTimeout(function () { if (w.parentNode && !w.classList.contains("on")) w.parentNode.removeChild(w); }, 240); } return; }
+    if (!w) { w = document.createElement("div"); w.id = "appsh"; w.className = "apsh"; document.body.appendChild(w); }
+    w.innerHTML = '<div class="apshbg" data-a="apshx"></div><div class="apshp" role="dialog" aria-label="Все разделы"><div class="apshgrip" data-a="apshx" title="Закрыть"></div><div class="r apshh"><input type="search" class="inp" id="apshq" placeholder="Найти раздел…" autocomplete="off"><a class="btn sm" href="#apps">▦ Все</a></div><div id="apshl">' + appSheetList("") + "</div></div>";
+    void w.offsetHeight; w.classList.add("on");
+  }
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest(".appsb"); if (!a || !window.matchMedia("(max-width: 700px)").matches) return;
+    e.preventDefault(); e.stopPropagation(); var w = $("appsh"); appSheet(!(w && w.classList.contains("on")));
+  }, true);
+  window.addEventListener("hashchange", function () { if ($("appsh")) appSheet(false); });
+  (function () { var y0 = null; document.addEventListener("touchstart", function (e) { var p = e.target.closest && e.target.closest(".apshp"); y0 = p && p.scrollTop <= 0 ? e.touches[0].clientY : null; }, { passive: true }); document.addEventListener("touchend", function (e) { if (y0 === null) return; var dy = e.changedTouches[0].clientY - y0; y0 = null; if (dy > 70) appSheet(false); }, { passive: true }); })();
+  function appMenuItems() {
+    return [{ c: "min", i: "◧", l: "Левая панель — только основное" }, { c: "all", i: "☰", l: "Показать в левой панели всё" }, "-",
+      { c: "mini", i: "📊", l: "Мини-виджеты на плитках", k: S.opt.appmini === false ? "" : "✓" }, { c: "home", i: "🏠", l: "Открывать при запуске приложения", k: S.opt.start === "apps" ? "✓" : "" }, "-",
+      { c: "edit", i: "✎", l: "Порядок и папки…" }, { c: "reset", i: "↺", l: "Вернуть исходные папки и порядок" }, { c: "often", i: "🧹", l: "Очистить «Часто открываете»" }];
+  }
+  function appMenuCmd(c) {
+    if (c === "min") return appsAct("appmin", document.body); if (c === "all") return appsAct("appall", document.body);
+    if (c === "mini") { S.opt.appmini = S.opt.appmini === false; optTouch(); save(); render(); toast(S.opt.appmini ? "Мини-виджеты на плитках включены" : "Мини-виджеты выключены — только названия и счётчики"); return; }
+    if (c === "home") { S.opt.start = S.opt.start === "apps" ? "" : "apps"; optTouch(); save(); render(); toast(S.opt.start ? "«Все разделы» будут открываться при запуске" : "При запуске — где остановились в прошлый раз"); return; }
+    if (c === "edit") { APPED = true; INPV.appq = ""; render(); return; }
+    if (c === "reset") return appsAct("apreset", document.body);
+    if (c === "often") { LS.set("zd-appuse", "{}"); render(); toast("«Часто открываете» очищено — соберётся заново"); }
+  }
   function appsAct(a, el) {
+    var L, g, i;
     switch (a) {
       case "apppin": var k = el.dataset.x, on = k === "inbox" || hiddenLists().indexOf(k) < 0; setListHidden(k, on); toast(on ? "Раздел убран из левой панели — он остаётся здесь" : "Раздел добавлен в левую панель"); return true;
-      case "appmin": var keep = ["inbox", "today", "plans", "cal"], h = LISTS_DEF.filter(function (x) { return keep.indexOf(x) < 0; }); S.opt.hideLists = h; LS.set("zd-hide", JSON.stringify(h)); optTouch(); save(); render(); toast("В панели — только основное; остальное — в «▦ Все разделы»"); return true;
+      case "appmin": var keep = ["inbox", "today", "plans", "cal"], hd = LISTS_DEF.filter(function (x) { return keep.indexOf(x) < 0; }); S.opt.hideLists = hd; LS.set("zd-hide", JSON.stringify(hd)); optTouch(); save(); render(); toast("В панели — только основное; остальное — в «▦ Все разделы»"); return true;
       case "appall": S.opt.hideLists = []; LS.set("zd-hide", "[]"); optTouch(); save(); render(); toast("В панели показаны все разделы"); return true;
+      case "appmenu": var rm = el.getBoundingClientRect(); ctxShow(rm.left - 200, rm.bottom + 4, appMenuItems(), { k: "appmenu" }); return true;
+      case "apped": APPED = !APPED; INPV.appq = ""; render(); return true;
+      case "apmv": L = appLayout(); g = appGroupOf(L, el.dataset.x); if (!g) return true; i = g.it.indexOf(el.dataset.x); var j = i + (+el.dataset.d); if (j < 0 || j >= g.it.length) return true; g.it[i] = g.it[j]; g.it[j] = el.dataset.x; appSaveL(L); return true;
+      case "apto": L = appLayout(); g = appGroupOf(L, el.dataset.x); var rt = el.getBoundingClientRect(); ctxShow(rt.left - 180, rt.bottom + 4, L.filter(function (z) { return z !== g; }).map(function (z) { return { c: z.id, i: "📁", l: z.n }; }).concat(["-", { c: "__new", i: "＋", l: "В новую папку" }]), { k: "appto", id: el.dataset.x }); return true;
+      case "apgmv": L = appLayout(); i = -1; L.forEach(function (z, n) { if (z.id === el.dataset.g) i = n; }); var gj = i + (+el.dataset.d); if (i < 0 || gj < 0 || gj >= L.length) return true; g = L[i]; L[i] = L[gj]; L[gj] = g; appSaveL(L); return true;
+      case "apgdel":
+        L = appLayout(); if (L.length < 2) return true; var prev = JSON.stringify(S.opt.appl || null); i = -1; L.forEach(function (z, n) { if (z.id === el.dataset.g) i = n; }); if (i < 0) return true;
+        g = L.splice(i, 1)[0]; L[Math.max(0, i - 1)].it = L[Math.max(0, i - 1)].it.concat(g.it); appSaveL(L);
+        toastUndo("Папка «" + g.n + "» удалена" + (g.it.length ? " — плитки перешли в «" + L[Math.max(0, i - 1)].n + "»" : ""), function () { S.opt.appl = JSON.parse(prev); optTouch(); save(); render(); }); return true;
+      case "apgnew": L = appLayout(); var nid = "u" + uid(); L.push({ id: nid, n: "Новая папка", c: APCOL[L.length % APCOL.length], it: [] }); appSaveL(L); setTimeout(function () { var inp = document.querySelector('.apgn[data-g="' + nid + '"]'); if (inp) { inp.focus(); inp.select(); } }, 30); return true;
+      case "apcol": L = appLayout(); g = L.filter(function (z) { return z.id === el.dataset.g; })[0]; if (!g) return true; g.c = APCOL[(APCOL.indexOf(g.c) + 1) % APCOL.length]; appSaveL(L); return true;
+      case "apreset": var pr2 = JSON.stringify(S.opt.appl || null); delete S.opt.appl; optTouch(); save(); render(); toastUndo("Папки и порядок — как были изначально", function () { S.opt.appl = JSON.parse(pr2); optTouch(); save(); render(); }); return true;
+      case "apshx": appSheet(false); return true;
     }
     return false;
+  }
+  function appCtx(k, id, c) {
+    if (k === "appmenu") { appMenuCmd(c); return true; }
+    if (k !== "appto") return false;
+    var L = appLayout(), gid = c;
+    if (c === "__new") { gid = "u" + uid(); L.push({ id: gid, n: "Новая папка", c: APCOL[L.length % APCOL.length], it: [] }); }
+    appMove(L, id, gid, null); appSaveL(L);
+    if (c === "__new") setTimeout(function () { var inp = document.querySelector('.apgn[data-g="' + gid + '"]'); if (inp) { inp.focus(); inp.select(); } }, 30);
+    return true;
   }
 
   function chalsWidget() {
@@ -17112,7 +17265,7 @@ CREATE TABLE push (
       case "wsrc": var rsr = el.getBoundingClientRect(), bsr = board(ARG); ctxShow(rsr.left, rsr.bottom + 4, [{ c: "__inh", i: "↺", l: bsr && bsr.src ? "Как у доски (" + wsrcName(bsr.src) + ")" : "По умолчанию" }, "-"].concat(wsrcMenu()), { k: "wsrc", id: el.closest(".wdg").dataset.w }); return;
       case "bsrc": var rbs = el.getBoundingClientRect(); ctxShow(rbs.left, rbs.bottom + 4, [{ c: "__none", i: "", l: "— у каждого виджета свой —" }, "-"].concat(wsrcMenu()), { k: "bsrc", id: ARG }); return;
       case "wnedit": var wne = el.closest(".wdg"); if (wne) { WNED = WNED === wne.dataset.w ? null : wne.dataset.w; if (!WNED) { flushBody(); var ae = document.activeElement; if (ae && ae.closest && ae.closest(".rte")) ae.blur(); fmtHide(); slashClose(); } render(); if (WNED) setTimeout(function () { var r = $("nrte"); if (r) { r.focus(); caretEnd(r); } }, 30); } return;
-      case "startpick": var rsp = el.getBoundingClientRect(), cur = S.opt.start || ""; ctxShow(rsp.left, rsp.bottom + 4, [{ c: "__last", i: "↺", l: "Где остановились в прошлый раз", k: cur ? "" : "✓" }, { c: "today", i: "", l: "Сегодня", k: cur === "today" ? "✓" : "" }, { c: "inbox", i: "", l: "Входящие", k: cur === "inbox" ? "✓" : "" }].concat(boards().length ? ["-"].concat(boards().map(function (b) { return { c: "board-" + b.id, i: "▦", l: "Доска «" + b.n + "»", k: cur === "board-" + b.id ? "✓" : "" }; })) : []), { k: "startpick" }); return;
+      case "startpick": var rsp = el.getBoundingClientRect(), cur = S.opt.start || ""; ctxShow(rsp.left, rsp.bottom + 4, [{ c: "__last", i: "↺", l: "Где остановились в прошлый раз", k: cur ? "" : "✓" }, { c: "today", i: "", l: "Сегодня", k: cur === "today" ? "✓" : "" }, { c: "inbox", i: "", l: "Входящие", k: cur === "inbox" ? "✓" : "" }, { c: "apps", i: "▦", l: "Все разделы", k: cur === "apps" ? "✓" : "" }].concat(boards().length ? ["-"].concat(boards().map(function (b) { return { c: "board-" + b.id, i: "▦", l: "Доска «" + b.n + "»", k: cur === "board-" + b.id ? "✓" : "" }; })) : []), { k: "startpick" }); return;
       case "bstart": var bst = board(ARG); if (bst) { S.opt.start = S.opt.start === "board-" + bst.id ? "" : "board-" + bst.id; optTouch(); save(); render(); toast(S.opt.start ? "«" + bst.n + "» будет открываться при запуске" : "При запуске — где остановились в прошлый раз"); } return;
       case "wsort": var rso = el.getBoundingClientRect(); ctxShow(rso.left, rso.bottom + 4, Object.keys(SORTN).filter(function (k) { return k !== "manual"; }).map(function (k) { return { c: k, i: "", l: SORTN[k] }; }), { k: "wsort", id: el.closest(".wdg").dataset.w }); return;
       case "wproj": var rpj = el.getBoundingClientRect(); ctxShow(rpj.left, rpj.bottom + 4, ptree().map(function (x) { return { c: x.p.id, i: piconH(x.p), l: x.p.n, pad: x.d }; }), { k: "wproj", id: el.closest(".wdg").dataset.w }); return;
@@ -18325,6 +18478,7 @@ CREATE TABLE push (
     if (c && /^pinp?:/.test(c)) { pinFrom(k, id, c.replace(/^pinp?:/, ""), c.indexOf("pinp:") === 0); return; }
     if (k === "board") { var bx = board(id); if (bx) bCmd(bx, c); return; }
     if (k === "bsrc") { var bs = board(id); if (!bs) return; if (c === "__none") delete bs.src; else bs.src = c; bSave(bs); toast(bs.src ? "Источник доски: " + wsrcName(bs.src) + " — виджеты без своего источника берут его" : "У каждого виджета теперь свой источник"); return; }
+    if (appCtx(k, id, c)) return;
     if (k === "startpick") { S.opt.start = c === "__last" ? "" : c; optTouch(); save(); render(); return; }
     if (k === "btplproj") { bFromTpl("proj", c); return; }
     if (k === "ptab") { ptCtx(id, c); return; }
