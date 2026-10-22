@@ -1457,6 +1457,9 @@ h2[data-col].dropin { outline: 2px dashed var(--acc); outline-offset: 2px; borde
 .gtrack { flex: none; position: relative; z-index: 1 }
 .garr { position: absolute; left: 0; top: 0; z-index: 1; pointer-events: none; overflow: visible }
 .garr path { fill: none; stroke: color-mix(in srgb, var(--fg) 55%, transparent); stroke-width: 1.6; stroke-linejoin: round; pointer-events: stroke }
+.gcon { position: absolute; top: 11px; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--acc); background: var(--panel); cursor: crosshair; opacity: 0; z-index: 3; touch-action: none; transition: opacity .12s, transform .12s; box-sizing: border-box } .grow:hover .gcon, .gcon.on { opacity: 1 } .gcon:hover, .gcon.on { transform: scale(1.35); background: var(--acc) } @media (hover: none) { .gcon { opacity: .55 } }
+.gbar.glktg { outline: 2px solid var(--acc); outline-offset: 2px } .glkl { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 4; overflow: visible } .glkl path { fill: none; stroke: var(--acc); stroke-width: 2; stroke-dasharray: 5 4 } .glkl circle { fill: var(--acc) }
+.garr path.ghit { stroke: transparent; stroke-width: 12; cursor: pointer } .garr g:hover path:not(.ghit) { stroke: var(--acc); stroke-width: 2.4 }
 .garr path.bad { stroke: var(--warn); stroke-width: 2; stroke-dasharray: 5 3 } .garr path.ok { stroke: color-mix(in srgb, var(--muted) 60%, transparent) }
 .garr marker path { fill: color-mix(in srgb, var(--fg) 55%, transparent); stroke: none } .garr marker.bad path { fill: var(--warn) } .garr marker.ok path { fill: color-mix(in srgb, var(--muted) 60%, transparent) }
 .gbody:has(.gbar.drag) .garr { opacity: .15 }
@@ -2718,7 +2721,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-148";
+  var APPV = "zd-app-2026-10-16-149";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -4603,11 +4606,11 @@ CREATE TABLE inbox (
   function vGantt() {
     var from = gFrom(), n = gDays(), px = gPx(), W = n * px, t0 = today0(), showDone = LS.get("zd-gdone") === "1";
     var l = tasks().filter(function (t) { return (showDone || !t.done) && (t.at || t.due); });
-    var h = head("Таймлайн", "Полоса задачи — от даты начала до дедлайна. Перетащите полосу, чтобы сдвинуть сроки, или потяните за край, чтобы изменить начало или дедлайн. Клик — открыть задачу.");
+    var h = head("Таймлайн", "Полоса задачи — от даты начала до дедлайна. Перетащите полосу, чтобы сдвинуть сроки, или потяните за край, чтобы изменить начало или дедлайн. Связь — потяните от кружка на конце полосы к другой полосе. Клик — открыть задачу.");
     h += '<div class="tbar gtbar"><button class="btn sm" type="button" data-a="g-prev" aria-label="Раньше">‹</button><button class="btn sm" type="button" data-a="g-today">Сегодня</button><button class="btn sm" type="button" data-a="g-next" aria-label="Позже">›</button>' +
       '<div class="seg"><button type="button" data-a="g-zoom" data-v="day" class="' + (GNT.zoom === "day" ? "on" : "") + '">Дни</button><button type="button" data-a="g-zoom" data-v="week" class="' + (GNT.zoom === "week" ? "on" : "") + '">Недели</button></div>' +
       '<label class="gchk"><input type="checkbox" data-a="g-done"' + (showDone ? " checked" : "") + "> выполненные</label>" +
-      '<label class="gchk" title="Стрелки «сначала сделать»: от задачи, которую ждут, к той, что ждёт. Красная — задача начинается раньше, чем закончится нужная"><input type="checkbox" data-a="g-deps"' + (LS.get("zd-gdeps") !== "0" ? " checked" : "") + "> связи</label></div>";
+      '<label class="gchk" title="Стрелки «сначала сделать»: от задачи, которую ждут, к той, что ждёт. Красная — задача начинается раньше, чем закончится нужная"><input type="checkbox" data-a="g-deps"' + (LS.get("zd-gdeps") !== "0" ? " checked" : "") + "> связи</label>" + '<label class="gchk" title="Сдвинули задачу позже — задачи, которые её ждут, сдвигаются следом, чтобы не начинаться раньше"><input type="checkbox" data-a="g-shift"' + (LS.get("zd-gshift") === "1" ? " checked" : "") + "> двигать зависимые</label></div>";
     if (!l.length) return h + '<div class="empty">Нет задач со сроками. Укажите задаче дату или дедлайн — она появится здесь.</div>';
     // шкала: месяцы и дни (или недели)
     var mo = "", dy = "", bg = "", i, cur = -1, ms0 = 0;
@@ -4630,7 +4633,7 @@ CREATE TABLE inbox (
       var bar = "";
       if (b > 0 && a < n) {
         var cl = Math.max(0, left), cw = Math.min(W, left + w) - cl;
-        bar = '<div class="gbar' + (t.done ? " dn" : "") + (late ? " late" : "") + (!t.at ? " dl" : "") + (left < 0 ? " cutl" : "") + (left + w > W ? " cutr" : "") + (cw < 100 ? " short" : "") + '" data-gid="' + t.id + '" style="left:' + cl + "px;width:" + cw + "px;--bc:" + (pp ? col(pp.c) : "var(--acc)") + '" title="' + esc(t.t) + " · " + gDate(sp.s) + (sp.e !== sp.s ? " — " + gDate(sp.e) : "") + (t.due ? " (дедлайн)" : "") + '"><i class="gh l"></i><span>' + esc(t.t) + '</span><i class="gh r"></i></div>' + (cw < 100 ? '<span class="gtx" style="left:' + (cl + cw + 6) + 'px">' + esc(t.t) + "</span>" : "");
+        bar = '<div class="gbar' + (t.done ? " dn" : "") + (late ? " late" : "") + (!t.at ? " dl" : "") + (left < 0 ? " cutl" : "") + (left + w > W ? " cutr" : "") + (cw < 100 ? " short" : "") + '" data-gid="' + t.id + '" style="left:' + cl + "px;width:" + cw + "px;--bc:" + (pp ? col(pp.c) : "var(--acc)") + '" title="' + esc(t.t) + " · " + gDate(sp.s) + (sp.e !== sp.s ? " — " + gDate(sp.e) : "") + (t.due ? " (дедлайн)" : "") + '"><i class="gh l"></i><span>' + esc(t.t) + '</span><i class="gh r"></i></div>' + (cw < 100 ? '<span class="gtx" style="left:' + (cl + cw + 18) + 'px">' + esc(t.t) + "</span>" : "") + (left >= 0 ? '<i class="gcon" data-gcid="' + t.id + '" data-side="l" style="left:' + (cl - 14) + 'px" title="Потяните к задаче, которую нужно сделать раньше"></i>' : "") + (left + w <= W ? '<i class="gcon" data-gcid="' + t.id + '" data-side="r" style="left:' + (cl + cw + 3) + 'px" title="Потяните к задаче, которая ждёт эту"></i>' : "");
       } else bar = '<span class="gout" style="' + (a >= n ? "right:4px" : "left:4px") + '">' + (a >= n ? gDate(sp.s) + " →" : "← " + gDate(sp.e)) + "</span>";
       return '<div class="grow"><div class="glab" style="padding-left:' + (10 + dep * 14) + 'px"><a data-a="g-open" data-id="' + t.id + '" class="' + (t.done ? "dn" : "") + '">' + esc(t.t) + '</a></div><div class="gtrack" style="width:' + W + 'px">' + bar + "</div></div>";
     }
@@ -4663,7 +4666,7 @@ CREATE TABLE inbox (
         var sx = x1 - Math.min(10, b1.width / 2), sy = dn > 0 ? b1.bottom - br.top : b1.top - br.top;
         if (x2 - sx >= k) d = "M" + sx + " " + sy + "V" + y2 + "H" + (x2 - 2);
         else { var my = y2 - dn * 15; d = "M" + sx + " " + sy + "V" + my + "H" + (x2 - k) + "V" + y2 + "H" + (x2 - 2); }
-        paths += '<path class="' + (bad ? "bad" : a.done ? "ok" : "") + '" d="' + d + '" marker-end="url(#garr' + (bad ? "b" : a.done ? "o" : "") + ')"><title>' + esc("«" + t.t + "» ждёт «" + a.t + "»" + (bad ? " — начинается раньше, чем закончится нужная задача" : a.done ? " — нужная задача уже сделана" : "")) + "</title></path>";
+        paths += '<g data-ps="' + t.id + '" data-pa="' + a.id + '"><path class="ghit" d="' + d + '"/><path class="' + (bad ? "bad" : a.done ? "ok" : "") + '" d="' + d + '" marker-end="url(#garr' + (bad ? "b" : a.done ? "o" : "") + ')"><title>' + esc("«" + t.t + "» ждёт «" + a.t + "»" + (bad ? " — начинается раньше, чем закончится нужная задача" : a.done ? " — нужная задача уже сделана" : "")) + "</title></path></g>";
         n++;
       });
     });
@@ -4711,8 +4714,8 @@ CREATE TABLE inbox (
     if (t.at) t.at = addDays(t.at, ds); else if (ds || g.mode !== "m") { t.at = c.s; t.allday = true; }
     if (t.due) t.due = sod(addDays(t.due, de)); else if (c.e !== c.s) t.due = c.e;
     if (g.mode === "m" && !t.due && !t.at) t.at = c.s;
-    touch(t); save(); render(); if (OPEN === t.id) renderPanel();
-    toast("Сроки: " + gDate(c.s) + (c.e !== c.s ? " — " + gDate(c.e) : ""));
+    touch(t); var pushed = LS.get("zd-gshift") === "1" ? gPush(t) : 0; save(); render(); if (OPEN === t.id) renderPanel();
+    toast("Сроки: " + gDate(c.s) + (c.e !== c.s ? " — " + gDate(c.e) : "") + (pushed ? " · сдвинуто связанных: " + pushed : ""));
   }
   document.addEventListener("pointerup", function () { if (GDR) gDrop(); });
   document.addEventListener("pointercancel", function () { if (GDR) { GDR = null; gTip(null, ""); render(); } });
@@ -10772,6 +10775,54 @@ CREATE TABLE inbox (
   }
   function srsWidget() { var c = srsDueCount(), q = srsQueue(); return '<div class="wnum' + (c ? "" : " ok") + '">' + c + '</div><div class="wsub">' + (c ? plural(c, ["карточка", "карточки", "карточек"]) + " на сегодня" : q.all.length ? "на сегодня всё повторено" : "карточек пока нет") + '</div><div class="r" style="justify-content:center"><a class="btn sm' + (c ? " pri" : "") + '" href="#srs">' + (c ? "▶ Повторить" : "Открыть") + "</a></div>"; }
 
+  /* --- таймлайн: связи рисуются мышью или пальцем — тянуть от кружка на конце полосы к другой полосе; клик по стрелке — меню;
+     «двигать зависимые» (zd-gshift) — сдвинули задачу позже, связанные сдвигаются следом --- */
+  var GLK = null;
+  function gShiftT(t, d) { if (!d) return; if (t.at) t.at = addDays(t.at, d); if (t.due) t.due = sod(addDays(t.due, d)); touch(t); }
+  // подвинуть всё, что ждёт задачу t и начинается раньше её конца; по цепочке
+  function gPush(t, seen) {
+    seen = seen || {}; if (seen[t.id]) return 0; seen[t.id] = 1; var sp = gSpan(t), cnt = 0; if (!sp) return 0;
+    depBlocks(t).forEach(function (x) { var s2 = gSpan(x); if (!s2 || x.done) return; if (s2.s < sp.e) { gShiftT(x, Math.round((sp.e - s2.s) / DAY)); cnt++; } cnt += gPush(x, seen); });
+    return cnt;
+  }
+  function gConflict(succ, pred) { var a = gSpan(pred), b = gSpan(succ); return !pred.done && a && b && b.s < a.e; }
+  function gLinkMake(srcId, side, tgtId) {
+    if (!tgtId || srcId === tgtId) return; var succ = task(side === "r" ? tgtId : srcId), pred = task(side === "r" ? srcId : tgtId); if (!succ || !pred) return;
+    if ((succ.after || []).indexOf(pred.id) >= 0) { toast("Такая связь уже есть"); return; }
+    if (!depAdd(succ, pred.id)) { render(); return; } save(); render(); if (OPEN === succ.id) renderPanel();
+    var msg = "⛓ «" + succ.t.slice(0, 40) + "» ждёт «" + pred.t.slice(0, 40) + "»";
+    if (gConflict(succ, pred)) toastAct(msg + " — но начинается раньше. Сдвинуть?", [["gfix", "Сдвинуть после", succ.id + "|" + pred.id]]); else toast(msg);
+  }
+  function gLinkLine(e) {
+    var G = GLK, body = document.querySelector("#gwrap .gbody"); if (!G || !body) return; var br = body.getBoundingClientRect(), x2 = e.clientX - br.left, y2 = e.clientY - br.top;
+    var tg = document.elementsFromPoint(e.clientX, e.clientY).filter(function (x) { return x.classList && x.classList.contains("gbar") && x.dataset.gid !== G.id; })[0];
+    [].forEach.call(document.querySelectorAll(".gbar.glktg"), function (x) { if (x !== tg) x.classList.remove("glktg"); }); if (tg) tg.classList.add("glktg"); G.tg = tg ? tg.dataset.gid : "";
+    var d = "M" + G.x1.toFixed(1) + " " + G.y1.toFixed(1) + " C" + (G.x1 + (G.side === "r" ? 40 : -40)).toFixed(1) + " " + G.y1.toFixed(1) + " " + (x2 + (G.side === "r" ? -40 : 40)).toFixed(1) + " " + y2.toFixed(1) + " " + x2.toFixed(1) + " " + y2.toFixed(1);
+    if (!G.svg) { body.insertAdjacentHTML("beforeend", '<svg class="glkl" width="' + body.scrollWidth + '" height="' + body.scrollHeight + '"><path d=""/><circle r="4"/></svg>'); G.svg = body.querySelector(".glkl"); }
+    G.svg.querySelector("path").setAttribute("d", d); var c = G.svg.querySelector("circle"); c.setAttribute("cx", x2); c.setAttribute("cy", y2);
+    gTip(G.dot, tg ? (G.side === "r" ? "Сначала «" + (task(G.id) || {}).t + "», потом эта" : "Эта задача — раньше «" + (task(G.id) || {}).t + "»").slice(0, 90) : "Отпустите на другой задаче");
+  }
+  document.addEventListener("pointerdown", function (e) {
+    var dot = e.target.closest && e.target.closest(".gcon"); if (!dot || e.button) return; e.preventDefault(); e.stopPropagation();
+    var body = document.querySelector("#gwrap .gbody"), br = body.getBoundingClientRect(), r = dot.getBoundingClientRect();
+    GLK = { id: dot.dataset.gcid, side: dot.dataset.side, dot: dot, x1: r.left + r.width / 2 - br.left, y1: r.top + r.height / 2 - br.top, tg: "" }; dot.classList.add("on");
+    try { dot.setPointerCapture(e.pointerId); } catch (er) { /* ok */ } gLinkLine(e);
+  }, true);
+  document.addEventListener("pointermove", function (e) { if (GLK) { e.preventDefault(); gLinkLine(e); } });
+  document.addEventListener("pointerup", function () { if (!GLK) return; var G = GLK; GLK = null; gTip(null, ""); if (G.svg) G.svg.remove(); G.dot.classList.remove("on"); [].forEach.call(document.querySelectorAll(".gbar.glktg"), function (x) { x.classList.remove("glktg"); }); if (G.tg) gLinkMake(G.id, G.side, G.tg); });
+  document.addEventListener("pointercancel", function () { if (!GLK) return; if (GLK.svg) GLK.svg.remove(); GLK = null; gTip(null, ""); });
+  // клик по стрелке — меню связи
+  document.addEventListener("click", function (e) {
+    var g = e.target.closest && e.target.closest(".garr g[data-ps]"); if (!g) return; var s = task(g.dataset.ps), p = task(g.dataset.pa); if (!s || !p) return;
+    ctxShow(e.clientX, e.clientY + 6, [{ c: "op", i: "↗", l: "Открыть «" + p.t.slice(0, 40) + "» (сначала)" }, { c: "os", i: "↗", l: "Открыть «" + s.t.slice(0, 40) + "» (потом)" }].concat(gConflict(s, p) ? ["-", { c: "fix", i: "⇥", l: "Сдвинуть «" + s.t.slice(0, 30) + "» после «" + p.t.slice(0, 30) + "»" }] : []).concat(["-", { c: "del", i: "✕", l: "Удалить связь" }]), { k: "gdep", id: s.id + "|" + p.id });
+  });
+  function gFix(sid, pid) { var s = task(sid), p = task(pid); if (!s || !p) return; var a = gSpan(p), b = gSpan(s); if (!a || !b || b.s >= a.e) return; gShiftT(s, Math.round((a.e - b.s) / DAY)); var n = gPush(s); save(); render(); toast("Сдвинуто: «" + s.t.slice(0, 40) + "»" + (n ? " и ещё " + n + " " + plural(n, ["связанная", "связанные", "связанных"]) : "")); }
+  function gDepCtx(id, c) {
+    var pp = id.split("|"), s = task(pp[0]), p = task(pp[1]); if (!s || !p) return;
+    if (c === "op") openTask(p.id); else if (c === "os") openTask(s.id); else if (c === "fix") gFix(s.id, p.id);
+    else if (c === "del") { s.after = (s.after || []).filter(function (x) { return x !== p.id; }); touch(s); save(); render(); toastUndo("Связь удалена", function () { s.after = (s.after || []).concat(p.id); touch(s); }); }
+  }
+
   function chalsWidget() {
     var h = "", t0 = today0(), any = false;
     if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
@@ -11300,6 +11351,7 @@ CREATE TABLE inbox (
     h += sec("gantt", "Таймлайн (диаграмма Ганта)", ul([
       "Задачи со сроками на шкале дней, по проектам. Полоса — от даты начала до дедлайна; только дедлайн — штриховка; просроченная — красная обводка; короткие полосы подписаны справа.",
       "<b>Перетащите полосу</b> — начало и дедлайн сдвинутся вместе. <b>Левый край</b> — меняет начало, <b>правый</b> — дедлайн. Во время перетаскивания видны новые даты.",
+      "<b>Связь рисуется прямо на шкале</b>: наведите на полосу — по краям появятся кружки. Потяните от <b>правого</b> кружка к другой полосе — та задача будет ждать эту; от <b>левого</b> — эта задача будет ждать ту. Клик по стрелке — меню: открыть задачи, «сдвинуть после» (если задача начинается раньше нужной), удалить связь. Галочка <b>«двигать зависимые»</b>: сдвинули задачу позже — все, кто её ждёт, сдвигаются следом.",
       "<b>Стрелки</b> показывают связи «Сначала сделать»: от задачи, которую ждут, к задаче, которая ждёт. <b>Красная пунктирная</b> — задача начинается раньше, чем закончится нужная: сдвиньте её полосу правее. Серая — нужная задача уже сделана. Галочка «связи» в панели прячет стрелки.",
       "Клик по полосе или названию открывает карточку. «‹ Сегодня ›» листают шкалу, «Дни / Недели» — масштаб, «выполненные» — показать закрытые."]));
     h += sec("matrix", "Матрица Эйзенхауэра", "<p>Открытые задачи делятся на четыре квадранта: важное (приоритет 1–2 или флажок) и срочное (просрочено или срок в ближайшие дни — сколько именно, выбирается над матрицей). Перетащите карточку в другой квадрант: «важно» ставит приоритет 2, «не важно» снимает приоритет и флажок, «срочно» ставит срок на сегодня, «не срочно» переносит на неделю вперёд.</p>");
@@ -12689,6 +12741,7 @@ CREATE TABLE inbox (
     if (a === "mmmsx") { MMMS = {}; render(); return; }
     if (a && mm7Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && mm8Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a === "gfix") { e.preventDefault(); var gfp = (el.dataset.t || "").split("|"); gFix(gfp[0], gfp[1]); return; }
     if (a === "ndbpe") { NDBP = el.dataset.k; render(); setTimeout(function () { var i = $("ndbpn"); if (i) i.focus(); }, 40); return; }
     if (a && ndbAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && srsAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
@@ -12761,6 +12814,7 @@ CREATE TABLE inbox (
       case "g-zoom": GNT.zoom = el.dataset.v; LS.set("zd-gz", GNT.zoom); GNT.from = 0; GNT.sl = null; GNT.keep = false; render(); return;
       case "g-done": LS.set("zd-gdone", LS.get("zd-gdone") === "1" ? "0" : "1"); render(); return;
       case "g-deps": LS.set("zd-gdeps", LS.get("zd-gdeps") === "0" ? "1" : "0"); render(); return;
+      case "g-shift": LS.set("zd-gshift", LS.get("zd-gshift") === "1" ? "0" : "1"); render(); toast(LS.get("zd-gshift") === "1" ? "Связанные задачи будут сдвигаться следом" : "Связанные задачи больше не сдвигаются сами"); return;
       case "g-open": openTask(el.dataset.id); return;
       case "pdel-yes":
         var pd = proj(ARG); if (pd) { tasks().forEach(function (x) { if (x.pid === pd.id) { x.pid = ""; touch(x); } }); pkids(pd.id).forEach(function (c) { c.parent = pd.parent || ""; touch(c); }); pd.del = 1; touch(pd); save(); }
@@ -14080,6 +14134,7 @@ CREATE TABLE inbox (
     if (k === "mmflt") { mm7Ctx(k, id, c); return; }
     if (k === "mmmode" || k === "mmtpl") { mm8Ctx(k, id, c); return; }
     if (k === "ndbcol") { ndbCtx(k, id, c); return; }
+    if (k === "gdep") { gDepCtx(id, c); return; }
     if (k === "mmlvl") { var lm = note(id); if (mmIs(lm)) mmLevels(lm, c); return; }
     if (k === "nexp") { var en = note(id); if (en) nExport(en, c.replace("+", ""), c.indexOf("+") > 0); return; }
     if (k === "ntplset") { var tn = note(id); if (tn) { if (c === "~") delete tn.tpl; else tn.tpl = c; if (tn.tpl === "map" && !mmRoot(tn)) tn.mm = { r: { id: uid(), k: [] } }; touch(tn); save(); render(); } return; }
