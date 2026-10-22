@@ -1,5 +1,5 @@
 // Офлайн-кэш приложения «Задачи»
-const CACHE = 'zd-app-2026-10-16-157';
+const CACHE = 'zd-app-2026-10-16-158';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'brand-64.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
@@ -27,4 +27,12 @@ self.addEventListener('notificationclick', e => {
     if (c) { c.postMessage({ zd: 'notif', act: act, id: id }); return act === 'open' ? c.focus() : undefined; }
     return self.clients.openWindow('./?nact=' + encodeURIComponent(act) + '&nid=' + encodeURIComponent(id));
   }));
+});
+// push-уведомления с сервера (когда приложение закрыто): {t, b, task, tag}
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (x) { d = { t: e.data ? e.data.text() : '' }; }
+  const opt = { body: d.b || '', tag: d.tag || 'zd-push', icon: 'icon-192.png', badge: 'icon-192.png', data: { id: d.task || '' } };
+  if (d.task) opt.actions = [{ action: 'done', title: '✓ Готово' }, { action: 'snooze', title: '+15 мин' }];
+  e.waitUntil(self.registration.showNotification(d.t || 'Задачи', opt));
 });

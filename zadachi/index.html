@@ -578,6 +578,11 @@ html.nosheet .dptopbox.dphab { background: color-mix(in srgb, var(--ok) 15%, tra
 .ntphc { margin: 14px 0 6px } .ntphc summary { cursor: pointer; font-weight: 600 } .ntphw { overflow-x: auto } .ntphw table { border-collapse: collapse; width: 100%; font-size: calc(13px * var(--fs)); margin-top: 6px } .ntphw td, .ntphw th { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top } .ntphw th { color: var(--muted); font-weight: 600 } .ntphw tr.on td { background: var(--acc-soft) } .ntphw td:first-child { white-space: nowrap; font-weight: 600 }
 html.mmfullon, html.mmfullon body { overflow: hidden }
 .mmwrap.full { position: fixed; inset: 0; z-index: 60; margin: 0; background: var(--bg); padding: calc(10px + env(safe-area-inset-top, 0px)) 12px calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 8px; overflow: auto } .mmwrap.full .mmvp, .mmwrap.full .cvvp { flex: 1 1 auto; height: auto; min-height: 320px } .mmwrap.full .mmhint { display: none } .mmwrap.full .mmout { flex: 1 1 auto; overflow: auto }
+.bcc { margin: 0 0 14px; display: grid; gap: 6px } .bch { display: flex; gap: 10px; align-items: center; flex-wrap: wrap } .bch b { font-size: calc(15px * var(--fs)) } .bch .btn { margin-left: auto } .bcbar { height: 8px; border-radius: 999px; background: var(--hover); overflow: hidden } .bcbar i { display: block; height: 100%; background: var(--ok); border-radius: 999px } .bcc p { margin: 2px 0 }
+.bcl { list-style: none; margin: 4px 0; padding: 0; display: grid; gap: 6px } .bcl li { display: flex; gap: 10px; align-items: flex-start } .bcl li div { display: grid; gap: 1px } .bcl li small { color: var(--muted); font-size: calc(12.5px * var(--fs)) } .bcl li.on b { color: var(--muted); text-decoration: line-through } .bcck { flex: none; width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid var(--line); background: var(--panel); color: #fff; cursor: pointer; padding: 0; font-weight: 700; margin-top: 1px } .bcl li.on .bcck { background: var(--ok); border-color: var(--ok) } .bcw { font-size: calc(12px * var(--fs)) }
+.bkc { display: grid; gap: 8px } .bkc h3 { margin: 10px 0 2px; font-size: calc(14.5px * var(--fs)) } .bkt td.ok { color: var(--ok) } .bkt td.bad { color: #c94a3a } .bkt select { max-width: 240px } .bkop summary { cursor: pointer; font-weight: 600 }
+.srvx { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; gap: 8px } .srvx h3 { margin: 0; font-size: calc(15px * var(--fs)) } .srvx .confirm .f input { width: 100%; font-family: var(--mono); font-size: 12px }
+.nrichp { margin: 10px 0; border: 1px dashed var(--line); border-radius: 10px; padding: 6px 12px } .nrichp summary { cursor: pointer; font-weight: 600; font-size: calc(13px * var(--fs)) } .nrichb { padding: 6px 0 } .nrichb pre { white-space: pre-wrap; font-size: 12px; color: var(--muted) }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -1556,6 +1561,8 @@ h2[data-col].dropin { outline: 2px dashed var(--acc); outline-offset: 2px; borde
 //   • Telegram:    /tg/<секрет> (через API Gateway) — сообщения боту;
 //   • таймер:      раз в минуту — рассылка наступивших напоминаний.
 // Переменные окружения: YDB_ENDPOINT, YDB_DATABASE, APP_ORIGIN; из Lockbox: BOT_TOKEN, HOOK_SECRET.
+// Для push-уведомлений (по желанию): VAPID_PUBLIC и VAPID_PRIVATE (секрет — лучше в Lockbox); ключи создаются в приложении
+// («Настройки» → «Напоминания и Telegram» → «Создать ключи»), подписки хранятся в таблице push.
 // Пользователь определяется по его токену Яндекс Диска (тот же вход, что для синхронизации).
 
 const ENV = process.env;
@@ -1563,6 +1570,7 @@ const TG_API = ENV.TG_API || "https://api.telegram.org";
 const DISK_API = ENV.DISK_API || "https://cloud-api.yandex.net/v1/disk/";
 const CODE_TTL = 30 * 60 * 1000; // код привязки Telegram действует 30 минут
 const MAXLEN = 1000;
+const crypto = require("crypto");
 
 /* ---------------- хранилище ---------------- */
 let DB = null; // для проверки без облака подставляется хранилище в памяти: module.exports._setDb(...)
@@ -1644,10 +1652,10 @@ function ydbStore(token) {
     },
     async due(now) {
       const r = await q(`DECLARE $now AS Timestamp;
-        SELECT r.uid AS uid, r.id AS id, r.fire_at AS fire_at, r.text AS text, r.rrule AS rrule, u.tg_chat AS chat
+        SELECT r.uid AS uid, r.id AS id, r.fire_at AS fire_at, r.text AS text, r.rrule AS rrule, r.task_id AS task_id, u.tg_chat AS chat
         FROM reminders AS r INNER JOIN users AS u ON r.uid = u.uid
         WHERE r.fire_at <= $now AND r.sent = false LIMIT 200;`, { $now: TS(now) });
-      return r.map((x) => ({ uid: x.uid, id: x.id, at: tsMs(x.fire_at), text: x.text, rrule: x.rrule || "", chat: x.chat }));
+      return r.map((x) => ({ uid: x.uid, id: x.id, at: tsMs(x.fire_at), text: x.text, rrule: x.rrule || "", task: x.task_id || "", chat: x.chat }));
     },
     async moveReminder(uid, id, at) {
       await q(`DECLARE $uid AS Utf8; DECLARE $id AS Utf8; DECLARE $at AS Timestamp;
@@ -1661,11 +1669,67 @@ function ydbStore(token) {
       const r = await q(`DECLARE $uid AS Utf8; SELECT id, text, created FROM inbox WHERE uid = $uid AND taken = false ORDER BY created LIMIT 200;`, { $uid: U(uid) });
       return r.map((x) => ({ id: x.id, text: x.text, at: tsMs(x.created) }));
     },
+    async putPush(uid, id, sub) {
+      await q(`DECLARE $uid AS Utf8; DECLARE $id AS Utf8; DECLARE $sub AS Utf8; DECLARE $now AS Timestamp;
+        UPSERT INTO push (uid, id, sub, created) VALUES ($uid, $id, $sub, $now);`, { $uid: U(uid), $id: U(id), $sub: U(sub), $now: TS(Date.now()) });
+    },
+    async listPush(uid) {
+      const r = await q(`DECLARE $uid AS Utf8; SELECT id, sub FROM push WHERE uid = $uid;`, { $uid: U(uid) });
+      return r.map((x) => { let sb = null; try { sb = JSON.parse(x.sub); } catch (e) { sb = null; } return { id: x.id, sub: sb }; }).filter((x) => x.sub && x.sub.endpoint && x.sub.keys);
+    },
+    async delPush(uid, id) {
+      await q(`DECLARE $uid AS Utf8; DECLARE $id AS Utf8; DELETE FROM push WHERE uid = $uid AND id = $id;`, { $uid: U(uid), $id: U(id) });
+    },
     async ackInbox(uid, id) {
       await q(`DECLARE $uid AS Utf8; DECLARE $id AS Utf8; DELETE FROM inbox WHERE uid = $uid AND id = $id;`, { $uid: U(uid), $id: U(id) });
     }
   };
 }
+
+/* ---------------- Web Push без сторонних библиотек: шифрование aes128gcm (RFC 8291) и подпись VAPID (RFC 8292) ---------------- */
+function b64u(buf) { return Buffer.from(buf).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+function unb64u(str) { return Buffer.from(String(str || "").replace(/-/g, "+").replace(/_/g, "/"), "base64"); }
+function hmac(key, data) { return crypto.createHmac("sha256", key).update(data).digest(); }
+function vapidKey() {
+  const pub = unb64u(ENV.VAPID_PUBLIC), d = String(ENV.VAPID_PRIVATE || "").trim();
+  if (pub.length !== 65 || !d) return null;
+  try { return crypto.createPrivateKey({ key: { kty: "EC", crv: "P-256", d, x: b64u(pub.subarray(1, 33)), y: b64u(pub.subarray(33, 65)) }, format: "jwk" }); } catch (e) { console.error("VAPID: ключи не подошли", e.message); return null; }
+}
+function vapidAuth(endpoint) {
+  const key = vapidKey(); if (!key) return null;
+  const h = b64u(JSON.stringify({ typ: "JWT", alg: "ES256" }));
+  const pl = b64u(JSON.stringify({ aud: new URL(endpoint).origin, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: ENV.VAPID_SUB || "https://tyamshikova-max.github.io" }));
+  const sig = crypto.sign("sha256", Buffer.from(h + "." + pl), { key, dsaEncoding: "ieee-p1363" });
+  return "vapid t=" + h + "." + pl + "." + b64u(sig) + ", k=" + String(ENV.VAPID_PUBLIC).trim();
+}
+function pushEncrypt(sub, text) {
+  const uaPub = unb64u(sub.keys.p256dh), auth = unb64u(sub.keys.auth);
+  const ecdh = crypto.createECDH("prime256v1"), asPub = ecdh.generateKeys(), secret = ecdh.computeSecret(uaPub);
+  const ikm = hmac(hmac(auth, secret), Buffer.concat([Buffer.from("WebPush: info\0", "latin1"), uaPub, asPub, Buffer.from([1])]));
+  const salt = crypto.randomBytes(16), prk = hmac(salt, ikm);
+  const cek = hmac(prk, Buffer.from("Content-Encoding: aes128gcm\0\x01", "latin1")).subarray(0, 16);
+  const nonce = hmac(prk, Buffer.from("Content-Encoding: nonce\0\x01", "latin1")).subarray(0, 12);
+  const c = crypto.createCipheriv("aes-128-gcm", cek, nonce);
+  const ct = Buffer.concat([c.update(Buffer.concat([Buffer.from(text, "utf8"), Buffer.from([2])])), c.final(), c.getAuthTag()]);
+  const head = Buffer.alloc(21); salt.copy(head, 0); head.writeUInt32BE(4096, 16); head.writeUInt8(65, 20);
+  return Buffer.concat([head, asPub, ct]);
+}
+async function pushSend(sub, obj) {
+  const auth = vapidAuth(sub.endpoint); if (!auth) return { ok: false, gone: false };
+  const r = await fetch(sub.endpoint, { method: "POST", headers: { Authorization: auth, "Content-Encoding": "aes128gcm", "Content-Type": "application/octet-stream", TTL: "3600", Urgency: "high" }, body: pushEncrypt(sub, JSON.stringify(obj)) });
+  if (!r.ok) console.error("push", r.status, (await r.text().catch(() => "")).slice(0, 200));
+  return { ok: r.ok, gone: r.status === 404 || r.status === 410 };
+}
+async function pushTo(uid, obj) {
+  if (!vapidKey()) return 0; const d = db(); let subs = [], n = 0;
+  try { subs = await d.listPush(uid); } catch (e) { console.error("push: нет таблицы push?", e.message); return 0; }
+  for (const x of subs) {
+    try { const r = await pushSend(x.sub, obj); if (r.ok) n++; else if (r.gone) await d.delPush(uid, x.id).catch(() => {}); }
+    catch (e) { console.error("push", e && e.message); }
+  }
+  return n;
+}
+function pushId(endpoint) { return crypto.createHash("sha256").update(String(endpoint)).digest("hex").slice(0, 32); }
 
 /* ---------------- общее ---------------- */
 let IAM = ""; // токен сервисного аккаунта из контекста вызова
@@ -1835,6 +1899,15 @@ async function api(event) {
     try { return reply(event, 200, Object.assign({ ok: true }, await fetchPage(u))); }
     catch (e) { return reply(event, 400, { error: "fetch", message: String((e && e.message) || e) }); }
   }
+  if (p === "push/key" && method === "GET") return reply(event, 200, { ok: true, key: vapidKey() ? String(ENV.VAPID_PUBLIC).trim() : "" });
+  if (p === "push/sub" && method === "POST") {
+    const sb = b && b.sub;
+    if (!sb || !/^https:\/\//.test(String(sb.endpoint || "")) || !sb.keys || !sb.keys.p256dh || !sb.keys.auth) return reply(event, 400, { error: "bad", message: "нет подписки" });
+    await d.putPush(uid, pushId(sb.endpoint), JSON.stringify({ endpoint: String(sb.endpoint), keys: { p256dh: String(sb.keys.p256dh), auth: String(sb.keys.auth) } }));
+    return reply(event, 200, { ok: true });
+  }
+  if (p === "push/unsub" && method === "POST") { if (b && b.endpoint) await d.delPush(uid, pushId(b.endpoint)).catch(() => {}); return reply(event, 200, { ok: true }); }
+  if (p === "push/test" && method === "POST") return reply(event, 200, { ok: true, sent: await pushTo(uid, { t: "🔔 Проверка: push-уведомления работают", b: "«Задачи»", tag: "zd-test" }) });
   if (p === "inbox" && method === "GET") return reply(event, 200, { ok: true, items: await d.listInbox(uid) });
   if (p === "inbox/ack" && method === "POST") {
     const ids = Array.isArray(b.ids) ? b.ids.slice(0, 200) : [];
@@ -1868,10 +1941,10 @@ async function bot(event) {
   const uids = await d.byChat(chat);
   if (!uids.length) { await say("Этот чат ещё не привязан. В приложении: «Настройки» → «Сервер и Telegram» → «Привязать Telegram»."); return { statusCode: 200, body: "ok" }; }
   if (/^\/stop\b/i.test(text)) { await d.unlinkChat(chat); await say("Чат отвязан. Напоминания сюда больше не придут."); return { statusCode: 200, body: "ok" }; }
-  if (/^\/help\b/i.test(text)) { await say("Пришлите текст — он станет задачей во «Входящих».\n/stop — отвязать чат."); return { statusCode: 200, body: "ok" }; }
+  if (/^\/help\b/i.test(text)) { await say("Пришлите текст — он станет задачей во «Входящих».\nНачните со слова «заметка» (или /note) — станет заметкой: первая строка — название, дальше — текст.\n/stop — отвязать чат."); return { statusCode: 200, body: "ok" }; }
   if (!text) { await say("Пока понимаю только текст."); return { statusCode: 200, body: "ok" }; }
   for (const u of uids) await d.addInbox(u, rid(), text.slice(0, MAXLEN));
-  await say("Добавил во «Входящие» ✓");
+  await say(/^\s*(?:\/note(?:@\w+)?|заметк[аи]|📝|#заметка)/i.test(text) ? "Записал в заметки ✓ (раздел «📥 Из Telegram»)" : "Добавил во «Входящие» ✓");
   return { statusCode: 200, body: "ok" };
 }
 
@@ -1919,6 +1992,7 @@ async function tick() {
       try { await tg("sendMessage", { chat_id: r.chat, text: "⏰ " + r.text, reply_markup: buttonsFor(r.id) }); sent++; }
       catch (e) { if (e.code === 403) await d.unlinkChat(r.chat).catch(() => {}); } // бот заблокирован — отвязываем
     }
+    try { if (await pushTo(r.uid, { t: "⏰ " + r.text, task: /^h:/.test(r.id) ? "" : r.task || "", tag: r.id })) sent++; } catch (e) { console.error("push", e && e.message); }
     const n = nextAt(r.at, r.rrule, now);
     if (n) await d.moveReminder(r.uid, r.id, n); else await d.delReminder(r.uid, r.id);
   }
@@ -2009,6 +2083,14 @@ CREATE TABLE inbox (
   text Utf8,
   created Timestamp,
   taken Bool,
+  PRIMARY KEY (uid, id)
+);
+
+CREATE TABLE push (
+  uid Utf8,
+  id Utf8,
+  sub Utf8,
+  created Timestamp,
   PRIMARY KEY (uid, id)
 );
 </script>
@@ -2430,6 +2512,7 @@ CREATE TABLE inbox (
     var it = withEmpty ? [{ c: "~", i: "📄", l: "Пустая страница" }, "-"] : [];
     Object.keys(NTPL).forEach(function (k) { it.push({ c: k, i: NTPL[k].ic, l: NTPL[k].n }); });
     var own = nOwnTpls(); if (own.length) { it.push("-"); own.forEach(function (x) { it.push({ c: x.id, i: x.ic || "📄", l: x.n + " · свой" }); }); it.push({ i: "🗑", l: "Удалить свой шаблон", sub: own.map(function (x) { return { c: "del:" + x.id, i: x.ic || "📄", l: x.n }; }) }); }
+    if (withEmpty) it.push("-", { c: "pack:osteo", i: "📚", l: "Готовый план чтения: остеопатия черепа" });
     return it;
   }
   // строки свойств в шапке страницы (режим правки)
@@ -2756,7 +2839,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-157";
+  var APPV = "zd-app-2026-10-16-158";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -3022,15 +3105,17 @@ CREATE TABLE inbox (
     pull: function () {
       if (!SRV.ready()) return Promise.resolve(0);
       return SRV.call("inbox").then(function (j) {
-        var items = j.items || [], have = {}, n = 0, na = 0;
-        S.tasks.forEach(function (t) { if (t.sid) have[t.sid] = 1; });
+        var items = j.items || [], have = {}, n = 0, na = 0, nn = 0;
+        S.tasks.forEach(function (t) { if (t.sid) have[t.sid] = 1; }); (S.notes || []).forEach(function (x) { if (x.sid) have[x.sid] = 1; });
         items.forEach(function (it) {
           if (/^act-/.test(it.id)) { na += applyAct(it); return; }
           if (have[it.id]) return;
+          if (tgNoteIt(it)) { nn++; return; }
           var t = newTaskFrom(String(it.text || "").slice(0, 1000), {});
           t.src = "tg"; t.sid = it.id; t.created = it.at || Date.now(); n++;
         });
         if (n) { save(); softRender(); toast("Из Telegram: " + n); }
+        if (nn) { save(); softRender(); toast("Из Telegram в заметки: " + nn); }
         if (na) toast("Отмечено в Telegram: " + na);
         if (!items.length) return n;
         return SRV.call("inbox/ack", { method: "POST", body: { ids: items.map(function (x) { return x.id; }) } }).then(function () { return n; });
@@ -4019,6 +4104,7 @@ CREATE TABLE inbox (
     if (!rd && NPOP === "tph") h += nTphHTML(n);
     if (mmIs(n)) h += mmViewHTML(n, rd); else if (cvIs(n)) h += cvViewHTML(n, rd);
     h += '<div id="nrte" class="rte' + (n.body ? "" : " empty") + '" data-note="' + n.id + '" contenteditable="' + (rd ? "false" : "true") + '" spellcheck="true" data-ph="Текст заметки… «/» — заголовок, чек-лист, спойлер, таблица, код; [[ — ссылка на страницу, ![[ — встроить страницу">' + (clean(n.body || "") || "<p><br></p>") + "</div>";
+    h += nRichPrevHTML(n, rd);
     var nk = nKids(n.id), nbl = nBacklinks(n.id);
     if (!rd || nk.length) h += '<div class="nsub"><div class="nsubh"><b>Вложенные страницы' + (nk.length ? " · " + nk.length : "") + "</b>" + nKVseg(n, nk) + (rd ? "" : '<button type="button" class="btn sm" data-a="note-sub">＋ Вложенная страница</button>') + "</div>" + (nk.length ? nKVwrap(n, nk) + '<div class="nsubg"' + (nKV(n) !== "tiles" && nk.length >= 2 ? " hidden" : "") + ">" + nk.map(function (k) { var kk = nKids(k.id).length, tx = noteText(k); return '<a class="nsubc" href="#note-' + k.id + '">' + (nCovCss(k) ? '<span class="nsubcov" style="' + nCovCss(k) + '"></span>' : "") + "<b>" + esc(nIc(k)) + " " + esc(nTitle(k)) + "</b>" + (tx ? "<small>" + esc(tx.slice(0, 90)) + "</small>" : "") + (kk ? '<small class="muted">' + kk + " " + plural(kk, ["вложенная", "вложенные", "вложенных"]) + "</small>" : "") + "</a>"; }).join("") + "</div>" : '<p class="muted" style="margin:0">Страницы внутри этой — для подробностей, примеров, уроков. Или наберите в тексте <code>[[</code> и название.</p>') + "</div>";
     if (nbl.length) h += '<div class="nback"><b>Ссылаются сюда · ' + nbl.length + "</b>" + nbl.map(function (x) { return x.k === "n" ? '<a href="#note-' + x.o.id + '">' + esc(nIc(x.o)) + " " + esc(nTitle(x.o)) + "</a>" : '<a href="#task-' + x.o.id + '">' + (x.o.done ? "✓ " : "☐ ") + esc(x.o.t) + "</a>"; }).join("") + "</div>";
@@ -4504,14 +4590,14 @@ CREATE TABLE inbox (
     var lines = setLines(x); if (!lines.length) return 0;
     if (d.mode === "chk") {
       var cid = setTid(x, day, "c"); if (have[cid]) return 0;
-      var ct = newTaskFrom(x.n, { day: day }); ct.id = cid; ct.set = x.id; setCommon(ct, f, { tags: [] }, true); if (f.est) ct.est = f.est;
+      var ct = newTaskFrom(x.n, { day: day }); ct.id = cid; ct.set = x.id; setCommon(ct, f, { tags: [] }, true); if (f.est) ct.est = f.est; if (f.dd) ct.due = addDays(day, +f.dd);
       ct.body = (f.desc ? noteToBody(f.desc) : "") + '<ul class="todo">' + lines.map(function (ln) { var q = parseQuick(ln); return "<li>" + esc((q.time ? p2(q.time[0]) + ":" + p2(q.time[1]) + " — " : "") + (q.t || ln)).slice(0, 300) + "</li>"; }).join("") + "</ul>"; delete ct.note;
       touch(ct); return 1;
     }
     if (sub) {
       var pidp = setTid(x, day, "p");
       par = have[pidp] ? S.tasks.filter(function (t) { return t.id === pidp; })[0] : null;
-      if (!par) { par = newTaskFrom(x.n, { day: day }); par.id = pidp; par.set = x.id; setCommon(par, f, { tags: [] }, true); if (f.desc) { par.body = noteToBody(f.desc); delete par.note; } touch(par); have[pidp] = 1; }
+      if (!par) { par = newTaskFrom(x.n, { day: day }); par.id = pidp; par.set = x.id; setCommon(par, f, { tags: [] }, true); if (f.desc) { par.body = noteToBody(f.desc); delete par.note; } if (f.dd) par.due = addDays(day, +f.dd); touch(par); have[pidp] = 1; }
       if (par.del) return 0; // родителя удалили — пункты не возвращаем
     }
     lines.forEach(function (ln, i) {
@@ -4520,7 +4606,7 @@ CREATE TABLE inbox (
       // «в 7:00» после семи утра быстрый ввод переносит на завтра; в наборе время относится к его дню
       if (t.at && !t.allday && sod(t.at) !== day && !/(завтра|послезавтра|через|\d{1,2}\.\d{1,2}|(^|\s)(пн|вт|ср|чт|пт|сб|вс)(?=\s|$)|понедельн|вторник|сред[уа]|четверг|пятниц|суббот|воскресен)/i.test(ln)) t.at = day + (t.at - sod(t.at));
       if (sub) { if (q.pid || q.newProj) t.pid = t.pid; else t.pid = par.pid || ""; if (par.sec && t.pid === par.pid) t.sec = par.sec; if (f.prio && !q.prio) t.prio = f.prio; }
-      else { setCommon(t, f, q, true); if (f.desc) { t.body = noteToBody(f.desc); delete t.note; } }
+      else { setCommon(t, f, q, true); if (f.desc) { t.body = noteToBody(f.desc); delete t.note; } if (f.dd && !t.due) t.due = addDays(day, +f.dd); }
       if (f.est && !t.est) t.est = f.est;
       t.id = id; t.set = x.id; t.created = Date.now() - i; touch(t); n++;
     });
@@ -4549,7 +4635,7 @@ CREATE TABLE inbox (
   }
   function setSumHTML(x) {
     var f = setF(x), d = x.data || {}, pj = f.pid && proj(f.pid), sum = [];
-    if (pj) sum.push(pj.n); if ((f.tags || []).length) sum.push(f.tags.map(function (g) { return "#" + g; }).join(" ")); if (f.prio) sum.push("!" + f.prio); if (f.est) sum.push(Math.round(f.est * 60) + " мин"); if (f.goal && goal(f.goal)) sum.push("🎯 " + goal(f.goal).n); if (f.desc) sum.push("📝 описание");
+    if (pj) sum.push(pj.n); if (f.dd) sum.push("⏰ срок " + (f.dd === "0" ? "в тот же день" : "+" + f.dd + " дн.")); if ((f.tags || []).length) sum.push(f.tags.map(function (g) { return "#" + g; }).join(" ")); if (f.prio) sum.push("!" + f.prio); if (f.est) sum.push(Math.round(f.est * 60) + " мин"); if (f.goal && goal(f.goal)) sum.push("🎯 " + goal(f.goal).n); if (f.desc) sum.push("📝 описание");
     if (d.mode === "sub") sum.push("одной задачей с подзадачами"); if (d.mode === "chk") sum.push("одной задачей с чек-листом");
     return sum.length ? ': <span class="muted">' + esc(sum.join(" · ")) + "</span>" : ' <span class="muted">— проект, теги, приоритет, оценка, цель, описание</span>';
   }
@@ -4567,6 +4653,7 @@ CREATE TABLE inbox (
     h += '<span>' + (d.mode === "chk" ? "Оценка задачи" : "Оценка на задачу") + '</span><div class="r"><input class="inp" type="number" min="0" step="5" data-setf="est" data-id="' + x.id + '" value="' + (f.est ? Math.round(f.est * 60) : "") + '" placeholder="—" style="width:90px"><span class="muted">мин</span></div>';
     h += '<span>Цель</span><div class="r"><button type="button" class="btn sm setfpick" data-a="setfgl" data-id="' + x.id + '">' + (f.goal && goal(f.goal) ? esc((goal(f.goal).ic || "🎯") + " " + goal(f.goal).n) : "— без цели") + " ▾</button></div>";
     h += '<span>Описание</span><textarea class="inp setfdesc" data-setf="desc" data-id="' + x.id + '" rows="' + Math.max(2, Math.min(8, String(f.desc || "").split("\n").length + 1)) + '" placeholder="Текст, который попадёт в описание задачи: что сделать, ссылки, напоминание себе">' + esc(f.desc || "") + "</textarea>";
+    h += '<span>Срок (дедлайн)</span><div class="seg">' + [["", "без срока"], ["0", "в тот же день"], ["1", "+1 день"], ["2", "+2 дня"], ["3", "+3 дня"], ["7", "+неделя"]].map(function (v) { return '<button type="button" data-a="setfdd" data-id="' + x.id + '" data-v="' + v[0] + '" class="' + ((f.dd || "") === v[0] ? "on" : "") + '">' + v[1] + "</button>"; }).join("") + "</div>";
     h += '<span>Как создавать</span><div class="seg setfmode">' + [["", "отдельными задачами"], ["sub", "задачей с подзадачами"], ["chk", "задачей с чек-листом"]].map(function (m) { return '<button type="button" data-a="setfm" data-id="' + x.id + '" data-v="' + m[0] + '" class="' + ((d.mode || "") === m[0] ? "on" : "") + '">' + m[1] + "</button>"; }).join("") + "</div>";
     h += '</div><p class="muted setfn">' + setNoteHTML(x) + '</p><div class="setpvw">' + setPreviewHTML(x) + "</div></details>";
     return h;
@@ -5654,6 +5741,7 @@ CREATE TABLE inbox (
     var h = head("Привычки", "Клик по кружку: выполнено → частично (50 %) → не выполнено. Правая кнопка — пауза, которая не прерывает серию. Клик по названию — статистика и настройки.");
     h += '<div class="htabs"><button type="button" class="tb' + (HV.tab === "act" ? " on" : "") + '" data-a="htab" data-x="act">Привычки <span class="c">' + act.length + "</span></button>" + (arch.length ? '<button type="button" class="tb' + (HV.tab === "arch" ? " on" : "") + '" data-a="htab" data-x="arch">Архив <span class="c">' + arch.length + "</span></button>" : "") +
       (HV.tab === "act" ? '<span class="hnav"><button type="button" class="ibtn" data-a="hwk" data-x="-1" title="Неделей раньше">‹</button><span>' + esc(rng) + '</span><button type="button" class="ibtn" data-a="hwk" data-x="1" title="Неделей позже"' + (HV.wk >= 0 ? " disabled" : "") + ">›</button>" + (HV.wk ? '<button type="button" class="btn sm" data-a="hwk" data-x="0">Сегодня</button>' : "") + "</span>" : "") + "</div>";
+    if (HV.tab === "act") h += bcCardHTML();
     var main = "";
     if (HV.tab === "act") {
       main += '<div class="hlist"><div class="hrow hhead"><span></span><span class="hsp"></span>' + days.map(function (d) { var dt = new Date(d); return '<span class="' + (d === t0 ? "td" : "") + '">' + WDS[dt.getDay()] + "<br>" + dt.getDate() + "</span>"; }).join("") + '<span title="Текущая серия">серия</span></div>' +
@@ -7562,7 +7650,8 @@ CREATE TABLE inbox (
       buStaleHTML() + (o.fname ? '<span class="muted">📄 ' + esc(o.fname) + (BUFINFO ? " · изменён " + esc(new Date(BUFINFO.mt).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) : "") + "</span>" + (BUFINFO && o.fmt && BUFINFO.mt > o.fmt ? '<span class="buchg">в файле есть изменения — обновите</span>' : "") : '<span class="muted">Файл не выбран — <a href="#" data-a="bufile">выбрать файл</a> (запомнится в настройках)</span>') + "</div>";
     if (BUUPD) h += buUpdHTML();
     if (BULAST) h += '<div class="bulast"><b>Обновлено: ' + esc(BULAST.what) + "</b>" + (BULAST.diff.length ? '<span class="muted">' + esc(BULAST.diff.slice(0, 12).join(" · ")) + (BULAST.diff.length > 12 ? " …" : "") + "</span>" : '<span class="muted">изменений нет</span>') + (BULAST.msgs.length ? '<span class="warnc">' + esc(BULAST.msgs.join("; ")) + "</span>" : "") + (BULAST.warns.length ? '<span class="muted">⚠ ' + esc(BULAST.warns.join("; ")) + "</span>" : "") + '<button type="button" class="ibtn" data-a="bulastx" title="Скрыть">×</button></div>';
-    h += '<div class="htabs butabs">' + [["week", "Неделя"], ["per", "Период"], ["regs", "Регулярные платежи"], ["debts", "Долги"], ["wish", "Желания"], ["fch", fcOpt().on ? "💰 Челлендж" : "Челлендж"]].map(function (x) { return '<button type="button" class="tb' + (tab === x[0] ? " on" : "") + '" data-a="butab" data-x="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>";
+    h += '<div class="htabs butabs">' + [["week", "Неделя"], ["per", "Период"], ["regs", "Регулярные платежи"], ["debts", "Долги"], ["wish", "Желания"], ["bank", "🏦 Выписка"], ["fch", fcOpt().on ? "💰 Челлендж" : "Челлендж"]].map(function (x) { return '<button type="button" class="tb' + (tab === x[0] ? " on" : "") + '" data-a="butab" data-x="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>";
+    if (tab === "bank") return h + bankHTML();
     if (tab === "debts") return h + fcDebtsHTML(); if (tab === "wish") return h + fcWishHTML(); if (tab === "fch") return h + fcHTML();
     if (!buPers().length && tab !== "regs") return h + '<div class="card bunone"><b>Данных пока нет.</b><p class="muted">1. Выберите файл «Финансы … .xlsx» (кнопка выше или «Настройки» → «Бюджет»).<br>2. «⟳ Обновить из файла» → текущий период.<br>Читается только выбранное: период (лист «Ноябрь 2026» = 11.10–10.11), несколько периодов или одна неделя. Файл открывается прямо в браузере на этом компьютере и никуда не отправляется — в «Задачи» попадают только суммы по дням и статьям.</p></div>';
     if (tab === "per") h += buPerHTML(); else if (tab === "regs") h += buRegsHTML(); else h += buWeekHTML();
@@ -11108,8 +11197,8 @@ CREATE TABLE inbox (
   // формулы и диаграммы: библиотеки подгружаются только когда нужны
   function nLib(src, css) { if (NLIB[src]) return NLIB[src]; return (NLIB[src] = new Promise(function (ok, no) { if (css) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = css; document.head.appendChild(l); } var s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = function () { delete NLIB[src]; no(new Error("нет связи")); }; document.head.appendChild(s); })); }
   function nRichRender() {
-    var r = document.querySelector('#view #nrte[contenteditable="false"]:not([data-rich]), #view .nembc:not([data-rich])'); if (!r) return;
-    [].forEach.call(document.querySelectorAll('#view #nrte[contenteditable="false"]:not([data-rich]), #view .nembc:not([data-rich])'), function (box) {
+    var r = document.querySelector('#view #nrte[contenteditable="false"]:not([data-rich]), #view .nembc:not([data-rich]), #view .nrichb:not([data-rich])'); if (!r) return;
+    [].forEach.call(document.querySelectorAll('#view #nrte[contenteditable="false"]:not([data-rich]), #view .nembc:not([data-rich]), #view .nrichb:not([data-rich])'), function (box) {
       box.setAttribute("data-rich", "1"); var txt = box.textContent || "";
       if (/\$\$[\s\S]+?\$\$|\\\(.+?\\\)/.test(txt)) nLib("https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js", "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css").then(function () {
         var walker = document.createTreeWalker(box, NodeFilter.SHOW_TEXT, { acceptNode: function (t) { return t.parentElement && t.parentElement.closest("pre, code, .nkx") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } }), list = [], t;
@@ -11337,11 +11426,217 @@ CREATE TABLE inbox (
     D.sub.forEach(function (el) { el.style.transform = tr; el.classList.add("mmdrag"); });
   }
 
+  /* --- сообщения боту → заметки: «заметка …», «/note …», «📝 …» (или все сообщения, если S.opt.tgnote) попадают в раздел «📥 Из Telegram» --- */
+  var TGNRE = /^\s*(?:\/note(?:@\w+)?|заметк[аи]|📝|#заметка)\s*[:\-—.]?\s*/i;
+  function tgNoteSec() { var s0 = live(S.nsecs || []).filter(function (x) { return x.n === "📥 Из Telegram"; })[0]; if (s0) return s0.id; var s1 = touch({ id: uid(), n: "📥 Из Telegram", parent: "", ord: nsKids("").length }); S.nsecs.push(s1); return s1.id; }
+  function tgNoteIt(it) {
+    var tx = String(it.text || ""), m = TGNRE.exec(tx); if (!m && !S.opt.tgnote) return false; if (m) tx = tx.slice(m[0].length); tx = tx.trim(); if (!tx) return false;
+    var ls = tx.split("\n"), title = ls[0].replace(/https?:\/\/\S+/g, "").trim().slice(0, 120) || "Из Telegram", rest = ls.length > 1 ? ls.slice(1) : /https?:\/\//.test(ls[0]) ? [ls[0]] : [];
+    var body = rest.map(function (l) { l = l.trim(); if (!l) return ""; return "<p>" + esc(l).replace(/https?:\/\/[^\s<]+/g, function (u) { return '<a href="' + u + '">' + u + "</a>"; }) + "</p>"; }).join("");
+    var n = newNote({ t: title, sec: tgNoteSec() }); n.body = clean(body); n.sid = it.id; n.src = "tg"; n.created = it.at || Date.now(); touch(n); return true;
+  }
+  /* --- холст: масштаб двумя пальцами --- */
+  var CVPT = {}, CVPINCH = null;
+  document.addEventListener("pointerdown", function (e) {
+    var vp = e.target.closest && e.target.closest("#cvvp"); if (!vp) return; CVPT[e.pointerId] = { x: e.clientX, y: e.clientY }; var ids = Object.keys(CVPT); if (ids.length < 2) return;
+    var n = note(vp.dataset.note), v = n && CVV[n.id]; if (!v) return; var a = CVPT[ids[0]], b = CVPT[ids[1]], r = vp.getBoundingClientRect();
+    CVD = null; CVPINCH = { n: n, d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, s0: v.s, mx: (a.x + b.x) / 2 - r.left, my: (a.y + b.y) / 2 - r.top, rx0: v.rx, ry0: v.ry, l: r.left, t: r.top }; v.fit = 0; e.stopImmediatePropagation();
+  }, true);
+  document.addEventListener("pointermove", function (e) {
+    if (CVPT[e.pointerId]) CVPT[e.pointerId] = { x: e.clientX, y: e.clientY }; if (!CVPINCH) return; var ids = Object.keys(CVPT); if (ids.length < 2) return; e.stopImmediatePropagation();
+    var P = CVPINCH, v = CVV[P.n.id], a = CVPT[ids[0]], b = CVPT[ids[1]], s = Math.max(0.15, Math.min(2.5, P.s0 * (Math.hypot(a.x - b.x, a.y - b.y) || 1) / P.d0)), mx = (a.x + b.x) / 2 - P.l, my = (a.y + b.y) / 2 - P.t;
+    v.s = s; v.rx = mx - (P.mx - P.rx0) * s / P.s0; v.ry = my - (P.my - P.ry0) * s / P.s0; cvApply(P.n);
+  }, true);
+  function cvPtEnd(e) { delete CVPT[e.pointerId]; if (CVPINCH && Object.keys(CVPT).length < 2) { CVPINCH = null; CVD = null; e.stopImmediatePropagation(); } }
+  document.addEventListener("pointerup", cvPtEnd, true); document.addEventListener("pointercancel", cvPtEnd, true);
+  /* --- предпросмотр формул и схем прямо при правке: под текстом, обновляется, когда уходите из текста --- */
+  function nRichSrc(body) {
+    TXTD.innerHTML = clean(body || ""); var out = "";
+    var txt = TXTD.textContent || "", re = /\$\$[\s\S]+?\$\$|\\\(.+?\\\)/g, m; while ((m = re.exec(txt))) out += "<p>" + esc(m[0]) + "</p>";
+    [].forEach.call(TXTD.querySelectorAll("pre"), function (p) { if (/^\s*mermaid\s*\n/i.test(p.textContent)) out += "<pre>" + esc(p.textContent) + "</pre>"; });
+    return out;
+  }
+  function nRichPrevHTML(n, rd) { if (rd) return ""; var c = nRichSrc(n.body); if (!c) return ""; return '<details class="nrichp" open><summary>👁 Как выглядят формулы и схемы <span class="muted">— обновится, когда выйдете из текста</span></summary><div class="nrichb">' + c + "</div></details>"; }
+  document.addEventListener("focusout", function (e) {
+    if (!e.target || e.target.id !== "nrte") return; setTimeout(function () { var r = $("nrte"), n = r && note(r.dataset.note), box = document.querySelector(".nrichp .nrichb"); if (!n) return; var src = nRichSrc(r.innerHTML);
+      if (!box) { if (src && !document.querySelector(".nrichp")) { r.insertAdjacentHTML("afterend", '<details class="nrichp" open><summary>👁 Как выглядят формулы и схемы</summary><div class="nrichb"></div></details>'); box = document.querySelector(".nrichp .nrichb"); } else return; }
+      if (box.getAttribute("data-src") === src) return; box.setAttribute("data-src", src); box.innerHTML = src; box.removeAttribute("data-rich"); nRichRender(); }, 50);
+  });
+  /* --- челлендж «Осанка и лицо» на 6 недель: S.opt.bch {start, on}; задача дня «🧘 Осанка и лицо · день N» с чек-листом, карточка в «Привычках» --- */
+  function bcOpt() { var o = S.opt.bch || {}; return { start: +o.start || 0, on: !!o.on }; }
+  function bcSet(k, v) { var o = S.opt.bch = Object.assign({}, S.opt.bch || {}); if (v === undefined) delete o[k]; else o[k] = v; optTouch(); save(); }
+  function bcDay(d0) { var o = bcOpt(); if (!o.on || !o.start) return null; var k = Math.round((sod(d0) - sod(o.start)) / DAY); if (k < 0) return null; return { n: k + 1, wk: Math.min(6, Math.floor(k / 7) + 1), sun: new Date(d0).getDay() === 0, post: k >= 42 }; }
+  var BCW = { 1: ["Замечаю осанку", "Учимся ловить «правильное» положение: стена, подбородок, лопатки. Лицо — язык к нёбу и мягкий самомассаж."], 2: ["Раскрываю грудь", "Добавляем растяжку груди: сутулость часто держится на зажатых грудных мышцах."], 3: ["Сильная спина", "Мышцы, которые держат спину: планка и ягодичный мост. Начинаем с малого."], 4: ["Шея и лицо", "«Ангел» у стены, отдых для глаз, больше внимания мышцам лица и шеи."], 5: ["Связка", "Всё вместе, планка чуть дольше. Осанку проверяем за столом трижды в день."], 6: ["Привычка", "Закрепляем: короткий комплекс — часть утра. В конце — фото сбоку и сравнение с первым."] };
+  function bcItems(d0) {
+    var day = bcDay(d0); if (!day) return null; var w = day.post ? 6 : day.wk, it = [];
+    it.push(["Стоять у стены — 1 минута", 1, "Затылок, лопатки, ягодицы и пятки касаются стены, подбородок чуть к себе. Запомните ощущение и отойдите, сохраняя его."]);
+    it.push(["Подбородок назад — 10 раз", 1, "Сидя прямо, отведите подбородок назад горизонтально, не опуская («двойной подбородок»), задержите на 5 секунд."]);
+    it.push(["Свести лопатки — 12 раз", 1, "Плечи вниз от ушей, лопатки к позвоночнику и вниз, задержать на 3 секунды."]);
+    it.push(day.n % 2 ? ["Кошка-корова — 8 раз", 1, "На четвереньках: на вдохе мягко прогнуть спину, на выдохе округлить. Медленно, без рывков."] : ["Вытяжение макушкой вверх — 30 секунд", 1, "Представьте нить от макушки к потолку: шея длинная, плечи опущены, дыхание спокойное."]);
+    if (w >= 2) it.push(["Растяжка груди в дверном проёме — 2 × 30 секунд", 1, "Предплечья на косяк на уровне плеч, шаг вперёд до мягкого растяжения в груди. Без боли."]);
+    if (w >= 3) { it.push(["Планка — " + (20 + (w - 3) * 10) + " секунд", 1, "На предплечьях, тело прямое, живот подтянут. Тяжело — с колен."]); it.push(["Ягодичный мост — 12 раз", 1, "Лёжа на спине, стопы на полу: поднять таз, сжать ягодицы, медленно опустить."]); }
+    if (w >= 4) it.push(["«Ангел» у стены — 8 раз", 1, "Спина, затылок и руки касаются стены; медленно поднимайте и опускайте руки, не отрывая их от стены."]);
+    it.push(["Язык к нёбу — 1 минута", 1, "Кончик языка за верхними зубами, весь язык прижат к нёбу, губы сомкнуты, зубы разомкнуты. Так держится подбородок и меньше нагрузка на шею."]);
+    it.push([["Самомассаж лица — 3 минуты", 3, "Чистые руки, немного крема. От центра к краям: лоб, скулы, подбородок, шея сверху вниз. Мягко, не растягивая кожу."], ["Расслабить лоб и челюсть — 2 минуты", 2, "Ладони на лоб на 30 секунд, затем круговой массаж жевательных мышц у угла челюсти и височных мышц."], ["Губы «О — У» — 10 раз и «воздушный шарик» — 30 секунд", 1, "Чётко вытягивайте губы в «О», затем в «У»; надуйте щёки и перекатывайте воздух справа налево."]][day.n % 3]);
+    if (w >= 4) it.push(["Глаза: пальминг — 1 минута", 1, "Потрите ладони, тёплыми ладонями закройте глаза без давления, медленно дышите."]);
+    if (day.sun) it.push(["Фото сбоку — раз в неделю", 1, "Встаньте боком к зеркалу или попросите сфотографировать. Сравните с прошлой неделей. Фото — только у вас."]);
+    if (day.sun && day.wk === 6 && !day.post) it.push(["Итоги челленджа", 5, "Сравните первое и последнее фото, вспомните, где осанку стало легче держать. Что оставить каждый день?"]);
+    var hab = [["Три раза за день проверить осанку за столом", 0, "Стопы на полу, экран на уровне глаз, плечи опущены, поясница с опорой."]];
+    return { day: day, it: it, hab: hab };
+  }
+  function bcTid(d0) { return "bch-" + dKey(d0); }
+  function bcSync(d0) {
+    var c = bcItems(d0), t = S.tasks.filter(function (x) { return x.id === bcTid(d0); })[0];
+    if (!c) { if (t && !t.done && !t.del) { t.del = 1; t.delAt = Date.now(); touch(t); return true; } return false; }
+    var ck = cChecked(t), all = c.it.concat(c.hab), mins = all.reduce(function (s, x) { return s + (x[1] || 0); }, 0);
+    var body = '<ul class="todo">' + all.map(function (x) { return "<li" + (ck[x[0]] ? ' data-checked="1"' : "") + ">" + esc(x[0]) + "</li>"; }).join("") + '</ul><p>Как делать — <a href="#habits">Привычки → «Осанка и лицо»</a>. При боли или головокружении — остановитесь.</p>';
+    var title = "🧘 Осанка и лицо · день " + c.day.n + (c.day.post ? "" : " из 42") + " · " + mins + " мин";
+    if (!t) { t = newTaskFrom(title, { day: d0 }); t.id = bcTid(d0); t.at = d0; t.allday = true; t.rem = false; t.rep = ""; t.tags = []; }
+    else if (t.del) { if (t.purged) return false; delete t.del; delete t.delAt; }
+    if (t.t === title && t.body === body) return false;
+    t.t = title; t.body = body; delete t.note;
+    TXTD.innerHTML = body; var lis = TXTD.querySelectorAll("ul.todo > li"), done = lis.length && [].every.call(lis, function (l) { return l.getAttribute("data-checked") === "1"; });
+    if (done && !t.done) { t.done = true; t.dt = Date.now(); } else if (!done && t.done) { t.done = false; delete t.dt; }
+    touch(t); return true;
+  }
+  function bcAutoRun() { if (!SETGATE || !bcOpt().on) return; var ch = bcSync(today0()); if (chOld("bch-")) ch = true; if (ch) save(); }
+  function bcToggle(txt) {
+    var d0 = today0(), t = S.tasks.filter(function (x) { return x.id === bcTid(d0); })[0]; if (!t) { bcSync(d0); t = S.tasks.filter(function (x) { return x.id === bcTid(d0); })[0]; } if (!t) return;
+    TXTD.innerHTML = t.body || ""; [].forEach.call(TXTD.querySelectorAll("ul.todo > li"), function (li) { if (li.textContent.trim() === txt) { if (li.getAttribute("data-checked") === "1") li.removeAttribute("data-checked"); else li.setAttribute("data-checked", "1"); } });
+    t.body = TXTD.innerHTML; touch(t); bcSync(d0); save(); render();
+  }
+  function bcCardHTML() {
+    var o = bcOpt(), t0 = today0();
+    if (!o.on) return '<div class="card bcc"><div class="bch"><b>🧘 Челлендж «Осанка и лицо» — 6 недель по 6–12 минут</b></div><p class="muted">Каждый день — короткий комплекс: осанка (стена, лопатки, подбородок, позже планка и «ангел»), шея и мягкий уход за лицом (язык к нёбу, самомассаж, гимнастика губ и щёк). Нагрузка растёт по неделям, задача дня с чек-листом появляется в «Сегодня». Это не лечение: при боли, головокружении, травмах шеи и спины — сначала к врачу.</p><div class="r"><button type="button" class="btn sm pri" data-a="bcstart" data-x="today">Начать сегодня</button><button type="button" class="btn sm" data-a="bcstart" data-x="mon">С понедельника</button></div></div>';
+    var c = bcItems(t0), day = bcDay(t0), t = S.tasks.filter(function (x) { return x.id === bcTid(t0); })[0], ck = cChecked(t);
+    if (!day) return '<div class="card bcc"><div class="bch"><b>🧘 Осанка и лицо</b><span class="muted">старт ' + esc(new Date(o.start).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })) + '</span><button type="button" class="btn sm" data-a="bcstop">Отменить</button></div></div>';
+    var wk = BCW[day.post ? 6 : day.wk], pct = Math.min(100, Math.round(day.n / 42 * 100));
+    return '<div class="card bcc"><div class="bch"><b>🧘 Осанка и лицо · день ' + day.n + (day.post ? "" : " из 42") + "</b><span class=\"muted\">неделя " + Math.min(6, day.wk) + " — «" + esc(wk[0]) + '»</span><button type="button" class="btn sm" data-a="bcstop" title="Остановить челлендж">Остановить</button></div><div class="bcbar"><i style="width:' + pct + '%"></i></div><p class="muted">' + esc(wk[1]) + '</p><ul class="bcl">' +
+      c.it.concat(c.hab).map(function (x) { var on = !!ck[x[0]]; return '<li class="' + (on ? "on" : "") + '"><button type="button" class="bcck" data-a="bcck" data-x="' + esc(x[0]) + '" aria-pressed="' + on + '">' + (on ? "✓" : "") + "</button><div><b>" + esc(x[0]) + "</b><small>" + esc(x[2]) + "</small></div></li>"; }).join("") + '</ul><p class="muted bcw">Это не лечение и не замена врачу. При боли, головокружении, онемении — остановитесь.</p></div>';
+  }
+  /* --- готовый план чтения: остеопатия черепа — страница-план с вложенными страницами (книги, статьи, видео) и задачами по неделям --- */
+  var RPOST = [
+    [1, "lesson", "Мой конспект «Остеопатия черепа» — обзор", "", "https://claude.ai/artifact/Myro6M946D8MANkXv4Ut17"], [1, "lesson", "CV4 technique — Wikipedia", "", "https://en.wikipedia.org/wiki/CV4_technique"], [1, "lesson", "Видео: К. Ралко, «Остеопатия для начинающих»", "", "https://www.youtube.com/watch?v=T7_yS5FHbW8"],
+    [2, "lesson", "Cranial treatments — Osmosis", "", "https://www.osmosis.org/learn/Cranial_treatments"], [2, "lesson", "Haller и соавт., 2020 — КСТ при хронической боли, метаанализ", "", "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6937867/"],
+    [3, "lesson", "Ceballos-Laita и соавт., 2024 — Is Craniosacral Therapy Effective?", "", "https://pubmed.ncbi.nlm.nih.gov/38540643/"], [3, "lesson", "Amendolara и соавт., 2024 — Frontiers in Medicine", "", "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2024.1452465/full"], [3, "lesson", "Обзор КСТ при головной боли, 2024", "", "https://pubmed.ncbi.nlm.nih.gov/37709558/"],
+    [4, "lesson", "Wirth-Pattullo, 1994 — надёжность измерения ритма", "", "https://pubmed.ncbi.nlm.nih.gov/8090842"], [4, "lesson", "Cureus, 2024 — согласие врачей при захвате свода", "", "https://assets.cureus.com/uploads/original_article/pdf/277999/20240830-192410-v0wper.pdf"], [4, "lesson", "Видео: остеопатическое лечение головной боли — лекция", "", "https://www.youtube.com/watch?v=2ZXPvUZrkg0"],
+    [5, "book", "Краниосакральная терапия 1", "Дж. Апледжер, Я. Вредевугд", "https://allsem.ru/shop/knigi-po-osteopatii/kraniosakralnaya-terapiya-1/"],
+    [7, "book", "Первичный дыхательный механизм. Пальпация краниосакральной системы", "С. В. Новосельцев", "https://osteopath.blog/ru/metody/osteopatia-literatura.html"], [7, "lesson", "Видео: массаж головы и шеи, основание черепа — RuTube", "", "https://rutube.ru/video/1e9334c660ca2a7a8a66d74fe808e81e/"],
+    [8, "lesson", "«Основы остеопатии», под ред. Д. Е. Мохова — противопоказания (раздел 6.1)", "", "https://static-sl.insales.ru/files/1/2863/11954991/original/osn_ost.pdf"], [8, "lesson", "Российский остеопатический журнал — синхондрозы черепа", "", "https://rojournal.elpub.ru/jour/article/download/359/346"], [8, "lesson", "Cranial osteopathy: its fate seems clear — критическая статья", "", "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1564028/"]
+  ];
+  function rpOsteo() {
+    var ex = notes().filter(function (x) { return x.pack === "osteo"; })[0]; if (ex) { toast("План чтения уже создан"); go("note-" + ex.id); return; }
+    var mon = new Date(today0()).getDay() === 1 ? today0() : monday(addDays(today0(), 7)), pj = projects().filter(function (p) { return p.n === "📚 План чтения: остеопатия"; })[0] || newProject("📚 План чтения: остеопатия");
+    var P = newNote({ t: "📚 План чтения: остеопатия черепа" }); P.ic = "📚"; P.pack = "osteo"; var cnt = {}, links = {};
+    RPOST.forEach(function (r) {
+      var i = cnt[r[0]] = (cnt[r[0]] || 0) + 1, day = addDays(mon, (r[0] - 1) * 7 + [0, 2, 4, 1, 3][(i - 1) % 5]), k = newNote({ t: r[2] }); k.parent = P.id; nApplyTpl(k, r[1]); k.pr = k.pr || {};
+      k.pr.date = dKey(day); k.pr.src = r[4]; if (r[1] === "book") { k.pr.author = r[3]; k.pr.status = "📖 Хочу прочитать"; } else k.pr.course = "Остеопатия черепа";
+      var t = newTaskFrom((r[1] === "book" ? "📖 Читать: " : /^Видео/.test(r[2]) ? "▶ Посмотреть: " : "📄 Прочитать: ") + r[2].replace(/^Видео: /, ""), { day: day }); t.pid = pj.id; t.at = day; t.allday = true; t.body = '<p><a href="#note-' + k.id + '">Страница с заметками</a> · <a href="' + esc(r[4]) + '">источник</a></p>'; delete t.note; touch(t);
+      k.tasks = [t.id]; touch(k); (links[r[0]] = links[r[0]] || []).push(k);
+    });
+    P.body = clean('<div class="callout">План на 8 недель: каждую неделю — 2–3 статьи, книга или видео. Задачи с датами — в проекте «📚 План чтения: остеопатия», страницы для заметок — ниже (таблица по датам и статусам). Ключевые мысли пишите карточками <code>вопрос :: ответ</code> — их подхватит «🔁 Повторение».</div>' + Object.keys(links).map(function (w) { return "<h2>Неделя " + w + "</h2><ul>" + links[w].map(function (k) { return '<li><a href="#note-' + k.id + '">' + esc(nTitle(k)) + "</a> — " + esc(new Date(k.pr.date + "T00:00").toLocaleDateString("ru-RU", { day: "numeric", month: "long" })) + "</li>"; }).join("") + "</ul>"; }).join("") + "<h2>Итоги и выводы</h2><p><br></p>");
+    touch(P); LS.set("zd-nkv:" + P.id, "table"); save(); go("note-" + P.id); toast("План чтения создан: " + RPOST.length + " страниц и задач, старт — " + new Date(mon).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }));
+  }
+  /* --- выписка банка (CSV) — сверка с бюджетом. Операции хранятся только на этом устройстве (IndexedDB zd-bank), сопоставление категорий — S.opt.bkmap --- */
+  var BKOPS = null, BKP = "";
+  function bkDB() { return new Promise(function (ok, no) { var r = indexedDB.open("zd-bank", 1); r.onupgradeneeded = function () { r.result.createObjectStore("kv"); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); }; }); }
+  function bkKV(k, v) { return bkDB().then(function (db) { return new Promise(function (ok, no) { var tx = db.transaction("kv", v === undefined ? "readonly" : "readwrite"), st = tx.objectStore("kv"), rq = v === undefined ? st.get(k) : st.put(v, k); rq.onsuccess = function () { ok(rq.result); }; rq.onerror = function () { no(rq.error); }; }); }); }
+  function bkLoad() { if (BKOPS) return Promise.resolve(BKOPS); return bkKV("ops").then(function (x) { BKOPS = x || []; return BKOPS; }).catch(function () { BKOPS = []; return BKOPS; }); }
+  function bkRows(txt) {
+    var lines = txt.replace(/^﻿/, "").split(/\r?\n/).filter(function (l) { return l.trim(); }); if (!lines.length) return [];
+    var hd = lines[0], dl = [";", "\t", ","].sort(function (a, b) { return hd.split(b).length - hd.split(a).length; })[0];
+    return lines.map(function (l) { var out = [], cur = "", q = false; for (var i = 0; i < l.length; i++) { var ch = l[i]; if (q) { if (ch === '"') { if (l[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; } else if (ch === '"') q = true; else if (ch === dl) { out.push(cur); cur = ""; } else cur += ch; } out.push(cur); return out.map(function (x) { return x.trim(); }); });
+  }
+  function bkNum(s) { s = String(s || "").replace(/[\s ₽]|RUB|руб\.?/gi, "").replace(",", "."); var v = parseFloat(s); return isFinite(v) ? v : null; }
+  function bkDate(s) { var m = /(\d{1,2})\.(\d{1,2})\.(\d{2,4})/.exec(s || ""); if (m) return new Date(+(m[3].length === 2 ? "20" + m[3] : m[3]), +m[2] - 1, +m[1]).getTime(); m = /(\d{4})-(\d{2})-(\d{2})/.exec(s || ""); return m ? new Date(+m[1], +m[2] - 1, +m[3]).getTime() : 0; }
+  function bkParse(txt) {
+    var rows = bkRows(txt); if (rows.length < 2) throw new Error("в файле нет строк с операциями"); var h = rows[0].map(function (x) { return x.toLowerCase(); }), f = function (re, not) { for (var i = 0; i < h.length; i++) if (re.test(h[i]) && !(not && not.test(h[i]))) return i; return -1; };
+    var iD = f(/^дата операции/); if (iD < 0) iD = f(/дата|date/); var iA = f(/сумма платежа/); if (iA < 0) iA = f(/сумма операции/); if (iA < 0) iA = f(/^сумма|amount/, /кэшбэк|бонус/); var iOut = f(/расход|списан|дебет/), iIn = f(/приход|зачисл|поступл|кредит/);
+    var iC = f(/категори|category/), iT = f(/описание|назначение|контрагент|description|получатель/), iS = f(/статус|status/);
+    if (iD < 0 || (iA < 0 && iOut < 0)) throw new Error("не нашлись столбцы даты и суммы — нужен CSV из интернет-банка (Т-Банк, Сбер, Альфа и т. п.)");
+    var out = [];
+    rows.slice(1).forEach(function (r) { if (iS >= 0 && /fail|отказ|отклон/i.test(r[iS] || "")) return; var d = bkDate(r[iD]); if (!d) return; var a = iA >= 0 ? bkNum(r[iA]) : (bkNum(r[iIn]) || 0) - Math.abs(bkNum(r[iOut]) || 0); if (a === null || !a) return; out.push({ d: d, a: Math.round(a * 100) / 100, c: (iC >= 0 ? r[iC] : "") || "Без категории", t: (iT >= 0 ? r[iT] : "").slice(0, 120) }); });
+    if (!out.length) throw new Error("операций не нашлось");
+    return out;
+  }
+  function bkImport() {
+    var i = document.createElement("input"); i.type = "file"; i.accept = ".csv,.txt"; i.style.display = "none"; document.body.appendChild(i);
+    i.addEventListener("change", function () {
+      var fl = i.files && i.files[0]; i.remove(); if (!fl) return;
+      fl.arrayBuffer().then(function (buf) { var txt; try { txt = new TextDecoder("utf-8", { fatal: true }).decode(buf); } catch (e) { txt = new TextDecoder("windows-1251").decode(buf); } var ops = bkParse(txt); return bkLoad().then(function (have) { var seen = {}; have.forEach(function (o) { seen[o.d + "|" + o.a + "|" + o.t] = 1; }); var add = ops.filter(function (o) { var k = o.d + "|" + o.a + "|" + o.t; if (seen[k]) return false; seen[k] = 1; return true; }); BKOPS = have.concat(add).sort(function (a, b) { return a.d - b.d; }); return bkKV("ops", BKOPS).then(function () { return [ops.length, add.length]; }); }); })
+        .then(function (r) { render(); toast("Выписка: операций в файле " + r[0] + ", новых " + r[1]); }).catch(function (e) { toast("Не получилось: " + ((e && e.message) || e)); });
+    });
+    i.click();
+  }
+  function bankHTML() {
+    if (!BKOPS) { bkLoad().then(render); return '<p class="muted">Загружаю…</p>'; }
+    var pers = buPers(), cur = buPid(today0()), ids = pers.map(function (P) { return P.id; }); if (ids.indexOf(cur) < 0) ids.push(cur); (BKOPS || []).forEach(function (o) { var pi = buPid(o.d); if (ids.indexOf(pi) < 0) ids.push(pi); }); if (!BKP || ids.indexOf(BKP) < 0) BKP = cur; var rg = buPRange(BKP), P = pers.filter(function (x) { return x.id === BKP; })[0], map = S.opt.bkmap || {};
+    var ops = (BKOPS || []).filter(function (o) { return o.d >= rg.from && o.d < rg.to + DAY; }), exp = ops.filter(function (o) { return o.a < 0; }), inc = ops.filter(function (o) { return o.a > 0; }), byC = {}, byS = {};
+    exp.forEach(function (o) { byC[o.c] = (byC[o.c] || 0) - o.a; var s = map[o.c]; if (s && s !== "-") byS[s] = (byS[s] || 0) - o.a; });
+    var cats = []; pers.forEach(function (x) { (x.cats || []).forEach(function (c) { if (cats.indexOf(c) < 0) cats.push(c); }); });
+    var h = '<div class="card bkc"><div class="bch"><b>🏦 Выписка банка — сверка с бюджетом</b><span class="muted">операций загружено: ' + (BKOPS || []).length + (BKOPS && BKOPS.length ? " · " + esc(new Date(BKOPS[0].d).toLocaleDateString("ru-RU")) + " — " + esc(new Date(BKOPS[BKOPS.length - 1].d).toLocaleDateString("ru-RU")) : "") + '</span></div><p class="muted">Загрузите CSV из интернет-банка (Т-Банк: «Операции» → «Выгрузить» → CSV; в других банках — «Выписка» → CSV). Операции остаются только на этом устройстве и никуда не отправляются; на других устройствах — загрузите файл там. Повторная загрузка того же файла не задвоит операции.</p><div class="r"><button type="button" class="btn sm pri" data-a="bkload">📥 Загрузить выписку (CSV)</button>' + ((BKOPS || []).length ? '<button type="button" class="btn sm" data-a="bkclr">Очистить на этом устройстве</button>' : "") + '<label class="f">Период <select class="inp" id="bkper">' + ids.sort().map(function (id) { return '<option value="' + id + '"' + (id === BKP ? " selected" : "") + ">" + esc(buPName(id)) + "</option>"; }).join("") + "</select></label></div>";
+    if (!ops.length) return h + '<p class="muted">В этом периоде операций из выписки нет.</p></div>';
+    h += '<div class="butiles"><div class="butile"><small>Расходы по выписке</small><span>' + buRub(exp.reduce(function (s, o) { return s - o.a; }, 0)) + '</span><small class="muted">' + exp.length + ' операций</small></div><div class="butile"><small>Поступления</small><span class="ok">' + buRub(inc.reduce(function (s, o) { return s + o.a; }, 0)) + "</span></div></div>";
+    if (P) { var st = (P.cats || []).filter(function (c) { return byS[c] || buFact(P, c); }); if (st.length) h += '<h3>Статьи бюджета: файл и выписка</h3><div class="ndbw"><table class="ndbt bkt"><thead><tr><th>Статья</th><th class="ndbnum">По файлу</th><th class="ndbnum">По выписке</th><th class="ndbnum">Разница</th></tr></thead><tbody>' + st.map(function (c) { var a = buFact(P, c), b = byS[c] || 0, d = b - a; return "<tr><td>" + esc(c) + '</td><td class="ndbnum">' + buRub(a) + '</td><td class="ndbnum">' + (byS[c] ? buRub(b) : '<span class="muted">не сопоставлено</span>') + '</td><td class="ndbnum ' + (Math.abs(d) < 1 ? "ok" : d > 0 ? "bad" : "") + '">' + (byS[c] ? (d > 0 ? "+" : "") + buRub(d) : "") + "</td></tr>"; }).join("") + "</tbody></table></div>"; }
+    else h += '<p class="muted">Для этого периода нет данных из файла Excel — показываю только выписку.</p>';
+    h += '<h3>Категории банка → статьи бюджета</h3><div class="ndbw"><table class="ndbt bkt"><thead><tr><th>Категория в банке</th><th class="ndbnum">Сумма</th><th>Статья бюджета</th></tr></thead><tbody>' + Object.keys(byC).sort(function (a, b) { return byC[b] - byC[a]; }).map(function (c) { var m = map[c] || ""; return "<tr><td>" + esc(c) + '</td><td class="ndbnum">' + buRub(byC[c]) + '</td><td><select class="inp" data-bkmap="' + esc(c) + '"><option value="">— выбрать —</option><option value="-"' + (m === "-" ? " selected" : "") + ">не учитывать</option>" + cats.map(function (s) { return '<option value="' + esc(s) + '"' + (m === s ? " selected" : "") + ">" + esc(s) + "</option>"; }).join("") + "</select></td></tr>"; }).join("") + "</tbody></table></div>";
+    h += '<details class="bkop"><summary>Крупные траты периода</summary><div class="ndbw"><table class="ndbt bkt"><tbody>' + exp.slice().sort(function (a, b) { return a.a - b.a; }).slice(0, 15).map(function (o) { return "<tr><td>" + esc(new Date(o.d).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })) + "</td><td>" + esc(o.t || o.c) + '</td><td class="muted">' + esc(o.c) + '</td><td class="ndbnum">' + buRub(-o.a) + "</td></tr>"; }).join("") + "</tbody></table></div></details>";
+    return h + "</div>";
+  }
+  document.addEventListener("change", function (e) {
+    var t = e.target; if (!t) return;
+    if (t.id === "bkper") { BKP = t.value; render(); return; }
+    if (t.dataset && t.dataset.bkmap !== undefined) { var m = S.opt.bkmap = Object.assign({}, S.opt.bkmap || {}); if (t.value) m[t.dataset.bkmap] = t.value; else delete m[t.dataset.bkmap]; optTouch(); save(); render(); }
+    if (t.id === "opt-tgnote") { S.opt.tgnote = !!t.checked; optTouch(); save(); toast(S.opt.tgnote ? "Все сообщения боту станут заметками" : "Заметкой станет только сообщение со словом «заметка» в начале"); }
+  });
+  /* --- Web Push: уведомления с сервера, даже когда приложение закрыто. Ключи VAPID создаются здесь же и вставляются в настройки облачной функции --- */
+  var PUSHK = null;
+  function pushB64u(buf) { var s = "", b = new Uint8Array(buf); for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+  function pushB64d(s) { s = String(s).replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; var r = atob(s), u = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) u[i] = r.charCodeAt(i); return u; }
+  function pushSup() { return "serviceWorker" in navigator && "PushManager" in window && !!window.Notification; }
+  function pushOn() {
+    if (!pushSup()) { toast("Этот браузер не поддерживает push-уведомления"); return; }
+    SRV.call("push/key").then(function (j) {
+      if (!j.key) { toast("На сервере нет ключей — создайте их ниже и добавьте в настройки функции"); return; }
+      return Notification.requestPermission().then(function (p) {
+        if (p !== "granted") { toast("Браузер не разрешил уведомления"); return; }
+        return navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription().then(function (old) { return old || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: pushB64d(j.key) }); }); })
+          .then(function (sub) { return SRV.call("push/sub", { method: "POST", body: { sub: sub.toJSON() } }); }).then(function () { LS.set("zd-push", "1"); render(); toast("Push-уведомления включены на этом устройстве"); });
+      });
+    }).catch(function (e) { toast("Не получилось: " + ((e && e.msg) || (e && e.message) || e)); });
+  }
+  function pushOff() { navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); }).then(function (sub) { if (!sub) return; var ep = sub.endpoint; return sub.unsubscribe().then(function () { return SRV.call("push/unsub", { method: "POST", body: { endpoint: ep } }).catch(function () { /* сервер уберёт сам */ }); }); }).then(function () { LS.del("zd-push"); render(); toast("Push-уведомления выключены"); }); }
+  function pushKeys() { crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]).then(function (kp) { return Promise.all([crypto.subtle.exportKey("raw", kp.publicKey), crypto.subtle.exportKey("jwk", kp.privateKey)]); }).then(function (r) { PUSHK = { pub: pushB64u(r[0]), priv: r[1].d }; render(); }).catch(function () { toast("Браузер не смог создать ключи"); }); }
+  function srvExtraHTML() {
+    var h = '<div class="srvx"><h3>📝 Заметки из Telegram</h3><p class="muted" style="margin:0">Начните сообщение боту со слова <b>«заметка»</b> (или <code>/note</code>, 📝) — оно станет страницей в разделе «📥 Из Telegram»: первая строка — название, остальное — текст, ссылки — кликабельные. Остальные сообщения, как раньше, — задачи во «Входящих».</p><label class="f"><span><input type="checkbox" id="opt-tgnote"' + (S.opt.tgnote ? " checked" : "") + "> Все сообщения боту — в заметки, а не в задачи</span></label></div>";
+    var on = LS.get("zd-push") === "1";
+    h += '<div class="srvx"><h3>📲 Push-уведомления (даже когда приложение закрыто)</h3><p class="muted" style="margin:0">Напоминания придут уведомлением от браузера, как от обычного приложения, — в дополнение к Telegram. Нужно один раз: добавить на сервер таблицу <code>push</code> и два ключа (см. <a href="#help-srv">Справка → Сервер</a>), затем включить на каждом устройстве. На iPhone — только у приложения, установленного на экран «Домой».</p><div class="r">' + (!pushSup() ? '<span class="warnc">Этот браузер не поддерживает push.</span>' : on ? '<span class="okc">✓ Включены на этом устройстве</span><button type="button" class="btn sm" data-a="pushtest">Проверить</button><button type="button" class="btn sm" data-a="pushoff">Выключить</button>' : '<button type="button" class="btn sm pri" data-a="pushon">Включить на этом устройстве</button>') + '<button type="button" class="btn sm" data-a="pushkeys">🔑 Создать ключи для сервера</button></div>';
+    if (PUSHK) h += '<div class="confirm info"><b>Ключи созданы — вставьте их в облачную функцию</b><span>«Редактор» функции → «Переменные окружения»: <code>VAPID_PUBLIC</code> и <code>VAPID_PRIVATE</code> (секретный ключ лучше положить в Lockbox, как токен бота). Здесь ключи не сохраняются: закроете — создайте новые.</span><label class="f">VAPID_PUBLIC<input class="inp" readonly value="' + esc(PUSHK.pub) + '" onclick="this.select()"></label><label class="f">VAPID_PRIVATE (секрет)<input class="inp" readonly value="' + esc(PUSHK.priv) + '" onclick="this.select()"></label><div class="r"><button type="button" class="btn sm" data-a="pushkx">Готово, скрыть</button></div></div>';
+    return h + "</div>";
+  }
+  function restAct(a, el) {
+    switch (a) {
+      case "bcstart": var sd = el.dataset.x === "mon" ? (new Date(today0()).getDay() === 1 ? today0() : monday(addDays(today0(), 7))) : today0(); bcSet("start", sd); bcSet("on", true); bcAutoRun(); render(); toast(sd === today0() ? "Челлендж начат — задача дня уже в «Сегодня»" : "Старт — " + new Date(sd).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })); return true;
+      case "bcstop": bcSet("on", false); render(); toast("Челлендж остановлен — начать заново можно в любой момент"); return true;
+      case "bcck": bcToggle(el.dataset.x); return true;
+      case "bcgo": go("habits"); return true;
+      case "bkload": bkImport(); return true;
+      case "bkclr": BKOPS = []; bkKV("ops", []).then(render); toast("Операции выписки удалены с этого устройства"); return true;
+      case "pushon": pushOn(); return true;
+      case "pushoff": pushOff(); return true;
+      case "pushtest": SRV.call("push/test", { method: "POST" }).then(function (j) { toast(j.sent ? "Отправлено — уведомление вот-вот придёт" : "Сервер не нашёл подписок этого пользователя"); }).catch(function (e) { toast("Не получилось: " + ((e && e.msg) || e)); }); return true;
+      case "pushkeys": pushKeys(); return true;
+      case "pushkx": PUSHK = null; render(); return true;
+    }
+    return false;
+  }
+
   function chalsWidget() {
     var h = "", t0 = today0(), any = false;
     if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
     if (fcOpt().on) { var f = fcItems(t0), s2 = chalTaskStat(fcTid(t0)); any = true; h += '<button type="button" class="chw" data-a="fcgo"><b>💰 Деньги</b><span>' + (f ? "день " + f.day.n + (s2 ? " · " + s2.d + " из " + s2.n : "") : "сегодня заданий нет") + "</span>" + (s2 && s2.n ? '<i style="--p:' + Math.round(s2.d / s2.n * 100) + '%"></i>' : "") + "</button>"; }
     if (kcOpt().on) { var kc = kcItems(t0), s3 = chalTaskStat(kcTid(t0)); any = true; h += '<button type="button" class="chw" data-a="kcgo"><b>🍳 Кухня</b><span>' + (kc ? "день " + kc.day.n + (s3 ? " · " + s3.d + " из " + s3.n : "") : "сегодня заданий нет") + "</span>" + (s3 && s3.n ? '<i style="--p:' + Math.round(s3.d / s3.n * 100) + '%"></i>' : "") + "</button>"; }
+    if (bcOpt().on) { var bcd = bcDay(t0), s4 = chalTaskStat(bcTid(t0)); any = true; h += '<button type="button" class="chw" data-a="bcgo"><b>🧘 Осанка</b><span>' + (bcd ? "день " + bcd.n + (s4 ? " · " + s4.d + " из " + s4.n : "") : "скоро старт") + "</span>" + (s4 && s4.n ? '<i style="--p:' + Math.round(s4.d / s4.n * 100) + '%"></i>' : "") + "</button>"; }
     if (buPers().length) { var w = buWeek(monday(t0)); if (!w.miss.length && w.dl) h += '<div class="chwd"><small class="muted">можно в день до воскресенья</small><b class="' + (w.tot.perDay < 0 ? "bad" : "ok") + '">' + buRub(Math.max(0, w.tot.perDay)) + "</b></div>"; }
     return any || h ? '<div class="chws">' + h + "</div>" : '<p class="wempty">Челленджи не запущены — «План уборки» → «Челлендж», «Бюджет» → «Челлендж», «Меню» → «Кухня»</p>';
   }
@@ -11529,6 +11824,7 @@ CREATE TABLE inbox (
         }
       }
     }
+    if (su && SRV.st.ok === true && YD.token()) h += srvExtraHTML();
     if (SRV.st.err) h += '<p class="warnc">' + esc(SRV.st.err) + "</p>";
     h += '<div class="r"><label class="f"><span><input type="checkbox" id="opt-autorem"' + (S.opt.autoRem ? " checked" : "") + "> Ставить напоминание автоматически, если у задачи указано время</span></label></div>" +
       '<div class="r"><label class="f">Напоминание для задач на весь день <select class="inp" id="opt-hour">' + [7, 8, 9, 10, 11, 12].map(function (x) { return '<option value="' + x + '"' + ((S.opt.allDayHour || 9) === x ? " selected" : "") + ">в " + x + ":00</option>"; }).join("") + "</select></label></div></section>";
@@ -12186,6 +12482,7 @@ CREATE TABLE inbox (
       "<li>Привязка бота к серверу: откройте в браузере https://api.telegram.org/bot<i>ТОКЕН</i>/setWebhook?url=<i>АДРЕС_ШЛЮЗА</i>/tg/<i>СЛОВО</i>&amp;secret_token=<i>СЛОВО</i> — должно ответить «Webhook was set».</li>" +
       '<li>Здесь: <a href="#settings-srv">«Настройки» → «Напоминания и Telegram»</a> → адрес шлюза → «Сохранить и проверить» → «Привязать Telegram».</li></ol>' +
       tip("Когда код сервера обновляется (например, появляются новые кнопки в напоминаниях), скопируйте новый index.js ниже в функцию univer → «Редактор» → «Сохранить изменения». Таблицы и настройки менять не нужно.") +
+      tip("<b>📲 Push-уведомления</b> (по желанию, в дополнение к Telegram): 1) в базе YDB выполните запрос <code>CREATE TABLE push</code> из блока «Таблицы» ниже; 2) обновите код функции (index.js ниже); 3) в приложении «Настройки» → «Напоминания и Telegram» → «🔑 Создать ключи для сервера» и добавьте в функцию переменные <code>VAPID_PUBLIC</code> и <code>VAPID_PRIVATE</code> (секрет — лучше через Lockbox); 4) на каждом устройстве — «Включить на этом устройстве». <b>📝 Заметки из Telegram</b> работают и без обновления сервера: сообщение, которое начинается со слова «заметка», станет страницей в «📥 Из Telegram».") +
       codeBox("srv-index", "index.js — код функции") + codeBox("srv-pkg", "package.json") + codeBox("srv-gw", "Спецификация API-шлюза") + codeBox("srv-sql", "Таблицы (запрос для YDB)"));
 
     /* ================= Голос и ИИ ================= */
@@ -12596,6 +12893,7 @@ CREATE TABLE inbox (
     try { chAuto(); } catch (er) { /* челлендж не мешает */ }
     try { fcAutoRun(); } catch (er) { /* финансовый челлендж не мешает */ }
     try { kcAutoRun(); } catch (er) { /* кухонный челлендж не мешает */ }
+    try { bcAutoRun(); } catch (er) { /* челлендж осанки не мешает */ }
     try { topMvScan(); } catch (er) { /* пометка переноса главного не мешает */ }
     try { if (SETGATE && bpaySync()) save(); } catch (er) { /* напоминания о платежах не мешают */ }
     try { applyLook(); } catch (er) { /* оформление не мешает работе */ }
@@ -13275,6 +13573,7 @@ CREATE TABLE inbox (
     if (a === "mmfreeback") { e.preventDefault(); var fn = mmCur(); if (fn) { MMSEL = el.dataset.t; mmFreeReset(fn, false); } return; }
     if (a === "cvfull") { fullSet("cv", !CVFULL); return; }
     if (a && cvAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && restAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -13532,6 +13831,7 @@ CREATE TABLE inbox (
       case "rev-ok": var rp = proj(ARG); if (rp) { rp.revAt = Date.now(); touch(rp); save(); toast("✓ «" + rp.n + "» проверен"); if (revDue().length) revGo(1); else { render(); toast("✓ Все проекты проверены"); } } return;
       case "setnew": var sx = touch({ id: uid(), kind: "set", n: sets().length ? "Новый набор" : "Утро", data: { text: sets().length ? "" : "Зарядка в 7:00 #здоровье\nСтакан воды\nРазобрать «Входящие»\nВыбрать три главные задачи дня", days: [] }, created: Date.now() }); S.tpls.push(sx); save(); render(); setTimeout(function () { var i = document.querySelector('[data-setn="' + sx.id + '"]'); if (i) { i.focus(); i.select(); } }, 50); return;
       case "setfp": setFSet(el.dataset.id, "prio", +el.dataset.v || 0); return;
+      case "setfdd": setFSet(el.dataset.id, "dd", el.dataset.v); return;
       case "setfpj": case "setfsx": case "setfgl":
         var xf = tplObj(el.dataset.id); if (!xf) return; var ff = setF(xf), rcf = el.getBoundingClientRect(), its;
         if (a === "setfpj") its = [{ c: "~", i: ff.pid ? "" : "✓", l: "— как в строке (без проекта)" }].concat(ptree().map(function (z) { return { c: z.p.id, i: ff.pid === z.p.id ? "✓" : "", l: picon(z.p) + " " + z.p.n, pad: z.d }; }));
@@ -14692,6 +14992,7 @@ CREATE TABLE inbox (
     if (k === "npradd") { var an = note(id); if (an) { an.prk = (an.prk || []).concat([c]); touch(an); save(); render(); setTimeout(function () { var i = document.querySelector('[data-npr="' + c + '"]'); if (i) i.focus(); }, 40); } return; }
     if (k === "nflt") { NFLT[id] = c; render(); return; }
     if (k === "ntplnew") {
+      if (c === "pack:osteo") { rpOsteo(); return; }
       if (c.indexOf("del:") === 0) { var did = c.slice(4), dt = nOwnTpls().filter(function (x) { return x.id === did; })[0]; S.opt.ntpls = nOwnTpls().filter(function (x) { return x.id !== did; }); optTouch(); save(); render(); if (dt) toast("Шаблон «" + dt.n + "» удалён"); return; }
       var ns = newNote({ sec: V === "nsec" ? ARG : V === "note" && note(ARG) ? note(ARG).sec : "", tags: V === "ntag" ? [ARG] : [] }); if (c !== "~") nApplyTpl(ns, c); save(); NFOCUS = true; TPICK = false; go("note-" + ns.id); return;
     }
