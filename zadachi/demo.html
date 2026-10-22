@@ -1453,6 +1453,11 @@ h2[data-col].dropin { outline: 2px dashed var(--acc); outline-offset: 2px; borde
 .gtrack { flex: none; position: relative; z-index: 1 }
 .garr { position: absolute; left: 0; top: 0; z-index: 1; pointer-events: none; overflow: visible }
 .garr path { fill: none; stroke: color-mix(in srgb, var(--fg) 55%, transparent); stroke-width: 1.6; stroke-linejoin: round; pointer-events: stroke }
+.gsum { position: absolute; top: 9px; height: 14px; border-radius: 4px; background: linear-gradient(90deg, color-mix(in srgb, var(--bc, var(--fg)) 85%, transparent) var(--pg, 0%), color-mix(in srgb, var(--bc, var(--fg)) 30%, transparent) var(--pg, 0%)); cursor: grab; z-index: 2; touch-action: pan-y } .gsum::before, .gsum::after { content: ""; position: absolute; bottom: -5px; border: 5px solid transparent; border-top-color: color-mix(in srgb, var(--bc, var(--fg)) 85%, transparent) } .gsum::before { left: 0; border-left-color: color-mix(in srgb, var(--bc, var(--fg)) 85%, transparent) } .gsum::after { right: 0; border-right-color: color-mix(in srgb, var(--bc, var(--fg)) 85%, transparent) } .gsum span { position: absolute; right: -40px; top: -2px; font-size: 11px; font-weight: 700; color: var(--muted) } .gsum.drag { opacity: .7; cursor: grabbing }
+.gcol { border: 0; background: transparent; color: var(--muted); cursor: pointer; padding: 0 2px; font-size: 12px; width: 16px } .gmsi { color: var(--acc); font-size: 11px }
+.gbar.gms { width: 18px !important; height: 18px; top: 7px; padding: 0; border-radius: 3px; transform: rotate(45deg); background: var(--bc) } .gbar.gms.dn { opacity: .5 } .gbar.crit { box-shadow: 0 0 0 2px #e5484d, 0 1px 2px rgba(0,0,0,.12) } .garr path.crit { stroke: #e5484d; stroke-width: 2.4 }
+.gbar.hasp { background: linear-gradient(90deg, color-mix(in srgb, var(--bc) 100%, #000 18%) var(--pg), color-mix(in srgb, var(--bc) 62%, transparent) var(--pg)) } .gpg { opacity: .85; font-weight: 700 } .gmo { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line) }
+.gnod { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center } .gnc { padding: 3px 10px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--bc) 55%, transparent); background: color-mix(in srgb, var(--bc) 12%, var(--panel)); font-size: calc(12.5px * var(--fs)); cursor: grab; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .gcon { position: absolute; top: 11px; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--acc); background: var(--panel); cursor: crosshair; opacity: 0; z-index: 3; touch-action: none; transition: opacity .12s, transform .12s; box-sizing: border-box } .grow:hover .gcon, .gcon.on { opacity: 1 } .gcon:hover, .gcon.on { transform: scale(1.35); background: var(--acc) } @media (hover: none) { .gcon { opacity: .55 } }
 .gbar.glktg { outline: 2px solid var(--acc); outline-offset: 2px } .glkl { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 4; overflow: visible } .glkl path { fill: none; stroke: var(--acc); stroke-width: 2; stroke-dasharray: 5 4 } .glkl circle { fill: var(--acc) }
 .garr path.ghit { stroke: transparent; stroke-width: 12; cursor: pointer } .garr g:hover path:not(.ghit) { stroke: var(--acc); stroke-width: 2.4 }
@@ -5754,7 +5759,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-149";
+  var APPV = "zd-app-2026-10-16-150";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -7628,59 +7633,14 @@ CREATE TABLE inbox (
   document.addEventListener("change", function (e) { var id = e.target.dataset && e.target.dataset.tpln; if (!id) return; var x = tplObj(id), v = e.target.value.trim(); if (x && v && v !== x.n) { x.n = v.slice(0, 80); touch(x); save(); toast("Переименовано"); } });
 
   /* ---------- таймлайн (диаграмма Ганта): полоса от начала до дедлайна, тянется мышью ---------- */
-  var GNT = { zoom: LS.get("zd-gz") === "week" ? "week" : "day", from: 0, sl: null, st: 0, keep: false }, GDR = null;
-  function gPx() { return GNT.zoom === "week" ? 12 : (innerWidth < 700 ? 30 : 38); }
-  function gDays() { return GNT.zoom === "week" ? 182 : 63; }
-  function gFrom() { if (!GNT.from) GNT.from = addDays(monday(Date.now()), GNT.zoom === "week" ? -14 : -7); return GNT.from; }
+  var GNT = { zoom: /^(week|month)$/.test(LS.get("zd-gz") || "") ? LS.get("zd-gz") : "day", from: 0, sl: null, st: 0, keep: false }, GDR = null;
+  function gPx() { return GNT.zoom === "month" ? 5 : GNT.zoom === "week" ? 12 : (innerWidth < 700 ? 30 : 38); }
+  function gDays() { return GNT.zoom === "month" ? 400 : GNT.zoom === "week" ? 182 : 63; }
+  function gFrom() { if (!GNT.from) GNT.from = addDays(monday(Date.now()), GNT.zoom === "month" ? -35 : GNT.zoom === "week" ? -14 : -7); return GNT.from; }
   function gIdx(ms) { return Math.round((sod(ms) - gFrom()) / DAY); }
-  function gSpan(t) { var s = t.at ? sod(t.at) : t.due ? sod(t.due) : 0; if (!s) return null; var e = t.due ? sod(t.due) : s; if (e < s) e = s; return { s: s, e: e }; }
+  function gSpan(t) { if (t.ms && (t.due || t.at)) { var md = sod(t.due || t.at); return { s: md, e: md }; } var s = t.at ? sod(t.at) : t.due ? sod(t.due) : 0; if (!s) return null; var e = t.due ? sod(t.due) : s; if (e < s) e = s; return { s: s, e: e }; }
   function gDate(ms) { var d = new Date(ms); return d.getDate() + " " + MONS[d.getMonth()]; }
   var MONS = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"], MONF = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
-  function vGantt() {
-    var from = gFrom(), n = gDays(), px = gPx(), W = n * px, t0 = today0(), showDone = LS.get("zd-gdone") === "1";
-    var l = tasks().filter(function (t) { return (showDone || !t.done) && (t.at || t.due); });
-    var h = head("Таймлайн", "Полоса задачи — от даты начала до дедлайна. Перетащите полосу, чтобы сдвинуть сроки, или потяните за край, чтобы изменить начало или дедлайн. Связь — потяните от кружка на конце полосы к другой полосе. Клик — открыть задачу.");
-    h += '<div class="tbar gtbar"><button class="btn sm" type="button" data-a="g-prev" aria-label="Раньше">‹</button><button class="btn sm" type="button" data-a="g-today">Сегодня</button><button class="btn sm" type="button" data-a="g-next" aria-label="Позже">›</button>' +
-      '<div class="seg"><button type="button" data-a="g-zoom" data-v="day" class="' + (GNT.zoom === "day" ? "on" : "") + '">Дни</button><button type="button" data-a="g-zoom" data-v="week" class="' + (GNT.zoom === "week" ? "on" : "") + '">Недели</button></div>' +
-      '<label class="gchk"><input type="checkbox" data-a="g-done"' + (showDone ? " checked" : "") + "> выполненные</label>" +
-      '<label class="gchk" title="Стрелки «сначала сделать»: от задачи, которую ждут, к той, что ждёт. Красная — задача начинается раньше, чем закончится нужная"><input type="checkbox" data-a="g-deps"' + (LS.get("zd-gdeps") !== "0" ? " checked" : "") + "> связи</label>" + '<label class="gchk" title="Сдвинули задачу позже — задачи, которые её ждут, сдвигаются следом, чтобы не начинаться раньше"><input type="checkbox" data-a="g-shift"' + (LS.get("zd-gshift") === "1" ? " checked" : "") + "> двигать зависимые</label></div>";
-    if (!l.length) return h + '<div class="empty">Нет задач со сроками. Укажите задаче дату или дедлайн — она появится здесь.</div>';
-    // шкала: месяцы и дни (или недели)
-    var mo = "", dy = "", bg = "", i, cur = -1, ms0 = 0;
-    for (i = 0; i < n; i++) {
-      var dd = new Date(addDays(from, i));
-      if (dd.getMonth() !== cur) { if (cur >= 0) mo += '<div class="gm" style="width:' + (i - ms0) * px + 'px">' + MONF[cur] + "</div>"; cur = dd.getMonth(); ms0 = i; }
-      var we = dd.getDay() === 0 || dd.getDay() === 6;
-      if (GNT.zoom === "day") dy += '<div class="gd' + (we ? " we" : "") + (addDays(from, i) === t0 ? " td" : "") + '" style="width:' + px + 'px"><b>' + dd.getDate() + "</b>" + WDS[dd.getDay()] + "</div>";
-      else if (dd.getDay() === 1) dy += '<div class="gd gw" style="left:' + i * px + "px;width:" + 7 * px + 'px">' + dd.getDate() + "." + p2(dd.getMonth() + 1) + "</div>";
-      if (we && GNT.zoom === "day") bg += '<i class="gwe" style="left:' + i * px + "px;width:" + px + 'px"></i>';
-    }
-    mo += '<div class="gm" style="width:' + (n - ms0) * px + 'px">' + MONF[cur] + "</div>";
-    var ti = gIdx(t0); if (ti >= 0 && ti < n) bg += '<i class="gtoday" style="left:' + (ti * px + px / 2) + 'px"></i>';
-    // строки: группы по проектам, внутри — дерево задач по дате начала
-    var groups = [{ p: null, d: 0 }].concat(ptree()), ids = {}, rows = "";
-    l.forEach(function (t) { ids[t.id] = 1; });
-    var byStart = function (a, b) { return gSpan(a).s - gSpan(b).s || (a.created || 0) - (b.created || 0); };
-    function row(t, dep) {
-      var sp = gSpan(t), a = gIdx(sp.s), b = gIdx(sp.e) + 1, left = a * px, w = (b - a) * px, pp = proj(t.pid), late = !t.done && t.due && t.due < t0;
-      var bar = "";
-      if (b > 0 && a < n) {
-        var cl = Math.max(0, left), cw = Math.min(W, left + w) - cl;
-        bar = '<div class="gbar' + (t.done ? " dn" : "") + (late ? " late" : "") + (!t.at ? " dl" : "") + (left < 0 ? " cutl" : "") + (left + w > W ? " cutr" : "") + (cw < 100 ? " short" : "") + '" data-gid="' + t.id + '" style="left:' + cl + "px;width:" + cw + "px;--bc:" + (pp ? col(pp.c) : "var(--acc)") + '" title="' + esc(t.t) + " · " + gDate(sp.s) + (sp.e !== sp.s ? " — " + gDate(sp.e) : "") + (t.due ? " (дедлайн)" : "") + '"><i class="gh l"></i><span>' + esc(t.t) + '</span><i class="gh r"></i></div>' + (cw < 100 ? '<span class="gtx" style="left:' + (cl + cw + 18) + 'px">' + esc(t.t) + "</span>" : "") + (left >= 0 ? '<i class="gcon" data-gcid="' + t.id + '" data-side="l" style="left:' + (cl - 14) + 'px" title="Потяните к задаче, которую нужно сделать раньше"></i>' : "") + (left + w <= W ? '<i class="gcon" data-gcid="' + t.id + '" data-side="r" style="left:' + (cl + cw + 3) + 'px" title="Потяните к задаче, которая ждёт эту"></i>' : "");
-      } else bar = '<span class="gout" style="' + (a >= n ? "right:4px" : "left:4px") + '">' + (a >= n ? gDate(sp.s) + " →" : "← " + gDate(sp.e)) + "</span>";
-      return '<div class="grow"><div class="glab" style="padding-left:' + (10 + dep * 14) + 'px"><a data-a="g-open" data-id="' + t.id + '" class="' + (t.done ? "dn" : "") + '">' + esc(t.t) + '</a></div><div class="gtrack" style="width:' + W + 'px">' + bar + "</div></div>";
-    }
-    function tree(t, dep) { var out = row(t, dep); l.filter(function (k) { return k.parent === t.id; }).sort(byStart).forEach(function (k) { out += tree(k, dep + 1); }); return out; }
-    groups.forEach(function (g) {
-      var pid = g.p ? g.p.id : "", gl = l.filter(function (t) { return (t.pid || "") === pid && !(t.parent && ids[t.parent]); }).sort(byStart);
-      if (!gl.length) return;
-      rows += '<div class="grow ggrp"><div class="glab" style="padding-left:' + (8 + g.d * 14) + 'px">' + (g.p ? piconH(g.p) + " " + esc(g.p.n) : "📥 Без проекта") + '</div><div class="gtrack" style="width:' + W + 'px"></div></div>';
-      gl.forEach(function (t) { rows += tree(t, 0); });
-    });
-    h += '<div class="gwrap" id="gwrap"><div class="ggrid" style="width:calc(var(--glw) + ' + W + 'px)"><div class="ghead"><div class="glab gcorner">Задача</div><div class="gscale" style="width:' + W + 'px"><div class="gms">' + mo + '</div><div class="gds' + (GNT.zoom === "week" ? " wk" : "") + '">' + dy + "</div></div></div>" +
-      '<div class="gbody"><div class="gbg" style="width:' + W + 'px">' + bg + "</div>" + rows + "</div></div></div>";
-    return h;
-  }
   function gArrows() {
     var body = document.querySelector("#gwrap .gbody"); if (!body) return;
     var old = body.querySelector(".garr"); if (old) old.remove();
@@ -7699,7 +7659,7 @@ CREATE TABLE inbox (
         var sx = x1 - Math.min(10, b1.width / 2), sy = dn > 0 ? b1.bottom - br.top : b1.top - br.top;
         if (x2 - sx >= k) d = "M" + sx + " " + sy + "V" + y2 + "H" + (x2 - 2);
         else { var my = y2 - dn * 15; d = "M" + sx + " " + sy + "V" + my + "H" + (x2 - k) + "V" + y2 + "H" + (x2 - 2); }
-        paths += '<g data-ps="' + t.id + '" data-pa="' + a.id + '"><path class="ghit" d="' + d + '"/><path class="' + (bad ? "bad" : a.done ? "ok" : "") + '" d="' + d + '" marker-end="url(#garr' + (bad ? "b" : a.done ? "o" : "") + ')"><title>' + esc("«" + t.t + "» ждёт «" + a.t + "»" + (bad ? " — начинается раньше, чем закончится нужная задача" : a.done ? " — нужная задача уже сделана" : "")) + "</title></path></g>";
+        paths += '<g data-ps="' + t.id + '" data-pa="' + a.id + '"><path class="ghit" d="' + d + '"/><path class="' + (bad ? "bad" : a.done ? "ok" : "") + (GCRIT[t.id] && GCRIT[a.id] ? " crit" : "") + '" d="' + d + '" marker-end="url(#garr' + (bad ? "b" : a.done ? "o" : "") + ')"><title>' + esc("«" + t.t + "» ждёт «" + a.t + "»" + (bad ? " — начинается раньше, чем закончится нужная задача" : a.done ? " — нужная задача уже сделана" : "")) + "</title></path></g>";
         n++;
       });
     });
@@ -13856,6 +13816,112 @@ CREATE TABLE inbox (
     else if (c === "del") { s.after = (s.after || []).filter(function (x) { return x !== p.id; }); touch(s); save(); render(); toastUndo("Связь удалена", function () { s.after = (s.after || []).concat(p.id); touch(s); }); }
   }
 
+  // группы: по проектам (с итоговой полосой и процентом), тегам, приоритету или без групп; свёрнутые — zd-gcol
+  var GCRIT = {}, GSUM = null;
+  function gGrp() { var g = LS.get("zd-ggrp"); return /^(proj|tag|prio|none)$/.test(g || "") ? g : "proj"; }
+  function gColl() { try { return JSON.parse(LS.get("zd-gcol") || "{}") || {}; } catch (e) { return {}; } }
+  function gPct(t) { var k = live(S.tasks).filter(function (x) { return x.parent === t.id; }); if (!k.length) return -1; return Math.round(100 * k.filter(function (x) { return x.done; }).length / k.length); }
+  function gGroups(l, mode) {
+    var ids = {}; l.forEach(function (t) { ids[t.id] = 1; }); var top = function (t) { return !(t.parent && ids[t.parent]); };
+    if (mode === "none") return [{ k: "all", n: "", hide: 1, d: 0, f: function () { return true; } }];
+    if (mode === "tag") { var tg = []; l.forEach(function (t) { var g = (t.tags || [])[0]; if (g && tg.indexOf(g) < 0) tg.push(g); }); tg.sort(function (a, b) { return a.localeCompare(b, "ru"); }); return tg.map(function (g) { return { k: "t:" + g, n: "#" + g, d: 0, f: function (t) { return (t.tags || [])[0] === g; } }; }).concat([{ k: "t:", n: "Без тегов", d: 0, f: function (t) { return !(t.tags || []).length; } }]); }
+    if (mode === "prio") return [1, 2, 3, 0].map(function (p) { return { k: "p:" + p, n: p ? ["", "❗ Приоритет 1", "‼ Приоритет 2", "· Приоритет 3"][p] : "Без приоритета", d: 0, f: function (t) { return (+t.prio || 0) === p; } }; });
+    return [{ k: "p:", n: "📥 Без проекта", d: 0, f: function (t) { return !t.pid; } }].concat(ptree().map(function (g) { return { k: "p:" + g.p.id, n: piconH(g.p) + " " + esc(g.p.n), html: 1, d: g.d, pc: col(g.p.c), f: function (t) { return t.pid === g.p.id; } }; }));
+  }
+  // критический путь: в каждой группе — от задачи со связями, которая кончается позже всех, назад по «ведущей» предшественнице
+  function gCritCalc(l) {
+    var m = {}, inDep = {}; l.forEach(function (t) { (t.after || []).forEach(function (a) { inDep[a] = 1; inDep[t.id] = 1; }); });
+    var by = {}; l.forEach(function (t) { if (!inDep[t.id] || t.done) return; var k = t.pid || ""; if (!by[k] || gSpan(t).e > gSpan(by[k]).e) by[k] = t; });
+    Object.keys(by).forEach(function (k) { var cur = by[k], guard = 0; while (cur && guard++ < 200) { m[cur.id] = 1; var best = null; (cur.after || []).forEach(function (aid) { var a = task(aid); if (!a || a.done || !gSpan(a)) return; if (!best || gSpan(a).e > gSpan(best).e) best = a; }); cur = best; } });
+    return m;
+  }
+  function vGantt() {
+    var from = gFrom(), n = gDays(), px = gPx(), W = n * px, t0 = today0(), showDone = LS.get("zd-gdone") === "1", mode = gGrp(), coll = gColl(), crit = LS.get("zd-gcrit") === "1";
+    var l = tasks().filter(function (t) { return (showDone || !t.done) && (t.at || t.due); });
+    GCRIT = crit ? gCritCalc(l) : {};
+    var h = head("Таймлайн", "Полоса задачи — от даты начала до дедлайна. Перетащите полосу, чтобы сдвинуть сроки, или потяните за край, чтобы изменить начало или дедлайн. Связь — потяните от кружка на конце полосы к другой полосе. Правый клик — меню полосы. Клик — открыть задачу.");
+    h += '<div class="tbar gtbar"><button class="btn sm" type="button" data-a="g-prev" aria-label="Раньше">‹</button><button class="btn sm" type="button" data-a="g-today">Сегодня</button><button class="btn sm" type="button" data-a="g-next" aria-label="Позже">›</button>' +
+      '<div class="seg">' + [["day", "Дни"], ["week", "Недели"], ["month", "Месяцы"]].map(function (z) { return '<button type="button" data-a="g-zoom" data-v="' + z[0] + '" class="' + (GNT.zoom === z[0] ? "on" : "") + '">' + z[1] + "</button>"; }).join("") + "</div>" +
+      '<div class="seg" title="Как группировать строки">' + [["proj", "Проекты"], ["tag", "Теги"], ["prio", "Приоритет"], ["none", "Без групп"]].map(function (z) { return '<button type="button" data-a="g-grp" data-v="' + z[0] + '" class="' + (mode === z[0] ? "on" : "") + '">' + z[1] + "</button>"; }).join("") + "</div>" +
+      (mode !== "none" ? '<button type="button" class="btn sm" data-a="g-colall" title="Свернуть или развернуть все группы">' + (Object.keys(coll).some(function (k) { return coll[k]; }) ? "⊞ Развернуть" : "⊟ Свернуть") + "</button>" : "") +
+      '<label class="gchk"><input type="checkbox" data-a="g-done"' + (showDone ? " checked" : "") + "> выполненные</label>" +
+      '<label class="gchk" title="Стрелки «сначала сделать»: от задачи, которую ждут, к той, что ждёт. Красная — задача начинается раньше, чем закончится нужная"><input type="checkbox" data-a="g-deps"' + (LS.get("zd-gdeps") !== "0" ? " checked" : "") + "> связи</label>" +
+      '<label class="gchk" title="Сдвинули задачу позже — задачи, которые её ждут, сдвигаются следом, чтобы не начинаться раньше"><input type="checkbox" data-a="g-shift"' + (LS.get("zd-gshift") === "1" ? " checked" : "") + "> двигать зависимые</label>" +
+      '<label class="gchk" title="Цепочка связей, от которой зависит срок окончания проекта: задержится любая из них — сдвинется и финиш"><input type="checkbox" data-a="g-crit"' + (crit ? " checked" : "") + "> критический путь</label></div>";
+    var nod = tasks().filter(function (t) { return !t.done && !t.at && !t.due && !t.someday; }).slice(0, 40);
+    if (!l.length) return h + '<div class="empty">Нет задач со сроками. Укажите задаче дату или дедлайн — она появится здесь.</div>' + gNodHTML(nod);
+    var mo = "", dy = "", bg = "", i, cur = -1, ms0 = 0;
+    for (i = 0; i < n; i++) {
+      var dd = new Date(addDays(from, i));
+      if (dd.getMonth() !== cur) { if (cur >= 0) mo += '<div class="gm" style="width:' + (i - ms0) * px + 'px">' + MONF[cur] + (GNT.zoom === "month" && (i - ms0) * px > 90 ? " " + new Date(addDays(from, ms0)).getFullYear() : "") + "</div>"; cur = dd.getMonth(); ms0 = i; }
+      var we = dd.getDay() === 0 || dd.getDay() === 6;
+      if (GNT.zoom === "day") dy += '<div class="gd' + (we ? " we" : "") + (addDays(from, i) === t0 ? " td" : "") + '" style="width:' + px + 'px"><b>' + dd.getDate() + "</b>" + WDS[dd.getDay()] + "</div>";
+      else if (GNT.zoom === "week" && dd.getDay() === 1) dy += '<div class="gd gw" style="left:' + i * px + "px;width:" + 7 * px + 'px">' + dd.getDate() + "." + p2(dd.getMonth() + 1) + "</div>";
+      else if (GNT.zoom === "month" && dd.getDay() === 1 && dd.getDate() <= 7) dy += '<div class="gd gw" style="left:' + i * px + "px;width:" + 28 * px + 'px">нед. ' + dd.getDate() + "</div>";
+      if (we && GNT.zoom === "day") bg += '<i class="gwe" style="left:' + i * px + "px;width:" + px + 'px"></i>';
+      if (GNT.zoom === "month" && dd.getDate() === 1) bg += '<i class="gmo" style="left:' + i * px + 'px"></i>';
+    }
+    mo += '<div class="gm" style="width:' + (n - ms0) * px + 'px">' + MONF[cur] + "</div>";
+    var ti = gIdx(t0); if (ti >= 0 && ti < n) bg += '<i class="gtoday" style="left:' + (ti * px + px / 2) + 'px"></i>';
+    var ids = {}, rows = ""; l.forEach(function (t) { ids[t.id] = 1; });
+    var byStart = function (a, b) { return gSpan(a).s - gSpan(b).s || (a.created || 0) - (b.created || 0); };
+    function row(t, dep, gcol) {
+      var sp = gSpan(t), a = gIdx(sp.s), b = gIdx(sp.e) + 1, left = a * px, w = (b - a) * px, pp = proj(t.pid), late = !t.done && t.due && t.due < t0, pg = gPct(t), ms = !!t.ms;
+      var bar = "", bc = mode === "proj" ? (pp ? col(pp.c) : "var(--acc)") : gcol || (pp ? col(pp.c) : "var(--acc)");
+      if (b > 0 && a < n) {
+        var cl = Math.max(0, left), cw = Math.min(W, left + w) - cl;
+        if (ms) { cl = left + w / 2 - 9; cw = 18; }
+        bar = '<div class="gbar' + (ms ? " gms" : "") + (t.done ? " dn" : "") + (late ? " late" : "") + (!t.at && !ms ? " dl" : "") + (left < 0 ? " cutl" : "") + (left + w > W ? " cutr" : "") + (cw < 100 ? " short" : "") + (GCRIT[t.id] ? " crit" : "") + (pg >= 0 && !ms ? " hasp" : "") + '" data-gid="' + t.id + '" style="left:' + cl + "px;width:" + cw + "px;--bc:" + bc + (pg >= 0 ? ";--pg:" + pg + "%" : "") + '" title="' + esc(t.t) + " · " + gDate(sp.s) + (sp.e !== sp.s ? " — " + gDate(sp.e) : "") + (ms ? " (веха)" : t.due ? " (дедлайн)" : "") + (pg >= 0 ? " · подзадачи " + pg + "%" : "") + '">' + (ms ? "" : '<i class="gh l"></i><span>' + esc(t.t) + (pg >= 0 && cw >= 100 ? ' <small class="gpg">' + pg + "%</small>" : "") + '</span><i class="gh r"></i>') + "</div>" + (cw < 100 || ms ? '<span class="gtx" style="left:' + (cl + cw + 18) + 'px">' + (ms ? "◆ " : "") + esc(t.t) + (pg >= 0 ? " · " + pg + "%" : "") + "</span>" : "") + (left >= 0 && !ms ? '<i class="gcon" data-gcid="' + t.id + '" data-side="l" style="left:' + (cl - 14) + 'px" title="Потяните к задаче, которую нужно сделать раньше"></i>' : "") + (left + w <= W ? '<i class="gcon" data-gcid="' + t.id + '" data-side="r" style="left:' + (cl + cw + 3) + 'px" title="Потяните к задаче, которая ждёт эту"></i>' : "");
+      } else bar = '<span class="gout" style="' + (a >= n ? "right:4px" : "left:4px") + '">' + (a >= n ? gDate(sp.s) + " →" : "← " + gDate(sp.e)) + "</span>";
+      return '<div class="grow"><div class="glab" style="padding-left:' + (10 + dep * 14) + 'px">' + (ms ? '<span class="gmsi">◆</span>' : "") + '<a data-a="g-open" data-id="' + t.id + '" class="' + (t.done ? "dn" : "") + '">' + esc(t.t) + '</a></div><div class="gtrack" style="width:' + W + 'px">' + bar + "</div></div>";
+    }
+    function tree(t, dep, gc) { var out = row(t, dep, gc); l.filter(function (k) { return k.parent === t.id; }).sort(byStart).forEach(function (k) { out += tree(k, dep + 1, gc); }); return out; }
+    gGroups(l, mode).forEach(function (g) {
+      var all = l.filter(g.f), gl = all.filter(function (t) { return !(t.parent && ids[t.parent] && g.f(task(t.parent) || {})); }).sort(byStart);
+      if (!gl.length) return;
+      if (!g.hide) {
+        var s0 = Infinity, e0 = -Infinity; all.forEach(function (t) { var sp = gSpan(t); s0 = Math.min(s0, sp.s); e0 = Math.max(e0, sp.e); });
+        var full = tasks().filter(function (t) { return (t.at || t.due) && g.f(t); }), dn = full.filter(function (t) { return t.done; }).length, pc = full.length ? Math.round(100 * dn / full.length) : 0;
+        var a0 = gIdx(s0), b0 = gIdx(e0) + 1, L = Math.max(0, a0 * px), R0 = Math.min(W, b0 * px), sum = R0 > L ? '<div class="gsum" data-gk="' + esc(g.k) + '" style="left:' + L + "px;width:" + (R0 - L) + "px;--pg:" + pc + "%" + (g.pc ? ";--bc:" + g.pc : "") + '" title="' + (g.html ? "" : esc(g.n) + " · ") + gDate(s0) + " — " + gDate(e0) + " · выполнено " + pc + "% (" + dn + " из " + full.length + ') · перетащите, чтобы сдвинуть всю группу"><span>' + pc + "%</span></div>" : "";
+        rows += '<div class="grow ggrp"><div class="glab" style="padding-left:' + (8 + g.d * 14) + 'px"><button type="button" class="gcol" data-a="g-col" data-k="' + esc(g.k) + '" aria-label="' + (coll[g.k] ? "Развернуть" : "Свернуть") + '">' + (coll[g.k] ? "▸" : "▾") + "</button>" + (g.html ? g.n : esc(g.n)) + ' <small class="muted">' + all.length + '</small></div><div class="gtrack" style="width:' + W + 'px">' + sum + "</div></div>";
+      }
+      if (!coll[g.k] || g.hide) gl.forEach(function (t) { rows += tree(t, 0, g.pc); });
+    });
+    h += '<div class="gwrap" id="gwrap"><div class="ggrid" style="width:calc(var(--glw) + ' + W + 'px)"><div class="ghead"><div class="glab gcorner">Задача</div><div class="gscale" style="width:' + W + 'px"><div class="gms">' + mo + '</div><div class="gds' + (GNT.zoom !== "day" ? " wk" : "") + '">' + dy + "</div></div></div>" +
+      '<div class="gbody"><div class="gbg" style="width:' + W + 'px">' + bg + "</div>" + rows + "</div></div></div>" + gNodHTML(nod);
+    return h;
+  }
+  function gNodHTML(nod) { if (!nod.length) return ""; return '<div class="gnod"><span class="muted">Без дат · ' + nod.length + (nod.length >= 40 ? "+" : "") + ' — перетащите задачу на шкалу, чтобы назначить день:</span>' + nod.map(function (t) { var pp = proj(t.pid); return '<span class="gnc" draggable="true" data-gtask="' + t.id + '" style="--bc:' + (pp ? col(pp.c) : "var(--acc)") + '" title="' + esc((pp ? pp.n + " · " : "") + t.t) + '">' + esc(t.t.slice(0, 50)) + "</span>"; }).join("") + "</div>"; }
+  // итоговая полоса группы: перетащить — сдвинуть все задачи группы
+  document.addEventListener("pointerdown", function (e) { var b = e.target.closest && e.target.closest(".gsum"); if (!b || e.button) return; e.preventDefault(); GSUM = { k: b.dataset.gk, x: e.clientX, el: b, left: b.offsetLeft, d: 0 }; try { b.setPointerCapture(e.pointerId); } catch (er) { /* ok */ } });
+  document.addEventListener("pointermove", function (e) { if (!GSUM) return; var d = Math.round((e.clientX - GSUM.x) / gPx()); if (d === GSUM.d) return; GSUM.d = d; GSUM.el.style.left = GSUM.left + d * gPx() + "px"; GSUM.el.classList.add("drag"); gTip(GSUM.el, d ? (d > 0 ? "+" : "") + d + " " + plural(Math.abs(d), ["день", "дня", "дней"]) : ""); });
+  document.addEventListener("pointerup", function () {
+    if (!GSUM) return; var G = GSUM; GSUM = null; gTip(null, ""); if (!G.d) { render(); return; }
+    var g = gGroups(tasks(), gGrp()).filter(function (x) { return x.k === G.k; })[0]; if (!g) { render(); return; }
+    var l = tasks().filter(function (t) { return !t.done && (t.at || t.due) && g.f(t); }); l.forEach(function (t) { gShiftT(t, G.d); }); save(); render();
+    toastUndo("Сдвинуто задач: " + l.length + " на " + (G.d > 0 ? "+" : "") + G.d + " " + plural(Math.abs(G.d), ["день", "дня", "дней"]), function () { l.forEach(function (t) { gShiftT(t, -G.d); }); });
+  });
+  // правый клик по полосе — меню
+  document.addEventListener("contextmenu", function (e) {
+    var b = e.target.closest && e.target.closest(".gbar[data-gid]"); if (!b) return; e.preventDefault(); var t = task(b.dataset.gid); if (!t) return;
+    ctxShow(e.clientX, e.clientY, [{ c: "open", i: "↗", l: "Открыть задачу" }, { c: "ms", i: t.ms ? "▬" : "◆", l: t.ms ? "Сделать обычной полосой" : "Сделать вехой (контрольная точка)" }, "-", { c: "d1", i: "→", l: "Сдвинуть на день позже" }, { c: "w1", i: "⇥", l: "Сдвинуть на неделю позже" }, { c: "m1", i: "←", l: "Сдвинуть на день раньше" }].concat((t.after || []).length || depBlocks(t).length ? ["-", { c: "nodep", i: "⛓", l: "Убрать все связи задачи" }] : []).concat(["-", { c: "nodate", i: "🗓", l: "Убрать с таймлайна (снять даты)" }]), { k: "gbar", id: t.id });
+  });
+  function gBarCtx(id, c) {
+    var t = task(id); if (!t) return;
+    if (c === "open") { openTask(id); return; }
+    if (c === "ms") { if (t.ms) delete t.ms; else { t.ms = true; if (!t.due && t.at) t.due = sod(t.at); } touch(t); save(); render(); toast(t.ms ? "◆ Веха — ромбик на дату дедлайна" : "Снова обычная полоса"); return; }
+    if (c === "d1" || c === "w1" || c === "m1") { gShiftT(t, c === "d1" ? 1 : c === "w1" ? 7 : -1); var pu = LS.get("zd-gshift") === "1" ? gPush(t) : 0; save(); render(); if (pu) toast("Сдвинуто связанных: " + pu); return; }
+    if (c === "nodep") { var was = (t.after || []).slice(), bl = depBlocks(t); t.after = []; bl.forEach(function (x) { x.after = (x.after || []).filter(function (k) { return k !== t.id; }); touch(x); }); touch(t); save(); render(); toastUndo("Связи убраны", function () { t.after = was; bl.forEach(function (x) { x.after = (x.after || []).concat(t.id); touch(x); }); touch(t); }); return; }
+    if (c === "nodate") { var at = t.at, du = t.due; delete t.at; delete t.due; touch(t); save(); render(); toastUndo("«" + t.t.slice(0, 40) + "» — без дат", function () { if (at) t.at = at; if (du) t.due = du; touch(t); }); }
+  }
+  // задачу без дат — перетащить на шкалу
+  document.addEventListener("dragstart", function (e) { var c = e.target.closest && e.target.closest(".gnc"); if (!c) return; e.dataTransfer.setData("text/plain", "gt:" + c.dataset.gtask); e.dataTransfer.effectAllowed = "move"; });
+  document.addEventListener("dragover", function (e) { var tr = e.target.closest && e.target.closest("#gwrap .gtrack"); if (!tr) return; e.preventDefault(); var r = tr.getBoundingClientRect(), i = Math.floor((e.clientX - r.left) / gPx()); gTip(tr, gDate(addDays(gFrom(), i))); });
+  document.addEventListener("drop", function (e) {
+    var tr = e.target.closest && e.target.closest("#gwrap .gtrack"); if (!tr) return; var d = e.dataTransfer.getData("text/plain") || ""; if (d.indexOf("gt:") !== 0) return; e.preventDefault(); gTip(null, "");
+    var t = task(d.slice(3)); if (!t) return; var r = tr.getBoundingClientRect(), day = addDays(gFrom(), Math.floor((e.clientX - r.left) / gPx())); t.at = day; t.allday = true; touch(t); save(); render(); toast("«" + t.t.slice(0, 40) + "» — " + gDate(day));
+  });
+
   function chalsWidget() {
     var h = "", t0 = today0(), any = false;
     if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
@@ -14384,6 +14450,8 @@ CREATE TABLE inbox (
     h += sec("gantt", "Таймлайн (диаграмма Ганта)", ul([
       "Задачи со сроками на шкале дней, по проектам. Полоса — от даты начала до дедлайна; только дедлайн — штриховка; просроченная — красная обводка; короткие полосы подписаны справа.",
       "<b>Перетащите полосу</b> — начало и дедлайн сдвинутся вместе. <b>Левый край</b> — меняет начало, <b>правый</b> — дедлайн. Во время перетаскивания видны новые даты.",
+      "<b>Группы</b>: по проектам (вложенные проекты — лесенкой), тегам, приоритету или без групп. У группы — итоговая полоса от первой до последней даты с процентом выполненных; ▾ — свернуть группу, «⊟ Свернуть» — все сразу. <b>Итоговую полосу можно перетащить</b> — сдвинется весь проект (можно вернуть).",
+      "<b>Правый клик по полосе</b>: сделать <b>вехой</b> (ромбик на дату — контрольная точка), сдвинуть на день или неделю, убрать связи, снять даты. Если у задачи есть подзадачи, на полосе виден <b>процент</b> выполненных. <b>«Критический путь»</b> — красным выделена цепочка связей, от которой зависит финиш проекта. Масштаб «Месяцы» — на год вперёд. Внизу — <b>задачи без дат</b>: перетащите на шкалу, и у задачи появится дата.",
       "<b>Связь рисуется прямо на шкале</b>: наведите на полосу — по краям появятся кружки. Потяните от <b>правого</b> кружка к другой полосе — та задача будет ждать эту; от <b>левого</b> — эта задача будет ждать ту. Клик по стрелке — меню: открыть задачи, «сдвинуть после» (если задача начинается раньше нужной), удалить связь. Галочка <b>«двигать зависимые»</b>: сдвинули задачу позже — все, кто её ждёт, сдвигаются следом.",
       "<b>Стрелки</b> показывают связи «Сначала сделать»: от задачи, которую ждут, к задаче, которая ждёт. <b>Красная пунктирная</b> — задача начинается раньше, чем закончится нужная: сдвиньте её полосу правее. Серая — нужная задача уже сделана. Галочка «связи» в панели прячет стрелки.",
       "Клик по полосе или названию открывает карточку. «‹ Сегодня ›» листают шкалу, «Дни / Недели» — масштаб, «выполненные» — показать закрытые."]));
@@ -15842,11 +15910,15 @@ CREATE TABLE inbox (
       case "fladd": var nf2 = touch({ id: uid(), n: "Новый флажок", c: (flags().length * 3 + 2) % COLORS.length, ord: flags().length }); S.flags.push(nf2); save(); render(); var fin = document.querySelector('[data-fln="' + nf2.id + '"]'); if (fin) { fin.focus(); fin.select(); } return;
       case "fldel": var fd = flagObj(el.dataset.id); if (fd) { var had = live(S.tasks).filter(function (x) { return (flagOf(x) || {}).id === fd.id; }); had.forEach(function (x) { x.flag = ""; touch(x); }); fd.del = 1; touch(fd); save(); render(); toastUndo("Флажок «" + fd.n + "» удалён" + (had.length ? ", снят с задач: " + had.length : ""), function () { delete fd.del; touch(fd); had.forEach(function (x) { x.flag = fd.id; touch(x); }); save(); render(); }); } return;
       case "tpl-del": var tx = tplObj(el.dataset.id); if (tx) { tx.del = 1; touch(tx); save(); render(); toast("Шаблон удалён"); } return;
-      case "g-prev": case "g-next": GNT.from = addDays(gFrom(), (a === "g-prev" ? -1 : 1) * (GNT.zoom === "week" ? 28 : 7)); GNT.sl = null; GNT.keep = true; render(); return;
+      case "g-prev": case "g-next": GNT.from = addDays(gFrom(), (a === "g-prev" ? -1 : 1) * (GNT.zoom === "month" ? 91 : GNT.zoom === "week" ? 28 : 7)); GNT.sl = null; GNT.keep = true; render(); return;
       case "g-today": GNT.from = 0; GNT.sl = null; GNT.keep = false; render(); return;
       case "g-zoom": GNT.zoom = el.dataset.v; LS.set("zd-gz", GNT.zoom); GNT.from = 0; GNT.sl = null; GNT.keep = false; render(); return;
       case "g-done": LS.set("zd-gdone", LS.get("zd-gdone") === "1" ? "0" : "1"); render(); return;
       case "g-deps": LS.set("zd-gdeps", LS.get("zd-gdeps") === "0" ? "1" : "0"); render(); return;
+      case "g-grp": LS.set("zd-ggrp", el.dataset.v); render(); return;
+      case "g-col": var gc = gColl(); if (gc[el.dataset.k]) delete gc[el.dataset.k]; else gc[el.dataset.k] = 1; LS.set("zd-gcol", JSON.stringify(gc)); render(); return;
+      case "g-colall": var ga = gColl(), anyc = Object.keys(ga).some(function (k) { return ga[k]; }), nc = {}; if (!anyc) gGroups(tasks().filter(function (t) { return t.at || t.due; }), gGrp()).forEach(function (g) { nc[g.k] = 1; }); LS.set("zd-gcol", JSON.stringify(nc)); render(); return;
+      case "g-crit": LS.set("zd-gcrit", LS.get("zd-gcrit") === "1" ? "0" : "1"); render(); return;
       case "g-shift": LS.set("zd-gshift", LS.get("zd-gshift") === "1" ? "0" : "1"); render(); toast(LS.get("zd-gshift") === "1" ? "Связанные задачи будут сдвигаться следом" : "Связанные задачи больше не сдвигаются сами"); return;
       case "g-open": openTask(el.dataset.id); return;
       case "pdel-yes":
@@ -17168,6 +17240,7 @@ CREATE TABLE inbox (
     if (k === "mmmode" || k === "mmtpl") { mm8Ctx(k, id, c); return; }
     if (k === "ndbcol") { ndbCtx(k, id, c); return; }
     if (k === "gdep") { gDepCtx(id, c); return; }
+    if (k === "gbar") { gBarCtx(id, c); return; }
     if (k === "mmlvl") { var lm = note(id); if (mmIs(lm)) mmLevels(lm, c); return; }
     if (k === "nexp") { var en = note(id); if (en) nExport(en, c.replace("+", ""), c.indexOf("+") > 0); return; }
     if (k === "ntplset") { var tn = note(id); if (tn) { if (c === "~") delete tn.tpl; else tn.tpl = c; if (tn.tpl === "map" && !mmRoot(tn)) tn.mm = { r: { id: uid(), k: [] } }; touch(tn); save(); render(); } return; }
