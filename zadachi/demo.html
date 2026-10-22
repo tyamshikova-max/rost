@@ -724,6 +724,8 @@ body.tclean #ntfBtn { order: 1 } body.tclean .prfb { order: 2 }
 .ritmood { gap: 8px; align-items: center; margin: 0 0 10px } .ritc textarea.inp { width: 100%; box-sizing: border-box }
 @media (max-width: 600px) { .hzs { flex-wrap: wrap } .hzs .btn { width: 100% } .hzpg b { font-size: 19px } .prfb { width: 30px; height: 30px } }
 
+.hzw .hzwb { border: 0; background: none; box-shadow: none; padding: 0; min-height: 0; margin: 0 } .hzw .hzwb .wb { padding: 0 } .hzmq { margin: 0 0 12px } .hzmq .chip.on { background: var(--acc); color: #fff; border-color: var(--acc) }
+.spzdr { display: grid; gap: 2px; padding: 4px 6px 12px } .spzdh { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 6px 10px } .spzdb { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; color: var(--fg); text-align: left; padding: 9px 8px; border-radius: 10px; cursor: pointer; font: inherit } .spzdb:hover, .spzdb.on { background: color-mix(in srgb, var(--acc) 9%, transparent) } .spzdb > span:nth-child(2) { flex: 1; min-width: 0; display: grid } .spzdb small { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .spzdb i { font-style: normal; color: var(--muted) } .spzdp { padding: 0 0 8px 12px; border-left: 2px solid color-mix(in srgb, var(--acc) 25%, transparent); margin: 0 0 6px 18px } .spzdf { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 6px 0 }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -8288,7 +8290,7 @@ CREATE TABLE dlg (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-171";
+  var APPV = "zd-app-2026-10-16-172";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -9042,6 +9044,7 @@ CREATE TABLE dlg (
       sv("settings", ic("settings"), "Настройки") + sv("help", ic("help"), "Справка") + "</div>" +
       '<div class="sidecopy" title="Версия ' + esc(APPV.replace("zd-app-", "")) + '">© ' + new Date().getFullYear() + " ytv · Задачи</div>";
     SIDEB = B; SIDEL = L; if (cpOn()) return cpHTML(!!FLY && document.body.classList.contains("sidefly"));
+    if (S.opt.rail !== false && window.innerWidth <= 860) return spzDrawer();
     var sf = sideFold();
     sideOrder().forEach(function (k) { if (B[k]) h += '<div class="sblk' + (sf[k] && k !== "service" ? " fold" : "") + '" data-blk="' + k + '">' + B[k] + "</div>"; });
     return h;
@@ -10580,7 +10583,6 @@ CREATE TABLE dlg (
   function tHours(t) { return +t.est ? +t.est : t.dur ? t.dur / 60 : t.at && !t.allday ? .5 : 0; }
   function dpRow(t, acts) { var p = proj(t.pid); return '<div class="dprow' + (t.done ? " dn" : "") + '"><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + (p ? ' <small>' + esc(p.n) + "</small>" : "") + (t.at || t.due ? ' <small class="' + (isLate(t) ? "late" : "") + '">' + esc(t.at ? whenTxt(t) : "⏰ " + dayName(t.due)) + "</small>" : "") + '</a><span class="dpa">' + acts.map(function (a) { return '<button type="button" class="btn sm' + (a[2] ? " " + a[2] : "") + '" data-a="dpa" data-t="' + t.id + '" data-c="' + a[0] + '">' + a[1] + "</button>"; }).join("") + "</span></div>"; }
   function vDaily() {
-    if (ARG === "review") return vDailyReview();
     var st = DP.step, dr = dayRec(), h = head("🌅 Утренний план", new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) + " · 3–5 минут, чтобы день прошёл спокойно");
     h += '<div class="dpsteps">' + DPSTEPS.map(function (x, i) { return '<button type="button" class="' + (i === st ? "on" : i < st ? "ok" : "") + '" data-a="dpgo" data-x="' + i + '"><b>' + (i < st ? "✓" : i + 1) + "</b>" + x[1] + "</button>"; }).join("") + "</div>";
     var k = DPSTEPS[st][0], b = "";
@@ -10622,20 +10624,6 @@ CREATE TABLE dlg (
     h += '<div class="r dpnav">' + (st > 0 ? '<button type="button" class="btn" data-a="dpgo" data-x="' + (st - 1) + '">← Назад</button>' : "") + (st < DPSTEPS.length - 1 ? '<button type="button" class="btn pri" data-a="dpgo" data-x="' + (st + 1) + '">Далее →</button>' : "") + '<a href="#today" class="muted" style="margin-left:auto">Выйти без сохранения шага</a></div>';
     return h;
   }
-  var DRV = { note: null, mood: 0 };
-  function vDailyReview() {
-    var dr = dayRec(), rv = (dr && dr.review) || {}, t0 = today0(), done = doneEvents().filter(function (e) { return e.d >= t0; }).map(function (e) { return task(e.t) || live(S.tasks).filter(function (x) { return x.id === e.t; })[0]; }).filter(Boolean);
-    var left = todayList().filter(function (t) { return !t.parent; }).sort(cmpBy("smart")), top = (dr && dr.top || []).map(function (id) { return live(S.tasks).filter(function (x) { return x.id === id; })[0]; }).filter(Boolean);
-    var h = head("Итоги дня", new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) + " · закройте день, чтобы завтра начать с чистого листа");
-    var topA = top.filter(function (t) { return !topMvKey(t); }), mvN = top.length - topA.length;
-    h += '<div class="dpsum"><div><b>' + done.length + '</b><small>сделано сегодня</small></div><div><b>' + left.length + '</b><small>осталось</small></div><div><b>' + topA.filter(function (t) { return doneToday(t); }).length + " из " + topA.length + '</b><small>главных сделано' + (mvN ? " · ↷ " + mvN + " " + plural(mvN, ["перенесена", "перенесены", "перенесено"]) : "") + "</small></div></div>";
-    if (top.length) h += '<div class="card dpbody"><h2>★ Главное</h2>' + top.map(function (t) { var mk = topMvKey(t); if (mk) return '<div class="dprow mv"><span class="dpstar">↷</span><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + " <small>перенесена " + esc(topMvTxt(mk)) + "</small></a></div>"; var dn = doneToday(t); return '<div class="dprow' + (dn ? " dn" : "") + '"><span class="dpstar on">' + (dn ? "✓" : "★") + '</span><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + "</a></div>"; }).join("") + "</div>";
-    h += '<div class="card dpbody"><h2>Что не успели <span class="c">' + left.length + "</span></h2>" + (left.length ? left.map(function (t) { return dpRow(t, [["done", "✓ Сделано"], ["d:1", "Завтра"], ["d:7", "Через неделю"], ["d:some", "Когда-нибудь"]]); }).join("") : '<p class="dpempty">✓ Всё сделано — отличный день</p>') + "</div>";
-    if (done.length) h += '<div class="card dpbody"><h2>Сделано <span class="c">' + done.length + "</span></h2>" + done.slice(0, 30).map(function (t) { return '<div class="dprow dn"><span class="dpstar">✓</span><span class="dpt">' + esc(t.t) + "</span></div>"; }).join("") + "</div>";
-    var mood = DRV.mood || dMood(dr || {}) || 0;
-    h += '<div class="card dpbody"><h2>Как прошёл день</h2><div class="seg dpmood">' + ["😞", "🙁", "😐", "🙂", "😄"].map(function (m, i) { return '<button type="button" data-a="dpmood" data-x="' + (i + 1) + '" class="' + (mood === i + 1 ? "on" : "") + '">' + m + "</button>"; }).join("") + '</div><textarea class="inp" rows="3" data-drnote="1" placeholder="Что получилось, что мешало, что важно завтра" style="width:100%;margin-top:8px">' + esc(DRV.note !== null ? DRV.note : dNote(dr || {})) + '</textarea><div class="r" style="margin-top:10px"><button type="button" class="btn pri" data-a="drdone">🌙 Завершить день</button>' + (rv.at ? '<span class="muted">итоги сохранены ' + hm(rv.at) + "</span>" : "") + "</div></div>";
-    return h;
-  }
   function todayPlanBox() {
     var dr = dayRec(), top = dayTop(), late = new Date().getHours() >= 17;
     var h = "";
@@ -10653,7 +10641,6 @@ CREATE TABLE dlg (
     var tg = e.target, ds = tg.dataset || {};
     if (ds.dptime) { var t = task(ds.dptime); if (!t) return; if (tg.value) { var p = tg.value.split(":"), d = new Date(today0()); d.setHours(+p[0], +p[1], 0, 0); t.at = d.getTime(); t.allday = false; if (!t.dur && !+t.est) t.dur = 30; if (S.opt.autoRem) t.rem = true; } else { t.at = today0(); t.allday = true; } touch(t); save(); render(); return; }
     if (ds.dpest) { var t2 = task(ds.dpest); if (!t2) return; t2.est = +tg.value || 0; touch(t2); save(); render(); return; }
-    if (ds.drnote) { DRV.note = tg.value; }
     if (ds.dpcap) { var v = Math.round((+String(tg.value).replace(",", ".") || 0) * 2) / 2; if (!(v >= 1)) v = 1; if (v > 24) v = 24; S.opt.dayCap = v; optTouch(); save(); render(); if (+tg.value > 24 || +tg.value < 1) toast("Можно от 1 до 24 часов"); return; }
   });
 
@@ -17607,6 +17594,7 @@ CREATE TABLE dlg (
   var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
   function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
   var CHLOG = [
+    ["172", "Главная под себя", ["Свои карточки на главной: любой виджет, как на досках, — «✎ Настроить главную» → «＋ Новая карточка…» или «＋ Виджет с доски…».", "«＋» в шапке панелей «Мой день», «Жизнь», «Дом и деньги»: задача на сегодня, привычка, цель, запись в дневник, меню, рецепт, документ, общий список.", "Вечером, когда день закрыт, на главной — итог: сделано, настроение и первое дело на завтра.", "Новичку — вопрос «Для чего вам приложение?»: нужные модули включаются сразу.", "На телефоне ☰ открывает шесть пространств вместо старой длинной панели.", "Значок «Дом и деньги» — 🔑. Учебный курс: все снимки пересняты на новом интерфейсе."]],
     ["170", "Новая структура", ["Главная страница по логотипу: приветствие, подсказка по времени суток, быстрый ввод и карточки «Сейчас», «Главное», «Прогресс дня», «Требует внимания», «Продолжить», привычки и самочувствие — их можно переставить и скрыть.", "Шесть пространств на полосе значков: Главная, Мой день, Задачи, Знания, Жизнь, Дом и деньги. У каждого — страница-обзор и своя панель; крошки тоже по пространствам.", "Без дублей: один утренний план (вместо «Плана дня» и «Утреннего плана») и одно завершение дня с настроением (вместо «Итогов дня»). «Статистика», «Отчёты» и «Итоги месяца» — вкладки одной «Аналитики».", "Чистая верхняя строка: логотип, поиск, 🔔 и кружок профиля — в нём синхронизация, тема, настройки, справка, клавиши, «Что нового» и уровень. 🎧, 🔋 и 📍 — в карточке «Сейчас».", "Модули: ненужные разделы можно выключить — данные остаются.", "«Первые шаги» на главной для новичков и ⋯ у заголовка каждой страницы."]],
     ["169", "Курс на новом интерфейсе", ["Снимки уроков 1–19 учебного курса пересняты на новом интерфейсе, текст про левую панель обновлён под полосу значков и панели."]],
     ["168", "Курс и демо", ["Учебный курс дополнен уроками 20–28: навигация, ритм дня, живые заметки, карты и холст, повторение и книги, люди и здоровье, мотивация, вместе с близкими, быстрые приёмы.", "Тестовые данные (и демо) показывают все блоки: заметки всех типов, карты мыслей, холст, панели с живыми списками и кнопками, людей, документы, самочувствие, сад, итоги, отложенные и застрявшие задачи."]],
@@ -18143,14 +18131,6 @@ CREATE TABLE dlg (
     return '<div class="modebar ritbar"><b>' + (k === "morning" ? "🌅 Утренний план" : "🌙 Завершить день") + "</b><span>" + (k === "morning" ? "2 минуты: хвосты, главное, время" : "5 минут: сделанное, хвосты, дневник, первое дело на завтра") + '</span><a class="btn sm pri" href="#' + k + '">Начать</a><button type="button" class="ibtn" data-a="ritbx" data-x="' + k + '" title="Не сегодня" aria-label="Не сегодня">✕</button></div>';
   }
   function ritRow(t, acts) { var p = proj(t.pid), mv = stuckN(t.id); return '<div class="ritr"><a href="#task-' + t.id + '">' + esc(t.t) + "</a>" + (p ? '<span class="muted">' + esc(p.n) + "</span>" : "") + (mv >= 3 ? '<em class="stkn" title="Сколько раз переносили">×' + mv + "</em>" : "") + '<span class="ritra">' + acts.map(function (a) { return '<button type="button" class="btn sm" data-a="ritt" data-x="' + a[0] + '" data-id="' + t.id + '">' + a[1] + "</button>"; }).join("") + "</span></div>"; }
-  function mornStep(s) {
-    var t0 = today0();
-    if (s === 0) { var late = tasks().filter(isLate); return "<h3>Хвосты со вчера</h3>" + (late.length ? '<p class="muted">Просрочено: ' + late.length + '. Решите для каждой: сегодня, завтра, отложить или закрыть.</p><div class="r" style="margin-bottom:8px"><button type="button" class="btn sm" data-a="ritall" data-x="d:0" data-l="late">Все — на сегодня</button></div>' + late.map(function (t) { return ritRow(t, [["d:0", "Сегодня"], ["d:1", "Завтра"], ["snz7", "💤 Неделя"], ["done", "✓"], ["del", "🗑"]]); }).join("") : '<p class="okc">Хвостов нет ✓ Можно сразу к главному.</p>'); }
-    if (s === 1) { var r = dayRec(), top = r ? r.top || [] : [], l = todayList(); return "<h3>Главное на сегодня</h3><p class=\"muted\">Отметьте ★ до трёх дел — они будут вверху «Сегодня».</p>" + (l.length ? l.sort(function (a, b) { return (top.indexOf(b.id) >= 0) - (top.indexOf(a.id) >= 0); }).map(function (t) { var on = top.indexOf(t.id) >= 0; return '<div class="ritr' + (on ? " on" : "") + '"><button type="button" class="ritstar" data-a="rittop" data-id="' + t.id + '" title="Главное" aria-label="Главное">' + (on ? "★" : "☆") + '</button><a href="#task-' + t.id + '">' + esc(t.t) + "</a></div>"; }).join("") : '<p class="muted">На сегодня задач нет — добавьте из «Планов» или быстрым вводом.</p>'); }
-    if (s === 2) { var hs = todayList().reduce(function (a, t) { return a + tHours(t); }, 0), dq = +S.opt.dayq || 0; return "<h3>По времени</h3><p>На сегодня запланировано <b>" + fmtH(hs) + " ч</b>" + (dq ? " при лимите " + fmtH(dq) + " ч" + (hs > dq ? ' — <span class="warnc">перегруз, что-то лучше перенести</span>' : " ✓") : "") + '.</p><div class="r" style="gap:8px"><button type="button" class="btn pri" data-a="apgo">⚡ Расставить по времени</button><button type="button" class="btn" data-a="dayq">⏱ Лимит дня…</button></div><p class="muted">Задачи без времени встанут в свободные окна; что не влезет — на завтра.</p>'; }
-    var rr = dayRec(), tp = rr ? (rr.top || []).map(task).filter(Boolean) : [];
-    return "<h3>Готово</h3>" + (tp.length ? "<p>Главное: " + tp.map(function (t) { return "<b>" + esc(t.t) + "</b>"; }).join(" · ") + "</p>" : "") + "<p>Задач на сегодня: " + todayList().length + '.</p><label class="muted" for="ritint">Намерение на день (по желанию)</label><input class="inp" id="ritint" value="' + esc((rr && rr.mi) || "") + '" placeholder="Например: спокойно закрыть отчёт и погулять">';
-  }
   function sdStep(s) {
     var t0 = today0();
     if (s === 0) { var dn = tasks().filter(function (t) { return t.done && (t.dt || 0) >= t0; }); return "<h3>Что сделано сегодня</h3>" + (dn.length ? "<p>Готово задач: <b>" + dn.length + "</b> 🎉</p><ul class=\"ritul\">" + dn.slice(0, 14).map(function (t) { return "<li>" + esc(t.t) + "</li>"; }).join("") + (dn.length > 14 ? "<li class=\"muted\">и ещё " + (dn.length - 14) + "</li>" : "") + "</ul>" : '<p class="muted">Сегодня ничего не отмечено сделанным — бывает. Может, что-то сделано, но не отмечено?</p>'); }
@@ -18164,10 +18144,9 @@ CREATE TABLE dlg (
     var steps = k === "morning" ? ["Хвосты", "Главное", "По времени", "Готово"] : ["Сделано", "Хвосты", "Дневник", "Завтра"], last = RIT.s >= steps.length - 1;
     var h = head(k === "morning" ? "🌅 Утренний план" : "🌙 Завершение дня", k === "morning" ? "Пара минут, чтобы начать день спокойно: разобрать хвосты, выбрать главное и разложить по времени." : "Пять минут, чтобы закрыть день: отметить сделанное, решить с хвостами, пара строк в дневник и первое дело на завтра.");
     h += '<div class="ritst">' + steps.map(function (s, i) { return '<button type="button" data-a="rits" data-x="' + i + '" class="' + (i === RIT.s ? "on" : i < RIT.s ? "ok" : "") + '"><b>' + (i < RIT.s ? "✓" : i + 1) + "</b>" + s + "</button>"; }).join("") + "</div>";
-    h += '<div class="card ritc">' + (k === "morning" ? mornStep(RIT.s) : sdStep(RIT.s)) + "</div>";
+    h += '<div class="card ritc">' + sdStep(RIT.s) + "</div>";
     return h + '<div class="r ritnav">' + (RIT.s ? '<button type="button" class="btn" data-a="rits" data-x="' + (RIT.s - 1) + '">← Назад</button>' : "") + (last ? '<button type="button" class="btn pri" data-a="ritdone">' + (k === "morning" ? "Готово — к задачам" : "Готово — день закрыт") + "</button>" : '<button type="button" class="btn pri" data-a="rits" data-x="' + (RIT.s + 1) + '">Далее →</button>') + "</div>";
   }
-  function vMorning() { return ritualView("morning"); }
   function vShutdown() { return ritualView("shutdown"); }
   document.addEventListener("change", function (e) { if (e.target && e.target.id === "ritint") { var r = dayRec(true); r.mi = e.target.value.slice(0, 300); touch(r); save(); } });
   document.addEventListener("keydown", function (e) {
@@ -18719,7 +18698,7 @@ CREATE TABLE dlg (
           "<b>⚠ Требует внимания</b> — неразобранные входящие, просрочка, дни рождения на неделе, сроки документов, карточки на повторение, «пора напомнить», застрявшие задачи, конфликты синхронизации.",
           "<b>↩ Продолжить</b> — последние открытые проекты, заметки и доски. <b>🌱 Привычки</b> и <b>🌿 Самочувствие</b> — отметить прямо здесь.",
           "Внизу — плитки пространств с живой строкой: задачи на сегодня, открытые задачи, заметки, привычки, бюджет недели.",
-          "«✎ Настроить главную»: ↑ ↓ — порядок карточек, ✕ — скрыть; скрытые возвращаются кнопками «＋». «↺ Как было» — исходный вид."],
+          "«✎ Настроить главную»: ↑ ↓ — порядок карточек, ✕ — скрыть; скрытые возвращаются кнопками «＋». «↺ Как было» — исходный вид.", "<b>Свои карточки</b>: в «✎ Настроить главную» — «＋ Новая карточка…» (любой виджет, как на досках: список задач, сроки, календарь, цели, бюджет, число, график, помидор…) или «＋ Виджет с доски…» — уже настроенный виджет любой доски. Новые карточки живут на доске «🏠 Карточки главной»: ↗ на карточке открывает её, там — размер и настройка.", "Вечером, когда день закрыт, наверху — итог: сколько сделано, настроение и первое дело на завтра.", "Новичку главная сначала спрашивает «Для чего вам приложение?»: работа, учёба, дом, деньги, здоровье — и включает нужные модули."],
         ex: [["Утро за минуту", "Открыли приложение — «Доброе утро» и подсказка «🌅 спланируйте день». Прошли пять шагов — на главной уже ★ три главных дела, а «⚠ Требует внимания» напоминает, что у мамы день рождения через 3 дня."],
           ["Минимум на экране", "Скрыли «Сейчас» и «Самочувствие», «Главное» подняли наверх — главная стала коротким списком «что важно и что горит»."]],
         tips: ["Хотите, чтобы при запуске открывалось «Сегодня», как раньше, — ⋯ у заголовка «Сегодня» → «Открывать при запуске».", "Новичкам на главной показываются «🚀 Первые шаги»: добавить задачу, разобрать «Входящие», создать проект, отметить привычку, войти через Яндекс. Когда всё сделано, карточка исчезает сама; ✕ — скрыть раньше."],
@@ -18733,7 +18712,7 @@ CREATE TABLE dlg (
           "📝 <b>Знания</b> — заметки (страницы, таблицы, карты мыслей, холсты, книги с цитатами), граф заметок, повторение, каталог шаблонов.",
           "🌿 <b>Жизнь</b> — привычки, цели, самочувствие, дневник, колесо баланса, люди, сад фокуса и «Аналитика».",
           "🧺 <b>Дом и деньги</b> — меню и кухня, план уборки, бюджет, документы и подписки, общие списки с близкими.",
-          "Щелчок по значку — страница-обзор: плитки разделов с живыми цифрами, а ниже — проекты (в «Задачах»), недавние заметки (в «Знаниях»), привычки и цели (в «Жизни»)."],
+          "Щелчок по значку — страница-обзор: плитки разделов с живыми цифрами, а ниже — проекты (в «Задачах»), недавние заметки (в «Знаниях»), привычки и цели (в «Жизни»).", "«＋» в шапке панели создаёт то, что нужно именно здесь: в «Задачах» — проект, в «Знаниях» — заметку, в «Мой день» — задачу на сегодня, в «Жизни» — привычку, цель, запись в дневник, в «Доме и деньгах» — меню, рецепт, документ, общий список.", "На телефоне и узком экране ☰ открывает те же шесть пространств: открытое раскрыто, щелчок по другому — переключиться."],
         ex: [["Где бюджет?", "🔑 → плитка «Бюджет» показывает траты недели прямо на обзоре; щелчок — сам бюджет."], ["Всё про здоровье", "🌿 → «Самочувствие», «Привычки» и «Колесо баланса» рядом, а «Аналитика» покажет, как идут дела за месяц."]],
         tips: ["Крошки над заголовком тоже по пространствам: «🏠 Главная / 🌿 Жизнь /».", "Разделом не пользуетесь — выключите его в «🧩 Модули», и пространство станет короче."],
         go: [["sp-day", "☀ Мой день"], ["sp-task", "✅ Задачи"], ["sp-life", "🌿 Жизнь"]] }),
@@ -18824,7 +18803,7 @@ CREATE TABLE dlg (
         ex: [["Разбор «Входящих» без мыши", "j — первая задача, «.» → набрать «пт» → Enter (на пятницу), j — следующая, «.» → «проект дом» → Enter."]] }),
       hx("x-mobile", "Телефон", {
         what: "На телефоне всё то же, но под палец.",
-        how: ["Нижняя панель: 🏠 Главная · Сегодня · ▦ Разделы · ✅ Задачи · 📝 Знания. «Задачи» и «Знания» открываются шторкой: «Обзор» — страница пространства, «☰ Вся панель» — прежнее меню.",
+        how: ["Нижняя панель: 🏠 Главная · Сегодня · ▦ Разделы · ✅ Задачи · 📝 Знания. «Задачи» и «Знания» открываются шторкой: «Обзор» — страница пространства, «☰ Вся панель» — все шесть пространств.", "☰ слева вверху — шесть пространств списком: открытое раскрыто со всеми разделами, щелчок по другому — переключиться.",
           "Карточка задачи — шторкой на полэкрана: потяните за ручку вверх — на весь экран, вниз — закрыть.",
           "Долгое нажатие на задачу — меню действий (первый пункт — «Выбрать несколько»); при отметке «готово» — лёгкая вибрация.",
           "Потяните список вниз в самом верху — синхронизация.",
@@ -19147,7 +19126,7 @@ CREATE TABLE dlg (
   }
   // ---------- главная ----------
   var HZC = [["fst", "🚀 Первые шаги"], ["now", "⏱ Сейчас"], ["top", "★ Главное на сегодня"], ["prog", "📊 Прогресс дня"], ["att", "⚠ Требует внимания"], ["cont", "↩ Продолжить"], ["hab", "🌱 Привычки сегодня"], ["well", "🌿 Самочувствие"]], HZED = false;
-  function hzOrder() { var o = (S.opt.homec || []).filter(function (k) { return HZC.some(function (c) { return c[0] === k; }); }); HZC.forEach(function (c) { if (o.indexOf(c[0]) < 0) o.push(c[0]); }); return o; }
+  function hzOrder() { var wk = hzWKeys(), o = (S.opt.homec || []).filter(function (k) { return HZC.some(function (c) { return c[0] === k; }) || wk.indexOf(k) >= 0; }); HZC.forEach(function (c) { if (o.indexOf(c[0]) < 0) o.push(c[0]); }); wk.forEach(function (k) { if (o.indexOf(k) < 0) o.push(k); }); return o; }
   function hzHid() { return S.opt.homeh || []; }
   function hzName(k) { var c = HZC.filter(function (z) { return z[0] === k; })[0]; return c ? c[1] : k; }
   function hzMorn() { var r = dayRec(); return LS.get("zd-rit-morning") === dKey(today0()) || !!(r && r.planned); }
@@ -19156,6 +19135,7 @@ CREATE TABLE dlg (
   function hzNext() { var now = Date.now(), end = today0() + DAY; return tasks().filter(function (t) { return !t.done && t.at && !t.allday && t.at >= now - 30 * 60000 && t.at < end; }).sort(function (a, b) { return a.at - b.at; }); }
   function hzSug() {
     var hr = new Date().getHours(), nx = hzNext(), tp = dayTop().filter(function (t) { return !t.done && !topMvKey(t); });
+    if (hr >= 17 && hzEve()) return hzEveCard();
     if (hr < 12 && !hzMorn()) return '<div class="hzs mo"><span class="hzsi">🌅</span><div><b>Утро — спланируйте день</b><small>2–3 минуты: входящие, хвосты, главное, время</small></div><a class="btn pri" href="#morning">Начать</a></div>';
     if (hr >= 17 && !hzEve()) return '<div class="hzs ev"><span class="hzsi">🌙</span><div><b>Вечер — закройте день</b><small>5 минут: сделанное, хвосты, пара строк в дневник, первое дело на завтра</small></div><a class="btn pri" href="#shutdown">Начать</a></div>';
     var cur = nx[0] && nx[0].at <= Date.now() ? nx[0] : null, nxt = nx.filter(function (t) { return t.at > Date.now(); })[0];
@@ -19181,6 +19161,7 @@ CREATE TABLE dlg (
   }
   function fstShow() { return !S.opt.fstoff && fstSteps().some(function (x) { return !x[3]; }); }
   function hzCard(k) {
+    if (/^w:/.test(k)) return hzWCard(k);
     var t0 = today0(), b = "", more = "";
     try {
       if (k === "fst") {
@@ -19237,10 +19218,10 @@ CREATE TABLE dlg (
     h += hzSug();
     h += '<div class="hzq"><input class="inp" id="hzq" type="text" placeholder="Записать задачу: «завтра в 10 позвонить маме #дела» — Enter" autocomplete="off" aria-label="Новая задача"><button type="button" class="btn pri" data-a="hzadd">＋</button></div>';
     var hid = hzHid(), cards = hzOrder().filter(function (k) { return HZED || hid.indexOf(k) < 0; }).map(function (k) { return hid.indexOf(k) >= 0 ? "" : hzCard(k); }).join("");
-    h += '<div class="hzgrid">' + cards + "</div>";
+    h += hzModQ() + '<div class="hzgrid">' + cards + "</div>";
     if (HZED) {
       var hs = hid.filter(function (k) { return HZC.some(function (c) { return c[0] === k; }); });
-      h += '<div class="card hzedb"><b>Настройка главной</b><p class="muted">↑ ↓ — порядок карточек, ✕ — скрыть. Скрытые можно вернуть:</p><div class="chips">' + (hs.length ? hs.map(function (k) { return '<button type="button" class="chip" data-a="hzshow" data-x="' + k + '">＋ ' + hzName(k) + "</button>"; }).join("") : '<span class="muted">скрытых нет</span>') + (S.opt.fstoff ? '<button type="button" class="chip" data-a="fston">＋ 🚀 Первые шаги</button>' : "") + '</div><div class="r" style="gap:8px;margin-top:10px"><button type="button" class="btn pri" data-a="hzed">Готово</button><button type="button" class="btn" data-a="hzreset">↺ Как было</button></div></div>';
+      h += '<div class="card hzedb"><b>Настройка главной</b><p class="muted">↑ ↓ — порядок карточек, ✕ — скрыть. Свои карточки — любой виджет, как на досках:</p><div class="r" style="gap:8px;margin:0 0 10px"><button type="button" class="btn sm" data-a="hzwnew">＋ Новая карточка…</button><button type="button" class="btn sm" data-a="hzwpick">＋ Виджет с доски…</button></div><p class="muted">Скрытые можно вернуть:</p><div class="chips">' + (hs.length ? hs.map(function (k) { return '<button type="button" class="chip" data-a="hzshow" data-x="' + k + '">＋ ' + hzName(k) + "</button>"; }).join("") : '<span class="muted">скрытых нет</span>') + (S.opt.fstoff ? '<button type="button" class="chip" data-a="fston">＋ 🚀 Первые шаги</button>' : "") + '</div><div class="r" style="gap:8px;margin-top:10px"><button type="button" class="btn pri" data-a="hzed">Готово</button><button type="button" class="btn" data-a="hzreset">↺ Как было</button></div></div>';
     }
     h += '<h3 class="apph">Пространства</h3>' + spzTiles();
     h += '<div class="r hzfoot"><button type="button" class="btn sm" data-a="hzed">' + (HZED ? "✓ Готово" : "✎ Настроить главную") + '</button><a class="btn sm" href="#apps">▦ Все разделы</a><a class="btn sm" href="#mods">🧩 Модули</a></div>';
@@ -19326,7 +19307,7 @@ CREATE TABLE dlg (
       case "hzqf": var q2 = $("hzq"); if (q2) { q2.focus(); q2.scrollIntoView({ block: "center" }); } return true;
       case "hzed": HZED = !HZED; render(); return true;
       case "hzmv": L = hzOrder(); var j = L.indexOf(x), k = j + (+el.dataset.d); if (j < 0 || k < 0 || k >= L.length) return true; L.splice(j, 1); L.splice(k, 0, x); S.opt.homec = L; optTouch(); save(); render(); return true;
-      case "hzhide": var hh = hzHid().slice(); if (hh.indexOf(x) < 0) hh.push(x); S.opt.homeh = hh; optTouch(); save(); render(); return true;
+      case "hzhide": if (/^w:/.test(x)) { hzWDel(x); return true; } var hh = hzHid().slice(); if (hh.indexOf(x) < 0) hh.push(x); S.opt.homeh = hh; optTouch(); save(); render(); return true;
       case "hzshow": S.opt.homeh = hzHid().filter(function (z) { return z !== x; }); optTouch(); save(); render(); return true;
       case "hzreset": delete S.opt.homec; delete S.opt.homeh; optTouch(); save(); render(); return true;
       case "hzctx": var b = $("ctxBtn"); if (b) { var hd = b.hidden; b.hidden = false; b.click(); b.hidden = hd; var m = $("ctx"), rr = el.getBoundingClientRect(); if (m && !m.hidden) place(m, rr.left, rr.bottom + 4); } return true;
@@ -19357,6 +19338,92 @@ CREATE TABLE dlg (
     if (V === "sp" || V === "home") return h;
     if (V === "apps") { var off = modsOffList().length; if (off) h += '<div class="modebar"><b>🧩 Модули</b><span>выключено ' + off + " — их здесь не видно</span><a class=\"btn sm\" href=\"#mods\">Настроить</a></div>"; }
     return h;
+  }
+
+  /* ---------- v172: свои карточки на главной (виджеты досок), «＋» в панелях пространств, вопрос «для чего вам
+     приложение» новичку, вечерняя карточка «день закрыт», меню ☰ на телефоне — по пространствам ---------- */
+  // карточка главной из виджета доски: ключ «w:доска:виджет»; новые — на доске «🏠 Карточки главной»
+  var HZWT = ["tasks", "dead", "cal", "habits", "goals", "budget", "savings", "count", "chart", "time", "pomo", "srs", "nold", "health", "routine", "quick", "chals", "order"];
+  function hzWList() { return (S.opt.homew || []).filter(function (x) { var b = board(x.b); return b && wOf(b, x.w); }); }
+  function hzWKeys() { return hzWList().map(function (x) { return "w:" + x.b + ":" + x.w; }); }
+  function hzWRef(k) { var p = String(k).split(":"), b = board(p[1]), w = wOf(b, p[2]); return b && w ? { b: b, w: w } : null; }
+  function hzEdBtns(k) { return '<span class="hzed"><button type="button" class="ibtn" data-a="hzmv" data-x="' + k + '" data-d="-1" title="Выше" aria-label="Выше">↑</button><button type="button" class="ibtn" data-a="hzmv" data-x="' + k + '" data-d="1" title="Ниже" aria-label="Ниже">↓</button><button type="button" class="ibtn" data-a="hzhide" data-x="' + k + '" title="Убрать с главной" aria-label="Убрать">✕</button></span>'; }
+  function hzWCard(k) {
+    var r = hzWRef(k); if (!r) return "";
+    var w = wEff(r.b, r.w), ttl = (w.cfg || {}).t || wDefTitle(w), ic = (WT[w.type] || {}).i || "▦", body;
+    try { body = wBody(r.b, w); } catch (e) { body = '<p class="muted">Не удалось показать виджет.</p>'; }
+    return '<section class="card hzc hzw" data-hz="' + esc(k) + '"><div class="hzh"><b>' + esc(ic) + " " + esc(ttl) + "</b>" + (HZED ? hzEdBtns(k) : '<a class="ibtn" href="#board-' + r.b.id + '" title="Открыть на доске «' + esc(r.b.n) + '» — там размер и настройка" aria-label="Открыть на доске">↗</a>') + '</div><div class="wdg hzwb w-' + w.type + '" data-w="' + w.id + '"><div class="wb">' + body + "</div></div></section>";
+  }
+  function hzBoard() { var b = boards().filter(function (x) { return x.homeb; })[0]; return b || bCreate("🏠 Карточки главной", [], { homeb: 1 }); }
+  function hzWPin(bid, wid) { var l = (S.opt.homew || []).filter(function (x) { return !(x.b === bid && x.w === wid); }); l.push({ b: bid, w: wid }); S.opt.homew = l; optTouch(); save(); render(); }
+  function hzWDel(k) { var p = String(k).split(":"); S.opt.homew = (S.opt.homew || []).filter(function (x) { return !(x.b === p[1] && x.w === p[2]); }); S.opt.homec = (S.opt.homec || []).filter(function (z) { return z !== k; }); optTouch(); save(); render(); }
+  function hzWMenu(el, kind) {
+    var r = el.getBoundingClientRect(), it = [];
+    if (kind === "new") it = HZWT.filter(function (t) { return WT[t] && (t !== "budget" || modOn("budget")) && (t !== "srs" || modOn("srs")); }).map(function (t) { return { c: "t:" + t, i: WT[t].i, l: WT[t].n }; });
+    else boards().forEach(function (b) { (b.w || []).forEach(function (w) { var we = wEff(b, w), on = (S.opt.homew || []).some(function (x) { return x.b === b.id && x.w === w.id; }); it.push({ c: "p:" + b.id + ":" + w.id, i: (WT[w.type] || {}).i || "▦", l: b.n + " — " + ((we.cfg || {}).t || wDefTitle(we)), k: on ? "✓" : "" }); }); });
+    if (!it.length) { toast("Досок с виджетами пока нет — добавьте «＋ Новая карточка»"); return; }
+    ctxShow(r.left, r.bottom + 4, it, { k: "hzw" });
+  }
+  // новичку: для чего приложение — включить нужные модули одним касанием
+  var MODQ = [["work", "💼", "Работа и проекты", ["sprint", "gantt", "matrix", "tbox"]], ["study", "🎓", "Учёба и знания", ["srs", "ngraph", "dnote"]], ["home", "🏡", "Дом и кухня", ["menu", "kitchen", "clean", "shared"]], ["money", "💰", "Деньги и документы", ["budget", "docs"]], ["health", "🌿", "Здоровье и баланс", ["wheel", "garden"]]], MQSEL = {};
+  function hzModQ() {
+    if (!S.opt.mods || S.opt.modq) return "";
+    return '<section class="card hzmq"><div class="hzh"><b>🧩 Для чего вам приложение?</b><button type="button" class="ibtn" data-a="mqskip" title="Пропустить" aria-label="Пропустить">✕</button></div><p class="muted">Отметьте, что пригодится, — включим нужные разделы. Остальное можно включить потом в «🧩 Модули».</p><div class="chips">' +
+      MODQ.map(function (q) { return '<button type="button" class="chip' + (MQSEL[q[0]] ? " on" : "") + '" data-a="mqtg" data-x="' + q[0] + '" aria-pressed="' + !!MQSEL[q[0]] + '">' + q[1] + " " + q[2] + "</button>"; }).join("") +
+      '</div><div class="r" style="gap:8px;margin-top:10px"><button type="button" class="btn pri" data-a="mqok">Готово</button><button type="button" class="btn" data-a="mqskip">Только основное</button></div></section>';
+  }
+  // вечер после завершения дня: итог и первое дело на завтра
+  function hzEveCard() {
+    var t0 = today0(), dn = doneEvents().filter(function (e) { return e.d >= t0; }).length, md = dMood(dayRec() || {}), tr = dayRecOf(dKey(addDays(t0, 1))), ft = tr && (tr.top || []).length ? task(tr.top[0]) : null;
+    return '<div class="hzs ev"><span class="hzsi">🌙</span><div><b>День закрыт ✓ Сделано: ' + dn + "</b><small>" + (md ? "настроение " + MOODS[md - 1] + " · " : "") + (ft ? "завтра первым делом: «" + esc(ft.t) + "»" : "первое дело на завтра не выбрано") + "</small></div>" + (ft ? '<a class="btn" href="#task-' + ft.id + '">Открыть</a>' : '<a class="btn" href="#shutdown">Выбрать</a>') + "</div>";
+  }
+  // «＋» в шапке панелей «Мой день», «Жизнь», «Дом и деньги»
+  var SPZPLUS = { day: [["q", "☐", "Задача на сегодня", ""], ["go:morning", "🌅", "Утренний план", ""], ["go:tbox", "🧱", "План по часам", "tbox"], ["go:dnote", "📅", "День за днём", "dnote"]],
+    life: [["hab", "🌱", "Привычка", ""], ["go:goals", "🎯", "Цель", "goals"], ["go:journal", "📔", "Запись в дневник", "journal"], ["go:health", "🌿", "Отметить самочувствие", "health"], ["go:people", "👥", "Человек", "people"]],
+    house: [["go:menunew", "🍲", "Меню на неделю", "menu"], ["go:recipes", "📖", "Рецепт", "menu"], ["go:docs", "📑", "Документ или подписка", "docs"], ["go:clean", "🧹", "План уборки", "clean"], ["go:shared", "👨‍👩‍👧", "Общий список", "shared"]] };
+  ["day", "life", "house"].forEach(function (k) { CPADD[k] = [["spzplus", "＋", "Добавить…"]]; });
+  function spzPlus(el) {
+    var r = el.getBoundingClientRect(), l = (SPZPLUS[cpSpace()] || []).filter(function (x) { return !x[3] || modOn(x[3]); });
+    if (!l.length) { toast("Здесь всё выключено — включите разделы в «🧩 Модули»"); return; }
+    ctxShow(r.left, r.bottom + 4, l.map(function (x) { return { c: x[0], i: x[1], l: x[2] }; }), { k: "spzp" });
+  }
+  // телефон и узкий экран: ☰ — шесть пространств, открытое раскрыто
+  var SPZDC = false;
+  function spzDrawer() {
+    var cur = cpSpace(), h = '<div class="spzdr"><div class="spzdh"><b>Пространства</b><a class="btn sm" href="#apps">▦ Все разделы</a></div>';
+    ["home", "day", "task", "know", "life", "house"].forEach(function (k) {
+      var on = k === cur && !SPZDC;
+      h += '<button type="button" class="spzdb' + (on ? " on" : "") + '" data-a="spzdr" data-x="' + k + '" aria-expanded="' + on + '"><span class="spzi">' + SPZ[k][0] + "</span><span><b>" + SPZ[k][1] + "</b><small>" + esc(spzLine(k)) + "</small></span><i>" + (on ? "▾" : "▸") + "</i></button>";
+      if (on) h += '<div class="spzdp"><nav class="nav">' + itemHTML("", "", spzHref(k), '<span class="pic">◉</span>', k === "home" ? "Главная — сводка дня" : "Обзор пространства", 0, {}) + "</nav>" + spzBody(k) + "</div>";
+    });
+    return h + '<div class="spzdf"><a class="btn sm" href="#mods">🧩 Модули</a><a class="btn sm" href="#help">? Справка</a><a class="btn sm" href="#settings">⚙ Настройки</a></div></div>';
+  }
+  function hz2Ctx(k, id, c) {
+    if (k === "hzw") {
+      if (c.indexOf("t:") === 0) { var t = c.slice(2), b = hzBoard(), w = { id: uid(), type: t, sz: WT[t].sz, cfg: t === "tasks" ? { src: "list:today", t: "Сегодня" } : {} }; b.w = (b.w || []).concat([w]); touch(b); save(); hzWPin(b.id, w.id); toast("Карточка «" + WT[t].n + "» на главной. Настроить — ↗ (откроется доска «Карточки главной»)"); }
+      else if (c.indexOf("p:") === 0) { var p = c.split(":"), on = (S.opt.homew || []).some(function (x) { return x.b === p[1] && x.w === p[2]; }); if (on) hzWDel("w:" + p[1] + ":" + p[2]); else { hzWPin(p[1], p[2]); toast("Виджет добавлен на главную"); } }
+      return true;
+    }
+    if (k === "spzp") {
+      if (c === "q") { go("today"); setTimeout(function () { try { qOpen(); } catch (e) { /* ок */ } }, 120); }
+      else if (c === "hab") { go("habits"); setTimeout(function () { var i = document.querySelector("[data-hnew]"); if (i) { i.focus(); i.scrollIntoView({ block: "center" }); } }, 150); }
+      else if (c.indexOf("go:") === 0) go(c.slice(3));
+      return true;
+    }
+    return false;
+  }
+  function hz2Act(a, el) {
+    var x = el.dataset.x;
+    switch (a) {
+      case "hzwnew": hzWMenu(el, "new"); return true;
+      case "hzwpick": hzWMenu(el, "pick"); return true;
+      case "mqtg": MQSEL[x] = !MQSEL[x]; render(); return true;
+      case "mqok": var n = 0; MODQ.forEach(function (q) { if (MQSEL[q[0]]) q[3].forEach(function (m) { if (!modOn(m)) { modSet(m, true); n++; } }); }); S.opt.modq = 1; optTouch(); save(); render(); railSync(); toast(n ? "Включено разделов: " + n + ". Изменить — «🧩 Модули»" : "Остаётся основное. Включить разделы — «🧩 Модули»"); return true;
+      case "mqskip": S.opt.modq = 1; optTouch(); save(); render(); return true;
+      case "spzplus": spzPlus(el); return true;
+      case "spzdr": if (x === cpSpace() && !SPZDC) SPZDC = true; else { SPZDC = false; cpSet(x); } $("side").innerHTML = sideHTML(); return true;
+    }
+    return false;
   }
 
   function chalsWidget() {
@@ -19644,7 +19711,7 @@ CREATE TABLE dlg (
     }
     return auxHead("Справка") + '<div class="stabs"><nav class="stnav" aria-label="Разделы справки"><input type="search" id="helpq" class="inp hsrch" placeholder="Поиск по справке" value="' + esc(HQ) + '" autocomplete="off">' +
       HTABS.map(function (x) { return '<a href="#help-' + x[0] + '" class="' + (!q && cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") +
-      '</nav><div class="stbody help"><a class="hcourse" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf"><span class="hci">📘</span><span><b>Учебный курс «Задачи»</b><small>28 уроков с картинками, практикой и вопросами · PDF, 121 страница, 13 МБ</small></span><span class="hcd">Скачать</span></a>' +
+      '</nav><div class="stbody help"><a class="hcourse" href="kurs-zadachi.pdf" target="_blank" rel="noopener" download="Учебный курс — Задачи.pdf"><span class="hci">📘</span><span><b>Учебный курс «Задачи»</b><small>28 уроков с картинками, практикой и вопросами · PDF, 123 страницы, 15 МБ</small></span><span class="hcd">Скачать</span></a>' +
       '<a class="hcourse htest" href="testdata.json" download="Тестовые данные для Задач.json"><span class="hci">🧪</span><span><b>Тестовые данные для упражнений</b><small>Проекты, задачи, привычки, заметки, цели и доски · JSON, 100 КБ. Загрузить в программу: «Настройки» → «Данные и синхронизация» → «📂 Восстановить из файла» — файл добавится к вашим данным, ничего не заменяя; удалить потом можно одной кнопкой там же.</small></span><span class="hcd">Скачать</span></a>' + html + '<p class="foot">© ' + new Date().getFullYear() + " ytv · Задачи</p></div></div>";
   }
   function codeBox(id, title) { var el = $(id); return '<div class="codebox"><div class="h"><b>' + title + '</b><button class="btn sm" type="button" data-copy="' + id + '">Скопировать</button></div><pre>' + esc(el ? el.textContent.trim() : "") + "</pre></div>"; }
@@ -21331,6 +21398,7 @@ CREATE TABLE dlg (
     if (a && uxAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && ux2Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && hzAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+    if (a && hz2Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -21455,8 +21523,6 @@ CREATE TABLE dlg (
       case "dptop": var dr = dayRec(true), tid = el.dataset.t, ix = dr.top.indexOf(tid); if (ix >= 0) dr.top.splice(ix, 1); else { if (dr.top.filter(function (x) { return !topMvKey(task(x)); }).length >= 3) { toast("Главных — не больше трёх: снимите звёздочку с другой задачи"); return; } dr.top.push(tid); } touch(dr); save(); render(); return;
       case "dpdone": var dd = dayRec(true); dd.planned = Date.now(); LS.set("zd-rit-morning", dKey(today0())); touch(dd); save(); DP.step = 0; go("today"); toast("☀ Хорошего дня! План — в «Сегодня»"); return;
       case "dpest": var rde = el.getBoundingClientRect(); ctxShow(rde.left, rde.bottom + 4, [["0", "без оценки"], [".25", "15 мин"], [".5", "30 мин"], ["1", "1 ч"], ["1.5", "1,5 ч"], ["2", "2 ч"], ["3", "3 ч"], ["4", "4 ч"], ["6", "6 ч"]].map(function (o) { return { c: o[0], i: "", l: o[1] }; }), { k: "dpest", id: el.dataset.t }); return;
-      case "dpmood": DRV.mood = +el.dataset.x; render(); return;
-      case "drdone": var dv = dayRec(true), na = document.querySelector("[data-drnote]"); dv.note = (na ? na.value : DRV.note || dNote(dv)).slice(0, 5000); dv.mood = DRV.mood || dMood(dv); dv.review = { at: Date.now(), mood: DRV.mood || (dv.review && dv.review.mood) || 0, note: (na ? na.value : DRV.note || "").slice(0, 3000), done: doneEvents().filter(function (x) { return x.d >= today0() && live(S.tasks).some(function (t) { return t.id === x.t; }); }).length }; touch(dv); DRV = { note: null, mood: 0 }; save(); render(); toast("🌙 День завершён. Отдыхайте!"); return;
       case "bnew": go("board-new"); return;
       case "btpl": bFromTpl(el.dataset.k); return;
       case "btplproj": var rbp = el.getBoundingClientRect(); ctxShow(rbp.left, rbp.bottom + 4, ptree().map(function (x) { return { c: x.p.id, i: piconH(x.p), l: x.p.n, pad: x.d }; }), { k: "btplproj" }); return;
@@ -22699,7 +22765,7 @@ CREATE TABLE dlg (
     if (c && /^pinp?:/.test(c)) { pinFrom(k, id, c.replace(/^pinp?:/, ""), c.indexOf("pinp:") === 0); return; }
     if (k === "board") { var bx = board(id); if (bx) bCmd(bx, c); return; }
     if (k === "bsrc") { var bs = board(id); if (!bs) return; if (c === "__none") delete bs.src; else bs.src = c; bSave(bs); toast(bs.src ? "Источник доски: " + wsrcName(bs.src) + " — виджеты без своего источника берут его" : "У каждого виджета теперь свой источник"); return; }
-    if (appCtx(k, id, c) || navCtx(k, id, c) || cpCtx(k, id, c) || ux2Ctx(k, id, c) || hzCtx(k, id, c)) return;
+    if (appCtx(k, id, c) || navCtx(k, id, c) || cpCtx(k, id, c) || ux2Ctx(k, id, c) || hzCtx(k, id, c) || hz2Ctx(k, id, c)) return;
     if (k === "startpick") { S.opt.start = c === "__last" ? "" : c; optTouch(); save(); render(); return; }
     if (k === "btplproj") { bFromTpl("proj", c); return; }
     if (k === "ptab") { ptCtx(id, c); return; }
