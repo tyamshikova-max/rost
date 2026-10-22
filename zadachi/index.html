@@ -2756,7 +2756,7 @@ CREATE TABLE inbox (
   };
   // данные: сжатый JSON по 900 знаков в свойствах служебных папок app:/tasks/state/c000…
   var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-  var APPV = "zd-app-2026-10-16-156";
+  var APPV = "zd-app-2026-10-16-157";
   function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
   // каноническая запись (ключи по алфавиту) — чтобы одинаковые данные на разных устройствах давали одинаковый отпечаток
   function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
@@ -9392,6 +9392,7 @@ CREATE TABLE inbox (
     var R = [], L = []; (root.f ? [] : root.k || []).forEach(function (c) { (c.side === "l" && !(n.mm && n.mm.lay === "right") ? L : R).push(c); });
     [[R, 1], [L, -1]].forEach(function (g) { var list = g[0], tot = list.reduce(function (a, c) { return a + N[c.id].sh; }, 0) + nr.gy * Math.max(0, list.length - 1), y = -tot / 2; list.forEach(function (c) { var nc = N[c.id]; nc.side = g[1]; nc.cx = g[1] * (nr.s.w / 2 + 48 * DN + nc.s.w / 2); nc.cy = y + nc.sh / 2; y += nc.sh + nr.gy; kidsY(c); }); });
     if (n.mm && n.mm.lay === "down") mmPlaceDown(root, N, DN); else if (n.mm && n.mm.lay === "radial") mmPlaceRadial(root, N, DN); else if (n.mm && n.mm.lay === "time") mmPlaceTime(root, N, DN); else if (n.mm && n.mm.lay === "fish") mmPlaceFish(root, N, DN);
+    mmFreeApply(n, root, N);
     // цвет: у ветки первого уровня — свой по порядку (или выбранный), дальше наследуется
     var PAL = th.pal; (function cw(x, c, d) { var own = x.st && x.st.c ? x.st.c : typeof x.c === "number" && d > 0 ? PAL[x.c % PAL.length] : c; N[x.id] && (N[x.id].col = own); (x.k || []).forEach(function (k, i) { cw(k, d === 0 ? PAL[i % PAL.length] : own, d + 1); }); })(mmRoot(n), th.root || "var(--fg)", 0);
     (function pg(x) { var dn = 0, tt = 0; (x.k || []).forEach(function (c) { var r = pg(c), t = mmTask(c); dn += r[0]; tt += r[1]; if (t && !t.del) { tt++; if (t.done) dn++; } }); if (N[x.id]) N[x.id].prg = [dn, tt]; return [dn, tt]; })(mmRoot(n)); mmCalc(n, N);
@@ -9629,7 +9630,7 @@ CREATE TABLE inbox (
     if (MMPINCH) { n = mmCur(); var ids = Object.keys(MMPT), vw0 = n && MMV[n.id]; if (!vw0 || ids.length < 2) return; var a = MMPT[ids[0]], b = MMPT[ids[1]], P = MMPINCH, s = Math.max(0.25, Math.min(2.5, P.s0 * (Math.hypot(a.x - b.x, a.y - b.y) || 1) / P.d0)), mx = (a.x + b.x) / 2 - P.l, my = (a.y + b.y) / 2 - P.t; vw0.s = s; vw0.rx = mx - (P.mx0 - P.rx0) * s / P.s0; vw0.ry = my - (P.my0 - P.ry0) * s / P.s0; mmApply(n); return; }
     if (MMPAN) { n = mmCur(); var vw = n && MMV[n.id]; if (!vw) return; vw.rx = MMPAN.rx + e.clientX - MMPAN.x0; vw.ry = MMPAN.ry + e.clientY - MMPAN.y0; mmApply(n); return; }
     if (!MMDR || MMDR.ro) return; if (!MMDR.moved && Math.abs(e.clientX - MMDR.x0) + Math.abs(e.clientY - MMDR.y0) < 7) return;
-    MMDR.moved = true; MMDR.el.classList.add("mmdrag"); MMDR.el.style.transform = "translate(" + (e.clientX - MMDR.x0) / ((MMV[ARG] || {}).s || 1) + "px," + (e.clientY - MMDR.y0) / ((MMV[ARG] || {}).s || 1) + "px)";
+    MMDR.moved = true; MMDR.el.classList.add("mmdrag"); mmDragTr(MMDR, "translate(" + (e.clientX - MMDR.x0) / ((MMV[ARG] || {}).s || 1) + "px," + (e.clientY - MMDR.y0) / ((MMV[ARG] || {}).s || 1) + "px)");
     [].forEach.call(document.querySelectorAll(".mmn.mmdrop, .mmn.mmdropb, .mmn.mmdropa"), function (x) { x.classList.remove("mmdrop", "mmdropb", "mmdropa"); });
     var under = document.elementsFromPoint(e.clientX, e.clientY).filter(function (x) { return x.classList && x.classList.contains("mmn") && x !== MMDR.el; })[0];
     MMDR.to = under ? under.dataset.mid : ""; MMDR.pos = "in";
@@ -9644,6 +9645,7 @@ CREATE TABLE inbox (
     if (!d.moved && MMBR && !d.ro) { mmBrushTo(n, d.id); return; }
     if (!d.moved && MMREL && !d.ro) { mmRelAdd(n, MMREL, d.id); return; }
     if (!d.moved) { if (!d.ro && MMLC && MMLC.id === d.id && Date.now() - MMLC.t < 450) { MMLC = null; MMSEL = MMED = d.id; render(); return; } MMLC = { id: d.id, t: Date.now() }; if (MMSEL !== d.id) { MMSEL = d.id; render(); } return; }
+    if (!d.to && !d.ro) { var fs = (MMV[n.id] || {}).s || 1; mmFreeMove(n, d.id, (e.clientX - d.x0) / fs, (e.clientY - d.y0) / fs); return; }
     if (!d.to || !mmMoveTo(n, d.id, d.to, d.pos || "in")) { if (d.to) toast("Сюда перенести нельзя — это ветка внутри себя"); render(); }
   });
   document.addEventListener("pointercancel", function (e) { mmPtrEnd(e); if (MMDR && MMDR.el) { MMDR.el.classList.remove("mmdrag"); MMDR.el.style.transform = ""; } MMDR = null; MMPAN = null; });
@@ -9874,7 +9876,7 @@ CREATE TABLE inbox (
       case "mmreldel": mmPush(n); n.mm.rel = mmRels(n).filter(function (x) { return x.id !== MMRELED; }); MMRELED = ""; mmSave(n); toast("Связь удалена"); return true;
       case "mmimg": mmImgPick(n); return true;
       case "mmmore": var rm = el.getBoundingClientRect(), lay = n.mm.lay || "both", sel = mmFind(n, MMSEL), cl = mmClipGet();
-        ctxShow(rm.left, rm.bottom + 4, [{ c: "copy", i: "⧉", l: "Копировать ветку", k: "Ctrl+C" }, { c: "cut", i: "✂", l: "Вырезать ветку", k: "Ctrl+X" }, { c: "paste", i: "📥", l: cl ? "Вставить ветку в выбранный узел" : "Вставить ветку (буфер пуст)", k: "Ctrl+V" }, "-", { c: "par", i: "⤒", l: "Вставить родителя (обернуть узел)", k: "Ctrl+Enter" }, { c: "sort:az", i: "↧", l: "Сортировать ветки: А → Я" }, { c: "sort:za", i: "↥", l: "Сортировать ветки: Я → А" }, { c: "sort:p", i: "①", l: "Сортировать ветки: по приоритету" }, { c: "sort:due", i: "⏰", l: "Сортировать ветки: по сроку задачи" }, "-", { c: "lay:both", i: lay === "both" ? "✓" : "↔", l: "Раскладка: вправо и влево" }, { c: "lay:right", i: lay === "right" ? "✓" : "→", l: "Раскладка: всё вправо (дерево)" }, { c: "lay:down", i: lay === "down" ? "✓" : "↓", l: "Раскладка: сверху вниз (оргструктура)" }, { c: "lay:radial", i: lay === "radial" ? "✓" : "◎", l: "Раскладка: по кругу" }, { c: "lay:time", i: lay === "time" ? "✓" : "⏳", l: "Раскладка: временная шкала" }, { c: "lay:fish", i: lay === "fish" ? "✓" : "🐟", l: "Раскладка: рыбья кость (причины)" }, "-", { c: "tpls", i: "🧩", l: "Новая карта из шаблона…" }, { c: "imp", i: "📂", l: "Открыть файл XMind, FreeMind, OPML…" }, "-", { c: "calc", i: n.mm.calc ? "✓" : "Σ", l: "Считать суммы веток (числа в узлах)" }, { c: "gantt", i: "📅", l: "Задачи карты на таймлайне" }, { c: "sticker", i: "🗒", l: "Стикер на карту (или двойной клик по пустому месту)" }, "-", { c: "mini", i: LS.get("zd-mmmini") === "0" ? "▣" : "✓", l: "Мини-карта в углу" }].concat(sel && sel.x.img ? ["-", { c: "noimg", i: "🖼", l: "Убрать картинку из узла" }] : []), { k: "mmmore", id: n.id }); return true;
+        ctxShow(rm.left, rm.bottom + 4, [{ c: "copy", i: "⧉", l: "Копировать ветку", k: "Ctrl+C" }, { c: "cut", i: "✂", l: "Вырезать ветку", k: "Ctrl+X" }, { c: "paste", i: "📥", l: cl ? "Вставить ветку в выбранный узел" : "Вставить ветку (буфер пуст)", k: "Ctrl+V" }, "-", { c: "par", i: "⤒", l: "Вставить родителя (обернуть узел)", k: "Ctrl+Enter" }, { c: "sort:az", i: "↧", l: "Сортировать ветки: А → Я" }, { c: "sort:za", i: "↥", l: "Сортировать ветки: Я → А" }, { c: "sort:p", i: "①", l: "Сортировать ветки: по приоритету" }, { c: "sort:due", i: "⏰", l: "Сортировать ветки: по сроку задачи" }, "-", { c: "lay:both", i: lay === "both" ? "✓" : "↔", l: "Раскладка: вправо и влево" }, { c: "lay:right", i: lay === "right" ? "✓" : "→", l: "Раскладка: всё вправо (дерево)" }, { c: "lay:down", i: lay === "down" ? "✓" : "↓", l: "Раскладка: сверху вниз (оргструктура)" }, { c: "lay:radial", i: lay === "radial" ? "✓" : "◎", l: "Раскладка: по кругу" }, { c: "lay:time", i: lay === "time" ? "✓" : "⏳", l: "Раскладка: временная шкала" }, { c: "lay:fish", i: lay === "fish" ? "✓" : "🐟", l: "Раскладка: рыбья кость (причины)" }, "-", { c: "tpls", i: "🧩", l: "Новая карта из шаблона…" }, { c: "imp", i: "📂", l: "Открыть файл XMind, FreeMind, OPML…" }, "-", { c: "calc", i: n.mm.calc ? "✓" : "Σ", l: "Считать суммы веток (числа в узлах)" }, { c: "gantt", i: "📅", l: "Задачи карты на таймлайне" }, { c: "sticker", i: "🗒", l: "Стикер на карту (или двойной клик по пустому месту)" }, "-", { c: "freeback", i: "↺", l: "Вернуть выбранную ветку на место" }, { c: "freeall", i: "⟲", l: "Выровнять всю карту (сбросить ручные перемещения)" }, "-", { c: "mini", i: LS.get("zd-mmmini") === "0" ? "▣" : "✓", l: "Мини-карта в углу" }].concat(sel && sel.x.img ? ["-", { c: "noimg", i: "🖼", l: "Убрать картинку из узла" }] : []), { k: "mmmore", id: n.id }); return true;
     }
     return false;
   }
@@ -11054,6 +11056,8 @@ CREATE TABLE inbox (
   function mm9More(n, c) {
     if (c === "calc") { mmPush(n); if (n.mm.calc) delete n.mm.calc; else n.mm.calc = true; mmSave(n); toast(n.mm.calc ? "Суммы веток: число в конце узла («Аренда 25 000 ₽») — у родителя появится Σ" : "Суммы выключены"); return true; }
     if (c === "gantt") { var ids = []; mmWalk(mmRoot(n), function (x) { var t = mmTask(x); if (t && !t.del) ids.push(t.id); }); if (!ids.length) { toast("На карте нет узлов-задач — сначала «☐ В задачу ▾»"); return true; } GNT.ids = ids; GNT.idsn = nTitle(n); GNT.from = 0; GNT.sl = null; go("gantt"); return true; }
+    if (c === "freeback") { mmFreeReset(n, false); return true; }
+    if (c === "freeall") { mmFreeReset(n, true); return true; }
     if (c === "sticker") { var vp = $("mmvp"), vw = MMV[n.id]; if (!vp || !vw) return true; mmFlAdd(n, (vp.clientWidth / 2 - vw.rx) / vw.s, (vp.clientHeight / 2 - vw.ry) / vw.s); return true; }
     return false;
   }
@@ -11291,7 +11295,7 @@ CREATE TABLE inbox (
       diff: "Самая длинная цепочка статусов — от «идеи» до «готово», чтобы видеть, что движется. Оценка помогает выбрать, за что взяться." },
     map: { n: "Карта мыслей", for: "Структура темы ветками: план, мозговой штурм, разбор книги, проект.",
       gives: ["Сверху — сама карта: центр — название страницы. Текст страницы ниже карты — для пояснений.", "Свойства не обязательны; есть темы оформления, метки, рамки, итоги, листы, стикеры."],
-      how: ["<b>⛶ На весь экран</b> — карта и все команды разворачиваются на всё окно, удобно править большую карту; Esc или «✕ Выйти» — обратно.", "Tab — ветка, Enter — рядом, F2 или двойной клик — править, Delete — удалить, стрелки — по карте, Ctrl+Z — отменить.", "«🖌 Тема» и «Аа Стиль» — оформление; «🏷 Метки» — приоритет, флажки, прогресс; «↗ Связь» — стрелка между ветками.", "«☐ В задачу» — узел становится задачей с живой отметкой; «▶ Режим» — презентация, мозговой штурм, тренажёр; «⋯» — раскладки, шаблоны, импорт XMind, суммы, листы.", "Узел, который кончается на «?», с ветками — карточка для «🔁 Повторения»."],
+      how: ["<b>⛶ На весь экран</b> — карта и все команды разворачиваются на всё окно, удобно править большую карту; Esc или «✕ Выйти» — обратно.", "<b>Свободное перемещение</b>: тяните ветку на пустое место — она останется там, где вы её отпустили; на другой узел — станет его веткой. «⋯» → «Вернуть ветку на место» / «Выровнять всю карту».", "Tab — ветка, Enter — рядом, F2 или двойной клик — править, Delete — удалить, стрелки — по карте, Ctrl+Z — отменить.", "«🖌 Тема» и «Аа Стиль» — оформление; «🏷 Метки» — приоритет, флажки, прогресс; «↗ Связь» — стрелка между ветками.", "«☐ В задачу» — узел становится задачей с живой отметкой; «▶ Режим» — презентация, мозговой штурм, тренажёр; «⋯» — раскладки, шаблоны, импорт XMind, суммы, листы.", "Узел, который кончается на «?», с ветками — карточка для «🔁 Повторения»."],
       diff: "Иерархия: всё растёт от центра ветками. От «Холста» — строгое дерево и автоматическая раскладка, а на холсте карточки лежат свободно. Карту можно встроить в другую страницу или положить на холст." },
     canvas: { n: "Холст", for: "Свободная доска для исследования темы: разложить рядом страницы, мысли, источники и связать их стрелками.",
       gives: ["Бесконечное поле с карточками трёх видов: текст, страница базы знаний (с началом текста, обложкой, у карты — сама карта) и группа-рамка.", "Стрелки между карточками с подписями, цвета карточек."],
@@ -11316,6 +11320,22 @@ CREATE TABLE inbox (
   window.addEventListener("hashchange", function () { if (MMFULL || CVFULL) { MMFULL = CVFULL = false; document.documentElement.classList.remove("mmfullon"); mmFs(false); } });
   document.addEventListener("fullscreenchange", function () { if (!(MMFULL || CVFULL)) return; if (!document.fullscreenElement) { fullSet(MMFULL ? "mm" : "cv", false); return; } var n = note(ARG); if (n) { if (MMFULL && MMV[n.id]) MMV[n.id].fit = 1; if (CVFULL && CVV[n.id]) CVV[n.id].fit = 1; render(); } });
   function fullBtn(kind) { var on = kind === "mm" ? MMFULL : CVFULL; return '<button type="button" class="btn sm' + (on ? " pri" : "") + '" data-a="' + kind + 'full" title="' + (on ? "Вернуться к обычной странице (Esc)" : "Развернуть на весь экран вместе с командами") + '">' + (on ? "✕ Выйти (Esc)" : "⛶ На весь экран") + "</button>"; }
+
+  /* --- карта: свободное перемещение — узел, брошенный на пустое место, остаётся там вместе со своей веткой (x.dx, x.dy — сдвиг от авто-раскладки) --- */
+  function mmFreeApply(n, root, N) {
+    (function ap(x, ox, oy, par) { var v = N[x.id]; if (!v) return; var mx = x === root ? 0 : +x.dx || 0, my = x === root ? 0 : +x.dy || 0; ox += mx; oy += my; if (v.cx !== undefined) { v.cx += ox; v.cy += oy; } if ((mx || my) && par && N[par.id] && !v.vert && !v.rad && !v.tl1 && !v.tl && !v.fb1 && !v.fbl && typeof v.fb2 !== "number") v.side = v.cx >= N[par.id].cx ? 1 : -1; if (mx || my) v.free = true; (x.f ? [] : x.k || []).forEach(function (c) { ap(c, ox, oy, x); }); })(root, 0, 0, null);
+  }
+  function mmFreeMove(n, id, dx, dy) {
+    var f = mmFind(n, id); if (!f) return; if (!f.p) { toast("Центр карты не двигается — тяните фон, чтобы сдвинуть всю карту"); render(); return; }
+    if (Math.abs(dx) + Math.abs(dy) < 6) { render(); return; } mmPush(n); f.x.dx = Math.round((+f.x.dx || 0) + dx); f.x.dy = Math.round((+f.x.dy || 0) + dy); if (!f.x.dx && !f.x.dy) { delete f.x.dx; delete f.x.dy; } MMSEL = id; mmSave(n);
+    toastAct("Ветка перемещена. Вернуть её в общую раскладку — «⋯» → «Вернуть ветку на место»", [["mmfreeback", "Вернуть сейчас", id]]);
+  }
+  function mmFreeReset(n, all) { var cnt = 0; mmPush(n); if (all) mmWalk(mmRoot(n), function (x) { if (x.dx || x.dy) { delete x.dx; delete x.dy; cnt++; } }); else { var f = mmFind(n, MMSEL); if (f) mmWalk(f.x, function (x) { if (x.dx || x.dy) { delete x.dx; delete x.dy; cnt++; } }); } if (!cnt) { MMU[n.id].pop(); toast(all ? "На карте нет перемещённых веток" : "Эта ветка стоит на своём месте"); return; } mmSave(n); toast("Возвращено на место: " + cnt); }
+  // пока тянете узел — едет вся его ветка
+  function mmDragTr(D, tr) {
+    D.el.style.transform = tr; if (!D.sub) { D.sub = []; var n = mmCur(), f = n && mmFind(n, D.id); if (f) mmWalk(f.x, function (x) { if (x !== f.x) { var el = document.querySelector('#mmvp .mmn[data-mid="' + x.id + '"]'); if (el) D.sub.push(el); } }); }
+    D.sub.forEach(function (el) { el.style.transform = tr; el.classList.add("mmdrag"); });
+  }
 
   function chalsWidget() {
     var h = "", t0 = today0(), any = false;
@@ -11909,6 +11929,7 @@ CREATE TABLE inbox (
       "<b>▶ Режим ▾</b>: <b>презентация</b> — на весь экран, сначала обзор, потом ветка за веткой (→ или пробел — дальше, ← — назад, Esc — выйти); <b>мозговой штурм</b> — пишите идеи карточками (Enter, можно через «;»), с таймером на 5–15 минут, потом перетащите карточки на узлы карты; <b>тренажёр</b> — ветки скрыты знаком «?», вспомните и откройте, отметьте «помню / не помню», повторите только забытое; <b>во весь экран</b> — карта без меню.",
       "<b>Раскладки</b> в «⋯»: ещё <b>по кругу</b>, <b>временная шкала</b> (этапы вдоль оси, по очереди сверху и снизу) и <b>рыбья кость</b> (диаграмма Исикавы: справа — проблема, на костях — группы причин). Там же <b>🧩 шаблоны</b> (SWOT, конспект книги, разбор урока, план недели, цель → шаги, проект, решение, причины проблемы, этапы) и <b>📂 импорт</b> карт из XMind, FreeMind, OPML, Markdown. В «⤓» — экспорт в OPML и FreeMind.",
       "<b>Суммы веток</b> («⋯» → «Считать суммы»): число в конце узла («Аренда 25 000 ₽», «Глава 1 — 30 стр.») складывается, и у родителя появляется Σ — до самого центра. <b>Листы</b>: «＋ Лист» над картой — ещё одна карта в той же странице (вкладки; × — удалить лист). <b>Стикеры</b>: двойной клик по пустому месту карты — жёлтый стикер; тяните его по полю, а на узел — станет веткой. «⋯» → «Задачи карты на таймлайне» — таймлайн только с задачами этой карты. На телефоне «☑ Несколько» — выделять узлы касаниями.",
+      "<b>Свободное перемещение</b>: тяните узел и отпустите на пустом месте — он вместе со всей своей веткой останется там, куда вы его поставили (линия к родителю перестроится сама). Отпустите на другом узле — станет его веткой, как раньше. Вернуть: «⋯» → «Вернуть выбранную ветку на место» или «Выровнять всю карту».",
       "<b>⛶ На весь экран</b> — карта вместе с панелью команд разворачивается на всё окно (браузер тоже переходит в полноэкранный режим, если разрешит). Выйти — «✕ Выйти», Esc или переход на другую страницу. Режим «Во весь экран (без меню)» в «▶ Режим» — для показа, без команд.",
       "<b>↗ Связь</b> — стрелка между узлами разных веток: выберите узел, «↗ Связь», затем нажмите второй узел. Подпись («влияет на», «см. также») — клик по значку на стрелке; там же «⇄ Развернуть» и «Удалить». <b>🖼</b> — картинка в узел (с Яндекс Диска, уменьшается до 640 точек).",
       "<b>⋯</b> над картой: копировать, вырезать, вставить ветку (Ctrl+C / Ctrl+X / Ctrl+V — в том числе в другую карту; в Word ветка вставится списком, а многоуровневый список из Word или от ИИ вставится в карту ветками) и <b>раскладка</b>: вправо и влево, всё вправо (как дерево) или сверху вниз (как оргструктура; стрелки ↑↓ — уровни, ←→ — соседи). «⤓» — ещё SVG и PDF.",
@@ -13251,6 +13272,7 @@ CREATE TABLE inbox (
     if (a && ndcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && ndeAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a === "mmfull") { fullSet("mm", !MMFULL); return; }
+    if (a === "mmfreeback") { e.preventDefault(); var fn = mmCur(); if (fn) { MMSEL = el.dataset.t; mmFreeReset(fn, false); } return; }
     if (a === "cvfull") { fullSet("cv", !CVFULL); return; }
     if (a && cvAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
     if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
