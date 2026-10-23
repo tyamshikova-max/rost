@@ -738,6 +738,7 @@ body.tclean #ntfBtn { order: 1 } body.tclean .prfb { order: 2 }
 body.hzrsing, body.hzrsing * { cursor: ew-resize !important; user-select: none !important } #hzmark { position: absolute; top: 0; bottom: 0; border: 2px dashed color-mix(in srgb, var(--acc) 55%, transparent); border-radius: 14px; pointer-events: none }
 .hzedit .hzh { flex-wrap: wrap; row-gap: 2px } .hzedit .hzh > b { flex: 1 1 120px } .hzedit .hzed { margin-left: auto; display: inline-flex; gap: 0 } .hzedit .hzed .ibtn { width: 24px; height: 24px; min-width: 24px; padding: 0; font-size: 12px } .hzedit .hzed .hzsp { width: auto; padding: 0 5px }
 .hzcolsel { gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0 }
+.ttq { display: inline-flex; gap: 4px; flex-wrap: wrap; margin-left: 4px } .ttq .chip { padding: 2px 8px; font-size: calc(12px * var(--fs)) }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -3050,7 +3051,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-182";
+var APPV = "zd-app-2026-10-16-183";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -4473,7 +4474,7 @@ if (p) m.push(pdotHTML(p, false));
 if (+t.est) m.push("⏱ " + fmtH(t.est) + " ч");
 if (t.at) m.push('<span class="' + (isLate(t) ? "warnc" : "") + '">' + esc(whenTxt(t)) + "</span>");
 if (kids.length) m.push("☐ " + kids.filter(function (k) { return k.done; }).length + "/" + kids.length);
-if (flagOf(t)) m.push(flagIc(flagOf(t))); if (t.fav) m.push("★"); if (t.pomo) m.push("🍅 " + t.pomo); if (ccount(t.id)) m.push("💬 " + ccount(t.id));
+if (flagOf(t)) m.push(flagIc(flagOf(t))); if (t.fav) m.push("★"); var pa = pomoAll(t); if (pa) m.push("🍅 " + pa); if (ccount(t.id)) m.push("💬 " + ccount(t.id));
 var bt = bodyTodo(t); if (bt) m.push("☑ " + bt[0] + "/" + bt[1]);
 return '<div class="kcard' + (t.prio ? " p" + t.prio : "") + (t.done ? " done" : "") + (SELS[t.id] ? " sel" : "") + '" draggable="true" data-id="' + t.id + '" data-a="kopen"><div class="kt">' + esc(t.t) + "</div>" + (m.length ? '<div class="km">' + m.join("") + "</div>" : "") + "</div>";
 }
@@ -4992,7 +4993,7 @@ var p = proj(t.pid), kids = tkids(t.id), mine = POMO && POMO.tid === t.id, top =
 h += '<div class="nowmain' + (t.done ? " isdone" : "") + '"><div class="nowcrumb">' + (top ? '<span class="nowstar">★ главное</span>' : "") + (p ? pdotHTML(p, true) : "") + (t.due ? '<span class="' + (isLate(t) ? "late" : "") + '">⏰ ' + esc(dayName(t.due)) + "</span>" : "") + (+t.est ? "<span>⏱ " + fmtH(t.est) + " ч</span>" : "") + "</div>" +
 '<h1 class="nowt">' + (t.done ? "✓ " : "") + esc(t.t) + "</h1>" +
 '<div class="nowtimer">' + (mine ? '<div class="wpt nowpt">' + pomoTxt() + '</div><div class="r"><button type="button" class="btn" data-now="ppause">' + (POMO.paused ? "▶ Продолжить" : "⏸ Пауза") + '</button><button type="button" class="btn" data-now="pstop">■ Стоп</button></div>'
-: '<div class="r"><button type="button" class="btn" data-now="pomo">🍅 Помодоро 25 минут</button><button type="button" class="btn" data-now="track">' + (t.ttOn ? "⏹ Остановить учёт" : "⏲ Засечь время") + "</button>" + (t.tt ? '<span class="muted">учтено ' + ttFmt(t.tt) + "</span>" : "") + (t.pomo ? '<span class="muted">🍅 ' + t.pomo + "</span>" : "") + "</div>") + "</div>" +
+: '<div class="r"><button type="button" class="btn" data-now="pomo">🍅 Помодоро 25 минут</button><button type="button" class="btn" data-now="track">' + (t.ttOn ? "⏹ Остановить учёт" : "⏲ Засечь время") + "</button>" + (t.tt ? '<span class="muted">учтено ' + ttFmt(t.tt) + "</span>" : "") + (pomoAll(t) ? '<span class="muted">🍅 ' + pomoAll(t) + "</span>" : "") + "</div>") + "</div>" +
 (kids.length ? '<div class="nowsubs"><h3>Подзадачи · ' + kids.filter(function (k) { return k.done; }).length + "/" + kids.length + "</h3>" + kids.map(function (k) { return '<label class="nowsub' + (k.done ? " dn" : "") + '"><input type="checkbox" data-nowsub="' + k.id + '"' + (k.done ? " checked" : "") + "> " + esc(k.t) + "</label>"; }).join("") + "</div>" : "") +
 (t.body ? '<div class="nowbody wnote">' + clean(t.body) + "</div>" : "") +
 '<div class="r nowact"><button type="button" class="btn pri nowok" data-now="done">' + (t.done ? "↺ Вернуть в работу" : "✓ Готово") + '</button><button type="button" class="btn" data-now="tomorrow">На завтра</button><button type="button" class="btn" data-now="open">✎ Открыть карточку</button></div></div>';
@@ -5540,7 +5541,7 @@ h += '<svg viewBox="0 0 ' + W2 + " " + H2 + '" class="wburn" role="img" aria-lab
 } else h += '<p class="wempty">В спринте пока нет задач — <a href="#sprint">спланировать</a></p>';
 return h;
 case "pomo":
-var tdy = today0(), pt = live(S.acts).filter(function (a) { return a.k === "pomo" && a.d >= tdy; }), pstat = '<div class="wsub">Сегодня: 🍅 ' + pt.length + " · " + pt.reduce(function (a, x) { return a + (+x.m || 25); }, 0) + " мин фокуса</div>";
+var tdy = today0(), pt = live(S.acts).filter(function (a) { return a.k === "pomo" && a.d >= tdy; }), pstat = '<div class="wsub">Сегодня: 🍅 ' + (pt.length + pomoEqIn(tdy, tdy + DAY)) + " · " + pt.reduce(function (a, x) { return a + (+x.m || 25); }, 0) + " мин фокуса</div>";
 if (POMO) { var ptk = task(POMO.tid); return '<div class="wpo ' + POMO.phase + '"><div class="wpt">' + pomoTxt() + '</div><div class="wpn">' + (POMO.phase === "work" ? (ptk ? '<a href="#task-' + ptk.id + '">' + esc(ptk.t) + "</a>" : "Задача") : "Перерыв ☕") + '</div><div class="r"><button type="button" class="btn sm" data-a="wpomo" data-x="pause">' + (POMO.paused ? "▶ Продолжить" : "⏸ Пауза") + '</button><button type="button" class="btn sm" data-a="wpomo" data-x="stop">■ Стоп</button></div></div>' + pstat; }
 var ptl = todayList().filter(function (t) { return !t.parent; }).sort(cmpBy("smart")).slice(0, 6);
 return pstat + (ptl.length ? '<div class="wpl">' + ptl.map(function (t) { return '<button type="button" data-a="wpomo" data-x="start" data-t="' + t.id + '" title="25 минут на эту задачу"><span>▶</span>' + esc(t.t) + "</button>"; }).join("") + "</div>" : '<p class="wempty">На сегодня задач нет — помидор запускается и из карточки задачи (⏱)</p>');
@@ -7121,7 +7122,7 @@ function tbCover(d0) { var end = addDays(d0, 1); return tbDay(addDays(d0, -1)).c
 function tbLog(d0, create) { var id = "tb:" + dKey(d0); S.tblog = S.tblog || []; var r = S.tblog.filter(function (x) { return x.id === id && !x.del; })[0] || null; if (!r && create) { r = touch({ id: id, f: {} }); S.tblog.push(r); } return r; }
 function tbFact(b) {
 var lg = tbLog(sod(b.st)); if (lg && lg.f && lg.f[b.key] !== undefined) return { m: +lg.f[b.key] || 0, man: true };
-var m = 0; (S.acts || []).forEach(function (a) { if (a.del || !(a.k === "time" || a.k === "pomo") || !a.m) return; var en = a.d, st = a.d - a.m * 6e4, o = Math.min(en, b.en) - Math.max(st, b.st); if (o > 0) m += o / 6e4; });
+var m = 0; (S.acts || []).forEach(function (a) { if (a.del || !(a.k === "time" || a.k === "pomo") || !(a.m > 0)) return; var en = a.d, st = a.d - a.m * 6e4, o = Math.min(en, b.en) - Math.max(st, b.st); if (o > 0) m += o / 6e4; });
 return { m: Math.round(m), man: false };
 }
 function tbBands(d) {
@@ -11628,7 +11629,7 @@ var dset = {}; ev.forEach(function (e) { dset[dKey(e.d)] = 1; }); var cs = 0, d0
 var keys = Object.keys(dset).sort(), best = 0, run = 0, prev = null; keys.forEach(function (k) { var ms = new Date(k + "T00:00").getTime(); run = prev !== null && Math.round((ms - prev) / DAY) === 1 ? run + 1 : 1; prev = ms; if (run > best) best = run; });
 var hrun = 0, hb = 0; for (var i = 0; i < 60; i++) { var dd = live(S.days).filter(function (x) { return x.id === "d:" + dKey(addDays(today0(), -i)) && x.h; })[0]; if (dd) { hrun++; hb = Math.max(hb, hrun); } else if (i) hrun = 0; }
 var lvl = Math.floor((Math.sqrt(1 + 8 * xp / 100) - 1) / 2) + 1, need = function (L) { return 100 * L * (L - 1) / 2; };
-return { xp: xp, per: per, lvl: lvl, cur: xp - need(lvl), next: need(lvl + 1) - need(lvl), done: ev.length, p1: p1, early: early, habits: hl.length, notes: nt.length, cards: Object.keys(sl).reduce(function (s, k) { return s + sl[k]; }, 0), pom: pom.length, streak: cs, best: best, wr: wr, hc: hc.length, hrun: hb, maps: nt.filter(mmIs).length, canv: nt.filter(cvIs).length, bch: S.tasks.filter(function (t) { return /^bch-/.test(t.id) && t.done && !t.canc; }).length };
+return { xp: xp, per: per, lvl: lvl, cur: xp - need(lvl), next: need(lvl + 1) - need(lvl), done: ev.length, p1: p1, early: early, habits: hl.length, notes: nt.length, cards: Object.keys(sl).reduce(function (s, k) { return s + sl[k]; }, 0), pom: pom.length + pomoEqIn(0, 9e15), streak: cs, best: best, wr: wr, hc: hc.length, hrun: hb, maps: nt.filter(mmIs).length, canv: nt.filter(cvIs).length, bch: S.tasks.filter(function (t) { return /^bch-/.test(t.id) && t.done && !t.canc; }).length };
 });
 }
 var ACH = [["first", "🌱", "Первый шаг", "Выполнить первую задачу", function (s) { return s.done >= 1; }], ["t10", "✅", "Разгон", "10 выполненных задач", function (s) { return s.done >= 10; }], ["t100", "💯", "Сотня", "100 выполненных задач", function (s) { return s.done >= 100; }], ["t500", "🏅", "Марафонец", "500 выполненных задач", function (s) { return s.done >= 500; }], ["t1000", "🏆", "Тысячница", "1000 выполненных задач", function (s) { return s.done >= 1000; }],
@@ -11879,6 +11880,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["183", "Время — в часах и минутах", ["Карточка задачи → «Учёт времени»: учтено «__ ч __ мин» (можно поправить) и кнопки «+5 мин», «+15 мин», «+30 мин», «+1 ч» — время без таймера.", "Учтённое время превращается в помидоры: 25 минут = 1 🍅 — в задаче, саду фокуса, «Прогрессе дня», «Аналитике» и уровне."]],
 ["180", "«Сейчас» — по вашему выбору", ["Кнопка «◉ Сейчас» сначала спрашивает, за что взяться: главное, остальное на сегодня или любая задача через поиск. «▶ По порядку» — как раньше.", "В режиме «Сейчас» — «☰ Другая задача»: переключиться, не выходя."]],
 ["181", "Главная: 1–4 колонки", ["«✎ Настроить главную» → «Колонок: 1 2 3 4».", "Ширина карточки — от одной колонки до всех: потяните за уголок справа внизу карточки или нажмите ⇤⇥ в настройке.", "Карточки укладываются «кирпичиками» без пустот; на узком экране колонок становится меньше сами."]],
 ["179", "Главная и панель — как удобно вам", ["Ширина боковой панели меняется: потяните мышью за её правый край; двойной щелчок по краю — как было.", "Карточки главной перетаскиваются мышью за ⠿ — в любое место и в другую колонку.", "Ширина карточки: в половину или во всю ширину — «✎ Настроить главную» → ⇤⇥; там же → ← — в другую колонку."]],
@@ -12784,7 +12786,7 @@ var days = live(S.days).filter(function (x) { var d = new Date(String(x.id).slic
 var nn = notes().filter(function (n) { return (n.created || 0) >= from && (n.created || 0) < to; }).length, jn = days.filter(function (x) { return x.note; }).length;
 var tp = Object.keys(byP).sort(function (a, b) { return byP[b] - byP[a]; }).slice(0, 3).map(function (id) { return [proj(id), byP[id]]; }).filter(function (x) { return x[0]; });
 var name = r.m < 0 ? r.y + " год" : new Date(r.y, r.m, 1).toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
-return { r: r, name: name, done: ev.length, act: ks.length, best: best, bd: bd, bdn: bd ? byDay[bd] : 0, focus: focus, pomo: acts.filter(function (a) { return a.k === "pomo"; }).length, hl: hl, sl: avg("sl"), md: avg("md"), en: avg("en"), nn: nn, jn: jn, tp: tp };
+return { r: r, name: name, done: ev.length, act: ks.length, best: best, bd: bd, bdn: bd ? byDay[bd] : 0, focus: focus, pomo: acts.filter(function (a) { return a.k === "pomo"; }).length + Math.floor(Math.max(0, acts.reduce(function (a, x) { return a + (x.k === "time" ? +x.m || 0 : 0); }, 0)) / POMOM), hl: hl, sl: avg("sl"), md: avg("md"), en: avg("en"), nn: nn, jn: jn, tp: tp };
 }
 function vRecap() {
 var D = rcData(), r = D.r, prev = r.m < 0 ? String(r.y - 1) : (r.m === 0 ? (r.y - 1) + "-12" : r.y + "-" + p2(r.m)), next = r.m < 0 ? String(r.y + 1) : (r.m === 11 ? (r.y + 1) + "-01" : r.y + "-" + p2(r.m + 2));
@@ -12810,10 +12812,10 @@ cv.toBlob(function (b) { if (!b) { toast("Не получилось сохран
 function gdPlant(n) { return n >= 6 ? "🌲" : n >= 4 ? "🌳" : n >= 2 ? "🌿" : "🌱"; }
 function vGarden() {
 var t0 = today0(), mon = monday(t0), acts = live(S.acts), pom = acts.filter(function (a) { return a.k === "pomo"; }), bad = acts.filter(function (a) { return a.k === "pomox"; });
-var day = function (l, d) { return l.filter(function (a) { return a.d >= d && a.d < addDays(d, 1); }).length; };
+var day = function (l, d) { return l.filter(function (a) { return a.d >= d && a.d < addDays(d, 1); }).length + (l === pom ? pomoEqIn(d, addDays(d, 1)) : 0); }, pomTot = pom.length + pomoEqIn(0, 9e15);
 var h = head("🌳 Сад фокуса", "Каждый завершённый помидор сажает растение; чем больше помидоров за день — тем выше дерево. Если бросить помидор раньше времени — росток вянет 🥀. Запустить помидор — в меню задачи или 🎧.");
 var wk = 0; for (var i = 0; i < 7; i++) wk += day(pom, addDays(mon, i));
-h += '<div class="rcg">' + '<div class="rcc"><b>' + pom.length + '</b><span>растений всего</span><small>' + fmtH(pom.length * 25 / 60) + " ч фокуса</small></div>" + '<div class="rcc"><b>' + wk + '</b><span>на этой неделе</span></div>' + '<div class="rcc"><b>' + bad.length + "</b><span>увяло</span><small>брошенные помидоры</small></div></div>";
+h += '<div class="rcg">' + '<div class="rcc"><b>' + pomTot + '</b><span>растений всего</span><small>' + fmtH(pomTot * 25 / 60) + " ч фокуса · 25 мин учтённого времени — тоже растение</small></div>" + '<div class="rcc"><b>' + wk + '</b><span>на этой неделе</span></div>' + '<div class="rcc"><b>' + bad.length + "</b><span>увяло</span><small>брошенные помидоры</small></div></div>";
 var g = '<div class="card gdn"><h3>Последние 8 недель</h3><div class="gdg"><span></span>' + ["пн", "вт", "ср", "чт", "пт", "сб", "вс"].map(function (x) { return "<small>" + x + "</small>"; }).join("");
 for (var w = 7; w >= 0; w--) { var m = addDays(mon, -7 * w); g += "<small>" + new Date(m).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + "</small>"; for (var d = 0; d < 7; d++) { var dd = addDays(m, d), n = day(pom, dd), x = day(bad, dd), fut = dd > t0; g += '<span class="gdc' + (fut ? " fut" : "") + '" title="' + esc(dayName(dd)) + ": помидоров " + n + (x ? ", брошено " + x : "") + '">' + (n ? gdPlant(n) + (n > 1 ? "<i>" + n + "</i>" : "") : x ? "🥀" : fut ? "" : "·") + "</span>"; } }
 g += "</div></div>";
@@ -13050,7 +13052,7 @@ more = '<a class="ibtn" href="#today" title="Все задачи на сегод
 } else if (k === "prog") {
 var dn2 = doneEvents().filter(function (e) { return e.d >= t0; }).length, left = todayList().length, all = dn2 + left;
 var hs = habits().filter(function (h) { return !h.arch && hDue(h, t0); }), hd = hs.filter(function (h) { return hDone(h, t0); }).length;
-var pm2 = live(S.acts).filter(function (a) { return a.k === "pomo" && a.d >= t0; }).length, hrs = todayList().reduce(function (a, t) { return a + tHours(t); }, 0), dq = +S.opt.dayq || 0;
+var pm2 = live(S.acts).filter(function (a) { return a.k === "pomo" && a.d >= t0; }).length + pomoEqIn(t0, t0 + DAY), hrs = todayList().reduce(function (a, t) { return a + tHours(t); }, 0), dq = +S.opt.dayq || 0;
 b = '<div class="hzpg"><div><b>' + dn2 + "</b><small>сделано</small></div><div><b>" + left + "</b><small>осталось</small></div><div><b>" + (hs.length ? hd + "/" + hs.length : "—") + "</b><small>привычки</small></div><div><b>" + pm2 + "</b><small>🍅 помидоры</small></div></div>" +
 (all ? appBar(dn2 / all * 100) + '<small class="muted">день выполнен на ' + Math.round(dn2 / all * 100) + " %" + (hrs ? " · в плане ещё " + fmtH(hrs) + " ч" + (dq ? " из " + fmtH(dq) : "") : "") + "</small>" : "");
 more = '<a class="ibtn" href="#stats" title="Аналитика" aria-label="Аналитика">→</a>';
@@ -13568,7 +13570,7 @@ if (STTAB === "time") return h + vTime(days);
 if (STTAB === "bal") return h + vBal();
 if (STTAB === "xp") return h + vXP();
 function card(v, l, s2) { return '<div class="stc"><b>' + v + "</b><span>" + l + "</span>" + (s2 ? '<small>' + s2 + "</small>" : "") + "</div>"; }
-h += '<div class="stgrid">' + card(ev.length, "выполнено", "в среднем " + String(Math.round(ev.length / days * 10) / 10).replace(".", ",") + " в день") + card(created, "создано", "за " + days + " дней") + card(cs + " " + plural(cs, ["день", "дня", "дней"]), "серия подряд", "лучшая: " + best) + card(pom.length, "помидоров", Math.round(pom.length * 25 / 60 * 10) / 10 + " ч фокуса") + card(open, "открыто сейчас", late ? '<span class="warnc">просрочено: ' + late + "</span>" : "просроченных нет") + (hr !== null ? card(hr + " %", "привычки выполнены", hl.length + " " + plural(hl.length, ["привычка", "привычки", "привычек"])) : "") + "</div>";
+h += '<div class="stgrid">' + card(ev.length, "выполнено", "в среднем " + String(Math.round(ev.length / days * 10) / 10).replace(".", ",") + " в день") + card(created, "создано", "за " + days + " дней") + card(cs + " " + plural(cs, ["день", "дня", "дней"]), "серия подряд", "лучшая: " + best) + card(pom.length + pomoEqIn(from, Date.now() + DAY), "помидоров", Math.round(pom.length * 25 / 60 * 10) / 10 + " ч с таймером" + (pomoEqIn(from, Date.now() + DAY) ? " · ещё " + pomoEqIn(from, Date.now() + DAY) + " из учтённого времени" : "")) + card(open, "открыто сейчас", late ? '<span class="warnc">просрочено: ' + late + "</span>" : "просроченных нет") + (hr !== null ? card(hr + " %", "привычки выполнены", hl.length + " " + plural(hl.length, ["привычка", "привычки", "привычек"])) : "") + "</div>";
 if (trk) h += '<p class="muted" style="margin:6px 0 0">⏲ Учтено времени по задачам за период: <b>' + ttFmt(trk * 60000) + "</b></p>";
 h += "<h2>Выполнено по дням</h2>" + barsSVG(per);
 h += '<div class="st2"><div><h2>По проектам</h2>' + (pr.length ? pr.map(function (x) { return '<div class="hbar"><span>' + esc(x.l) + '</span><i style="width:' + Math.round(x.v / pr[0].v * 100) + "%;background:" + x.c + '"></i><b>' + x.v + "</b></div>"; }).join("") : '<p class="muted">Пока нет выполненных задач.</p>') + "</div>" +
@@ -14200,7 +14202,17 @@ if (YD.token()) YD.api("/resources?path=" + encodeURIComponent(f.p), { method: "
 toast("Вложение удалено (файл — в корзине Яндекс Диска)");
 }
 function attImgs() { if (!YD.token()) return; [].forEach.call(document.querySelectorAll("img[data-ydimg]:not([src])"), function (im) { attHref(im.dataset.ydimg).then(function (h) { im.src = h; }).catch(function () { im.replaceWith(document.createTextNode("🖼")); }); }); }
+var POMOM = 25;
+function ttMinOf(t) { return Math.max(0, Math.round((t.tt || 0) / 60000)); }
+function pomoAll(t) { return (t.pomo || 0) + Math.floor(ttMinOf(t) / POMOM); }
+function pomoEqIn(from, to) { var m = live(S.acts).reduce(function (a, x) { return a + (x.k === "time" && x.d >= from && x.d < to ? (+x.m || 0) : 0); }, 0); return Math.floor(Math.max(0, m) / POMOM); }
+function ttLog(t, min) { if (!min) return; t.tt = Math.max(0, (t.tt || 0) + min * 60000); touch(t); logAct("time", t.id, { m: min, man: 1 }); }
 function ttFmt(ms) { var m = Math.round(ms / 60000); if (m < 60) return m + " мин"; return Math.floor(m / 60) + " ч" + (m % 60 ? " " + (m % 60) + " мин" : ""); }
+document.addEventListener("change", function (e) {
+var el = e.target; if (!el || !el.dataset || !el.dataset.ttin) return; var t = task(OPEN); if (!t) return; var v = el.closest(".v"); if (!v) return;
+var hh = Math.max(0, Math.round(+(v.querySelector('[data-ttin="h"]') || {}).value || 0)), mm = Math.max(0, Math.round(+(v.querySelector('[data-ttin="m"]') || {}).value || 0));
+var want = hh * 60 + mm, d = want - ttMinOf(t); if (!d) return; ttLog(t, d); save(); renderPanel(); render(); toast("⏲ Учтено: " + ttFmt(t.tt));
+});
 function ttStop(t, quiet) { if (!t || !t.ttOn) return; var ms = Math.max(0, Date.now() - t.ttOn); t.tt = (t.tt || 0) + ms; t.ttOn = 0; touch(t); if (ms >= 30000) logAct("time", t.id, { m: Math.round(ms / 60000) }); if (!quiet) { save(); render(); if (OPEN === t.id) renderPanel(); toast("⏲ Учтено: " + ttFmt(ms) + " · всего " + ttFmt(t.tt)); } ttRender(); }
 function ttStart(t) { live(S.tasks).forEach(function (x) { if (x.ttOn && x !== t) ttStop(x, true); }); t.ttOn = Date.now(); touch(t); save(); render(); if (OPEN === t.id) renderPanel(); ttRender(); toast("⏲ Время пошло: «" + t.t.slice(0, 40) + "»"); }
 function ttRunning() { return live(S.tasks).filter(function (x) { return x.ttOn; })[0] || null; }
@@ -15125,7 +15137,8 @@ h += '<div class="props">' +
 (t.done ? "" : '<span>Статус</span><div class="v"><div class="seg"><button type="button" data-p="st" data-v="" class="' + (t.st !== "doing" ? "on" : "") + '">Нужно сделать</button><button type="button" data-p="st" data-v="doing" class="' + (t.st === "doing" ? "on" : "") + '">В работе</button></div></div>') +
 '<span>Приоритет</span><div class="v"><div class="seg">' + [[1, "1"], [2, "2"], [3, "3"], [0, "—"]].map(function (x) { return '<button type="button" data-p="prio" data-v="' + x[0] + '" class="' + ((t.prio || 0) === x[0] ? "on" : "") + '" title="' + ["обычный", "срочно", "важно", "желательно"][x[0]] + '">' + x[1] + "</button>"; }).join("") + "</div></div>" +
 '<span>Теги</span><div class="v tagv">' + tg.map(function (n) { return '<span class="tchip" style="--tc:' + tcolor(n) + '"><a href="#tag-' + esc(n) + '" title="Открыть тег">' + esc(tlab(n)) + '</a><button type="button" class="tx" data-p="tag" data-tag="' + esc(n) + '" title="Убрать тег" aria-label="Убрать тег">×</button></span>'; }).join("") + '<input type="text" data-pf="newtag" class="tagin" placeholder="' + (tg.length ? "+ тег" : "Добавить тег…") + '" size="12" autocomplete="off" spellcheck="false"></div>' +
-'<span>Учёт времени</span><div class="v"><button type="button" class="btn sm' + (t.ttOn ? " pri" : "") + '" data-p="track">' + (t.ttOn ? "■ Остановить" : "▶ Засечь время") + '</button><span class="muted">учтено</span><input type="number" min="0" step="0.25" data-pf="tth" value="' + (t.tt ? Math.round(t.tt / 36e5 * 100) / 100 : "") + '" placeholder="0" style="width:70px"> ч</div>' +
+'<span>Учёт времени</span><div class="v"><button type="button" class="btn sm' + (t.ttOn ? " pri" : "") + '" data-p="track">' + (t.ttOn ? "■ Остановить" : "▶ Засечь время") + '</button><span class="muted">учтено</span><input type="number" min="0" step="1" data-ttin="h" value="' + Math.floor(ttMinOf(t) / 60) + '" style="width:58px" aria-label="Часов"> ч <input type="number" min="0" max="59" step="1" data-ttin="m" value="' + ttMinOf(t) % 60 + '" style="width:58px" aria-label="Минут"> мин' + (pomoAll(t) ? '<span class="muted" title="Каждые 25 минут учтённого времени — один помидор, плюс помидоры с таймера">· 🍅 ' + pomoAll(t) + "</span>" : "") +
+'<span class="ttq">' + [5, 15, 30, 60].map(function (m) { return '<button type="button" class="chip" data-p="ttadd" data-v="' + m + '" title="Добавить ' + (m < 60 ? m + " минут" : "час") + ' к учтённому">+' + (m < 60 ? m + " мин" : "1 ч") + "</button>"; }).join("") + "</span></div>" +
 '<span>Входит в</span><div class="v"><select data-pf="parent"><option value="">— это главная задача —</option>' + cand.map(function (x) { return '<option value="' + x.id + '"' + (t.parent === x.id ? " selected" : "") + ">" + esc(x.t.slice(0, 60)) + "</option>"; }).join("") + "</select></div>" +
 '<span>Напоминание</span><div class="v"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-pf="rem"' + (t.rem ? " checked" : "") + (t.at ? "" : " disabled") + "> " + (SRV.ready() && bnOn() ? "в Telegram и в браузере" : bnOn() ? "в браузере" : "в Telegram") + (t.at && t.allday ? " в " + (S.opt.allDayHour || 9) + ":00" : "") + "</label>" + (t.rem && t.at ? '<span class="remo">' + REMO.map(function (o) { return '<button type="button" class="chip' + (remOffs(t).indexOf(o) >= 0 ? " on" : "") + '" data-p="remoff" data-v="' + o + '" title="' + (o ? "Напомнить за " + REMN[o] : "Напомнить в момент начала") + '">' + (o ? "за " : "") + REMN[o] + "</button>"; }).join("") + "</span>" : "") + (!t.at ? '<span class="muted">сначала укажите срок</span>' : SRV.ready() || bnOn() ? "" : '<span class="muted">— включите <a href="#settings-bnotif">напоминания в браузере</a> или подключите <a href="#settings-srv">сервер</a></span>') + "</div>" + depRows(t) + "</div>";
 if (!t.body && t.note) t.body = noteToBody(t.note);
@@ -15319,6 +15332,7 @@ if (a === "npick") { NPICK = !NPICK; renderPanel(); var npq = $("npq"); if (npq)
 if (a === "nlinkt") { var nl2 = note(el.dataset.id); if (nl2) { nl2.tasks = (nl2.tasks || []).concat(t.id); touch(nl2); save(); renderPanel(); render(); toast("Заметка привязана"); } return; }
 if (a === "nunl") { var nu2 = note(el.dataset.id); if (nu2) { nu2.tasks = (nu2.tasks || []).filter(function (x) { return x !== t.id; }); touch(nu2); save(); renderPanel(); render(); } return; }
 if (a === "track") { if (t.ttOn) ttStop(t); else ttStart(t); return; }
+if (a === "ttadd") { var tm = +el.dataset.v || 0; ttLog(t, tm); save(); renderPanel(); render(); toast("⏲ +" + ttFmt(tm * 60000) + " · всего " + ttFmt(t.tt) + (Math.floor((ttMinOf(t)) / POMOM) > Math.floor((ttMinOf(t) - tm) / POMOM) ? " · 🍅 +" + (Math.floor(ttMinOf(t) / POMOM) - Math.floor((ttMinOf(t) - tm) / POMOM)) : "")); return; }
 if (a === "fopen") { attOpen(t, el.dataset.id); return; }
 if (a === "fdel") { attDel(t, el.dataset.id); return; }
 if (a === "flagdd") { var rdd = el.getBoundingClientRect(); ctxShow(rdd.left, rdd.bottom + 4, flagMenu(t), { k: "task", id: t.id }); return; }
