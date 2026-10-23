@@ -372,7 +372,7 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .bfxwarn { padding: 8px 12px; border-radius: 8px; font-size: calc(13px * var(--fs)); background: color-mix(in srgb, var(--buwarn) 12%, transparent) }
 .bupay { display: flex; gap: 10px; align-items: baseline; padding: 4px 0; border-top: 1px solid var(--line); font-size: calc(13.5px * var(--fs)) } .bupay .bud { width: 48px; flex: none; color: var(--muted); font-size: calc(12px * var(--fs)) } .bupay .bun { flex: 1; min-width: 0 }
 .butbl { overflow-x: auto } .butbl table { width: 100%; border-collapse: collapse; font-size: calc(13px * var(--fs)); font-variant-numeric: tabular-nums } .butbl th, .butbl td { padding: 5px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap } .butbl th:first-child, .butbl td:first-child { text-align: left } .butbl th { font-weight: 500; color: var(--muted); font-size: calc(12px * var(--fs)) } .butbl tr.cur td { background: var(--acc-soft) } .butbl tr.fut td { color: var(--muted) }
-.buregs { padding: 4px 12px } .bureg { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 7px 0 } .bureg + .bureg { border-top: 1px solid var(--line) } .bureg.off { opacity: .5 } .burgn { flex: 1 1 180px; min-width: 0 } .burd { width: 64px } .bura { width: 110px }
+.buregs { padding: 4px 12px } .bureg { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 7px 0 } .bureg + .bureg { border-top: 1px solid var(--line) } .bureg.off { opacity: .5 } .burgn { flex: 1 1 180px; min-width: 0 } .burd { width: 64px } .burf { width: 150px } .burnx { font-size: 12px } .bura { width: 110px }
 .bukinds { display: grid; gap: 6px } .bukr { gap: 8px; align-items: center } .bukn { min-width: 140px }
 .busnap { margin: -4px 0 10px } .bunone { padding: 14px 16px }
 .buw { display: grid; gap: 6px } .buwl { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; font-size: calc(13.5px * var(--fs)) }
@@ -8179,7 +8179,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-175";
+var APPV = "zd-app-2026-10-16-176";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -12714,18 +12714,28 @@ if (k === "off") r.off.push(x); else { r.rows.push(x); r.exp.plan += pl; r.exp.f
 r.inc = { plan: buSum((P.inc || {}).plan || {}), fact: buSum((P.inc || {}).fact || {}) };
 return r;
 }
+function bregOk(g) { return !g.off && (g.per === "w" ? /^\d{4}-\d\d-\d\d$/.test(g.from || "") : +g.day > 0); }
+function bregWk(g) { return Math.max(1, Math.min(8, Math.round(+g.wk || 2))); }
+function bregHit(g, d) {
+if (g.per === "w") { if (!g.from) return false; var f = new Date(g.from + "T00:00").getTime(), n = Math.round((sod(d) - f) / DAY); return n >= 0 && n % (bregWk(g) * 7) === 0; }
+var dt = new Date(d), last = new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate(); return dt.getDate() === Math.min(+g.day, last);
+}
+function bregNext(g, t0) {
+if (g.per === "w") { var f = new Date(g.from + "T00:00").getTime(), st = bregWk(g) * 7; if (t0 <= f) return f; return addDays(f, Math.ceil(Math.round((t0 - f) / DAY) / st) * st); }
+var d = new Date(t0), last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(), due = new Date(d.getFullYear(), d.getMonth(), Math.min(+g.day, last)).getTime();
+if (due < t0) { var l2 = new Date(d.getFullYear(), d.getMonth() + 2, 0).getDate(); due = new Date(d.getFullYear(), d.getMonth() + 1, Math.min(+g.day, l2)).getTime(); }
+return due;
+}
+function bregPer(g) { var w = bregWk(g); return g.per === "w" ? (w === 1 ? "каждую неделю" : w === 2 ? "каждые 2 недели" : "каждые " + w + " недели") : "каждый месяц"; }
 function buRegsIn(a, b) {
 var out = [];
-live(S.bregs || []).filter(function (x) { return !x.off && +x.day > 0; }).forEach(function (g) {
-for (var d = sod(a); d <= sod(b); d = addDays(d, 1)) {
-var dt = new Date(d), last = new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate();
-if (dt.getDate() === Math.min(+g.day, last)) out.push({ g: g, d: d });
-}
+live(S.bregs || []).filter(bregOk).forEach(function (g) {
+for (var d = sod(a); d <= sod(b); d = addDays(d, 1)) if (bregHit(g, d)) out.push({ g: g, d: d });
 });
 return out.sort(function (x, y) { return x.d - y.d; }).map(function (x) {
 var P = buPer(buPid(x.d)); if (!P) { x.st = "nodata"; return x; }
 var due = live(S.bregs || []).filter(function (g) { return !g.off && g.cat === x.g.cat; }), need = 0;
-for (var d = P.from; d <= x.d; d = addDays(d, 1)) { var dt = new Date(d), last = new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate(); due.forEach(function (g) { if (dt.getDate() === Math.min(+g.day, last)) need += +g.amt || 0; }); }
+for (var d = P.from; d <= x.d; d = addDays(d, 1)) due.forEach(function (g) { if (bregOk(g) && bregHit(g, d)) need += +g.amt || 0; });
 var paid = buFact(P, x.g.cat, dKey(P.from), dKey(Math.max(x.d, Math.min(today0(), P.to))));
 x.st = x.d > today0() ? "wait" : paid + 1 >= need ? "ok" : x.d < today0() ? "late" : "wait"; return x;
 });
@@ -12830,12 +12840,12 @@ return h;
 }
 function buCatsKnown() { var out = []; buPers().forEach(function (P) { (P.cats || []).forEach(function (c) { if (out.indexOf(c) < 0) out.push(c); }); }); if (!out.length) out = ["Траты", "Ипотека", "Ком. усл", "Фитнес/здоровье", "Животные", "Стиль ж", "Кредиты", "ФИН ЦЕЛИ", "Налог ПНД"]; return out; }
 function buRegsHTML() {
-var l = live(S.bregs || []).sort(function (a, b) { return (+a.day || 99) - (+b.day || 99) || (a.n || "").localeCompare(b.n || ""); });
-var h = '<p class="muted" style="margin:0 0 8px">Платежи, которые повторяются каждый месяц: ипотека, кредиты, коммунальные, мобильная связь, интернет, подписки и услуги. Число месяца — когда ожидается; «Неделя» покажет платежи своей недели и оплачены ли они (по факту статьи с 11-го).</p>';
+var l = live(S.bregs || []).sort(function (a, b) { return (a.per === "w" ? 0 : +a.day || 99) - (b.per === "w" ? 0 : +b.day || 99) || (a.n || "").localeCompare(b.n || ""); });
+var h = '<p class="muted" style="margin:0 0 8px">Платежи, которые повторяются каждый месяц или каждые несколько недель: ипотека, кредиты, коммунальные, мобильная связь, интернет, подписки и услуги. Число месяца — когда ожидается; если платёж идёт, например, раз в 2 недели — нажмите «каждый месяц ▾» и укажите дату ближайшего платежа; «Неделя» покажет платежи своей недели и оплачены ли они (по факту статьи с 11-го).</p>';
 h += '<div class="gsheet buregs">' + (l.length ? l.map(function (g) {
-return '<div class="bureg' + (g.off ? " off" : "") + '"><input class="inp burgn" data-bureg="n" data-id="' + g.id + '" value="' + esc(g.n || "") + '" placeholder="Название" aria-label="Название"><button type="button" class="btn sm" data-a="burcat" data-id="' + g.id + '">' + esc(g.cat || "статья") + ' ▾</button><span class="r"><input class="inp burd" type="number" min="1" max="31" data-bureg="day" data-id="' + g.id + '" value="' + (+g.day || "") + '" aria-label="Число месяца"><span class="muted">-го</span></span><span class="r"><input class="inp bura" type="text" inputmode="numeric" data-bureg="amt" data-id="' + g.id + '" value="' + (g.amt ? Math.round(g.amt).toLocaleString("ru-RU") : "") + '" aria-label="Сумма"><span class="muted">₽</span></span><button type="button" class="ibtn" data-a="buroff" data-id="' + g.id + '" title="' + (g.off ? "Включить" : "Временно не ждать") + '">' + (g.off ? "▶" : "⏸") + '</button><button type="button" class="ibtn" data-a="burdel" data-id="' + g.id + '" title="Удалить">🗑</button></div>';
+return '<div class="bureg' + (g.off ? " off" : "") + '"><input class="inp burgn" data-bureg="n" data-id="' + g.id + '" value="' + esc(g.n || "") + '" placeholder="Название" aria-label="Название"><button type="button" class="btn sm" data-a="burcat" data-id="' + g.id + '">' + esc(g.cat || "статья") + ' ▾</button><button type="button" class="btn sm burper" data-a="burper" data-id="' + g.id + '" title="Как часто">' + bregPer(g) + ' ▾</button>' + (g.per === "w" ? '<span class="r"><span class="muted">с</span><input class="inp burf" type="date" data-bureg="from" data-id="' + g.id + '" value="' + esc(g.from || "") + '" aria-label="Дата платежа, от которой считать"></span>' + (bregOk(g) ? '<span class="muted burnx">след.: ' + new Date(bregNext(g, today0())).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + "</span>" : "") : '<span class="r"><input class="inp burd" type="number" min="1" max="31" data-bureg="day" data-id="' + g.id + '" value="' + (+g.day || "") + '" aria-label="Число месяца"><span class="muted">-го</span></span>') + '<span class="r"><input class="inp bura" type="text" inputmode="numeric" data-bureg="amt" data-id="' + g.id + '" value="' + (g.amt ? Math.round(g.amt).toLocaleString("ru-RU") : "") + '" aria-label="Сумма"><span class="muted">₽</span></span><button type="button" class="ibtn" data-a="buroff" data-id="' + g.id + '" title="' + (g.off ? "Включить" : "Временно не ждать") + '">' + (g.off ? "▶" : "⏸") + '</button><button type="button" class="ibtn" data-a="burdel" data-id="' + g.id + '" title="Удалить">🗑</button></div>';
 }).join("") : '<p class="muted" style="padding:8px 0">Пока пусто.</p>') + '</div><div class="r" style="margin-top:8px"><button type="button" class="btn sm" data-a="buradd">＋ Платёж</button></div>';
-var P = buPer(buPid(today0())); if (P && l.length) { var by = {}; l.filter(function (g) { return !g.off; }).forEach(function (g) { by[g.cat] = (by[g.cat] || 0) + (+g.amt || 0); }); h += '<p class="muted">Регулярных в месяц против плана ' + esc(buPName(P.id)) + ": " + Object.keys(by).map(function (c) { return esc(c) + " " + buRub(by[c]) + " из " + buRub(+P.plan[c] || 0); }).join(" · ") + "</p>"; }
+var P = buPer(buPid(today0())); if (P && l.length) { var by = {}; l.filter(function (g) { return !g.off; }).forEach(function (g) { by[g.cat] = (by[g.cat] || 0) + (+g.amt || 0) * (g.per === "w" ? 30.44 / (7 * bregWk(g)) : 1); }); h += '<p class="muted">Регулярных в месяц против плана ' + esc(buPName(P.id)) + ": " + Object.keys(by).map(function (c) { return esc(c) + " " + buRub(by[c]) + " из " + buRub(+P.plan[c] || 0); }).join(" · ") + "</p>"; }
 return h;
 }
 function buSetHTML() {
@@ -12867,6 +12877,7 @@ case "bufilex": BUFH = null; BUFINFO = null; buKV("fh", null).catch(function () 
 case "bukind": var ks = Object.assign({}, buOpt().kinds); ks[buNorm(el.dataset.c)] = el.dataset.v; buSet("kinds", ks); render(); return true;
 case "buradd": S.bregs = S.bregs || []; S.bregs.push(touch({ id: uid(), n: "", cat: "Ком. усл", day: 10, amt: 0 })); save(); render(); setTimeout(function () { var i = document.querySelectorAll(".burgn"); if (i.length) i[i.length - 1].focus(); }, 40); return true;
 case "burdel": var g = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (g) { g.del = 1; g.delAt = Date.now(); touch(g); save(); render(); toastUndo("Платёж удалён", function () { delete g.del; delete g.delAt; touch(g); }); } return true;
+case "burper": var rp = el.getBoundingClientRect(), gp = live(S.bregs || []).filter(function (x) { return x.id === id; })[0] || {}; ctxShow(rp.left, rp.bottom + 4, [["m", "Каждый месяц (число месяца)"], ["w1", "Каждую неделю"], ["w2", "Каждые 2 недели"], ["w3", "Каждые 3 недели"], ["w4", "Каждые 4 недели"]].map(function (o) { var on = o[0] === "m" ? gp.per !== "w" : gp.per === "w" && "w" + bregWk(gp) === o[0]; return { c: o[0], i: on ? "✓" : "", l: o[1] }; }), { k: "burper", id: id }); return true;
 case "buroff": var g2 = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (g2) { g2.off = g2.off ? 0 : 1; touch(g2); save(); render(); } return true;
 case "burcat": var rc = el.getBoundingClientRect(), cur = (live(S.bregs || []).filter(function (x) { return x.id === id; })[0] || {}).cat; ctxShow(rc.left, rc.bottom + 4, buCatsKnown().map(function (c) { return { c: c, i: cur === c ? "✓" : "", l: c }; }), { k: "burcat", id: id }); return true;
 }
@@ -12874,7 +12885,7 @@ return false;
 }
 document.addEventListener("change", function (e) {
 var t = e.target, ds = t.dataset || {}; if (!ds.bureg) return; var g = live(S.bregs || []).filter(function (x) { return x.id === ds.id; })[0]; if (!g) return;
-if (ds.bureg === "n") g.n = t.value.trim().slice(0, 80); else if (ds.bureg === "day") g.day = Math.max(1, Math.min(31, Math.round(+t.value || 1))); else g.amt = Math.max(0, Math.round(+String(t.value).replace(/[\s ₽]/g, "").replace(",", ".") || 0));
+if (ds.bureg === "n") g.n = t.value.trim().slice(0, 80); else if (ds.bureg === "day") g.day = Math.max(1, Math.min(31, Math.round(+t.value || 1))); else if (ds.bureg === "from") { g.from = /^\d{4}-\d\d-\d\d$/.test(t.value) ? t.value : ""; touch(g); save(); render(); return; } else g.amt = Math.max(0, Math.round(+String(t.value).replace(/[\s ₽]/g, "").replace(",", ".") || 0));
 touch(g); save();
 });
 var BFX = null, BFXLAST;
@@ -13800,14 +13811,13 @@ st(true, "7. Следующая неделя", nw.miss.length ? '<span class="mu
 }
 function bpaySync() {
 if ((S.opt.bud || {}).payrem === false) return false; var ch = false, t0 = today0(), d = new Date(t0);
-live(S.bregs || []).filter(function (g) { return !g.off && +g.day > 0; }).forEach(function (g) {
-var last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(), due = new Date(d.getFullYear(), d.getMonth(), Math.min(+g.day, last)).getTime();
-if (due < t0) { var l2 = new Date(d.getFullYear(), d.getMonth() + 2, 0).getDate(); due = new Date(d.getFullYear(), d.getMonth() + 1, Math.min(+g.day, l2)).getTime(); }
+live(S.bregs || []).filter(bregOk).forEach(function (g) {
+var due = bregNext(g, t0);
 var id = "pay-" + g.id + "-" + dKey(due), t = S.tasks.filter(function (x) { return x.id === id; })[0];
 var prev = S.tasks.filter(function (x) { return x.id && x.id.indexOf("pay-" + g.id + "-") === 0 && x.id !== id && !x.done && !x.del; });
 prev.forEach(function (x) { var dd = new Date(x.id.slice(-10) + "T00:00").getTime(), s0 = buRegsIn(dd, dd).filter(function (y) { return y.g.id === g.id; })[0]; if (s0 && s0.st === "ok") { x.done = true; x.dt = Date.now(); touch(x); ch = true; } });
 if (due - t0 > 2 * DAY || t) return;
-t = newTaskFrom("💳 " + (g.n || "Платёж") + " · " + rub(+g.amt || 0) + " · до " + new Date(due).getDate() + "-го", { day: t0 }); t.id = id; t.at = t0; t.allday = true; t.due = due; t.rem = true; t.tags = []; touch(t); ch = true;
+t = newTaskFrom("💳 " + (g.n || "Платёж") + " · " + rub(+g.amt || 0) + " · до " + (g.per === "w" ? new Date(due).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) : new Date(due).getDate() + "-го"), { day: t0 }); t.id = id; t.at = t0; t.allday = true; t.due = due; t.rem = true; t.tags = []; touch(t); ch = true;
 });
 return ch;
 }
@@ -16960,6 +16970,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["176", "Платежи раз в 2 недели", ["«Бюджет» → «Регулярные платежи»: кроме «каждый месяц» — каждую неделю, каждые 2, 3 или 4 недели от выбранной даты. Например, ипотека раз в 2 недели: в одном месяце 28-го, в другом 26-го — приложение посчитает само.", "Такие платежи видны в «Неделе» бюджета, сверяются с выпиской и напоминают о себе за 2 дня, как ежемесячные."]],
 ["175", "Быстрее показывается экран", ["Фоновые расчёты (автозадачи челленджей, плана уборки, дней рождения, история изменений) теперь идут сразу после того, как экран показан, а не до этого.", "«Настройки» → «Диагностика» → «⏱ Скорость запуска»: сколько занимает разбор кода, чтение данных, первый экран и фоновые расчёты на этом устройстве, и последние 10 запусков."]],
 ["173", "Быстрее и удобнее", ["Приложение грузится быстрее: справка подгружается отдельно при первом открытии, лишнее (комментарии, отступы) убирается при сборке — файл меньше на 17 %.", "Главная по дню недели: в пятницу и на выходных — «🧭 Обзор недели», в начале месяца — «🏁 Итоги» прошлого месяца.", "Клавиши: g и буква — переход отовсюду (g h — главная, g s — сегодня, g d — мой день, g t — задачи, g z — знания, g l — жизнь, g m — дом и деньги); j / k и Enter — по карточкам главной.", "Демо: на главной — свои карточки «Сроки» и «Цели»."]],
 ["172", "Главная под себя", ["Свои карточки на главной: любой виджет, как на досках, — «✎ Настроить главную» → «＋ Новая карточка…» или «＋ Виджет с доски…».", "«＋» в шапке панелей «Мой день», «Жизнь», «Дом и деньги»: задача на сегодня, привычка, цель, запись в дневник, меню, рецепт, документ, общий список.", "Вечером, когда день закрыт, на главной — итог: сделано, настроение и первое дело на завтра.", "Новичку — вопрос «Для чего вам приложение?»: нужные модули включаются сразу.", "На телефоне ☰ открывает шесть пространств вместо старой длинной панели.", "Значок «Дом и деньги» — 🔑. Учебный курс: все снимки пересняты на новом интерфейсе."]],
@@ -21027,6 +21038,7 @@ if (k === "rhexp" || k === "kpexp") { var kpx = k === "kpexp" ? pantry().filter(
 if (k === "rqset") { rqSet(c); return; }
 if (k === "kpmv") { var kpm = pantry().filter(function (x) { return x.id === id; })[0]; if (kpm) { kpm.pl = c; touch(kpm); save(); render(); } return; }
 if (k === "ckzone") { var cq = live(S.chq || []).filter(function (x) { return x.id === id; })[0]; if (cq) { cq.zone = c; touch(cq); save(); render(); } return; }
+if (k === "burper") { var bp = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bp) { if (c === "m") { delete bp.per; } else { bp.per = "w"; bp.wk = +c.slice(1); if (!bp.from) bp.from = dKey(today0()); } touch(bp); save(); render(); if (c !== "m") toast("Укажите дату ближайшего (или последнего) платежа — от неё считаются " + bregPer(bp)); } return; }
 if (k === "burcat") { var bg = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bg) { bg.cat = c; touch(bg); save(); render(); } return; }
 if (k === "tbpick") { var tl = tbList(); tl.forEach(function (b) { if (b.id === id) b.cat = c; }); tbSave(TBTAB, tl); render(); return; }
 if (k === "setfpj" || k === "setfsx" || k === "setfgl") { setFSet(id, { setfpj: "pid", setfsx: "sec", setfgl: "goal" }[k], c === "~" ? "" : c); return; }
