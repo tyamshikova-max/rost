@@ -734,7 +734,7 @@ body.tclean #ntfBtn { order: 1 } body.tclean .prfb { order: 2 }
 .bootb { margin: 4px 0 12px } .bootb h3 { margin: 0 0 6px } .boott { border-collapse: collapse; font-size: calc(13px * var(--fs)) } .boott td { padding: 3px 12px 3px 0; vertical-align: top } .boott .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap }
 #sideRz { position: fixed; z-index: 42; width: 6px; cursor: col-resize; touch-action: none } #sideRz:hover, body.siderz #sideRz { background: color-mix(in srgb, var(--acc) 45%, transparent) } body.siderz, body.siderz * { cursor: col-resize !important; user-select: none !important }
 .hzms { position: relative; min-height: 80px } .hzms > .hzc { position: absolute; margin: 0; box-sizing: border-box } .hzms:not(.ready) > .hzc { visibility: hidden }
-.hzrs { position: absolute; right: 3px; bottom: 3px; width: 14px; height: 14px; cursor: ew-resize; opacity: 0; transition: opacity .15s; border-right: 3px solid var(--muted); border-bottom: 3px solid var(--muted); border-radius: 0 0 6px 0; touch-action: none } .hzc:hover .hzrs, .hzedit .hzrs { opacity: .6 } .hzrs:hover { opacity: 1; border-color: var(--acc) }
+.hzrs { position: absolute; right: 3px; bottom: 3px; width: 16px; height: 16px; cursor: ew-resize; opacity: .25; transition: opacity .15s; border-right: 3px solid var(--muted); border-bottom: 3px solid var(--muted); border-radius: 0 0 6px 0; touch-action: none } .hzc:hover .hzrs, .hzedit .hzrs { opacity: .7 } .hzrs:hover { opacity: 1; border-color: var(--acc) }
 body.hzrsing, body.hzrsing * { cursor: ew-resize !important; user-select: none !important } #hzmark { position: absolute; top: 0; bottom: 0; border: 2px dashed color-mix(in srgb, var(--acc) 55%, transparent); border-radius: 14px; pointer-events: none }
 .hzedit .hzh { flex-wrap: wrap; row-gap: 2px } .hzedit .hzh > b { flex: 1 1 120px } .hzedit .hzed { margin-left: auto; display: inline-flex; gap: 0 } .hzedit .hzed .ibtn { width: 24px; height: 24px; min-width: 24px; padding: 0; font-size: 12px } .hzedit .hzed .hzsp { width: auto; padding: 0 5px }
 .hzcolsel { gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0 }
@@ -3050,7 +3050,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-181";
+var APPV = "zd-app-2026-10-16-182";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -13358,7 +13358,7 @@ function hzMas() {
 var G = hzGeom(); if (!G) return; var hs = []; for (var j = 0; j < G.n; j++) hs.push(0);
 [].forEach.call(G.box.children, function (el) {
 if (!el.dataset.hzk) return; var s = Math.min(+el.dataset.s || 1, G.n), c = G.n === 1 ? 0 : Math.max(0, Math.min(+el.dataset.c || 0, G.n - s));
-if (HZRS && HZRS.k === el.dataset.hzk) s = Math.min(HZRS.s, G.n - c);
+if (HZRS && HZRS.k === el.dataset.hzk) { s = Math.min(HZRS.s, G.n); c = Math.min(HZRS.c, G.n - s); }
 el.style.width = (s * G.cw + (s - 1) * G.g) + "px"; el.style.left = (c * (G.cw + G.g)) + "px";
 var top = 0; for (var q = c; q < c + s; q++) top = Math.max(top, hs[q]);
 el.style.top = top + "px"; var h = el.offsetHeight; for (q = c; q < c + s; q++) hs[q] = top + h + G.g;
@@ -13399,10 +13399,10 @@ e.preventDefault(); HZRS = { k: el.dataset.hzk, s: +el.dataset.s || 1, c: Math.m
 });
 document.addEventListener("pointermove", function (e) {
 if (!HZRS) return; var G = hzGeom(); if (!G) return;
-var s = Math.max(1, Math.min(G.n - HZRS.c, Math.round((e.clientX - HZRS.left + G.g) / (G.cw + G.g)))); if (s !== HZRS.s) { HZRS.s = s; hzMas(); }
+var s = Math.max(1, Math.min(G.n, Math.round((e.clientX - HZRS.left + G.g) / (G.cw + G.g)))); if (s !== HZRS.s) { HZRS.s = s; hzMas(); }
 });
 document.addEventListener("pointerup", function () {
-if (!HZRS) return; var r = HZRS; HZRS = null; document.body.classList.remove("hzrsing"); hzFix(); S.opt.homespan[r.k] = r.s; S.opt.homecol[r.k] = Math.min(S.opt.homecol[r.k], hzN() - r.s); optTouch(); save(); render();
+if (!HZRS) return; var r = HZRS; HZRS = null; document.body.classList.remove("hzrsing"); hzFix(); r.s = Math.min(r.s, hzN()); S.opt.homespan[r.k] = r.s; S.opt.homecol[r.k] = Math.max(0, Math.min(r.c, hzN() - r.s)); optTouch(); save(); render();
 });
 function hz4Act(a, el) {
 var x = el.dataset.x;
