@@ -729,6 +729,11 @@ body.tclean #ntfBtn { order: 1 } body.tclean .prfb { order: 2 }
 .hzc.kfoc { outline-offset: 2px }
 .bootb { margin: 4px 0 12px } .bootb h3 { margin: 0 0 6px } .boott { border-collapse: collapse; font-size: calc(13px * var(--fs)) } .boott td { padding: 3px 12px 3px 0; vertical-align: top } .boott .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap }
 #sideRz { position: fixed; z-index: 42; width: 6px; cursor: col-resize; touch-action: none } #sideRz:hover, body.siderz #sideRz { background: color-mix(in srgb, var(--acc) 45%, transparent) } body.siderz, body.siderz * { cursor: col-resize !important; user-select: none !important }
+.hzms { position: relative; min-height: 80px } .hzms > .hzc { position: absolute; margin: 0; box-sizing: border-box } .hzms:not(.ready) > .hzc { visibility: hidden }
+.hzrs { position: absolute; right: 3px; bottom: 3px; width: 14px; height: 14px; cursor: ew-resize; opacity: 0; transition: opacity .15s; border-right: 3px solid var(--muted); border-bottom: 3px solid var(--muted); border-radius: 0 0 6px 0; touch-action: none } .hzc:hover .hzrs, .hzedit .hzrs { opacity: .6 } .hzrs:hover { opacity: 1; border-color: var(--acc) }
+body.hzrsing, body.hzrsing * { cursor: ew-resize !important; user-select: none !important } #hzmark { position: absolute; top: 0; bottom: 0; border: 2px dashed color-mix(in srgb, var(--acc) 55%, transparent); border-radius: 14px; pointer-events: none }
+.hzedit .hzh { flex-wrap: wrap; row-gap: 2px } .hzedit .hzh > b { flex: 1 1 120px } .hzedit .hzed { margin-left: auto; display: inline-flex; gap: 0 } .hzedit .hzed .ibtn { width: 24px; height: 24px; min-width: 24px; padding: 0; font-size: 12px } .hzedit .hzed .hzsp { width: auto; padding: 0 5px }
+.hzcolsel { gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0 }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -8184,7 +8189,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-180";
+var APPV = "zd-app-2026-10-16-181";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -17014,6 +17019,7 @@ var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
 ["180", "«Сейчас» — по вашему выбору", ["Кнопка «◉ Сейчас» сначала спрашивает, за что взяться: главное, остальное на сегодня или любая задача через поиск. «▶ По порядку» — как раньше.", "В режиме «Сейчас» — «☰ Другая задача»: переключиться, не выходя."]],
+["181", "Главная: 1–4 колонки", ["«✎ Настроить главную» → «Колонок: 1 2 3 4».", "Ширина карточки — от одной колонки до всех: потяните за уголок справа внизу карточки или нажмите ⇤⇥ в настройке.", "Карточки укладываются «кирпичиками» без пустот; на узком экране колонок становится меньше сами."]],
 ["179", "Главная и панель — как удобно вам", ["Ширина боковой панели меняется: потяните мышью за её правый край; двойной щелчок по краю — как было.", "Карточки главной перетаскиваются мышью за ⠿ — в любое место и в другую колонку.", "Ширина карточки: в половину или во всю ширину — «✎ Настроить главную» → ⇤⇥; там же → ← — в другую колонку."]],
 ["177", "Платежи недели — всегда на виду", ["«Бюджет» → «Неделя»: блок «Регулярные платежи этой недели» виден и до загрузки файла — даты, названия и суммы (для платежей раз в 2 недели — с пометкой периода). Оплачено ли — появляется, когда загружены данные.", "В заголовке блока — сколько всего регулярных платежей на этой неделе."]],
 ["176", "Платежи раз в 2 недели", ["«Бюджет» → «Регулярные платежи»: кроме «каждый месяц» — каждую неделю, каждые 2, 3 или 4 недели от выбранной даты. Например, ипотека раз в 2 недели: в одном месяце 28-го, в другом 26-го — приложение посчитает само.", "Такие платежи видны в «Неделе» бюджета, сверяются с выпиской и напоминают о себе за 2 дня, как ежемесячные."]],
@@ -18222,7 +18228,7 @@ var hid = hzHid();
 h += hzModQ() + '<div class="hzgrid' + (HZED ? " hzedit" : "") + '">' + hzLayout(hzOrder().filter(function (k) { return hid.indexOf(k) < 0; })) + "</div>";
 if (HZED) {
 var hs = hid.filter(function (k) { return HZC.some(function (c) { return c[0] === k; }); });
-h += '<div class="card hzedb"><b>Настройка главной</b><p class="muted">Перетаскивайте карточки мышью за ⠿ — куда угодно, в том числе в другую колонку (это можно и без режима настройки). Здесь: ↑ ↓ — порядок, → ← — в другую колонку, ⇤⇥ — во всю ширину или в половину, ✕ — скрыть. Свои карточки — любой виджет, как на досках:</p><div class="r" style="gap:8px;margin:0 0 10px"><button type="button" class="btn sm" data-a="hzwnew">＋ Новая карточка…</button><button type="button" class="btn sm" data-a="hzwpick">＋ Виджет с доски…</button></div><p class="muted">Скрытые можно вернуть:</p><div class="chips">' + (hs.length ? hs.map(function (k) { return '<button type="button" class="chip" data-a="hzshow" data-x="' + k + '">＋ ' + hzName(k) + "</button>"; }).join("") : '<span class="muted">скрытых нет</span>') + (S.opt.fstoff ? '<button type="button" class="chip" data-a="fston">＋ 🚀 Первые шаги</button>' : "") + '</div><div class="r" style="gap:8px;margin-top:10px"><button type="button" class="btn pri" data-a="hzed">Готово</button><button type="button" class="btn" data-a="hzreset">↺ Как было</button></div></div>';
+h += '<div class="card hzedb"><b>Настройка главной</b>' + hzColsHTML() + '<p class="muted">Перетаскивайте карточки мышью за ⠿ — куда угодно, в том числе в другую колонку; ширину меняйте, потянув за уголок справа внизу карточки (это можно и без режима настройки). Здесь: ↑ ↓ — порядок, ← → — в соседнюю колонку, ↔ — ширина в колонках, ✕ — скрыть. Свои карточки — любой виджет, как на досках:</p><div class="r" style="gap:8px;margin:0 0 10px"><button type="button" class="btn sm" data-a="hzwnew">＋ Новая карточка…</button><button type="button" class="btn sm" data-a="hzwpick">＋ Виджет с доски…</button></div><p class="muted">Скрытые можно вернуть:</p><div class="chips">' + (hs.length ? hs.map(function (k) { return '<button type="button" class="chip" data-a="hzshow" data-x="' + k + '">＋ ' + hzName(k) + "</button>"; }).join("") : '<span class="muted">скрытых нет</span>') + (S.opt.fstoff ? '<button type="button" class="chip" data-a="fston">＋ 🚀 Первые шаги</button>' : "") + '</div><div class="r" style="gap:8px;margin-top:10px"><button type="button" class="btn pri" data-a="hzed">Готово</button><button type="button" class="btn" data-a="hzreset">↺ Как было</button></div></div>';
 }
 h += '<h3 class="apph">Пространства</h3>' + spzTiles();
 h += '<div class="r hzfoot"><button type="button" class="btn sm" data-a="hzed">' + (HZED ? "✓ Готово" : "✎ Настроить главную") + '</button><a class="btn sm" href="#apps">▦ Все разделы</a><a class="btn sm" href="#mods">🧩 Модули</a></div>';
@@ -18306,7 +18312,7 @@ case "hzed": HZED = !HZED; render(); return true;
 case "hzmv": L = hzOrder(); var j = L.indexOf(x), k = j + (+el.dataset.d); if (j < 0 || k < 0 || k >= L.length) return true; L.splice(j, 1); L.splice(k, 0, x); S.opt.homec = L; optTouch(); save(); render(); return true;
 case "hzhide": if (/^w:/.test(x)) { hzWDel(x); return true; } var hh = hzHid().slice(); if (hh.indexOf(x) < 0) hh.push(x); S.opt.homeh = hh; optTouch(); save(); render(); return true;
 case "hzshow": S.opt.homeh = hzHid().filter(function (z) { return z !== x; }); optTouch(); save(); render(); return true;
-case "hzreset": delete S.opt.homec; delete S.opt.homeh; delete S.opt.homecol; delete S.opt.homewide; optTouch(); save(); render(); return true;
+case "hzreset": delete S.opt.homec; delete S.opt.homeh; delete S.opt.homecol; delete S.opt.homewide; delete S.opt.homespan; delete S.opt.homecols; optTouch(); save(); render(); return true;
 case "hzctx": var b = $("ctxBtn"); if (b) { var hd = b.hidden; b.hidden = false; b.click(); b.hidden = hd; var m = $("ctx"), rr = el.getBoundingClientRect(); if (m && !m.hidden) place(m, rr.left, rr.bottom + 4); } return true;
 case "fstoff": S.opt.fstoff = 1; optTouch(); save(); render(); toast("«Первые шаги» скрыты. Вернуть — «✎ Настроить главную»"); return true;
 case "fston": delete S.opt.fstoff; optTouch(); save(); render(); return true;
@@ -18468,34 +18474,43 @@ row("Фоновые расчёты", x.bg, "уже после показа: ав
 "</table>" + (l.length > 1 ? '<p class="muted">Последние запуски (экран показан): ' + l.map(function (z) { return z.shown; }).join(" · ") + " мс · в среднем (медиана) " + ms(med("shown")) + ".</p>" : "") +
 '<p class="muted">Хорошо — до 1000 мс, терпимо — до 2000 мс. Сравните компьютер и телефон: откройте этот раздел на каждом.</p></div>';
 }
-var HZDRAG = "";
-function hzColOf(k, i) { var m = S.opt.homecol || {}; return m[k] === 0 || m[k] === 1 ? m[k] : i % 2; }
-function hzWide(k) { return !!(S.opt.homewide || {})[k]; }
-function hzDeco(k, html, col) {
-var wide = hzWide(k);
-html = html.replace('<div class="hzh">', '<div class="hzh"><span class="hzg" data-hzg="' + esc(k) + '" title="Перетащите, чтобы переставить (в том числе в другую колонку)" aria-hidden="true">⠿</span>');
-if (HZED) html = html.replace('<span class="hzed">', '<span class="hzed"><button type="button" class="ibtn" data-a="hzwide" data-x="' + esc(k) + '" title="' + (wide ? "Половина ширины" : "Во всю ширину") + '" aria-label="Ширина">' + (wide ? "⇥⇤" : "⇤⇥") + "</button>" + (wide ? "" : '<button type="button" class="ibtn" data-a="hzcol" data-x="' + esc(k) + '" title="В ' + (col ? "левую" : "правую") + ' колонку" aria-label="В другую колонку">' + (col ? "←" : "→") + "</button>"));
-return html.replace('<section class="card hzc', '<section data-hzk="' + esc(k) + '" class="card hzc' + (wide ? " hzwd" : ""));
+var HZDRAG = "", HZRS = null, HZMO = null, HZMT = 0;
+function hzN() { var n = +S.opt.homecols; return n >= 1 && n <= 4 ? Math.round(n) : 2; }
+function hzColOf(k, i) { var m = S.opt.homecol || {}, n = hzN(); return typeof m[k] === "number" ? Math.max(0, Math.min(n - 1, m[k])) : i % n; }
+function hzSpan(k) { var m = S.opt.homespan || {}, n = hzN(); if (typeof m[k] === "number") return Math.max(1, Math.min(n, m[k])); return (S.opt.homewide || {})[k] ? n : 1; }
+function hzDeco(k, html, c, s) {
+var n = hzN();
+html = html.replace('<div class="hzh">', '<div class="hzh"><span class="hzg" data-hzg="' + esc(k) + '" title="Перетащите, чтобы переставить (в любую колонку)" aria-hidden="true">⠿</span>');
+if (HZED) html = html.replace('<span class="hzed">', '<span class="hzed"><button type="button" class="ibtn hzsp" data-a="hzspan" data-x="' + esc(k) + '" title="Ширина: ' + s + " из " + n + ' колонок — нажмите, чтобы изменить" aria-label="Ширина">↔ ' + s + "/" + n + "</button>" +
+(c > 0 ? '<button type="button" class="ibtn" data-a="hzcol" data-x="' + esc(k) + '" data-d="-1" title="В колонку левее" aria-label="Левее">←</button>' : "") + (c + s < n ? '<button type="button" class="ibtn" data-a="hzcol" data-x="' + esc(k) + '" data-d="1" title="В колонку правее" aria-label="Правее">→</button>' : ""));
+html = html.replace(/<\/section>$/, '<span class="hzrs" data-hzrs="' + esc(k) + '" title="Потяните, чтобы изменить ширину карточки" aria-hidden="true"></span></section>');
+return html.replace('<section class="card hzc', '<section data-hzk="' + esc(k) + '" data-c="' + c + '" data-s="' + s + '" class="card hzc');
 }
 function hzLayout(keys) {
-var one = window.innerWidth <= 900, out = "", blk = [[], []], idx = 0;
-var flush = function () { if (blk[0].length || blk[1].length) out += '<div class="hzcols">' + blk.map(function (c, ci) { return '<div class="hzcol" data-hzcol="' + ci + '">' + c.join("") + "</div>"; }).join("") + "</div>"; blk = [[], []]; };
-keys.forEach(function (k) {
-var html = hzCard(k); if (!html) return; var c = hzWide(k) ? 0 : hzColOf(k, idx); html = hzDeco(k, html, c);
-if (one) { out += html; return; }
-if (hzWide(k)) { flush(); out += html; } else { blk[c].push(html); idx++; }
-});
-if (one) return '<div class="hzone">' + out + "</div>";
-flush(); return out || '<div class="hzcols"><div class="hzcol" data-hzcol="0"></div><div class="hzcol" data-hzcol="1"></div></div>';
+var out = "", i = 0;
+keys.forEach(function (k) { var html = hzCard(k); if (!html) return; var s = hzSpan(k), c = Math.min(hzColOf(k, i), hzN() - s); out += hzDeco(k, html, Math.max(0, c), s); i++; });
+setTimeout(hzMas, 0);
+return '<div class="hzms" id="hzms">' + out + "</div>";
 }
-function hzFix() { var o = hzOrder(), m = Object.assign({}, S.opt.homecol || {}), i = 0; o.forEach(function (k) { if (hzWide(k)) return; if (m[k] !== 0 && m[k] !== 1) m[k] = i % 2; i++; }); S.opt.homecol = m; S.opt.homec = o; }
+function hzGeom() { var box = $("hzms"); if (!box) return null; var W = box.clientWidth, g = 12, n = Math.max(1, Math.min(hzN(), Math.floor((W + g) / (250 + g)))); return { box: box, W: W, g: g, n: n, cw: (W - g * (n - 1)) / n }; }
+function hzMas() {
+var G = hzGeom(); if (!G) return; var hs = []; for (var j = 0; j < G.n; j++) hs.push(0);
+[].forEach.call(G.box.children, function (el) {
+if (!el.dataset.hzk) return; var s = Math.min(+el.dataset.s || 1, G.n), c = G.n === 1 ? 0 : Math.max(0, Math.min(+el.dataset.c || 0, G.n - s));
+if (HZRS && HZRS.k === el.dataset.hzk) s = Math.min(HZRS.s, G.n - c);
+el.style.width = (s * G.cw + (s - 1) * G.g) + "px"; el.style.left = (c * (G.cw + G.g)) + "px";
+var top = 0; for (var q = c; q < c + s; q++) top = Math.max(top, hs[q]);
+el.style.top = top + "px"; var h = el.offsetHeight; for (q = c; q < c + s; q++) hs[q] = top + h + G.g;
+});
+G.box.style.height = Math.max(0, Math.max.apply(null, hs) - G.g) + "px"; G.box.classList.add("ready");
+if (window.ResizeObserver) { if (!HZMO) HZMO = new ResizeObserver(function () { cancelAnimationFrame(HZMT); HZMT = requestAnimationFrame(hzMas); }); [].forEach.call(G.box.children, function (el) { if (!el.__hzo) { el.__hzo = 1; HZMO.observe(el); } }); }
+}
+window.addEventListener("resize", function () { if ($("hzms")) hzMas(); });
+function hzFix() { var o = hzOrder(), m = Object.assign({}, S.opt.homecol || {}), sp = Object.assign({}, S.opt.homespan || {}), i = 0; o.forEach(function (k) { if (typeof m[k] !== "number") m[k] = hzColOf(k, i); if (typeof sp[k] !== "number") sp[k] = hzSpan(k); i++; }); S.opt.homecol = m; S.opt.homespan = sp; delete S.opt.homewide; S.opt.homec = o; }
 function hzDropAt(k, tk, after, col) {
 hzFix(); var o = S.opt.homec.filter(function (z) { return z !== k; });
-if (tk) { var j = o.indexOf(tk); if (j < 0) j = o.length - 1; o.splice(after ? j + 1 : j, 0, k); if (!hzWide(tk) && !hzWide(k)) S.opt.homecol[k] = hzColOf(tk, 0); }
-else if (col !== undefined) {
-var last = -1; o.forEach(function (z, i) { if (!hzWide(z) && hzColOf(z, 0) === col) last = i; });
-o.splice(last + 1, 0, k); S.opt.homecol[k] = col;
-}
+if (tk) { var j = o.indexOf(tk); if (j < 0) j = o.length - 1; o.splice(after ? j + 1 : j, 0, k); S.opt.homecol[k] = Math.min(S.opt.homecol[tk], hzN() - hzSpan(k)); }
+else if (col !== undefined) { var last = -1; o.forEach(function (z, i) { var c = S.opt.homecol[z], s = hzSpan(z); if (col >= c && col < c + s) last = i; }); o.splice(last + 1, 0, k); S.opt.homecol[k] = Math.max(0, Math.min(col, hzN() - hzSpan(k))); }
 S.opt.homec = o; optTouch(); save(); render();
 }
 document.addEventListener("mousedown", function (e) { var g = e.target.closest && e.target.closest(".hzg"); if (!g) return; var s = g.closest("[data-hzk]"); if (s) s.setAttribute("draggable", "true"); });
@@ -18503,24 +18518,40 @@ document.addEventListener("dragstart", function (e) {
 var s = e.target.closest && e.target.closest("[data-hzk][draggable]"); if (!s) return; HZDRAG = s.dataset.hzk; s.classList.add("hzdrg");
 try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", HZDRAG); } catch (er) { /* ок */ }
 });
-function hzClr() { [].forEach.call(document.querySelectorAll(".hzdb, .hzda, .hzdc"), function (x) { x.classList.remove("hzdb", "hzda", "hzdc"); }); }
+function hzClr() { [].forEach.call(document.querySelectorAll(".hzdb, .hzda"), function (x) { x.classList.remove("hzdb", "hzda"); }); var m = $("hzmark"); if (m) m.remove(); }
+function hzColAt(x) { var G = hzGeom(); if (!G) return 0; var r = G.box.getBoundingClientRect(); return Math.max(0, Math.min(G.n - 1, Math.floor((x - r.left) / (G.cw + G.g)))); }
 document.addEventListener("dragover", function (e) {
-if (!HZDRAG) return; var t = e.target.closest && (e.target.closest("[data-hzk]") || e.target.closest("[data-hzcol]")); if (!t) return; e.preventDefault(); hzClr();
-if (t.dataset.hzk) { if (t.dataset.hzk === HZDRAG) return; var r = t.getBoundingClientRect(); t.classList.add(e.clientY > r.top + r.height / 2 ? "hzda" : "hzdb"); } else t.classList.add("hzdc");
+if (!HZDRAG) return; var t = e.target.closest && (e.target.closest("[data-hzk]") || e.target.closest("#hzms")); if (!t) return; e.preventDefault(); hzClr();
+if (t.dataset.hzk) { if (t.dataset.hzk === HZDRAG) return; var r = t.getBoundingClientRect(); t.classList.add(e.clientY > r.top + r.height / 2 ? "hzda" : "hzdb"); return; }
+var G = hzGeom(), c = hzColAt(e.clientX), m = document.createElement("div"); m.id = "hzmark"; m.style.cssText = "left:" + (c * (G.cw + G.g)) + "px;width:" + G.cw + "px"; G.box.appendChild(m);
 });
 document.addEventListener("drop", function (e) {
-if (!HZDRAG) return; var k = HZDRAG; HZDRAG = ""; var t = e.target.closest && (e.target.closest("[data-hzk]") || e.target.closest("[data-hzcol]")); hzClr(); if (!t) { render(); return; }
+if (!HZDRAG) return; var k = HZDRAG; HZDRAG = ""; var t = e.target.closest && (e.target.closest("[data-hzk]") || e.target.closest("#hzms")); hzClr(); if (!t) { render(); return; }
 e.preventDefault();
 if (t.dataset.hzk) { if (t.dataset.hzk === k) { render(); return; } var r = t.getBoundingClientRect(); hzDropAt(k, t.dataset.hzk, e.clientY > r.top + r.height / 2); }
-else hzDropAt(k, "", false, +t.dataset.hzcol);
+else hzDropAt(k, "", false, hzColAt(e.clientX));
 });
 document.addEventListener("dragend", function () { if (!HZDRAG) { [].forEach.call(document.querySelectorAll("[data-hzk][draggable]"), function (x) { x.removeAttribute("draggable"); x.classList.remove("hzdrg"); }); return; } HZDRAG = ""; hzClr(); render(); });
+document.addEventListener("pointerdown", function (e) {
+var h = e.target.closest && e.target.closest("[data-hzrs]"); if (!h) return; var el = h.closest("[data-hzk]"), G = hzGeom(); if (!el || !G) return;
+e.preventDefault(); HZRS = { k: el.dataset.hzk, s: +el.dataset.s || 1, c: Math.min(+el.dataset.c || 0, G.n - 1), left: el.getBoundingClientRect().left }; document.body.classList.add("hzrsing"); try { h.setPointerCapture(e.pointerId); } catch (er) { /* ок */ }
+});
+document.addEventListener("pointermove", function (e) {
+if (!HZRS) return; var G = hzGeom(); if (!G) return;
+var s = Math.max(1, Math.min(G.n - HZRS.c, Math.round((e.clientX - HZRS.left + G.g) / (G.cw + G.g)))); if (s !== HZRS.s) { HZRS.s = s; hzMas(); }
+});
+document.addEventListener("pointerup", function () {
+if (!HZRS) return; var r = HZRS; HZRS = null; document.body.classList.remove("hzrsing"); hzFix(); S.opt.homespan[r.k] = r.s; S.opt.homecol[r.k] = Math.min(S.opt.homecol[r.k], hzN() - r.s); optTouch(); save(); render();
+});
 function hz4Act(a, el) {
 var x = el.dataset.x;
-if (a === "hzwide") { var w = Object.assign({}, S.opt.homewide || {}); hzFix(); if (w[x]) delete w[x]; else w[x] = 1; S.opt.homewide = w; optTouch(); save(); render(); return true; }
-if (a === "hzcol") { hzFix(); S.opt.homecol[x] = S.opt.homecol[x] ? 0 : 1; optTouch(); save(); render(); return true; }
+if (a === "hzspan") { hzFix(); var n = hzN(), s = hzSpan(x) % n + 1; S.opt.homespan[x] = s; S.opt.homecol[x] = Math.min(S.opt.homecol[x], n - s); optTouch(); save(); render(); return true; }
+if (a === "hzcol") { hzFix(); S.opt.homecol[x] = Math.max(0, Math.min(hzN() - hzSpan(x), S.opt.homecol[x] + (+el.dataset.d || 0))); optTouch(); save(); render(); return true; }
+if (a === "hzncols") { var nn = +el.dataset.x; hzFix(); S.opt.homecols = nn; var used = []; for (var u = 0; u < nn; u++) used.push(0);
+S.opt.homec.forEach(function (z) { var sp = Math.min(S.opt.homespan[z] || 1, nn), best = 0; for (var c = 0; c <= nn - sp; c++) if (Math.max.apply(null, used.slice(c, c + sp)) < Math.max.apply(null, used.slice(best, best + sp))) best = c; S.opt.homespan[z] = sp; S.opt.homecol[z] = best; for (c = best; c < best + sp; c++) used[c] = Math.max.apply(null, used.slice(best, best + sp)) + 1; }); optTouch(); save(); render(); toast("Главная: " + nn + " " + plural(nn, ["колонка", "колонки", "колонок"]) + " · ширину карточек меняйте за уголок справа внизу"); return true; }
 return false;
 }
+function hzColsHTML() { var n = hzN(); return '<div class="r hzcolsel"><span class="muted">Колонок:</span><div class="seg">' + [1, 2, 3, 4].map(function (v) { return '<button type="button" data-a="hzncols" data-x="' + v + '" class="' + (n === v ? "on" : "") + '">' + v + "</button>"; }).join("") + '</div><span class="muted">на узком экране колонок станет меньше сами</span></div>'; }
 var SWD = null;
 function sideWSet(w, keep) { w = Math.max(200, Math.min(520, Math.round(w))); document.documentElement.style.setProperty("--sidew", w + "px"); if (keep) LS.set("zd-sidew", String(w)); sideRzSync(); }
 function sideRzSync() {
