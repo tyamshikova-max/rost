@@ -7787,7 +7787,7 @@ if (k === "pid") { var pp = proj(v); return pp ? pp.n : "удалённый пр
 if (k === "sec") { var sx = psecs(proj(t.pid)).filter(function (x) { return x.id === v; })[0]; return sx ? sx.n : "другая секция"; }
 if (k === "flag") { var fo = v === true ? flagObj("f1") : flagObj(v); return fo ? fo.n : "флажок"; }
 if (k === "st") return v === "doing" ? "в работе" : String(v);
-if (k === "est") return fmtH(v) + " ч";
+if (k === "est") return estFmt(v);
 if (k === "dur") return v + " мин";
 if (k === "sprint") { var m = /^s:(\d+)-(\d+)-(\d+)$/.exec(v); return m ? "неделя с " + m[3] + "." + m[2] : String(v); }
 if (k === "parent") { var pt = task(v); return pt ? "«" + pt.t + "»" : "удалённая задача"; }
@@ -8190,7 +8190,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-183";
+var APPV = "zd-app-2026-10-16-184";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -8591,7 +8591,7 @@ AIP = { kind: "sprint", sp: sp.id, items: items, note: j.why || "" }; render();
 }
 function aiBox() {
 if (!AIP || (AIP.kind === "day" && V !== "today") || (AIP.kind === "sprint" && V !== "sprint")) return "";
-var li = AIP.items.map(function (x) { var t = task(x.id); return t ? "<li>" + (AIP.kind === "day" ? "<b>" + esc(x.start) + "</b> · " + esc(t.t) + ' <span class="muted">(' + (+x.min || 30) + " мин)</span>" : esc(t.t) + (t.est ? ' <span class="muted">· ' + fmtH(t.est) + " ч</span>" : "")) + "</li>" : ""; }).join("");
+var li = AIP.items.map(function (x) { var t = task(x.id); return t ? "<li>" + (AIP.kind === "day" ? "<b>" + esc(x.start) + "</b> · " + esc(t.t) + ' <span class="muted">(' + (+x.min || 30) + " мин)</span>" : esc(t.t) + (t.est ? ' <span class="muted">· ' + estFmt(t.est) + "</span>" : "")) + "</li>" : ""; }).join("");
 return '<div class="aibox"><b>✨ ' + (AIP.kind === "day" ? "План дня от " : "Предложение в спринт от ") + esc(AI.name()) + "</b>" + (AIP.note ? '<span class="muted">' + esc(AIP.note) + "</span>" : "") + "<ol>" + li + '</ol><div class="r"><button class="btn pri" type="button" data-a="aiok">Применить</button><button class="btn" type="button" data-a="aino">Отмена</button></div></div>';
 }
 function aiApply() {
@@ -9048,7 +9048,7 @@ if (t.due && !t.done) { var dlate = t.due < today0(), dtoday = !dlate && t.due <
 if (t.rem && t.at && SRV.ready()) meta.push('<span title="Напоминание в Telegram">🔔</span>');
 var fo = flagOf(t); if (fo) meta.push('<span class="fl" title="Флажок: ' + esc(fo.n) + '">' + flagIc(fo) + "</span>");
 if (t.st === "doing" && !t.done) meta.push('<span class="when">▶ в работе</span>');
-if (+t.est) meta.push("⏱ " + fmtH(t.est) + " ч");
+if (+t.est) meta.push("⏱ " + estFmt(t.est));
 if (t.sprint && !o.noSprint) meta.push("🏃 " + esc(spLabel(t.sprint)));
 if (ccount(t.id)) meta.push("💬 " + ccount(t.id));
 if (kids.length) meta.push("☐ " + (kids.length - kidsOpen) + "/" + kids.length);
@@ -10098,7 +10098,7 @@ setTimeout(function () { var i = $("nowq"); if (i && window.innerWidth > 700) i.
 }
 function nowPickList(q) {
 q = String(q || "").toLowerCase().trim();
-var row = function (t) { var p = proj(t.pid), meta = []; if (p) meta.push(esc(p.n)); if (t.at && !t.allday) meta.push(hm(t.at)); if (isLate(t)) meta.push('<span class="late">просрочено</span>'); if (+t.est) meta.push("⏱ " + fmtH(t.est) + " ч"); if (tkids(t.id).length) meta.push("☑ " + tkids(t.id).filter(function (k) { return k.done; }).length + "/" + tkids(t.id).length);
+var row = function (t) { var p = proj(t.pid), meta = []; if (p) meta.push(esc(p.n)); if (t.at && !t.allday) meta.push(hm(t.at)); if (isLate(t)) meta.push('<span class="late">просрочено</span>'); if (+t.est) meta.push("⏱ " + estFmt(t.est)); if (tkids(t.id).length) meta.push("☑ " + tkids(t.id).filter(function (k) { return k.done; }).length + "/" + tkids(t.id).length);
 return '<button type="button" class="nowpr" data-nowp="t" data-id="' + t.id + '"><span class="nowprt">' + esc(t.t) + "</span>" + (meta.length ? '<small class="muted">' + meta.join(" · ") + "</small>" : "") + "</button>"; };
 var top = dayTop().filter(function (t) { return !doneToday(t) && !topMvKey(t); }), tids = top.map(function (t) { return t.id; });
 if (q) {
@@ -10129,7 +10129,7 @@ var left = NOW.q.filter(function (id) { var x = task(id); return x && !x.done; }
 var h = '<div class="nowtop"><b>◉ Сейчас</b><span class="muted">' + (NOW.i + 1) + " из " + NOW.q.length + " · осталось " + left + '</span><span class="nowsp"></span><button type="button" class="btn sm" data-now="prev"' + (NOW.i ? "" : " disabled") + '>‹ Предыдущая</button><button type="button" class="btn sm" data-now="next"' + (NOW.i < NOW.q.length - 1 ? "" : " disabled") + '>Следующая ›</button><button type="button" class="btn sm" data-now="pick" title="Выбрать другую задачу">☰ Другая задача</button><button type="button" class="ibtn" data-now="exit" title="Выйти (Esc)" aria-label="Выйти">✕</button></div>';
 if (!t || !left) { h += '<div class="nowmain nowdone"><div class="nowbig">🎉</div><h1>Всё на сегодня сделано</h1><p class="muted">Можно отдохнуть или подвести итоги дня.</p><div class="r"><a class="btn pri" href="#daily-review" data-now="exit">🌙 Завершить день</a><button type="button" class="btn" data-now="pick">☰ Выбрать задачу</button><button type="button" class="btn" data-now="exit">Выйти</button></div></div>'; b.innerHTML = h; return; }
 var p = proj(t.pid), kids = tkids(t.id), mine = POMO && POMO.tid === t.id, top = dayTop().some(function (x) { return x.id === t.id; });
-h += '<div class="nowmain' + (t.done ? " isdone" : "") + '"><div class="nowcrumb">' + (top ? '<span class="nowstar">★ главное</span>' : "") + (p ? pdotHTML(p, true) : "") + (t.due ? '<span class="' + (isLate(t) ? "late" : "") + '">⏰ ' + esc(dayName(t.due)) + "</span>" : "") + (+t.est ? "<span>⏱ " + fmtH(t.est) + " ч</span>" : "") + "</div>" +
+h += '<div class="nowmain' + (t.done ? " isdone" : "") + '"><div class="nowcrumb">' + (top ? '<span class="nowstar">★ главное</span>' : "") + (p ? pdotHTML(p, true) : "") + (t.due ? '<span class="' + (isLate(t) ? "late" : "") + '">⏰ ' + esc(dayName(t.due)) + "</span>" : "") + (+t.est ? "<span>⏱ " + estFmt(t.est) + "</span>" : "") + "</div>" +
 '<h1 class="nowt">' + (t.done ? "✓ " : "") + esc(t.t) + "</h1>" +
 '<div class="nowtimer">' + (mine ? '<div class="wpt nowpt">' + pomoTxt() + '</div><div class="r"><button type="button" class="btn" data-now="ppause">' + (POMO.paused ? "▶ Продолжить" : "⏸ Пауза") + '</button><button type="button" class="btn" data-now="pstop">■ Стоп</button></div>'
 : '<div class="r"><button type="button" class="btn" data-now="pomo">🍅 Помодоро 25 минут</button><button type="button" class="btn" data-now="track">' + (t.ttOn ? "⏹ Остановить учёт" : "⏲ Засечь время") + "</button>" + (t.tt ? '<span class="muted">учтено ' + ttFmt(t.tt) + "</span>" : "") + (pomoAll(t) ? '<span class="muted">🍅 ' + pomoAll(t) + "</span>" : "") + "</div>") + "</div>" +
@@ -10429,7 +10429,7 @@ var tt = todayList().filter(function (t) { return !t.parent; }).sort(cmpBy("date
 var pct = cap ? Math.min(100, Math.round(need / cap * 100)) : 100, over = need > cap;
 b = '<h2>Хватит ли времени?</h2><p class="muted">Сколько часов в день вы отдаёте задачам: <input type="number" class="inp dpcapin" data-dpcap="1" min="1" max="24" step="0.5" value="' + cap + '" aria-label="Часов на задачи в день"> ч (от 1 до 24, запоминается; то же — в «Настройки» → «Общие» → «План дня»). Задачам без оценки поставьте время или оценку в часах.</p>' +
 '<div class="dpcap' + (over ? " over" : "") + '"><div class="dpbar"><i style="width:' + pct + '%"></i></div><b>' + fmtH(need) + " ч из " + fmtH(cap) + " ч</b>" + (over ? '<span class="late"> — перегруз на ' + fmtH(need - cap) + " ч: перенесите что-то на завтра</span>" : need ? '<span class="muted"> — запас ' + fmtH(cap - need) + " ч</span>" : "") + (noEst ? '<span class="muted"> · без оценки: ' + noEst + "</span>" : "") + "</div>" +
-tt.map(function (t) { return '<div class="dprow"><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + '</a><span class="dpa"><input type="time" class="inp" data-dptime="' + t.id + '" value="' + (t.at && !t.allday ? hm(t.at) : "") + '" title="Во сколько"><button type="button" class="ddb sm" data-a="dpest" data-t="' + t.id + '" title="Сколько займёт">' + (+t.est ? "⏱ " + fmtH(t.est) + " ч" : t.dur ? "⏱ " + t.dur + " мин" : "оценка") + '<span class="dda">▾</span></button><button type="button" class="btn sm" data-a="dpa" data-t="' + t.id + '" data-c="d:1">Завтра</button></span></div>'; }).join("") +
+tt.map(function (t) { return '<div class="dprow"><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + '</a><span class="dpa"><input type="time" class="inp" data-dptime="' + t.id + '" value="' + (t.at && !t.allday ? hm(t.at) : "") + '" title="Во сколько"><button type="button" class="ddb sm" data-a="dpest" data-t="' + t.id + '" title="Сколько займёт">' + (+t.est ? "⏱ " + estFmt(t.est) : t.dur ? "⏱ " + t.dur + " мин" : "оценка") + '<span class="dda">▾</span></button><button type="button" class="btn sm" data-a="dpa" data-t="' + t.id + '" data-c="d:1">Завтра</button></span></div>'; }).join("") +
 (AI.ready() ? '<div class="r" style="margin-top:10px"><button type="button" class="btn sm aibtn" data-a="aiday">✨ ИИ расставит задачи по времени</button></div>' : "");
 } else {
 var tp = dayTop(), tl2 = todayList(), hrs = tl2.reduce(function (a, t) { return a + tHours(t); }, 0);
@@ -17019,6 +17019,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["184", "Оценка — в часах и минутах", ["Карточка задачи: «оценка __ ч __ мин». В списках, «Сейчас» и плане дня оценка тоже видна как «25 мин» или «1 ч 30 мин»."]],
 ["183", "Время — в часах и минутах", ["Карточка задачи → «Учёт времени»: учтено «__ ч __ мин» (можно поправить) и кнопки «+5 мин», «+15 мин», «+30 мин», «+1 ч» — время без таймера.", "Учтённое время превращается в помидоры: 25 минут = 1 🍅 — в задаче, саду фокуса, «Прогрессе дня», «Аналитике» и уровне."]],
 ["180", "«Сейчас» — по вашему выбору", ["Кнопка «◉ Сейчас» сначала спрашивает, за что взяться: главное, остальное на сегодня или любая задача через поиск. «▶ По порядку» — как раньше.", "В режиме «Сейчас» — «☰ Другая задача»: переключиться, не выходя."]],
 ["181", "Главная: 1–4 колонки", ["«✎ Настроить главную» → «Колонок: 1 2 3 4».", "Ширина карточки — от одной колонки до всех: потяните за уголок справа внизу карточки или нажмите ⇤⇥ в настройке.", "Карточки укладываются «кирпичиками» без пустот; на узком экране колонок становится меньше сами."]],
@@ -19346,6 +19347,13 @@ function ttMinOf(t) { return Math.max(0, Math.round((t.tt || 0) / 60000)); }
 function pomoAll(t) { return (t.pomo || 0) + Math.floor(ttMinOf(t) / POMOM); }
 function pomoEqIn(from, to) { var m = live(S.acts).reduce(function (a, x) { return a + (x.k === "time" && x.d >= from && x.d < to ? (+x.m || 0) : 0); }, 0); return Math.floor(Math.max(0, m) / POMOM); }
 function ttLog(t, min) { if (!min) return; t.tt = Math.max(0, (t.tt || 0) + min * 60000); touch(t); logAct("time", t.id, { m: min, man: 1 }); }
+function estFmt(h) { return ttFmt((+h || 0) * 3600000); }
+document.addEventListener("change", function (e) {
+var el = e.target; if (!el || !el.dataset || !el.dataset.estin) return; var t = task(OPEN); if (!t) return; var v = el.closest(".v"); if (!v) return;
+var hh = Math.max(0, Math.round(+(v.querySelector('[data-estin="h"]') || {}).value || 0)), mm = Math.max(0, Math.round(+(v.querySelector('[data-estin="m"]') || {}).value || 0));
+if (mm >= 60) { hh += Math.floor(mm / 60); mm %= 60; }
+t.est = Math.round((hh * 60 + mm) / 60 * 10000) / 10000; touch(t); save(); renderPanel(); render();
+});
 function ttFmt(ms) { var m = Math.round(ms / 60000); if (m < 60) return m + " мин"; return Math.floor(m / 60) + " ч" + (m % 60 ? " " + (m % 60) + " мин" : ""); }
 document.addEventListener("change", function (e) {
 var el = e.target; if (!el || !el.dataset || !el.dataset.ttin) return; var t = task(OPEN); if (!t) return; var v = el.closest(".v"); if (!v) return;
@@ -20272,7 +20280,7 @@ h += '<div class="props">' +
 (psecs(proj(t.pid)).length ? '<span>Секция</span><div class="v"><select data-pf="sec"><option value="">— без секции —</option>' + psecs(proj(t.pid)).map(function (x) { return '<option value="' + x.id + '"' + (t.sec === x.id ? " selected" : "") + ">" + esc(x.n) + "</option>"; }).join("") + "</select></div>" : "") +
 '<span>Проект</span><div class="v"><select data-pf="pid"><option value="">Входящие (без проекта)</option>' + ptree().map(function (x) { return '<option value="' + x.p.id + '"' + (t.pid === x.p.id ? " selected" : "") + ">" + "  ".repeat(x.d).replace(/ /g, "&nbsp;") + picon(x.p) + " " + esc(x.p.n) + "</option>"; }).join("") + '</select><button type="button" class="ibtn pnp" data-p="pnew" title="Новый проект для этой задачи">＋</button>' + (PNP ? '<div class="pnpbox"><input type="text" id="pn-np" placeholder="Название нового проекта" autocomplete="off" maxlength="60"><button type="button" class="btn pri sm" data-p="pnewok">Создать</button><button type="button" class="btn sm" data-p="pnewx">Отмена</button></div>' : "") + "</div>" +
 '<span>Ответственный</span><div class="v"><select data-pf="resp">' + respOptions(t.resp) + "</select></div>" +
-'<span>Спринт</span><div class="v"><select data-pf="sprint">' + spOptions(t) + '</select><span class="muted">оценка</span><input type="number" min="0" step="0.5" data-pf="est" value="' + (+t.est || "") + '" placeholder="ч" style="width:70px"><span class="muted">ч</span></div>' +
+'<span>Спринт</span><div class="v"><select data-pf="sprint">' + spOptions(t) + '</select><span class="muted">оценка</span><input type="number" min="0" step="1" data-estin="h" value="' + (+t.est ? Math.floor(Math.round(t.est * 60) / 60) : "") + '" placeholder="0" style="width:56px" aria-label="Оценка: часов"><span class="muted">ч</span><input type="number" min="0" max="59" step="5" data-estin="m" value="' + (+t.est ? Math.round(t.est * 60) % 60 : "") + '" placeholder="0" style="width:56px" aria-label="Оценка: минут"><span class="muted">мин</span></div>' +
 (t.done ? "" : '<span>Статус</span><div class="v"><div class="seg"><button type="button" data-p="st" data-v="" class="' + (t.st !== "doing" ? "on" : "") + '">Нужно сделать</button><button type="button" data-p="st" data-v="doing" class="' + (t.st === "doing" ? "on" : "") + '">В работе</button></div></div>') +
 '<span>Приоритет</span><div class="v"><div class="seg">' + [[1, "1"], [2, "2"], [3, "3"], [0, "—"]].map(function (x) { return '<button type="button" data-p="prio" data-v="' + x[0] + '" class="' + ((t.prio || 0) === x[0] ? "on" : "") + '" title="' + ["обычный", "срочно", "важно", "желательно"][x[0]] + '">' + x[1] + "</button>"; }).join("") + "</div></div>" +
 '<span>Теги</span><div class="v tagv">' + tg.map(function (n) { return '<span class="tchip" style="--tc:' + tcolor(n) + '"><a href="#tag-' + esc(n) + '" title="Открыть тег">' + esc(tlab(n)) + '</a><button type="button" class="tx" data-p="tag" data-tag="' + esc(n) + '" title="Убрать тег" aria-label="Убрать тег">×</button></span>'; }).join("") + '<input type="text" data-pf="newtag" class="tagin" placeholder="' + (tg.length ? "+ тег" : "Добавить тег…") + '" size="12" autocomplete="off" spellcheck="false"></div>' +
@@ -20530,7 +20538,7 @@ if (!date) { t.rep = ""; t.rem = false; } else if (f === "time" && time && S.opt
 else if (f === "due") t.due = v ? new Date(v + "T00:00").getTime() : 0;
 else if (f === "sprint") { if (v && !sprint(v)) ensureSprint(new Date(v.slice(2) + "T00:00").getTime()); setSprint(t, v); }
 else if (f === "resp") { if (v) t.resp = v; else delete t.resp; }
-else if (f === "est") t.est = Math.max(0, Math.round((parseFloat(String(v).replace(",", ".")) || 0) * 10) / 10);
+else if (f === "est") t.est = Math.max(0, Math.round((parseFloat(String(v).replace(",", ".")) || 0) * 60) / 60);
 else if (f === "rem") t.rem = !!v && !!t.at;
 else if (f === "sec") t.sec = v;
 else if (f === "tth") t.tt = Math.max(0, Math.round((parseFloat(String(v).replace(",", ".")) || 0) * 36e5));
