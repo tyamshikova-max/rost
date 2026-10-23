@@ -8190,7 +8190,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-184";
+var APPV = "zd-app-2026-10-16-185";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -13860,6 +13860,13 @@ st(true, "7. Следующая неделя", nw.miss.length ? '<span class="mu
 }
 function bpaySync() {
 if ((S.opt.bud || {}).payrem === false) return false; var ch = false, t0 = today0(), d = new Date(t0);
+var gm = {}; live(S.bregs || []).forEach(function (g) { gm[g.id] = g; });
+S.tasks.forEach(function (x) {
+if (!x.id || x.id.indexOf("pay-") !== 0 || x.done || x.del || x.id.length < 16) return;
+var gid = x.id.slice(4, -11), dk = x.id.slice(-10), g = gm[gid], dd = new Date(dk + "T00:00").getTime();
+if (!/^\d{4}-\d\d-\d\d$/.test(dk) || (g && bregOk(g) && bregHit(g, dd))) return;
+x.del = 1; x.delAt = Date.now(); touch(x); ch = true;
+});
 live(S.bregs || []).filter(bregOk).forEach(function (g) {
 var due = bregNext(g, t0);
 var id = "pay-" + g.id + "-" + dKey(due), t = S.tasks.filter(function (x) { return x.id === id; })[0];
@@ -17019,6 +17026,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["185", "Напоминания о платежах — точнее", ["При переключении платежа на «каждые 2 недели» дата не подставляется сама — укажите дату настоящего платежа.", "Если у платежа поменяли дату или период, выключили или удалили его, лишнее напоминание исчезает само."]],
 ["184", "Оценка — в часах и минутах", ["Карточка задачи: «оценка __ ч __ мин». В списках, «Сейчас» и плане дня оценка тоже видна как «25 мин» или «1 ч 30 мин»."]],
 ["183", "Время — в часах и минутах", ["Карточка задачи → «Учёт времени»: учтено «__ ч __ мин» (можно поправить) и кнопки «+5 мин», «+15 мин», «+30 мин», «+1 ч» — время без таймера.", "Учтённое время превращается в помидоры: 25 минут = 1 🍅 — в задаче, саду фокуса, «Прогрессе дня», «Аналитике» и уровне."]],
 ["180", "«Сейчас» — по вашему выбору", ["Кнопка «◉ Сейчас» сначала спрашивает, за что взяться: главное, остальное на сегодня или любая задача через поиск. «▶ По порядку» — как раньше.", "В режиме «Сейчас» — «☰ Другая задача»: переключиться, не выходя."]],
@@ -21207,7 +21215,7 @@ if (k === "rhexp" || k === "kpexp") { var kpx = k === "kpexp" ? pantry().filter(
 if (k === "rqset") { rqSet(c); return; }
 if (k === "kpmv") { var kpm = pantry().filter(function (x) { return x.id === id; })[0]; if (kpm) { kpm.pl = c; touch(kpm); save(); render(); } return; }
 if (k === "ckzone") { var cq = live(S.chq || []).filter(function (x) { return x.id === id; })[0]; if (cq) { cq.zone = c; touch(cq); save(); render(); } return; }
-if (k === "burper") { var bp = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bp) { if (c === "m") { delete bp.per; } else { bp.per = "w"; bp.wk = +c.slice(1); if (!bp.from) bp.from = dKey(today0()); } touch(bp); save(); render(); if (c !== "m") toast("Укажите дату ближайшего (или последнего) платежа — от неё считаются " + bregPer(bp)); } return; }
+if (k === "burper") { var bp = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bp) { if (c === "m") { delete bp.per; } else { bp.per = "w"; bp.wk = +c.slice(1); } touch(bp); save(); render(); if (c !== "m" && !bp.from) toast("Укажите в поле «с» дату любого настоящего платежа — от неё считаются " + bregPer(bp)); } return; }
 if (k === "burcat") { var bg = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bg) { bg.cat = c; touch(bg); save(); render(); } return; }
 if (k === "tbpick") { var tl = tbList(); tl.forEach(function (b) { if (b.id === id) b.cat = c; }); tbSave(TBTAB, tl); render(); return; }
 if (k === "setfpj" || k === "setfsx" || k === "setfgl") { setFSet(id, { setfpj: "pid", setfsx: "sec", setfgl: "goal" }[k], c === "~" ? "" : c); return; }
