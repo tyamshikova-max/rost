@@ -728,6 +728,7 @@ body.tclean #ntfBtn { order: 1 } body.tclean .prfb { order: 2 }
 .spzdr { display: grid; gap: 2px; padding: 4px 6px 12px } .spzdh { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 6px 10px } .spzdb { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; color: var(--fg); text-align: left; padding: 9px 8px; border-radius: 10px; cursor: pointer; font: inherit } .spzdb:hover, .spzdb.on { background: color-mix(in srgb, var(--acc) 9%, transparent) } .spzdb > span:nth-child(2) { flex: 1; min-width: 0; display: grid } .spzdb small { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .spzdb i { font-style: normal; color: var(--muted) } .spzdp { padding: 0 0 8px 12px; border-left: 2px solid color-mix(in srgb, var(--acc) 25%, transparent); margin: 0 0 6px 18px } .spzdf { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 6px 0 }
 .hzs2 { display: flex; gap: 10px; align-items: center; padding: 8px 12px; margin: -4px 0 12px; border-radius: 12px; border: 1px dashed color-mix(in srgb, var(--acc) 35%, transparent); font-size: calc(13.5px * var(--fs)) } .hzs2 > span { font-size: 20px } .hzs2 > div { flex: 1; min-width: 0; display: grid } .hzs2 small { color: var(--muted) }
 .hzc.kfoc { outline-offset: 2px }
+.bootb { margin: 4px 0 12px } .bootb h3 { margin: 0 0 6px } .boott { border-collapse: collapse; font-size: calc(13px * var(--fs)) } .boott td { padding: 3px 12px 3px 0; vertical-align: top } .boott .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -2357,6 +2358,7 @@ CREATE TABLE dlg (
 </script>
 <script>(function () {
 "use strict";
+var BOOT = { t0: performance.now(), au: {}, done: false };
 var $ = function (id) { return document.getElementById(id); };
 function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 function uid() { return Date.now().toString(36).slice(-6) + Math.random().toString(36).slice(2, 6); }
@@ -2402,7 +2404,8 @@ function saveLocal() {
 var js = JSON.stringify(S), ok = LS.set("zd-state", js.length > LZMIN ? lzPack(js) : js);
 if (!ok && Date.now() - SAVEWARN > 60000) { SAVEWARN = Date.now(); toast("⚠ В браузере не хватает места для данных — они сохраняются на Яндекс Диск, но обратитесь к разработчику"); }
 }
-var S = (function () { try { var raw = LS.get("zd-state") || "null"; if (raw.charCodeAt(0) === 1) raw = lzUnpack(raw); return JSON.parse(raw); } catch (e) { return null; } })() || {};
+var S = (function () { try { var raw = LS.get("zd-state") || "null"; BOOT.sz = raw.length; if (raw.charCodeAt(0) === 1) raw = lzUnpack(raw); return JSON.parse(raw); } catch (e) { return null; } })() || {};
+BOOT.st = performance.now();
 S.recipes = S.recipes || []; S.menus = S.menus || []; S.prods = S.prods || []; S.chores = S.chores || []; S.chlog = S.chlog || []; S.tblog = S.tblog || []; S.sops = S.sops || []; S.bpers = S.bpers || []; S.bwk = S.bwk || []; S.bregs = S.bregs || []; S.chq = S.chq || []; S.ckr = S.ckr || []; S.dplaces = S.dplaces || []; S.dout = S.dout || []; S.debts = S.debts || []; S.dbal = S.dbal || []; S.wish = S.wish || []; S.nsd = S.nsd || []; S.mdiary = S.mdiary || []; S.fck = S.fck || []; S.env = S.env || []; S.pantry = S.pantry || []; S.kchk = S.kchk || []; S.kwaste = S.kwaste || []; S.reports = S.reports || [];
 S.v = 2; S.tasks = S.tasks || []; S.projects = S.projects || []; S.tags = S.tags || []; S.filters = S.filters || []; S.sprints = S.sprints || []; S.comments = S.comments || []; S.habits = S.habits || []; S.hlog = S.hlog || []; S.acts = S.acts || []; S.tpls = S.tpls || []; S.flags = S.flags || []; S.notes = S.notes || []; S.nsecs = S.nsecs || []; S.ntags = S.ntags || []; S.boards = S.boards || []; S.goals = S.goals || []; S.days = S.days || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
 var VIEWS = (function () { try { return JSON.parse(LS.get("zd-views") || "{}") || {}; } catch (e) { return {}; } })();
@@ -3037,7 +3040,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-174";
+var APPV = "zd-app-2026-10-16-175";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -11818,6 +11821,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["175", "Быстрее показывается экран", ["Фоновые расчёты (автозадачи челленджей, плана уборки, дней рождения, история изменений) теперь идут сразу после того, как экран показан, а не до этого.", "«Настройки» → «Диагностика» → «⏱ Скорость запуска»: сколько занимает разбор кода, чтение данных, первый экран и фоновые расчёты на этом устройстве, и последние 10 запусков."]],
 ["173", "Быстрее и удобнее", ["Приложение грузится быстрее: справка подгружается отдельно при первом открытии, лишнее (комментарии, отступы) убирается при сборке — файл меньше на 17 %.", "Главная по дню недели: в пятницу и на выходных — «🧭 Обзор недели», в начале месяца — «🏁 Итоги» прошлого месяца.", "Клавиши: g и буква — переход отовсюду (g h — главная, g s — сегодня, g d — мой день, g t — задачи, g z — знания, g l — жизнь, g m — дом и деньги); j / k и Enter — по карточкам главной.", "Демо: на главной — свои карточки «Сроки» и «Цели»."]],
 ["172", "Главная под себя", ["Свои карточки на главной: любой виджет, как на досках, — «✎ Настроить главную» → «＋ Новая карточка…» или «＋ Виджет с доски…».", "«＋» в шапке панелей «Мой день», «Жизнь», «Дом и деньги»: задача на сегодня, привычка, цель, запись в дневник, меню, рецепт, документ, общий список.", "Вечером, когда день закрыт, на главной — итог: сделано, настроение и первое дело на завтра.", "Новичку — вопрос «Для чего вам приложение?»: нужные модули включаются сразу.", "На телефоне ☰ открывает шесть пространств вместо старой длинной панели.", "Значок «Дом и деньги» — 🔑. Учебный курс: все снимки пересняты на новом интерфейсе."]],
 ["170", "Новая структура", ["Главная страница по логотипу: приветствие, подсказка по времени суток, быстрый ввод и карточки «Сейчас», «Главное», «Прогресс дня», «Требует внимания», «Продолжить», привычки и самочувствие — их можно переставить и скрыть.", "Шесть пространств на полосе значков: Главная, Мой день, Задачи, Знания, Жизнь, Дом и деньги. У каждого — страница-обзор и своя панель; крошки тоже по пространствам.", "Без дублей: один утренний план (вместо «Плана дня» и «Утреннего плана») и одно завершение дня с настроением (вместо «Итогов дня»). «Статистика», «Отчёты» и «Итоги месяца» — вкладки одной «Аналитики».", "Чистая верхняя строка: логотип, поиск, 🔔 и кружок профиля — в нём синхронизация, тема, настройки, справка, клавиши, «Что нового» и уровень. 🎧, 🔋 и 📍 — в карточке «Сейчас».", "Модули: ненужные разделы можно выключить — данные остаются.", "«Первые шаги» на главной для новичков и ⋯ у заголовка каждой страницы."]],
@@ -13243,6 +13247,30 @@ function hz3Act(a, el) {
 if (a === "hzs2x") { LS.set("zd-hzs2" + el.dataset.x, dKey(today0())); render(); return true; }
 return false;
 }
+var BOOTAU = [["история изменений", function () { histScan(); }], ["наборы задач", function () { setsAuto(); }], ["план уборки", function () { cleanAuto(); }], ["челлендж «Дом»", function () { chAuto(); }], ["финансовый челлендж", function () { fcAutoRun(); }], ["кухонный челлендж", function () { kcAutoRun(); }], ["челлендж осанки", function () { bcAutoRun(); }], ["люди и документы", function () { peopleAuto(); }]];
+function bootAutos() {
+var m = BOOT.auT === undefined, t0 = m ? performance.now() : 0;
+BOOTAU.forEach(function (x) { var t = m ? performance.now() : 0; try { x[1](); } catch (er) { /* фоновое не мешает */ } if (m) BOOT.au[x[0]] = performance.now() - t; });
+if (m) BOOT.auT = performance.now() - t0;
+}
+function bootSave() {
+var n = (performance.getEntriesByType && performance.getEntriesByType("navigation")[0]) || {}, r = function (v) { return Math.max(0, Math.round(v || 0)); };
+var rec = { at: Date.now(), net: r(n.responseEnd), code: r(BOOT.t0 - (n.responseEnd || 0)), data: r(BOOT.st - BOOT.t0), init: r(BOOT.r0 - BOOT.st), first: r(BOOT.r1 - BOOT.r0), tail: r((BOOT.end || BOOT.r1) - BOOT.r1), draw: r(BOOT.paint - (BOOT.end || BOOT.r1)), shown: r(BOOT.paint), bg: r(BOOT.auT), full: r(BOOT.full), kb: Math.round((BOOT.sz || 0) / 1024), w: innerWidth };
+var top = Object.keys(BOOT.au).map(function (k) { return [k, r(BOOT.au[k])]; }).sort(function (a, b) { return b[1] - a[1]; }).filter(function (x) { return x[1] >= 3; }).slice(0, 4); if (top.length) rec.top = top;
+var l = []; try { l = JSON.parse(LS.get("zd-boot") || "[]") || []; } catch (e) { l = []; } l.unshift(rec); LS.set("zd-boot", JSON.stringify(l.slice(0, 10)));
+try { document.documentElement.setAttribute("data-boot", JSON.stringify(rec)); } catch (e) { /* ок */ }
+}
+function bootHTML() {
+var l = []; try { l = JSON.parse(LS.get("zd-boot") || "[]") || []; } catch (e) { l = []; } if (!l.length) return "";
+var x = l[0], ms = function (v) { return (v || 0) + " мс"; }, med = function (k) { var a = l.map(function (z) { return z[k] || 0; }).sort(function (p, q) { return p - q; }); return a[Math.floor(a.length / 2)]; };
+var row = function (t, v, hint) { return "<tr><td>" + t + '</td><td class="num">' + ms(v) + "</td><td class=\"muted\">" + hint + "</td></tr>"; };
+return '<div class="bootb"><h3>⏱ Скорость запуска на этом устройстве</h3><table class="boott">' +
+row("Загрузка страницы", x.net, "получить файл (из офлайн-кэша или из сети)") + row("Разбор кода", x.code, "браузер читает и готовит код приложения") + row("Данные", x.data, "прочитать ваши задачи и заметки (" + (x.kb || 0) + " КБ)") +
+row("Подготовка", x.init, "настройка разделов") + row("Первый экран", x.first, "нарисовать открытую страницу") + (x.tail !== undefined ? row("Запуск служб", x.tail, "синхронизация, напоминания, таймеры") + row("Браузер: показ", x.draw, "после кода: стили, раскладка, мелкие отложенные дела") : "") + "<tr><td><b>Экран показан</b></td><td class=\"num\"><b>" + ms(x.shown) + '</b></td><td class="muted">с момента открытия</td></tr>' +
+row("Фоновые расчёты", x.bg, "уже после показа: автозадачи челленджей, уборки, людей" + (x.top ? " — дольше всего: " + x.top.map(function (z) { return esc(z[0]) + " " + z[1] + " мс"; }).join(", ") : "")) +
+"</table>" + (l.length > 1 ? '<p class="muted">Последние запуски (экран показан): ' + l.map(function (z) { return z.shown; }).join(" · ") + " мс · в среднем (медиана) " + ms(med("shown")) + ".</p>" : "") +
+'<p class="muted">Хорошо — до 1000 мс, терпимо — до 2000 мс. Сравните компьютер и телефон: откройте этот раздел на каждом.</p></div>';
+}
 function chalsWidget() {
 var h = "", t0 = today0(), any = false;
 if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
@@ -13470,7 +13498,7 @@ var tstN = tstCount();
 if (!tstN) h += '<section class="card" id="s-test"><h2>🧪 Тестовые данные</h2><p class="muted" style="margin:0">Готовый набор для проверки возможностей: 10 проектов, 53 задачи (сроки, повторы, подзадачи, спринт, выполненные), теги, фильтры, привычки с отметками, заметки и 3 доски. Добавляется к вашим данным, ничего не заменяя, и удаляется отсюда же одной кнопкой — ваши записи при этом останутся.</p><div class="r"><button class="btn" type="button" data-a="tstload">🧪 Загрузить тестовые данные</button></div></section>';
 if (tstN) h += '<section class="card" id="s-test"><h2>🧪 Тестовые данные</h2><p class="muted" style="margin:0">Загружено тестовых записей: ' + tstN + ' (проекты, задачи, теги, фильтры, привычки, заметки, доски). Кнопка ниже удалит только их — ваши собственные задачи и проекты останутся. Если вы положили свою задачу в тестовый проект, она останется, но без проекта.</p>' +
 (CONF === "tstwipe" ? '<div class="confirm"><b>Удалить все тестовые данные?</b><div class="r"><button class="btn warn" type="button" data-a="tstwipe-yes">Удалить тестовые</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : '<div class="r"><button class="btn warn" type="button" data-a="tstwipe">🧪 Удалить тестовые данные…</button></div>') + "</section>";
-h += '<section class="card" id="s-diag"><h2>Диагностика</h2><p class="muted" style="margin:0">Если что-то работает странно (теряется курсор, не нажимается галочка), включите диагностику, повторите действие и нажмите «Скопировать отчёт» в окошке справа внизу — пришлите текст разработчику. В отчёте нет текста задач, только служебные сведения.</p><div class="r"><button class="btn" type="button" data-a="diag">' + (DIAG.on ? "Выключить диагностику" : "🔍 Включить диагностику") + "</button></div></section>";
+h += '<section class="card" id="s-diag"><h2>Диагностика</h2>' + bootHTML() + '<p class="muted" style="margin:0">Если что-то работает странно (теряется курсор, не нажимается галочка), включите диагностику, повторите действие и нажмите «Скопировать отчёт» в окошке справа внизу — пришлите текст разработчику. В отчёте нет текста задач, только служебные сведения.</p><div class="r"><button class="btn" type="button" data-a="diag">' + (DIAG.on ? "Выключить диагностику" : "🔍 Включить диагностику") + "</button></div></section>";
 h += '<section class="card" id="s-wipe"><h2>Очистка базы</h2><p class="muted" style="margin:0">Удаляет все задачи, проекты, теги, фильтры, спринты, комментарии, привычки, историю и шаблоны — здесь и, после синхронизации, на других устройствах. Корзина тоже очищается. Флажки и настройки остаются.</p>' +
 (CONF === "wipe" ? '<div class="confirm"><b>Удалить все данные без возможности вернуть?</b><span>Если они могут пригодиться, сначала сохраните копию в файл — из неё всё можно будет восстановить.</span><div class="r"><button class="btn" type="button" data-a="export">💾 Сначала сохранить копию</button><button class="btn warn" type="button" data-a="wipe-yes">Удалить всё</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : '<div class="r"><button class="btn warn" type="button" data-a="wipe">🗑 Очистить всю базу…</button></div>') + "</section>";
 return h;
@@ -13846,21 +13874,16 @@ function coarse() { try { return window.matchMedia("(pointer: coarse)").matches;
 document.addEventListener("change", function (e) { var t = e.target; if (t && (t.tagName === "SELECT" || t.type === "color" || (/^(date|time|datetime-local)$/.test(t.type || "") && coarse()))) try { t.blur(); } catch (er) { /* поле уже убрано */ } }, true);
 document.addEventListener("focusout", function (e) { if (!RHOLD || e.target !== RHOLD) return; RHOLD = null; if (PDOWN) return; /* ушли из поля нажатием — догонит отпускание кнопки мыши (pUp), чтобы само нажатие не потерялось */ setTimeout(function () { var a = document.activeElement; if (a && (a.tagName === "SELECT" || /^(date|time|datetime-local|month|week|color)$/.test(a.type || ""))) return; if (PEND) { PEND = false; render(); if (OPEN) renderPanel(); } }, 30); }, true);
 function render() { nPrSync();
-try { histScan(); } catch (er) { /* история не мешает */ }
-try { setsAuto(); } catch (er) { /* наборы не мешают */ }
-try { cleanAuto(); } catch (er) { /* план уборки не мешает */ }
-try { chAuto(); } catch (er) { /* челлендж не мешает */ }
-try { fcAutoRun(); } catch (er) { /* финансовый челлендж не мешает */ }
-try { kcAutoRun(); } catch (er) { /* кухонный челлендж не мешает */ }
-try { bcAutoRun(); } catch (er) { /* челлендж осанки не мешает */ }
-try { peopleAuto(); } catch (er) { /* люди и документы не мешают */ }
+if (BOOT.done) bootAutos();
 try { navAuto(); } catch (er) { /* навигация не мешает */ }
 try { uxAuto(); } catch (er) { /* удобства не мешают */ }
 try { ux2Auto(); } catch (er) { /* живые блоки не мешают */ }
 try { hzAuto(); } catch (er) { /* главная не мешает */ }
+if (BOOT.done) {
 try { setTimeout(xpCheck, 0); } catch (er) { /* очки не мешают */ }
 try { topMvScan(); } catch (er) { /* пометка переноса главного не мешает */ }
 try { if (SETGATE && bpaySync()) save(); } catch (er) { /* напоминания о платежах не мешают */ }
+}
 try { applyLook(); } catch (er) { /* оформление не мешает работе */ }
 var ae0 = document.activeElement;
 if (ae0 && (ae0.tagName === "SELECT" || /^(date|time|datetime-local|month|week|color)$/.test(ae0.type || "")) && ($("view").contains(ae0) || ($("panel") && $("panel").contains(ae0)))) { PEND = true; RHOLD = ae0; if (DIAG && DIAG.on) dlog("перерисовка отложена: открыт список или поле даты"); return; }
@@ -16415,7 +16438,8 @@ S.tasks.push(touch({ id: uid(), t: "Попробуйте быстрый ввод
 }
 LS.set("zd-started", "1");
 save(true);
-route();
+BOOT.r0 = performance.now(); route(); BOOT.r1 = performance.now();
+requestAnimationFrame(function () { setTimeout(function () { BOOT.paint = performance.now(); BOOT.done = true; render(); BOOT.full = performance.now(); bootSave(); }, 0); });
 SYNC.show();
 function setsOpen() { if (SETGATE) return; SETGATE = true; softRender(); }
 if (SYNC.enabled()) { SYNC.run().then(setsOpen, setsOpen); setTimeout(setsOpen, 25000); } else setTimeout(setsOpen, 1200);
@@ -16475,6 +16499,7 @@ b.w = k > 0 ? [ws[k]].concat(ws.slice(0, k), ws.slice(k + 1)) : [{ id: uid(), ty
 if (ch) save();
 LS.set("zd-daytopmig", "1");
 })();
+BOOT.end = performance.now();
 window.ZD = { touch: touch, save: save, bnTick: bnTick, bnAct: bnAct, food: { menuNeeds: menuNeeds, menuObj: menuObj, recCalc: recCalc, parseIng: parseIng, findProd: findProd, recipe: recipe, recFromHtml: recFromHtml, recFromText: recFromText, rosstatParse: rosstatParse, priceCalc: priceCalc }, AI: AI, aiApply: aiApply, setAIP: function (x) { AIP = x; render(); }, habits: habits, hMark: hMark, hStreak: hStreak, doneEvents: doneEvents, CAL: CAL, occIn: occIn, reorderTask: reorderTask, palBuild: function (q) { palBuild(q); return PAL.items; }, SELS: function () { return selIds(); }, taskCmd: taskCmd, pasteInto: pasteInto, taskMenu: taskMenu, ensureSprint: ensureSprint, monday: monday, setCol: setCol, S: S, parseQuick: parseQuick, nextOcc: nextOcc, ruleText: ruleText, ruleOf: ruleOf, nextAfterDone: nextAfterDone, remWanted: remWanted, mergeList: mergeList, SRV: SRV, filterRes: filterRes, moveProj: moveProj, moveTaskTo: moveTaskTo, task: task };
 })();</script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
