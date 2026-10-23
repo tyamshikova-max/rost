@@ -8179,7 +8179,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-176";
+var APPV = "zd-app-2026-10-16-177";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -12752,7 +12752,7 @@ if (BULAST) h += '<div class="bulast"><b>Обновлено: ' + esc(BULAST.what
 h += '<div class="htabs butabs">' + [["week", "Неделя"], ["per", "Период"], ["regs", "Регулярные платежи"], ["debts", "Долги"], ["wish", "Желания"], ["bank", "🏦 Выписка"], ["fch", fcOpt().on ? "💰 Челлендж" : "Челлендж"]].map(function (x) { return '<button type="button" class="tb' + (tab === x[0] ? " on" : "") + '" data-a="butab" data-x="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>";
 if (tab === "bank") return h + bankHTML();
 if (tab === "debts") return h + fcDebtsHTML(); if (tab === "wish") return h + fcWishHTML(); if (tab === "fch") return h + fcHTML();
-if (!buPers().length && tab !== "regs") return h + '<div class="card bunone"><b>Данных пока нет.</b><p class="muted">1. Выберите файл «Финансы … .xlsx» (кнопка выше или «Настройки» → «Бюджет»).<br>2. «⟳ Обновить из файла» → текущий период.<br>Читается только выбранное: период (лист «Ноябрь 2026» = 11.10–10.11), несколько периодов или одна неделя. Файл открывается прямо в браузере на этом компьютере и никуда не отправляется — в «Задачи» попадают только суммы по дням и статьям.</p></div>';
+if (!buPers().length && tab !== "regs") return h + (tab === "week" && live(S.bregs || []).some(bregOk) ? buRegsWeekHTML(monday(today0()), true) : "") + '<div class="card bunone"><b>Данных пока нет.</b><p class="muted">1. Выберите файл «Финансы … .xlsx» (кнопка выше или «Настройки» → «Бюджет»).<br>2. «⟳ Обновить из файла» → текущий период.<br>Читается только выбранное: период (лист «Ноябрь 2026» = 11.10–10.11), несколько периодов или одна неделя. Файл открывается прямо в браузере на этом компьютере и никуда не отправляется — в «Задачи» попадают только суммы по дням и статьям.</p></div>';
 if (tab === "per") h += buPerHTML(); else if (tab === "regs") h += buRegsHTML(); else h += buWeekHTML();
 setTimeout(buPeek, 0);
 return h;
@@ -12773,6 +12773,11 @@ if (lim <= 0) return fact > 0 ? "Лимита нет, потрачено " + buR
 var p = Math.round(fact / lim * 100), m = mark !== undefined && mark >= 0 ? Math.round(mark) : -1;
 var t = p + "% лимита" + (m >= 0 ? " · к сегодня положено ≈" + m + "%" : "");
 return t + (p > 100 ? " · лимит превышен на " + buRub(fact - lim) : m >= 0 ? (p > m + 8 ? " · тратите быстрее графика" : " · в графике") + ", осталось " + buRub(lim - fact) : " · осталось " + buRub(lim - fact));
+}
+function buRegsWeekHTML(mon, nodata) {
+var rg = buRegsIn(mon, addDays(mon, 6)), t0 = today0(), tot = rg.reduce(function (a, x) { return a + (+x.g.amt || 0); }, 0);
+return '<div class="card busec"><div class="bulab">Регулярные платежи этой недели' + (rg.length > 1 ? " · всего " + buRub(tot) : "") + "</div>" + (rg.length ? rg.map(function (x) { return '<div class="bupay"><span class="bud">' + new Date(x.d).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" }) + '</span><span class="bun">' + esc(x.g.n) + ' <small class="muted">' + esc(x.g.cat || "") + (x.g.per === "w" ? " · " + bregPer(x.g) : "") + '</small></span><span class="bunum ' + (x.st === "ok" ? "ok" : x.st === "late" ? "bad" : "") + '">' + buRub(+x.g.amt || 0) + (x.st === "ok" ? " ✓ похоже, оплачено" : x.st === "late" ? " · не видно оплаты" : x.d === t0 ? " · сегодня" : x.d < t0 ? "" : " · ожидается") + "</span></div>"; }).join("") : '<p class="muted" style="margin:0">На этой неделе по справочнику ничего — <a href="#" data-a="butab" data-x="regs">справочник платежей</a>.</p>') +
+(nodata && rg.length ? '<p class="muted" style="margin:8px 0 0">Оплачено ли — станет видно, когда загрузите данные из файла.</p>' : "") + "</div>";
 }
 function buWeekHTML() {
 var mon = addDays(monday(today0()), 7 * BUWK), w = buWeek(mon), t0 = today0(), isCur = BUWK === 0, prev = buWeek(addDays(mon, -7));
@@ -12795,8 +12800,7 @@ return '<div class="bufx" title="' + esc(tip) + '"><div class="bufxh"><b>' + esc
 buBar(x.fact, x.lim, mark, cw) + '<div class="bufxs">' + det.map(function (d) { return "<span>" + d + "</span>"; }).join("") + "</div></div>";
 }).join("") : '<p class="muted">Нет гибких статей — отметьте их в «Настройки» → «Бюджет».</p>') + "</div>";
 if (w.snap) { var sf = buSum(w.snap.fact), sl = buSum(w.snap.lim); h += '<p class="muted busnap">Итог на момент закрытия недели (' + esc(new Date(w.snap.at).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })) + "): потрачено " + buRub(sf) + " из " + buRub(sl) + (Math.abs(sf - Math.round(T.fact)) >= 1 ? " · сейчас по файлу " + buRub(T.fact) : " · совпадает с файлом") + "</p>"; }
-var rg = buRegsIn(mon, addDays(mon, 6));
-h += '<div class="card busec"><div class="bulab">Регулярные платежи этой недели</div>' + (rg.length ? rg.map(function (x) { return '<div class="bupay"><span class="bud">' + new Date(x.d).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" }) + '</span><span class="bun">' + esc(x.g.n) + ' <small class="muted">' + esc(x.g.cat || "") + '</small></span><span class="bunum ' + (x.st === "ok" ? "ok" : x.st === "late" ? "bad" : "") + '">' + buRub(+x.g.amt || 0) + (x.st === "ok" ? " ✓ похоже, оплачено" : x.st === "late" ? " · не видно оплаты" : x.st === "nodata" ? "" : x.d === t0 ? " · сегодня" : " · ожидается") + "</span></div>"; }).join("") : '<p class="muted" style="margin:0">На этой неделе по справочнику ничего — <a href="#" data-a="butab" data-x="regs">справочник платежей</a>.</p>') + "</div>";
+h += buRegsWeekHTML(mon);
 var P = buPer(buPid(Math.min(Math.max(t0, mon), addDays(mon, 6))));
 if (P) { var pr = buPeriod(P), pays = pr.rows.filter(function (x) { return x.k === "pay"; }); if (pays.length) h += '<div class="card busec"><div class="bulab">Платежи периода ' + esc(buPName(P.id)) + " — план и факт</div>" + pays.map(function (x) { return '<div class="burow"><span>' + esc(x.c) + buPct(x.fact, x.plan) + "</span>" + buBar(x.fact, x.plan, -1, x.fact > x.plan + 1 ? "bad" : "pay") + '<span class="bunum' + (x.fact > x.plan + 1 ? " bad" : "") + '">' + buRub(x.fact) + " / " + buRub(x.plan) + (x.fact > x.plan + 1 ? " · сверх плана" : x.plan - x.fact >= 1 ? " · осталось " + buRub(x.plan - x.fact) : " ✓") + "</span></div>"; }).join("") + "</div>"; }
 return h;
@@ -16970,6 +16974,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["177", "Платежи недели — всегда на виду", ["«Бюджет» → «Неделя»: блок «Регулярные платежи этой недели» виден и до загрузки файла — даты, названия и суммы (для платежей раз в 2 недели — с пометкой периода). Оплачено ли — появляется, когда загружены данные.", "В заголовке блока — сколько всего регулярных платежей на этой неделе."]],
 ["176", "Платежи раз в 2 недели", ["«Бюджет» → «Регулярные платежи»: кроме «каждый месяц» — каждую неделю, каждые 2, 3 или 4 недели от выбранной даты. Например, ипотека раз в 2 недели: в одном месяце 28-го, в другом 26-го — приложение посчитает само.", "Такие платежи видны в «Неделе» бюджета, сверяются с выпиской и напоминают о себе за 2 дня, как ежемесячные."]],
 ["175", "Быстрее показывается экран", ["Фоновые расчёты (автозадачи челленджей, плана уборки, дней рождения, история изменений) теперь идут сразу после того, как экран показан, а не до этого.", "«Настройки» → «Диагностика» → «⏱ Скорость запуска»: сколько занимает разбор кода, чтение данных, первый экран и фоновые расчёты на этом устройстве, и последние 10 запусков."]],
 ["173", "Быстрее и удобнее", ["Приложение грузится быстрее: справка подгружается отдельно при первом открытии, лишнее (комментарии, отступы) убирается при сборке — файл меньше на 17 %.", "Главная по дню недели: в пятницу и на выходных — «🧭 Обзор недели», в начале месяца — «🏁 Итоги» прошлого месяца.", "Клавиши: g и буква — переход отовсюду (g h — главная, g s — сегодня, g d — мой день, g t — задачи, g z — знания, g l — жизнь, g m — дом и деньги); j / k и Enter — по карточкам главной.", "Демо: на главной — свои карточки «Сроки» и «Цели»."]],
