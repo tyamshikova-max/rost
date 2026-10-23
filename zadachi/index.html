@@ -3051,7 +3051,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-185";
+var APPV = "zd-app-2026-10-16-186";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -7734,7 +7734,7 @@ return '<div class="burow" title="' + esc(fx ? buTip(x.fact, x.plan, r.el < r.pd
 }).join("") + '<div class="burow butot"><span>Итого расходы' + buPct(r.exp.fact, r.exp.plan) + '</span>' + buBar(r.exp.fact, r.exp.plan, -1, r.exp.fact > r.exp.plan ? "bad" : "") + '<span class="bunum">' + buRub(r.exp.fact) + " / " + buRub(r.exp.plan) + "</span></div></div>";
 if (r.off.length) h += '<p class="muted">Не входит в расходы: ' + r.off.map(function (x) { return esc(x.c) + " " + buRub(x.fact) + (x.plan ? " из " + buRub(x.plan) : ""); }).join(" · ") + "</p>";
 var inc = P.inc || { plan: {}, fact: {} }, srcs = Object.keys(Object.assign({}, inc.plan, inc.fact));
-if (srcs.length) h += '<div class="card busec"><div class="bulab">Доходы — факт и план</div>' + srcs.map(function (s) { var f = +inc.fact[s] || 0, pl = +inc.plan[s] || 0; return '<div class="burow' + (f || pl ? "" : " buzero") + '"><span>' + esc(s) + "</span>" + buBar(f, pl, -1, "inc") + '<span class="bunum">' + buRub(f) + " / " + buRub(pl) + "</span></div>"; }).join("") + "</div>";
+if (srcs.length) h += '<div class="card busec"><div class="bulab">Доходы — факт и план</div>' + srcs.map(function (s) { var f = +inc.fact[s] || 0, pl = +inc.plan[s] || 0; return '<div class="burow' + (f || pl ? "" : " buzero") + '"><span>' + esc(s) + buPct(f, pl) + "</span>" + buBar(f, pl, -1, "inc") + '<span class="bunum">' + buRub(f) + " / " + buRub(pl) + "</span></div>"; }).join("") + "</div>";
 var sl2 = soldIn(P.from, P.to + DAY - 1); if (sl2.length) h += '<p class="muted">🏷️ Продано вещей из расхламления за период: ' + sl2.length + " на " + buRub(sl2.reduce(function (a2, x) { return a2 + (+x.price || 0); }, 0)) + " — если ещё не внесли, добавьте в 1С как доход «Продажи».</p>";
 var rows = [], acc = 0;
 for (var m = monday(P.from); m <= P.to; m = addDays(m, 7)) {
@@ -11887,6 +11887,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["186", "Доходы — с процентом", ["«Бюджет» → «Период» → «Доходы — факт и план»: у каждого источника дохода — процент выполнения плана в скобках, как у расходов."]],
 ["185", "Напоминания о платежах — точнее", ["При переключении платежа на «каждые 2 недели» дата не подставляется сама — укажите дату настоящего платежа.", "Если у платежа поменяли дату или период, выключили или удалили его, лишнее напоминание исчезает само."]],
 ["184", "Оценка — в часах и минутах", ["Карточка задачи: «оценка __ ч __ мин». В списках, «Сейчас» и плане дня оценка тоже видна как «25 мин» или «1 ч 30 мин»."]],
 ["183", "Время — в часах и минутах", ["Карточка задачи → «Учёт времени»: учтено «__ ч __ мин» (можно поправить) и кнопки «+5 мин», «+15 мин», «+30 мин», «+1 ч» — время без таймера.", "Учтённое время превращается в помидоры: 25 минут = 1 🍅 — в задаче, саду фокуса, «Прогрессе дня», «Аналитике» и уровне."]],
