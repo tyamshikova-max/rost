@@ -3037,7 +3037,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-173";
+var APPV = "zd-app-2026-10-16-174";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -12909,8 +12909,8 @@ var D = appDef(), col = appColMap(appLayout()), s = SPZ[k], h = head(s[0] + " " 
 h += '<div class="aptg spzov">' + spzKeys(k).map(function (x) { var d = D[x], n = appCnt(x); return '<div class="apt" style="--ac:' + (col[x] || "var(--acc)") + '"><a class="aptl" href="#' + x + '"><span class="apti">' + d[1] + "</span><b>" + esc(d[2]) + (n !== "" && n !== 0 ? '<span class="aptn">' + esc(String(n)) + "</span>" : "") + "</b><small>" + esc(d[3]) + "</small>" + appMini(x) + "</a></div>"; }).join("") + "</div>";
 try {
 if (k === "task") {
-var pl = projects().filter(function (p) { return !isArch(p.id) && !p.parent; }).map(function (p) { var all = tasks().filter(function (t) { return t.pid === p.id; }), dn = all.filter(function (t) { return t.done; }).length; return { p: p, n: all.length - dn, pct: all.length ? Math.round(dn / all.length * 100) : 0 }; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 8);
-if (pl.length) h += '<h3 class="apph">Проекты</h3><div class="spzpl">' + pl.map(function (x) { return '<a class="spzp" href="#proj-' + x.p.id + '"><span>' + piconH(x.p) + "</span><b>" + esc(x.p.n) + "</b><small>" + x.n + " " + plural(x.n, ["открытая", "открытые", "открытых"]) + "</small>" + appBar(x.pct) + "</a>"; }).join("") + "</div>";
+var pl = projects().filter(function (p) { return !isArch(p.id) && !p.parent; }).map(function (p) { var ids = pdesc(p.id), all = tasks().filter(function (t) { return ids.indexOf(t.pid) >= 0; }), dn = all.filter(function (t) { return t.done; }).length; return { p: p, n: all.length - dn, sub: ids.length - 1, pct: all.length ? Math.round(dn / all.length * 100) : 0 }; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 8);
+if (pl.length) h += '<h3 class="apph">Проекты</h3><div class="spzpl">' + pl.map(function (x) { return '<a class="spzp" href="#proj-' + x.p.id + '"><span>' + piconH(x.p) + "</span><b>" + esc(x.p.n) + "</b><small>" + x.n + " " + plural(x.n, ["открытая", "открытые", "открытых"]) + (x.sub ? " · " + x.sub + " " + plural(x.sub, ["подпроект", "подпроекта", "подпроектов"]) : "") + "</small>" + appBar(x.pct) + "</a>"; }).join("") + "</div>";
 } else if (k === "know") {
 var nl = notes().slice().sort(function (a, b) { return (b.upd || b.created || 0) - (a.upd || a.created || 0); }).slice(0, 8);
 if (nl.length) h += '<h3 class="apph">Недавно изменены</h3><div class="spzpl">' + nl.map(function (n) { return '<a class="spzp" href="#note-' + n.id + '"><span>' + esc(nIc(n)) + "</span><b>" + esc(nTitle(n)) + "</b><small>" + esc(new Date(n.upd || n.created || Date.now()).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })) + "</small></a>"; }).join("") + "</div>";
