@@ -1732,6 +1732,15 @@ html.st-glass .top .brand { background: transparent; border-right-color: var(--g
 .stpick { margin: 0 0 12px; padding: 12px 0; border-bottom: 1px solid var(--line) } .stpickh { display: flex; gap: 6px 12px; align-items: baseline; flex-wrap: wrap; margin: 0 0 10px } .stpickh .ibtn { margin-left: auto } .stpickh .muted { font-size: calc(12.5px * var(--fs)) }
 .stpickl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px } @media (max-width: 600px) { .stpickl { grid-template-columns: 1fr 1fr } }
 .hzq .mic { flex: none }
+.spcimg { width: 1.2em; height: 1.2em; border-radius: 6px; object-fit: cover; vertical-align: -.2em; display: inline-block }
+.rlb .spcimg { width: 24px; height: 24px; border-radius: 7px; vertical-align: middle } .rladd { color: var(--muted); font-size: 18px; border: 1px dashed var(--line) !important } .rladd:hover { color: var(--acc) }
+.spchi { display: inline-flex; vertical-align: -.08em } .spcbar { gap: 8px; margin: 6px 0 14px }
+.spcmenu { columns: 2 260px; column-gap: 24px } .spcmenu .spcg { break-inside: avoid; display: inline-block; width: 100% } .spcempty { margin: 6px 0 16px }
+.spzt.spztadd { border-style: dashed; color: var(--muted) } .spzt.spztadd .spzi { color: var(--acc) }
+.spcsec { margin: 16px 0 0; display: grid; gap: 8px } .spcsec > .lbl { font-weight: 600 } .spcprev { font-size: 28px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; background: var(--acc-soft) } .spcprev .spcimg { width: 44px; height: 44px; border-radius: 12px }
+.spcics { display: flex; flex-wrap: wrap; gap: 4px } .spcics button { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line); background: none; font-size: 19px; cursor: pointer; color: var(--fg) } .spcics button.on { border: 2px solid var(--acc); background: var(--acc-soft) } .spcics .spcimgb { width: auto; padding: 0 12px; font-size: calc(13px * var(--fs)) }
+.spcitems { display: grid; gap: 2px; max-width: 640px } .spcit { display: flex; align-items: center; gap: 8px; padding: 5px 4px 5px 10px; border-radius: 8px; background: var(--hover) } .spcit > span:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .spcit.spch { background: none; padding-left: 0 } .spcit.spch .inp { flex: 1; font-weight: 600 } .spcctl { display: inline-flex; gap: 2px; flex: none }
+.spcadd { border-top: 1px solid var(--line); padding: 8px 0 } .spcadd summary { cursor: pointer; font-weight: 500 } .spcadd .chips { margin-top: 8px; max-height: 260px; overflow-y: auto } .spcfoot { gap: 8px; margin-top: 18px }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -2557,9 +2566,9 @@ return set;
 }
 function isArch(pid) { var a = archIds(); return !!(a && pid && a[pid]); }
 var FOCUS = LS.get("zd-focus") || "", FSC = null;
-function focusSet() { if (!FOCUS) return null; var k = FOCUS + "|" + S.projects.length + "|" + S.at; if (FSC && FSC.k === k) return FSC.s; var st = {}; pdesc(FOCUS).forEach(function (id) { st[id] = 1; }); FSC = { k: k, s: st }; return st; }
-function tasks() { return memo("tasks|" + today0() + "|" + SHOWARCH + "|" + FOCUS + "|" + CTXF + "|" + ENF, function () { var a = SHOWARCH ? null : archIds(), l = live(S.tasks), fs = focusSet(), sz0 = today0(); l = l.filter(function (t) { return t.done || !t.snz || t.snz <= sz0; }); if (a) l = l.filter(function (t) { return !a[t.pid]; }); if (fs) l = l.filter(function (t) { return fs[t.pid]; }); if (CTXF) l = l.filter(function (t) { var c = (t.tags || []).filter(isCtx); return !c.length || c.indexOf(CTXF) >= 0; }); if (ENF) l = l.filter(function (t) { return t.done || (t.en && t.en <= ENF); }); return l; }).slice(); }
-function setFocus(id) { FOCUS = id || ""; FSC = null; if (FOCUS) LS.set("zd-focus", FOCUS); else LS.del("zd-focus"); render(); toast(FOCUS ? "🎯 Фокус: «" + (proj(FOCUS) || {}).n + "» — видны только его задачи" : "Фокус снят — видны все задачи"); }
+function focusSet() { if (!FOCUS) return null; var k = FOCUS + "|" + S.projects.length + "|" + S.at; if (FSC && FSC.k === k) return FSC.s; var st = {}; if (/^sp:/.test(FOCUS)) st = spcFocusSet(FOCUS.slice(3)); else pdesc(FOCUS).forEach(function (id) { st[id] = 1; }); FSC = { k: k, s: st }; return st; }
+function tasks() { return memo("tasks|" + today0() + "|" + SHOWARCH + "|" + FOCUS + "|" + CTXF + "|" + ENF, function () { var a = SHOWARCH ? null : archIds(), l = live(S.tasks), fs = focusSet(), sz0 = today0(); l = l.filter(function (t) { return t.done || !t.snz || t.snz <= sz0; }); if (a) l = l.filter(function (t) { return !a[t.pid]; }); if (fs) l = l.filter(function (t) { return fs[t.pid] || (fs.__g && t.goal && fs.__g[t.goal]); }); if (CTXF) l = l.filter(function (t) { var c = (t.tags || []).filter(isCtx); return !c.length || c.indexOf(CTXF) >= 0; }); if (ENF) l = l.filter(function (t) { return t.done || (t.en && t.en <= ENF); }); return l; }).slice(); }
+function setFocus(id) { FOCUS = id || ""; FSC = null; if (FOCUS) LS.set("zd-focus", FOCUS); else LS.del("zd-focus"); render(); toast(FOCUS ? "🎯 Фокус: «" + (/^sp:/.test(FOCUS) ? spcName(FOCUS.slice(3)) : (proj(FOCUS) || {}).n) + "» — видны только его задачи" : "Фокус снят — видны все задачи"); }
 function task(id) {
 if (!id) return null;
 var m = memo("byId", function () { var o = {}; S.tasks.forEach(function (t) { if (!t.del) o[t.id] = t; }); return o; });
@@ -3172,7 +3181,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-204";
+var APPV = "zd-app-2026-10-16-205";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -3587,7 +3596,7 @@ function parse(hh) {
 var h = hh !== undefined ? String(hh) : decodeURIComponent((location.hash || "").slice(1)), m;
 if ((m = h.match(/^task-(.+)$/))) return { v: "task", a: m[1] };
 if ((m = h.match(/^share-(.+)$/))) return { v: "share", a: m[1] };
-if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board|goal|menu|recipe|shop|rimp|rpt|srs|dnote|tbox|recap|sh|sp)-(.+)$/))) return { v: m[1], a: m[2] };
+if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board|goal|menu|recipe|shop|rimp|rpt|srs|dnote|tbox|recap|sh|spced|sp)-(.+)$/))) return { v: m[1], a: m[2] };
 if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
 if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch", "menu", "menunew", "recipes", "rhave", "prods", "clean", "budget", "kitchen", "rpt", "ngraph", "srs", "weekly", "health", "people", "docs", "apps", "news", "market", "snoozed", "morning", "shutdown", "conflicts", "dnote", "tbox", "recap", "garden", "shared", "wheel", "home", "mods"].indexOf(h) >= 0) return { v: h, a: "" };
 if ((m = h.match(/^daily-?(.*)$/))) return { v: m[1] === "review" ? "shutdown" : "morning", a: "" };
@@ -3814,7 +3823,7 @@ function listsAll() { var o = (S.opt.lists || []).filter(function (x) { return L
 var NEWHIDE = ["gantt", "matrix", "sprint", "journal", "waiting", "someday", "flag"];
 function hiddenLists() { var l = LS.get("zd-hide"); if (l) { try { var a = JSON.parse(l); if (Array.isArray(a)) return a; } catch (e) { /* старый формат */ } } return S.opt.hideLists || (LS.get("zd-newdef") === "1" ? NEWHIDE : []); }
 function listsOrder() { var hid = hiddenLists(); return listsAll().filter(function (x) { return x === "inbox" || hid.indexOf(x) < 0; }); }
-var LISTN = { home: "Главная", sp: "Пространство", mods: "Модули", apps: "Все разделы", news: "Что нового", market: "Шаблоны", snoozed: "Отложенные", morning: "Утренний план", shutdown: "Завершение дня", conflicts: "Конфликты", wheel: "Колесо баланса", dnote: "День за днём", tbox: "План по часам", recap: "Итоги", garden: "Сад фокуса", shared: "Общие списки", sh: "Общий список", weekly: "Обзор недели", health: "Самочувствие", people: "Люди", docs: "Документы", srs: "Повторение", ngraph: "Граф заметок", rpt: "Отчёты", kitchen: "Кухня", menu: "Меню", clean: "План уборки", budget: "Бюджет", journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
+var LISTN = { home: "Главная", sp: "Пространство", spced: "Настройка пространства", mods: "Модули", apps: "Все разделы", news: "Что нового", market: "Шаблоны", snoozed: "Отложенные", morning: "Утренний план", shutdown: "Завершение дня", conflicts: "Конфликты", wheel: "Колесо баланса", dnote: "День за днём", tbox: "План по часам", recap: "Итоги", garden: "Сад фокуса", shared: "Общие списки", sh: "Общий список", weekly: "Обзор недели", health: "Самочувствие", people: "Люди", docs: "Документы", srs: "Повторение", ngraph: "Граф заметок", rpt: "Отчёты", kitchen: "Кухня", menu: "Меню", clean: "План уборки", budget: "Бюджет", journal: "Дневник", goals: "Цели", waiting: "Жду ответа", daily: "План дня", inbox: "Входящие", today: "Сегодня", cal: "Календарь", gantt: "Таймлайн", matrix: "Матрица", habits: "Привычки", sprint: "Спринт", plans: "Планы", someday: "Когда-нибудь", flag: "С флажком", all: "Все задачи", stats: "Статистика" };
 function setListHidden(id, hide) { if (id === "inbox") return; var h = hiddenLists().filter(function (x) { return x !== id; }); if (hide) h.push(id); S.opt.hideLists = h; LS.set("zd-hide", JSON.stringify(h)); optTouch(); save(); render(); }
 function sideFold() { try { return JSON.parse(LS.get("zd-sfold") || "{}") || {}; } catch (e) { return {}; } }
 var BHELP = { fav: "fav", boards: "dash", lists: "lists", projects: "tree", notes: "notes", filters: "filters", tags: "tags" };
@@ -4518,7 +4527,7 @@ var due = revDue(), p = V === "proj" ? proj(ARG) : null;
 return '<div class="modebar rev"><b>↻ Проверка проектов</b><span>' + (due.length ? "осталось проверить: " + due.length : "все проверены ✓") + (p ? " · «" + esc(p.n) + "»: " + (p.revAt ? "проверен " + new Date(p.revAt).toLocaleDateString("ru-RU") : "ещё не проверялся") + (revInt(p) ? ", интервал " + revInt(p) + " дн." : ", без проверки") : "") + '</span><span class="r"><button type="button" class="btn sm" data-a="rev-prev" title="Предыдущий">‹</button><button type="button" class="btn sm" data-a="rev-next" title="Следующий">›</button>' + (p ? '<button type="button" class="btn sm pri" data-a="rev-ok">✓ Проверено</button>' : "") + '<button type="button" class="btn sm" data-a="rev-off">Выйти</button></span></div>' +
 (p && V === "proj" ? '<p class="muted revhint">Уберите неактуальное, добавьте новое, проверьте приоритеты и сроки, назначьте даты задачам без срока — и нажмите «Проверено».</p>' : "");
 }
-function focusBar() { if (!FOCUS) return ""; var p = proj(FOCUS); if (!p) { FOCUS = ""; LS.del("zd-focus"); return ""; } return '<div class="modebar foc"><b>🎯 Фокус</b><span>«' + esc(p.n) + '» — в списках, поиске и календаре видны только его задачи</span><span class="r"><a class="btn sm" href="#proj-' + p.id + '">Открыть проект</a><button type="button" class="btn sm" data-a="focus-off">Выйти из фокуса</button></span></div>'; }
+function focusBar() { if (!FOCUS) return ""; if (/^sp:/.test(FOCUS)) { var fsk = FOCUS.slice(3); if (!SPZ[fsk]) { FOCUS = ""; LS.del("zd-focus"); return ""; } return '<div class="modebar foc"><b>🎯 Фокус</b><span>пространство «' + esc(spcName(fsk)) + '» — в списках, поиске и календаре видны только задачи его проектов и целей</span><span class="r"><a class="btn sm" href="#' + spzHref(fsk) + '">Открыть пространство</a><button type="button" class="btn sm" data-a="focus-off">Выйти из фокуса</button></span></div>'; } var p = proj(FOCUS); if (!p) { FOCUS = ""; LS.del("zd-focus"); return ""; } return '<div class="modebar foc"><b>🎯 Фокус</b><span>«' + esc(p.n) + '» — в списках, поиске и календаре видны только его задачи</span><span class="r"><a class="btn sm" href="#proj-' + p.id + '">Открыть проект</a><button type="button" class="btn sm" data-a="focus-off">Выйти из фокуса</button></span></div>'; }
 function vProjIn(p) {
 var vo = vopt(), ids = vo.sub ? pdesc(p.id) : [p.id];
 var l = tasks().filter(function (t) { return ids.indexOf(t.pid) >= 0 && !t.done; });
@@ -12062,6 +12071,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["205", "Свои пространства", ["＋ внизу полосы пространств — своё пространство: название, значок (или своя картинка), меню слева из чего угодно — разделы, проекты, цели, заметки, фильтры, теги, доски, готовые списки — и свой рабочий стол из карточек, как на главной. Заготовки: «Учёба», «Работа», «Хобби», «Ремонт или переезд», «Здоровье».", "Встроенные пространства тоже настраиваются: ✎ в шапке панели — меню, название и значок; на странице пространства — «✎ Рабочий стол». «↺ Вернуть как было» — к исходному виду.", "🎯 Фокус пространства: в списках, поиске и календаре видны только задачи его проектов и целей.", "Правый щелчок по проекту, тегу или фильтру → «🪐 В пространство» — добавить в любое пространство."]],
 ["204", "Челленджи, итоги недели, новая иконка", ["🎯 Челленджи недели — в карточке «Уровень и очки»: каждую неделю три задания по вашим данным (шаги по цели, помидоры, привычки, ранние задачи, дни подряд, «Входящие» до нуля, обзор недели). Выполнили — бонус +30 или +50 очков.", "📊 «Неделя в цифрах» в начале обзора недели: задачи, очки, помидоры, привычки — со сравнением с прошлой неделей, столбики по дням и лучший день. Итоги можно отправить себе в Telegram — кнопкой или автоматически по воскресеньям после 18:00.", "Новая иконка приложения в стиле логотипа; ярлык «Записать в дневник» на значке приложения (долгое нажатие на иконку на телефоне).", "🎤 Микрофон в строке «Записать задачу» на главной.", "При первом запуске главная предлагает выбрать оформление из четырёх стилей."]],
 ["203", "Уровень и очки — на главной", ["Новая карточка на главной «🏆 Уровень и очки»: уровень и сколько до следующего, очки за сегодня и цель дня (по вашему обычному темпу), серия дней подряд и рекорд, сколько достижений собрано, ближайшее достижение с прогрессом и подсказка, что сделать дальше.", "«За что очки» — прямо в карточке: задача +10 (с приоритетом 1 — +15), обзор недели +30, привычка +5, помидор +4, заметка +3, отметка самочувствия +3, повторение карточки +2."]],
 ["202", "Новый логотип", ["Логотип — теперь верх левой колонки, одним целым с меню. Значок — простая галочка, которая в каждом стиле своя: в «Облаке» — тонкий контур, в «Бенто» — тёмная плитка, в «Экспрессиве» — круглая, в «Стекле» — полупрозрачная. Название — шрифтом заголовков стиля."]],
@@ -12396,6 +12406,7 @@ function cpBody(k) { return spzBody(k); }
 function cpHTML(fly) {
 var k = cpSpace(), s = SPACES[k];
 var h = '<div class="cph"' + (k === "task" ? ' data-droproot="1"' : "") + "><b>" + s[1] + "</b>" + (CPADD[k] || []).map(function (x) { return '<button type="button" class="ibtn" data-a="' + x[0] + '" title="' + x[2] + '" aria-label="' + x[2] + '">' + x[1] + "</button>"; }).join("") +
+'<button type="button" class="ibtn" data-a="spced" data-x="' + k + '" title="Настроить пространство: меню, название, значок" aria-label="Настроить пространство">✎</button>' +
 '<button type="button" class="ibtn" data-a="cpmore" title="Ещё: история, корзина, архив, настройка полосы" aria-label="Ещё">⋯</button>' +
 (fly ? '<button type="button" class="ibtn" data-a="cppin" title="Закрепить панель" aria-label="Закрепить панель">📌</button>' : '<button type="button" class="ibtn" data-a="cphide" title="Скрыть панель (или щёлкните значок ещё раз)" aria-label="Скрыть панель">⇤</button>') + "</div>";
 h += '<label class="cps"><span aria-hidden="true">⌕</span><input type="search" id="cpq" placeholder="Найти в разделе" value="' + esc(CPQ) + '" autocomplete="off"></label>';
@@ -12407,7 +12418,7 @@ var b = document.querySelector(".side .cpb"); if (!b) return; var q = CPQ.toLowe
 [].forEach.call(b.querySelectorAll(".cpg, .none"), function (x) { x.hidden = !!q; });
 }
 function cpRedraw() { try { $("side").innerHTML = sideHTML(); cpFilter(); railSync(); } catch (e) { render(); } }
-function cpFollow(v, a) { if (FLY) return; var k = spzOf(v, a); if (k && SPACES[k] && k !== cpSpace()) { cpSet(k); CPQ = ""; } }
+function cpFollow(v, a) { if (FLY) return; try { if (v !== "sp" && spcCovers(cpSpace(), v, a)) return; } catch (e) { /* ок */ } var k = spzOf(v, a); if (k && SPACES[k] && k !== cpSpace()) { cpSet(k); CPQ = ""; } }
 function cpFlyOff() { if (!FLY) return; FLY = ""; document.body.classList.remove("sidefly"); cpRedraw(); }
 var RAILD = ["apps", "home", "day", "task", "know", "life", "house", "find", "fav", "rec"];
 var RAILE = { apps: ["▦", "Все разделы (Alt+A)"], home: ["🏠", "Главная: сводка дня, избранное, доски"], day: ["☀", "Мой день: входящие, сегодня, планы, утро и вечер"], task: ["✅", "Задачи: проекты, списки, теги и фильтры"], know: ["📝", "Знания: заметки, карты, повторение"], life: ["🌿", "Жизнь: привычки, цели, самочувствие, люди"], house: ["🔑", "Дом и деньги: меню, уборка, бюджет, документы"], find: ["⌕", "Поиск и команды (Ctrl+K)"], fav: ["★", "Избранное"], rec: ["🕘", "Недавние"] };
@@ -12422,7 +12433,7 @@ var r = $("rail"); if (!on) { if (r) r.remove(); return; }
 if (!r) { r = document.createElement("nav"); r.id = "rail"; r.setAttribute("aria-label", "Быстрая навигация"); document.body.appendChild(r); }
 var D = appDef(), x = (S.opt.railx || []).filter(function (k) { return D[k]; }), bt = function (k, i, t) { return '<button type="button" class="rlb" data-r="' + k + '" title="' + t + '" aria-label="' + t + '">' + i + (k === "ntf" ? '<i class="ntfc" hidden></i>' : "") + "</button>"; };
 var sy = !YD.on ? "" : '<button type="button" class="rlb rlsync' + (SYNC.st === "err" ? " err" : SYNC.at ? " ok" : "") + '" data-a="svc-sync" title="' + esc(!YD.token() ? "Войти через Яндекс для синхронизации" : SYNC.st === "err" ? "Нет связи с Диском — нажмите, чтобы повторить" : "Синхронизация через Яндекс Диск — нажмите, чтобы обновить") + '" aria-label="Синхронизация">☁</button>';
-var html = railKeys().map(function (k) { var e = RAILE[k]; return '<button type="button" class="rlb' + (k === "apps" ? " appsl" : "") + (SPACES[k] ? " rls" : "") + '" data-r="' + k + '" title="' + e[1] + '" aria-label="' + e[1] + '" draggable="true">' + e[0] + (k === "day" ? '<i class="rlc" hidden></i>' : "") + "</button>"; }).join("") +
+var html = railKeys().map(function (k) { var e = RAILE[k]; return '<button type="button" class="rlb' + (k === "apps" ? " appsl" : "") + (SPACES[k] ? " rls" : "") + '" data-r="' + k + '" title="' + e[1] + '" aria-label="' + e[1] + '" draggable="true">' + e[0] + (k === "day" ? '<i class="rlc" hidden></i>' : "") + "</button>"; }).join("") + '<button type="button" class="rlb rladd" data-a="spcnew" title="Новое пространство" aria-label="Новое пространство">＋</button>' +
 (x.length ? '<span class="rlsep"></span>' + x.map(function (k) { return '<a class="rlb rlx" href="#' + k + '" data-x="' + k + '" title="' + esc(D[k][2]) + '" aria-label="' + esc(D[k][2]) + '">' + D[k][1] + "</a>"; }).join("") : "") +
 '<span class="rlsp"></span>' + (S.opt.topfull === true ? bt("ntf", "🔔", "Уведомления (Alt+B)") + sy : "") + bt("help", "?", "Справка") + bt("settings", "⚙", "Настройки");
 if (r.dataset.sig !== html) { r.innerHTML = html; r.dataset.sig = html; }
@@ -13122,6 +13133,7 @@ var n = appCnt(k); return itemHTML("", "", k, '<span class="pic">' + x[1] + "</s
 }
 function spzNav(keys) { var h = keys.map(spzLink).join(""); return h ? '<nav class="nav">' + h + "</nav>" : ""; }
 function spzBody(k) {
+var its = spcItems(k); if (its) return spcBody(k, its);
 var B = SIDEB, g = function (t) { return '<div class="cpg">' + t + "</div>"; };
 if (k === "home") {
 var rc = recentItems(6);
@@ -13154,10 +13166,11 @@ if (k === "house") { if (modOn("budget") && buPers().length) { var T = buWeek(mo
 } catch (e) { /* строка не обязательна */ }
 return SPZ[k] ? SPZ[k][2] : "";
 }
-function spzTiles(cls) { return '<div class="spzg' + (cls ? " " + cls : "") + '">' + ["day", "task", "know", "life", "house"].map(function (k) { return '<a class="spzt" href="#sp-' + k + '"><span class="spzi">' + SPZ[k][0] + "</span><b>" + SPZ[k][1] + "</b><small>" + esc(spzLine(k)) + "</small></a>"; }).join("") + "</div>"; }
+function spzTiles(cls) { return '<div class="spzg' + (cls ? " " + cls : "") + '">' + spcAll().filter(function (k) { return k !== "home"; }).map(function (k) { return '<a class="spzt" href="#sp-' + k + '"><span class="spzi">' + SPZ[k][0] + "</span><b>" + SPZ[k][1] + "</b><small>" + esc(spzLine(k)) + "</small></a>"; }).join("") + '<a class="spzt spztadd" href="#spced-new"><span class="spzi">＋</span><b>Своё пространство</b><small>меню и рабочий стол — из того, что нужно вам</small></a></div>'; }
 function vSpz() {
-var k = SPZ[ARG] ? ARG : "day"; if (k === "home") return vHome();
+var k = SPZ[ARG] ? ARG : "day"; if (k === "home") return vHome(); if (spcGet(k)) return vSpcPage(k);
 var D = appDef(), col = appColMap(appLayout()), s = SPZ[k], h = head(s[0] + " " + s[1], s[2] + ". Слева — панель пространства; значок на полосе — сюда же.");
+h += spcBar(k) + spcDeskHTML(k);
 h += '<div class="aptg spzov">' + spzKeys(k).map(function (x) { var d = D[x], n = appCnt(x); return '<div class="apt" style="--ac:' + (col[x] || "var(--acc)") + '"><a class="aptl" href="#' + x + '"><span class="apti">' + d[1] + "</span><b>" + esc(d[2]) + (n !== "" && n !== 0 ? '<span class="aptn">' + esc(String(n)) + "</span>" : "") + "</b><small>" + esc(d[3]) + "</small>" + appMini(x) + "</a></div>"; }).join("") + "</div>";
 try {
 if (k === "task") {
@@ -13178,9 +13191,9 @@ var off = (SPZK[k] || []).filter(function (x) { return D[x] && !modOn(x); });
 if (off.length) h += '<p class="muted spzoff">Выключено в этом пространстве: ' + off.map(function (x) { return D[x][1] + " " + esc(D[x][2]); }).join(", ") + ' — <a href="#mods">🧩 Модули</a></p>';
 return h;
 }
-var HZC = [["fst", "🚀 Первые шаги"], ["now", "⏱ Сейчас"], ["top", "★ Главное на сегодня"], ["prog", "📊 Прогресс дня"], ["att", "⚠ Требует внимания"], ["cont", "↩ Продолжить"], ["hab", "🌱 Привычки сегодня"], ["well", "🌿 Самочувствие"], ["pav", "🧭 Советник"], ["xp", "🏆 Уровень и очки"]], HZED = false;
-function hzOrder() { var wk = hzWKeys(), o = (S.opt.homec || []).filter(function (k) { return HZC.some(function (c) { return c[0] === k; }) || wk.indexOf(k) >= 0; }); HZC.forEach(function (c) { if (o.indexOf(c[0]) < 0) { var ai = c[0] === "pav" ? o.indexOf("att") : c[0] === "xp" ? o.indexOf("prog") : -1; if (ai >= 0) o.splice(ai + 1, 0, c[0]); else o.push(c[0]); } }); wk.forEach(function (k) { if (o.indexOf(k) < 0) o.push(k); }); return o; }
-function hzHid() { return S.opt.homeh || []; }
+var HZC = [["spt", "✅ Задачи пространства"], ["fst", "🚀 Первые шаги"], ["now", "⏱ Сейчас"], ["top", "★ Главное на сегодня"], ["prog", "📊 Прогресс дня"], ["att", "⚠ Требует внимания"], ["cont", "↩ Продолжить"], ["hab", "🌱 Привычки сегодня"], ["well", "🌿 Самочувствие"], ["pav", "🧭 Советник"], ["xp", "🏆 Уровень и очки"]], HZED = false;
+function hzOrder() { var wk = hzWKeys(), o = (HZS().homec || []).filter(function (k) { return HZC.some(function (c) { return c[0] === k; }) || wk.indexOf(k) >= 0; }); HZC.forEach(function (c) { if (o.indexOf(c[0]) < 0) { var ai = c[0] === "pav" ? o.indexOf("att") : c[0] === "xp" ? o.indexOf("prog") : -1; if (ai >= 0) o.splice(ai + 1, 0, c[0]); else o.push(c[0]); } }); wk.forEach(function (k) { if (o.indexOf(k) < 0) o.push(k); }); return o; }
+function hzHid() { return HZS().homeh || []; }
 function hzName(k) { var c = HZC.filter(function (z) { return z[0] === k; })[0]; return c ? c[1] : k; }
 function hzMorn() { var r = dayRec(); return LS.get("zd-rit-morning") === dKey(today0()) || !!(r && r.planned); }
 function hzEve() { var r = dayRec(); return LS.get("zd-rit-shutdown") === dKey(today0()) || !!(r && r.review); }
@@ -13255,6 +13268,8 @@ b = rc.length ? rc.map(function (x) { return '<a class="hza" href="#' + esc(x.h)
 } else if (k === "hab") {
 b = habitsToday() || '<p class="muted">На сегодня привычек нет. <a href="#habits">Завести привычку</a></p>';
 more = '<a class="ibtn" href="#habits" title="Привычки" aria-label="Привычки">→</a>';
+} else if (k === "spt") {
+b = spcTasksCard(); if (!b) return "";
 } else if (k === "xp") {
 if (!xpOn()) return "";
 b = xpHomeHTML();
@@ -13277,10 +13292,7 @@ h += stPickHTML();
 h += '<div class="hzq"><input class="inp" id="hzq" type="text" placeholder="Записать задачу: «завтра в 10 позвонить маме #дела» — Enter" autocomplete="off" aria-label="Новая задача"><button type="button" class="btn mic" data-a="mic" data-for="hzq" title="Надиктовать задачу" aria-label="Надиктовать задачу">🎤</button><button type="button" class="btn pri" data-a="hzadd">＋</button></div>';
 var hid = hzHid();
 h += hzModQ() + '<div class="hzgrid' + (HZED ? " hzedit" : "") + '">' + hzLayout(hzOrder().filter(function (k) { return hid.indexOf(k) < 0; })) + "</div>";
-if (HZED) {
-var hs = hid.filter(function (k) { return HZC.some(function (c) { return c[0] === k; }); });
-h += '<div class="card hzedb"><b>Настройка главной</b>' + hzColsHTML() + '<p class="muted">Перетаскивайте карточки мышью за ⠿ — куда угодно, в том числе в другую колонку; ширину меняйте, потянув за уголок справа внизу карточки (это можно и без режима настройки). Здесь: ↑ ↓ — порядок, ← → — в соседнюю колонку, ↔ — ширина в колонках, ✕ — скрыть. Свои карточки — любой виджет, как на досках:</p><div class="r" style="gap:8px;margin:0 0 10px"><button type="button" class="btn sm" data-a="hzwnew">＋ Новая карточка…</button><button type="button" class="btn sm" data-a="hzwpick">＋ Виджет с доски…</button></div><p class="muted">Скрытые можно вернуть:</p><div class="chips">' + (hs.length ? hs.map(function (k) { return '<button type="button" class="chip" data-a="hzshow" data-x="' + k + '">＋ ' + hzName(k) + "</button>"; }).join("") : '<span class="muted">скрытых нет</span>') + (S.opt.fstoff ? '<button type="button" class="chip" data-a="fston">＋ 🚀 Первые шаги</button>' : "") + '</div><div class="r" style="gap:8px;margin-top:10px"><button type="button" class="btn pri" data-a="hzed">Готово</button><button type="button" class="btn" data-a="hzreset">↺ Как было</button></div></div>';
-}
+if (HZED) h += hzEdBlock("Настройка главной");
 h += '<h3 class="apph">Пространства</h3>' + spzTiles();
 h += '<div class="r hzfoot"><button type="button" class="btn sm" data-a="hzed">' + (HZED ? "✓ Готово" : "✎ Настроить главную") + '</button><a class="btn sm" href="#apps">▦ Все разделы</a><a class="btn sm" href="#mods">🧩 Модули</a></div>';
 return h;
@@ -13360,10 +13372,10 @@ case "hztop": var r = dayRec(true), tp = (r.top || []).slice(), i = tp.indexOf(e
 case "hzadd": var q = $("hzq"); if (q) { var v = q.value; q.value = ""; hzAddText(v); } return true;
 case "hzqf": var q2 = $("hzq"); if (q2) { q2.focus(); q2.scrollIntoView({ block: "center" }); } return true;
 case "hzed": HZED = !HZED; render(); return true;
-case "hzmv": L = hzOrder(); var j = L.indexOf(x), k = j + (+el.dataset.d); if (j < 0 || k < 0 || k >= L.length) return true; L.splice(j, 1); L.splice(k, 0, x); S.opt.homec = L; optTouch(); save(); render(); return true;
-case "hzhide": if (/^w:/.test(x)) { hzWDel(x); return true; } var hh = hzHid().slice(); if (hh.indexOf(x) < 0) hh.push(x); S.opt.homeh = hh; optTouch(); save(); render(); return true;
-case "hzshow": S.opt.homeh = hzHid().filter(function (z) { return z !== x; }); optTouch(); save(); render(); return true;
-case "hzreset": delete S.opt.homec; delete S.opt.homeh; delete S.opt.homecol; delete S.opt.homewide; delete S.opt.homespan; delete S.opt.homecols; optTouch(); save(); render(); return true;
+case "hzmv": L = hzOrder(); var j = L.indexOf(x), k = j + (+el.dataset.d); if (j < 0 || k < 0 || k >= L.length) return true; L.splice(j, 1); L.splice(k, 0, x); HZS().homec = L; optTouch(); save(); render(); return true;
+case "hzhide": if (/^w:/.test(x)) { hzWDel(x); return true; } var hh = hzHid().slice(); if (hh.indexOf(x) < 0) hh.push(x); HZS().homeh = hh; optTouch(); save(); render(); return true;
+case "hzshow": HZS().homeh = hzHid().filter(function (z) { return z !== x; }); optTouch(); save(); render(); return true;
+case "hzreset": delete HZS().homec; delete HZS().homeh; delete HZS().homecol; delete HZS().homewide; delete HZS().homespan; delete HZS().homecols; if (HZS() !== S.opt) HZS().homeh = HZC.map(function (c) { return c[0]; }); optTouch(); save(); render(); return true;
 case "hzctx": var b = $("ctxBtn"); if (b) { var hd = b.hidden; b.hidden = false; b.click(); b.hidden = hd; var m = $("ctx"), rr = el.getBoundingClientRect(); if (m && !m.hidden) place(m, rr.left, rr.bottom + 4); } return true;
 case "fstoff": S.opt.fstoff = 1; optTouch(); save(); render(); toast("«Первые шаги» скрыты. Вернуть — «✎ Настроить главную»"); return true;
 case "fston": delete S.opt.fstoff; optTouch(); save(); render(); return true;
@@ -13398,7 +13410,7 @@ if (V === "apps") { var off = modsOffList().length; if (off) h += '<div class="m
 return h;
 }
 var HZWT = ["tasks", "dead", "cal", "habits", "goals", "budget", "savings", "count", "chart", "time", "pomo", "srs", "nold", "health", "routine", "quick", "chals", "order"];
-function hzWList() { return (S.opt.homew || []).filter(function (x) { var b = board(x.b); return b && wOf(b, x.w); }); }
+function hzWList() { return (HZS().homew || []).filter(function (x) { var b = board(x.b); return b && wOf(b, x.w); }); }
 function hzWKeys() { return hzWList().map(function (x) { return "w:" + x.b + ":" + x.w; }); }
 function hzWRef(k) { var p = String(k).split(":"), b = board(p[1]), w = wOf(b, p[2]); return b && w ? { b: b, w: w } : null; }
 function hzEdBtns(k) { return '<span class="hzed"><button type="button" class="ibtn" data-a="hzmv" data-x="' + k + '" data-d="-1" title="Выше" aria-label="Выше">↑</button><button type="button" class="ibtn" data-a="hzmv" data-x="' + k + '" data-d="1" title="Ниже" aria-label="Ниже">↓</button><button type="button" class="ibtn" data-a="hzhide" data-x="' + k + '" title="Убрать с главной" aria-label="Убрать">✕</button></span>'; }
@@ -13409,12 +13421,12 @@ try { body = wBody(r.b, w); } catch (e) { body = '<p class="muted">Не удал
 return '<section class="card hzc hzw" data-hz="' + esc(k) + '"><div class="hzh"><b>' + esc(ic) + " " + esc(ttl) + "</b>" + (HZED ? hzEdBtns(k) : '<a class="ibtn" href="#board-' + r.b.id + '" title="Открыть на доске «' + esc(r.b.n) + '» — там размер и настройка" aria-label="Открыть на доске">↗</a>') + '</div><div class="wdg hzwb w-' + w.type + '" data-w="' + w.id + '"><div class="wb">' + body + "</div></div></section>";
 }
 function hzBoard() { var b = boards().filter(function (x) { return x.homeb; })[0]; return b || bCreate("🏠 Карточки главной", [], { homeb: 1 }); }
-function hzWPin(bid, wid) { var l = (S.opt.homew || []).filter(function (x) { return !(x.b === bid && x.w === wid); }); l.push({ b: bid, w: wid }); S.opt.homew = l; optTouch(); save(); render(); }
-function hzWDel(k) { var p = String(k).split(":"); S.opt.homew = (S.opt.homew || []).filter(function (x) { return !(x.b === p[1] && x.w === p[2]); }); S.opt.homec = (S.opt.homec || []).filter(function (z) { return z !== k; }); optTouch(); save(); render(); }
+function hzWPin(bid, wid) { var l = (HZS().homew || []).filter(function (x) { return !(x.b === bid && x.w === wid); }); l.push({ b: bid, w: wid }); HZS().homew = l; optTouch(); save(); render(); }
+function hzWDel(k) { var p = String(k).split(":"); HZS().homew = (HZS().homew || []).filter(function (x) { return !(x.b === p[1] && x.w === p[2]); }); HZS().homec = (HZS().homec || []).filter(function (z) { return z !== k; }); optTouch(); save(); render(); }
 function hzWMenu(el, kind) {
 var r = el.getBoundingClientRect(), it = [];
 if (kind === "new") it = HZWT.filter(function (t) { return WT[t] && (t !== "budget" || modOn("budget")) && (t !== "srs" || modOn("srs")); }).map(function (t) { return { c: "t:" + t, i: WT[t].i, l: WT[t].n }; });
-else boards().forEach(function (b) { (b.w || []).forEach(function (w) { var we = wEff(b, w), on = (S.opt.homew || []).some(function (x) { return x.b === b.id && x.w === w.id; }); it.push({ c: "p:" + b.id + ":" + w.id, i: (WT[w.type] || {}).i || "▦", l: b.n + " — " + ((we.cfg || {}).t || wDefTitle(we)), k: on ? "✓" : "" }); }); });
+else boards().forEach(function (b) { (b.w || []).forEach(function (w) { var we = wEff(b, w), on = (HZS().homew || []).some(function (x) { return x.b === b.id && x.w === w.id; }); it.push({ c: "p:" + b.id + ":" + w.id, i: (WT[w.type] || {}).i || "▦", l: b.n + " — " + ((we.cfg || {}).t || wDefTitle(we)), k: on ? "✓" : "" }); }); });
 if (!it.length) { toast("Досок с виджетами пока нет — добавьте «＋ Новая карточка»"); return; }
 ctxShow(r.left, r.bottom + 4, it, { k: "hzw" });
 }
@@ -13441,17 +13453,17 @@ ctxShow(r.left, r.bottom + 4, l.map(function (x) { return { c: x[0], i: x[1], l:
 var SPZDC = false;
 function spzDrawer() {
 var cur = cpSpace(), h = '<div class="spzdr"><div class="spzdh"><b>Пространства</b><a class="btn sm" href="#apps">▦ Все разделы</a></div>';
-["home", "day", "task", "know", "life", "house"].forEach(function (k) {
+spcAll().forEach(function (k) {
 var on = k === cur && !SPZDC;
 h += '<button type="button" class="spzdb' + (on ? " on" : "") + '" data-a="spzdr" data-x="' + k + '" aria-expanded="' + on + '"><span class="spzi">' + SPZ[k][0] + "</span><span><b>" + SPZ[k][1] + "</b><small>" + esc(spzLine(k)) + "</small></span><i>" + (on ? "▾" : "▸") + "</i></button>";
 if (on) h += '<div class="spzdp"><nav class="nav">' + itemHTML("", "", spzHref(k), '<span class="pic">◉</span>', k === "home" ? "Главная — сводка дня" : "Обзор пространства", 0, {}) + "</nav>" + spzBody(k) + "</div>";
 });
-return h + '<div class="spzdf"><a class="btn sm" href="#mods">🧩 Модули</a><a class="btn sm" href="#help">? Справка</a><a class="btn sm" href="#settings">⚙ Настройки</a></div></div>';
+return h + '<div class="spzdf"><a class="btn sm" href="#spced-new">＋ Пространство</a><a class="btn sm" href="#mods">🧩 Модули</a><a class="btn sm" href="#help">? Справка</a><a class="btn sm" href="#settings">⚙ Настройки</a></div></div>';
 }
 function hz2Ctx(k, id, c) {
 if (k === "hzw") {
 if (c.indexOf("t:") === 0) { var t = c.slice(2), b = hzBoard(), w = { id: uid(), type: t, sz: WT[t].sz, cfg: t === "tasks" ? { src: "list:today", t: "Сегодня" } : {} }; b.w = (b.w || []).concat([w]); touch(b); save(); hzWPin(b.id, w.id); toast("Карточка «" + WT[t].n + "» на главной. Настроить — ↗ (откроется доска «Карточки главной»)"); }
-else if (c.indexOf("p:") === 0) { var p = c.split(":"), on = (S.opt.homew || []).some(function (x) { return x.b === p[1] && x.w === p[2]; }); if (on) hzWDel("w:" + p[1] + ":" + p[2]); else { hzWPin(p[1], p[2]); toast("Виджет добавлен на главную"); } }
+else if (c.indexOf("p:") === 0) { var p = c.split(":"), on = (HZS().homew || []).some(function (x) { return x.b === p[1] && x.w === p[2]; }); if (on) hzWDel("w:" + p[1] + ":" + p[2]); else { hzWPin(p[1], p[2]); toast("Виджет добавлен на главную"); } }
 return true;
 }
 if (k === "spzp") {
@@ -13531,9 +13543,13 @@ row("Фоновые расчёты", x.bg, "уже после показа: ав
 '<p class="muted">Хорошо — до 1000 мс, терпимо — до 2000 мс. Сравните компьютер и телефон: откройте этот раздел на каждом.</p></div>';
 }
 var HZDRAG = "", HZRS = null, HZMO = null, HZMT = 0;
-function hzN() { var n = +S.opt.homecols; return n >= 1 && n <= 4 ? Math.round(n) : 2; }
-function hzColOf(k, i) { var m = S.opt.homecol || {}, n = hzN(); return typeof m[k] === "number" ? Math.max(0, Math.min(n - 1, m[k])) : i % n; }
-function hzSpan(k) { var m = S.opt.homespan || {}, n = hzN(); if (typeof m[k] === "number") return Math.max(1, Math.min(n, m[k])); return (S.opt.homewide || {})[k] ? n : 1; }
+function hzEdBlock(title) {
+var hid = hzHid(), hs = hid.filter(function (k) { return HZC.some(function (c) { return c[0] === k; }); });
+return '<div class="card hzedb"><b>' + title + '</b>' + hzColsHTML() + '<p class="muted">Перетаскивайте карточки мышью за ⠿ — куда угодно, в том числе в другую колонку; ширину меняйте, потянув за уголок справа внизу карточки (это можно и без режима настройки). Здесь: ↑ ↓ — порядок, ← → — в соседнюю колонку, ↔ — ширина в колонках, ✕ — скрыть. Свои карточки — любой виджет, как на досках:</p><div class="r" style="gap:8px;margin:0 0 10px"><button type="button" class="btn sm" data-a="hzwnew">＋ Новая карточка…</button><button type="button" class="btn sm" data-a="hzwpick">＋ Виджет с доски…</button></div><p class="muted">Скрытые можно вернуть:</p><div class="chips">' + (hs.length ? hs.map(function (k) { return '<button type="button" class="chip" data-a="hzshow" data-x="' + k + '">＋ ' + hzName(k) + "</button>"; }).join("") : '<span class="muted">скрытых нет</span>') + (S.opt.fstoff ? '<button type="button" class="chip" data-a="fston">＋ 🚀 Первые шаги</button>' : "") + '</div><div class="r" style="gap:8px;margin-top:10px"><button type="button" class="btn pri" data-a="hzed">Готово</button><button type="button" class="btn" data-a="hzreset">↺ Как было</button></div></div>';
+}
+function hzN() { var n = +HZS().homecols; return n >= 1 && n <= 4 ? Math.round(n) : 2; }
+function hzColOf(k, i) { var m = HZS().homecol || {}, n = hzN(); return typeof m[k] === "number" ? Math.max(0, Math.min(n - 1, m[k])) : i % n; }
+function hzSpan(k) { var m = HZS().homespan || {}, n = hzN(); if (typeof m[k] === "number") return Math.max(1, Math.min(n, m[k])); return (HZS().homewide || {})[k] ? n : 1; }
 function hzDeco(k, html, c, s) {
 var n = hzN();
 html = html.replace('<div class="hzh">', '<div class="hzh"><span class="hzg" data-hzg="' + esc(k) + '" title="Перетащите, чтобы переставить (в любую колонку)" aria-hidden="true">⠿</span>');
@@ -13563,12 +13579,12 @@ if (window.ResizeObserver && G.box.__wo === undefined) { G.box.__wo = G.W || 0; 
 if (window.ResizeObserver) { if (!HZMO) HZMO = new ResizeObserver(function () { cancelAnimationFrame(HZMT); HZMT = requestAnimationFrame(hzMas); }); [].forEach.call(G.box.children, function (el) { if (!el.__hzo) { el.__hzo = 1; HZMO.observe(el); } }); }
 }
 window.addEventListener("resize", function () { if ($("hzms")) hzMas(); });
-function hzFix() { var o = hzOrder(), m = Object.assign({}, S.opt.homecol || {}), sp = Object.assign({}, S.opt.homespan || {}), i = 0; o.forEach(function (k) { if (typeof m[k] !== "number") m[k] = hzColOf(k, i); if (typeof sp[k] !== "number") sp[k] = hzSpan(k); i++; }); S.opt.homecol = m; S.opt.homespan = sp; delete S.opt.homewide; S.opt.homec = o; }
+function hzFix() { var o = hzOrder(), m = Object.assign({}, HZS().homecol || {}), sp = Object.assign({}, HZS().homespan || {}), i = 0; o.forEach(function (k) { if (typeof m[k] !== "number") m[k] = hzColOf(k, i); if (typeof sp[k] !== "number") sp[k] = hzSpan(k); i++; }); HZS().homecol = m; HZS().homespan = sp; delete HZS().homewide; HZS().homec = o; }
 function hzDropAt(k, tk, after, col) {
-hzFix(); var o = S.opt.homec.filter(function (z) { return z !== k; });
-if (tk) { var j = o.indexOf(tk); if (j < 0) j = o.length - 1; o.splice(after ? j + 1 : j, 0, k); S.opt.homecol[k] = Math.min(S.opt.homecol[tk], hzN() - hzSpan(k)); }
-else if (col !== undefined) { var last = -1; o.forEach(function (z, i) { var c = S.opt.homecol[z], s = hzSpan(z); if (col >= c && col < c + s) last = i; }); o.splice(last + 1, 0, k); S.opt.homecol[k] = Math.max(0, Math.min(col, hzN() - hzSpan(k))); }
-S.opt.homec = o; optTouch(); save(); render();
+hzFix(); var o = HZS().homec.filter(function (z) { return z !== k; });
+if (tk) { var j = o.indexOf(tk); if (j < 0) j = o.length - 1; o.splice(after ? j + 1 : j, 0, k); HZS().homecol[k] = Math.min(HZS().homecol[tk], hzN() - hzSpan(k)); }
+else if (col !== undefined) { var last = -1; o.forEach(function (z, i) { var c = HZS().homecol[z], s = hzSpan(z); if (col >= c && col < c + s) last = i; }); o.splice(last + 1, 0, k); HZS().homecol[k] = Math.max(0, Math.min(col, hzN() - hzSpan(k))); }
+HZS().homec = o; optTouch(); save(); render();
 }
 document.addEventListener("mousedown", function (e) { var g = e.target.closest && e.target.closest(".hzg"); if (!g) return; var s = g.closest("[data-hzk]"); if (s) s.setAttribute("draggable", "true"); });
 document.addEventListener("dragstart", function (e) {
@@ -13598,14 +13614,14 @@ if (!HZRS) return; var G = hzGeom(); if (!G) return;
 var s = Math.max(1, Math.min(G.n, Math.round((e.clientX - HZRS.left + G.g) / (G.cw + G.g)))); if (s !== HZRS.s) { HZRS.s = s; hzMas(); }
 });
 document.addEventListener("pointerup", function () {
-if (!HZRS) return; var r = HZRS; HZRS = null; document.body.classList.remove("hzrsing"); hzFix(); r.s = Math.min(r.s, hzN()); S.opt.homespan[r.k] = r.s; S.opt.homecol[r.k] = Math.max(0, Math.min(r.c, hzN() - r.s)); optTouch(); save(); render();
+if (!HZRS) return; var r = HZRS; HZRS = null; document.body.classList.remove("hzrsing"); hzFix(); r.s = Math.min(r.s, hzN()); HZS().homespan[r.k] = r.s; HZS().homecol[r.k] = Math.max(0, Math.min(r.c, hzN() - r.s)); optTouch(); save(); render();
 });
 function hz4Act(a, el) {
 var x = el.dataset.x;
-if (a === "hzspan") { hzFix(); var n = hzN(), s = hzSpan(x) % n + 1; S.opt.homespan[x] = s; S.opt.homecol[x] = Math.min(S.opt.homecol[x], n - s); optTouch(); save(); render(); return true; }
-if (a === "hzcol") { hzFix(); S.opt.homecol[x] = Math.max(0, Math.min(hzN() - hzSpan(x), S.opt.homecol[x] + (+el.dataset.d || 0))); optTouch(); save(); render(); return true; }
-if (a === "hzncols") { var nn = +el.dataset.x; hzFix(); S.opt.homecols = nn; var used = []; for (var u = 0; u < nn; u++) used.push(0);
-S.opt.homec.forEach(function (z) { var sp = Math.min(S.opt.homespan[z] || 1, nn), best = 0; for (var c = 0; c <= nn - sp; c++) if (Math.max.apply(null, used.slice(c, c + sp)) < Math.max.apply(null, used.slice(best, best + sp))) best = c; S.opt.homespan[z] = sp; S.opt.homecol[z] = best; for (c = best; c < best + sp; c++) used[c] = Math.max.apply(null, used.slice(best, best + sp)) + 1; }); optTouch(); save(); render(); toast("Главная: " + nn + " " + plural(nn, ["колонка", "колонки", "колонок"]) + " · ширину карточек меняйте за уголок справа внизу"); return true; }
+if (a === "hzspan") { hzFix(); var n = hzN(), s = hzSpan(x) % n + 1; HZS().homespan[x] = s; HZS().homecol[x] = Math.min(HZS().homecol[x], n - s); optTouch(); save(); render(); return true; }
+if (a === "hzcol") { hzFix(); HZS().homecol[x] = Math.max(0, Math.min(hzN() - hzSpan(x), HZS().homecol[x] + (+el.dataset.d || 0))); optTouch(); save(); render(); return true; }
+if (a === "hzncols") { var nn = +el.dataset.x; hzFix(); HZS().homecols = nn; var used = []; for (var u = 0; u < nn; u++) used.push(0);
+HZS().homec.forEach(function (z) { var sp = Math.min(HZS().homespan[z] || 1, nn), best = 0; for (var c = 0; c <= nn - sp; c++) if (Math.max.apply(null, used.slice(c, c + sp)) < Math.max.apply(null, used.slice(best, best + sp))) best = c; HZS().homespan[z] = sp; HZS().homecol[z] = best; for (c = best; c < best + sp; c++) used[c] = Math.max.apply(null, used.slice(best, best + sp)) + 1; }); optTouch(); save(); render(); toast("Главная: " + nn + " " + plural(nn, ["колонка", "колонки", "колонок"]) + " · ширину карточек меняйте за уголок справа внизу"); return true; }
 return false;
 }
 function hzColsHTML() { var n = hzN(); return '<div class="r hzcolsel"><span class="muted">Колонок:</span><div class="seg">' + [1, 2, 3, 4].map(function (v) { return '<button type="button" data-a="hzncols" data-x="' + v + '" class="' + (n === v ? "on" : "") + '">' + v + "</button>"; }).join("") + '</div><span class="muted">на узком экране колонок станет меньше сами</span></div>'; }
@@ -14151,6 +14167,243 @@ case "wsumauto": S.opt.wsumtg = !S.opt.wsumtg; optTouch(); save(); toast(S.opt.w
 }
 return false;
 }
+var SPCBASE = ["home", "day", "task", "know", "life", "house"], SPCORIG = {}, SPCSIG = "";
+SPCBASE.forEach(function (k) { SPCORIG[k] = { z: SPZ[k].slice(), s: SPACES[k].slice(), r: (RAILE[k] || []).slice() }; });
+var SPCICONS = ["📚", "🎓", "💼", "🏗", "🎨", "🎸", "🏃", "🧘", "🍳", "✈", "🐶", "👶", "💻", "📈", "🧾", "🏡", "🌱", "❤", "🧠", "🎯", "🛠", "📷", "🎮", "⚽", "🚗", "🌍", "☕", "🎵", "✍", "🔬", "💡", "⭐", "🏠", "☀", "✅", "📝", "🌿", "🔑"];
+var SPCX = { homenav: "Главная и все разделы", projects: "Все проекты", notes: "Все заметки", tags: "Теги", filters: "Фильтры", flags: "Флажки", fav: "Избранное", boards: "Доски", recent: "Недавние", archtpl: "Архив и шаблоны" };
+var SPCDEF = {
+home: [{ t: "x", k: "homenav" }, { t: "h", n: "Избранное" }, { t: "x", k: "fav" }, { t: "h", n: "Доски" }, { t: "x", k: "boards" }, { t: "h", n: "Недавние" }, { t: "x", k: "recent" }],
+day: [{ t: "r", k: "inbox" }, { t: "r", k: "today" }, { t: "r", k: "plans" }, { t: "r", k: "cal" }, { t: "h", n: "Ритуалы" }, { t: "r", k: "morning" }, { t: "r", k: "shutdown" }, { t: "r", k: "weekly" }, { t: "h", n: "Ещё" }, { t: "r", k: "tbox" }, { t: "r", k: "dnote" }, { t: "r", k: "snoozed" }],
+task: [{ t: "h", n: "Проекты" }, { t: "x", k: "projects" }, { t: "h", n: "Списки" }, { t: "r", k: "all" }, { t: "r", k: "flag" }, { t: "r", k: "waiting" }, { t: "r", k: "someday" }, { t: "r", k: "done" }, { t: "h", n: "Виды" }, { t: "r", k: "sprint" }, { t: "r", k: "gantt" }, { t: "r", k: "matrix" }, { t: "h", n: "Теги" }, { t: "x", k: "tags" }, { t: "h", n: "Фильтры" }, { t: "x", k: "filters" }, { t: "x", k: "flags" }, { t: "h", n: "Ещё" }, { t: "x", k: "archtpl" }],
+know: [{ t: "x", k: "notes" }, { t: "h", n: "Ещё" }, { t: "r", k: "ngraph" }, { t: "r", k: "srs" }, { t: "r", k: "market" }],
+life: [{ t: "r", k: "habits" }, { t: "r", k: "goals" }, { t: "r", k: "health" }, { t: "r", k: "journal" }, { t: "h", n: "Обзор" }, { t: "r", k: "wheel" }, { t: "r", k: "people" }, { t: "r", k: "garden" }, { t: "r", k: "stats" }],
+house: [{ t: "r", k: "menu" }, { t: "r", k: "kitchen" }, { t: "r", k: "clean" }, { t: "r", k: "budget" }, { t: "h", n: "Бумаги и близкие" }, { t: "r", k: "docs" }, { t: "r", k: "shared" }]
+};
+var SPCTPL = {
+blank: ["Пустое", "⭐", [], ["spt"]],
+study: ["Учёба", "🎓", [{ t: "h", n: "Учёба" }, { t: "r", k: "goals" }, { t: "r", k: "srs" }, { t: "r", k: "notes" }, { t: "r", k: "tbox" }], ["spt", "now", "xp"]],
+work: ["Работа", "💼", [{ t: "h", n: "Работа" }, { t: "r", k: "today" }, { t: "r", k: "cal" }, { t: "r", k: "waiting" }, { t: "r", k: "sprint" }], ["spt", "now", "prog"]],
+hobby: ["Хобби", "🎨", [{ t: "r", k: "notes" }, { t: "r", k: "habits" }, { t: "r", k: "goals" }], ["spt", "hab"]],
+move: ["Ремонт или переезд", "🏗", [{ t: "r", k: "budget" }, { t: "r", k: "docs" }, { t: "r", k: "notes" }], ["spt", "pav"]],
+health: ["Здоровье", "❤", [{ t: "r", k: "health" }, { t: "r", k: "habits" }, { t: "r", k: "journal" }], ["well", "hab", "spt"]]
+};
+function spcData() { return S.opt.spc || { l: [], ov: {} }; }
+function spcList() { return (spcData().l || []).filter(function (x) { return x && x.id; }); }
+function spcGet(k) { return spcList().filter(function (x) { return x.id === k; })[0] || null; }
+function spcOv(k) { return (spcData().ov || {})[k] || null; }
+function spcAll() { return SPCBASE.concat(spcList().map(function (x) { return x.id; })); }
+function spcItems(k) { var c = spcGet(k); if (c) return c.items || []; var o = spcOv(k); return o && o.items ? o.items : null; }
+function spcName(k) { return SPZ[k] ? SPZ[k][1] : k; }
+function spcIcH(o, dflt) { return o && o.img ? '<img class="spcimg" src="' + esc(o.img) + '" alt="">' : esc((o && o.ic) || dflt || "⭐"); }
+function spcSave(fn) { var d = JSON.parse(JSON.stringify(spcData())); d.l = d.l || []; d.ov = d.ov || {}; fn(d); S.opt.spc = d; optTouch(); save(); spcSync(true); }
+function spcSync(force, noRail) {
+var d = spcData(), sig = JSON.stringify([(d.l || []).map(function (x) { return [x.id, x.n, x.ic, x.img]; }), Object.keys(d.ov || {}).map(function (k) { var o = d.ov[k]; return [k, o.n, o.ic, o.img]; })]);
+if (sig === SPCSIG && !force) return; SPCSIG = sig;
+SPCBASE.forEach(function (k) {
+var o = (d.ov || {})[k] || {}, O = SPCORIG[k], ic = o.img || o.ic ? spcIcH(o) : O.z[0], n = o.n || O.z[1];
+SPZ[k] = [ic, n, O.z[2]]; SPACES[k] = [ic, n, O.s[2]]; if (RAILE[k]) RAILE[k] = [ic, o.n ? esc(n) : O.r[1]];
+});
+Object.keys(SPZ).forEach(function (k) { if (SPCBASE.indexOf(k) < 0 && !spcGet(k)) { delete SPZ[k]; delete SPACES[k]; delete RAILE[k]; delete SPZK[k]; var i = RAILD.indexOf(k); if (i >= 0) RAILD.splice(i, 1); } });
+spcList().forEach(function (x) {
+var ic = spcIcH(x); SPZ[x.id] = [ic, x.n || "Пространство", "Своё пространство"]; SPACES[x.id] = [ic, x.n || "Пространство", "x-spaces"]; RAILE[x.id] = [ic, esc(x.n || "Пространство") + ": своё пространство"]; SPZK[x.id] = [];
+if (RAILD.indexOf(x.id) < 0) { var j = RAILD.indexOf("find"); RAILD.splice(j < 0 ? RAILD.length : j, 0, x.id); }
+});
+if (!noRail) try { railSync(); } catch (e) { /* полоса — при следующей перерисовке */ }
+}
+function spcItemHTML(it) {
+var B = SIDEB, o;
+if (it.t === "r") return spzLink(it.k);
+if (it.t === "p") { o = proj(it.id); if (!o) return ""; var ids = pdesc(o.id), n = tasks().filter(function (t) { return !t.done && ids.indexOf(t.pid) >= 0; }).length; return itemHTML("proj", o.id, "proj-" + o.id, '<span class="pic">' + piconH(o) + "</span>", o.n, n, {}); }
+if (it.t === "g") { o = goal(it.id); return o ? itemHTML("", "", "goal-" + o.id, '<span class="pic">' + esc(o.ic || "🎯") + "</span>", o.n, 0, {}) : ""; }
+if (it.t === "n") { o = note(it.id); return o ? itemHTML("", "", "note-" + o.id, '<span class="pic">' + esc(nIc(o)) + "</span>", nTitle(o), 0, {}) : ""; }
+if (it.t === "f") { o = filt(it.id); return o ? itemHTML("filter", o.id, "filter-" + o.id, ic("filter"), o.n, 0, {}) : ""; }
+if (it.t === "tag") { o = tagObj(it.id); return o ? itemHTML("tag", o.n, "tag-" + o.n, '<span class="pic">#</span>', o.n, tasks().filter(function (t) { return !t.done && (t.tags || []).indexOf(o.n) >= 0; }).length, {}) : ""; }
+if (it.t === "b") { o = board(it.id); return o ? itemHTML("board", o.id, "board-" + o.id, '<span class="pic">' + esc(o.ic || "▦") + "</span>", o.n, 0, {}) : ""; }
+if (it.t === "x") {
+if (it.k === "homenav") return itemHTML("", "", "home", '<span class="pic">🏠</span>', "Главная", 0, {}) + itemHTML("", "", "apps", '<span class="pic">▦</span>', "Все разделы", 0, {});
+if (it.k === "fav") return B.fav ? cpStrip(B.fav) : '<div class="none">Отметьте ★ проект, заметку, тег или ☆ раздел в «Все разделы».</div>';
+if (it.k === "recent") return recentItems(6).map(function (x) { return itemHTML("", "", x.h, '<span class="pic">' + x.ic + "</span>", x.t, 0, {}); }).join("");
+if (it.k === "flags") return flags().map(function (f) { var n = tasks().filter(function (t) { var q = !t.done && flagOf(t); return q && q.id === f.id; }).length; return itemHTML("", "", "flag-" + f.id, '<span class="pic">' + flagIc(f) + "</span>", f.n, n, {}); }).join("");
+if (it.k === "archtpl") return itemHTML("", "", "archive", ic("archive"), "Архив проектов", archList().length, {}) + itemHTML("", "", "templates", ic("tpl"), "Шаблоны проектов и задач", 0, {});
+return cpStrip(B[it.k] || "");
+}
+return "";
+}
+function spcBody(k, items) {
+var groups = [], cur = { n: null, parts: [] }; groups.push(cur);
+items.forEach(function (it) { if (it.t === "h") { cur = { n: it.n || "", parts: [] }; groups.push(cur); return; } var x = spcItemHTML(it); if (x) cur.parts.push(x); });
+var out = groups.filter(function (g) { return g.parts.length; }).map(function (g) {
+var body = "", nav = "";
+g.parts.forEach(function (x) { if (/^\s*<(nav|div)/.test(x)) { if (nav) { body += '<nav class="nav">' + nav + "</nav>"; nav = ""; } body += x; } else nav += x; });
+if (nav) body += '<nav class="nav">' + nav + "</nav>";
+return '<div class="spcg">' + (g.n !== null ? '<div class="cpg">' + esc(g.n) + "</div>" : "") + body + "</div>";
+}).join("");
+return out || '<div class="none">Пока пусто — «✎» вверху панели: добавьте разделы, проекты, заметки.</div>';
+}
+function spcHas(k, t, id) { return (spcItems(k) || []).some(function (it) { return it.t === t && (it.id === id || it.k === id); }); }
+function spcFocusSet(k) {
+var st = {}, g = {}; (spcItems(k) || []).forEach(function (it) {
+if (it.t === "p") pdesc(it.id).forEach(function (id) { st[id] = 1; });
+if (it.t === "g") { var o = goal(it.id); if (o) { g[o.id] = 1; goalPids(o).forEach(function (id) { st[id] = 1; }); } }
+});
+st.__g = g; return st;
+}
+function spcCanFocus(k) { return (spcItems(k) || []).some(function (it) { return it.t === "p" || it.t === "g"; }); }
+function spcDesk(k) {
+var d = S.opt.spc = S.opt.spc || { l: [], ov: {} }; d.l = d.l || []; d.ov = d.ov || {};
+var o = d.l.filter(function (x) { return x.id === k; })[0]; if (!o) o = d.ov[k] = d.ov[k] || {};
+if (!o.desk) o.desk = { homeh: HZC.map(function (x) { return x[0]; }), homecols: 2 };
+return o.desk;
+}
+function HZS() { return V === "sp" && ARG && ARG !== "home" && SPZ[ARG] ? spcDesk(ARG) : S.opt; }
+function spcDeskHTML(k) {
+var hid = hzHid(), keys = hzOrder().filter(function (x) { return hid.indexOf(x) < 0; });
+var h = keys.length || HZED ? '<div class="hzgrid' + (HZED ? " hzedit" : "") + '">' + hzLayout(keys) + "</div>" : "";
+if (HZED) h += hzEdBlock("Рабочий стол пространства");
+else if (!keys.length && spcGet(k)) h += '<p class="muted spcempty">Рабочий стол пуст. «✎ Рабочий стол» — добавьте карточки: задачи пространства, сейчас, прогресс, советник, привычки или любой виджет.</p>';
+return h;
+}
+function spcBar(k) {
+var foc = FOCUS === "sp:" + k, can = spcCanFocus(k);
+return '<div class="r spcbar"><button type="button" class="btn sm' + (foc ? " pri" : "") + '" data-a="spcfocus" data-x="' + esc(k) + '"' + (can || foc ? "" : ' title="Добавьте в пространство проекты или цели — тогда фокус покажет только их задачи"') + ">🎯 " + (foc ? "Выйти из фокуса" : "Фокус") + '</button><button type="button" class="btn sm" data-a="hzed">' + (HZED ? "✓ Готово" : "✎ Рабочий стол") + '</button><a class="btn sm" href="#spced-' + esc(k) + '">⚙ Настроить пространство</a></div>';
+}
+function vSpcPage(k) {
+var c = spcGet(k), h = head('<span class="spchi">' + SPZ[k][0] + "</span> " + esc(c.n || "Пространство"), "Своё пространство: меню слева, рабочий стол — здесь.");
+h += spcBar(k) + spcDeskHTML(k);
+h += '<h3 class="apph">В этом пространстве</h3><div class="spcmenu">' + spcBody(k, c.items || []) + "</div>";
+return h;
+}
+function spcTasksCard() {
+if (V !== "sp" || !SPZ[ARG] || !spcCanFocus(ARG)) return "";
+var fs = spcFocusSet(ARG), l = live(S.tasks).filter(function (t) { return !t.done && !t.canc && !t.del && (fs[t.pid] || (t.goal && fs.__g[t.goal])); }).sort(cmpBy("smart"));
+if (!l.length) return '<p class="muted">Открытых задач нет — всё сделано.</p>';
+return l.slice(0, 8).map(function (t) { return hzRow(t); }).join("") + (l.length > 8 ? '<a class="muted" href="#all" data-a="spcfocus" data-x="' + esc(ARG) + '">ещё ' + (l.length - 8) + " — в фокусе пространства</a>" : "");
+}
+var SPCD = null, SPCQ = "";
+function spcDraft(k) {
+if (SPCD && SPCD.k === k) return SPCD;
+var c = spcGet(k), o = spcOv(k) || {};
+if (k === "new") SPCD = { k: "new", n: "", ic: "⭐", img: "", items: [], desk: ["spt", "now"], tpl: "blank" };
+else if (c) SPCD = { k: k, n: c.n || "", ic: c.ic || "⭐", img: c.img || "", items: JSON.parse(JSON.stringify(c.items || [])) };
+else SPCD = { k: k, n: o.n || SPCORIG[k].z[1], ic: o.ic || SPCORIG[k].z[0], img: o.img || "", items: JSON.parse(JSON.stringify(o.items || SPCDEF[k] || [])), base: true };
+SPCQ = ""; return SPCD;
+}
+function spcItemLabel(it) {
+var D = appDef(), o;
+if (it.t === "h") return null;
+if (it.t === "r") return D[it.k] ? D[it.k][1] + " " + D[it.k][2] : it.k;
+if (it.t === "x") return "▤ " + (SPCX[it.k] || it.k) + " (список)";
+if (it.t === "p") return (o = proj(it.id)) ? "📁 " + o.n : "📁 (проект удалён)";
+if (it.t === "g") return (o = goal(it.id)) ? (o.ic || "🎯") + " " + o.n : "🎯 (цель удалена)";
+if (it.t === "n") return (o = note(it.id)) ? nIc(o) + " " + nTitle(o) : "📝 (заметка удалена)";
+if (it.t === "f") return (o = filt(it.id)) ? "⛃ " + o.n : "⛃ (фильтр удалён)";
+if (it.t === "tag") return "#" + it.id;
+if (it.t === "b") return (o = board(it.id)) ? (o.ic || "▦") + " " + o.n : "▦ (доска удалена)";
+return "";
+}
+function vSpcEd() {
+var k = ARG && (ARG === "new" || SPZ[ARG]) ? ARG : "new", D0 = spcDraft(k), isNew = k === "new", D = appDef();
+var h = head(isNew ? "Новое пространство" : "Настройка: " + esc(D0.n || spcName(k)), isNew ? "Название и значок, что будет в меню слева и на рабочем столе. Всё можно поменять потом." : "Меню слева и оформление пространства. Рабочий стол настраивается на странице пространства — «✎ Рабочий стол».");
+if (isNew) h += '<div class="spcsec"><div class="lbl">Заготовка</div><div class="chips">' + Object.keys(SPCTPL).map(function (t) { return '<button type="button" class="chip' + (D0.tpl === t ? " on" : "") + '" data-a="spctpl" data-x="' + t + '">' + SPCTPL[t][1] + " " + SPCTPL[t][0] + "</button>"; }).join("") + "</div></div>";
+h += '<div class="spcsec"><div class="lbl">Название и значок</div><div class="r"><span class="spcprev">' + spcIcH(D0) + '</span><input class="inp" id="spcn" type="text" maxlength="40" placeholder="Например: Учёба 1С" value="' + esc(D0.n) + '" style="flex:1 1 220px"></div>' +
+'<div class="spcics">' + SPCICONS.map(function (x) { return '<button type="button" class="' + (!D0.img && D0.ic === x ? "on" : "") + '" data-a="spcic" data-x="' + x + '">' + x + "</button>"; }).join("") + '<button type="button" class="spcimgb" data-a="spcimg" title="Своя картинка">🖼 своя картинка</button>' + (D0.img ? '<button type="button" class="spcimgb" data-a="spcimgx">✕ убрать картинку</button>' : "") + "</div></div>";
+h += '<div class="spcsec"><div class="lbl">Меню пространства <span class="muted">— порядок стрелками, «✕» — убрать</span></div><div class="spcitems">' + (D0.items.length ? D0.items.map(function (it, i) {
+var lab = spcItemLabel(it), ctl = '<span class="spcctl"><button type="button" class="ibtn" data-a="spcmv" data-x="' + i + '" data-d="-1" aria-label="Выше">↑</button><button type="button" class="ibtn" data-a="spcmv" data-x="' + i + '" data-d="1" aria-label="Ниже">↓</button><button type="button" class="ibtn" data-a="spcdel" data-x="' + i + '" aria-label="Убрать">✕</button></span>';
+return it.t === "h" ? '<div class="spcit spch"><input class="inp" data-spch="' + i + '" value="' + esc(it.n || "") + '" placeholder="Заголовок группы">' + ctl + "</div>" : '<div class="spcit"><span>' + esc(lab) + "</span>" + ctl + "</div>";
+}).join("") : '<p class="muted">Пусто — добавьте пункты ниже.</p>') + '</div><button type="button" class="btn sm" data-a="spcaddh">＋ Заголовок группы</button></div>';
+var chip = function (t, id, lab) { var on = D0.items.some(function (it) { return it.t === t && (it.id === id || it.k === id); }); return '<button type="button" class="chip' + (on ? " on" : "") + '" data-a="spcpick" data-t="' + t + '" data-x="' + esc(id) + '">' + (on ? "✓ " : "＋ ") + esc(lab) + "</button>"; };
+var sec = function (title, body, open) { return body ? '<details class="spcadd"' + (open ? " open" : "") + "><summary>" + title + '</summary><div class="chips">' + body + "</div></details>" : ""; };
+var pr = projects().filter(function (p) { return !isArch(p.id); });
+h += '<div class="spcsec"><div class="lbl">Добавить в меню</div>' +
+sec("Проекты", pr.map(function (p) { return chip("p", p.id, (p.parent ? "↳ " : "") + p.n); }).join(""), isNew) +
+sec("Цели", goals().filter(function (g) { return (g.st || "active") === "active"; }).map(function (g) { return chip("g", g.id, (g.ic || "🎯") + " " + g.n); }).join(""), isNew) +
+sec("Разделы приложения", Object.keys(D).filter(function (x) { return modOn(x); }).map(function (x) { return chip("r", x, D[x][1] + " " + D[x][2]); }).join(""), false) +
+'<details class="spcadd"' + (SPCQ ? " open" : "") + '><summary>Заметки</summary><input class="inp" id="spcq" type="search" placeholder="Найти заметку" value="' + esc(SPCQ) + '" style="margin:6px 0"><div class="chips" id="spcql">' + spcNotesChips() + "</div></details>" +
+sec("Фильтры", filters().map(function (f) { return chip("f", f.id, f.n); }).join(""), false) +
+sec("Теги", tags().map(function (g) { return chip("tag", g.n, "#" + g.n); }).join(""), false) +
+sec("Доски", boards().filter(function (b) { return !b.homeb; }).map(function (b) { return chip("b", b.id, (b.ic || "▦") + " " + b.n); }).join(""), false) +
+sec("Готовые списки", Object.keys(SPCX).map(function (x) { return chip("x", x, SPCX[x]); }).join(""), false) + "</div>";
+if (isNew) h += '<div class="spcsec"><div class="lbl">Рабочий стол — карточки</div><div class="chips">' + HZC.filter(function (c) { return c[0] !== "fst"; }).map(function (c) { var on = D0.desk.indexOf(c[0]) >= 0; return '<button type="button" class="chip' + (on ? " on" : "") + '" data-a="spcdk" data-x="' + c[0] + '">' + (on ? "✓ " : "＋ ") + c[1] + "</button>"; }).join("") + '</div><p class="muted">Потом на рабочий стол можно добавить любой виджет — как на досках.</p></div>';
+var hidR = railHid().indexOf(k) >= 0;
+if (!isNew) h += '<div class="spcsec"><label class="chk"><input type="checkbox" data-a="spcrail" data-x="' + esc(k) + '"' + (hidR ? "" : " checked") + "> Показывать на полосе слева</label></div>";
+h += '<div class="r spcfoot"><button type="button" class="btn pri" data-a="spcsave">' + (isNew ? "Создать пространство" : "Сохранить") + '</button><button type="button" class="btn" data-a="spccancel">Отмена</button>' +
+(D0.base && spcOv(k) ? '<button type="button" class="btn" data-a="spcreset">↺ Вернуть как было</button>' : "") + (!isNew && !D0.base ? '<button type="button" class="btn warn" data-a="spcrm">🗑 Удалить пространство</button>' : "") + "</div>";
+if (CONF === "spcrm") h += '<div class="confirm"><b>Удалить пространство «' + esc(D0.n) + '»?</b><span>Проекты, заметки и задачи останутся на месте — удаляется только само пространство.</span><div class="r"><button type="button" class="btn warn" data-a="spcrmy">Удалить</button><button type="button" class="btn" data-a="cancel">Отмена</button></div></div>';
+return h;
+}
+function spcNotesChips() {
+var D0 = SPCD; if (!D0) return ""; var q = SPCQ.toLowerCase().trim();
+var l = notes().filter(function (n) { return !q || nTitle(n).toLowerCase().indexOf(q) >= 0; }).sort(function (a, b) { return (b.upd || 0) - (a.upd || 0); }).slice(0, 30);
+return l.map(function (n) { var on = D0.items.some(function (it) { return it.t === "n" && it.id === n.id; }); return '<button type="button" class="chip' + (on ? " on" : "") + '" data-a="spcpick" data-t="n" data-x="' + n.id + '">' + (on ? "✓ " : "＋ ") + esc(nIc(n) + " " + nTitle(n).slice(0, 50)) + "</button>"; }).join("") || '<span class="muted">Ничего не найдено</span>';
+}
+document.addEventListener("input", function (e) {
+var t = e.target; if (!t || !SPCD) return;
+if (t.id === "spcn") SPCD.n = t.value.slice(0, 40);
+if (t.dataset && t.dataset.spch !== undefined) { var it = SPCD.items[+t.dataset.spch]; if (it) it.n = t.value.slice(0, 40); }
+if (t.id === "spcq") { SPCQ = t.value; var l = $("spcql"); if (l) l.innerHTML = spcNotesChips(); }
+});
+function spcPickImg() {
+var fi = document.createElement("input"); fi.type = "file"; fi.accept = "image/*"; fi.style.display = "none"; document.body.appendChild(fi);
+fi.addEventListener("change", function () {
+var f = fi.files && fi.files[0]; fi.remove(); if (!f) return; var im = new Image(), u = URL.createObjectURL(f);
+im.onload = function () { var S0 = 128, cv = document.createElement("canvas"), k = Math.max(S0 / im.width, S0 / im.height); cv.width = S0; cv.height = S0; cv.getContext("2d").drawImage(im, (S0 - im.width * k) / 2, (S0 - im.height * k) / 2, im.width * k, im.height * k); URL.revokeObjectURL(u); if (SPCD) { SPCD.img = cv.toDataURL("image/jpeg", .85); render(); } };
+im.onerror = function () { URL.revokeObjectURL(u); toast("Не удалось открыть картинку"); }; im.src = u;
+}); fi.click();
+}
+function spcToggleItem(k, t, id) {
+if (!SPZ[k]) return; var base = SPCBASE.indexOf(k) >= 0;
+spcSave(function (d) {
+var list; if (base) { d.ov[k] = d.ov[k] || {}; list = d.ov[k].items = d.ov[k].items || JSON.parse(JSON.stringify(SPCDEF[k] || [])); } else { var c = d.l.filter(function (x) { return x.id === k; })[0]; if (!c) return; list = c.items = c.items || []; }
+var i = -1; list.forEach(function (it, j) { if (it.t === t && (it.id === id || it.k === id)) i = j; });
+if (i >= 0) { list.splice(i, 1); toast("Убрано из «" + spcName(k) + "»"); } else { list.push(t === "r" || t === "x" ? { t: t, k: id } : { t: t, id: id }); toast("Добавлено в «" + spcName(k) + "»"); }
+});
+render();
+}
+function spcMenu(t, id) { return { i: "🪐", l: "В пространство", sub: spcAll().filter(function (k) { return k !== "home"; }).map(function (k) { return { c: "spcadd:" + k, i: spcHas(k, t, id) ? "✓" : "", l: spcName(k).replace(/<[^>]+>/g, "") }; }).concat(["-", { c: "spcnew", i: "＋", l: "Новое пространство…" }]) }; }
+function spcAct(a, el) {
+var x = el.dataset.x, D0 = SPCD;
+switch (a) {
+case "spcnew": SPCD = null; go("spced-new"); return true;
+case "spced": go("spced-" + (x || cpSpace())); return true;
+case "spcfocus": setFocus(FOCUS === "sp:" + x ? "" : "sp:" + x); return true;
+case "spcrail": var hl = railHid().slice(), hi = hl.indexOf(x); if (hi >= 0) hl.splice(hi, 1); else hl.push(x); S.opt.rail2h = hl; optTouch(); save(); railSync(); return true;
+}
+if (!D0) return false;
+switch (a) {
+case "spctpl": var T = SPCTPL[x]; if (!T) return true; D0.tpl = x; if (!D0.n || Object.keys(SPCTPL).some(function (q) { return SPCTPL[q][0] === D0.n; })) D0.n = x === "blank" ? "" : T[0]; D0.ic = T[1]; D0.img = ""; D0.items = JSON.parse(JSON.stringify(T[2])); D0.desk = T[3].slice(); render(); return true;
+case "spcic": D0.ic = x; D0.img = ""; render(); return true;
+case "spcimg": spcPickImg(); return true;
+case "spcimgx": D0.img = ""; render(); return true;
+case "spcmv": var i = +x, j = i + (+el.dataset.d); if (j < 0 || j >= D0.items.length) return true; var it = D0.items.splice(i, 1)[0]; D0.items.splice(j, 0, it); render(); return true;
+case "spcdel": D0.items.splice(+x, 1); render(); return true;
+case "spcaddh": D0.items.push({ t: "h", n: "Группа" }); render(); return true;
+case "spcpick": var t = el.dataset.t, f = -1; D0.items.forEach(function (q, n) { if (q.t === t && (q.id === x || q.k === x)) f = n; }); if (f >= 0) D0.items.splice(f, 1); else D0.items.push(t === "r" || t === "x" ? { t: t, k: x } : { t: t, id: x }); render(); return true;
+case "spcdk": var di = D0.desk.indexOf(x); if (di >= 0) D0.desk.splice(di, 1); else D0.desk.push(x); render(); return true;
+case "spccancel": var back = D0.k === "new" ? "home" : spzHref(D0.k); SPCD = null; go(back); return true;
+case "spcreset": var rk = D0.k; spcSave(function (d) { delete d.ov[rk]; }); SPCD = null; toast("Пространство — как было"); go(spzHref(rk)); return true;
+case "spcrm": CONF = "spcrm"; render(); return true;
+case "spcrmy": var dk = D0.k; spcSave(function (d) { d.l = d.l.filter(function (q) { return q.id !== dk; }); }); if (FOCUS === "sp:" + dk) setFocus(""); if (LS.get("zd-space") === dk) cpSet("day"); CONF = null; SPCD = null; toast("Пространство удалено"); go("home"); return true;
+case "spcsave":
+var nm = String(D0.n || "").trim(); if (!nm && !D0.base) { toast("Назовите пространство"); var ni = $("spcn"); if (ni) ni.focus(); return true; }
+var sk = D0.k;
+if (sk === "new") {
+sk = "c" + uid().replace(/[^a-z0-9]/gi, "").toLowerCase().slice(0, 9);
+var dsk = D0.desk.slice(); if (dsk.indexOf("spt") < 0 && D0.items.some(function (q) { return q.t === "p" || q.t === "g"; })) dsk.unshift("spt");
+spcSave(function (d) { d.l.push({ id: sk, n: nm, ic: D0.ic, img: D0.img, items: D0.items, desk: { homec: dsk, homeh: HZC.map(function (c) { return c[0]; }).filter(function (c) { return dsk.indexOf(c) < 0; }), homecols: 2 } }); });
+toast("Пространство «" + nm + "» создано — значок на полосе слева");
+} else if (D0.base) {
+var O = SPCORIG[sk].z; spcSave(function (d) { var o = d.ov[sk] = d.ov[sk] || {}; o.items = D0.items; if (nm && nm !== O[1]) o.n = nm; else delete o.n; if (D0.img) o.img = D0.img; else delete o.img; if (D0.ic && D0.ic !== O[0]) o.ic = D0.ic; else delete o.ic; });
+toast("Сохранено");
+} else {
+spcSave(function (d) { var c = d.l.filter(function (q) { return q.id === sk; })[0]; if (c) { c.n = nm; c.ic = D0.ic; c.img = D0.img; c.items = D0.items; } });
+toast("Сохранено");
+}
+SPCD = null; cpSet(sk); LS.set("zd-sideoff", "0"); go(spzHref(sk)); return true;
+}
+return false;
+}
+function spcCovers(k, v, a) { var t = { proj: "p", goal: "g", note: "n", filter: "f", tag: "tag", board: "b" }[v]; return t ? spcHas(k, t, a) : !!a ? false : spcHas(k, "r", v); }
+spcSync(true, true);
 function chalsWidget() {
 var h = "", t0 = today0(), any = false;
 if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
@@ -14753,7 +15006,7 @@ function iv(id, def) { return INPV[id] !== undefined && INPV[id] !== "" ? INPV[i
 function coarse() { try { return window.matchMedia("(pointer: coarse)").matches; } catch (er) { return false; } }
 document.addEventListener("change", function (e) { var t = e.target; if (t && (t.tagName === "SELECT" || t.type === "color" || (/^(date|time|datetime-local)$/.test(t.type || "") && coarse()))) try { t.blur(); } catch (er) { /* поле уже убрано */ } }, true);
 document.addEventListener("focusout", function (e) { if (!RHOLD || e.target !== RHOLD) return; RHOLD = null; if (PDOWN) return; /* ушли из поля нажатием — догонит отпускание кнопки мыши (pUp), чтобы само нажатие не потерялось */ setTimeout(function () { var a = document.activeElement; if (a && (a.tagName === "SELECT" || /^(date|time|datetime-local|month|week|color)$/.test(a.type || ""))) return; if (PEND) { PEND = false; render(); if (OPEN) renderPanel(); } }, 30); }, true);
-function render() { nPrSync(); try { dlSnap(); } catch (er) { /* не мешает */ }
+function render() { nPrSync(); try { spcSync(); } catch (er) { /* пространства не мешают */ } try { dlSnap(); } catch (er) { /* не мешает */ }
 if (BOOT.done) bootAutos();
 try { navAuto(); } catch (er) { /* навигация не мешает */ }
 try { uxAuto(); } catch (er) { /* удобства не мешают */ }
@@ -14856,7 +15109,7 @@ try { ctxShowBtn(); if (NOW) renderNow(); } catch (er) { /* не мешает */
 try { enShowBtn(); fsBtn(); var xs = $("xpSlot"); if (xs) xs.innerHTML = xpBadge(); var sw = $("shrwrap"); if (!sw) { sw = document.createElement("div"); sw.id = "shrwrap"; document.body.appendChild(sw); } setHTML(sw, shareHTML()); } catch (er) { /* не мешает */ }
 setHTML($("side"), sideHTML());
 try { setHTML($("bnav"), bnavHTML()); document.documentElement.classList.toggle("nohq", !!S.opt.noHq); } catch (er) { /* не мешает */ }
-var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, rhave: vRhave, kitchen: vKitchen, rpt: vRpt, ngraph: vNGraph, srs: vSrs, weekly: vWeekly, health: vHealth, people: vPeople, docs: vDocs, apps: vApps, news: vNews, market: vMarket, snoozed: vSnoozed, home: vHome, sp: vSpz, mods: vMods, morning: vDaily, shutdown: vShutdown, conflicts: vConflicts, wheel: function () { STTAB = "bal"; LS.set("zd-sttab", "bal"); setTimeout(function () { try { history.replaceState(null, "", "#stats"); } catch (er) { /* ок */ } route(); }, 0); return ""; }, dnote: vDnote, tbox: vTbox, recap: vRecap, garden: vGarden, shared: vShared, sh: vSh, clean: vClean, budget: vBudget, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
+var f = { inbox: vInbox, today: vToday, plans: vPlans, someday: vSomeday, share: vShare, notes: vNotes, nsec: vNotes, ntag: vNotes, note: vNote, flag: vFlag, all: vAll, done: vDone, tarch: vTArch, report: vReport, menu: function () { if (!ARG) return vMenu(); var mm = menuObj(ARG); return mm ? vMenuPage(mm) : '<p class="empty">Меню не найдено. <a href="#menu">К списку меню</a></p>'; }, menunew: vMenuNew, recipes: vRecipes, rhave: vRhave, kitchen: vKitchen, rpt: vRpt, ngraph: vNGraph, srs: vSrs, weekly: vWeekly, health: vHealth, people: vPeople, docs: vDocs, apps: vApps, news: vNews, market: vMarket, snoozed: vSnoozed, home: vHome, spced: vSpcEd, sp: vSpz, mods: vMods, morning: vDaily, shutdown: vShutdown, conflicts: vConflicts, wheel: function () { STTAB = "bal"; LS.set("zd-sttab", "bal"); setTimeout(function () { try { history.replaceState(null, "", "#stats"); } catch (er) { /* ок */ } route(); }, 0); return ""; }, dnote: vDnote, tbox: vTbox, recap: vRecap, garden: vGarden, shared: vShared, sh: vSh, clean: vClean, budget: vBudget, recipe: function () { foodSeed(); var rr = recipe(ARG); return rr ? vRecipe(rr) : '<p class="empty">Рецепт не найден. <a href="#recipes">Все рецепты</a></p>'; }, prods: vProds, rimp: vRimp, shop: function () { var ms = menuObj(ARG); return ms ? vShop(ms) : '<p class="empty">Меню не найдено.</p>'; }, proj: vProj, tag: vTag, filter: vFilter, sprint: vSprint, sprints: vSprints, trash: vTrash, cal: vCal, gantt: vGantt, archive: vArchive, templates: vTpls, matrix: vMatrix, habits: vHabits, stats: vStats, board: vBoard, waiting: vWaiting, journal: vJournal, goals: vGoals, goal: vGoal, daily: vDaily, search: vSearch, settings: vSettingsTabs, help: vHelpTabs }[V] || vToday;
 var cb = $("cbody"), keepScroll = cb && V === "cal" ? cb.scrollTop : null;
 $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "templates");
 try { ptTouch(location.hash.slice(1) || "today"); } catch (er) { /* вкладки не мешают */ }
@@ -15486,6 +15739,7 @@ if (a && dzAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && bavAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && pavAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && v204Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+if (a && spcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -16822,6 +17076,7 @@ if (k === "proj") items.push(["subproj", "＋ Подпроект"], { c: "focus"
 if (k === "tag") items.push({ i: "↳", l: "Вложить в тег", sub: [{ c: "tp:", i: o.par ? "" : "✓", l: "— верхний уровень —" }].concat(tags().filter(function (x) { return tagDesc(o.n).indexOf(x.n) < 0; }).map(function (x) { return { c: "tp:" + x.n, i: o.par === x.n ? "✓" : "", l: "#" + x.n }; })) });
 if (k === "proj" && CLIP && task(CLIP.id)) items.push(["pasteproj", "📋 Вставить задачу сюда"]);
 items.push(pinMenu()); if (k === "proj") items.push({ i: "🎯", l: "Цель", sub: goalMenu(o.goal || "", "pg:") }, pinMenu("progress"), { c: "pboard", i: "▦", l: "Доска проекта (по шаблону)" }, { c: "pmap", i: "🧠", l: "Карта мыслей проекта" });
+items.push(spcMenu(k === "proj" ? "p" : k === "filter" ? "f" : "tag", id));
 items.push(["fav", o.fav ? "☆ Убрать из избранного" : "★ В избранное"], "-", ["del", "🗑 Удалить в корзину", 1], "-", { c: "help:" + (k === "proj" ? "tree" : k === "tag" ? "tags" : "filters"), i: "?", l: "Справка" });
 ctxShow(e.clientX, e.clientY, items, { k: k, id: id });
 return;
@@ -16914,6 +17169,8 @@ if (k === "flagcol") { var fcc = flagObj(id); if (fcc) { fcc.c = +c.slice(2); to
 if (k === "newp") { if (c === "blank") { var np2 = newProject("Новый проект", ""); save(); RN = { where: "page", k: "proj", id: np2.id }; go("proj-" + np2.id); } else tplUse(c.slice(4)); return; }
 if (k === "list") { if (c === "open") go(id); else if (c === "hide") { setListHidden(id, true); toast("«" + LISTN[id] + "» скрыто — вернуть: «Настройки» → «Пункты «Списков»»"); } else go("settings-lists"); return; }
 if (k === "ai") { var ta = task(id); if (c === "cfg") go("settings-ai"); else if (ta) aiTask(ta, c); return; }
+if (c.indexOf("spcadd:") === 0) { spcToggleItem(c.slice(7), k === "proj" ? "p" : k === "filter" ? "f" : "tag", id); return; }
+if (c === "spcnew") { SPCD = null; go("spced-new"); return; }
 var href = (k === "proj" ? "proj-" : k === "tag" ? "tag-" : "filter-") + id;
 if (c === "open") go(href);
 else if (c === "rename") { RN = { where: "side", k: k, id: id }; render(); }
