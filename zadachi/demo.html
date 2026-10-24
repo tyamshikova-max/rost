@@ -744,6 +744,9 @@ body.hzrsing, body.hzrsing * { cursor: ew-resize !important; user-select: none !
 #dwrbox { position: fixed; inset: 0; z-index: 56; background: var(--bg); background-image: var(--wall, none); overflow-y: auto; padding: calc(12px + env(safe-area-inset-top, 0px)) 18px 40px }
 .dwrtop { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; max-width: 820px; margin: 0 auto 14px } .dwrpage { max-width: 820px; margin: 0 auto } #dwrbox .drte { min-height: 72vh; padding: 28px 34px 28px 46px; font-size: calc(17px * var(--fs)); line-height: 1.75; border-radius: 18px; background: var(--pop, var(--panel)) } #dwrbox .drte.empty::before { left: 46px; top: 28px }
 .drte img { max-width: 100%; border-radius: 10px } .jtags { margin: 0 0 8px } .jdh .jedit { margin-left: auto }
+.bav { margin: 0 0 12px } .bavh { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 6px } .bavt { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-top: 1px dashed var(--line) } .bavt > div { flex: 1; min-width: 0; display: grid; gap: 2px } .bavt small { color: var(--muted); font-size: calc(13px * var(--fs)) } .bavi { font-size: 20px; line-height: 1.2; flex: none; width: 26px; text-align: center } .bava { display: inline-flex; gap: 4px; align-items: center; flex: none }
+.bavt.warn b { color: var(--warn, #c0392b) } .bavt.good b { color: var(--acc) } .bavmore { margin-top: 6px } .bavconf, .bavai { display: grid; gap: 6px; padding: 10px 12px; margin: 6px 0; border-radius: 12px; background: color-mix(in srgb, var(--acc) 7%, transparent) } .bavconf span { color: var(--muted); font-size: calc(13px * var(--fs)) } .bavai p { margin: 0 } .bavaih { display: flex; align-items: center } .bavaih b { flex: 1 }
+@media (max-width: 600px) { .bavt { flex-wrap: wrap } .bava { margin-left: 36px } }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -8200,7 +8203,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-188";
+var APPV = "zd-app-2026-10-16-189";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -12814,7 +12817,8 @@ if (BULAST) h += '<div class="bulast"><b>Обновлено: ' + esc(BULAST.what
 h += '<div class="htabs butabs">' + [["week", "Неделя"], ["per", "Период"], ["regs", "Регулярные платежи"], ["debts", "Долги"], ["wish", "Желания"], ["bank", "🏦 Выписка"], ["fch", fcOpt().on ? "💰 Челлендж" : "Челлендж"]].map(function (x) { return '<button type="button" class="tb' + (tab === x[0] ? " on" : "") + '" data-a="butab" data-x="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>";
 if (tab === "bank") return h + bankHTML();
 if (tab === "debts") return h + fcDebtsHTML(); if (tab === "wish") return h + fcWishHTML(); if (tab === "fch") return h + fcHTML();
-if (!buPers().length && tab !== "regs") return h + (tab === "week" && live(S.bregs || []).some(bregOk) ? buRegsWeekHTML(monday(today0()), true) : "") + '<div class="card bunone"><b>Данных пока нет.</b><p class="muted">1. Выберите файл «Финансы … .xlsx» (кнопка выше или «Настройки» → «Бюджет»).<br>2. «⟳ Обновить из файла» → текущий период.<br>Читается только выбранное: период (лист «Ноябрь 2026» = 11.10–10.11), несколько периодов или одна неделя. Файл открывается прямо в браузере на этом компьютере и никуда не отправляется — в «Задачи» попадают только суммы по дням и статьям.</p></div>';
+if (!buPers().length && tab !== "regs") return h + (tab === "week" ? bavHTML() : "") + (tab === "week" && live(S.bregs || []).some(bregOk) ? buRegsWeekHTML(monday(today0()), true) : "") + '<div class="card bunone"><b>Данных пока нет.</b><p class="muted">1. Выберите файл «Финансы … .xlsx» (кнопка выше или «Настройки» → «Бюджет»).<br>2. «⟳ Обновить из файла» → текущий период.<br>Читается только выбранное: период (лист «Ноябрь 2026» = 11.10–10.11), несколько периодов или одна неделя. Файл открывается прямо в браузере на этом компьютере и никуда не отправляется — в «Задачи» попадают только суммы по дням и статьям.</p></div>';
+if (tab === "per" || tab === "week") h += bavHTML();
 if (tab === "per") h += buPerHTML(); else if (tab === "regs") h += buRegsHTML(); else h += buWeekHTML();
 setTimeout(buPeek, 0);
 return h;
@@ -17045,6 +17049,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["189", "Советник бюджета", ["«Бюджет» → «Неделя» и «Период»: карточка «🧭 Советник» — 3–5 советов по вашим цифрам: темп недели, прогноз периода, статьи с перерасходом 3 недели подряд, сравнение с прошлым периодом, мелкие частые траты из выписки, дорогие дни недели, платежи без видимой оплаты, подписки и продления, «остывшие» желания, проценты по долгам и порядок погашения, похвала за недели в лимите.", "Считается прямо в приложении — данные никуда не уходят. «✕» — спрятать совет на месяц; у части советов есть действие (задача, переход). Важные советы — в 🔔 раз в неделю.", "«✨ Спросить ИИ» (если подключён ИИ) — после подтверждения: уходят только итоги по статьям, без описаний операций."]],
 ["188", "«День за днём» и дневник", ["Карточки «День за днём» настраиваются, как на главной: перетаскивание за ⠿, 1–4 колонки, ширина за уголок, скрыть и вернуть — «✎ Настроить страницу». Новые карточки: «💰 Траты дня» и «📜 В этот день» (запись год, месяц и неделю назад).", "Дневник крупнее, во всю ширину; «⛶» — писать на весь экран (настроение, счётчик слов, Esc — свернуть).", "Картинки в дневнике: вставьте из буфера, перетащите или 🖼 — сохраняются на ваш Яндекс Диск.", "Вопросы дня под пустой записью, шаблоны записей («3 хорошие вещи», «Рефлексия дня», «Утренние страницы», «Благодарности») — кнопкой «▤ Шаблон…» и через «/».", "🎤 — надиктовать запись; счётчик слов и «подряд N дней».", "«Дневник»: у прошлых дней — «✎ Править», над списком — #теги из записей для быстрого поиска."]],
 ["187", "Дневник — как описание задачи", ["Запись дня в «День за днём», «Дневнике» и «Завершении дня» — тот же редактор, что у описания задачи: «/» — заголовки, чек-листы, списки, цитаты, таблицы, спойлеры; выделите текст — жирный, курсив, ссылка; @ — ссылка на задачу или заметку.", "Прошлые записи в «Дневнике» показываются с оформлением.", "«Бюджет» → «Желания»: набранное название и цена не пропадают, если страница обновилась (например, после синхронизации); Enter — сразу «В список»."]],
 ["186", "Доходы — с процентом", ["«Бюджет» → «Период» → «Доходы — факт и план»: у каждого источника дохода — процент выполнения плана в скобках, как у расходов."]],
@@ -17182,6 +17187,7 @@ try { var ib = inboxList().length; if (ib >= 10) add("inb:" + dk, "📥", "Во 
 try { if (new Date(now).getHours() >= 18) { var hs = habits().filter(function (h) { return !h.arch && hDue(h, t0) && !hDone(h, t0); }); if (hs.length) add("hab:" + dk, "🌱", "Привычки: осталось " + hs.length, hs.slice(0, 3).map(function (h) { return h.n || ""; }).join(" · "), "habits", t0 + 18 * 3600000); } } catch (e) { /* ок */ }
 try { if (new Date(now).getHours() >= 20) { var hr = dayRecOf(dk), hk = hr && hr.h ? Object.keys(hr.h).filter(function (f) { return f !== "at"; }).length : 0; if (!hk) add("hl:" + dk, "🌿", "Отметьте самочувствие за сегодня", "20 секунд", "health", t0 + 20 * 3600000); } } catch (e) { /* ок */ }
 try { if (buPers().length) { var T = buWeek(monday(t0)).tot; if (T.lim > 0 && T.fact > T.lim) add("bu:" + dKey(monday(t0)), "💰", "Бюджет недели превышен", buRub(T.fact) + " из " + buRub(T.lim), "budget", t0); } } catch (e) { /* ок */ }
+try { var bv = bavTips().filter(function (x) { return x.lvl === "warn"; }); if (bv.length) add("bav:" + dKey(monday(t0)) + ":" + bv.length, "🧭", "Советник бюджета: " + bv.length + " " + plural(bv.length, ["важный совет", "важных совета", "важных советов"]), bv[0].t, "budget", t0); } catch (e) { /* ок */ }
 try { var dq = dayQuota(); if (dq) add("dq:" + dk, "⏱", dq.t, dq.s, "today", t0); } catch (e) { /* ок */ }
 try { var hr0 = new Date(now).getHours(); if (hr0 >= 6 && hr0 < 12 && !ritDone("morning")) add("mr:" + dk, "🌅", "Утренний план на 2 минуты", "хвосты, главное, время", "morning", t0 + 6 * 3600000); if (hr0 >= 18 && !ritDone("shutdown")) add("sd:" + dk, "🌙", "Завершить день", "сделанное, хвосты, дневник, завтра", "shutdown", t0 + 18 * 3600000); } catch (e) { /* ок */ }
 try { var cf = confList(); if (cf.length) add("cf:" + cf[0].at, "⚠", "Конфликты синхронизации: " + cf.length, "запись менялась на двух устройствах — посмотрите", "conflicts", cf[0].at); } catch (e) { /* ок */ }
@@ -18737,6 +18743,93 @@ case "jtag": JQ = JQ.toLowerCase() === x ? "" : x; render(); return true;
 return false;
 }
 function dzCtx(k, id, c) { if (k === "dztpl") { if (DZT[c]) setTimeout(function () { dzInsert(DZT[c][1]); }, 0); return true; } return false; }
+var BAVALL = false, BAVCONF = false, BAVAI = null, BAVAIL = false;
+function bavHid() { var m = S.opt.bavx || {}, now = Date.now(), o = {}; Object.keys(m).forEach(function (k) { if (m[k] > now) o[k] = m[k]; }); return o; }
+function bavTips() {
+var L = [], t0 = today0(), add = function (id, lvl, ic, t, d, act, w) { L.push({ id: id, lvl: lvl, ic: ic, t: t, d: d || "", act: act || null, w: w || (lvl === "warn" ? 3 : lvl === "good" ? 1 : 2) }); };
+var pid = buPid(t0), P = buPer(pid), mon = monday(t0);
+try { var w = buWeek(mon); if (!w.miss.length && w.tot.lim > 0) { var T = w.tot, mark = (7 - w.dl + (w.dl ? 0.5 : 0)) / 7, sh = T.fact / T.lim;
+if (T.fact > T.lim) add("wk-over:" + dKey(mon), "warn", "🔥", "Лимит недели превышен на " + buRub(T.fact - T.lim), "Потрачено " + buRub(T.fact) + " из " + buRub(T.lim) + ". Перерасход перенесётся на следующую неделю — её лимит станет меньше.", null, 5);
+else if (sh > mark + 0.1 && w.dl > 0) add("wk-fast:" + dKey(mon), "warn", "⏩", "Траты недели идут быстрее графика на " + Math.round((sh - mark) * 100) + "%", "Чтобы уложиться, до воскресенья — не больше " + buRub(Math.max(0, T.perDay)) + " в день.", null, 4);
+else if (w.dl <= 3 && T.left > 0) add("wk-ok:" + dKey(mon), "good", "✅", "Неделя идёт в лимите", "Остаток гибких трат — " + buRub(T.left) + (w.dl ? ", это ≈ " + buRub(T.perDay) + " в день до воскресенья" : "") + ".");
+} } catch (e) { /* неделя не мешает */ }
+var r = null; try { if (P) { r = buPeriod(P); if (r.el >= 3 && r.el < r.pd) {
+var fc = r.rows.reduce(function (s, x) { return s + (x.k === "flex" ? (x.fc || 0) : x.k === "pay" ? Math.max(x.fact, x.plan) : x.fact); }, 0), inc = Math.max(r.inc.fact, r.inc.plan), bal = inc - fc;
+if (fc > r.exp.plan * 1.03 && fc - r.exp.plan > 1000) add("per-fc:" + pid, "warn", "📉", "В том же темпе расходы периода ≈ " + buRub(fc) + " при плане " + buRub(r.exp.plan), "Это на " + buRub(fc - r.exp.plan) + " больше. Больше всего «тянут»: " + r.rows.filter(function (x) { return x.k === "flex" && x.fc > x.plan * 1.05; }).sort(function (a, b) { return (b.fc - b.plan) - (a.fc - a.plan); }).slice(0, 3).map(function (x) { return x.c + " (+" + buRub(x.fc - x.plan) + ")"; }).join(", ") + ".", null, 4);
+if (inc > 0) add("per-bal:" + pid, bal < 0 ? "warn" : "info", bal < 0 ? "⚠" : "🧮", bal < 0 ? "До конца периода может не хватить ≈ " + buRub(-bal) : "К концу периода останется ≈ " + buRub(bal), "Доходы " + buRub(inc) + " (план или факт, что больше) − прогноз расходов " + buRub(fc) + ".", null, bal < 0 ? 5 : 1);
+} } } catch (e) { /* период не мешает */ }
+try { var wk = live(S.bwk || []).sort(function (a, b) { return a.id < b.id ? 1 : -1; }).slice(0, 3); if (wk.length === 3) { var cats = {}; wk.forEach(function (x) { Object.keys(x.lim || {}).forEach(function (c) { cats[c] = 1; }); });
+Object.keys(cats).forEach(function (c) { var over = wk.filter(function (x) { return (+x.fact[c] || 0) > (+x.lim[c] || 0) * 1.05 + 100; }); if (over.length < 3) return; var avg = over.reduce(function (s, x) { return s + (+x.fact[c] || 0) - (+x.lim[c] || 0); }, 0) / 3;
+add("chr:" + c + ":" + wk[0].id, "warn", "🔁", "«" + c + "» — выше лимита 3 недели подряд", "В среднем на " + buRub(avg) + " в неделю. Либо лимит нереалистичный — поднять до настоящих трат, либо нужна цель урезать.", { l: "✓ Задача: пересмотреть", task: "Пересмотреть лимит «" + c + "» в файле бюджета (перерасход ≈ " + Math.round(avg) + " ₽ в неделю)" }, 4); });
+var good = 0; live(S.bwk || []).sort(function (a, b) { return a.id < b.id ? 1 : -1; }).some(function (x) { var f = buSum(x.fact || {}), l = buSum(x.lim || {}); if (l > 0 && f <= l) { good++; return false; } return true; });
+if (good >= 2) add("streak:" + good, "good", "🏆", good + " " + plural(good, ["неделя", "недели", "недель"]) + " подряд в лимите", "Так держать — гибкие траты под контролем.");
+} } catch (e) { /* итоги недель не мешают */ }
+try { if (P && r && r.el >= 5) { var prevId = buPid(addDays(P.from, -1)), PP = buPer(prevId); if (PP) { var to = addDays(PP.from, r.el - 1);
+r.rows.filter(function (x) { return x.k === "flex"; }).forEach(function (x) { var was = buFact(PP, x.c, dKey(PP.from), dKey(to)); if (was < 500 && x.fact < 500) return; var d = x.fact - was;
+if (d > 1000 && x.fact > was * 1.3) add("cmp:" + x.c + ":" + pid, "info", "📈", "«" + x.c + "»: +" + Math.round((x.fact / Math.max(1, was) - 1) * 100) + "% к тому же времени прошлого периода", buRub(x.fact) + " против " + buRub(was) + " за первые " + r.el + " " + plural(r.el, ["день", "дня", "дней"]) + ".", null, 2);
+else if (d < -1000 && x.fact < was * 0.8) add("cmpg:" + x.c + ":" + pid, "good", "📉", "«" + x.c + "»: −" + Math.round((1 - x.fact / Math.max(1, was)) * 100) + "% к прошлому периоду", "Экономия " + buRub(-d) + " за то же время.");
+}); } } } catch (e) { /* сравнение не мешает */ }
+try { if (BKOPS && BKOPS.length) { var since = addDays(t0, -30), sm = BKOPS.filter(function (o) { return o.d >= since && o.a < 0 && -o.a <= 300; }); if (sm.length >= 10) { var byc = {}; sm.forEach(function (o) { byc[o.c] = (byc[o.c] || 0) + 1; });
+add("small:" + dKey(t0), "info", "☕", sm.length + " покупок до 300 ₽ за 30 дней — на " + buRub(sm.reduce(function (s, o) { return s - o.a; }, 0)), "Чаще всего: " + Object.keys(byc).sort(function (a, b) { return byc[b] - byc[a]; }).slice(0, 3).map(function (c) { return c + " (" + byc[c] + ")"; }).join(", ") + ". Мелочи незаметно складываются в заметную сумму.", null, 2); } } else if (BKOPS === null) bkLoad().then(function () { if (V === "budget") render(); }); } catch (e) { /* выписка не мешает */ }
+try { var wsum = [0, 0, 0, 0, 0, 0, 0], wcnt = [0, 0, 0, 0, 0, 0, 0], since2 = dKey(addDays(t0, -56)); buPers().forEach(function (Q) { Object.keys(Q.days || {}).forEach(function (k) { if (k < since2 || k > dKey(t0)) return; var dd = Q.days[k], s = 0; Object.keys(dd).forEach(function (c) { if (buKind(c) === "flex") s += +dd[c] || 0; }); var wd = new Date(k + "T00:00").getDay(); wsum[wd] += s; wcnt[wd]++; }); });
+var avgs = wsum.map(function (s, i) { return wcnt[i] ? s / wcnt[i] : 0; }), all = wsum.reduce(function (a, b) { return a + b; }, 0) / Math.max(1, wcnt.reduce(function (a, b) { return a + b; }, 0)), mx = avgs.indexOf(Math.max.apply(null, avgs));
+if (all > 0 && wcnt[mx] >= 3 && avgs[mx] > all * 2 && avgs[mx] - all > 500) add("wd:" + mx, "info", "📅", "По " + ["воскресеньям", "понедельникам", "вторникам", "средам", "четвергам", "пятницам", "субботам"][mx] + " тратите в " + (avgs[mx] / all).toFixed(1).replace(".", ",") + " раза больше среднего дня", "≈ " + buRub(avgs[mx]) + " против " + buRub(all) + " (гибкие статьи, последние 8 недель). Можно заранее планировать такие дни.", null, 2);
+} catch (e) { /* дни недели не мешают */ }
+try { buRegsIn(addDays(t0, -14), addDays(t0, 5)).forEach(function (x) { var ds = new Date(x.d).toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+if (x.st === "late") add("reg-late:" + x.g.id + ":" + dKey(x.d), "warn", "💳", "Не видно оплаты «" + x.g.n + "» за " + ds, buRub(+x.g.amt || 0) + " по статье «" + (x.g.cat || "") + "». Если уже оплатили — обновите данные из файла.", { l: "Открыть платежи", tab: "regs" }, 4);
+else if (x.d >= t0) add("reg-soon:" + x.g.id + ":" + dKey(x.d), "info", "🗓", "Скоро платёж: «" + x.g.n + "» — " + ds, buRub(+x.g.amt || 0) + (x.d === t0 ? " · сегодня" : "") + ".", null, 3); }); } catch (e) { /* платежи не мешают */ }
+try { var subs = nOfTpl("doc").filter(function (n) { return +(n.pr || {}).cost > 0; }), sumS = subs.reduce(function (s, n) { return s + (+n.pr.cost || 0); }, 0);
+nOfTpl("doc").forEach(function (n) { var pr = n.pr || {}; if (!pr.exp) return; var ex = new Date(pr.exp + "T00:00").getTime(), dd = Math.round((ex - t0) / DAY); if (dd >= 0 && dd <= 14) add("doc:" + n.id + ":" + pr.exp, "info", "📑", "Продлится через " + dd + " " + plural(dd, ["день", "дня", "дней"]) + ": " + nTitle(n), (+pr.cost ? buRub(+pr.cost) + ". " : "") + "Если не нужно — самое время отменить.", { l: "Открыть", go: "note-" + n.id }, 3); });
+if (sumS > 0) add("subs:" + pid, "info", "💳", "Подписки и регулярные услуги — " + buRub(sumS) + " в месяц (" + buRub(sumS * 12) + " в год)", subs.length + " " + plural(subs.length, ["позиция", "позиции", "позиций"]) + ". Раз в квартал полезно пересмотреть, чем действительно пользуетесь.", { l: "Документы", go: "docs" }, 1);
+} catch (e) { /* документы не мешают */ }
+try { var w2 = buWeek(mon); live(S.wish || []).filter(function (x) { return !x.dec && Date.now() >= x.at + fcWishWait(x); }).slice(0, 2).forEach(function (x) { add("wish:" + x.id, "info", "🛍", "Желание «" + x.n + "» остыло — можно решать", (x.price ? buRub(x.price) + (w2.tot.left > 0 && !w2.miss.length ? " — это " + Math.round(x.price / w2.tot.left * 100) + "% остатка гибких трат недели" : "") + ". " : "") + "Всё ещё хочется?", { l: "К желаниям", tab: "wish" }, 2); }); } catch (e) { /* желания не мешают */ }
+try { var dl = live(S.debts || []).filter(function (d) { return !d.off && fcDebtCur(d) > 0; }); if (dl.length) { var pm = dl.reduce(function (s, d) { return s + fcDebtCur(d) * (+d.rate || 0) / 1200; }, 0);
+if (pm > 100) add("debt-int:" + pid, "info", "💸", "На проценты по долгам уходит ≈ " + buRub(pm) + " в месяц", "Это ≈ " + buRub(pm * 12) + " в год при нынешних остатках.", { l: "Долги", tab: "debts" }, 2);
+var hi = dl.filter(function (d) { return +d.rate > 0; }).sort(function (a, b) { return (+b.rate) - (+a.rate); })[0], lo = dl.slice().sort(function (a, b) { return fcDebtCur(a) - fcDebtCur(b); })[0];
+if (hi && dl.length > 1) add("debt-ord:" + hi.id + ":" + lo.id, "info", "🎯", "Порядок погашения: «" + hi.n + "» дороже всех (" + String(hi.rate).replace(".", ",") + "%)", "Расчёт: лишние деньги сначала на «" + hi.n + "» — меньше переплата процентами («лавина»). Сначала «" + lo.n + "» (" + buRub(fcDebtCur(lo)) + ") — быстрее закроется первый долг («снежный ком»). Выбор стратегии — во вкладке «Долги».", { l: "Долги", tab: "debts" }, 1);
+} } catch (e) { /* долги не мешают */ }
+var hid = bavHid(); L = L.filter(function (x) { return !hid[x.id]; });
+L.forEach(function (x) { x.t = String(x.t).replace(/&nbsp;/g, " "); x.d = String(x.d).replace(/&nbsp;/g, " "); });
+return L.sort(function (a, b) { return b.w - a.w; });
+}
+function bavHTML() {
+var L = bavTips(), show = BAVALL ? L : L.slice(0, 5);
+var h = '<div class="card bav"><div class="bavh"><b>🧭 Советник</b><span class="muted">' + (L.length ? L.length + " " + plural(L.length, ["совет", "совета", "советов"]) + " по вашим цифрам" : "всё спокойно") + '</span><span class="nowsp"></span>' + (AI.ready() ? '<button type="button" class="btn sm" data-a="bavai">✨ Спросить ИИ</button>' : "") + "</div>";
+if (BAVCONF) h += '<div class="bavconf"><b>Отправить ИИ (' + esc(AI.name()) + ') итоги бюджета?</b><span>Уйдут только суммы по статьям, доходы, лимиты недели и проценты по долгам — без описаний операций и названий магазинов.</span><div class="r"><button type="button" class="btn sm pri" data-a="bavaigo">Отправить</button><button type="button" class="btn sm" data-a="bavaix">Отмена</button></div></div>';
+if (BAVAIL) h += '<p class="muted">✨ ИИ думает…</p>';
+if (BAVAI) h += '<div class="bavai"><div class="bavaih"><b>✨ Мнение ИИ</b><button type="button" class="ibtn" data-a="bavaiclr" title="Скрыть" aria-label="Скрыть">✕</button></div>' + BAVAI.split(/\n+/).filter(function (x) { return x.trim(); }).map(function (x) { return "<p>" + esc(x.replace(/^[-*•]\s*/, "• ").replace(/\*\*/g, "")) + "</p>"; }).join("") + "</div>";
+h += show.map(function (x) { var a = x.act; return '<div class="bavt ' + x.lvl + '"><span class="bavi">' + x.ic + '</span><div><b>' + esc(x.t) + "</b>" + (x.d ? "<small>" + esc(x.d) + "</small>" : "") + '</div><span class="bava">' + (a ? '<button type="button" class="btn sm" data-a="bavdo" data-x="' + esc(x.id) + '">' + esc(a.l) + "</button>" : "") + '<button type="button" class="ibtn" data-a="bavx" data-x="' + esc(x.id) + '" title="Не сейчас — спрятать на месяц" aria-label="Спрятать">✕</button></span></div>'; }).join("");
+if (L.length > 5) h += '<button type="button" class="btn sm bavmore" data-a="bavall">' + (BAVALL ? "Свернуть" : "Ещё " + (L.length - 5)) + "</button>";
+if (!L.length) h += '<p class="muted" style="margin:4px 0 0">Сейчас ничего тревожного: перерасходов и пропущенных платежей не видно.</p>';
+return h + "</div>";
+}
+function bavAI() {
+var t0 = today0(), P = buPer(buPid(t0)), r = P ? buPeriod(P) : null, w = buWeek(monday(t0)), lines = [];
+if (r) { lines.push("Период: прошло " + r.el + " из " + r.pd + " дней. Доходы: план " + Math.round(r.inc.plan) + ", факт " + Math.round(r.inc.fact) + ". Расходы: план " + Math.round(r.exp.plan) + ", факт " + Math.round(r.exp.fact) + ".");
+lines.push("Статьи (вид; план; факт; прогноз): " + r.rows.map(function (x) { return x.c + " (" + (x.k === "flex" ? "гибкая" : "платёж") + "; " + Math.round(x.plan) + "; " + Math.round(x.fact) + (x.fc ? "; " + Math.round(x.fc) : "") + ")"; }).join(", ") + "."); }
+if (!w.miss.length) lines.push("Неделя: лимит гибких " + Math.round(w.tot.lim) + ", потрачено " + Math.round(w.tot.fact) + ", дней до воскресенья " + w.dl + ".");
+var dl = live(S.debts || []).filter(function (d) { return !d.off && fcDebtCur(d) > 0; }); if (dl.length) lines.push("Долги (остаток; ставка %): " + dl.map(function (d) { return Math.round(fcDebtCur(d)) + "; " + (+d.rate || 0); }).join(" | ") + ".");
+var p = "Ты — спокойный и практичный помощник по личному бюджету. По цифрам ниже дай 4–6 конкретных советов по-русски, коротко, без общих фраз и без советов про инвестиции. Каждый совет — с новой строки, начинай с «• ». Суммы в рублях.\n\n" + lines.join("\n");
+BAVAIL = true; render();
+aiRun("Советник бюджета", function () { return AI.text(p).then(function (txt) { BAVAI = String(txt || "").slice(0, 4000); BAVAIL = false; render(); }, function (e) { BAVAIL = false; render(); throw e; }); });
+}
+function bavAct(a, el) {
+var x = el.dataset.x;
+switch (a) {
+case "bavx": var m = Object.assign({}, S.opt.bavx || {}); m[x] = Date.now() + 30 * DAY; S.opt.bavx = m; optTouch(); save(); render(); toast("Совет спрятан на месяц"); return true;
+case "bavall": BAVALL = !BAVALL; render(); return true;
+case "bavdo": var tip = bavTips().filter(function (z) { return z.id === x; })[0]; if (!tip || !tip.act) return true; var A = tip.act;
+if (A.task) { var t = newTaskFrom(A.task, { day: today0() }); t.at = today0(); t.allday = true; t.tags = []; touch(t); save(); var mm = Object.assign({}, S.opt.bavx || {}); mm[x] = Date.now() + 30 * DAY; S.opt.bavx = mm; optTouch(); render(); toast("Задача — в «Сегодня»"); }
+else if (A.tab) { BUTAB = A.tab; LS.set("zd-butab", A.tab); if (V === "budget") render(); else go("budget"); }
+else if (A.go) go(A.go);
+return true;
+case "bavai": BAVCONF = true; render(); return true;
+case "bavaix": BAVCONF = false; render(); return true;
+case "bavaigo": BAVCONF = false; bavAI(); return true;
+case "bavaiclr": BAVAI = null; render(); return true;
+}
+return false;
+}
 function chalsWidget() {
 var h = "", t0 = today0(), any = false;
 if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
@@ -20020,6 +20113,7 @@ if (a && hz2Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && hz3Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && hz4Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && dzAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+if (a && bavAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
