@@ -8203,7 +8203,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-191";
+var APPV = "zd-app-2026-10-16-192";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -16644,7 +16644,7 @@ function wrTop() { var r = (S.opt.wrev || {})[wrKey()]; return r ? (r.top || [])
 function wrBanner() {
 var tops = wrTop(), wd = new Date().getDay(), r = (S.opt.wrev || {})[wrKey()], h = "";
 if (tops.length) h += '<div class="wrtop"><b>⭐ Главное недели:</b> ' + tops.map(function (t) { return '<a href="#task-' + t.id + '" class="' + (t.done ? "dn" : "") + '">' + (t.done ? "✓ " : "") + esc(t.t.slice(0, 60)) + "</a>"; }).join(" · ") + "</div>";
-if ((wd === 0 || wd === 5 || wd === 1) && !(r && r.done)) h += '<div class="wrb"><span>🗓 ' + (wd === 1 ? "Начало недели" : "Конец недели") + " — время для обзора: 15 минут, и голова свободна.</span><a class=\"btn sm pri\" href=\"#weekly\">Начать обзор</a></div>";
+if ((wd === 0 || wd === 5 || wd === 6 || wd === 1) && !(r && r.done)) h += '<div class="wrb"><span>🗓 ' + (wd === 1 ? "Начало недели" : "Конец недели") + " — время для обзора: 15 минут, и голова свободна.</span><a class=\"btn sm pri\" href=\"#weekly\">Начать обзор</a></div>";
 return h;
 }
 function vWeekly() {
@@ -17049,6 +17049,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["192", "Обзор недели — и в субботу", ["Плашка «Конец недели — время для обзора» в «Сегодня» и напоминание в 🔔 теперь появляются в пятницу, субботу, воскресенье и понедельник — пока обзор не пройден."]],
 ["191", "Мелочи", ["«День за днём»: в «✎ Настроить страницу» у карточек стрелки ↑ ↓ — выше и ниже в своей колонке.", "«Бюджет»: карточку «🧭 Советник» можно свернуть — щёлкните по заголовку; в свёрнутом виде видно, сколько советов и сколько важных."]],
 ["189", "Советник бюджета", ["«Бюджет» → «Неделя» и «Период»: карточка «🧭 Советник» — 3–5 советов по вашим цифрам: темп недели, прогноз периода, статьи с перерасходом 3 недели подряд, сравнение с прошлым периодом, мелкие частые траты из выписки, дорогие дни недели, платежи без видимой оплаты, подписки и продления, «остывшие» желания, проценты по долгам и порядок погашения, похвала за недели в лимите.", "Считается прямо в приложении — данные никуда не уходят. «✕» — спрятать совет на месяц; у части советов есть действие (задача, переход). Важные советы — в 🔔 раз в неделю.", "«✨ Спросить ИИ» (если подключён ИИ) — после подтверждения: уходят только итоги по статьям, без описаний операций."]],
 ["188", "«День за днём» и дневник", ["Карточки «День за днём» настраиваются, как на главной: перетаскивание за ⠿, 1–4 колонки, ширина за уголок, скрыть и вернуть — «✎ Настроить страницу». Новые карточки: «💰 Траты дня» и «📜 В этот день» (запись год, месяц и неделю назад).", "Дневник крупнее, во всю ширину; «⛶» — писать на весь экран (настроение, счётчик слов, Esc — свернуть).", "Картинки в дневнике: вставьте из буфера, перетащите или 🖼 — сохраняются на ваш Яндекс Диск.", "Вопросы дня под пустой записью, шаблоны записей («3 хорошие вещи», «Рефлексия дня», «Утренние страницы», «Благодарности») — кнопкой «▤ Шаблон…» и через «/».", "🎤 — надиктовать запись; счётчик слов и «подряд N дней».", "«Дневник»: у прошлых дней — «✎ Править», над списком — #теги из записей для быстрого поиска."]],
@@ -17183,7 +17184,7 @@ try { tasks().filter(function (t) { return !t.done && t.at && !t.allday && t.at 
 try { nOfTpl("person").forEach(function (n) { var pr = n.pr || {}; if (pr.bday) { var b = nextBday(pr.bday), dd = Math.round((b - t0) / DAY); if (dd <= 7) add("bd:" + n.id + ":" + new Date(b).getFullYear(), "🎂", "День рождения: " + nTitle(n), dd === 0 ? "сегодня" : dd === 1 ? "завтра" : "через " + dd + " " + plural(dd, ["день", "дня", "дней"]), "note-" + n.id, b - 7 * DAY); } var c = pContactDue(n); if (c && c <= t0) add("ct:" + n.id + ":" + dKey(c), "📞", "Пора связаться: " + nTitle(n), "", "note-" + n.id, c); }); } catch (e) { /* ок */ }
 try { nOfTpl("doc").forEach(function (n) { var pr = n.pr || {}; if (!pr.exp) return; var ex = new Date(pr.exp + "T00:00").getTime(), dd = Math.round((ex - t0) / DAY); if (dd <= 30 && dd >= -30) add("dx:" + n.id + ":" + pr.exp, "📑", (dd < 0 ? "Истёк срок: " : "Скоро срок: ") + nTitle(n), dd < 0 ? "просрочено на " + (-dd) + " дн." : dd === 0 ? "сегодня" : "через " + dd + " дн.", "note-" + n.id, ex - 30 * DAY); }); } catch (e) { /* ок */ }
 try { var sc = srsDueCount(); if (sc) add("srs:" + dk, "🔁", "Повторить карточки: " + sc, "", "srs", t0); } catch (e) { /* ок */ }
-try { var wd = new Date(t0).getDay(), wr = (S.opt.wrev || {})[wrKey()]; if ((wd === 0 || wd === 1 || wd === 5) && !(wr && wr.done)) add("wr:" + wrKey(), "🧭", "Пора сделать обзор недели", "8 шагов, около 20 минут", "weekly", t0); } catch (e) { /* ок */ }
+try { var wd = new Date(t0).getDay(), wr = (S.opt.wrev || {})[wrKey()]; if ((wd === 0 || wd === 1 || wd === 5 || wd === 6) && !(wr && wr.done)) add("wr:" + wrKey(), "🧭", "Пора сделать обзор недели", "8 шагов, около 20 минут", "weekly", t0); } catch (e) { /* ок */ }
 try { var ib = inboxList().length; if (ib >= 10) add("inb:" + dk, "📥", "Во «Входящих» " + ib + " задач", "разберите — станет спокойнее", "inbox", t0); } catch (e) { /* ок */ }
 try { if (new Date(now).getHours() >= 18) { var hs = habits().filter(function (h) { return !h.arch && hDue(h, t0) && !hDone(h, t0); }); if (hs.length) add("hab:" + dk, "🌱", "Привычки: осталось " + hs.length, hs.slice(0, 3).map(function (h) { return h.n || ""; }).join(" · "), "habits", t0 + 18 * 3600000); } } catch (e) { /* ок */ }
 try { if (new Date(now).getHours() >= 20) { var hr = dayRecOf(dk), hk = hr && hr.h ? Object.keys(hr.h).filter(function (f) { return f !== "at"; }).length : 0; if (!hk) add("hl:" + dk, "🌿", "Отметьте самочувствие за сегодня", "20 секунд", "health", t0 + 20 * 3600000); } } catch (e) { /* ок */ }
