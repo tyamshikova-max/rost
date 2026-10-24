@@ -1733,6 +1733,13 @@ body:not(.sideoff) .top .brand + .appsb, body:not(.sideoff) .top .brand ~ .q { m
 }
 html.st-cloud .top .brand, html.st-bento .top .brand, html.st-expr .top .brand { border-right-color: transparent }
 html.st-glass .top .brand { background: transparent; border-right-color: var(--gedge) }
+.xpw { display: flex; gap: 14px; align-items: center } .xpwl { display: grid; place-items: center; width: 58px; height: 58px; flex: none; border-radius: 50%; background: var(--acc-soft); color: var(--acc); line-height: 1 } .xpwl b { font-size: calc(24px * var(--fs)) } .xpwl small { font-size: calc(10.5px * var(--fs)); color: var(--muted) }
+.xpwm { flex: 1; min-width: 0; display: grid; gap: 6px } .xpwt { display: flex; gap: 6px 10px; flex-wrap: wrap; align-items: baseline; justify-content: space-between } .xpwt span { font-size: calc(12.5px * var(--fs)) }
+.xpwr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 14px 0 0 } .xpwr > div { display: grid; gap: 3px; align-content: start } .xpwr b { font-size: calc(20px * var(--fs)); font-variant-numeric: tabular-nums } .xpwr small { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.3 }
+.xpwr .bcbar.ok i { background: var(--ok) } .xpwtip { margin: 10px 0 0; font-size: calc(13.5px * var(--fs)) }
+.xpwnx { display: flex; gap: 10px; align-items: center; margin: 10px 0 0; padding: 10px 0 0; border-top: 1px solid var(--line) } .xpwnx > span { font-size: 22px; flex: none } .xpwnx > div { flex: 1; min-width: 0; display: grid; gap: 3px } .xpwnx small { color: var(--muted); font-size: calc(12px * var(--fs)) }
+.xpwhow { margin: 10px 0 0 } .xpwhow summary { cursor: pointer; color: var(--muted); font-size: calc(13px * var(--fs)) } .xpwh { display: grid; grid-template-columns: 24px 1fr auto; gap: 8px; padding: 4px 0; font-size: calc(13.5px * var(--fs)) } .xpwh b { color: var(--acc); font-variant-numeric: tabular-nums } .xpwhow p { font-size: calc(12.5px * var(--fs)); margin: 6px 0 0 }
+@media (max-width: 420px) { .xpwr { grid-template-columns: 1fr 1fr } }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -3173,7 +3180,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-202";
+var APPV = "zd-app-2026-10-16-203";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -11802,6 +11809,23 @@ var ACH = [["first", "🌱", "Первый шаг", "Выполнить перв
 ["c100", "🔁", "Память", "100 повторений карточек", function (s) { return s.cards >= 100; }], ["wr1", "🗓", "Обзор недели", "Завершить обзор недели", function (s) { return s.wr >= 1; }], ["wr4", "🧭", "Капитан", "4 обзора недели", function (s) { return s.wr >= 4; }], ["hc7", "🩺", "Слушаю тело", "7 дней подряд отмечать самочувствие", function (s) { return s.hrun >= 7; }], ["bch14", "🧘", "Прямая спина", "14 дней челленджа «Осанка и лицо»", function (s) { return s.bch >= 14; }]];
 function xpOn() { return !S.opt || S.opt.game !== false; }
 function xpBadge() { if (!xpOn()) return ""; var s = xpStats(); return '<a class="xpb" href="#stats" data-a="xpgo" title="Уровень ' + s.lvl + " · " + s.xp + ' очков — «Аналитика» → «🏆 Уровень»">⭐ ' + s.lvl + "</a>"; }
+var ACHP = { first: ["done", 1, "задач"], t10: ["done", 10, "задач"], t100: ["done", 100, "задач"], t500: ["done", 500, "задач"], t1000: ["done", 1000, "задач"], s7: ["best", 7, "дней подряд"], s30: ["best", 30, "дней подряд"], p1: ["p1", 25, "задач с ❗"], early: ["early", 10, "задач до 9 утра"], h50: ["habits", 50, "отметок"], h300: ["habits", 300, "отметок"], pom25: ["pom", 25, "помидоров"], pom200: ["pom", 200, "помидоров"], n10: ["notes", 10, "заметок"], n100: ["notes", 100, "заметок"], map: ["maps", 1, "карт"], canvas: ["canv", 1, "холстов"], c100: ["cards", 100, "повторений"], wr1: ["wr", 1, "обзоров"], wr4: ["wr", 4, "обзоров"], hc7: ["hrun", 7, "дней подряд"], bch14: ["bch", 14, "дней"] };
+var XPHOW = [["✅", "Задача выполнена", "+10"], ["❗", "Задача с приоритетом 1", "+15"], ["🗓", "Обзор недели", "+30"], ["🌱", "Отметка привычки", "+5"], ["🍅", "Помидор (25 минут фокуса)", "+4"], ["📝", "Новая заметка", "+3"], ["🩺", "Отметка самочувствия за день", "+3"], ["🔁", "Повторение карточки", "+2"]];
+function xpDayGoal(s) { var t0 = today0(), sum = 0, n = 0; for (var i = 1; i <= 14; i++) { var v = s.per[dKey(addDays(t0, -i))] || 0; sum += v; if (v) n++; } var avg = n ? sum / Math.max(n, 7) : 0; return Math.max(30, Math.ceil(avg * 1.1 / 10) * 10); }
+function xpHomeHTML() {
+var s = xpStats(), t0 = today0(), td = s.per[dKey(t0)] || 0, yd = s.per[dKey(addDays(t0, -1))] || 0, goal = xpDayGoal(s), got = ACH.filter(function (a) { return a[4](s); }).length;
+var nx = ACH.filter(function (a) { return !a[4](s) && ACHP[a[0]]; }).map(function (a) { var m = ACHP[a[0]], v = Math.min(+s[m[0]] || 0, m[1]); return { a: a, v: v, n: m[1], u: m[2], r: v / m[1] }; }).sort(function (x, y) { return y.r - x.r; })[0];
+var bar = function (pc, cls) { return '<div class="bcbar' + (cls ? " " + cls : "") + '"><i style="width:' + Math.max(0, Math.min(100, Math.round(pc))) + '%"></i></div>'; };
+var h = '<div class="xpw"><div class="xpwl"><b>' + s.lvl + '</b><small>уровень</small></div><div class="xpwm"><div class="xpwt"><b>' + s.xp.toLocaleString("ru-RU") + " очков</b><span class=\"muted\">до " + (s.lvl + 1) + "-го — ещё " + (s.next - s.cur) + "</span></div>" + bar(s.cur / s.next * 100) + "</div></div>";
+h += '<div class="xpwr"><div><b>+' + td + '</b><small>сегодня' + (td >= goal ? " · цель дня ✓" : " · цель " + goal) + "</small>" + bar(td / goal * 100, td >= goal ? "ok" : "") + "</div>" +
+'<div><b>🔥 ' + s.streak + '</b><small>' + plural(s.streak, ["день", "дня", "дней"]) + " подряд · рекорд " + s.best + "</small></div>" +
+'<div><b>🏆 ' + got + '</b><small>из ' + ACH.length + " достижений</small></div></div>";
+var tip = td >= goal ? "Цель дня выполнена — отличный темп!" : td ? "До цели дня — " + (goal - td) + " очков: это " + Math.ceil((goal - td) / 10) + " " + plural(Math.ceil((goal - td) / 10), ["задача", "задачи", "задач"]) + "." : s.streak ? "Сделайте сегодня хоть одну задачу — серия «🔥 " + s.streak + "» продолжится." : yd ? "Вчера было +" + yd + ". Начните с маленькой задачи." : "Одна выполненная задача — уже +10.";
+h += '<p class="xpwtip">' + tip + "</p>";
+if (nx) h += '<div class="xpwnx"><span>' + nx.a[1] + '</span><div><b>' + esc(nx.a[2]) + '</b><small>' + esc(nx.a[3]) + " · " + nx.v + " из " + nx.n + "</small>" + bar(nx.r * 100) + "</div></div>";
+h += '<details class="xpwhow"><summary>За что очки</summary>' + XPHOW.map(function (x) { return '<div class="xpwh"><span>' + x[0] + "</span><span>" + x[1] + "</span><b>" + x[2] + "</b></div>"; }).join("") + '<p class="muted">Уровни: 2-й — со 100 очков, 3-й — с 300, 4-й — с 600, дальше каждый следующий дороже на 100. Серия — дни подряд хотя бы с одной выполненной задачей. Все достижения и карта года — <a href="#stats" data-a="xpgo">«Аналитика» → «🏆 Уровень»</a>.</p></details>';
+return h;
+}
 function xpCheck() {
 if (!xpOn() || !SETGATE) return; var s = xpStats(), seen = {}; try { seen = JSON.parse(LS.get("zd-ach") || "null"); } catch (e) { seen = null; }
 var got = ACH.filter(function (a) { return a[4](s); }).map(function (a) { return a[0]; }), lv = +LS.get("zd-xplvl") || 0;
@@ -12043,6 +12067,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["203", "Уровень и очки — на главной", ["Новая карточка на главной «🏆 Уровень и очки»: уровень и сколько до следующего, очки за сегодня и цель дня (по вашему обычному темпу), серия дней подряд и рекорд, сколько достижений собрано, ближайшее достижение с прогрессом и подсказка, что сделать дальше.", "«За что очки» — прямо в карточке: задача +10 (с приоритетом 1 — +15), обзор недели +30, привычка +5, помидор +4, заметка +3, отметка самочувствия +3, повторение карточки +2."]],
 ["202", "Новый логотип", ["Логотип — теперь верх левой колонки, одним целым с меню. Значок — простая галочка, которая в каждом стиле своя: в «Облаке» — тонкий контур, в «Бенто» — тёмная плитка, в «Экспрессиве» — круглая, в «Стекле» — полупрозрачная. Название — шрифтом заголовков стиля."]],
 ["201", "Главная — сразу на всю ширину", ["Карточки главной и «Дня за днём» растягиваются вместе с окном сразу: раньше после скрытия боковой панели справа мог оставаться пустой край, пока страница не перерисуется."]],
 ["200", "Новые стили оформления", ["Вместо прежних цветовых схем — четыре стиля, у каждого светлый и тёмный вариант: «Облако» (тихо и просторно, без теней и рамок, заголовки с засечками — по умолчанию), «Стекло» (матовые полупрозрачные панели поверх мягких обоев), «Бенто» (плитки с мягкими цветными фонами, крупные цифры) и «Экспрессив» (тональные заливки, очень круглые формы, кнопки-таблетки, живые анимации).", "Значки и эмодзи по умолчанию контурные — одним цветом с текстом. Вернуть цветные: «Настройки» → «Оформление» → «Значки».", "Оттенок — 9 спокойных цветов или любой свой. Обои — только у «Стекла»."]],
@@ -13157,8 +13182,8 @@ var off = (SPZK[k] || []).filter(function (x) { return D[x] && !modOn(x); });
 if (off.length) h += '<p class="muted spzoff">Выключено в этом пространстве: ' + off.map(function (x) { return D[x][1] + " " + esc(D[x][2]); }).join(", ") + ' — <a href="#mods">🧩 Модули</a></p>';
 return h;
 }
-var HZC = [["fst", "🚀 Первые шаги"], ["now", "⏱ Сейчас"], ["top", "★ Главное на сегодня"], ["prog", "📊 Прогресс дня"], ["att", "⚠ Требует внимания"], ["cont", "↩ Продолжить"], ["hab", "🌱 Привычки сегодня"], ["well", "🌿 Самочувствие"], ["pav", "🧭 Советник"]], HZED = false;
-function hzOrder() { var wk = hzWKeys(), o = (S.opt.homec || []).filter(function (k) { return HZC.some(function (c) { return c[0] === k; }) || wk.indexOf(k) >= 0; }); HZC.forEach(function (c) { if (o.indexOf(c[0]) < 0) { var ai = c[0] === "pav" ? o.indexOf("att") : -1; if (ai >= 0) o.splice(ai + 1, 0, c[0]); else o.push(c[0]); } }); wk.forEach(function (k) { if (o.indexOf(k) < 0) o.push(k); }); return o; }
+var HZC = [["fst", "🚀 Первые шаги"], ["now", "⏱ Сейчас"], ["top", "★ Главное на сегодня"], ["prog", "📊 Прогресс дня"], ["att", "⚠ Требует внимания"], ["cont", "↩ Продолжить"], ["hab", "🌱 Привычки сегодня"], ["well", "🌿 Самочувствие"], ["pav", "🧭 Советник"], ["xp", "🏆 Уровень и очки"]], HZED = false;
+function hzOrder() { var wk = hzWKeys(), o = (S.opt.homec || []).filter(function (k) { return HZC.some(function (c) { return c[0] === k; }) || wk.indexOf(k) >= 0; }); HZC.forEach(function (c) { if (o.indexOf(c[0]) < 0) { var ai = c[0] === "pav" ? o.indexOf("att") : c[0] === "xp" ? o.indexOf("prog") : -1; if (ai >= 0) o.splice(ai + 1, 0, c[0]); else o.push(c[0]); } }); wk.forEach(function (k) { if (o.indexOf(k) < 0) o.push(k); }); return o; }
 function hzHid() { return S.opt.homeh || []; }
 function hzName(k) { var c = HZC.filter(function (z) { return z[0] === k; })[0]; return c ? c[1] : k; }
 function hzMorn() { var r = dayRec(); return LS.get("zd-rit-morning") === dKey(today0()) || !!(r && r.planned); }
@@ -13234,6 +13259,9 @@ b = rc.length ? rc.map(function (x) { return '<a class="hza" href="#' + esc(x.h)
 } else if (k === "hab") {
 b = habitsToday() || '<p class="muted">На сегодня привычек нет. <a href="#habits">Завести привычку</a></p>';
 more = '<a class="ibtn" href="#habits" title="Привычки" aria-label="Привычки">→</a>';
+} else if (k === "xp") {
+if (!xpOn()) return "";
+b = xpHomeHTML();
 } else if (k === "pav") {
 b = pavHTML("all", { bare: true, lim: 3 });
 } else if (k === "well") {
