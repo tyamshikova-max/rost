@@ -15,8 +15,8 @@
 <!-- шрифты не задерживают запуск: пока грузятся (или если Google недоступен), текст виден системным шрифтом -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
 <style>:root {
---bg: #f4f5f1; --panel: #ffffff; --side: #eceee8; --fg: #1c211f; --muted: #67706b; --line: #dde1da; --hover: #e6e9e2;
---acc: #1d6b5a; --acc-soft: #dcefe8; --warn: #b5432f; --buwarn: #c46a12; --ok: #2b7351; --star: #d49a12; --flag: #d1453b;
+--bg: #f4f2ee; --panel: #faf9f6; --side: #f4f2ee; --fg: #2b2a28; --muted: #87827a; --line: #e5e1d9; --hover: #ebe8e1;
+--acc: #4f7568; --acc-soft: #e3eae5; --hf: Lora, Georgia, serif; --hw: 500; --onacc: #fff; --warn: #b5432f; --buwarn: #c46a12; --ok: #2b7351; --star: #d49a12; --flag: #d1453b;
 --p1: #d1453b; --p2: #df8a1c; --p3: #3b78d0;
 --sans: "Onest", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", Consolas, monospace;
 --shadow: 0 6px 24px rgba(20, 30, 25, .12);
@@ -24,12 +24,12 @@
 color-scheme: light;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
---bg: #141816; --panel: #1b201d; --side: #171c19; --fg: #e8ece8; --muted: #9aa49e; --line: #2c332f; --hover: #232a26;
---acc: #5fc4a6; --acc-soft: #1d3a31; --warn: #ff8a72; --buwarn: #f2a650; --ok: #6cc497; --star: #f0be4a; --flag: #ff6b5e; --p1: #ff6b5e; --p2: #f2a640; --p3: #6ea2f0;
+--bg: #1c1d1f; --panel: #222325; --side: #1c1d1f; --fg: #dcdad5; --muted: #8e8b85; --line: #2f3032; --hover: #292a2c;
+--acc: #93b8a9; --acc-soft: #26302c; --warn: #ff8a72; --buwarn: #f2a650; --ok: #6cc497; --star: #f0be4a; --flag: #ff6b5e; --p1: #ff6b5e; --p2: #f2a640; --p3: #6ea2f0;
 --shadow: 0 6px 24px rgba(0, 0, 0, .45); color-scheme: dark } }
 :root[data-theme="dark"] {
---bg: #141816; --panel: #1b201d; --side: #171c19; --fg: #e8ece8; --muted: #9aa49e; --line: #2c332f; --hover: #232a26;
---acc: #5fc4a6; --acc-soft: #1d3a31; --warn: #ff8a72; --buwarn: #f2a650; --ok: #6cc497; --star: #f0be4a; --flag: #ff6b5e; --p1: #ff6b5e; --p2: #f2a640; --p3: #6ea2f0;
+--bg: #1c1d1f; --panel: #222325; --side: #1c1d1f; --fg: #dcdad5; --muted: #8e8b85; --line: #2f3032; --hover: #292a2c;
+--acc: #93b8a9; --acc-soft: #26302c; --warn: #ff8a72; --buwarn: #f2a650; --ok: #6cc497; --star: #f0be4a; --flag: #ff6b5e; --p1: #ff6b5e; --p2: #f2a640; --p3: #6ea2f0;
 --shadow: 0 6px 24px rgba(0, 0, 0, .45); color-scheme: dark }
 * { box-sizing: border-box }
 [hidden] { display: none !important }
@@ -1652,7 +1652,86 @@ h2[data-col].dropin { outline: 2px dashed var(--acc); outline-offset: 2px; borde
 #view:focus { outline: none }
 @media (prefers-reduced-motion: reduce) {
 *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important }
-}</style>
+}
+h1, h2, .bh1, .ntitle, .ntitleR { font-family: var(--hf, var(--sans)); font-weight: var(--hw, 700) }
+html .btn.pri { color: var(--onacc, #fff) }
+html .nav a.on { font-weight: 500; box-shadow: none }
+html .nav a .n.od { background: none; color: var(--warn); padding: 0; font-weight: 600 }
+html.emomono .rlb, html.emomono .spzi, html.emomono .hzh b { font-variant-emoji: text }
+html.st-cloud .top, html.st-cloud .side { border-color: transparent }
+html.st-cloud .card, html.st-cloud .wdg { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none }
+html.st-cloud .card { padding: 18px 2px 16px }
+html.st-cloud .btn { background: transparent; border-color: var(--line); border-radius: 8px }
+html.st-cloud .btn:hover { background: var(--hover) }
+html.st-cloud .btn.pri { background: var(--acc); border-color: var(--acc) }
+html.st-cloud .chip { background: transparent; border-radius: 6px }
+html.st-cloud .nav a.on { background: var(--hover); color: var(--fg) }
+html.st-cloud .nav a.on .n { color: var(--muted) }
+html.st-cloud h1 { letter-spacing: -.01em }
+html.st-glass .card, html.st-glass .wdg { border-radius: 20px; border-color: var(--gedge); box-shadow: inset 0 1px 0 var(--gedge), 0 8px 30px rgba(0, 0, 0, .06); backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5) }
+html.st-glass .btn, html.st-glass .chip { border-radius: 999px; border-color: var(--gedge); background: color-mix(in srgb, var(--solid) 55%, transparent) }
+html.st-glass .btn.pri { background: var(--acc); border-color: var(--acc) }
+html.st-glass .nav a { border-radius: 12px }
+html.st-glass .nav a.on { background: color-mix(in srgb, var(--solid) 70%, transparent); color: var(--fg); box-shadow: inset 0 1px 0 var(--gedge) }
+html.st-glass .side { border-right-color: var(--gedge) }
+html.st-bento .top, html.st-bento .side { border-color: transparent }
+html.st-bento .card, html.st-bento .wdg { border: 0; border-radius: 22px; box-shadow: none }
+html.st-bento .hzms > .hzc:nth-child(6n+1), html.st-bento .dzms > .dzc:nth-child(6n+1) { background: var(--t1) }
+html.st-bento .hzms > .hzc:nth-child(6n+2), html.st-bento .dzms > .dzc:nth-child(6n+2) { background: var(--t2) }
+html.st-bento .hzms > .hzc:nth-child(6n+3), html.st-bento .dzms > .dzc:nth-child(6n+3) { background: var(--t3) }
+html.st-bento .hzms > .hzc:nth-child(6n+4), html.st-bento .dzms > .dzc:nth-child(6n+4) { background: var(--t4) }
+html.st-bento .hzms > .hzc:nth-child(6n+5), html.st-bento .dzms > .dzc:nth-child(6n+5) { background: var(--t5) }
+html.st-bento .hzms > .hzc:nth-child(6n), html.st-bento .dzms > .dzc:nth-child(6n) { background: var(--t6) }
+html.st-bento .btn { border: 0; border-radius: 999px; background: var(--hover) }
+html.st-bento .btn.pri { background: var(--fg); color: var(--bg) }
+html.st-bento .chip { border: 0; background: var(--hover) }
+html.st-bento .nav a { border-radius: 12px }
+html.st-bento .nav a.on { background: var(--fg); color: var(--bg) }
+html.st-bento .nav a.on .n { color: var(--bg); opacity: .7 }
+html.st-bento h1 { letter-spacing: -.025em }
+html.st-expr .top, html.st-expr .side { border-color: transparent }
+html.st-expr .card, html.st-expr .wdg { border: 0; border-radius: 28px; box-shadow: none }
+html.st-expr .hzms > .hzc:nth-child(4n+1), html.st-expr .dzms > .dzc:nth-child(4n+1) { background: var(--t1) }
+html.st-expr .hzms > .hzc:nth-child(4n+3), html.st-expr .dzms > .dzc:nth-child(4n+3) { background: var(--t3); border-radius: 28px 28px 28px 10px }
+html.st-expr .hzms > .hzc:nth-child(4n+2), html.st-expr .dzms > .dzc:nth-child(4n+2) { border-radius: 10px 28px 28px 28px }
+html.st-expr .btn { border: 0; border-radius: 999px; background: var(--acc-soft); color: var(--fg); transition: transform .25s cubic-bezier(.3, 1.6, .5, 1) }
+html.st-expr .btn:active { transform: scale(.94) }
+html.st-expr .btn.pri { background: var(--acc) }
+html.st-expr .chip { border: 0; border-radius: 10px; background: var(--acc-soft) }
+html.st-expr .nav a { border-radius: 999px }
+html.st-expr .nav a.on { background: var(--acc-soft); color: var(--fg) }
+html.st-expr .ck { border-color: var(--acc) }
+html.st-expr .task.done .ck, html.st-expr .hzr.dn .hzck { animation: xpop .4s cubic-bezier(.3, 1.6, .5, 1) }
+@keyframes xpop { 0% { transform: scale(.6) } 60% { transform: scale(1.2) } 100% { transform: scale(1) } }
+@media (prefers-reduced-motion: reduce) { html.st-expr .task.done .ck, html.st-expr .hzr.dn .hzck { animation: none } html.st-expr .btn { transition: none } }
+html.st-cloud .hzs { background: transparent; border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; padding-left: 2px; padding-right: 2px }
+html.st-cloud .hzs2 { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding-left: 2px }
+html.st-glass .hzs { background: var(--panel); border-color: var(--gedge); border-radius: 20px; backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5) }
+html.st-glass .hzs2 { border: 1px solid var(--gedge); background: color-mix(in srgb, var(--solid) 40%, transparent); border-radius: 16px }
+html.st-bento .hzs { background: var(--t3); border: 0; border-radius: 22px }
+html.st-bento .hzs2 { border: 0; background: var(--hover); border-radius: 16px }
+html.st-expr .hzs { background: var(--acc-soft); border: 0; border-radius: 28px }
+html.st-expr .hzs2 { border: 0; background: color-mix(in srgb, var(--acc-soft) 55%, transparent); border-radius: 20px }
+html.st-cloud :is(.tdtb, .tdload, .dptopbox, .wrb, .gsheet, .list) { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none }
+html.st-glass :is(.tdtb, .tdload, .dptopbox, .wrb, .gsheet, .list) { border: 1px solid var(--gedge); border-radius: 18px }
+html.st-bento :is(.tdtb, .tdload, .dptopbox, .wrb, .gsheet, .list) { border: 0; border-radius: 20px; box-shadow: none }
+html.st-bento :is(.tdtb, .tdload, .gsheet, .list) { background: var(--panel) } html.st-bento .dptopbox { background: var(--t1) } html.st-bento .wrb { background: var(--t3) }
+html.st-expr :is(.tdtb, .tdload, .dptopbox, .wrb, .gsheet, .list) { border: 0; border-radius: 24px; box-shadow: none }
+html.st-expr :is(.tdtb, .tdload, .gsheet, .list) { background: var(--panel) } html.st-expr :is(.dptopbox, .wrb) { background: var(--acc-soft) }
+.lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
+.lkst .lkcard { align-content: start }
+.lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
+.lksv { display: grid; grid-template-columns: 24% 1fr 1fr; grid-template-rows: 30px 9px 9px; gap: 5px; padding: 8px; height: 78px; box-sizing: border-box; background: var(--b); border: 1px solid var(--l); border-radius: 9px }
+.lksv i { display: block; border-radius: 4px }
+.lksv .s { grid-row: 1 / 4; background: color-mix(in srgb, var(--f) 6%, var(--b)) }
+.lksv .x1, .lksv .x2 { background: var(--p) }
+.lksv .r { grid-column: 2 / 4; background: color-mix(in srgb, var(--f) 20%, transparent); border-radius: 3px }
+.lksv .r:last-child { grid-column: 2 / 3; background: var(--a) }
+.lksv-cloud .x1, .lksv-cloud .x2 { background: none; border-top: 1px solid var(--l); border-radius: 0 }
+.lksv-glass { background: linear-gradient(135deg, var(--w1), var(--b) 55%, var(--w2)) }
+.lksv-glass .x1, .lksv-glass .x2, .lksv-glass .s { background: color-mix(in srgb, var(--p) 55%, transparent); border: 1px solid color-mix(in srgb, #fff 60%, transparent); border-radius: 7px }
+.lksv-bento .x1 { background: var(--q1); border-radius: 8px } .lksv-bento .x2 { background: var(--q2); border-radius: 8px }
+.lksv-expr .x1 { background: var(--q1); border-radius: 12px } .lksv-expr .x2 { background: var(--q2); border-radius: 12px 12px 12px 3px } .lksv-expr .r:last-child { border-radius: 9px }</style>
 </head>
 <body>
 <button type="button" class="skipb" id="skipBtn">К содержимому страницы</button>
@@ -3079,7 +3158,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-199";
+var APPV = "zd-app-2026-10-16-200";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -11949,6 +12028,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["200", "Новые стили оформления", ["Вместо прежних цветовых схем — четыре стиля, у каждого светлый и тёмный вариант: «Облако» (тихо и просторно, без теней и рамок, заголовки с засечками — по умолчанию), «Стекло» (матовые полупрозрачные панели поверх мягких обоев), «Бенто» (плитки с мягкими цветными фонами, крупные цифры) и «Экспрессив» (тональные заливки, очень круглые формы, кнопки-таблетки, живые анимации).", "Значки и эмодзи по умолчанию контурные — одним цветом с текстом. Вернуть цветные: «Настройки» → «Оформление» → «Значки».", "Оттенок — 9 спокойных цветов или любой свой. Обои — только у «Стекла»."]],
 ["199", "Обновления — сразу", ["Новая версия приложения подхватывается при первом обновлении страницы: раньше браузер мог до 10 минут показывать прошлую."]],
 ["198", "Советник по целям и планам", ["«🧭 Советник» — как в бюджете, но для целей, задач и планирования: 3–5 советов по вашим данным с причиной и кнопкой-действием. Считается прямо в приложении.", "Цели: срок прошёл; нет открытых шагов; отстаёте от темпа (прогноз к сроку и сколько задач закрывать в неделю); 3 недели без движения («Шаг — на завтра»); срок близко, а на неделе ничего не запланировано («⭐ В главное недели»); слишком много активных целей.", "Задачи: большие задачи без шагов; «жду ответа» дольше недели («Напомнить сегодня»); копятся «Входящие»; заросло «Когда-нибудь»; всё с высоким приоритетом; просроченное растёт третью неделю.", "Планирование: оценки против учтённого времени («Учитывать поправку» — часы плана станут честными); перегруженный день впереди («Перенести N → пт»); скопление дедлайнов; сколько плана на день выполняется (лимит задач в день); ваши продуктивные часы; пропущенный обзор недели. Спринт: набрано больше обычного темпа.", "Где: карточка на главной, начало обзора недели — все советы; «Цели», «Планы», «Все задачи», «Спринт» — советы своей области. Важные — в 🔔 раз в неделю. «✕» — спрятать на месяц, «▾» — свернуть.", "«✨ Спросить ИИ» (в обзоре недели) — только числа, без названий задач и целей, после подтверждения."]],
 ["197", "Главное недели и дедлайны", ["«⭐ Главное недели» в «Сегодня»: кнопка «✎ Изменить» — убрать задачу (×) или найти и добавить другую поиском по всем задачам, не заходя в обзор недели.", "Перенесли дату задачи позже её дедлайна — приложение предложит сдвинуть и дедлайн («Не спрашивать» — выключить)."]],
@@ -15582,9 +15662,7 @@ tstMerge(j); render(); toast("Тестовые данные добавлены: 
 case "tstwipe-yes": var tn = wipeTest(); CONF = null; if (V === "board" && !board(ARG)) go("settings"); render(); toast("Тестовые данные удалены" + (tn ? " · задач: " + tn : "")); return;
 case "look": setLook(el.dataset.k, el.dataset.v); return;
 case "wpup": wpPick(); return;
-case "lkc": var lk = S.opt.look = Object.assign({}, S.opt.look || {}); lk.custom = Object.assign({}, CUSTOM0, lk.custom || {}); lk.custom[el.dataset.k] = el.dataset.k === "t" ? +el.dataset.v : el.dataset.v; optTouch(); save(); applyLook(true); render(); return;
-case "lkcreset": e.preventDefault(); var lk2 = S.opt.look = Object.assign({}, S.opt.look || {}); delete lk2.custom; optTouch(); save(); applyLook(true); render(); return;
-case "lookreset": e.preventDefault(); delete S.opt.look; optTouch(); save(); applyLook(true); render(); toast("Оформление — как было"); return;
+case "lookreset": e.preventDefault(); delete S.opt.look; optTouch(); save(); applyLook(true); render(); toast("Оформление сброшено: «Облако»"); return;
 case "wipe-yes": var wn = wipeAll(); go("inbox"); render(); toast("База очищена" + (wn ? " · удалено задач: " + wn : "")); return;
 case "imp-replace":
 if (!IMPF) return;
@@ -16961,36 +17039,33 @@ if (SYNC.st === "ok") toast("Синхронизировано · " + hm(SYNC.at)
 else if (SYNC.st === "err") toast("Нет связи с Диском: " + SYNC.msg + " · подробности — «Настройки» → «Синхронизация»");
 });
 });
-var SCHEMES = {
-sage: ["Шалфей", ["#f4f5f1", "#ffffff", "#eceee8", "#1c211f", "#67706b", "#dde1da", "#e6e9e2", "#1d6b5a", "#dcefe8", "#c9a24a", "#5b8fc9"], ["#141816", "#1b201d", "#171c19", "#e8ece8", "#9aa49e", "#2c332f", "#232a26", "#5fc4a6", "#1d3a31", "#c9a24a", "#4f7fb8"]],
-ocean: ["Океан", ["#f2f6fa", "#ffffff", "#e8eff6", "#15202b", "#5f6f80", "#d8e2ec", "#e3ebf3", "#1f6fc5", "#dbe9f8", "#22a3b8", "#7a6ad8"], ["#0f1620", "#16202c", "#121b26", "#e6edf5", "#8fa1b5", "#253244", "#1d2937", "#5aa7f0", "#17304a", "#1f9bb0", "#6f5fd0"]],
-lavender: ["Лаванда", ["#f6f4fa", "#ffffff", "#eeeaf6", "#1f1a2b", "#6e6681", "#e2dcec", "#ebe6f3", "#6d4fc2", "#e8e0fa", "#d06aa8", "#5b8fd9"], ["#15121d", "#1d1828", "#191522", "#ece8f5", "#a49cb8", "#2e2740", "#252036", "#a68cf5", "#2e2552", "#c45d9c", "#4f7fd0"]],
-sand: ["Песок", ["#f7f3ec", "#fffdf9", "#efe8dc", "#2a221a", "#7a6c5c", "#e6dccd", "#efe6d8", "#b5562f", "#f6e1d4", "#d6a23a", "#7c9a6a"], ["#1a1612", "#221d18", "#1d1915", "#f0e9df", "#ad9f8d", "#352d25", "#2b241e", "#e88a5c", "#3e2a1f", "#c8932e", "#6d8a5c"]],
-rose: ["Вишня", ["#faf4f5", "#ffffff", "#f3e9eb", "#2a1a1e", "#80646b", "#ecdce0", "#f3e5e8", "#c03a5b", "#f8dde4", "#e08a3c", "#8a5cc7"], ["#1b1214", "#241a1d", "#1f1618", "#f4e8ea", "#b3979d", "#3a2a2e", "#2d2124", "#f07893", "#47222c", "#d47e32", "#8058c0"]],
-sunset: ["Закат", ["#fbf5ef", "#ffffff", "#f5ebe0", "#2b1d14", "#7d6656", "#efdfd0", "#f6e7d9", "#e0601f", "#fde3d2", "#e0a21f", "#c0446a"], ["#1a120d", "#231912", "#1e150f", "#f6ebe2", "#b39d8c", "#3a2a1f", "#2c2017", "#ff8a4c", "#4a2615", "#e0a21f", "#c0446a"]],
-graphite: ["Графит", ["#f4f4f5", "#ffffff", "#ebebed", "#18181b", "#66666e", "#dcdce0", "#e5e5e8", "#3f4a5a", "#e2e6ec", "#8a94a6", "#a3a3ad"], ["#111113", "#19191c", "#151517", "#ececee", "#9a9aa3", "#2a2a2f", "#222226", "#9fb0c8", "#262c36", "#6b7486", "#55555e"]],
-midnight: ["Полночь", ["#ffffff", "#ffffff", "#f5f6f8", "#111216", "#666b73", "#e4e6ea", "#eef0f3", "#3355ff", "#e3e8ff", "#00b3c7", "#a14dff"], ["#000000", "#0b0b0d", "#050506", "#f2f2f2", "#8b8b93", "#1f1f24", "#16161a", "#7b8cff", "#1a1f45", "#00a5b8", "#8f45ee"]],
-mint: ["Мята", ["#eff8f5", "#ffffff", "#e3f2ec", "#14231e", "#5c726a", "#d3e6df", "#e0efe9", "#0c7a6a", "#d5f1ea", "#ef7f5f", "#4f8fd6"], ["#0f1a17", "#15221e", "#121e1a", "#e4f1ec", "#92aaa2", "#23352f", "#1c2c27", "#43d1b5", "#12382f", "#f08a6c", "#5a9be0"]],
-forest: ["Лес", ["#f2f4ee", "#fdfdf9", "#e7ebe0", "#1a2117", "#636e5c", "#d9dfd0", "#e4e9db", "#2f6b3a", "#dcebd9", "#c99a2e", "#8a5a3b"], ["#11160f", "#182015", "#141b12", "#e8ede3", "#9aa691", "#29331f", "#212b1b", "#7fcf8b", "#1e3a22", "#d4a63a", "#b07a52"]],
-berry: ["Ягоды", ["#faf3f7", "#ffffff", "#f3e6ee", "#2a1624", "#7d6274", "#ecd9e5", "#f3e3ed", "#a2347a", "#f6dbec", "#e0a03c", "#5b6fd6"], ["#1a1017", "#23161f", "#1e131b", "#f5e6ef", "#b596a8", "#3a2433", "#2d1c28", "#ea72bb", "#45203a", "#dca043", "#7d8ce8"]],
-aurora: ["Сияние", ["#f1f6f8", "#ffffff", "#e5eef2", "#13202a", "#5d7180", "#d5e2e9", "#e1ebf0", "#0a7878", "#d3efee", "#7b5cff", "#e3699a"], ["#0b1218", "#111b23", "#0e171e", "#e3eef3", "#8ea6b3", "#1f2f3a", "#18252e", "#3fd6c6", "#10363a", "#9a83ff", "#f07aa8"]],
-peach: ["Персик", ["#fdf6f1", "#ffffff", "#f8ebe2", "#2c1e17", "#806a5e", "#f1dfd3", "#f7e8de", "#b54a30", "#fbe0d6", "#e3a12f", "#6f9a7c"], ["#1c1411", "#251b17", "#201714", "#f7ece5", "#b8a194", "#3b2b24", "#2e221d", "#ff9070", "#4a2a20", "#e6ac40", "#7fae8c"]],
-coffee: ["Кофе", ["#f6f2ee", "#fffdfb", "#ede5dd", "#251c16", "#776a5f", "#e2d8ce", "#ece3da", "#7a4a2a", "#efe0d3", "#c08a3e", "#5e8a7a"], ["#15110e", "#1d1814", "#191511", "#efe6de", "#a89a8d", "#31291f", "#27211b", "#d9a37a", "#3b2a1d", "#c99a52", "#6fa08e"]],
-neon: ["Неон", ["#f6f5ff", "#ffffff", "#eceafe", "#16142a", "#646184", "#dedbf5", "#e9e7fb", "#6a2cff", "#e7ddff", "#00a99a", "#ff3d8b"], ["#08070f", "#110f1d", "#0c0b16", "#f0eeff", "#9a96bf", "#24203e", "#1a172e", "#a98bff", "#2a1f5c", "#12e0c8", "#ff5fa2"]],
-nordic: ["Нордик", ["#f3f5f7", "#ffffff", "#e8ecf0", "#1b232b", "#64707c", "#d9e0e6", "#e4e9ee", "#3a6a8c", "#dbe7f0", "#c78b4a", "#6b8f71"], ["#12171c", "#192027", "#151b21", "#e6ecf1", "#97a4b0", "#28323c", "#202931", "#8fbbdc", "#1f3446", "#d39e62", "#7fa587"]]
+var STY = {
+cloud: ["Облако", "Тихо и просторно: без теней и рамок, тонкие линии, заголовки с засечками",
+["#f4f2ee", "#faf9f6", "#f4f2ee", "#2b2a28", "#87827a", "#e5e1d9", "#ebe8e1", "#4f7568", "#e3eae5", "#b9a88a", "#8fa3b5"],
+["#1c1d1f", "#222325", "#1c1d1f", "#dcdad5", "#8e8b85", "#2f3032", "#292a2c", "#93b8a9", "#26302c", "#7d6f58", "#5b6b7a"],
+["#faf9f6", "#faf9f6", "#faf9f6", "#faf9f6", "#faf9f6", "#faf9f6"], ["#222325", "#222325", "#222325", "#222325", "#222325", "#222325"], ["Onest", "Lora", 500, 1]],
+glass: ["Стекло", "Матовые полупрозрачные панели поверх мягких обоев",
+["#e7ebee", "#ffffff", "#ffffff", "#1f2326", "#56606a", "#d5dce2", "#ffffff", "#2f6f8f", "#dcebf3", "#d9c4a3", "#a9c6ad"],
+["#101418", "#1b2026", "#161b20", "#e6ebef", "#9aa6b1", "#2b333b", "#252c33", "#7fb6d2", "#1d3442", "#8a7455", "#4f6b55"],
+["", "", "", "", "", ""], ["", "", "", "", "", ""], ["Inter", "Inter", 600, 0]],
+bento: ["Бенто", "Плитки с мягкими цветными фонами, крупные цифры, большие скругления",
+["#f6f6f4", "#ffffff", "#f6f6f4", "#1d1f1e", "#727874", "#ecece8", "#efefeb", "#2f6b58", "#e3ece6", "#f3ece0", "#e9ecf4"],
+["#131414", "#1c1e1d", "#131414", "#e9ebea", "#959b97", "#2a2c2b", "#242625", "#7fc4a8", "#203a31", "#3a3326", "#262b36"],
+["#e6efe8", "#f3ece0", "#e9ecf4", "#f5e9e6", "#eef0e4", "#ece8f4"], ["#1e2a24", "#2b261e", "#222632", "#2c2220", "#252a1e", "#262232"], ["Manrope", "Manrope", 700, 0]],
+expr: ["Экспрессив", "Тональные заливки, очень круглые формы, кнопки-таблетки, живые анимации",
+["#fbf8ff", "#ffffff", "#f3edf7", "#1d1b20", "#6b6672", "#e9e2ee", "#efe8f4", "#6750a4", "#e8def8", "#ffd8e4", "#eaddff"],
+["#141218", "#1d1b20", "#1a1820", "#e6e0e9", "#a8a1ae", "#322f37", "#2b2930", "#d0bcff", "#4a4458", "#5a3a45", "#3b3350"],
+["#eaddff", "#ffffff", "#ffd8e4", "#ffffff", "#e8def8", "#ffffff"], ["#3b3350", "#1d1b20", "#4a2f3a", "#1d1b20", "#352f45", "#1d1b20"], ["Rubik", "Rubik", 600, 0]]
 };
-var ACCENTS = ["#1d6b5a", "#2f8f3f", "#5a8f29", "#0f8a78", "#1b9aaa", "#0e7490", "#1f6fc5", "#3355ff", "#4f46e5", "#6d4fc2", "#8b3fd1", "#a2347a",
-"#d0508a", "#c03a5b", "#d1453b", "#b8322a", "#e0601f", "#d97706", "#c9a21a", "#a16207", "#8a5a3b", "#6b4f3a", "#3f4a5a", "#52525b"];
+var ACCENTS = ["#4f7568", "#2f6b58", "#2f6f8f", "#4a6fa5", "#6750a4", "#8a5a7a", "#b06a5a", "#9a7a3a", "#4f5660"];
 function accFix(hex, dk) {
 if (!/^#[0-9a-f]{6}$/i.test(hex || "")) return hex; var a = hex.toLowerCase(), g = 0;
 if (!dk) while (hexLum(a) > .3 && g++ < 12) a = hexMix(a, "#000000", .12);
 else while (hexLum(a) < .08 && g++ < 12) a = hexMix(a, "#ffffff", .12);
 return a;
 }
-var GLASS = { off: "Нет", soft: "Лёгкая", strong: "Сильная" }, WALLS = { plain: "Однотонный", grad: "Градиент", aurora: "Аврора", img: "Обои" };
 var WPICS = { mountains: "Горы", waves: "Волны", hills: "Холмы", night: "Звёздное небо", rays: "Лучи", paper: "Клетка", custom: "Своя картинка" };
 var WDIM = { 0: "Ярко", 1: "Приглушить", 2: "Едва заметно" };
-var FONTS = { onest: ["Onest", "Onest"], inter: ["Inter", "Inter"], manrope: ["Manrope", "Manrope"], golos: ["Golos Text", "Golos Text"], plex: ["IBM Plex Sans", "IBM Plex Sans"], nunito: ["Nunito", "Nunito"], ptsans: ["PT Sans", "PT Sans"], roboto: ["Roboto", "Roboto"], montserrat: ["Montserrat", "Montserrat"], lora: ["Lora", "Lora"], ptserif: ["PT Serif", "PT Serif"], system: ["Системный", ""] };
 var FSIZES = { "0.9": "Мелкий", "1": "Обычный", "1.07": "Крупнее", "1.14": "Крупный", "1.22": "Очень крупный" };
 function wpSVG(k, c, dk) {
 var bg = c[0], a = c[7], b = c[9], d = c[10], W = 1600, H = 1000, svg = "";
@@ -17057,7 +17132,7 @@ cv.toBlob(function (bl) {
 if (!bl) { toast("Не удалось прочитать картинку"); return; }
 var id = uid(), m0 = wpMeta();
 wpPut(bl, id).then(function () { wpSetMeta({ id: id, p: "", at: Date.now(), old: m0 && m0.p ? m0.p : "" }); return wpLoad(true); }).then(function () {
-setLook("wall", "img"); setLook("pic", "custom");
+setLook("pic", "custom");
 if (!SYNC.enabled()) { toast("Обои установлены. Чтобы они появились и на других устройствах, войдите через Яндекс"); return; }
 toast("Обои установлены, отправляю на Яндекс Диск…");
 setTimeout(function () { wpUpload().then(function (ok) { toast(ok ? "Обои на Яндекс Диске — появятся на всех устройствах" : "Не удалось отправить обои на Диск — попробую ещё раз при следующей синхронизации"); }); }, 300);
@@ -17072,90 +17147,52 @@ fi.click();
 function fontLink(fam, id, extra) { if (!fam) return; var l = $(id); if (!l) { l = document.createElement("link"); l.rel = "stylesheet"; l.id = id; document.head.appendChild(l); } var href = "https://fonts.googleapis.com/css2?" + fam + (extra || "") + "&display=swap"; if (l.getAttribute("href") !== href) l.setAttribute("href", href); }
 function hexMix(x, y, t) { var p = parseInt(x.slice(1), 16), q = parseInt(y.slice(1), 16), r = function (sh) { return Math.round(((p >> sh) & 255) * (1 - t) + ((q >> sh) & 255) * t); }; return "#" + ((1 << 24) + (r(16) << 16) + (r(8) << 8) + r(0)).toString(16).slice(1); }
 function hexLum(x) { var n = parseInt(x.slice(1), 16), f = function (v) { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(n >> 16 & 255) + .7152 * f(n >> 8 & 255) + .0722 * f(n & 255); }
-var CUSTOM0 = { a: "#1f6fc5", b: "#1f6fc5", c: "#d06aa8", t: 1 };
-var CTINT = { 0: "Почти белый", 1: "Оттенок", 2: "Цветной" };
-function customScheme(cu) {
-cu = Object.assign({}, CUSTOM0, cu || {}); var a = cu.a, b = cu.b, c2 = cu.c, t = +cu.t || 0, k = [[.035, .07, .015, .1, .09], [.09, .15, .03, .18, .15], [.2, .3, .08, .32, .27]][t] || [.09, .15, .03, .18, .15];
-var al = a; while (hexLum(al) > .32) al = hexMix(al, "#000000", .15);
-var L = [hexMix("#ffffff", b, k[0]), hexMix("#ffffff", b, k[2]), hexMix("#ffffff", b, k[1]), hexMix("#16181b", b, .18), hexMix("#6a6f76", b, .22), hexMix("#ffffff", b, k[3]), hexMix("#ffffff", b, k[4]), al, hexMix("#ffffff", al, .14), c2, hexMix(c2, a, .5)];
-var ad = a; while (hexLum(ad) < .22) ad = hexMix(ad, "#ffffff", .15);
-var dt = [.05, .1, .17][t] || .1, bgD = hexMix("#0f1012", b, dt);
-var D = [bgD, hexMix("#17181b", b, dt + .02), hexMix("#131416", b, dt), hexMix("#eceef0", b, .06), hexMix("#9a9ea6", b, .15), hexMix("#2a2c31", b, dt + .05), hexMix("#212327", b, dt + .03), ad, hexMix(bgD, ad, .24), c2, hexMix(c2, a, .5)];
-return ["Своя", L, D];
-}
-function schemeOf(L) { return L.scheme === "custom" ? customScheme((S.opt.look || {}).custom) : SCHEMES[L.scheme]; }
-function lookCfg() { var l = S.opt.look || {}; return { scheme: SCHEMES[l.scheme] || l.scheme === "custom" ? l.scheme : "sage", acc: l.acc || "", glass: GLASS[l.glass] ? l.glass : "soft", wall: WALLS[l.wall] ? l.wall : "aurora", pic: WPICS[l.pic] ? l.pic : "mountains", dim: WDIM[l.dim] !== undefined ? +l.dim : 1, font: FONTS[l.font] ? l.font : "onest", fs: FSIZES[l.fs] ? l.fs : "1", sheet: l.sheet !== undefined && isFinite(+l.sheet) ? Math.max(0, Math.min(100, Math.round(+l.sheet))) : 86, card: l.card !== undefined && l.card !== null && isFinite(+l.card) ? Math.max(30, Math.min(100, Math.round(+l.card))) : null }; }
+function lookCfg() { var l = S.opt.look || {}; return { style: STY[l.style] ? l.style : "cloud", acc: l.acc || "", pic: WPICS[l.pic] ? l.pic : "hills", dim: WDIM[l.dim] !== undefined ? +l.dim : 1, fs: FSIZES[l.fs] ? l.fs : "1", emo: l.emo === "color" ? "color" : "mono" }; }
 function isDark() { var p = themePref(); return p === "dark" || (p === "system" && !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)); }
 function rgba(hex, a) { var n = parseInt(String(hex).slice(1), 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
 var LOOKKEY = "";
 function applyLook(force) {
-var L = lookCfg(), dk = isDark(), key = JSON.stringify(L) + JSON.stringify((S.opt.look || {}).custom || "") + JSON.stringify(wpMeta() || "") + dk + WPURL; if (key === LOOKKEY && !force) return; LOOKKEY = key;
-if (L.wall === "img" && L.pic === "custom" && !WPUPB && (!WPLOADED || ((wpMeta() || {}).id || "") !== (WPID || ""))) { WPID = (wpMeta() || {}).id || ""; wpLoad(); }
-var c = schemeOf(L)[dk ? 2 : 1], st = document.documentElement.style, acc = c[7], soft = c[8];
-if (L.acc) { var LA = accFix(L.acc, dk); acc = dk ? "color-mix(in srgb, " + LA + " 72%, #ffffff)" : LA; soft = "color-mix(in srgb, " + LA + " " + (dk ? 26 : 15) + "%, " + c[1] + ")"; }
-var g = L.glass, ga = g === "strong" ? (dk ? .5 : .52) : g === "soft" ? (dk ? .72 : .7) : 1;
-var v = { "--bg": c[0], "--fg": c[3], "--muted": c[4], "--line": g === "off" ? c[5] : rgba(c[5], dk ? .9 : .85), "--hover": g === "off" ? c[6] : rgba(c[6], .8), "--acc": acc, "--acc-soft": soft,
-"--panel": g === "off" ? c[1] : rgba(c[1], ga), "--side": g === "off" ? c[2] : rgba(c[2], g === "strong" ? .42 : .6), "--pop": g === "off" ? c[1] : rgba(c[1], g === "strong" ? .8 : .88), "--topbg": g === "off" ? c[0] : rgba(c[0], g === "strong" ? .45 : .62),
-"--blur": g === "strong" ? "26px" : "16px", "--solid": c[1] };
-var w1 = L.acc || c[7], k = dk ? 1 : 1.25;
-v["--wall"] = L.wall === "aurora" ? "radial-gradient(48vw 42vw at 6% 4%, " + rgba(w1.charAt(0) === "#" ? w1 : c[7], .26 * k) + ", transparent 70%), radial-gradient(40vw 40vw at 96% 12%, " + rgba(c[9], .2 * k) + ", transparent 70%), radial-gradient(55vw 45vw at 55% 104%, " + rgba(c[10], .2 * k) + ", transparent 72%)"
-: L.wall === "grad" ? "linear-gradient(150deg, " + rgba(w1.charAt(0) === "#" ? w1 : c[7], dk ? .16 : .12) + " 0%, transparent 45%, " + rgba(c[10], dk ? .14 : .1) + " 100%)" : "none";
-if (L.wall === "img") {
-var pic = L.pic === "custom" ? (WPURL ? 'url("' + WPURL + '") center / cover no-repeat' : "") : wpSVG(L.pic, L.acc ? c.slice(0, 7).concat([L.acc]).concat(c.slice(8)) : c, dk);
-var da = [0, dk ? .45 : .4, dk ? .72 : .68][L.dim];
-v["--wall"] = pic ? "linear-gradient(" + rgba(c[0], da) + ", " + rgba(c[0], da) + "), " + pic : "none";
-}
-v["--fs"] = L.fs; v["--sheet"] = L.sheet + "%"; v["--card"] = cardDen(L) + "%";
-var F = FONTS[L.font]; v["--sans"] = F[1] ? '"' + F[1] + '", "Onest", "Segoe UI", system-ui, sans-serif' : 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
-if (F[1] && L.font !== "onest") fontLink("family=" + F[1].replace(/ /g, "+") + ":wght@400;500;600;700", "fontlink");
+var L = lookCfg(), dk = isDark(), gl = L.style === "glass", key = JSON.stringify(L) + JSON.stringify(wpMeta() || "") + dk + WPURL; if (key === LOOKKEY && !force) return; LOOKKEY = key;
+if (gl && L.pic === "custom" && !WPUPB && (!WPLOADED || ((wpMeta() || {}).id || "") !== (WPID || ""))) { WPID = (wpMeta() || {}).id || ""; wpLoad(); }
+var Y = STY[L.style], c = Y[dk ? 3 : 2], st = document.documentElement.style, acc = c[7], soft = c[8], base = c[7];
+if (L.acc && /^#[0-9a-f]{6}$/i.test(L.acc)) { var LA = accFix(L.acc, dk); base = LA; acc = dk ? hexMix(LA, "#ffffff", .3) : LA; soft = hexMix(c[1], LA, dk ? .26 : .14); }
+var v = { "--bg": c[0], "--fg": c[3], "--muted": c[4], "--acc": acc, "--acc-soft": soft, "--solid": c[1], "--onacc": hexLum(acc) > .4 ? (dk ? c[0] : "#1d1b20") : "#ffffff",
+"--line": gl ? (dk ? "rgba(255,255,255,.09)" : "rgba(30,40,50,.1)") : c[5], "--hover": gl ? (dk ? "rgba(255,255,255,.07)" : "rgba(255,255,255,.5)") : c[6],
+"--panel": gl ? rgba(c[1], dk ? .5 : .52) : c[1], "--side": gl ? rgba(c[2], dk ? .38 : .34) : c[2], "--pop": gl ? rgba(c[1], dk ? .84 : .88) : c[1], "--topbg": gl ? rgba(c[0], dk ? .42 : .4) : c[0],
+"--blur": "22px", "--gedge": dk ? "rgba(255,255,255,.08)" : "rgba(255,255,255,.65)", "--sheet": gl ? "74%" : "100%", "--card": gl ? "88%" : "100%", "--fs": L.fs };
+(dk ? Y[5] : Y[4]).forEach(function (x, i) { v["--t" + (i + 1)] = x || c[1]; });
+if (gl) { var pic = L.pic === "custom" ? (WPURL ? 'url("' + WPURL + '") center / cover no-repeat' : "") : wpSVG(L.pic, L.acc ? c.slice(0, 7).concat([base]).concat(c.slice(8)) : c, dk), da = [0, dk ? .4 : .3, dk ? .68 : .6][L.dim]; v["--wall"] = pic ? "linear-gradient(" + rgba(c[0], da) + ", " + rgba(c[0], da) + "), " + pic : "none"; }
+else v["--wall"] = "none";
+var F = Y[6], emo = L.emo === "mono" ? ', "Noto Emoji"' : "";
+v["--sans"] = '"' + F[0] + '"' + emo + ', "Onest", "Segoe UI", system-ui, sans-serif';
+v["--hf"] = '"' + F[1] + '"' + emo + (F[3] ? ", Georgia, serif" : ', "Onest", system-ui, sans-serif'); v["--hw"] = String(F[2]);
+var fam = ["family=" + F[0].replace(/ /g, "+") + ":wght@400;500;600;700"]; if (F[1] !== F[0]) fam.push("family=" + F[1].replace(/ /g, "+") + ":wght@400;500;600"); if (emo) fam.push("family=Noto+Emoji:wght@400");
+fontLink(fam.join("&"), "fontlink");
 Object.keys(v).forEach(function (x) { st.setProperty(x, v[x]); });
-document.documentElement.classList.toggle("glass", g !== "off"); document.documentElement.classList.toggle("nosheet", !L.sheet);
+var cl = document.documentElement.classList; Object.keys(STY).forEach(function (k) { cl.toggle("st-" + k, k === L.style); }); cl.toggle("glass", gl); cl.remove("nosheet"); cl.toggle("emomono", L.emo === "mono");
 var mt = document.querySelector('meta[name="theme-color"]'); if (mt) mt.setAttribute("content", c[0]);
 }
-if (lookCfg().wall === "img" && lookCfg().pic === "custom") wpLoad();
+if (lookCfg().style === "glass" && lookCfg().pic === "custom") wpLoad();
 if (window.matchMedia) try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { applyLook(); }); } catch (e) { /* старый браузер */ }
-function cardDen(L) { return L.card !== null ? L.card : Math.max(40, L.sheet); }
-document.addEventListener("input", function (e) { if (!e.target.dataset || !e.target.dataset.lkcard) return; var lk = S.opt.look = Object.assign({}, S.opt.look || {}); lk.card = +e.target.value; applyLook(true); var o = document.getElementById("lkcardv"); if (o) o.textContent = e.target.value + " %"; });
-document.addEventListener("change", function (e) { if (!e.target.dataset || !e.target.dataset.lkcard) return; optTouch(); save(); });
-function sheetTxt(n) { return n ? n + " %" + (n === 100 ? " · сплошная" : "") : "нет"; }
-document.addEventListener("input", function (e) { if (!e.target.dataset || !e.target.dataset.lksheet) return; var lk = S.opt.look = Object.assign({}, S.opt.look || {}); lk.sheet = +e.target.value; applyLook(true); var o = document.getElementById("lksheetv"); if (o) o.textContent = sheetTxt(+e.target.value); });
-document.addEventListener("change", function (e) { if (!e.target.dataset || !e.target.dataset.lksheet) return; optTouch(); save(); });
-function lookInitCustom() { var lk = S.opt.look = Object.assign({}, S.opt.look || {}); if (lk.custom) return; var cur = lookCfg(), sc = schemeOf(cur)[1]; lk.custom = { a: cur.acc || sc[7], b: cur.acc || sc[7], c: sc[9], t: 1 }; }
-document.addEventListener("input", function (e) { var k = e.target.dataset && e.target.dataset.lkc; if (!k) return; var lk = S.opt.look = Object.assign({}, S.opt.look || {}); lk.custom = Object.assign({}, CUSTOM0, lk.custom || {}); lk.custom[k] = e.target.value; applyLook(true); });
-document.addEventListener("change", function (e) { var k = e.target.dataset && e.target.dataset.lkc; if (!k) return; optTouch(); save(); render(); });
 document.addEventListener("input", function (e) { if (e.target.id !== "lkaccpick") return; var L0 = S.opt.look = Object.assign({}, S.opt.look || {}); L0.acc = e.target.value; applyLook(true); });
 document.addEventListener("change", function (e) { if (e.target.id !== "lkaccpick") return; setLook("acc", e.target.value.toLowerCase()); });
 function setLook(k, v) {
-if (k === "scheme" && v === "custom") lookInitCustom(); var L = S.opt.look = Object.assign({}, S.opt.look || {}); if (v === "" || v === null) delete L[k]; else L[k] = v; optTouch(); save(); applyLook(true); render(); }
+var L = S.opt.look = Object.assign({}, S.opt.look || {}); if (v === "" || v === null) delete L[k]; else L[k] = v; optTouch(); save(); applyLook(true); render(); }
 function lookSection() {
 var L = lookCfg(), dk = isDark(), th = themePref();
 var seg = function (k, map, cur, order) { return '<div class="seg">' + (order || Object.keys(map)).map(function (x) { return '<button type="button" data-a="look" data-k="' + k + '" data-v="' + x + '" class="' + (cur === x ? "on" : "") + '">' + map[x] + "</button>"; }).join("") + "</div>"; };
 var h = '<section class="card" id="s-look"><h2>Оформление</h2>';
 h += '<div class="lkrow"><span class="lbl">Режим</span><div class="seg" role="radiogroup" aria-label="Тема">' + [["system", "Как в системе"], ["light", "Светлый"], ["dark", "Тёмный"]].map(function (o) { return '<button type="button" data-theme="' + o[0] + '" class="' + (th === o[0] ? "on" : "") + '" role="radio" aria-checked="' + (th === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div></div>";
-h += '<div class="lbl" style="margin-top:14px">Цветовая схема</div><div class="lkgrid">' + Object.keys(SCHEMES).concat(["custom"]).map(function (k) {
-var sc = k === "custom" ? customScheme((S.opt.look || {}).custom) : SCHEMES[k], a = sc[dk ? 2 : 1], b = sc[dk ? 1 : 2];
-var mini = function (c) { return '<span class="lkmini" style="background:' + c[0] + ';border-color:' + c[5] + '"><i class="s" style="background:' + c[2] + '"><b style="background:' + c[8] + '"></b><b></b><b></b></i><i class="m" style="background:' + c[1] + ';border-color:' + c[5] + '"><u style="background:' + c[3] + '"></u><u style="background:' + c[4] + '"></u><u style="background:' + c[4] + '"></u><em style="background:' + c[7] + '"></em></i></span>'; };
-return '<button type="button" class="lkcard' + (L.scheme === k ? " on" : "") + (k === "custom" ? " lkcus" : "") + '" data-a="look" data-k="scheme" data-v="' + k + '"><span class="lkpair">' + mini(a) + mini(b) + '</span><span class="lkn">' + (k === "custom" ? "🎨 Своя схема" : sc[0]) + "</span></button>";
+h += '<div class="lbl" style="margin-top:14px">Стиль</div><div class="lkgrid lkst">' + Object.keys(STY).map(function (k) {
+var Y = STY[k], c = Y[dk ? 3 : 2], t = Y[dk ? 5 : 4];
+return '<button type="button" class="lkcard' + (L.style === k ? " on" : "") + '" data-a="look" data-k="style" data-v="' + k + '"><span class="lksv lksv-' + k + '" style="--b:' + c[0] + ";--p:" + c[1] + ";--l:" + c[5] + ";--a:" + c[7] + ";--f:" + c[3] + ";--m:" + c[4] + ";--q1:" + (t[0] || c[1]) + ";--q2:" + (t[2] || c[1]) + ";--w1:" + c[9] + ";--w2:" + c[10] + '"><i class="s"></i><i class="x1"></i><i class="x2"></i><i class="r"></i><i class="r"></i></span><span class="lkn" style="font-family:' + (Y[6][3] ? "Lora, Georgia, serif" : "'" + Y[6][0] + "', system-ui") + '">' + Y[0] + '</span><small class="lkd">' + Y[1] + "</small></button>";
 }).join("") + "</div>";
-if (L.scheme === "custom") {
-var cu = Object.assign({}, CUSTOM0, (S.opt.look || {}).custom || {});
-var cpick = function (key, label, hint, sw) { return '<div class="lkcr"><span class="lbl">' + label + '<small>' + hint + '</small></span><input type="color" class="lkcol" data-lkc="' + key + '" value="' + cu[key] + '" aria-label="' + label + '"><div class="sw">' + sw.map(function (x) { return '<button type="button" data-a="lkc" data-k="' + key + '" data-v="' + x + '" class="' + (cu[key] === x ? "on" : "") + '" style="background:' + x + '"></button>'; }).join("") + "</div></div>"; };
-h += '<div class="lkcus-ed"><div class="lkcush"><b>🎨 Своя схема</b><span class="muted">меняйте цвета — приложение перекрашивается сразу; тёмный вариант рассчитывается сам</span></div>' +
-cpick("a", "Основной цвет", "кнопки, выделение, флажок в списке", ["#1f6fc5", "#3355ff", "#6d4fc2", "#c03a5b", "#e0601f", "#2f8f3f", "#1b9aaa", "#3f4a5a"]) +
-cpick("b", "Цвет фона", "в какой оттенок окрасить фон и панели", ["#1f6fc5", "#6d4fc2", "#c03a5b", "#e0a21f", "#2f8f6f", "#8d6748", "#7d8783", "#d06aa8"]) +
-cpick("c", "Второй цвет", "для обоев и фона «аврора»", ["#d06aa8", "#e0a21f", "#22a3b8", "#7a6ad8", "#e0601f", "#5b8fc9", "#97c459", "#f09595"]) +
-'<div class="lkrow"><span class="lbl">Насыщенность фона</span><div class="seg">' + [0, 1, 2].map(function (x) { return '<button type="button" data-a="lkc" data-k="t" data-v="' + x + '" class="' + (+cu.t === x ? "on" : "") + '">' + CTINT[x] + "</button>"; }).join("") + '</div></div><p class="muted" style="margin:8px 0 0"><a href="#" data-a="lkcreset">Начать заново</a></p></div>';
-}
-h += '<div class="lbl" style="margin-top:14px">Акцентный цвет</div><div class="sw lkacc"><button type="button" data-a="look" data-k="acc" data-v="" class="lkauto' + (!L.acc ? " on" : "") + '" title="Как в схеме">◐</button>' + ACCENTS.concat(L.acc && ACCENTS.indexOf(L.acc) < 0 ? [L.acc] : []).map(function (x) { return '<button type="button" data-a="look" data-k="acc" data-v="' + x + '" class="' + (L.acc === x ? "on" : "") + '" style="background:' + x + '" title="' + x + '"></button>'; }).join("") +
-'<label class="lkpick" title="Любой цвет — откроется палитра"><input type="color" id="lkaccpick" value="' + (/^#[0-9a-f]{6}$/i.test(L.acc || "") ? L.acc : "#1f6fc5") + '" aria-label="Выбрать любой акцентный цвет"><span>любой цвет</span></label></div>';
-h += '<div class="lkrow"><span class="lbl">Прозрачность окон</span>' + seg("glass", GLASS, L.glass) + "</div>";
-h += '<div class="lkrow"><span class="lbl">Подложка под задачами</span><input type="range" class="lkrange" min="0" max="100" step="5" value="' + L.sheet + '" data-lksheet="1" aria-label="Плотность подложки под списками задач"><span class="lkval" id="lksheetv">' + sheetTxt(L.sheet) + '</span><button type="button" class="btn sm" data-a="look" data-k="sheet" data-v="">Как было</button></div>' +
-'<p class="muted" style="margin:4px 0 0">Фон под списками и заголовками групп: 0 — без подложки, 100 — сплошная. Помогает читать задачи поверх обоев.</p>' +
-'<div class="lkrow"><span class="lbl">Карточка задачи</span><input type="range" class="lkrange" min="30" max="100" step="5" value="' + cardDen(L) + '" data-lkcard="1" aria-label="Плотность фона карточки задачи"><span class="lkval" id="lkcardv">' + cardDen(L) + " %" + (L.card === null ? " · как подложка" : "") + "</span>" + (L.card === null ? "" : '<button type="button" class="btn sm" data-a="look" data-k="card" data-v="">Как подложка</button>') + "</div>" +
-'<p class="muted" style="margin:4px 0 0">Насколько плотный фон у карточки задачи, которая открывается справа: 100 — сплошной, меньше — сквозь карточку видны список и обои (с размытием). Пока ползунок не трогали, карточка повторяет подложку под задачами.</p>';
-h += '<div class="lkrow"><span class="lbl">Фон</span>' + seg("wall", WALLS, L.wall) + "</div>";
-if (L.wall === "img") {
-var c0 = schemeOf(L)[dk ? 2 : 1];
+h += '<div class="lkrow"><span class="lbl">Оттенок</span><div class="sw lkacc"><button type="button" data-a="look" data-k="acc" data-v="" class="lkauto' + (!L.acc ? " on" : "") + '" title="Как в стиле">◐</button>' + ACCENTS.concat(L.acc && ACCENTS.indexOf(L.acc) < 0 ? [L.acc] : []).map(function (x) { return '<button type="button" data-a="look" data-k="acc" data-v="' + x + '" class="' + (L.acc === x ? "on" : "") + '" style="background:' + x + '" title="' + x + '"></button>'; }).join("") +
+'<label class="lkpick" title="Любой цвет — откроется палитра"><input type="color" id="lkaccpick" value="' + (/^#[0-9a-f]{6}$/i.test(L.acc || "") ? L.acc : "#4f7568") + '" aria-label="Выбрать любой цвет"><span>любой</span></label></div></div>';
+h += '<div class="lkrow"><span class="lbl">Значки</span>' + seg("emo", { mono: "Контурные", color: "Цветные" }, L.emo) + '<span class="muted">контурные — одним цветом с текстом, спокойнее для глаз</span></div>';
+if (L.style === "glass") {
+h += '<div class="lbl" style="margin-top:14px">Обои под стеклом</div>';
+var c0 = STY.glass[dk ? 3 : 2];
 h += '<div class="lkwp">' + Object.keys(WPICS).map(function (k) {
 var bgc = k === "custom" ? (WPURL ? 'url("' + WPURL + '") center / cover no-repeat' : "var(--hover)") : wpSVG(k, c0, dk);
 return '<button type="button" class="lkwc' + (L.pic === k ? " on" : "") + '" data-a="' + (k === "custom" && !WPURL ? "wpup" : "look") + '" data-k="pic" data-v="' + k + '"><span class="lkwi" style="background:' + esc(bgc) + '">' + (k === "custom" && !WPURL ? "＋" : "") + '</span><span>' + WPICS[k] + "</span></button>";
@@ -17163,10 +17200,8 @@ return '<button type="button" class="lkwc' + (L.pic === k ? " on" : "") + '" dat
 h += '<div class="lkrow"><span class="lbl">Картинка</span>' + seg("dim", WDIM, String(L.dim)) + (L.pic === "custom" ? '<button type="button" class="btn sm" data-a="wpup">Загрузить другую…</button>' : "") + "</div>";
 if (L.pic === "custom") { var wst = { disk: "☁ Хранится на вашем Яндекс Диске и появляется на всех устройствах.", remote: "☁ Загружена с вашего Яндекс Диска (её поставили на другом устройстве).", local: "Пока только на этом устройстве — уйдёт на Яндекс Диск при синхронизации.", nologin: "Картинка лежит на вашем Яндекс Диске — войдите через Яндекс («Данные и синхронизация»), чтобы она появилась здесь.", err: "Не удалось получить картинку с Яндекс Диска — проверьте связь.", uperr: "Не удалось отправить картинку на Яндекс Диск — попробую ещё раз при следующей синхронизации." }[WPST] || (SYNC.enabled() ? "" : "Без входа через Яндекс картинка хранится только на этом устройстве."); if (wst) h += '<p class="muted" style="margin:6px 0 0">' + wst + "</p>"; }
 }
-fontLink(Object.keys(FONTS).filter(function (k) { return FONTS[k][1]; }).map(function (k) { return "family=" + FONTS[k][1].replace(/ /g, "+"); }).join("&"), "fontprev", "&text=" + encodeURIComponent("Съешь же ещё этих мягких французских булок АаБбВв OnestInterManropeGolosTextIBMPlexSansNunitoPTSansRobotoMontserratLoraSerif0123456789"));
-h += '<div class="lbl" style="margin-top:14px">Шрифт</div><div class="lkfonts">' + Object.keys(FONTS).map(function (k) { var F = FONTS[k]; return '<button type="button" class="lkfont' + (L.font === k ? " on" : "") + '" data-a="look" data-k="font" data-v="' + k + '" style="font-family:' + (F[1] ? "'" + F[1] + "'," : "") + 'system-ui"><b>' + esc(F[0]) + "</b><small>Съешь ещё этих мягких булок</small></button>"; }).join("") + "</div>";
 h += '<div class="lkrow"><span class="lbl">Размер текста</span>' + seg("fs", FSIZES, L.fs, ["0.9", "1", "1.07", "1.14", "1.22"]) + "</div>";
-h += '<p class="muted" style="margin:10px 0 0">Всё оформление одинаково на всех устройствах, кроме светлого или тёмного режима (☾ вверху справа). Своя картинка-обои хранится на вашем Яндекс Диске. <a href="#" data-a="lookreset">Вернуть как было</a></p></section>';
+h += '<p class="muted" style="margin:10px 0 0">Стиль и оттенок одинаковы на всех устройствах; светлый или тёмный режим (☾ вверху справа) — свой на каждом. Своя картинка-обои хранится на вашем Яндекс Диске. <a href="#" data-a="lookreset">Сбросить оформление</a></p></section>';
 return h;
 }
 function themePref() { return LS.get("zd-theme") || "system"; }
