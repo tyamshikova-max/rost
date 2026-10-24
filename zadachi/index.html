@@ -3079,7 +3079,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-198";
+var APPV = "zd-app-2026-10-16-199";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -11949,6 +11949,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["199", "Обновления — сразу", ["Новая версия приложения подхватывается при первом обновлении страницы: раньше браузер мог до 10 минут показывать прошлую."]],
 ["198", "Советник по целям и планам", ["«🧭 Советник» — как в бюджете, но для целей, задач и планирования: 3–5 советов по вашим данным с причиной и кнопкой-действием. Считается прямо в приложении.", "Цели: срок прошёл; нет открытых шагов; отстаёте от темпа (прогноз к сроку и сколько задач закрывать в неделю); 3 недели без движения («Шаг — на завтра»); срок близко, а на неделе ничего не запланировано («⭐ В главное недели»); слишком много активных целей.", "Задачи: большие задачи без шагов; «жду ответа» дольше недели («Напомнить сегодня»); копятся «Входящие»; заросло «Когда-нибудь»; всё с высоким приоритетом; просроченное растёт третью неделю.", "Планирование: оценки против учтённого времени («Учитывать поправку» — часы плана станут честными); перегруженный день впереди («Перенести N → пт»); скопление дедлайнов; сколько плана на день выполняется (лимит задач в день); ваши продуктивные часы; пропущенный обзор недели. Спринт: набрано больше обычного темпа.", "Где: карточка на главной, начало обзора недели — все советы; «Цели», «Планы», «Все задачи», «Спринт» — советы своей области. Важные — в 🔔 раз в неделю. «✕» — спрятать на месяц, «▾» — свернуть.", "«✨ Спросить ИИ» (в обзоре недели) — только числа, без названий задач и целей, после подтверждения."]],
 ["197", "Главное недели и дедлайны", ["«⭐ Главное недели» в «Сегодня»: кнопка «✎ Изменить» — убрать задачу (×) или найти и добавить другую поиском по всем задачам, не заходя в обзор недели.", "Перенесли дату задачи позже её дедлайна — приложение предложит сдвинуть и дедлайн («Не спрашивать» — выключить)."]],
 ["196", "Без мигания", ["Страница больше не собирается заново при каждом изменении: меняется только то, что изменилось. Не мигают карточки главной и «Дня за днём», не перезагружаются картинки, не сбрасывается прокрутка внутри блоков, курсор остаётся в поле.", "Если что-то стало показываться странно — «Настройки» → «Диагностика» → «Перерисовывать страницу целиком» вернёт прежний способ."]],
@@ -17255,7 +17256,7 @@ LS.set("zd-daytopmig", "1");
 BOOT.end = performance.now();
 window.ZD = { touch: touch, save: save, bnTick: bnTick, bnAct: bnAct, food: { menuNeeds: menuNeeds, menuObj: menuObj, recCalc: recCalc, parseIng: parseIng, findProd: findProd, recipe: recipe, recFromHtml: recFromHtml, recFromText: recFromText, rosstatParse: rosstatParse, priceCalc: priceCalc }, AI: AI, aiApply: aiApply, setAIP: function (x) { AIP = x; render(); }, habits: habits, hMark: hMark, hStreak: hStreak, doneEvents: doneEvents, CAL: CAL, occIn: occIn, reorderTask: reorderTask, palBuild: function (q) { palBuild(q); return PAL.items; }, SELS: function () { return selIds(); }, taskCmd: taskCmd, pasteInto: pasteInto, taskMenu: taskMenu, ensureSprint: ensureSprint, monday: monday, setCol: setCol, S: S, parseQuick: parseQuick, nextOcc: nextOcc, ruleText: ruleText, ruleOf: ruleOf, nextAfterDone: nextAfterDone, remWanted: remWanted, mergeList: mergeList, SRV: SRV, filterRes: filterRes, moveProj: moveProj, moveTaskTo: moveTaskTo, task: task };
 })();</script>
-<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (r) { r.update(); }).catch(function () {});</script>
 
 </body>
 </html>
