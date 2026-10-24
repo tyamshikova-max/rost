@@ -1714,6 +1714,21 @@ html.st-bento :is(.tdtb, .tdload, .dptopbox, .wrb, .gsheet, .list) { border: 0; 
 html.st-bento :is(.tdtb, .tdload, .gsheet, .list) { background: var(--panel) } html.st-bento .dptopbox { background: var(--t1) } html.st-bento .wrb { background: var(--t3) }
 html.st-expr :is(.tdtb, .tdload, .dptopbox, .wrb, .gsheet, .list) { border: 0; border-radius: 24px; box-shadow: none }
 html.st-expr :is(.tdtb, .tdload, .gsheet, .list) { background: var(--panel) } html.st-expr :is(.dptopbox, .wrb) { background: var(--acc-soft) }
+.top .brand i.bm { width: 28px; height: 28px; background: none; color: inherit; font-size: inherit; flex: none; display: block; border-radius: 0 }
+.bm svg { width: 100%; height: 100%; display: block; overflow: visible }
+.bm-b { fill: var(--acc) } .bm-c { fill: none; stroke: var(--onacc, #fff); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round }
+.top .brand span { font-family: var(--hf, var(--sans)); font-weight: var(--hw, 700); font-size: calc(19px * var(--fs)); letter-spacing: -.01em }
+html.st-cloud .bm-b { fill: none; stroke: var(--fg); stroke-width: 1.6 } html.st-cloud .bm-c { stroke: var(--acc); stroke-width: 2.2 }
+html.st-glass .bm-b { fill: color-mix(in srgb, var(--acc) 82%, transparent); stroke: var(--gedge); stroke-width: 1.2 }
+html.st-bento .bm-b { fill: var(--fg) } html.st-bento .bm-c { stroke: var(--bg) }
+html.st-expr .bm-b { rx: 13.5px } html.st-expr .bm svg { transition: transform .35s cubic-bezier(.3, 1.6, .5, 1) } html.st-expr .brand:hover .bm svg { transform: rotate(-8deg) scale(1.06) }
+@media (min-width: 861px) {
+body:not(.sideoff) .top .brand { align-self: stretch; margin: calc(-10px - env(safe-area-inset-top, 0px)) 0 -10px -16px; padding: env(safe-area-inset-top, 0px) 16px 0; width: var(--sidew, 270px); box-sizing: border-box; background: var(--side); border-right: 1px solid var(--line); gap: 10px }
+body.rail:not(.sideoff) .top .brand { width: calc(52px + var(--sidew, 270px)); padding-left: 12px }
+body:not(.sideoff) .top .brand + .appsb, body:not(.sideoff) .top .brand ~ .q { margin-left: 6px }
+}
+html.st-cloud .top .brand, html.st-bento .top .brand, html.st-expr .top .brand { border-right-color: transparent }
+html.st-glass .top .brand { background: transparent; border-right-color: var(--gedge) }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -6876,7 +6891,7 @@ html.st-expr :is(.tdtb, .tdload, .gsheet, .list) { background: var(--panel) } ht
 <button type="button" class="skipb" id="skipBtn">К содержимому страницы</button>
 <header class="top">
   <button class="ibtn" id="menuBtn" type="button" aria-label="Меню"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-  <a class="brand" href="#home" id="brand"><i>✓</i><span>Задачи</span></a>
+  <a class="brand" href="#home" id="brand" aria-label="Задачи — главная"><i class="bm" aria-hidden="true"><svg viewBox="0 0 32 32"><rect class="bm-b" x="2.5" y="2.5" width="27" height="27" rx="9"/><path class="bm-c" d="M10.5 16.5l3.8 3.8 7.4-8.3"/></svg></i><span>Задачи</span></a>
   <a class="ibtn appsb" href="#apps" title="Все разделы" aria-label="Все разделы">▦</a><button class="ibtn ntfb" id="ntfBtn" type="button" data-a="ntfopen" title="Уведомления (Alt+B)" aria-label="Уведомления">🔔<i class="ntfc" hidden></i></button>
   <input class="q" id="q" type="search" placeholder="Поиск · Ctrl+K — команды" aria-label="Поиск по задачам">
   <span id="xpSlot"></span><button class="ibtn" id="fsBtn" type="button" data-a="fsnd" title="Звуки для фокуса">🎧</button><button class="ibtn" id="enBtn" type="button" data-a="enf" title="Сколько сил сейчас: показать только подходящие задачи">🔋</button><button class="ibtn ctxb" id="ctxBtn" type="button" hidden title="Где я сейчас: показывать только задачи для этого места (и задачи без контекста)"></button>
@@ -8297,7 +8312,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-201";
+var APPV = "zd-app-2026-10-16-202";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -17167,6 +17182,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["202", "Новый логотип", ["Логотип — теперь верх левой колонки, одним целым с меню. Значок — простая галочка, которая в каждом стиле своя: в «Облаке» — тонкий контур, в «Бенто» — тёмная плитка, в «Экспрессиве» — круглая, в «Стекле» — полупрозрачная. Название — шрифтом заголовков стиля."]],
 ["201", "Главная — сразу на всю ширину", ["Карточки главной и «Дня за днём» растягиваются вместе с окном сразу: раньше после скрытия боковой панели справа мог оставаться пустой край, пока страница не перерисуется."]],
 ["200", "Новые стили оформления", ["Вместо прежних цветовых схем — четыре стиля, у каждого светлый и тёмный вариант: «Облако» (тихо и просторно, без теней и рамок, заголовки с засечками — по умолчанию), «Стекло» (матовые полупрозрачные панели поверх мягких обоев), «Бенто» (плитки с мягкими цветными фонами, крупные цифры) и «Экспрессив» (тональные заливки, очень круглые формы, кнопки-таблетки, живые анимации).", "Значки и эмодзи по умолчанию контурные — одним цветом с текстом. Вернуть цветные: «Настройки» → «Оформление» → «Значки».", "Оттенок — 9 спокойных цветов или любой свой. Обои — только у «Стекла»."]],
 ["199", "Обновления — сразу", ["Новая версия приложения подхватывается при первом обновлении страницы: раньше браузер мог до 10 минут показывать прошлую."]],
