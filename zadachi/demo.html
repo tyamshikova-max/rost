@@ -8203,7 +8203,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-193";
+var APPV = "zd-app-2026-10-16-194";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -16637,7 +16637,7 @@ return '<div class="r aprow"><button type="button" class="btn sm" data-a="apgo" 
 var ENF = +(LS.get("zd-enf") || 0), ENN = ["", "🪫 мало сил", "🔋 средне", "⚡ много сил"];
 function enShowBtn() { var b = $("enBtn"); if (!b) return; b.classList.toggle("on", !!ENF); b.textContent = ENF ? ["", "🪫", "🔋", "⚡"][ENF] : "🔋"; b.title = ENF ? "Показаны задачи: " + ENN[ENF] + " и проще. Нажмите, чтобы сменить" : "Сколько сил сейчас: показать только подходящие задачи"; }
 function enCtx(c) { ENF = +c; if (ENF) LS.set("zd-enf", String(ENF)); else LS.del("zd-enf"); DV++; render(); toast(ENF ? "Показаны задачи с энергией «" + ENN[ENF] + "» и проще (у остальных энергия не указана — в «🔋» меню задачи)" : "Показаны все задачи"); }
-var WRVS = [["inbox", "📥 Разобрать «Входящие»", "Каждой задаче — проект, дата или «Когда-нибудь»; лишнее удалить."], ["late", "⏰ Просроченное", "Перенести на реальные даты или отменить то, что уже не нужно."], ["proj", "📁 Проекты без следующего шага", "У каждого живого проекта должна быть хотя бы одна открытая задача."], ["wait", "⏳ «Жду ответа»", "Кому напомнить? Что уже можно закрыть?"], ["some", "💭 «Когда-нибудь»", "Пролистать: что пора взять в работу, что удалить."], ["goals", "🎯 Цели", "Есть ли движение? Какой шаг сделать на этой неделе?"], ["top", "⭐ Три главных дела недели", "Выберите до трёх задач — они будут видны в «Сегодня» всю неделю."], ["note", "✍ Итоги прошлой недели", "Что получилось, что нет, что поменять."]];
+var WRVS = [["inbox", "📥 Разобрать «Входящие»", "Каждой задаче — проект, дата или «Когда-нибудь»; лишнее удалить."], ["late", "⏰ Просроченное", "Перенести на реальные даты или отменить то, что уже не нужно."], ["proj", "📁 Проекты без следующего шага", "У каждого живого проекта должна быть хотя бы одна открытая задача. Проекты-«папки» с подпроектами не считаются — шаги у них в подпроектах."], ["wait", "⏳ «Жду ответа»", "Кому напомнить? Что уже можно закрыть?"], ["some", "💭 «Когда-нибудь»", "Пролистать: что пора взять в работу, что удалить."], ["goals", "🎯 Цели", "Есть ли движение? Какой шаг сделать на этой неделе?"], ["top", "⭐ Три главных дела недели", "Выберите до трёх задач — они будут видны в «Сегодня» всю неделю."], ["note", "✍ Итоги прошлой недели", "Что получилось, что нет, что поменять."]];
 function wrKey() { return dKey(monday(today0())); }
 function wrRec() { var o = S.opt.wrev = S.opt.wrev || {}, k = wrKey(); return o[k] = o[k] || { st: {}, top: [] }; }
 function wrTop() { var r = (S.opt.wrev || {})[wrKey()]; return r ? (r.top || []).map(task).filter(function (t) { return t && !t.del; }) : []; }
@@ -16649,7 +16649,7 @@ return h;
 }
 function vWeekly() {
 if (LS.get("zd-wrgo") !== wrKey()) LS.set("zd-wrgo", wrKey());
-var r = wrRec(), t0 = today0(), inbox = inboxList().length, late = tasks().filter(function (t) { return !t.done && isLate(t); }).length, noNext = projects().filter(function (p) { return !p.arch && !p.done && !tasks().some(function (t) { return t.pid === p.id && !t.done; }); }), wait = waitList().length, some = (typeof somedayList === "function" ? somedayList() : []).length, gl = live(S.goals || []).filter(function (g) { return (g.st || "active") === "active"; });
+var r = wrRec(), t0 = today0(), inbox = inboxList().length, late = tasks().filter(function (t) { return !t.done && isLate(t); }).length, noNext = projects().filter(function (p) { return !p.arch && !isArch(p.id) && !p.done && !pkids(p.id).length && !tasks().some(function (t) { return t.pid === p.id && !t.done; }); }), wait = waitList().length, some = (typeof somedayList === "function" ? somedayList() : []).length, gl = live(S.goals || []).filter(function (g) { return (g.st || "active") === "active"; });
 var cnt = { inbox: inbox, late: late, proj: noNext.length, wait: wait, some: some, goals: gl.length }, link = { inbox: "#inbox", late: "#all", wait: "#waiting", some: "#someday", goals: "#goals" }, done = WRVS.filter(function (s) { return r.st[s[0]]; }).length;
 var h = head("🗓 Обзор недели", "Неделя с " + new Date(monday(t0)).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + ". Пройдите шаги сверху вниз — отмечайте сделанное. Обзор раз в неделю держит систему в порядке: ничего не теряется, главное видно.");
 h += '<div class="bcbar wrbar"><i style="width:' + Math.round(done / WRVS.length * 100) + '%"></i></div><ol class="wrl">' + WRVS.map(function (s) {
@@ -17050,6 +17050,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["194", "Обзор недели — проекты", ["Шаг «Проекты без следующего шага» больше не показывает проекты-«папки» (у которых есть подпроекты) и архивные — следующий шаг у них в подпроектах."]],
 ["193", "Обзор недели — не потеряться", ["Если обзор недели начат и не закончен, на любой другой странице вверху — полоса «🗓 Идёт обзор недели · шаг N из 8» и кнопка «↩ Вернуться к обзору». ✕ — убрать полосу (обзор останется как есть)."]],
 ["192", "Обзор недели — и в субботу", ["Плашка «Конец недели — время для обзора» в «Сегодня» и напоминание в 🔔 теперь появляются в пятницу, субботу, воскресенье и понедельник — пока обзор не пройден."]],
 ["191", "Мелочи", ["«День за днём»: в «✎ Настроить страницу» у карточек стрелки ↑ ↓ — выше и ниже в своей колонке.", "«Бюджет»: карточку «🧭 Советник» можно свернуть — щёлкните по заголовку; в свёрнутом виде видно, сколько советов и сколько важных."]],
