@@ -8203,7 +8203,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-192";
+var APPV = "zd-app-2026-10-16-193";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -16648,6 +16648,7 @@ if ((wd === 0 || wd === 5 || wd === 6 || wd === 1) && !(r && r.done)) h += '<div
 return h;
 }
 function vWeekly() {
+if (LS.get("zd-wrgo") !== wrKey()) LS.set("zd-wrgo", wrKey());
 var r = wrRec(), t0 = today0(), inbox = inboxList().length, late = tasks().filter(function (t) { return !t.done && isLate(t); }).length, noNext = projects().filter(function (p) { return !p.arch && !p.done && !tasks().some(function (t) { return t.pid === p.id && !t.done; }); }), wait = waitList().length, some = (typeof somedayList === "function" ? somedayList() : []).length, gl = live(S.goals || []).filter(function (g) { return (g.st || "active") === "active"; });
 var cnt = { inbox: inbox, late: late, proj: noNext.length, wait: wait, some: some, goals: gl.length }, link = { inbox: "#inbox", late: "#all", wait: "#waiting", some: "#someday", goals: "#goals" }, done = WRVS.filter(function (s) { return r.st[s[0]]; }).length;
 var h = head("🗓 Обзор недели", "Неделя с " + new Date(monday(t0)).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + ". Пройдите шаги сверху вниз — отмечайте сделанное. Обзор раз в неделю держит систему в порядке: ничего не теряется, главное видно.");
@@ -17049,6 +17050,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["193", "Обзор недели — не потеряться", ["Если обзор недели начат и не закончен, на любой другой странице вверху — полоса «🗓 Идёт обзор недели · шаг N из 8» и кнопка «↩ Вернуться к обзору». ✕ — убрать полосу (обзор останется как есть)."]],
 ["192", "Обзор недели — и в субботу", ["Плашка «Конец недели — время для обзора» в «Сегодня» и напоминание в 🔔 теперь появляются в пятницу, субботу, воскресенье и понедельник — пока обзор не пройден."]],
 ["191", "Мелочи", ["«День за днём»: в «✎ Настроить страницу» у карточек стрелки ↑ ↓ — выше и ниже в своей колонке.", "«Бюджет»: карточку «🧭 Советник» можно свернуть — щёлкните по заголовку; в свёрнутом виде видно, сколько советов и сколько важных."]],
 ["189", "Советник бюджета", ["«Бюджет» → «Неделя» и «Период»: карточка «🧭 Советник» — 3–5 советов по вашим цифрам: темп недели, прогноз периода, статьи с перерасходом 3 недели подряд, сравнение с прошлым периодом, мелкие частые траты из выписки, дорогие дни недели, платежи без видимой оплаты, подписки и продления, «остывшие» желания, проценты по долгам и порядок погашения, похвала за недели в лимите.", "Считается прямо в приложении — данные никуда не уходят. «✕» — спрятать совет на месяц; у части советов есть действие (задача, переход). Важные советы — в 🔔 раз в неделю.", "«✨ Спросить ИИ» (если подключён ИИ) — после подтверждения: уходят только итоги по статьям, без описаний операций."]],
@@ -18349,8 +18351,13 @@ function hzAuto() {
 try { prfSync(); } catch (e) { /* ок */ }
 if (V === "inbox" && !inboxList().length && LS.get("zd-fst-inbox") !== "1") LS.set("zd-fst-inbox", "1");
 }
+function wrBackBar() {
+if (V === "weekly" || LS.get("zd-wrgo") !== wrKey()) return ""; var r = (S.opt.wrev || {})[wrKey()]; if (r && r.done) return "";
+var st = (r && r.st) || {}, dn = WRVS.filter(function (x) { return st[x[0]]; }).length, nx = WRVS.filter(function (x) { return !st[x[0]]; })[0];
+return '<div class="modebar wrback"><b>🗓 Идёт обзор недели</b><span>шаг ' + Math.min(WRVS.length, dn + 1) + " из " + WRVS.length + (nx ? " · " + esc(nx[1]) : "") + '</span><a class="btn sm pri" href="#weekly">↩ Вернуться к обзору</a><button type="button" class="ibtn" data-a="wrbackx" title="Убрать полосу (обзор останется как есть)" aria-label="Убрать">✕</button></div>';
+}
 function hzBars() {
-var D = appDef(), h = "", sk = spzOf(V, ARG);
+var D = appDef(), h = wrBackBar(), sk = spzOf(V, ARG);
 if (D[V] && !modOn(V)) h += '<div class="modebar"><b>⏻ Модуль выключен</b><span>«' + esc(D[V][2]) + "» не видно в навигации. Данные на месте.</span>" + '<button type="button" class="btn sm pri" data-a="modon" data-x="' + V + '">Включить</button></div>';
 if (sk && V !== "home" && V !== "sp" && V !== "apps" && !(V === "proj" || V === "note" || V === "nsec")) {
 var t = D[V] && !ARG ? D[V][2] : V === "goal" ? '<a href="#goals">Цели</a>' : V === "board" ? "Доски" : V === "tag" ? "Теги" : V === "filter" ? "Фильтры" : V === "flag" && ARG ? '<a href="#flag">С флажком</a>' : "";
@@ -18826,6 +18833,7 @@ switch (a) {
 case "bavx": var m = Object.assign({}, S.opt.bavx || {}); m[x] = Date.now() + 30 * DAY; S.opt.bavx = m; optTouch(); save(); render(); toast("Совет спрятан на месяц"); return true;
 case "bavall": BAVALL = !BAVALL; render(); return true;
 case "bavfold": S.opt.bavfold = !S.opt.bavfold; optTouch(); save(); render(); return true;
+case "wrbackx": LS.del("zd-wrgo"); render(); return true;
 case "bavdo": var tip = bavTips().filter(function (z) { return z.id === x; })[0]; if (!tip || !tip.act) return true; var A = tip.act;
 if (A.task) { var t = newTaskFrom(A.task, { day: today0() }); t.at = today0(); t.allday = true; t.tags = []; touch(t); save(); var mm = Object.assign({}, S.opt.bavx || {}); mm[x] = Date.now() + 30 * DAY; S.opt.bavx = mm; optTouch(); render(); toast("Задача — в «Сегодня»"); }
 else if (A.tab) { BUTAB = A.tab; LS.set("zd-butab", A.tab); if (V === "budget") render(); else go("budget"); }
