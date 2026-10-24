@@ -747,6 +747,7 @@ body.hzrsing, body.hzrsing * { cursor: ew-resize !important; user-select: none !
 .bav { margin: 0 0 12px } .bav.fold .bavh { margin: 0 } .bavtg { display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; padding: 0; cursor: pointer; color: var(--fg); font: inherit } .bavch { color: var(--muted); width: 12px } .bavh { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 6px } .bavt { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-top: 1px dashed var(--line) } .bavt > div { flex: 1; min-width: 0; display: grid; gap: 2px } .bavt small { color: var(--muted); font-size: calc(13px * var(--fs)) } .bavi { font-size: 20px; line-height: 1.2; flex: none; width: 26px; text-align: center } .bava { display: inline-flex; gap: 4px; align-items: center; flex: none }
 .bavt.warn b { color: var(--warn, #c0392b) } .bavt.good b { color: var(--acc) } .bavmore { margin-top: 6px } .bavconf, .bavai { display: grid; gap: 6px; padding: 10px 12px; margin: 6px 0; border-radius: 12px; background: color-mix(in srgb, var(--acc) 7%, transparent) } .bavconf span { color: var(--muted); font-size: calc(13px * var(--fs)) } .bavai p { margin: 0 } .bavaih { display: flex; align-items: center } .bavaih b { flex: 1 }
 @media (max-width: 600px) { .bavt { flex-wrap: wrap } .bava { margin-left: 36px } }
+.rte.rtx { min-height: 64px; padding: 8px 14px 8px 28px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); margin: 4px 0; text-align: left; font-weight: 400 } .rte.rtx.empty::before { left: 28px; top: 8px; right: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis } .rtx:focus { border-color: var(--acc); outline: none } .rtx img, .rte img { max-width: 100%; border-radius: 10px } label.goal .rtx { display: block; margin-top: 6px }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
 .scrim { display: none }
@@ -8203,7 +8204,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-194";
+var APPV = "zd-app-2026-10-16-195";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -9643,7 +9644,7 @@ if (kind === "cur") {
 var pv = sprint(prevId), pvOpen = pv && pv.status !== "done" ? spTasks(pv).filter(function (t) { return !t.done; }) : [];
 if (pvOpen.length) h += '<div class="confirm info"><b>Прошлый спринт (' + spName(pv) + ") не завершён: незакрытых задач — " + pvOpen.length + "</b><div class=\"r\"><button class=\"btn pri sm\" type=\"button\" data-a=\"spcarry\" data-x=\"" + pv.id + '">Перенести их в этот спринт и закрыть прошлый</button><a class="btn sm" href="#sprint-' + pv.id + '">Открыть прошлый</a></div></div>';
 }
-h += '<label class="goal">Цель спринта<textarea data-sp="goal" rows="2" placeholder="Чего хотим добиться за эту неделю?">' + esc(sp.goal || "") + "</textarea></label>";
+h += '<label class="goal">Цель спринта' + rtxHTML("spgoal", sp.id, "Чего хотим добиться за эту неделю?") + "</label>";
 var pct = st.n ? Math.round(st.d / st.n * 100) : 0, load = cap ? Math.round(st.est / cap * 100) : 0;
 h += '<div class="spbar"><span>Задачи: <b>' + st.d + " / " + st.n + "</b> (" + pct + " %)</span><span>Оценка: <b>" + fmtH(st.estDone) + " / " + fmtH(st.est) + "</b> ч</span><label>Вместимость недели <input type=\"number\" min=\"1\" step=\"1\" data-cap=\"1\" value=\"" + cap + '"> ч</label><span class="' + (st.est > cap ? "warnc" : "muted") + '">загрузка ' + load + " %" + (st.est > cap ? " — больше, чем помещается" : "") + "</span></div>" +
 '<div class="plab">Выполнено задач — ' + pct + ' %</div><div class="prog"><i style="width:' + pct + '%"></i></div><div class="plab">Загрузка недели по оценке — ' + load + ' %</div><div class="prog' + (st.est > cap ? " over" : "") + '"><i style="width:' + Math.min(100, load) + '%"></i></div>';
@@ -9652,11 +9653,11 @@ if (CONF === "spclose") {
 var open = l.filter(function (t) { return !t.done; }).length;
 h += '<div class="confirm info"><b>Завершить спринт «' + spName(sp) + "»?</b><span>Сделано " + st.d + " из " + st.n + " задач" + (st.est ? ", " + fmtH(st.estDone) + " из " + fmtH(st.est) + " ч" : "") + ".</span>" +
 (open ? '<span>Незакрытые задачи (' + open + '): <label><input type="radio" name="spdest" value="next" checked> в следующий спринт</label> &nbsp; <label><input type="radio" name="spdest" value="backlog"> в бэклог</label></span>' : "") +
-'<label class="goal">Итоги: что получилось, что улучшить<textarea id="sp-retro" rows="3">' + esc(sp.retro || "") + "</textarea></label>" +
+'<label class="goal">Итоги: что получилось, что улучшить' + rtxHTML("spretro", sp.id, "Что получилось, что улучшить") + "</label>" +
 '<div class="r"><button class="btn pri" type="button" data-a="spclose-yes">Завершить спринт</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>';
 } else h += '<div style="margin:6px 0 4px"><button class="btn sm" type="button" data-a="spclose">Завершить спринт…</button></div>';
 } else if (sp.status === "done") {
-h += '<label class="goal">Итоги спринта<textarea data-sp="retro" rows="3" placeholder="Что получилось, что улучшить">' + esc(sp.retro || "") + "</textarea></label>";
+h += '<label class="goal">Итоги спринта' + rtxHTML("spretro", sp.id, "Что получилось, что улучшить") + "</label>";
 if (sp.stat) h += '<p class="muted">При закрытии: сделано ' + sp.stat.d + " из " + sp.stat.n + " задач" + (sp.stat.est ? ", " + fmtH(sp.stat.estDone) + " из " + fmtH(sp.stat.est) + " ч" : "") + ".</p>";
 }
 var mode = LS.get("zd-spview") || "board";
@@ -9888,13 +9889,13 @@ var lines = setLines(x); if (!lines.length) return 0;
 if (d.mode === "chk") {
 var cid = setTid(x, day, "c"); if (have[cid]) return 0;
 var ct = newTaskFrom(x.n, { day: day }); ct.id = cid; ct.set = x.id; setCommon(ct, f, { tags: [] }, true); if (f.est) ct.est = f.est; if (f.dd) ct.due = addDays(day, +f.dd);
-ct.body = (f.desc ? noteToBody(f.desc) : "") + '<ul class="todo">' + lines.map(function (ln) { var q = parseQuick(ln); return "<li>" + esc((q.time ? p2(q.time[0]) + ":" + p2(q.time[1]) + " — " : "") + (q.t || ln)).slice(0, 300) + "</li>"; }).join("") + "</ul>"; delete ct.note;
+ct.body = (f.desc ? setDescBody(f) : "") + '<ul class="todo">' + lines.map(function (ln) { var q = parseQuick(ln); return "<li>" + esc((q.time ? p2(q.time[0]) + ":" + p2(q.time[1]) + " — " : "") + (q.t || ln)).slice(0, 300) + "</li>"; }).join("") + "</ul>"; delete ct.note;
 touch(ct); return 1;
 }
 if (sub) {
 var pidp = setTid(x, day, "p");
 par = have[pidp] ? S.tasks.filter(function (t) { return t.id === pidp; })[0] : null;
-if (!par) { par = newTaskFrom(x.n, { day: day }); par.id = pidp; par.set = x.id; setCommon(par, f, { tags: [] }, true); if (f.desc) { par.body = noteToBody(f.desc); delete par.note; } if (f.dd) par.due = addDays(day, +f.dd); touch(par); have[pidp] = 1; }
+if (!par) { par = newTaskFrom(x.n, { day: day }); par.id = pidp; par.set = x.id; setCommon(par, f, { tags: [] }, true); if (f.desc) { par.body = setDescBody(f); delete par.note; } if (f.dd) par.due = addDays(day, +f.dd); touch(par); have[pidp] = 1; }
 if (par.del) return 0; // родителя удалили — пункты не возвращаем
 }
 lines.forEach(function (ln, i) {
@@ -9902,7 +9903,7 @@ var id = setTid(x, day, i); if (have[id]) return;
 var q = parseQuick(ln), t = newTaskFrom(ln, sub ? { parent: par.id } : { day: day });
 if (t.at && !t.allday && sod(t.at) !== day && !/(завтра|послезавтра|через|\d{1,2}\.\d{1,2}|(^|\s)(пн|вт|ср|чт|пт|сб|вс)(?=\s|$)|понедельн|вторник|сред[уа]|четверг|пятниц|суббот|воскресен)/i.test(ln)) t.at = day + (t.at - sod(t.at));
 if (sub) { if (q.pid || q.newProj) t.pid = t.pid; else t.pid = par.pid || ""; if (par.sec && t.pid === par.pid) t.sec = par.sec; if (f.prio && !q.prio) t.prio = f.prio; }
-else { setCommon(t, f, q, true); if (f.desc) { t.body = noteToBody(f.desc); delete t.note; } if (f.dd && !t.due) t.due = addDays(day, +f.dd); }
+else { setCommon(t, f, q, true); if (f.desc) { t.body = setDescBody(f); delete t.note; } if (f.dd && !t.due) t.due = addDays(day, +f.dd); }
 if (f.est && !t.est) t.est = f.est;
 t.id = id; t.set = x.id; t.created = Date.now() - i; touch(t); n++;
 });
@@ -9947,7 +9948,7 @@ h += '<span>Теги</span><input class="inp" data-setf="tags" data-id="' + x.id
 h += '<span>Приоритет</span><div class="seg">' + [[0, "—"], [1, "1"], [2, "2"], [3, "3"]].map(function (v) { return '<button type="button" data-a="setfp" data-id="' + x.id + '" data-v="' + v[0] + '" class="' + ((f.prio || 0) === v[0] ? "on" : "") + '">' + v[1] + "</button>"; }).join("") + "</div>";
 h += '<span>' + (d.mode === "chk" ? "Оценка задачи" : "Оценка на задачу") + '</span><div class="r"><input class="inp" type="number" min="0" step="5" data-setf="est" data-id="' + x.id + '" value="' + (f.est ? Math.round(f.est * 60) : "") + '" placeholder="—" style="width:90px"><span class="muted">мин</span></div>';
 h += '<span>Цель</span><div class="r"><button type="button" class="btn sm setfpick" data-a="setfgl" data-id="' + x.id + '">' + (f.goal && goal(f.goal) ? esc((goal(f.goal).ic || "🎯") + " " + goal(f.goal).n) : "— без цели") + " ▾</button></div>";
-h += '<span>Описание</span><textarea class="inp setfdesc" data-setf="desc" data-id="' + x.id + '" rows="' + Math.max(2, Math.min(8, String(f.desc || "").split("\n").length + 1)) + '" placeholder="Текст, который попадёт в описание задачи: что сделать, ссылки, напоминание себе">' + esc(f.desc || "") + "</textarea>";
+h += '<span>Описание</span>' + rtxHTML("setdesc", x.id, "Текст, который попадёт в описание задачи") + "";
 h += '<span>Срок (дедлайн)</span><div class="seg">' + [["", "без срока"], ["0", "в тот же день"], ["1", "+1 день"], ["2", "+2 дня"], ["3", "+3 дня"], ["7", "+неделя"]].map(function (v) { return '<button type="button" data-a="setfdd" data-id="' + x.id + '" data-v="' + v[0] + '" class="' + ((f.dd || "") === v[0] ? "on" : "") + '">' + v[1] + "</button>"; }).join("") + "</div>";
 h += '<span>Как создавать</span><div class="seg setfmode">' + [["", "отдельными задачами"], ["sub", "задачей с подзадачами"], ["chk", "задачей с чек-листом"]].map(function (m) { return '<button type="button" data-a="setfm" data-id="' + x.id + '" data-v="' + m[0] + '" class="' + ((d.mode || "") === m[0] ? "on" : "") + '">' + m[1] + "</button>"; }).join("") + "</div>";
 h += '</div><p class="muted setfn">' + setNoteHTML(x) + '</p><div class="setpvw">' + setPreviewHTML(x) + "</div></details>";
@@ -10334,7 +10335,7 @@ h += '<div class="card gset"><div class="wcr"><span>Срок</span><div class="r
 '<div class="wcr"><span>Цвет</span><div class="sw">' + COLORS.map(function (c, i) { return '<button type="button" data-a="gcol" data-v="' + i + '" class="' + ((g.c || 0) === i ? "on" : "") + '" style="background:' + c[1] + '" title="' + c[0] + '"></button>'; }).join("") + "</div></div>" +
 '<div class="wcr"><span>Прогресс</span><div><div class="seg"><button type="button" data-a="gmode" data-x="tasks" class="' + (g.m || g.sv ? "" : "on") + '">по задачам</button><button type="button" data-a="gmode" data-x="num" class="' + (g.m ? "on" : "") + '">по числу</button><button type="button" data-a="gmode" data-x="sv" class="' + (g.sv ? "on" : "") + '">🏦 накопление ₽</button></div>' +
 (g.sv ? svSetHTML(g) : g.m ? '<div class="r gnum"><button type="button" class="btn sm" data-a="gstep" data-x="-1">−</button><input type="number" class="inp" data-goal="' + g.id + '" data-gf="cur" value="' + (+g.m.cur || 0) + '" step="any" style="width:90px"><button type="button" class="btn sm" data-a="gstep" data-x="1">＋</button><span class="muted">из</span><input type="number" class="inp" data-goal="' + g.id + '" data-gf="target" value="' + (+g.m.target || "") + '" step="any" placeholder="цель" style="width:90px"><input type="text" class="inp" data-goal="' + g.id + '" data-gf="unit" value="' + esc(g.m.unit || "") + '" placeholder="км, страниц, ₽" style="width:120px"></div>' : '<div class="wsub">Доля выполненных задач в привязанных проектах и задачах цели</div>') + "</div></div>" +
-'<div class="wcr"><span>Зачем</span><textarea class="inp" rows="2" data-goal="' + g.id + '" data-gf="desc" placeholder="Почему это важно, как поймёте, что цель достигнута">' + esc(g.desc || "") + "</textarea></div></div>";
+'<div class="wcr"><span>Зачем</span>' + rtxHTML("goal", g.id, "Почему это важно, как поймёте, что цель достигнута") + "</div></div>";
 h += '<h2>Проекты цели <span class="c">' + ps.length + '</span></h2><div class="gprojs">' + ps.map(function (p) { var ids = pdesc(p.id), l = live(S.tasks).filter(function (t) { return ids.indexOf(t.pid) >= 0 && !t.canc; }), d = l.filter(function (t) { return t.done; }).length; return '<span class="gpj"><a href="#proj-' + p.id + '">' + piconH(p) + " " + esc(p.n) + '</a><small>' + d + "/" + l.length + '</small><button type="button" data-a="gunlink" data-p="' + p.id + '" title="Отвязать проект">×</button></span>'; }).join("") + '<button type="button" class="btn sm" data-a="glink">＋ Привязать проект</button></div>';
 h += goalSeqHTML(g);
 h += "<h2>Задачи цели <span class=\"c\">" + open.length + "</span></h2>" + (renderTree(open, "smart", {}) || '<p class="muted" style="margin:4px 0">Отдельные шаги, которые не относятся ни к одному проекту. Задачу можно привязать и из её меню → «🎯 Цель».</p>') + wqa("goal:" + g.id, "g" + g.id);
@@ -10987,7 +10988,7 @@ var mt = mb.toLocaleDateString("ru-RU", { month: "long", year: "numeric" }).repl
 var tt = hTotals(x), r30 = hRateX(x, 30), rAll = hRateX(x), ds = (x.days || []).length ? x.days : [0, 1, 2, 3, 4, 5, 6], sel = function (k, v, on, inner, tip) { return '<button type="button" data-a="hset" data-h="' + x.id + '" data-k="' + k + '" data-v="' + v + '" class="' + (on ? "on" : "") + '"' + (tip ? ' title="' + esc(tip) + '"' : "") + ">" + inner + "</button>"; };
 return '<aside class="hdet" style="--hc:' + col(x.c || 0) + '">' +
 '<div class="hdh">' + hMarkIco(x) + '<input type="text" class="inp" data-hfv="n" data-h="' + x.id + '" value="' + esc(x.n) + '" placeholder="Название привычки" aria-label="Название привычки"><button type="button" class="ibtn" data-a="hclose" title="Закрыть (Esc)" aria-label="Закрыть">✕</button></div>' +
-'<textarea class="inp" rows="2" data-hfv="desc" data-h="' + x.id + '" placeholder="Описание: зачем эта привычка и как её выполнять">' + esc(x.desc || "") + "</textarea>" +
+'' + rtxHTML("habit", x.id, "Описание: зачем эта привычка и как её выполнять") + "" +
 (x.arch ? '<p class="muted" style="margin:0">В архиве: отметки и статистика сохранены.</p>' : "") +
 '<div class="hstats"><div><b>🔥 ' + fmtN(hStreak(x)) + '</b><small>текущая серия</small></div><div><b>🏆 ' + fmtN(hBest(x)) + '</b><small>самая длинная серия</small></div><div><b>' + tt.done + '</b><small>' + plural(tt.done, ["день выполнен", "дня выполнено", "дней выполнено"]) + "</small></div>" +
 '<div><b>' + (r30 === null ? "—" : r30 + " %") + '</b><small>за 30 дней</small></div><div><b>' + (rAll === null ? "—" : rAll + " %") + '</b><small>за всё время</small></div><div><b>' + tt.part + " · " + tt.skip + '</b><small>частично · пауза</small></div></div>' +
@@ -11068,7 +11069,7 @@ save(); render();
 });
 document.addEventListener("keydown", function (e) {
 var tg = e.target;
-if (tg.dataset && tg.dataset.hnew && e.key === "Enter") { e.preventDefault(); var v = tg.value.trim(); if (v) { tg.value = ""; hCreate(v); setTimeout(function () { var i = document.querySelector('.hdet [data-hfv="desc"]'); if (i) i.focus(); }, 40); } return; }
+if (tg.dataset && tg.dataset.hnew && e.key === "Enter") { e.preventDefault(); var v = tg.value.trim(); if (v) { tg.value = ""; hCreate(v); setTimeout(function () { var i = document.querySelector('.hdet .rtx'); if (i) i.focus(); }, 40); } return; }
 if (e.key === "Escape" && V === "habits" && HED && $("ctx").hidden && !OPEN) { if (/INPUT|TEXTAREA/.test(tg.tagName)) tg.blur(); HED = null; HDEL = null; render(); }
 });
 document.addEventListener("change", function (e) {
@@ -16656,7 +16657,7 @@ h += '<div class="bcbar wrbar"><i style="width:' + Math.round(done / WRVS.length
 var k = s[0], on = !!r.st[k], extra = "";
 if (k === "proj" && noNext.length) extra = '<div class="wrx">' + noNext.slice(0, 12).map(function (p) { return '<a class="chip" href="#proj-' + p.id + '">' + esc(picon(p)) + " " + esc(p.n) + "</a>"; }).join("") + "</div>";
 if (k === "top") { var cand = tasks().filter(function (t) { return !t.done && !t.parent; }).sort(function (a, b) { return ((a.prio || 9) - (b.prio || 9)) || ((a.due || 9e15) - (b.due || 9e15)); }).slice(0, 40); extra = '<div class="wrx">' + (r.top || []).map(task).filter(Boolean).map(function (t) { return '<span class="chip on">⭐ ' + esc(t.t.slice(0, 50)) + ' <button type="button" data-a="wrtopx" data-id="' + t.id + '" aria-label="Убрать">×</button></span>'; }).join("") + ((r.top || []).length < 3 ? '<select class="inp" id="wrtopadd"><option value="">＋ выбрать задачу…</option>' + cand.filter(function (t) { return (r.top || []).indexOf(t.id) < 0; }).map(function (t) { return '<option value="' + t.id + '">' + esc(t.t.slice(0, 70)) + "</option>"; }).join("") + "</select>" : "") + "</div>"; }
-if (k === "note") extra = '<textarea class="inp wrnote" id="wrnote" rows="3" placeholder="Что получилось, что нет, что поменять на следующей неделе">' + esc(r.note || "") + "</textarea>";
+if (k === "note") extra = '' + rtxHTML("week", wrKey(), "Что получилось, что нет, что поменять на следующей неделе") + "";
 return '<li class="' + (on ? "on" : "") + '"><button type="button" class="bcck" data-a="wrck" data-x="' + k + '" aria-pressed="' + on + '">' + (on ? "✓" : "") + "</button><div><b>" + esc(s[1]) + (cnt[k] !== undefined ? ' <span class="wrc' + (cnt[k] && /^(inbox|late|proj|wait)$/.test(k) ? " hot" : "") + '">' + cnt[k] + "</span>" : "") + "</b><small>" + esc(s[2]) + "</small>" + (link[k] ? '<a class="btn sm" href="' + link[k] + '">Открыть</a>' : "") + extra + "</div></li>";
 }).join("") + "</ol>" + '<div class="r"><button type="button" class="btn pri" data-a="wrdone"' + (r.done ? " disabled" : "") + ">" + (r.done ? "✓ Обзор недели завершён" : "Завершить обзор") + '</button><span class="muted">Завершено обзоров: ' + Object.keys(S.opt.wrev || {}).filter(function (k) { return S.opt.wrev[k].done; }).length + "</span></div>";
 return h;
@@ -16701,7 +16702,7 @@ case "apx": APV = null; render(); return true;
 case "apset": var ra = el.getBoundingClientRect(), o = apOpt(); ctxShow(ra.left, ra.bottom + 4, [{ i: "🌅", l: "Начало дня: " + o.s + ":00", sub: [7, 8, 9, 10, 11].map(function (x) { return { c: "s:" + x, i: o.s === x ? "✓" : "", l: x + ":00" }; }) }, { i: "🌙", l: "Конец дня: " + o.e + ":00", sub: [16, 17, 18, 19, 20, 21, 22].map(function (x) { return { c: "e:" + x, i: o.e === x ? "✓" : "", l: x + ":00" }; }) }, { i: "☕", l: "Перерыв между задачами: " + o.gap + " мин", sub: [0, 5, 10, 15].map(function (x) { return { c: "g:" + x, i: o.gap === x ? "✓" : "", l: x + " мин" }; }) }], { k: "apset", id: "" }); return true;
 case "wrck": var rr = wrRec(), k = el.dataset.x; if (rr.st[k]) delete rr.st[k]; else rr.st[k] = 1; optTouch(); save(); render(); return true;
 case "wrtopx": var r2 = wrRec(); r2.top = (r2.top || []).filter(function (x) { return x !== el.dataset.id; }); optTouch(); save(); render(); return true;
-case "wrdone": var r3 = wrRec(), nt = $("wrnote"); if (nt) r3.note = nt.value.slice(0, 3000); r3.done = Date.now(); WRVS.forEach(function (s) { r3.st[s[0]] = 1; }); optTouch(); save(); render(); toast("Обзор недели завершён ✓"); return true;
+case "wrdone": rtxFlush(); var r3 = wrRec(); r3.done = Date.now(); WRVS.forEach(function (s) { r3.st[s[0]] = 1; }); optTouch(); save(); render(); toast("Обзор недели завершён ✓"); return true;
 case "balsc": var w = S.opt.wheel = S.opt.wheel || {}, mk = wrKey(); w[mk] = Object.assign({}, w[mk] || {}); w[mk][el.dataset.k] = +el.dataset.v; optTouch(); save(); render(); return true;
 }
 return false;
@@ -16742,7 +16743,7 @@ return '<div class="hck' + (compact ? " cmp" : "") + '">' + HMX.map(function (m)
 function hSpark(k, max) { var t0 = today0(), pts = [], W = 300, H = 46, PN = Math.max(7, Math.min(365, perDays())); for (var i = PN - 1; i >= 0; i--) { var h = hDay(dKey(addDays(t0, -i))); pts.push(h && h[k] !== undefined ? h[k] : null); } var p = "", xs = W / (PN - 1); pts.forEach(function (v, i) { if (v === null) return; p += (p ? " L" : "M") + (i * xs).toFixed(1) + " " + (H - 4 - (v / max) * (H - 8)).toFixed(1); }); return '<svg viewBox="0 0 ' + W + " " + H + '" class="hsp" preserveAspectRatio="none"><path d="' + p + '"/>' + pts.map(function (v, i) { return v === null ? "" : '<circle cx="' + (i * xs).toFixed(1) + '" cy="' + (H - 4 - (v / max) * (H - 8)).toFixed(1) + '" r="' + (PN > 60 ? 1.2 : 2.2) + '"/>'; }).join("") + "</svg>"; }
 function vHealth() {
 var key = dKey(today0()), ins = hInsights(), h = head("🌿 Самочувствие", "Отметка за 20 секунд в день: сон, энергия, настроение, боль, вода, движение. Через неделю появятся связи — что на что влияет. Это наблюдения, а не диагноз.");
-h += '<div class="card"><h3>Сегодня, ' + esc(new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long" })) + "</h3>" + hCheckHTML(key) + '<textarea class="inp hnt" data-hnt="' + key + '" rows="2" placeholder="Заметка о самочувствии (по желанию)">' + esc((hDay(key) || {}).nt || "") + "</textarea></div>";
+h += '<div class="card"><h3>Сегодня, ' + esc(new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long" })) + "</h3>" + hCheckHTML(key) + '' + rtxHTML("health", key, "Заметка о самочувствии (по желанию)") + "</div>";
 h += '<div class="card"><div class="r hperh"><h3>' + esc(perName(Math.max(7, perDays()))) + "</h3>" + perSegHTML(Math.max(7, perDays()), 7) + '</div><div class="hspg">' + HMX.map(function (m) { return '<div><small>' + m[1] + "</small>" + hSpark(m[0], m[0] === "sl" ? 12 : m[0] === "mv" ? 90 : 10) + "</div>"; }).join("") + "</div></div>";
 h += '<div class="card"><h3>🔎 Что связано с самочувствием</h3>' + (ins.n < 7 ? '<p class="muted">Нужно хотя бы 7 дней отметок — сейчас ' + ins.n + ". Отмечайте каждый день, хотя бы пару показателей.</p>" : ins.l.length ? '<ul class="hins">' + ins.l.map(function (x) { return '<li class="' + (x.good ? "good" : "bad") + '">' + (x.good ? "👍 " : "⚠ ") + esc(x.t) + "</li>"; }).join("") + '</ul><p class="muted">Это совпадения в ваших данных за последние 90 дней, а не доказанная причина. При сильной или новой боли — к врачу.</p>' : '<p class="muted">Заметных связей пока нет — продолжайте отмечать.</p>') + "</div>";
 var hist = []; for (var i = 1; i <= 14; i++) { var dk = dKey(addDays(today0(), -i)), hh = hDay(dk); if (hh) hist.push([dk, hh]); }
@@ -17050,6 +17051,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["195", "Единый редактор", ["Все поля для длинного текста теперь — один и тот же редактор, как у описания задачи, заметок и дневника: «/» — заголовки, чек-листы, списки, цитаты, таблицы, шаблоны; выделите текст — жирный, курсив, ссылка; @ — ссылка на задачу или заметку; картинки — вставить, перетащить или «/» → «Картинка».", "Где: итоги недели в обзоре недели, цель и итоги спринта, описание цели, описание привычки, заметка о самочувствии, описание задачи в наборе (оно попадает в задачу с оформлением)."]],
 ["194", "Обзор недели — проекты", ["Шаг «Проекты без следующего шага» больше не показывает проекты-«папки» (у которых есть подпроекты) и архивные — следующий шаг у них в подпроектах."]],
 ["193", "Обзор недели — не потеряться", ["Если обзор недели начат и не закончен, на любой другой странице вверху — полоса «🗓 Идёт обзор недели · шаг N из 8» и кнопка «↩ Вернуться к обзору». ✕ — убрать полосу (обзор останется как есть)."]],
 ["192", "Обзор недели — и в субботу", ["Плашка «Конец недели — время для обзора» в «Сегодня» и напоминание в 🔔 теперь появляются в пятницу, субботу, воскресенье и понедельник — пока обзор не пройден."]],
@@ -18847,6 +18849,47 @@ case "bavaiclr": BAVAI = null; render(); return true;
 }
 return false;
 }
+function rtxPlain(o, k) { return o ? (o[k + "H"] ? clean(o[k + "H"]) : noteToBody(o[k] || "")) : ""; }
+function rtxPut(o, k, html, text, n) { if (!o) return false; o[k + "H"] = html; o[k] = String(text || "").slice(0, n || 5000); return true; }
+var RTX = {
+spgoal: { get: function (id) { return rtxPlain(sprint(id), "goal"); }, set: function (id, h, t) { var o = sprint(id); if (rtxPut(o, "goal", h, t)) touch(o); } },
+spretro: { get: function (id) { return rtxPlain(sprint(id), "retro"); }, set: function (id, h, t) { var o = sprint(id); if (rtxPut(o, "retro", h, t)) touch(o); } },
+goal: { get: function (id) { return rtxPlain(goal(id), "desc"); }, set: function (id, h, t) { var o = goal(id); if (rtxPut(o, "desc", h, t, 2000)) touch(o); } },
+habit: { get: function (id) { return rtxPlain(hab(id), "desc"); }, set: function (id, h, t) { var o = hab(id); if (rtxPut(o, "desc", h, t, 2000)) touch(o); } },
+week: { get: function (id) { return rtxPlain((S.opt.wrev || {})[id], "note"); }, set: function (id, h, t) { var o = id === wrKey() ? wrRec() : (S.opt.wrev || {})[id]; if (rtxPut(o, "note", h, t, 3000)) optTouch(); } },
+health: { get: function (id) { return rtxPlain(hDay(id), "nt"); }, set: function (id, h, t) { var r = dayRecOf(id, true); r.h = Object.assign({}, r.h || {}); rtxPut(r.h, "nt", h, t, 1000); r.h.at = Date.now(); touch(r); } },
+setdesc: { get: function (id) { return rtxPlain(setF(tplObj(id)), "desc"); }, set: function (id, h, t) { setFSet(id, "descH", h, true); setFSet(id, "desc", String(t || "").slice(0, 4000), true); } }
+};
+function rtxHTML(kind, id, ph, cls) {
+var h = ""; try { h = RTX[kind].get(id) || ""; } catch (e) { h = ""; }
+if (h.indexOf("data-ydimg") >= 0) setTimeout(function () { try { attImgs(); } catch (er) { /* подгрузятся позже */ } }, 0);
+return '<div class="rte rtx' + (cls ? " " + cls : "") + (h ? "" : " empty") + '" data-rtx="' + kind + '" data-rid="' + esc(id) + '" contenteditable="true" spellcheck="true" data-ph="' + esc((ph || "Текст") + " · «/» — заголовок, чек-лист, таблица, картинка") + '">' + (h || "<p><br></p>") + "</div>";
+}
+function rtxFlush() { if (BTE && BTE.dataset && BTE.dataset.rtx) saveBody(); [].forEach.call(document.querySelectorAll(".rtx"), rtxSave); }
+function rtxSave(be) {
+if (!document.contains(be)) return; var R0 = RTX[be.dataset.rtx]; if (!R0) return;
+var html = bodyEmpty(be) ? "" : clean(be.innerHTML), was = ""; try { was = R0.get(be.dataset.rid) || ""; } catch (e) { was = ""; }
+if (html === was) return; R0.set(be.dataset.rid, html, dnText(html)); save();
+}
+function setDescBody(f) { return f.descH ? clean(f.descH) : noteToBody(f["desc"]); }
+function rtxUpload(r, files, rg) {
+if (!YD.on || !YD.token()) { toast("Картинки хранятся на вашем Яндекс Диске — войдите в «Настройки» → «Синхронизация»"); return; }
+var list = [].slice.call(files || []).filter(function (f) { return /^image\//.test(f.type || "") && f.size <= 50 * 1048576; }); if (!list.length) { toast("Сюда можно вставить картинку (до 50 МБ)"); return; }
+var kind = String(r.dataset.rtx || "x").replace(/[^\w-]/g, ""), rid = String(r.dataset.rid || "x").replace(/[^\w-]/g, "_").slice(0, 40), base = "app:/tasks/files/rtx/" + kind + "/" + rid;
+var chain = YD.folder("app:/tasks").then(function () { return YD.folder("app:/tasks/files"); }).then(function () { return YD.folder("app:/tasks/files/rtx"); }).then(function () { return YD.folder("app:/tasks/files/rtx/" + kind); }).then(function () { return YD.folder(base); }), imgs = [];
+list.forEach(function (f0) { chain = chain.then(function () { toast("Загружаю на Диск: " + f0.name); return nfShrink(f0); }).then(function (f) { var p = base + "/" + uid() + "_" + (f.name || "photo.jpg").replace(/[\\/:*?"<>|]+/g, "_").slice(0, 80); return YD.api("/resources/upload?overwrite=true&path=" + encodeURIComponent(p)).then(function (j) { return fetch(j.href, { method: "PUT", body: f }); }).then(function (rs) { if (!rs.ok && rs.status !== 201 && rs.status !== 202) throw { msg: "ошибка " + rs.status }; imgs.push({ p: p, n: f0.name || "картинка" }); }); }); });
+chain.then(function () {
+if (!imgs.length) return; var html = imgs.map(function (m) { return '<p><img data-ydimg="' + esc(m.p) + '" alt="' + esc(m.n) + '"></p>'; }).join("");
+if (document.contains(r)) { r.focus(); var s = getSelection(); if (rg && document.contains(rg.startContainer) && r.contains(rg.startContainer)) { s.removeAllRanges(); s.addRange(rg); } else caretEnd(r); exc("insertHTML", html); r.classList.remove("empty"); BTE = r; saveBody(); attImgs(); }
+toast(imgs.length > 1 ? "Картинок вставлено: " + imgs.length : "Картинка вставлена");
+}).catch(function (e) { toast("Не удалось загрузить: " + ((e && e.msg) || "нет связи с Диском")); });
+}
+function rtxPick(r) { var rg = null, s = getSelection(); if (s.rangeCount && r.contains(s.anchorNode)) rg = s.getRangeAt(0).cloneRange(); var i = document.createElement("input"); i.type = "file"; i.accept = "image/*"; i.multiple = true; i.style.display = "none"; document.body.appendChild(i); i.addEventListener("change", function () { var f = i.files; i.remove(); rtxUpload(r, f, rg); }); i.click(); }
+function edPickImg() { var r = rteEl(); if (!r) return; if (r.id === "nrte") { var n = note(r.dataset.note); if (n) nfPick(n, "image/*"); return; } if (r.id === "drte") { dzPickImg(); return; } if (r.dataset.rtx) { rtxPick(r); return; } toast("Картинку можно вставить в заметку, дневник и текстовые поля; к задаче — «📎 Прикрепить файл»"); }
+document.addEventListener("paste", function (e) { var r = e.target.closest && e.target.closest(".rtx"); if (!r) return; var cd = e.clipboardData; if (!cd || !cd.files || !cd.files.length) return; e.preventDefault(); e.stopImmediatePropagation(); var s = getSelection(); rtxUpload(r, cd.files, s.rangeCount ? s.getRangeAt(0).cloneRange() : null); }, true);
+document.addEventListener("dragover", function (e) { var r = e.target.closest && e.target.closest(".rtx"); if (r && e.dataTransfer && [].indexOf.call(e.dataTransfer.types || [], "Files") >= 0) { e.preventDefault(); r.classList.add("nfdrop"); } }, true);
+document.addEventListener("dragleave", function (e) { var r = e.target.closest && e.target.closest(".rtx"); if (r) r.classList.remove("nfdrop"); }, true);
+document.addEventListener("drop", function (e) { var r = e.target.closest && e.target.closest(".rtx"); if (!r || !e.dataTransfer || !e.dataTransfer.files || !e.dataTransfer.files.length) return; r.classList.remove("nfdrop"); e.preventDefault(); e.stopImmediatePropagation(); var rg = null; try { if (document.caretRangeFromPoint) rg = document.caretRangeFromPoint(e.clientX, e.clientY); } catch (er) { rg = null; } rtxUpload(r, e.dataTransfer.files, rg); }, true);
 function chalsWidget() {
 var h = "", t0 = today0(), any = false;
 if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
@@ -20321,7 +20364,7 @@ case "spclose": CONF = "spclose"; render(); return;
 case "spclose-yes":
 var sc = sprint(ARG || curSprintId()); if (!sc) return;
 var dest = document.querySelector('input[name="spdest"]:checked'), toNext = !dest || dest.value === "next", nx = toNext ? ensureSprint(addDays(sc.start, 7)) : null, moved = 0;
-sc.stat = spStat(sc); var rt = $("sp-retro"); if (rt) sc.retro = rt.value.slice(0, 5000);
+rtxFlush(); sc.stat = spStat(sc);
 spTasks(sc).forEach(function (x) { if (!x.done) { x.sprint = nx ? nx.id : ""; touch(x); moved++; } });
 sc.status = "done"; touch(sc); CONF = null; save(); render();
 toast("Спринт завершён" + (moved ? ". Незакрытые задачи (" + moved + ") — " + (nx ? "в следующем спринте" : "в бэклоге") : "")); return;
@@ -20727,6 +20770,7 @@ function bodyEmpty(r) { return !r.textContent.trim() && !r.querySelector("hr,tab
 var BTE = null;
 function saveBody() {
 clearTimeout(BT); BT = null; var be = BTE; BTE = null;
+if (be && be.dataset && be.dataset.rtx) { rtxSave(be); return; }
 if (be && be.id === "nrte") { var nb = note(be.dataset.note); if (nb && document.contains(be)) { var nbb = bodyEmpty(be) ? "" : clean(be.innerHTML); if (nbb !== (nb.body || "")) { nhSnap(nb); nb.body = nbb; touch(nb); save(); } } return; }
 if (be && be.id === "drte") { if (!document.contains(be)) return; var dk = be.dataset.day, dr = dayRecOf(dk), dh = bodyEmpty(be) ? "" : clean(be.innerHTML); if (dh !== ((dr && dr.nb) || "")) { dr = dr || dayRecOf(dk, true); dr.nb = dh; dr.note = dnText(dh).slice(0, 5000); touch(dr); save(); } return; }
 if (be && be.id === "prte") { var pp = proj(be.dataset.proj); if (pp && document.contains(be)) { var pb = bodyEmpty(be) ? "" : clean(be.innerHTML); if (pb !== (pp.body || "")) { pp.body = pb; touch(pp); save(); } } return; }
@@ -20895,9 +20939,10 @@ var BLOCKS = [
 ["Вставка", "embed", "↪", "Встроить страницу", "Живой блок другой страницы — или наберите ![[", "", "встроить страницу embed раздел карта"],
 ["Вставка", "nquery", "🔎", "Живой список", "Задачи или заметки по условию — обновляется сам", "", "живой список запрос фильтр dataview задачи заметки"],
 ["Вставка", "nbutton", "▶", "Кнопка", "Один щелчок — задачи, страница по шаблону или привычка", "", "кнопка button действие шаблон создать"],
+["Вставка", "img", "🖼", "Картинка", "С компьютера или телефона — сохранится на ваш Яндекс Диск", "", "картинка фото изображение image рисунок файл"],
 ["Вставка", "sketch", "✏", "Рисунок от руки", "Холст для мыши, пера или пальца", "", "рисунок рисовать скетч sketch draw схема от руки"],
 ["Вставка", "formula", "∑", "Формула", "LaTeX между $$ … $$ — видна в режиме чтения", "", "формула latex математика уравнение"],
-["Вставка", "mermaid", "◇", "Диаграмма из текста", "mermaid: схема, процесс, гант — видна в режиме чтения", "", "диаграмма mermaid схема блок-схема процесс"]
+["Вставка", "mermaid", "◇", "Диаграмма из текста", "mermaid: схема, процесс, гант — видна в режиме чтения", "", "диаграмма mermaid схема блок-схема процесс"],
 ["Дневник", "dj3", "✨", "3 хорошие вещи", "Шаблон записи: три приятных события дня", "", "три хорошие вещи дневник шаблон радость"],
 ["Дневник", "djr", "🔍", "Рефлексия дня", "Что было, что поняла, что изменю завтра", "", "рефлексия итоги дня дневник шаблон"],
 ["Дневник", "djm", "🌅", "Утренние страницы", "Писать подряд, не перечитывая", "", "утренние страницы дневник шаблон поток"],
@@ -20907,6 +20952,7 @@ var HOTK = { Digit0: "text", Digit1: "h1", Digit2: "h2", Digit3: "h3", Digit4: "
 function applyBlock(type) {
 var r = rteEl(); if (!r) return;
 if (type === "sketch") { nSkInsert(); return; }
+if (type === "img") { edPickImg(); return; }
 if (DZT[type]) { exc("insertHTML", DZT[type][1]); r.classList.remove("empty"); bodyLater(); return; }
 if (type === "nquery" || type === "nbutton") {
 if (r.id !== "nrte") { toast("Это блок для заметок"); return; }
@@ -21135,7 +21181,7 @@ bodyLater();
 $("fmt").hidden = true; FMTR = null; var r = rteEl(); if (r) r.focus();
 }
 });
-document.addEventListener("selectionchange", function () { if (!OPEN && !$("prte") && !$("nrte") && !$("drte")) return; if (SL) slashCheck(); clearTimeout(window.__fs); window.__fs = setTimeout(fmtShow, 30); });
+document.addEventListener("selectionchange", function () { if (!OPEN && !$("prte") && !$("nrte") && !$("drte") && !document.querySelector(".rtx")) return; if (SL) slashCheck(); clearTimeout(window.__fs); window.__fs = setTimeout(fmtShow, 30); });
 document.addEventListener("input", function (e) {
 if (!e.target.classList || !e.target.classList.contains("rte")) return;
 if (e.inputType === "insertText" && e.data === "/") {
