@@ -1,5 +1,5 @@
 // Офлайн-кэш приложения «Задачи»
-const CACHE = 'zd-app-2026-10-16-197';
+const CACHE = 'zd-app-2026-10-16-198';
 const CORE = ['./', 'index.html', 'help.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'brand-64.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
