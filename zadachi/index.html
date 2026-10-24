@@ -1741,6 +1741,7 @@ html.st-glass .top .brand { background: transparent; border-right-color: var(--g
 .spcics { display: flex; flex-wrap: wrap; gap: 4px } .spcics button { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line); background: none; font-size: 19px; cursor: pointer; color: var(--fg) } .spcics button.on { border: 2px solid var(--acc); background: var(--acc-soft) } .spcics .spcimgb { width: auto; padding: 0 12px; font-size: calc(13px * var(--fs)) }
 .spcitems { display: grid; gap: 2px; max-width: 640px } .spcit { display: flex; align-items: center; gap: 8px; padding: 5px 4px 5px 10px; border-radius: 8px; background: var(--hover) } .spcit > span:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .spcit.spch { background: none; padding-left: 0 } .spcit.spch .inp { flex: 1; font-weight: 600 } .spcctl { display: inline-flex; gap: 2px; flex: none }
 .spcadd { border-top: 1px solid var(--line); padding: 8px 0 } .spcadd summary { cursor: pointer; font-weight: 500 } .spcadd .chips { margin-top: 8px; max-height: 260px; overflow-y: auto } .spcfoot { gap: 8px; margin-top: 18px }
+.rowmore { list-style: none; padding: 10px 4px; border-bottom: 0 } .rowmore .btn { width: 100%; justify-content: center }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -2582,12 +2583,14 @@ var tl = Date.now() - 30 * 864e5;
 var al = Date.now() - 400 * 864e5; S.acts = S.acts.filter(function (x) { return (x.d || 0) > al; });
 var lim = Date.now() - 60 * 864e5; ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "tpls", "flags", "notes", "nsecs", "ntags", "boards", "goals", "days"].forEach(function (k) { S[k] = S[k].filter(function (x) { return !x.del || x.upd > lim; }); }); }
 function projects() { return live(S.projects); }
-function proj(id) { return id ? projects().filter(function (p) { return p.id === id; })[0] || null : null; }
+function idMap(k, arr) { return memo("idm:" + k, function () { var o = {}; live(arr).forEach(function (x) { o[x.id] = x; }); return o; }); }
+function proj(id) { return id ? idMap("p", S.projects)[id] || projects().filter(function (p) { return p.id === id; })[0] || null : null; }
 function pkids(pid) { return projects().filter(function (p) { return (p.parent || "") === (pid || "") && (!pid || p.id !== pid) && (!p.arch || SHOWARCH); }).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0); }); }
 function pdesc(pid) { var out = [pid], i = 0; while (i < out.length) { pkids(out[i++]).forEach(function (c) { if (out.indexOf(c.id) < 0) out.push(c.id); }); } return out; }
 function ppath(p) { var a = [], g = 0; while (p && g++ < 30) { a.unshift(p); p = proj(p.parent); } return a; }
 function pname(p) { return ppath(p).map(function (x) { return x.n; }).join(" / "); }
-function ptree() { var out = []; (function walk(pid, d) { pkids(pid).forEach(function (p) { out.push({ p: p, d: d }); walk(p.id, d + 1); }); })("", 0); return out; }
+function ptree() { return memo("ptree", ptree0); }
+function ptree0() { var out = []; (function walk(pid, d) { pkids(pid).forEach(function (p) { out.push({ p: p, d: d }); walk(p.id, d + 1); }); })("", 0); return out; }
 var PICONS = ["📁", "🗂️", "🏠", "💼", "🎓", "📚", "📖", "✍️", "💻", "🧠", "💡", "🎯", "🚀", "📈", "📊", "💰", "🏦", "🧾", "🛒", "🍳", "❤️", "🩺", "🏃", "🧘", "✈️", "🚗", "🌱", "🐾", "👨‍👩‍👧", "🎁", "🎉", "🔨", "🧹", "📞", "📅", "📝", "📄", "🎵", "🎨", "📷", "🎮", "⭐", "🔥", "⚙️", "🛠️", "🌍", "🗣️", "☕", "🔒"];
 var PAUTO = [[/дом|квартир|быт|уборк/, "🏠"], [/работ|офис|карьер|служб/, "💼"], [/уч[её]б|курс|универ|школ|экзам|лекци/, "🎓"], [/книг|чтени|литератур/, "📖"], [/спорт|трениров|фитнес|бег|зал\b|йог/, "🏃"], [/здоров|врач|медиц|лечен|аптек/, "🩺"],
 [/финанс|деньг|бюджет|налог|банк|расход|доход/, "💰"], [/покуп|магазин|продукт|заказ/, "🛒"], [/путешеств|поездк|отпуск|отдых|туризм/, "✈️"], [/1с|код|программ|разработ|сайт|прилож|айти|\bit\b|dev/, "💻"], [/квартал|аналит|статист/, "📊"], [/отч[её]т|документ|бумаг/, "📄"],
@@ -2823,7 +2826,7 @@ function flagIc(f, cls) { return '<svg class="fli' + (cls ? " " + cls : "") + '"
 function flagMenu(t) { var cur = flagOf(t); return flags().map(function (f) { return { c: "fl:" + f.id, i: flagIc(f), l: f.n, k: cur === f ? "✓" : "" }; }).concat(["-", { c: "fl:", i: "∅", l: "Без флажка", k: cur ? "" : "✓" }, { c: "fl:cfg", i: "⚙", l: "Настроить флажки…" }, { c: "help:flags", i: "?", l: "Справка о флажках" }]); }
 S.tasks.forEach(function (t) { if (t.flag === true) t.flag = flagObj("f1") ? "f1" : defFlag(); });
 function notes() { return live(S.notes); }
-function note(id) { return id ? live(S.notes).filter(function (n) { return n.id === id; })[0] || null : null; }
+function note(id) { return id ? idMap("n", S.notes)[id] || live(S.notes).filter(function (n) { return n.id === id; })[0] || null : null; }
 function nsecs() { return live(S.nsecs).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0) || (a.n < b.n ? -1 : 1); }); }
 function nsec(id) { return id ? live(S.nsecs).filter(function (x) { return x.id === id; })[0] || null : null; }
 function nsKids(pid) { return nsecs().filter(function (x) { return (x.parent || "") === (pid || "") && x.id !== pid; }); }
@@ -3181,7 +3184,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-205";
+var APPV = "zd-app-2026-10-16-206";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -3996,6 +3999,7 @@ function pcols(p) { return (p && p.cols && p.cols.length) ? p.cols : [{ id: "new
 function kcolOf(t, p) { if (t.done) return "done"; var cs = pcols(p); if (t.col && cs.some(function (c) { return c.id === t.col; })) return t.col; return t.st === "doing" && cs.some(function (c) { return c.id === "doing"; }) ? "doing" : t.st === "doing" && cs.length > 1 ? cs[1].id : cs[0].id; }
 var RNX = null, SECADD = null;
 function groupsOf(list, g) {
+var PTI = null;
 var t0 = today0(), out = [], m = {}, gp = V === "proj" ? proj(ARG) : null;
 function put(key, title, t, ord, color, ih) { if (!m[key]) { m[key] = { key: key, title: title, items: [], ord: ord, color: color, ih: ih }; out.push(m[key]); } m[key].items.push(t); }
 list.forEach(function (t) {
@@ -4010,7 +4014,7 @@ else put("e", "Позже", t, 4);
 } else if (g === "day") {
 var eb = effAt(t); if (!eb) put("z", "Без срока", t, 9e15); else if (isPastDay(t)) put("a", "Просрочено", t, 0); else put(dKey(eb), dayName(eb), t, sod(eb));
 } else if (g === "project") {
-var p = proj(t.pid); if (!p) put("", "Без проекта", t, -1); else put(p.id, pname(p), t, ptree().map(function (x) { return x.p.id; }).indexOf(p.id), col(p.c), piconH(p));
+var p = proj(t.pid); if (!p) put("", "Без проекта", t, -1); else if (m[p.id]) m[p.id].items.push(t); else { if (!PTI) { PTI = {}; ptree().forEach(function (x, i) { PTI[x.p.id] = i; }); } put(p.id, pname(p), t, PTI[p.id] !== undefined ? PTI[p.id] : -1, col(p.c), piconH(p)); }
 } else if (g === "prio") { var pr = t.prio || 0; put("p" + pr, pr ? "Приоритет " + pr : "Обычный приоритет", t, pr || 9); }
 else if (g === "flag") { var gf = flagOf(t); put(gf ? gf.id : "n", gf ? gf.n : "Без флажка", t, gf ? flags().indexOf(gf) : 999, gf ? col(gf.c) : undefined); }
 else if (g === "section") { var sk = secOf(t, gp), so = psecs(gp).map(function (x) { return x.id; }).indexOf(sk); put(sk, sk === "~" ? "Без секции" : psecs(gp)[so].n, t, so); }
@@ -4074,19 +4078,25 @@ var h = '<li class="task' + (blk ? " blocked" : "") + (t.done || ftd ? " done" :
 if (SUB === t.id) h += '<li class="subadd" style="padding-left:' + (30 + (depth + 1) * 26) + 'px"><input id="subin" data-sub="' + t.id + '" placeholder="Подзадача — тоже с быстрым вводом: завтра, #тег, !1"><button class="btn pri sm" type="button" data-a="subok" data-x="' + t.id + '">Добавить</button><button class="btn sm" type="button" data-a="subcancel">Отмена</button></li>';
 return h;
 }
+var ROWN = 0, ROWLIM = 0, RLIM = {};
+function rowsReset() { ROWN = 0; ROWLIM = RLIM[location.hash] || 400; }
 function renderTree(list, sort, o) {
 o = o || {};
-var inSet = {}; list.forEach(function (t) { inSet[t.id] = 1; });
-var cmp = cmpBy(sort), seen = {};
+var inSet = {}, kids = {}; list.forEach(function (t) { inSet[t.id] = 1; });
+list.forEach(function (t) { if (t.parent && inSet[t.parent]) (kids[t.parent] = kids[t.parent] || []).push(t); });
+var cmp = cmpBy(sort), seen = {}, shown = 0, cut = false;
 var roots = list.filter(function (t) { return !t.parent || !inSet[t.parent]; }).sort(cmp);
 var h = "";
 (function walk(arr, d) {
 arr.forEach(function (t) {
-if (seen[t.id] || d > 30) return; seen[t.id] = 1;
+if (seen[t.id] || d > 30) return;
+if (ROWLIM && ROWN >= ROWLIM && d === 0) { cut = true; return; }
+seen[t.id] = 1; ROWN++; shown++;
 h += taskRow(t, d, inSet, o);
-if (!t.fold) walk(list.filter(function (k) { return k.parent === t.id; }).sort(cmp), d + 1);
+if (!t.fold && kids[t.id]) walk(kids[t.id].sort(cmp), d + 1);
 });
 })(roots, 0);
+if (cut) { var rest = list.length - Object.keys(seen).length; if (rest > 0) h += '<li class="rowmore"><button type="button" class="btn sm" data-a="rowmore">Показать ещё ' + rest + " " + plural(rest, ["задачу", "задачи", "задач"]) + "</button></li>"; }
 return h ? '<ul class="list">' + h + "</ul>" : "";
 }
 function secHead(p, sid, name, n, fold) {
@@ -5241,7 +5251,7 @@ return h;
 var GICONS = ["🎯", "🏆", "🎓", "💼", "🧺", "💪", "📚", "✍️", "💰", "🌍", "❤️", "🧠", "🚀", "🌱", "🎨", "🧘"];
 var GST = { active: "В работе", done: "Достигнуты", drop: "Отложены" }, GTAB = "active", GNOTE = false;
 function goals() { return live(S.goals).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0) || (a.created || 0) - (b.created || 0); }); }
-function goal(id) { return id ? live(S.goals).filter(function (g) { return g.id === id; })[0] || null : null; }
+function goal(id) { return id ? idMap("g", S.goals || [])[id] || live(S.goals).filter(function (g) { return g.id === id; })[0] || null : null; }
 function goalProjs(g) { return projects().filter(function (p) { return p.goal === g.id; }); }
 function goalPids(g) { var out = []; goalProjs(g).forEach(function (p) { pdesc(p.id).forEach(function (id) { if (out.indexOf(id) < 0) out.push(id); }); }); return out; }
 function goalTasks(g) { var pids = goalPids(g); return live(S.tasks).filter(function (t) { return !t.canc && (t.goal === g.id || (t.pid && pids.indexOf(t.pid) >= 0)); }); }
@@ -12071,6 +12081,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["206", "Быстрее на больших списках", ["Списки с тысячами задач открываются в несколько раз быстрее: «Все задачи» с 3000 задач — 0,2 с вместо 0,8 с, «Планы» — втрое быстрее.", "Очень длинный список показывается порциями: сначала 400 задач, внизу — «Показать ещё»."]],
 ["205", "Свои пространства", ["＋ внизу полосы пространств — своё пространство: название, значок (или своя картинка), меню слева из чего угодно — разделы, проекты, цели, заметки, фильтры, теги, доски, готовые списки — и свой рабочий стол из карточек, как на главной. Заготовки: «Учёба», «Работа», «Хобби», «Ремонт или переезд», «Здоровье».", "Встроенные пространства тоже настраиваются: ✎ в шапке панели — меню, название и значок; на странице пространства — «✎ Рабочий стол». «↺ Вернуть как было» — к исходному виду.", "🎯 Фокус пространства: в списках, поиске и календаре видны только задачи его проектов и целей.", "Правый щелчок по проекту, тегу или фильтру → «🪐 В пространство» — добавить в любое пространство."]],
 ["204", "Челленджи, итоги недели, новая иконка", ["🎯 Челленджи недели — в карточке «Уровень и очки»: каждую неделю три задания по вашим данным (шаги по цели, помидоры, привычки, ранние задачи, дни подряд, «Входящие» до нуля, обзор недели). Выполнили — бонус +30 или +50 очков.", "📊 «Неделя в цифрах» в начале обзора недели: задачи, очки, помидоры, привычки — со сравнением с прошлой неделей, столбики по дням и лучший день. Итоги можно отправить себе в Telegram — кнопкой или автоматически по воскресеньям после 18:00.", "Новая иконка приложения в стиле логотипа; ярлык «Записать в дневник» на значке приложения (долгое нажатие на иконку на телефоне).", "🎤 Микрофон в строке «Записать задачу» на главной.", "При первом запуске главная предлагает выбрать оформление из четырёх стилей."]],
 ["203", "Уровень и очки — на главной", ["Новая карточка на главной «🏆 Уровень и очки»: уровень и сколько до следующего, очки за сегодня и цель дня (по вашему обычному темпу), серия дней подряд и рекорд, сколько достижений собрано, ближайшее достижение с прогрессом и подсказка, что сделать дальше.", "«За что очки» — прямо в карточке: задача +10 (с приоритетом 1 — +15), обзор недели +30, привычка +5, помидор +4, заметка +3, отметка самочувствия +3, повторение карточки +2."]],
@@ -14364,6 +14375,7 @@ function spcAct(a, el) {
 var x = el.dataset.x, D0 = SPCD;
 switch (a) {
 case "spcnew": SPCD = null; go("spced-new"); return true;
+case "rowmore": RLIM[location.hash] = (RLIM[location.hash] || 400) + 800; render(); return true;
 case "spced": go("spced-" + (x || cpSpace())); return true;
 case "spcfocus": setFocus(FOCUS === "sp:" + x ? "" : "sp:" + x); return true;
 case "spcrail": var hl = railHid().slice(), hi = hl.indexOf(x); if (hi >= 0) hl.splice(hi, 1); else hl.push(x); S.opt.rail2h = hl; optTouch(); save(); railSync(); return true;
@@ -15115,7 +15127,7 @@ $("view").classList.toggle("narrow", V === "trash" || V === "archive" || V === "
 try { ptTouch(location.hash.slice(1) || "today"); } catch (er) { /* вкладки не мешают */ }
 var pth = ""; try { pth = ptHTML(); } catch (er) { pth = ""; }
 var PTSL = $("ptabs") ? $("ptabs").scrollLeft : 0;
-var bb = ""; try { bb = backBar(); } catch (er) { bb = ""; }
+var bb = ""; try { bb = backBar(); } catch (er) { bb = ""; } rowsReset();
 var fresh = RVIEW !== location.hash; RVIEW = location.hash; // другой раздел — собираем страницу заново; тот же — меняем только отличия
 setHTML($("view"), bb + pth + (V === "settings" || V === "help" ? "" : syncBar() + focusBar() + revBar() + navBars()) + f(), fresh);
 try { if ($("hzms")) hzMas(); if ($("dzms")) dzMas(); } catch (er) { /* раскладка — следом */ }
