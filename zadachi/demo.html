@@ -578,7 +578,8 @@ html.mmfullon, html.mmfullon body { overflow: hidden }
 .nrichp { margin: 10px 0; border: 1px dashed var(--line); border-radius: 10px; padding: 6px 12px } .nrichp summary { cursor: pointer; font-weight: 600; font-size: calc(13px * var(--fs)) } .nrichb { padding: 6px 0 } .nrichb pre { white-space: pre-wrap; font-size: 12px; color: var(--muted) }
 #shrov { position: fixed; inset: 0; z-index: 80; background: color-mix(in srgb, var(--bg) 70%, transparent); display: grid; place-items: center; padding: 16px } .shrc { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; width: min(520px, 100%); display: grid; gap: 10px; box-shadow: var(--shadow) } .shrp { max-height: 240px; overflow: auto; word-break: break-word } .shrp p { margin: 4px 0 }
 #fsBtn.on, #enBtn.on { background: var(--acc-soft); color: var(--acc) } .xpb { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; background: var(--acc-soft); color: var(--acc); font-weight: 700; font-size: 12.5px; text-decoration: none; margin-right: 4px }
-.aprow { margin: 0 0 8px } .apv { margin: 0 0 12px; display: grid; gap: 6px } .apl { margin: 4px 0; padding-left: 22px } .apl li { margin: 3px 0 } .wrtop { padding: 8px 12px; border-radius: 10px; background: var(--acc-soft); margin: 0 0 8px; display: flex; gap: 8px; flex-wrap: wrap } .wrtop a { color: var(--fg) } .wrtop a.dn { color: var(--muted); text-decoration: line-through } .wrb { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 8px 12px; border: 1px dashed var(--acc); border-radius: 10px; margin: 0 0 8px }
+.aprow { margin: 0 0 8px } .apv { margin: 0 0 12px; display: grid; gap: 6px } .apl { margin: 4px 0; padding-left: 22px } .apl li { margin: 3px 0 } .wrtop .wrtoped { margin-left: auto } .wrtop.wrted { display: grid; gap: 8px } .wrtedh { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap } .wrtedh .btn { margin-left: auto } .wrtpl { display: grid; gap: 2px; max-height: 260px; overflow-y: auto } .wrtpi { text-align: left; padding: 6px 10px; border-radius: 8px; background: none; border: 0; color: var(--fg); font: inherit; cursor: pointer } .wrtpi:hover { background: var(--panel) } .wrtpi small { color: var(--muted) }
+.wrtop { padding: 8px 12px; border-radius: 10px; background: var(--acc-soft); margin: 0 0 8px; display: flex; gap: 8px; flex-wrap: wrap } .wrtop a { color: var(--fg) } .wrtop a.dn { color: var(--muted); text-decoration: line-through } .wrb { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 8px 12px; border: 1px dashed var(--acc); border-radius: 10px; margin: 0 0 8px }
 .wrl { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 10px } .wrl > li { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel) } .wrl > li > div { display: grid; gap: 4px; flex: 1; min-width: 0 } .wrl > li small { color: var(--muted) } .wrl > li.on b { color: var(--muted) } .wrl > li.on .bcck { background: var(--ok); border-color: var(--ok) } .wrl .btn { justify-self: start } .wrc { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--hover); font-size: 12px; text-align: center } .wrc.hot { background: #e5484d; color: #fff } .wrx { display: flex; gap: 6px; flex-wrap: wrap; align-items: center } .wrx .chip button { border: 0; background: transparent; cursor: pointer; color: var(--muted) } .wrnote { width: 100% } .wrbar { margin-top: 6px }
 .balc { display: grid; gap: 10px } .balg { display: grid; grid-template-columns: minmax(260px, 380px) 1fr; gap: 16px; align-items: start } @media (max-width: 700px) { .balg { grid-template-columns: 1fr } } .radar { width: 100%; max-width: 380px } .radar .rg { fill: none; stroke: var(--line) } .radar .rl { font-size: 10px; fill: var(--muted) } .radar .rv { fill: color-mix(in srgb, var(--acc) 30%, transparent); stroke: var(--acc); stroke-width: 2 }
 .balrow { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 3px 0 } .balsc { display: inline-flex; gap: 2px } .balsc button { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); font-size: 11px; cursor: pointer; padding: 0 } .balsc button.on { background: var(--acc); border-color: var(--acc); color: #fff } .balp { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px }
@@ -7576,7 +7577,20 @@ var VIEWS = (function () { try { return JSON.parse(LS.get("zd-views") || "{}") |
 function save(quiet) { try { unScan(); } catch (er) { /* отмена не мешает сохранению */ } try { histScan(); } catch (er) { /* история не мешает сохранению */ } if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); DV++; saveLocal(); if (!quiet) { SYNC.later(); SRV.later(); } }
 function live(a) { return a.filter(function (x) { return !x.del; }); }
 function optTouch() { S.opt.upd = Math.max(Date.now(), (S.opt.upd || 0) + 1); }
-function touch(o) { o.upd = Date.now(); DV++; return o; }
+function touch(o) { o.upd = Date.now(); DV++; if (o && o.due && o.at && typeof o.t === "string") dlWatch(o); return o; }
+var DLATS = {}, DLQ = {}, DLT = null;
+function dlSnap() { live(S.tasks).forEach(function (t) { DLATS[t.id] = t.at || 0; }); }
+function dlWatch(t) {
+var prev = DLATS[t.id]; DLATS[t.id] = t.at || 0;
+if (prev === undefined || prev === (t.at || 0) || t.done || t.rep || LS.get("zd-dlask") === "0") return;
+if (sod(t.at) <= sod(t.due)) return;
+DLQ[t.id] = 1; clearTimeout(DLT); DLT = setTimeout(dlAsk, 60);
+}
+function dlAsk() {
+var ids = Object.keys(DLQ).filter(function (id) { var t = task(id); return t && !t.done && t.at && t.due && sod(t.at) > sod(t.due); }); DLQ = {}; if (!ids.length) return;
+var dt = function (ms) { return new Date(ms).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }); }, t = task(ids[0]);
+toastAct(ids.length === 1 ? "Новая дата (" + dt(t.at) + ") позже дедлайна (" + dt(t.due) + "). Сдвинуть дедлайн?" : "У " + ids.length + " задач дата теперь позже дедлайна. Сдвинуть дедлайны?", [["dlmove", ids.length === 1 ? "Сдвинуть на " + dt(t.at) : "Сдвинуть", ids.join(",")], ["dlnever", "Не спрашивать"]]);
+}
 var DV = 0, MEMO = {};
 function memo(k, f) { var m = MEMO[k]; if (m && m.v === DV) return m.x; var x = f(); MEMO[k] = { v: DV, x: x }; return x; }
 function col(c) { return (COLORS[c] || COLORS[0])[1]; }
@@ -8204,7 +8218,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-196";
+var APPV = "zd-app-2026-10-16-197";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -16642,9 +16656,27 @@ var WRVS = [["inbox", "📥 Разобрать «Входящие»", "Кажд�
 function wrKey() { return dKey(monday(today0())); }
 function wrRec() { var o = S.opt.wrev = S.opt.wrev || {}, k = wrKey(); return o[k] = o[k] || { st: {}, top: [] }; }
 function wrTop() { var r = (S.opt.wrev || {})[wrKey()]; return r ? (r.top || []).map(task).filter(function (t) { return t && !t.del; }) : []; }
+var WRTE = false;
+function wrTopIds() { var r = (S.opt.wrev || {})[wrKey()]; return ((r && r.top) || []).filter(function (id) { var t = task(id); return t && !t.del; }); }
+function wrTopSet(ids) { var r = wrRec(); r.top = ids.slice(0, 3); optTouch(); save(); }
+function wrTopToggle(id) { var ids = wrTopIds(), i = ids.indexOf(id); if (i >= 0) { ids.splice(i, 1); wrTopSet(ids); toast("Убрано из главного недели"); return; } if (ids.length >= 3) { toast("В главном недели уже 3 задачи — сначала уберите одну"); return; } ids.push(id); wrTopSet(ids); toast("⭐ Добавлено в главное недели"); }
+function wrTopList(q) {
+var ids = wrTopIds(); q = String(q || "").trim().toLowerCase();
+var l = tasks().filter(function (t) { return !t.done && ids.indexOf(t.id) < 0 && (!q || t.t.toLowerCase().indexOf(q) >= 0); }).sort(function (a, b) { return ((a.prio || 9) - (b.prio || 9)) || ((a.due || 9e15) - (b.due || 9e15)) || ((a.at || 9e15) - (b.at || 9e15)); }).slice(0, 12);
+return l.length ? l.map(function (t) { var p = proj(t.pid); return '<button type="button" class="wrtpi" data-a="wrtadd" data-id="' + t.id + '">' + esc(t.t.slice(0, 80)) + (p ? ' <small>' + esc(p.n) + "</small>" : "") + "</button>"; }).join("") : '<p class="muted" style="margin:4px 0">Ничего не найдено</p>';
+}
+function wrTopEd() {
+var ids = wrTopIds();
+return '<div class="wrtop wrted"><div class="wrtedh"><b>⭐ Главное недели</b><span class="muted">до трёх задач — видны в «Сегодня» всю неделю</span><button type="button" class="btn sm pri" data-a="wrted">Готово</button></div>' +
+'<div class="chips">' + (ids.length ? ids.map(function (id) { var t = task(id); return '<span class="chip on">⭐ ' + esc(t.t.slice(0, 60)) + ' <button type="button" data-a="wrtopx" data-id="' + id + '" aria-label="Убрать" title="Убрать из главного">×</button></span>'; }).join("") : '<span class="muted">Пока ничего не выбрано</span>') + "</div>" +
+(ids.length < 3 ? '<input type="search" class="inp" id="wrtq" placeholder="Найти задачу…" autocomplete="off" value="' + esc(INPV.wrtq || "") + '"><div class="wrtpl" id="wrtpl">' + wrTopList(INPV.wrtq) + "</div>" : '<p class="muted" style="margin:6px 0 0">Выбрано 3 — чтобы поменять, уберите одну задачу (×).</p>') + "</div>";
+}
+document.addEventListener("input", function (e) { if (e.target && e.target.id === "wrtq") { INPV.wrtq = e.target.value; var l = $("wrtpl"); if (l) l.innerHTML = wrTopList(e.target.value); } });
 function wrBanner() {
 var tops = wrTop(), wd = new Date().getDay(), r = (S.opt.wrev || {})[wrKey()], h = "";
-if (tops.length) h += '<div class="wrtop"><b>⭐ Главное недели:</b> ' + tops.map(function (t) { return '<a href="#task-' + t.id + '" class="' + (t.done ? "dn" : "") + '">' + (t.done ? "✓ " : "") + esc(t.t.slice(0, 60)) + "</a>"; }).join(" · ") + "</div>";
+if (WRTE) h += wrTopEd();
+else if (!tops.length && r && r.done) h += '<div class="wrtop"><b>⭐ Главное недели</b> <span class="muted">не выбрано</span><button type="button" class="btn sm wrtoped" data-a="wrted">＋ Выбрать</button></div>';
+else if (tops.length) h += '<div class="wrtop"><b>⭐ Главное недели:</b> ' + tops.map(function (t) { return '<a href="#task-' + t.id + '" class="' + (t.done ? "dn" : "") + '">' + (t.done ? "✓ " : "") + esc(t.t.slice(0, 60)) + "</a>"; }).join(" · ") + '<button type="button" class="btn sm wrtoped" data-a="wrted" title="Изменить главное недели">✎ Изменить</button></div>';
 if ((wd === 0 || wd === 5 || wd === 6 || wd === 1) && !(r && r.done)) h += '<div class="wrb"><span>🗓 ' + (wd === 1 ? "Начало недели" : "Конец недели") + " — время для обзора: 15 минут, и голова свободна.</span><a class=\"btn sm pri\" href=\"#weekly\">Начать обзор</a></div>";
 return h;
 }
@@ -16701,6 +16733,8 @@ case "apok": apApply(); return true;
 case "apx": APV = null; render(); return true;
 case "apset": var ra = el.getBoundingClientRect(), o = apOpt(); ctxShow(ra.left, ra.bottom + 4, [{ i: "🌅", l: "Начало дня: " + o.s + ":00", sub: [7, 8, 9, 10, 11].map(function (x) { return { c: "s:" + x, i: o.s === x ? "✓" : "", l: x + ":00" }; }) }, { i: "🌙", l: "Конец дня: " + o.e + ":00", sub: [16, 17, 18, 19, 20, 21, 22].map(function (x) { return { c: "e:" + x, i: o.e === x ? "✓" : "", l: x + ":00" }; }) }, { i: "☕", l: "Перерыв между задачами: " + o.gap + " мин", sub: [0, 5, 10, 15].map(function (x) { return { c: "g:" + x, i: o.gap === x ? "✓" : "", l: x + " мин" }; }) }], { k: "apset", id: "" }); return true;
 case "wrck": var rr = wrRec(), k = el.dataset.x; if (rr.st[k]) delete rr.st[k]; else rr.st[k] = 1; optTouch(); save(); render(); return true;
+case "wrted": WRTE = !WRTE; INPV.wrtq = ""; render(); if (WRTE) setTimeout(function () { var q = $("wrtq"); if (q) q.focus(); }, 30); return true;
+case "wrtadd": var r4 = wrRec(); if ((r4.top || []).indexOf(el.dataset.id) < 0) r4.top = (r4.top || []).concat([el.dataset.id]).slice(0, 3); INPV.wrtq = ""; optTouch(); save(); render(); return true;
 case "wrtopx": var r2 = wrRec(); r2.top = (r2.top || []).filter(function (x) { return x !== el.dataset.id; }); optTouch(); save(); render(); return true;
 case "wrdone": rtxFlush(); var r3 = wrRec(); r3.done = Date.now(); WRVS.forEach(function (s) { r3.st[s[0]] = 1; }); optTouch(); save(); render(); toast("Обзор недели завершён ✓"); return true;
 case "balsc": var w = S.opt.wheel = S.opt.wheel || {}, mk = wrKey(); w[mk] = Object.assign({}, w[mk] || {}); w[mk][el.dataset.k] = +el.dataset.v; optTouch(); save(); render(); return true;
@@ -17051,6 +17085,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["197", "Главное недели и дедлайны", ["«⭐ Главное недели» в «Сегодня»: кнопка «✎ Изменить» — убрать задачу (×) или найти и добавить другую поиском по всем задачам, не заходя в обзор недели.", "Перенесли дату задачи позже её дедлайна — приложение предложит сдвинуть и дедлайн («Не спрашивать» — выключить)."]],
 ["196", "Без мигания", ["Страница больше не собирается заново при каждом изменении: меняется только то, что изменилось. Не мигают карточки главной и «Дня за днём», не перезагружаются картинки, не сбрасывается прокрутка внутри блоков, курсор остаётся в поле.", "Если что-то стало показываться странно — «Настройки» → «Диагностика» → «Перерисовывать страницу целиком» вернёт прежний способ."]],
 ["195", "Единый редактор", ["Все поля для длинного текста теперь — один и тот же редактор, как у описания задачи, заметок и дневника: «/» — заголовки, чек-листы, списки, цитаты, таблицы, шаблоны; выделите текст — жирный, курсив, ссылка; @ — ссылка на задачу или заметку; картинки — вставить, перетащить или «/» → «Картинка».", "Где: итоги недели в обзоре недели, цель и итоги спринта, описание цели, описание привычки, заметка о самочувствии, описание задачи в наборе (оно попадает в задачу с оформлением)."]],
 ["194", "Обзор недели — проекты", ["Шаг «Проекты без следующего шага» больше не показывает проекты-«папки» (у которых есть подпроекты) и архивные — следующий шаг у них в подпроектах."]],
@@ -19104,7 +19139,7 @@ h += densHTML();
 var ptm = LS.get("zd-ptabs") || "";
 h += '<section class="card" id="s-ptabs"><h2>Вкладки открытых страниц</h2><p class="muted" style="margin:0">Строка вкладок над страницей, как в многооконной программе: каждая открытая страница — вкладка; нажатие возвращает к странице на то же место, × закрывает, правый клик — закрепить или закрыть другие, вкладки перетаскиваются. Только на компьютере (на телефоне вкладок нет), хранятся на этом устройстве. По умолчанию выключены — как в Яндексе: где вы, показывают крошки над заголовком, а к прежним страницам ведут «🕘 Недавние», Alt+← и Alt+щелчок «открыть рядом».</p><div class="seg" style="margin-top:10px">' + [["", "Не показывать"], ["on", "Показывать"]].map(function (x) { return '<button type="button" data-a="ptmode" data-v="' + x[0] + '" class="' + (ptm === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></section>";
 var nsh = subHidden().length;
-h += '<section class="card" id="s-hints"><h2>Подсказки</h2><p class="muted" style="margin:0">Значки «?» у блоков ведут в справку по этому месту. Когда приложение освоено, их можно спрятать — справка останется в «?» внизу левой панели.</p><div class="r" style="margin-top:10px;align-items:center"><button type="button" class="lt' + (S.opt.noHq ? "" : " on") + '" data-a="hqtog"><span class="lbox"></span><span>Показывать значки «?»</span></button>' + (nsh ? '<button type="button" class="btn sm" data-a="subreset">Вернуть скрытые пояснения (' + nsh + ")</button>" : '<span class="muted">Пояснения под заголовками можно скрыть крестиком ✕ рядом с ними.</span>') + "</div></section>";
+h += '<section class="card" id="s-hints"><h2>Подсказки</h2><p class="muted" style="margin:0">Значки «?» у блоков ведут в справку по этому месту. Когда приложение освоено, их можно спрятать — справка останется в «?» внизу левой панели.</p><div class="r" style="margin-top:10px;align-items:center"><button type="button" class="lt' + (S.opt.noHq ? "" : " on") + '" data-a="hqtog"><span class="lbox"></span><span>Показывать значки «?»</span></button><button type="button" class="lt' + (LS.get("zd-dlask") === "0" ? "" : " on") + '" data-a="dlasktog"><span class="lbox"></span><span>Предлагать сдвинуть дедлайн, если дата задачи стала позже него</span></button>' + (nsh ? '<button type="button" class="btn sm" data-a="subreset">Вернуть скрытые пояснения (' + nsh + ")</button>" : '<span class="muted">Пояснения под заголовками можно скрыть крестиком ✕ рядом с ними.</span>') + "</div></section>";
 var tad = tArchDays();
 h += '<section class="card" id="s-tarch"><h2>Архив выполненных задач</h2><p class="muted" style="margin:0">Выполненные задачи старше этого срока уходят из «Сделано» на страницу <a href="#tarch">«Архив задач»</a>. Ничего не удаляется: они остаются в статистике, целях, проектах и поиске; вернуть в работу — снять отметку.</p><div class="seg" style="margin-top:10px">' + TARCHO.map(function (x) { return '<button type="button" data-a="tarchset" data-v="' + x[0] + '" class="' + (tad === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></section>";
 h += '<section class="card" id="s-review"><h2>Проверка проектов</h2><p class="muted" style="margin:0">Как часто напоминать пересмотреть проект (кнопка ↻ у заголовка «Проекты»). Для отдельного проекта интервал меняется правым кликом по нему → «Интервал проверки».</p><div class="seg" style="margin-top:10px">' + [[7, "неделя"], [14, "2 недели"], [30, "месяц"], [182, "полгода"], [0, "не проверять"]].map(function (x) { return '<button type="button" data-a="revdef" data-v="' + x[0] + '" class="' + (rd === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + "</div></section>";
@@ -19493,7 +19528,7 @@ function iv(id, def) { return INPV[id] !== undefined && INPV[id] !== "" ? INPV[i
 function coarse() { try { return window.matchMedia("(pointer: coarse)").matches; } catch (er) { return false; } }
 document.addEventListener("change", function (e) { var t = e.target; if (t && (t.tagName === "SELECT" || t.type === "color" || (/^(date|time|datetime-local)$/.test(t.type || "") && coarse()))) try { t.blur(); } catch (er) { /* поле уже убрано */ } }, true);
 document.addEventListener("focusout", function (e) { if (!RHOLD || e.target !== RHOLD) return; RHOLD = null; if (PDOWN) return; /* ушли из поля нажатием — догонит отпускание кнопки мыши (pUp), чтобы само нажатие не потерялось */ setTimeout(function () { var a = document.activeElement; if (a && (a.tagName === "SELECT" || /^(date|time|datetime-local|month|week|color)$/.test(a.type || ""))) return; if (PEND) { PEND = false; render(); if (OPEN) renderPanel(); } }, 30); }, true);
-function render() { nPrSync();
+function render() { nPrSync(); try { dlSnap(); } catch (er) { /* не мешает */ }
 if (BOOT.done) bootAutos();
 try { navAuto(); } catch (er) { /* навигация не мешает */ }
 try { uxAuto(); } catch (er) { /* удобства не мешают */ }
@@ -20198,6 +20233,8 @@ if (a === "mmmsx") { MMMS = {}; render(); return; }
 if (a && mm7Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && mm8Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && mm9Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+if (a === "dlmove") { e.preventDefault(); var dln = 0; (el.dataset.t || "").split(",").forEach(function (id) { var t = task(id); if (t && t.at && t.due && sod(t.at) > sod(t.due)) { t.due = sod(t.at); touch(t); dln++; } }); if (dln) { save(); render(); if (OPEN) renderPanel(); } toast(dln > 1 ? "Дедлайны сдвинуты: " + dln : "Дедлайн сдвинут"); return; }
+if (a === "dlnever") { e.preventDefault(); LS.set("zd-dlask", "0"); toast("Больше не спрошу. Включить снова — «Настройки» → «Подсказки»"); return; }
 if (a === "gfix") { e.preventDefault(); var gfp = (el.dataset.t || "").split("|"); gFix(gfp[0], gfp[1]); return; }
 if (a === "ndbpe") { NDBP = el.dataset.k; render(); setTimeout(function () { var i = $("ndbpn"); if (i) i.focus(); }, 40); return; }
 if (a && ndbAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
@@ -20498,6 +20535,7 @@ case "todaymore": var tmr = el.getBoundingClientRect(); ctxShow(tmr.left, tmr.bo
 case "vtog": var vop = LS.get("zd-vopen") !== "1"; LS.set("zd-vopen", vop ? "1" : "0"); render(); return;
 case "subhide": var sh = subHidden(); if (sh.indexOf(V) < 0) sh.push(V); LS.set("zd-subhide", JSON.stringify(sh)); render(); toast("Пояснение скрыто — вернуть: «Настройки» → «Общие» → «Подсказки»"); return;
 case "subreset": LS.del("zd-subhide"); render(); toast("Пояснения под заголовками снова видны"); return;
+case "dlasktog": if (LS.get("zd-dlask") === "0") LS.del("zd-dlask"); else LS.set("zd-dlask", "0"); render(); return;
 case "hqtog": S.opt.noHq = !S.opt.noHq; optTouch(); save(); render(); return;
 case "bnmenu": document.body.classList.toggle("menu"); return;
 case "bnsearch": palOpen(); return;
