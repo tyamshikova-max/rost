@@ -8345,7 +8345,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-216";
+var APPV = "zd-app-2026-10-16-217";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -9232,7 +9232,7 @@ if (t.goal && goal(t.goal) && V !== "goal") meta.push('<a class="tag" href="#goa
 var bt = bodyTodo(t); if (bt) meta.push("☑ " + bt[0] + "/" + bt[1]); else if (t.body || t.note) meta.push("📝");
 if (t.src === "tg") meta.push("из Telegram");
 if (t.fav) meta.push('<span style="color:var(--star)">★</span>');
-if (t.pomo) meta.push("🍅 " + t.pomo);
+var pl = pomoLive(t); if (pl) meta.push('<span title="Помидоры: с таймера Помодоро и каждые 25 минут учтённого времени">🍅 ' + pl + "</span>");
 var ntn = notesOfTask(t.id).length; if (ntn) meta.push("📝 " + ntn);
 if (t.ttOn) meta.push('<span class="ttrun">⏲ идёт</span>'); else if (t.tt) meta.push("⏲ " + ttFmt(t.tt));
 meta = meta.filter(function (x) { return x && x !== '<span class="when"></span>'; });
@@ -9794,7 +9794,7 @@ if (p) m.push(pdotHTML(p, false));
 if (+t.est) m.push("⏱ " + fmtH(t.est) + " ч");
 if (t.at) m.push('<span class="' + (isLate(t) ? "warnc" : "") + '">' + esc(whenTxt(t)) + "</span>");
 if (kids.length) m.push("☐ " + kids.filter(function (k) { return k.done; }).length + "/" + kids.length);
-if (flagOf(t)) m.push(flagIc(flagOf(t))); if (t.fav) m.push("★"); var pa = pomoAll(t); if (pa) m.push("🍅 " + pa); if (ccount(t.id)) m.push("💬 " + ccount(t.id));
+if (flagOf(t)) m.push(flagIc(flagOf(t))); if (t.fav) m.push("★"); var pa = pomoLive(t); if (pa) m.push("🍅 " + pa); if (ccount(t.id)) m.push("💬 " + ccount(t.id));
 var bt = bodyTodo(t); if (bt) m.push("☑ " + bt[0] + "/" + bt[1]);
 return '<div class="kcard' + (t.prio ? " p" + t.prio : "") + (t.done ? " done" : "") + (SELS[t.id] ? " sel" : "") + '" draggable="true" data-id="' + t.id + '" data-a="kopen"><div class="kt">' + esc(t.t) + "</div>" + (m.length ? '<div class="km">' + m.join("") + "</div>" : "") + "</div>";
 }
@@ -10315,7 +10315,7 @@ var p = proj(t.pid), kids = tkids(t.id), mine = POMO && POMO.tid === t.id, top =
 h += '<div class="nowmain' + (t.done ? " isdone" : "") + '"><div class="nowcrumb">' + (top ? '<span class="nowstar">★ главное</span>' : "") + (p ? pdotHTML(p, true) : "") + (t.due ? '<span class="' + (isLate(t) ? "late" : "") + '">⏰ ' + esc(dayName(t.due)) + "</span>" : "") + (+t.est ? "<span>⏱ " + estFmt(t.est) + "</span>" : "") + "</div>" +
 '<h1 class="nowt">' + (t.done ? "✓ " : "") + esc(t.t) + "</h1>" +
 '<div class="nowtimer">' + (mine ? '<div class="wpt nowpt">' + pomoTxt() + '</div><div class="r"><button type="button" class="btn" data-now="ppause">' + (POMO.paused ? "▶ Продолжить" : "⏸ Пауза") + '</button><button type="button" class="btn" data-now="pstop">■ Стоп</button></div>'
-: '<div class="r"><button type="button" class="btn" data-now="pomo">🍅 Помодоро 25 минут</button><button type="button" class="btn" data-now="track">' + (t.ttOn ? "⏹ Остановить учёт" : "⏲ Засечь время") + "</button>" + (t.tt ? '<span class="muted">учтено ' + ttFmt(t.tt) + "</span>" : "") + (pomoAll(t) ? '<span class="muted">🍅 ' + pomoAll(t) + "</span>" : "") + "</div>") + "</div>" +
+: '<div class="r"><button type="button" class="btn" data-now="pomo">🍅 Помодоро 25 минут</button><button type="button" class="btn" data-now="track">' + (t.ttOn ? "⏹ Остановить учёт" : "⏲ Засечь время") + "</button>" + (t.tt ? '<span class="muted">учтено ' + ttFmt(t.tt) + "</span>" : "") + (pomoLive(t) ? '<span class="muted">🍅 ' + pomoLive(t) + "</span>" : "") + "</div>") + "</div>" +
 (kids.length ? '<div class="nowsubs"><h3>Подзадачи · ' + kids.filter(function (k) { return k.done; }).length + "/" + kids.length + "</h3>" + kids.map(function (k) { return '<label class="nowsub' + (k.done ? " dn" : "") + '"><input type="checkbox" data-nowsub="' + k.id + '"' + (k.done ? " checked" : "") + "> " + esc(k.t) + "</label>"; }).join("") + "</div>" : "") +
 (t.body ? '<div class="nowbody wnote">' + clean(t.body) + "</div>" : "") +
 '<div class="r nowact"><button type="button" class="btn pri nowok" data-now="done">' + (t.done ? "↺ Вернуть в работу" : "✓ Готово") + '</button><button type="button" class="btn" data-now="tomorrow">На завтра</button><button type="button" class="btn" data-now="open">✎ Открыть карточку</button></div></div>';
@@ -17266,6 +17266,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["217", "Помидоры видны снова", ["🍅 в строке задачи считает и время из «Засечь время» (каждые 25 минут — помидор), а не только таймер Помодоро; пока идёт учёт — учитывается и текущий отрезок.", "В карточке задачи помидоры видны всегда, вместе с идущим таймером и подсказкой «до следующего N мин»."]],
 ["216", "Задачи с картинки — бесплатно", ["📷 в строке новой задачи (и на главной) — выберите скриншот: расписание, записи в клуб, список дел. Текст распознаётся бесплатно прямо на устройстве (картинка никуда не уходит; в первый раз скачивается русский язык, ~15 МБ). Приложение находит день, время, длительность, «лист ожидания» и место — и показывает список для проверки: поправьте и снимите лишнее.", "Скриншот можно и просто вставить (Ctrl+V) в строку новой задачи. Распознанный текст можно поправить и разобрать заново. Если подключён ИИ-помощник — есть кнопка «✨ Точнее через ИИ» (платно, по вашему ключу)."]],
 ["215", "«День за днём»: главное — с галочками", ["В карточке «Главное» выполненные задачи зачёркнуты и отмечены ✓, перенесённые — «↷ перенесена»; отметить «готово» (или вернуть в работу) можно прямо там."]],
 ["214", "«План по часам» удобнее", ["На ленте дня — цветным фоном блоки вашего распорядка (сон, работа, еда…), как в календаре.", "«＋ Задача» или щелчок по пустому месту ленты — окно новой задачи сразу на это время, с выбором длительности (15 мин … 2 ч).", "«📥 Из бэклога» — поставить на день или на время любую задачу, где бы она ни была: просроченное и «Входящие» — первыми, поиск по названию и проекту."]],
@@ -20730,6 +20731,8 @@ function attImgs() { if (!YD.token()) return; [].forEach.call(document.querySele
 var POMOM = 25;
 function ttMinOf(t) { return Math.max(0, Math.round((t.tt || 0) / 60000)); }
 function pomoAll(t) { return (t.pomo || 0) + Math.floor(ttMinOf(t) / POMOM); }
+function ttLiveMin(t) { return Math.max(0, Math.round(((t.tt || 0) + (t.ttOn ? Math.max(0, Date.now() - t.ttOn) : 0)) / 60000)); }
+function pomoLive(t) { return (t.pomo || 0) + Math.floor(ttLiveMin(t) / POMOM); }
 function pomoEqIn(from, to) { var m = live(S.acts).reduce(function (a, x) { return a + (x.k === "time" && x.d >= from && x.d < to ? (+x.m || 0) : 0); }, 0); return Math.floor(Math.max(0, m) / POMOM); }
 function ttLog(t, min) { if (!min) return; t.tt = Math.max(0, (t.tt || 0) + min * 60000); touch(t); logAct("time", t.id, { m: min, man: 1 }); }
 function estFmt(h) { return ttFmt((+h || 0) * 3600000); }
@@ -21680,7 +21683,7 @@ h += '<div class="props">' +
 (t.done ? "" : '<span>Статус</span><div class="v"><div class="seg"><button type="button" data-p="st" data-v="" class="' + (t.st !== "doing" ? "on" : "") + '">Нужно сделать</button><button type="button" data-p="st" data-v="doing" class="' + (t.st === "doing" ? "on" : "") + '">В работе</button></div></div>') +
 '<span>Приоритет</span><div class="v"><div class="seg">' + [[1, "1"], [2, "2"], [3, "3"], [0, "—"]].map(function (x) { return '<button type="button" data-p="prio" data-v="' + x[0] + '" class="' + ((t.prio || 0) === x[0] ? "on" : "") + '" title="' + ["обычный", "срочно", "важно", "желательно"][x[0]] + '">' + x[1] + "</button>"; }).join("") + "</div></div>" +
 '<span>Теги</span><div class="v tagv">' + tg.map(function (n) { return '<span class="tchip" style="--tc:' + tcolor(n) + '"><a href="#tag-' + esc(n) + '" title="Открыть тег">' + esc(tlab(n)) + '</a><button type="button" class="tx" data-p="tag" data-tag="' + esc(n) + '" title="Убрать тег" aria-label="Убрать тег">×</button></span>'; }).join("") + '<input type="text" data-pf="newtag" class="tagin" placeholder="' + (tg.length ? "+ тег" : "Добавить тег…") + '" size="12" autocomplete="off" spellcheck="false"></div>' +
-'<span>Учёт времени</span><div class="v"><button type="button" class="btn sm' + (t.ttOn ? " pri" : "") + '" data-p="track">' + (t.ttOn ? "■ Остановить" : "▶ Засечь время") + '</button><span class="muted">учтено</span><input type="number" min="0" step="1" data-ttin="h" value="' + Math.floor(ttMinOf(t) / 60) + '" style="width:58px" aria-label="Часов"> ч <input type="number" min="0" max="59" step="1" data-ttin="m" value="' + ttMinOf(t) % 60 + '" style="width:58px" aria-label="Минут"> мин' + (pomoAll(t) ? '<span class="muted" title="Каждые 25 минут учтённого времени — один помидор, плюс помидоры с таймера">· 🍅 ' + pomoAll(t) + "</span>" : "") +
+'<span>Учёт времени</span><div class="v"><button type="button" class="btn sm' + (t.ttOn ? " pri" : "") + '" data-p="track">' + (t.ttOn ? "■ Остановить" : "▶ Засечь время") + '</button><span class="muted">учтено</span><input type="number" min="0" step="1" data-ttin="h" value="' + Math.floor(ttMinOf(t) / 60) + '" style="width:58px" aria-label="Часов"> ч <input type="number" min="0" max="59" step="1" data-ttin="m" value="' + ttMinOf(t) % 60 + '" style="width:58px" aria-label="Минут"> мин' + (function () { var lm = ttLiveMin(t), pl2 = pomoLive(t), left = POMOM - lm % POMOM; return '<span class="muted" title="Каждые 25 минут учтённого времени — один помидор, плюс помидоры с таймера Помодоро">· 🍅 ' + pl2 + (t.ttOn ? " · идёт " + ttFmt(Date.now() - t.ttOn) : "") + (lm || t.ttOn ? " · до следующего " + left + " мин" : "") + "</span>"; })() +
 '<span class="ttq">' + [5, 15, 30, 60].map(function (m) { return '<button type="button" class="chip" data-p="ttadd" data-v="' + m + '" title="Добавить ' + (m < 60 ? m + " минут" : "час") + ' к учтённому">+' + (m < 60 ? m + " мин" : "1 ч") + "</button>"; }).join("") + "</span></div>" +
 '<span>Входит в</span><div class="v"><select data-pf="parent"><option value="">— это главная задача —</option>' + cand.map(function (x) { return '<option value="' + x.id + '"' + (t.parent === x.id ? " selected" : "") + ">" + esc(x.t.slice(0, 60)) + "</option>"; }).join("") + "</select></div>" +
 '<span>Напоминание</span><div class="v"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-pf="rem"' + (t.rem ? " checked" : "") + (t.at ? "" : " disabled") + "> " + (SRV.ready() && bnOn() ? "в Telegram и в браузере" : bnOn() ? "в браузере" : "в Telegram") + (t.at && t.allday ? " в " + (S.opt.allDayHour || 9) + ":00" : "") + "</label>" + (t.rem && t.at ? '<span class="remo">' + REMO.map(function (o) { return '<button type="button" class="chip' + (remOffs(t).indexOf(o) >= 0 ? " on" : "") + '" data-p="remoff" data-v="' + o + '" title="' + (o ? "Напомнить за " + REMN[o] : "Напомнить в момент начала") + '">' + (o ? "за " : "") + REMN[o] + "</button>"; }).join("") + "</span>" : "") + (!t.at ? '<span class="muted">сначала укажите срок</span>' : SRV.ready() || bnOn() ? "" : '<span class="muted">— включите <a href="#settings-bnotif">напоминания в браузере</a> или подключите <a href="#settings-srv">сервер</a></span>') + "</div>" + depRows(t) + "</div>";
