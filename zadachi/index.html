@@ -3191,7 +3191,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-211";
+var APPV = "zd-app-2026-10-16-212";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -12109,6 +12109,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["212", "Пространство «Челленджи»", ["Челленджи — отдельное пространство: значок 🏁 на полосе слева (и в меню пространств на телефоне). В панели — «Все челленджи» и каждая программа со своим днём («6/42»); щелчок — на её страницу.", "Как любое пространство, его можно настроить (✎) или скрыть с полосы."]],
 ["211", "Демо обновлено, ссылка на демо; «Сколько сил» больше не прячет задачи", ["Фильтр «🔋 Сколько сил» скрывает только задачи тяжелее выбранного, а задачи без отметки сил видны всегда (раньше при «⚡ много сил» пропадали все задачи без отметки). Пока фильтр включён, над списком — полоса: сколько скрыто и «Показать все задачи».", "Демо-версия показывает новые возможности: своё пространство «Учёба 1С» с рабочим столом и фокусом, два идущих челленджа («Осанка и лицо» и «Дом»), советник по оценкам времени, выбор оформления, челленджи недели и «Неделю в цифрах».", "Ссылка на демо — в меню кружка профиля («▶ Демо-версия»), в справке «С чего начать» и в «Настройки» → «Тестовые данные». Демо открывается в новой вкладке и ваши данные не трогает."]],
 ["210", "Все челленджи в одном месте", ["Новая страница «🏁 Челленджи» (🌿 Жизнь и «Все разделы»): «Осанка и лицо», «Дом», «Финансы», «Кухня» — что идёт сейчас (день, прогресс программы, сколько сделано сегодня, кнопка «Задание на сегодня»), что можно начать — «Подробнее и старт»."]],
 ["209", "«Все разделы» листается правильно", ["Открытое окно «Все разделы» прокручивается само, а страница под ним больше не уезжает; щелчок по пустому месту закрывает окно."]],
@@ -12440,7 +12441,7 @@ else if (e.code === "KeyB") { e.preventDefault(); ntfShow(!$("ntfp"), document.q
 window.addEventListener("hashchange", function () { if ($("railpop")) $("railpop").remove(); if ($("ntfp")) $("ntfp").remove(); });
 window.addEventListener("resize", function () { try { railSync(); } catch (e) { /* ок */ } });
 var SIDEB = {}, SIDEL = {}, CPQ = "", FLY = "", FLYT = 0, RDRAG = "", RCXY = [80, 80];
-var SPACES = { home: ["🏠", "Главная", "x-spaces"], day: ["☀", "Мой день", "x-spaces"], task: ["✅", "Задачи", "x-spaces"], know: ["📝", "Знания", "x-spaces"], life: ["🌿", "Жизнь", "x-spaces"], house: ["🔑", "Дом и деньги", "x-spaces"] };
+var SPACES = { home: ["🏠", "Главная", "x-spaces"], day: ["☀", "Мой день", "x-spaces"], task: ["✅", "Задачи", "x-spaces"], know: ["📝", "Знания", "x-spaces"], life: ["🌿", "Жизнь", "x-spaces"], house: ["🔑", "Дом и деньги", "x-spaces"], chal: ["🏁", "Челленджи", "x-bch"] };
 var CPADD = { task: [["rev-on", "↻", "Проверка проектов"], ["newproj", "+", "Новый проект"]], know: [["nsec-new", "🗀", "Новый раздел заметок"], ["note-new", "+", "Новая заметка"]], home: [["bnew", "+", "Новая доска"]], tagx: [["newtag", "#", "Новый тег"], ["newfilter", "⛃", "Новый фильтр"]] };
 function cpOn() { return S.opt.rail !== false && window.innerWidth > 860; }
 function cpSpace() { var k = FLY || LS.get("zd-space") || "day"; return SPACES[k] ? k : "day"; }
@@ -12464,8 +12465,8 @@ var b = document.querySelector(".side .cpb"); if (!b) return; var q = CPQ.toLowe
 function cpRedraw() { try { $("side").innerHTML = sideHTML(); cpFilter(); railSync(); } catch (e) { render(); } }
 function cpFollow(v, a) { if (FLY) return; try { if (v !== "sp" && spcCovers(cpSpace(), v, a)) return; } catch (e) { /* ок */ } var k = spzOf(v, a); if (k && SPACES[k] && k !== cpSpace()) { cpSet(k); CPQ = ""; } }
 function cpFlyOff() { if (!FLY) return; FLY = ""; document.body.classList.remove("sidefly"); cpRedraw(); }
-var RAILD = ["apps", "home", "day", "task", "know", "life", "house", "find", "fav", "rec"];
-var RAILE = { apps: ["▦", "Все разделы (Alt+A)"], home: ["🏠", "Главная: сводка дня, избранное, доски"], day: ["☀", "Мой день: входящие, сегодня, планы, утро и вечер"], task: ["✅", "Задачи: проекты, списки, теги и фильтры"], know: ["📝", "Знания: заметки, карты, повторение"], life: ["🌿", "Жизнь: привычки, цели, самочувствие, люди"], house: ["🔑", "Дом и деньги: меню, уборка, бюджет, документы"], find: ["⌕", "Поиск и команды (Ctrl+K)"], fav: ["★", "Избранное"], rec: ["🕘", "Недавние"] };
+var RAILD = ["apps", "home", "day", "task", "know", "life", "house", "chal", "find", "fav", "rec"];
+var RAILE = { apps: ["▦", "Все разделы (Alt+A)"], home: ["🏠", "Главная: сводка дня, избранное, доски"], day: ["☀", "Мой день: входящие, сегодня, планы, утро и вечер"], task: ["✅", "Задачи: проекты, списки, теги и фильтры"], know: ["📝", "Знания: заметки, карты, повторение"], life: ["🌿", "Жизнь: привычки, цели, самочувствие, люди"], house: ["🔑", "Дом и деньги: меню, уборка, бюджет, документы"], chal: ["🏁", "Челленджи: осанка и лицо, дом, финансы, кухня"], find: ["⌕", "Поиск и команды (Ctrl+K)"], fav: ["★", "Избранное"], rec: ["🕘", "Недавние"] };
 function railHid() { return S.opt.rail2h || ["find", "fav", "rec"]; }
 function railKeys() { var o = (S.opt.rail2o || []).filter(function (k) { return RAILE[k]; }), hid = railHid(); RAILD.forEach(function (k) { if (o.indexOf(k) < 0) o.push(k); }); return o.filter(function (k) { return k === "apps" || hid.indexOf(k) < 0; }); }
 function railSync() {
@@ -13153,14 +13154,15 @@ day: ["☀", "Мой день", "Входящие, сегодня, планы, �
 task: ["✅", "Задачи", "Проекты, списки, теги и фильтры, таймлайн, матрица, спринт"],
 know: ["📝", "Знания", "Заметки, карты мыслей, холсты, повторение, книги"],
 life: ["🌿", "Жизнь", "Привычки, самочувствие, цели, колесо баланса, люди"],
-house: ["🔑", "Дом и деньги", "Меню, кухня, уборка, бюджет, документы, общие списки"]
+house: ["🔑", "Дом и деньги", "Меню, кухня, уборка, бюджет, документы, общие списки"],
+chal: ["🏁", "Челленджи", "Программы по дням: осанка и лицо, дом, финансы, кухня"]
 };
-var SPZK = { day: ["inbox", "today", "plans", "cal", "morning", "shutdown", "weekly", "tbox", "dnote", "snoozed"], task: ["all", "flag", "waiting", "someday", "done", "sprint", "gantt", "matrix"], know: ["notes", "ngraph", "srs", "market"], life: ["habits", "chals", "goals", "health", "journal", "wheel", "people", "garden", "stats"], house: ["menu", "kitchen", "clean", "budget", "docs", "shared"] };
+var SPZK = { chal: ["chals"], day: ["inbox", "today", "plans", "cal", "morning", "shutdown", "weekly", "tbox", "dnote", "snoozed"], task: ["all", "flag", "waiting", "someday", "done", "sprint", "gantt", "matrix"], know: ["notes", "ngraph", "srs", "market"], life: ["habits", "chals", "goals", "health", "journal", "wheel", "people", "garden", "stats"], house: ["menu", "kitchen", "clean", "budget", "docs", "shared"] };
 var SPZV = { proj: "task", archive: "task", templates: "task", tag: "task", filter: "task", all: "task", waiting: "task", someday: "task", done: "task", tarch: "task", sprint: "task", sprints: "task", gantt: "task", matrix: "task", flag: "task", trash: "task",
 note: "know", nsec: "know", ntag: "know", notes: "know", ngraph: "know", srs: "know", market: "know",
 board: "home", home: "home", apps: "home", news: "home", mods: "home",
 inbox: "day", today: "day", plans: "day", cal: "day", morning: "day", shutdown: "day", weekly: "day", tbox: "day", dnote: "day", snoozed: "day", daily: "day", report: "day",
-habits: "life", chals: "life", goals: "life", goal: "life", health: "life", journal: "life", wheel: "life", people: "life", garden: "life", stats: "life", recap: "life", rpt: "life",
+habits: "life", chals: "chal", goals: "life", goal: "life", health: "life", journal: "life", wheel: "life", people: "life", garden: "life", stats: "life", recap: "life", rpt: "life",
 menu: "house", menunew: "house", recipes: "house", rhave: "house", prods: "house", recipe: "house", shop: "house", rimp: "house", kitchen: "house", clean: "house", budget: "house", docs: "house", shared: "house", sh: "house" };
 function spzOf(v, a) { if (v === "sp") return SPZ[a] ? a : ""; if (v === "flag" && !a) return "task"; return SPZV[v] || ""; }
 function spzHref(k) { return k === "home" ? "home" : "sp-" + k; }
@@ -13197,10 +13199,12 @@ g("Ещё") + '<nav class="nav">' + itemHTML("", "", "archive", ic("archive"), "
 if (k === "know") return cpStrip(B.notes) + g("Ещё") + spzNav(["ngraph", "srs", "market"]);
 if (k === "life") return spzNav(["habits", "chals", "goals", "health", "journal"]) + g("Обзор") + spzNav(["wheel", "people", "garden", "stats"]);
 if (k === "house") return spzNav(["menu", "kitchen", "clean", "budget"]) + g("Бумаги и близкие") + spzNav(["docs", "shared"]);
+if (k === "chal") return spzNav(["chals"]) + g("Программы") + chalNav();
 return "";
 }
 function spzLine(k) {
 try {
+if (k === "chal") { var na = chalList().filter(function (c) { return c.on; }).length; return na ? "идёт " + na + " " + plural(na, ["челлендж", "челленджа", "челленджей"]) : "осанка и лицо, дом, финансы, кухня"; }
 var t0 = today0();
 if (k === "day") { var tl = todayList().length, ib = inboxList().length; return "сегодня " + tl + " " + plural(tl, ["задача", "задачи", "задач"]) + (ib ? " · входящих " + ib : ""); }
 if (k === "task") { var op = tasks().filter(function (t) { return !t.done; }).length, pr = projects().filter(function (p) { return !isArch(p.id); }).length; return op + " " + plural(op, ["открытая", "открытые", "открытых"]) + " · " + pr + " " + plural(pr, ["проект", "проекта", "проектов"]); }
@@ -13212,7 +13216,7 @@ return SPZ[k] ? SPZ[k][2] : "";
 }
 function spzTiles(cls) { return '<div class="spzg' + (cls ? " " + cls : "") + '">' + spcAll().filter(function (k) { return k !== "home"; }).map(function (k) { return '<a class="spzt" href="#sp-' + k + '"><span class="spzi">' + SPZ[k][0] + "</span><b>" + SPZ[k][1] + "</b><small>" + esc(spzLine(k)) + "</small></a>"; }).join("") + '<a class="spzt spztadd" href="#spced-new"><span class="spzi">＋</span><b>Своё пространство</b><small>меню и рабочий стол — из того, что нужно вам</small></a></div>'; }
 function vSpz() {
-var k = SPZ[ARG] ? ARG : "day"; if (k === "home") return vHome(); if (spcGet(k)) return vSpcPage(k);
+var k = SPZ[ARG] ? ARG : "day"; if (k === "home") return vHome(); if (spcGet(k)) return vSpcPage(k); if (k === "chal") return vChals();
 var D = appDef(), col = appColMap(appLayout()), s = SPZ[k], h = head(s[0] + " " + s[1], s[2] + ". Слева — панель пространства; значок на полосе — сюда же.");
 h += spcBar(k) + spcDeskHTML(k);
 h += '<div class="aptg spzov">' + spzKeys(k).map(function (x) { var d = D[x], n = appCnt(x); return '<div class="apt" style="--ac:' + (col[x] || "var(--acc)") + '"><a class="aptl" href="#' + x + '"><span class="apti">' + d[1] + "</span><b>" + esc(d[2]) + (n !== "" && n !== 0 ? '<span class="aptn">' + esc(String(n)) + "</span>" : "") + "</b><small>" + esc(d[3]) + "</small>" + appMini(x) + "</a></div>"; }).join("") + "</div>";
@@ -14215,16 +14219,17 @@ case "wsumauto": S.opt.wsumtg = !S.opt.wsumtg; optTouch(); save(); toast(S.opt.w
 }
 return false;
 }
-var SPCBASE = ["home", "day", "task", "know", "life", "house"], SPCORIG = {}, SPCSIG = "";
+var SPCBASE = ["home", "day", "task", "know", "life", "house", "chal"], SPCORIG = {}, SPCSIG = "";
 SPCBASE.forEach(function (k) { SPCORIG[k] = { z: SPZ[k].slice(), s: SPACES[k].slice(), r: (RAILE[k] || []).slice() }; });
 var SPCICONS = ["📚", "🎓", "💼", "🏗", "🎨", "🎸", "🏃", "🧘", "🍳", "✈", "🐶", "👶", "💻", "📈", "🧾", "🏡", "🌱", "❤", "🧠", "🎯", "🛠", "📷", "🎮", "⚽", "🚗", "🌍", "☕", "🎵", "✍", "🔬", "💡", "⭐", "🏠", "☀", "✅", "📝", "🌿", "🔑"];
-var SPCX = { homenav: "Главная и все разделы", projects: "Все проекты", notes: "Все заметки", tags: "Теги", filters: "Фильтры", flags: "Флажки", fav: "Избранное", boards: "Доски", recent: "Недавние", archtpl: "Архив и шаблоны" };
+var SPCX = { chals: "Список челленджей", homenav: "Главная и все разделы", projects: "Все проекты", notes: "Все заметки", tags: "Теги", filters: "Фильтры", flags: "Флажки", fav: "Избранное", boards: "Доски", recent: "Недавние", archtpl: "Архив и шаблоны" };
 var SPCDEF = {
 home: [{ t: "x", k: "homenav" }, { t: "h", n: "Избранное" }, { t: "x", k: "fav" }, { t: "h", n: "Доски" }, { t: "x", k: "boards" }, { t: "h", n: "Недавние" }, { t: "x", k: "recent" }],
 day: [{ t: "r", k: "inbox" }, { t: "r", k: "today" }, { t: "r", k: "plans" }, { t: "r", k: "cal" }, { t: "h", n: "Ритуалы" }, { t: "r", k: "morning" }, { t: "r", k: "shutdown" }, { t: "r", k: "weekly" }, { t: "h", n: "Ещё" }, { t: "r", k: "tbox" }, { t: "r", k: "dnote" }, { t: "r", k: "snoozed" }],
 task: [{ t: "h", n: "Проекты" }, { t: "x", k: "projects" }, { t: "h", n: "Списки" }, { t: "r", k: "all" }, { t: "r", k: "flag" }, { t: "r", k: "waiting" }, { t: "r", k: "someday" }, { t: "r", k: "done" }, { t: "h", n: "Виды" }, { t: "r", k: "sprint" }, { t: "r", k: "gantt" }, { t: "r", k: "matrix" }, { t: "h", n: "Теги" }, { t: "x", k: "tags" }, { t: "h", n: "Фильтры" }, { t: "x", k: "filters" }, { t: "x", k: "flags" }, { t: "h", n: "Ещё" }, { t: "x", k: "archtpl" }],
 know: [{ t: "x", k: "notes" }, { t: "h", n: "Ещё" }, { t: "r", k: "ngraph" }, { t: "r", k: "srs" }, { t: "r", k: "market" }],
 life: [{ t: "r", k: "habits" }, { t: "r", k: "chals" }, { t: "r", k: "goals" }, { t: "r", k: "health" }, { t: "r", k: "journal" }, { t: "h", n: "Обзор" }, { t: "r", k: "wheel" }, { t: "r", k: "people" }, { t: "r", k: "garden" }, { t: "r", k: "stats" }],
+chal: [{ t: "r", k: "chals" }, { t: "h", n: "Программы" }, { t: "x", k: "chals" }],
 house: [{ t: "r", k: "menu" }, { t: "r", k: "kitchen" }, { t: "r", k: "clean" }, { t: "r", k: "budget" }, { t: "h", n: "Бумаги и близкие" }, { t: "r", k: "docs" }, { t: "r", k: "shared" }]
 };
 var SPCTPL = {
@@ -14272,6 +14277,7 @@ if (it.k === "homenav") return itemHTML("", "", "home", '<span class="pic">🏠<
 if (it.k === "fav") return B.fav ? cpStrip(B.fav) : '<div class="none">Отметьте ★ проект, заметку, тег или ☆ раздел в «Все разделы».</div>';
 if (it.k === "recent") return recentItems(6).map(function (x) { return itemHTML("", "", x.h, '<span class="pic">' + x.ic + "</span>", x.t, 0, {}); }).join("");
 if (it.k === "flags") return flags().map(function (f) { var n = tasks().filter(function (t) { var q = !t.done && flagOf(t); return q && q.id === f.id; }).length; return itemHTML("", "", "flag-" + f.id, '<span class="pic">' + flagIc(f) + "</span>", f.n, n, {}); }).join("");
+if (it.k === "chals") return chalNav();
 if (it.k === "archtpl") return itemHTML("", "", "archive", ic("archive"), "Архив проектов", archList().length, {}) + itemHTML("", "", "templates", ic("tpl"), "Шаблоны проектов и задач", 0, {});
 return cpStrip(B[it.k] || "");
 }
@@ -14476,9 +14482,14 @@ h += '<div class="r chlb">' + (task(c.tid) ? '<button type="button" class="btn s
 } else h += '<div class="r chlb"><button type="button" class="btn sm pri" data-a="' + c.go + '">Подробнее и старт</button><span class="muted">' + esc(c.where) + "</span></div>";
 return h + "</div>";
 }
+function chalNav() {
+var t0 = today0();
+return '<nav class="nav">' + chalList().map(function (c) { var d = null; try { d = c.on ? c.day() : null; } catch (e) { d = null; } var n = c.on ? (d ? (d.post ? "✓" : d.n + "/" + d.total) : "…") : 0;
+return '<a href="#chals" data-a="' + c.go + '" title="' + esc(c.d) + '"><span class="pic">' + c.ic + '</span><span class="nm">' + esc(c.n) + "</span>" + (n ? '<span class="n">' + esc(String(n)) + "</span>" : "") + "</a>"; }).join("") + "</nav>";
+}
 function vChals() {
 var L = chalList(), act = L.filter(function (c) { return c.on; }), off = L.filter(function (c) { return !c.on; });
-var h = head("🏁 Челленджи", "Программы на несколько недель: каждый день задание само появляется в «Сегодня». Пропустили день — ничего страшного, задания идут дальше.");
+var h = head(SPZ.chal[0] + " " + SPZ.chal[1], "Программы на несколько недель: каждый день задание само появляется в «Сегодня». Пропустили день — ничего страшного, задания идут дальше.");
 if (act.length) h += '<h3 class="apph">Идут сейчас</h3><div class="chlg">' + act.map(chalCard).join("") + "</div>";
 if (off.length) h += '<h3 class="apph">' + (act.length ? "Можно начать" : "Выберите, с чего начать") + '</h3><div class="chlg">' + off.map(chalCard).join("") + "</div>";
 h += '<p class="muted chlnote">Очки за задания челленджей идут в «🏆 Уровень и очки»; достижение «Прямая спина» — за 14 дней «Осанки и лица».</p>';
