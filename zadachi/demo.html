@@ -8409,7 +8409,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-227";
+var APPV = "zd-app-2026-10-16-228";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -17432,6 +17432,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["228", "Кнопка «＋ Создать» на странице пространства", ["На странице каждого пространства — заметная кнопка «＋ Создать» рядом с «Фокус» и «Рабочий стол»: то же меню, что у маленького «＋» в шапке боковой панели. В «Знаниях» там — «Заметка», «Раздел заметок» и «🧠 Карта мыслей из файла»."]],
 ["227", "Карты мыслей из файлов; бюджет на главной", ["Карточка «🔁 Цикл планирования» — во всю ширину рабочего стола, шаги в один ряд; рабочий стол пространства больше не прилегает вплотную к плиткам разделов.", "🧠 «Знания» → «＋ Создать…» → «Карта мыслей из файла»: XMind, FreeMind, OPML, Markdown-список или HTML-страница со сворачиваемыми разделами — получится карта с ветками. Если у заголовка один узел, его разделы раскладываются вокруг центра.", "Карточки-виджеты на главной (бюджет недели, сроки и другие) больше не срезают текст по углам в стилях «Стекло», «Бенто», «Экспрессив». «Бюджет недели»: у периода видны даты; если лимит недели исчерпан перерасходом прошлых недель — так и написано, без «из −3 000 ₽».", "Денежный дневник находится через поиск («денежный дневник») — сразу открывается нужная вкладка бюджета."]],
 ["226", "Под капотом: модули и автотесты", ["Код приложения разложен на 25 понятных модулей (задачи, заметки, бюджет, кухня, пространства, настройки…), а набор автотестов (242 проверки) запускается одной командой перед каждой выкладкой — чтобы новые возможности не ломали старые. Для вас ничего не меняется."]],
 ["225", "Телефон: сначала задачи", ["На телефоне в «Сегодня» все подсказки (закрыть день, до конца рабочего дня, застрявшие задачи, перегруз, главное недели, план) собраны в один свёрнутый блок «💡 Подсказки дня» — список задач виден сразу. Нажмите на блок — раскроется.", "Советы советника на узком экране больше не сжимаются в узкую колонку: текст — во всю ширину, кнопки — под ним. Поиск в «Все разделы» — во всю ширину."]],
@@ -17796,7 +17797,7 @@ function cpStrip(html) { return String(html || "").replace(/^<div class="lab"[\s
 function cpBody(k) { return spzBody(k); }
 function cpHTML(fly) {
 var k = cpSpace(), s = SPACES[k];
-var h = '<div class="cph"' + (k === "task" ? ' data-droproot="1"' : "") + "><b>" + s[1] + "</b>" + (SPZ[k] ? [["spzplus", "＋", "Создать…"]] : CPADD[k] || []).map(function (x) { return '<button type="button" class="ibtn" data-a="' + x[0] + '" title="' + x[2] + '" aria-label="' + x[2] + '">' + x[1] + "</button>"; }).join("") +
+var h = '<div class="cph"' + (k === "task" ? ' data-droproot="1"' : "") + "><b>" + s[1] + "</b>" + (SPZ[k] ? [["spzplus", "＋", "Создать… (задача, заметка, проект — зависит от пространства)"]] : CPADD[k] || []).map(function (x) { return '<button type="button" class="ibtn" data-a="' + x[0] + '" title="' + x[2] + '" aria-label="' + x[2] + '">' + x[1] + "</button>"; }).join("") +
 '<button type="button" class="ibtn" data-a="spced" data-x="' + k + '" title="Настроить пространство: меню, название, значок" aria-label="Настроить пространство">✎</button>' +
 '<button type="button" class="ibtn" data-a="cpmore" title="Ещё: история, корзина, архив, настройка полосы" aria-label="Ещё">⋯</button>' +
 (fly ? '<button type="button" class="ibtn" data-a="cppin" title="Закрепить панель" aria-label="Закрепить панель">📌</button>' : '<button type="button" class="ibtn" data-a="cphide" title="Скрыть панель (или щёлкните значок ещё раз)" aria-label="Скрыть панель">⇤</button>') + "</div>";
@@ -18872,7 +18873,7 @@ if (!l.length) add(["q", "☐", "Задача на сегодня"]);
 return l;
 }
 function spzPlus(el) {
-var r = el.getBoundingClientRect(), l = spzAddList(cpSpace());
+var r = el.getBoundingClientRect(), l = spzAddList(el.dataset.x && SPZ[el.dataset.x] ? el.dataset.x : cpSpace()); // со страницы пространства — его меню, из панели — открытой
 if (!l.length) { toast("Здесь всё выключено — включите разделы в «🧩 Модули»"); return; }
 ctxShow(r.left, r.bottom + 4, l.map(function (x) { return { c: x[0], i: x[1], l: x[2] }; }), { k: "spzp" });
 }
@@ -19705,7 +19706,7 @@ return h;
 }
 function spcBar(k) {
 var foc = FOCUS === "sp:" + k, can = spcCanFocus(k);
-return '<div class="r spcbar"><button type="button" class="btn sm' + (foc ? " pri" : "") + '" data-a="spcfocus" data-x="' + esc(k) + '"' + (can || foc ? "" : ' title="Добавьте в пространство проекты или цели — тогда фокус покажет только их задачи"') + ">🎯 " + (foc ? "Выйти из фокуса" : "Фокус") + '</button><button type="button" class="btn sm" data-a="hzed">' + (HZED ? "✓ Готово" : "✎ Рабочий стол") + '</button><a class="btn sm" href="#spced-' + esc(k) + '">⚙ Настроить пространство</a></div>';
+return '<div class="r spcbar"><button type="button" class="btn sm pri" data-a="spzplus" data-x="' + esc(k) + '" title="Что можно создать в этом пространстве">＋ Создать</button><button type="button" class="btn sm' + (foc ? " pri" : "") + '" data-a="spcfocus" data-x="' + esc(k) + '"' + (can || foc ? "" : ' title="Добавьте в пространство проекты или цели — тогда фокус покажет только их задачи"') + ">🎯 " + (foc ? "Выйти из фокуса" : "Фокус") + '</button><button type="button" class="btn sm" data-a="hzed">' + (HZED ? "✓ Готово" : "✎ Рабочий стол") + '</button><a class="btn sm" href="#spced-' + esc(k) + '">⚙ Настроить пространство</a></div>';
 }
 function spcTasksCard() {
 if (V !== "sp" || !SPZ[ARG] || !spcCanFocus(ARG)) return "";
