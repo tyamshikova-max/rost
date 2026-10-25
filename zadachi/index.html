@@ -1776,6 +1776,11 @@ html.prcalm .ck.p3 { border-color: color-mix(in srgb, var(--acc) 40%, var(--mute
 .mtips > summary::after { content: "▸"; float: right; color: var(--muted) } .mtips[open] > summary::after { content: "▾" } .mtips[open] { padding-bottom: 8px } .mtips .modebar { margin: 6px 0 }
 @media (max-width: 600px) { .appbar #appq { flex: 1 1 100%; width: 100%; min-width: 0; max-width: none } }
 html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; background: none; overflow: visible; -webkit-backdrop-filter: none; backdrop-filter: none } html .hzc.hzw .wdg.hzwb > .wb { overflow: visible }
+.fcpdn { padding: 6px 10px; border-radius: 8px; background: var(--hover); font-size: calc(13.5px * var(--fs)) } .fcpdn.bad b { color: #c94a3a } .fcpdn.warn b { color: var(--buwarn) } .fcpdn.ok b { color: var(--ok) }
+.fcseq { display: grid; gap: 0; font-size: calc(13px * var(--fs)); overflow-x: auto } .fcseqh, .fcseqr { display: grid; grid-template-columns: 26px minmax(140px, 1fr) 64px 100px 120px 90px; gap: 8px; padding: 5px 2px; border-bottom: 1px solid var(--line); align-items: baseline; min-width: 560px }
+.fcseqh { color: var(--muted); font-size: calc(12px * var(--fs)) } .fcseqr span:nth-child(n+3) { font-variant-numeric: tabular-nums } .fcseq em { font-style: normal; font-size: calc(11.5px * var(--fs)); padding: 0 6px; border-radius: 99px; white-space: nowrap }
+.fcg0 { color: #c94a3a; background: color-mix(in srgb, #c94a3a 10%, transparent) } .fcg2 { color: var(--muted); background: var(--hover) }
+.fcmon { font-size: calc(13.5px * var(--fs)); line-height: 1.6 } .fcrules ul { margin: 6px 0; padding-left: 18px; font-size: calc(13px * var(--fs)) } .fcrules li { margin: 3px 0 }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -3270,7 +3275,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-229";
+var APPV = "zd-app-2026-10-16-230";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -8833,11 +8838,16 @@ return '<div class="ckq"><span>' + esc(q[1]) + (q[0] === "lim" && auto !== null 
 }).join("") + "</div>";
 }
 function fcDebtCur(d) { var b = live(S.dbal || []).filter(function (x) { return x.debt === d.id; }).sort(function (a, c) { return c.d - a.d; })[0]; return b ? +b.v : +d.start || 0; }
-function fcDebtsSorted() { var s = fcOpt().strat, l = live(S.debts || []).filter(function (d) { return !d.off; }); return l.sort(function (a, b) { var ca = fcDebtCur(a), cb = fcDebtCur(b); if ((ca <= 0) !== (cb <= 0)) return ca <= 0 ? 1 : -1; return s === "av" ? (+b.rate || 0) - (+a.rate || 0) || ca - cb : ca - cb || (+b.rate || 0) - (+a.rate || 0); }); }
+var FCHOT = 50;
+function fcGroup(rate, dep) { return rate >= FCHOT ? 0 : rate <= 0 || (dep > 0 && rate <= dep) ? 2 : 1; }
+function fcCmp(strat, dep) { return function (a, b) { var ga = fcGroup(a.rate, dep), gb = fcGroup(b.rate, dep); if (ga !== gb) return ga - gb; if (ga === 0) return b.r - a.r || a.b - b.b; return strat === "sb" ? a.b - b.b || b.r - a.r : b.r - a.r || a.b - b.b; }; }
+function fcStrat() { return fcOpt().strat || "av"; } // не выбрано — «лавина»: по книгам она выгоднее
+function fcDep() { return +((S.opt.bud || {}).fch || {}).dep || 0; }
+function fcDebtsSorted() { var cmp = fcCmp(fcStrat(), fcDep()), l = live(S.debts || []).filter(function (d) { return !d.off; }).map(function (d) { return { d: d, b: fcDebtCur(d), rate: +d.rate || 0, r: (+d.rate || 0) / 1200 }; }); return l.sort(function (x, y) { if ((x.b <= 0) !== (y.b <= 0)) return x.b <= 0 ? 1 : -1; return cmp(x, y); }).map(function (x) { return x.d; }); }
 function fcDebtsHTML() {
 var all = live(S.debts || []), act = fcDebtsSorted(), st = all.filter(function (d) { return !d.off; }).reduce(function (s, d) { return s + (+d.start || 0); }, 0), cur = all.filter(function (d) { return !d.off; }).reduce(function (s, d) { return s + Math.max(0, fcDebtCur(d)); }, 0), pct = st ? Math.round((st - cur) / st * 100) : 0, focus = act.filter(function (d) { return fcDebtCur(d) > 0; })[0], o = fcOpt();
 var h = '<div class="r fcimpb"><button type="button" class="btn sm" data-a="fcimp">📥 Загрузить из листа «Долги»</button></div>' + fcImpHTML() + '<div class="butiles"><div class="butile"><small>Долги сейчас</small><span>' + buRub(cur) + '</span><small class="muted">было ' + buRub(st) + '</small></div><div class="butile"><small>Закрыто</small><span class="ok">' + buRub(st - cur) + " · " + pct + "%</span></div>" + (focus ? '<div class="butile"><small>Фокус-долг</small><span>' + esc(focus.n) + '</span><small class="muted">лишние деньги — сюда, на остальные — минимум</small></div>' : "") + "</div>";
-h += '<div class="r fcstrat"><span class="muted">Стратегия:</span><div class="seg"><button type="button" data-a="fcstrat" data-v="sb" class="' + (o.strat === "sb" ? "on" : "") + '" title="Сначала самый маленький остаток — быстрые победы">❄ снежный ком</button><button type="button" data-a="fcstrat" data-v="av" class="' + (o.strat === "av" ? "on" : "") + '" title="Сначала самая высокая ставка — меньше переплата">⛰ лавина</button></div><span class="muted">' + (o.strat === "av" ? "сначала самая высокая ставка" : o.strat === "sb" ? "сначала самый маленький остаток" : "выберите — от этого зависит порядок и фокус-долг") + "</span></div>";
+h += '<div class="r fcstrat"><span class="muted">Стратегия:</span><div class="seg"><button type="button" data-a="fcstrat" data-v="sb" class="' + (fcStrat() === "sb" ? "on" : "") + '" title="Сначала самый маленький остаток — быстрые победы">❄ снежный ком</button><button type="button" data-a="fcstrat" data-v="av" class="' + (fcStrat() === "av" ? "on" : "") + '" title="Сначала самая высокая ставка — меньше переплата">⛰ лавина</button></div><span class="muted">' + (fcStrat() === "av" ? "сначала самая высокая ставка — меньше переплата" + (o.strat ? "" : " (по умолчанию)") : "сначала самый маленький остаток — быстрые победы") + "; сверхдорогие (от " + FCHOT + "%) — всегда первыми, беспроцентные — последними" + "</span></div>";
 h += '<div class="gsheet fcdebts">' + (all.length ? act.concat(all.filter(function (d) { return d.off; })).map(function (d, i) {
 var c = fcDebtCur(d), p = +d.start ? Math.max(0, Math.min(100, Math.round((+d.start - c) / +d.start * 100))) : 0, lastB = live(S.dbal || []).filter(function (x) { return x.debt === d.id; }).sort(function (a, b) { return b.d - a.d; })[0];
 return '<div class="fcd' + (d.off ? " off" : "") + (focus && d.id === focus.id ? " focus" : "") + (+d.start > 0 && c <= 0 ? " closed" : "") + '"><div class="fcdh"><input class="inp fcdn" data-fcd="n" data-id="' + d.id + '" value="' + esc(d.n) + '" aria-label="Название"><span class="fcdp">' + (+d.start > 0 && c <= 0 ? "🎉 закрыт" : +d.start ? p + "%" : "впишите «было»") + "</span></div>" + buBar(+d.start - c, +d.start, -1, +d.start > 0 && c <= 0 ? "" : "pay") +
@@ -8935,8 +8945,8 @@ else if (ds.fcd === "day") d.day = Math.max(0, Math.min(31, Math.round(+t.value 
 else d[ds.fcd] = Math.max(0, svAmt(t.value));
 touch(d); save(); setTimeout(render, 0);
 });
-document.addEventListener("change", function (e) { if (e.target.id === "fcextra") { fcSet("extra", svAmt(e.target.value)); setTimeout(render, 0); } });
-document.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.id === "fcextra") { e.preventDefault(); e.target.blur(); } });
+document.addEventListener("change", function (e) { if (e.target.id === "fcextra") { fcSet("extra", svAmt(e.target.value)); setTimeout(render, 0); } if (e.target.id === "fcdep") { fcSet("dep", Math.max(0, parseFloat(String(e.target.value).replace(",", ".")) || 0)); setTimeout(render, 0); } });
+document.addEventListener("keydown", function (e) { if (e.key === "Enter" && (e.target.id === "fcextra" || e.target.id === "fcdep")) { e.preventDefault(); e.target.blur(); } });
 document.addEventListener("change", function (e) { var t = e.target; if (!t.dataset || !t.dataset.fcth) return; var v = svAmt(t.value); if (v > 0) fcSet(t.dataset.fcth, v); });
 document.addEventListener("keydown", function (e) {
 var t = e.target; if (e.key !== "Enter") return;
@@ -8969,32 +8979,47 @@ if (!FCIMP) return "";
 return '<div class="card fcimp"><div class="bulab">Лист «Долги» — какой месяц загрузить?</div>' + FCIMP.map(function (b, i) { var sum = b.rows.reduce(function (s, x) { return s + x.bal; }, 0); return '<div class="fcimpr"><span><b>' + esc(b.m) + '</b> <small class="muted">' + b.rows.length + " " + plural(b.rows.length, ["долг", "долга", "долгов"]) + " · " + buRub(sum) + " · " + esc(b.rows.map(function (x) { return x.n; }).join(", ").slice(0, 120)) + '</small></span><button type="button" class="btn sm pri" data-a="fcimpgo" data-i="' + i + '">Загрузить</button></div>'; }).join("") +
 '<p class="muted" style="margin:0">Новые долги появятся с «было» = остаток месяца; у уже заведённых (по названию) обновится «сейчас», минимальный платёж и число. Ставки впишите сами.</p><div class="r"><button type="button" class="btn sm" data-a="fcimpx">Отмена</button></div></div>';
 }
-function fcSim(strat, extra) {
-var ds = live(S.debts || []).filter(function (d) { return !d.off && fcDebtCur(d) > 0; }).map(function (d) { return { id: d.id, n: d.n, b: fcDebtCur(d), r: (+d.rate || 0) / 1200, m: +d.min || 0, end: 0 }; });
-if (!ds.length) return null; var interest = 0, mo = 0, warn = [];
-ds.forEach(function (d) { if (!d.m) warn.push("«" + d.n + "»: нет минимального платежа"); else if (d.m <= d.b * d.r) warn.push("«" + d.n + "»: минимальный платёж не покрывает проценты"); });
+function fcSim(strat, extra, minOnly) {
+var dep = fcDep(), ds = live(S.debts || []).filter(function (d) { return !d.off && fcDebtCur(d) > 0; }).map(function (d) { return { id: d.id, n: d.n, b: fcDebtCur(d), b0: fcDebtCur(d), rate: +d.rate || 0, r: (+d.rate || 0) / 1200, m: +d.min || 0, end: 0, int: 0, g: fcGroup(+d.rate || 0, dep) }; });
+if (!ds.length) return null; var interest = 0, mo = 0, warn = [], first = null, cmp = fcCmp(strat, dep);
+ds.forEach(function (d) { if (!d.m) warn.push("«" + d.n + "»: нет минимального платежа"); else if (d.m <= d.b * d.r) warn.push("«" + d.n + "»: минимальный платёж не покрывает проценты — долг растёт"); });
 while (mo < 600 && ds.some(function (d) { return d.b > 0.5; })) {
-mo++; var pool = extra;
-ds.forEach(function (d) { if (d.b <= 0.5) { pool += d.m; return; } var i = d.b * d.r; interest += i; d.b += i; var p = Math.min(d.m, d.b); d.b -= p; pool += d.m - p; });
-var order = ds.filter(function (d) { return d.b > 0.5; }).sort(strat === "av" ? function (a, b) { return b.r - a.r || a.b - b.b; } : function (a, b) { return a.b - b.b || b.r - a.r; });
-for (var k = 0; k < order.length && pool > 0.5; k++) { var p2 = Math.min(pool, order[k].b); order[k].b -= p2; pool -= p2; }
+mo++; var pool = minOnly ? 0 : extra, pay = {};
+ds.forEach(function (d) { if (d.b <= 0.5) { if (!minOnly) pool += d.m; return; } var i = d.b * d.r; interest += i; d.int += i; d.b += i; var p = Math.min(d.m, d.b); d.b -= p; pay[d.id] = p; if (!minOnly) pool += d.m - p; });
+var order = ds.filter(function (d) { return d.b > 0.5; }).sort(cmp);
+for (var k = 0; k < order.length && pool > 0.5; k++) { var p2 = Math.min(pool, order[k].b); order[k].b -= p2; pool -= p2; pay[order[k].id] = (pay[order[k].id] || 0) + p2; }
+if (mo === 1) first = pay;
 ds.forEach(function (d) { if (d.b <= 0.5 && !d.end) d.end = mo; });
 }
-return { ds: ds, mo: mo, interest: Math.round(interest), warn: warn, never: mo >= 600 };
+var seq = ds.slice().sort(function (a, b) { return cmp({ b: a.b0, r: a.r, rate: a.rate }, { b: b.b0, r: b.r, rate: b.rate }); });
+return { ds: ds, seq: seq, first: first || {}, mo: mo, interest: Math.round(interest), warn: warn, never: mo >= 600 };
 }
 function fcMonthIn(mo) { var d = new Date(); d = new Date(d.getFullYear(), d.getMonth() + mo, 1); return SVMPR[d.getMonth()] + " " + d.getFullYear(); }
 function fcMonth(mo) { var d = new Date(); d = new Date(d.getFullYear(), d.getMonth() + mo, 1); return d.toLocaleDateString("ru-RU", { month: "long", year: "numeric" }).replace(/\s*г\.?$/, ""); }
 function fcCalcHTML() {
-var o = fcOpt(), ex = +((S.opt.bud || {}).fch || {}).extra || 0, a = fcSim("sb", ex), b = fcSim("av", ex);
-var h = '<div class="card fccalc"><div class="bulab">Расчёт закрытия долгов</div><div class="r"><span class="muted">Сверх минимальных платежей в месяц</span><input class="inp" id="fcextra" value="' + (ex ? ex.toLocaleString("ru-RU") : "") + '" placeholder="0" inputmode="numeric" style="width:120px"><span class="muted">₽ — Enter</span></div>';
-if (!a) return h + '<p class="muted" style="margin:0">Заведите долги с остатком «сейчас», ставкой и минимальным платежом — посчитаю, когда закроется каждый.</p></div>';
+var st = fcStrat(), F = (S.opt.bud || {}).fch || {}, ex = +F.extra || 0, dep = fcDep(), a = fcSim("sb", ex), b = fcSim("av", ex), base = fcSim(st, 0, true);
+var h = '<div class="card fccalc"><div class="bulab">Расчёт закрытия долгов</div><div class="r"><span class="muted">Сверх минимальных платежей в месяц</span><input class="inp" id="fcextra" value="' + (ex ? ex.toLocaleString("ru-RU") : "") + '" placeholder="0" inputmode="numeric" style="width:110px"><span class="muted">₽ · ставка вашего вклада</span><input class="inp fcsm" id="fcdep" value="' + (dep ? String(dep).replace(".", ",") : "") + '" placeholder="—" inputmode="decimal" style="width:60px" title="Если вписать — долги со ставкой ниже вклада досрочно не гасятся: выгоднее держать деньги на вкладе"><span class="muted">% — Enter</span></div>';
+if (!a) return h + '<p class="muted" style="margin:0">Заведите долги с остатком «сейчас», ставкой и минимальным платежом — посчитаю, в каком порядке и когда закроется каждый.</p></div>';
+var cur = st === "sb" ? a : b;
+var P = buPer(buPid(today0())), inc = P ? buSum((P.inc || {}).plan || {}) || buSum((P.inc || {}).fact || {}) : 0, mins = cur.ds.reduce(function (sm, d) { return sm + d.m; }, 0);
+if (inc > 0 && mins > 0) { var pdn = Math.round(mins / inc * 100); h += '<div class="fcpdn ' + (pdn > 30 ? "bad" : pdn > 25 ? "warn" : "ok") + '">Долговая нагрузка: <b>' + pdn + "%</b> дохода (" + buRub(mins) + " из " + buRub(inc) + ") · " + (pdn > 30 ? "выше нормы 30% — сначала снижайте: досрочное погашение, рефинансирование дорогих кредиток" : pdn > 25 ? "на границе нормы (25–30%)" : "в норме — до 30%") + "</div>"; }
 var line = function (r, nm, on) { return '<div class="fcsimr' + (on ? " on" : "") + '"><b>' + nm + "</b><span>" + (r.never ? "не закрываются — платежей не хватает" : "все закрыты в <b>" + esc(fcMonthIn(r.mo)) + "</b> (" + r.mo + " " + plural(r.mo, ["месяц", "месяца", "месяцев"]) + ")") + ' · проценты ≈ <b>' + buRub(r.interest) + "</b></span></div>"; };
-h += line(a, "❄ Снежный ком", o.strat !== "av") + line(b, "⛰ Лавина", o.strat === "av");
-if (!a.never && !b.never && Math.abs(a.interest - b.interest) >= 100) h += '<p class="muted" style="margin:0">' + (b.interest < a.interest ? "Лавина экономит " + buRub(a.interest - b.interest) + " на процентах; снежный ком быстрее даёт первые закрытые долги." : "Снежный ком здесь не дороже лавины.") + "</p>";
-var cur = o.strat === "av" ? b : a;
-h += '<div class="fcsimt">' + cur.ds.slice().sort(function (x, y) { return (x.end || 999) - (y.end || 999); }).map(function (d) { return "<span>" + esc(d.n) + ' <small class="muted">— ' + (d.end ? esc(fcMonth(d.end)) : "не закрывается") + "</small></span>"; }).join("") + "</div>";
+h += line(b, "⛰ Лавина", st !== "sb") + line(a, "❄ Снежный ком", st === "sb") + (base ? line(base, "Только минимальные", false) : "");
+if (!a.never && !b.never) { var dif = a.interest - b.interest; h += '<p class="muted" style="margin:0">' + (dif >= Math.max(3000, b.interest * 0.03) ? "⛰ Лавина выгоднее на " + buRub(dif) + " — подходит, если готовы держать дисциплину; ❄ снежный ком дороже, зато первые долги закрываются быстрее, и это мотивирует." : "Разница между стратегиями небольшая (" + buRub(Math.abs(dif)) + ") — можно выбрать ❄ снежный ком: быстрые победы мотивируют.") + (base && !base.never && !cur.never && base.interest > cur.interest ? " По сравнению с одними минимальными платежами план экономит " + buRub(base.interest - cur.interest) + (base.mo > cur.mo ? " и " + (base.mo - cur.mo) + " " + plural(base.mo - cur.mo, ["месяц", "месяца", "месяцев"]) : "") + "." : "") + "</p>"; }
+var tag = function (d) { return d.g === 0 ? ' <em class="fcg0">сверхдорогой — первым</em>' : d.g === 2 ? ' <em class="fcg2">' + (d.rate <= 0 ? "без процентов" : "дешевле вклада") + " — по графику</em>" : ""; };
+h += '<div class="fcseq"><div class="fcseqh"><span title="Очередь досрочного погашения: куда идут деньги сверх минимума">№</span><span>Долг · очередь досрочного погашения</span><span>Ставка</span><span>Остаток</span><span>Закроется</span><span>Проценты</span></div>' + cur.seq.map(function (d, i) { return '<div class="fcseqr"><span>' + (i + 1) + "</span><span>" + esc(d.n) + tag(d) + "</span><span>" + String(d.rate || 0).replace(".", ",") + "%</span><span>" + buRub(d.b0) + "</span><span>" + (d.end ? esc(fcMonth(d.end)) : "не закрывается") + "</span><span>" + buRub(d.int) + "</span></div>"; }).join("") + "</div>";
+var f = cur.first, fl = cur.ds.filter(function (d) { return f[d.id]; }).sort(function (x, y) { return (f[y.id] - y.m) - (f[x.id] - x.m); });
+if (fl.length) h += '<div class="fcmon"><b>В этом месяце:</b> ' + fl.map(function (d) { var ex2 = Math.max(0, Math.round(f[d.id] - d.m)); return esc(d.n) + " — <b>" + buRub(f[d.id]) + "</b>" + (ex2 > 0 ? ' <small class="muted">(минимум + ' + buRub(ex2) + " досрочно)</small>" : ""); }).join(" · ") + "</div>";
 if (a.warn.length) h += '<p class="warnc" style="margin:0">⚠ ' + esc(a.warn.join("; ")) + "</p>";
-return h + '<p class="muted" style="margin:0">Считается так: каждый месяц начисляются проценты, по всем долгам — минимальный платёж, а «сверх минимума» и платежи уже закрытых долгов идут на фокус-долг. Ставка — годовая, %.</p></div>';
+h += '<details class="fcrules"><summary class="muted">Правила, по которым считается</summary><ul>' +
+"<li>По всем долгам — минимальный платёж по графику, без просрочек: вносите за 2–3 дня до даты списания.</li>" +
+"<li>Всё «сверх минимума» и платежи уже закрытых долгов — на один долг по очереди; закрыли его — деньги переходят на следующий.</li>" +
+"<li>Очередь: сначала сверхдорогие (от " + FCHOT + "% — МФО, просрочка), дальше по стратегии; беспроцентные рассрочки и кредитки в льготном периоде — по графику, досрочно не гасить" + (dep ? ", как и долги дешевле вашего вклада (" + String(dep).replace(".", ",") + "%)" : "") + ".</li>" +
+"<li>Досрочно — «в уменьшение срока»: это снижает переплату сильнее, чем уменьшение платежа.</li>" +
+"<li>Подушку безопасности на досрочное погашение не тратить: при кредитах она нужна особенно.</li>" +
+"<li>Дорогие кредитки — кандидат на рефинансирование или реструктуризацию; новые кредиты, чтобы закрыть старые, не брать.</li></ul>" +
+'<small class="muted">По книге «Трачу и приобретаю» (гл. 6) и уроку «Колесо расходов» из вашей библиотеки. Ставка — годовая, %; проценты начисляются помесячно.</small></details>';
+return h + "</div>";
 }
 var FCHOUR = false;
 function fcEnvHTML(mon) {
@@ -12294,6 +12319,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["230", "Долги: порядок закрытия по правилам", ["Очередь досрочного погашения — по правилам из книг вашей библиотеки («Трачу и приобретаю», урок «Колесо расходов»): сверхдорогие долги (от 50% — МФО, просрочка) всегда первыми; дальше по стратегии — ⛰ лавина (от самой высокой ставки, по умолчанию) или ❄ снежный ком (от самого маленького остатка); беспроцентные рассрочки и кредитки в льготном периоде — последними, по графику.", "Одна и та же очередь — в списке долгов, у фокус-долга и в расчёте.", "Расчёт показывает: порядок закрытия с месяцем и процентами по каждому долгу, сколько платить в этом месяце и куда досрочно, сравнение с «только минимальными платежами», долговую нагрузку в % дохода (норма — до 30%). Можно вписать ставку вклада — долги дешевле вклада досрочно не гасятся."]],
 ["229", "Долги — через поиск", ["Ctrl+K → «долги» (или «кредит», «рассрочка») — сразу открывается вкладка «Долги» в «Бюджете»."]],
 ["228", "Кнопка «＋ Создать» на странице пространства", ["На странице каждого пространства — заметная кнопка «＋ Создать» рядом с «Фокус» и «Рабочий стол»: то же меню, что у маленького «＋» в шапке боковой панели. В «Знаниях» там — «Заметка», «Раздел заметок» и «🧠 Карта мыслей из файла»."]],
 ["227", "Карты мыслей из файлов; бюджет на главной", ["Карточка «🔁 Цикл планирования» — во всю ширину рабочего стола, шаги в один ряд; рабочий стол пространства больше не прилегает вплотную к плиткам разделов.", "🧠 «Знания» → «＋ Создать…» → «Карта мыслей из файла»: XMind, FreeMind, OPML, Markdown-список или HTML-страница со сворачиваемыми разделами — получится карта с ветками. Если у заголовка один узел, его разделы раскладываются вокруг центра.", "Карточки-виджеты на главной (бюджет недели, сроки и другие) больше не срезают текст по углам в стилях «Стекло», «Бенто», «Экспрессив». «Бюджет недели»: у периода видны даты; если лимит недели исчерпан перерасходом прошлых недель — так и написано, без «из −3 000 ₽».", "Денежный дневник находится через поиск («денежный дневник») — сразу открывается нужная вкладка бюджета."]],
