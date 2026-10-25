@@ -1777,6 +1777,13 @@ html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; backgro
 .fcseqh { color: var(--muted); font-size: calc(12px * var(--fs)) } .fcseqr span:nth-child(n+3) { font-variant-numeric: tabular-nums } .fcseq em { font-style: normal; font-size: calc(11.5px * var(--fs)); padding: 0 6px; border-radius: 99px; white-space: nowrap }
 .fcg0 { color: #c94a3a; background: color-mix(in srgb, #c94a3a 10%, transparent) } .fcg2 { color: var(--muted); background: var(--hover) }
 .fcmon { font-size: calc(13.5px * var(--fs)); line-height: 1.6 } .fcrules ul { margin: 6px 0; padding-left: 18px; font-size: calc(13px * var(--fs)) } .fcrules li { margin: 3px 0 }
+#snzbox { position: fixed; inset: 0; z-index: 96; background: rgba(0, 0, 0, .3); display: grid; place-items: center; padding: 16px; box-sizing: border-box }
+.snzw { width: min(480px, 100%); display: grid; gap: 10px; padding: 14px 16px; border-radius: 16px; background: var(--pop, var(--panel)); box-shadow: var(--shadow); box-sizing: border-box } .snzch { gap: 6px; flex-wrap: wrap } #snzwhy { width: 100%; box-sizing: border-box; resize: vertical }
+.snzbk { margin: 0 0 12px; border-left: 3px solid var(--acc) } .snzr { display: flex; gap: 8px 12px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; padding: 8px 0; border-top: 1px dashed var(--line) } .snzr > div:first-child { min-width: 0; flex: 1 1 260px }
+.snzra { gap: 4px; flex-wrap: wrap } .snzwy { font-size: calc(13px * var(--fs)); color: var(--fg); margin-top: 2px } .snzd { font-variant-numeric: tabular-nums; margin-right: 4px }
+.snzpn { padding: 6px 10px; margin: 4px 0 8px; border-radius: 8px; background: var(--hover); font-size: calc(13px * var(--fs)); display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+.snztl { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 12px } .snzm { display: grid; justify-items: center; min-width: 54px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 10px; color: inherit; text-decoration: none } .snzm span { font-size: 1.2em; font-weight: 600; color: var(--acc) }
+.snzold { display: grid; gap: 0 }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -8333,6 +8340,9 @@ var w = wdOf(tok); if (w >= 0) { var add = (w - new Date().getDay() + 7) % 7; re
 return null;
 }
 cut(new RegExp("\\s(?:до|к|дедлайн)\\s(сегодня|завтра|послезавтра|\\d{1,2}\\.\\d{1,2}(?:\\.\\d{2,4})?|" + WDRE + ")(?=\\s)", "gi"), function (a, tok) { var d = dayFrom(tok); if (d !== null) out.due = d; });
+var snzOf = function (n, u) { u = u.toLowerCase(); var d = new Date(t00); if (/^(п|пол)/.test(u)) d.setMonth(d.getMonth() + 6); else if (/^д/.test(u)) d.setDate(d.getDate() + n); else if (/^н/.test(u)) d.setDate(d.getDate() + 7 * n); else if (/^(г|л)/.test(u)) d.setFullYear(d.getFullYear() + n); else d.setMonth(d.getMonth() + n); return d.getTime(); };
+cut(/\s(?:вернуться|отложить|напомнить)\s(?:через|на)\s(?:(\d+)\s)?(полгода|дн[яей]|день|недел[июь]|месяц[аев]*|год[а]?|лет)(?=\s)/gi, function (a, n, u) { out.snz = snzOf(n ? +n : 1, u); });
+cut(/\s~(\d+)\s?(д|н|м|г)(?=\s)/gi, function (a, n, u) { out.snz = snzOf(+n, u); });
 cut(/\sчерез\s(\d+\s)?(минут[уы]?|час[аов]*|дн[яей]|день|недел[июь]|месяц[аев]*)(?=\s)/gi, function (a, num, u) {
 var n = num ? +num : 1, now = Date.now(); u = u.toLowerCase();
 if (/^мин/.test(u)) { out.at = Math.ceil((now + n * 6e4) / 6e4) * 6e4; out.rel = 1; }
@@ -8379,6 +8389,7 @@ return out;
 }
 function quickPreview(q) {
 var bits = [];
+if (q.snz) bits.push("💤 вернуться " + new Date(q.snz).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" }));
 if (q.at) bits.push("📅 " + (q.allday ? dayName(q.at) : dayName(q.at) + ", " + hm(q.at)));
 if (q.rep) bits.push("🔁 " + ruleText({ rep: q.rep, rr: q.rr, at: q.at || Date.now() }));
 if (q.due) bits.push("⏰ до " + dayName(q.due).toLowerCase());
@@ -8414,7 +8425,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-230";
+var APPV = "zd-app-2026-10-16-231";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -9051,6 +9062,7 @@ help: '<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c
 function ic(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICO[n] + "</svg>"; }
 function inboxList() { return tasks().filter(function (t) { return !t.done && !t.pid && !t.at && !t.due && !t.parent && !t.some; }); }
 function isSome(t) { return !!t.some && !t.at && !t.due; }
+function somedayOld() { var lim = Date.now() - 90 * DAY; return somedayList().filter(function (t) { return (t.someAt || t.created || 0) < lim; }); }
 function somedayList() { return tasks().filter(function (t) { return !t.done && isSome(t); }); }
 function todayList() { var end = today0() + DAY; return tasks().filter(function (t) { return !t.done && !(t.till && wkOn(t)) && ((t.at && t.at < end) || (t.due && t.due < end) || (t.wait && t.wait.ask && t.wait.ask < end)); }); }
 function flagList() { return tasks().filter(function (t) { return !t.done && hasFlag(t); }); }
@@ -9696,7 +9708,7 @@ return (NDBP && !rd ? nDbPropPanel() : "") + '<div class="npage' + (tocI.length 
 function noteDel(n) { n.del = 1; n.delAt = Date.now(); touch(n); save(); var back = n.sec && nsec(n.sec) ? "nsec-" + n.sec : "notes"; go(back); toastUndo("Заметка удалена", function () { delete n.del; delete n.delAt; touch(n); save(); render(); }); }
 function vWaiting() { return std("Жду ответа", "Задачи, переданные кому-то. В день «спросить» задача появится в «Сегодня» — напомнить о себе. Пометить задачу: меню задачи → «⏳ Жду ответа…» или строка «Жду ответа» в карточке.", waitList(), { empty: "Ничего не ждёте — хорошо. Когда отдадите задачу кому-то, отметьте её «⏳ Жду ответа».", scope: function (t) { return !!t.wait; } }); }
 function vSomeday() { return std("Когда-нибудь", "Идеи и дела «не сейчас». Они не попадают во «Входящие» и «Сегодня», пока вы не назначите им дату.", somedayList(), { empty: "Пусто. Отправить задачу сюда — меню задачи → «Установить дату» → «Когда-нибудь» (Alt+O).", scope: isSome }); }
-function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: tipsFold((mobNarrow() ? todayBars() : []).concat([tbNowHTML(), wrBanner(), apHTML(), todayLoadHTML(), aiBox(), todayPlanBox()]), "today", "Подсказки дня"), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
+function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: snzBackHTML() + tipsFold((mobNarrow() ? todayBars() : []).concat([tbNowHTML(), wrBanner(), apHTML(), todayLoadHTML(), aiBox(), todayPlanBox()]), "today", "Подсказки дня"), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
 var PDAY = 0, PFROM = 0;
 function pFrom() { if (!PFROM) PFROM = monday(Date.now()); return PFROM; }
 function onDay(t, d0) { return (t.at && sod(t.at) === d0) || (t.due && sod(t.due) === d0) || spanIn(t, d0); }
@@ -10715,10 +10727,11 @@ var tids = {}; tl.forEach(function (t) { tids[t.id] = 1; });
 var sug = [], seen = {}, addS = function (t, why) { if (!t || tids[t.id] || seen[t.id] || t.done || t.parent) return; seen[t.id] = 1; sug.push([t, why]); };
 goals().filter(function (g) { return (g.st || "active") === "active"; }).forEach(function (g) { goalNext(g, 2).forEach(function (t) { addS(t, (g.ic || "🎯") + " " + g.n); }); });
 tasks().filter(function (t) { return !t.done && t.due && t.due < today0() + 4 * DAY; }).forEach(function (t) { addS(t, "⏰ дедлайн " + dayName(t.due).toLowerCase()); });
-tasks().filter(function (t) { return !t.done && t.sprint === curSprintId() && !t.at; }).forEach(function (t) { addS(t, "🏃 в спринте"); });
+var spl = tasks().filter(function (t) { return !t.done && !t.parent && t.sprint === curSprintId() && !t.at && !tids[t.id]; }).sort(cmpBy("prio")); spl.forEach(function (t) { seen[t.id] = 1; });
 flagList().forEach(function (t) { addS(t, "⚑ с флажком"); });
 var tmv = top.map(task).filter(function (t) { return t && topMvKey(t); });
 if (tmv.length) b += '<h2>Перенесены</h2>' + tmv.map(function (t) { return '<div class="dprow mv"><span class="dpstar">↷</span><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + " <small>перенесена " + esc(topMvTxt(topMvKey(t))) + '</small></a><span class="dpa"><button type="button" class="btn sm" data-a="tmdrop" data-t="' + t.id + '">Убрать из главного</button></span></div>'; }).join("");
+if (spl.length) b += '<h2>🏃 Из спринта этой недели <span class="c">' + spl.length + '</span></h2><p class="muted">Задачи спринта без даты — возьмите сегодня то, что успеете.</p>' + spl.map(function (t) { return '<div class="dprow"><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + (+t.est ? " <small>⏱ " + fmtH(t.est) + " ч</small>" : "") + (t.due ? ' <small>⏰ до ' + esc(dayName(t.due).toLowerCase()) + "</small>" : "") + '</a><span class="dpa"><button type="button" class="btn sm" data-a="dpa" data-t="' + t.id + '" data-c="d:0">＋ На сегодня</button></span></div>'; }).join("");
 if (sug.length) b += '<h2>Можно взять сегодня</h2>' + sug.slice(0, 12).map(function (x) { var t = x[0]; return '<div class="dprow"><a class="dpt" href="#task-' + t.id + '">' + esc(t.t) + ' <small>' + esc(x[1]) + '</small></a><span class="dpa"><button type="button" class="btn sm" data-a="dpa" data-t="' + t.id + '" data-c="d:0">＋ На сегодня</button></span></div>'; }).join("");
 var ag = goals().filter(function (g) { return (g.st || "active") === "active"; });
 if (ag.length) b += '<div class="dpgoals">🎯 Ваши цели: ' + ag.map(function (g) { return '<a href="#goal-' + g.id + '">' + esc(g.n) + " · " + goalProg(g).pct + "%</a>"; }).join(" · ") + "</div>";
@@ -16989,6 +17002,7 @@ var k = s[0], on = !!r.st[k], extra = "";
 if (k === "proj" && noNext.length) extra = '<div class="wrx">' + noNext.slice(0, 12).map(function (p) { return '<a class="chip" href="#proj-' + p.id + '">' + esc(picon(p)) + " " + esc(p.n) + "</a>"; }).join("") + "</div>";
 if (k === "top") { var cand = tasks().filter(function (t) { return !t.done && !t.parent; }).sort(function (a, b) { return ((a.prio || 9) - (b.prio || 9)) || ((a.due || 9e15) - (b.due || 9e15)); }).slice(0, 40); extra = '<div class="wrx">' + (r.top || []).map(task).filter(Boolean).map(function (t) { return '<span class="chip on">⭐ ' + esc(t.t.slice(0, 50)) + ' <button type="button" data-a="wrtopx" data-id="' + t.id + '" aria-label="Убрать">×</button></span>'; }).join("") + ((r.top || []).length < 3 ? '<select class="inp" id="wrtopadd"><option value="">＋ выбрать задачу…</option>' + cand.filter(function (t) { return (r.top || []).indexOf(t.id) < 0; }).map(function (t) { return '<option value="' + t.id + '">' + esc(t.t.slice(0, 70)) + "</option>"; }).join("") + "</select>" : "") + "</div>"; }
 if (k === "note") extra = '' + rtxHTML("week", wrKey(), "Что получилось, что нет, что поменять на следующей неделе") + "";
+if (k === "some") { var old = somedayOld(); if (old.length) extra = '<div class="wrx snzold"><small class="muted">Давно лежат (3+ месяца) — оставить, назначить дату или удалить:</small>' + old.slice(0, 12).map(function (t) { return '<div class="snzr"><a href="#task-' + t.id + '">' + esc(t.t) + '</a><div class="r snzra"><button type="button" class="btn sm" data-a="snzd" data-x="somekeep" data-id="' + t.id + '">Оставить</button><button type="button" class="btn sm" data-a="snzd" data-x="date" data-id="' + t.id + '">📅 Дату</button><button type="button" class="btn sm" data-a="snzd" data-x="del" data-id="' + t.id + '">🗑</button></div></div>'; }).join("") + "</div>"; }
 return '<li class="' + (on ? "on" : "") + '"><button type="button" class="bcck" data-a="wrck" data-x="' + k + '" aria-pressed="' + on + '">' + (on ? "✓" : "") + "</button><div><b>" + esc(s[1]) + (cnt[k] !== undefined ? ' <span class="wrc' + (cnt[k] && /^(inbox|late|proj|wait)$/.test(k) ? " hot" : "") + '">' + cnt[k] + "</span>" : "") + "</b><small>" + esc(s[2]) + "</small>" + (link[k] ? '<a class="btn sm" href="' + link[k] + '">Открыть</a>' : "") + extra + "</div></li>";
 }).join("") + "</ol>" + '<div class="r"><button type="button" class="btn pri" data-a="wrdone"' + (r.done ? " disabled" : "") + ">" + (r.done ? "✓ Обзор недели завершён" : "Завершить обзор") + '</button><span class="muted">Завершено обзоров: ' + Object.keys(S.opt.wrev || {}).filter(function (k) { return S.opt.wrev[k].done; }).length + "</span></div>";
 return h;
@@ -17261,6 +17275,7 @@ var FEAT = [
 ["уровень очки xp достижения геймификация баллы", "🏆", "Уровень и очки", "карточка «🏆 Уровень и очки» на главной; «Жизнь» → «Статистика»", "stats"],
 ["бюджет деньги расходы доходы выписка банк", "💰", "Бюджет", "«Дом и деньги» → «Бюджет»", "budget"],
 ["долги долг кредит кредитка карта рассрочка сплит займ ипотека", "💳", "Долги", "«Бюджет» → вкладка «Долги»: внизу строка «Новый долг» — название и Enter, потом поля «было», «сейчас», ставка, мин. платёж, число", "budget-debts"],
+["отложить вернуться напомнить позже через месяц полгода отложенные", "💤", "Вернуться к задаче позже", "меню задачи → «Отложить до…» (месяц, полгода, год, своя дата и пометка «зачем») или при вводе: «… вернуться через 3 месяца», «… ~2м». В свой день задача появится в «Требует внимания» и в «Сегодня»", "snoozed"],
 ["денежный дневник импульсивные покупки эмоции дни без трат", "📒", "Денежный дневник", "«Бюджет» → вкладка «Челлендж» → блок «Дни без трат · дневник»: строка «что купила на эмоциях и почему» + галочка «импульсивная покупка», Enter — записано", "budget-fch"],
 ["меню рецепты кухня продукты покупки", "🍲", "Меню и рецепты", "«Дом и деньги» → «Меню»", "menu"],
 ["уборка дом порядок", "🧹", "План уборки", "«Дом и деньги» → «Уборка»", "clean"],
@@ -17458,6 +17473,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["231", "💤 Вернуться к задаче", ["Утренний план, шаг «Главное»: задачи спринта этой недели без даты — отдельным блоком «🏃 Из спринта этой недели», все сразу, с оценкой и дедлайном.", "«Отложить до…» — теперь и на 2, 3 месяца, полгода, год или свою дату, с пометкой «зачем вернуться». Прямо при вводе: «позвонить в страховую вернуться через 3 месяца» или «… ~3м» (д — дни, н — недели, м — месяцы, г — годы).", "В свой день задача не теряется: появляется в «Требует внимания» на главной, блоком «🔔 Вернулись из отложенных» в «Сегодня», в колокольчике и уведомлением браузера (в 9:00). Решения в один щелчок: сделать сегодня, назначить дату, отложить ещё, в «Когда-нибудь», оставить в списке или удалить.", "«Когда-нибудь» не забывается: то, что лежит там 3+ месяца, всплывает в обзоре недели — оставить, назначить дату или удалить.", "«💤 Отложенные» — лента по месяцам: что и когда к вам вернётся, с пометками; любую задачу можно вернуть раньше."]],
 ["230", "Долги: порядок закрытия по правилам", ["Очередь досрочного погашения — по правилам из книг вашей библиотеки («Трачу и приобретаю», урок «Колесо расходов»): сверхдорогие долги (от 50% — МФО, просрочка) всегда первыми; дальше по стратегии — ⛰ лавина (от самой высокой ставки, по умолчанию) или ❄ снежный ком (от самого маленького остатка); беспроцентные рассрочки и кредитки в льготном периоде — последними, по графику.", "Одна и та же очередь — в списке долгов, у фокус-долга и в расчёте.", "Расчёт показывает: порядок закрытия с месяцем и процентами по каждому долгу, сколько платить в этом месяце и куда досрочно, сравнение с «только минимальными платежами», долговую нагрузку в % дохода (норма — до 30%). Можно вписать ставку вклада — долги дешевле вклада досрочно не гасятся."]],
 ["229", "Долги — через поиск", ["Ctrl+K → «долги» (или «кредит», «рассрочка») — сразу открывается вкладка «Долги» в «Бюджете»."]],
 ["228", "Кнопка «＋ Создать» на странице пространства", ["На странице каждого пространства — заметная кнопка «＋ Создать» рядом с «Фокус» и «Рабочий стол»: то же меню, что у маленького «＋» в шапке боковой панели. В «Знаниях» там — «Заметка», «Раздел заметок» и «🧠 Карта мыслей из файла»."]],
@@ -17638,6 +17654,7 @@ try { var lt = tasks().filter(isLate); if (lt.length) add("late:" + dk, "⚠", "
 try { tasks().filter(function (t) { return !t.done && t.at && !t.allday && t.at >= now - 3 * 3600000 && t.at <= now + 15 * 60000; }).forEach(function (t) { add("rem:" + t.id + ":" + t.at, "⏰", t.t, (t.at > now ? "в " : "было в ") + hm(t.at), "task-" + t.id, t.at); }); } catch (e) { /* ок */ }
 try { nOfTpl("person").forEach(function (n) { var pr = n.pr || {}; if (pr.bday) { var b = nextBday(pr.bday), dd = Math.round((b - t0) / DAY); if (dd <= 7) add("bd:" + n.id + ":" + new Date(b).getFullYear(), "🎂", "День рождения: " + nTitle(n), dd === 0 ? "сегодня" : dd === 1 ? "завтра" : "через " + dd + " " + plural(dd, ["день", "дня", "дней"]), "note-" + n.id, b - 7 * DAY); } var c = pContactDue(n); if (c && c <= t0) add("ct:" + n.id + ":" + dKey(c), "📞", "Пора связаться: " + nTitle(n), "", "note-" + n.id, c); }); } catch (e) { /* ок */ }
 try { nOfTpl("doc").forEach(function (n) { var pr = n.pr || {}; if (!pr.exp) return; var ex = new Date(pr.exp + "T00:00").getTime(), dd = Math.round((ex - t0) / DAY); if (dd <= 30 && dd >= -30) add("dx:" + n.id + ":" + pr.exp, "📑", (dd < 0 ? "Истёк срок: " : "Скоро срок: ") + nTitle(n), dd < 0 ? "просрочено на " + (-dd) + " дн." : dd === 0 ? "сегодня" : "через " + dd + " дн.", "note-" + n.id, ex - 30 * DAY); }); } catch (e) { /* ок */ }
+try { var sbl = snzBack(); if (sbl.length) add("snzb:" + dk + ":" + sbl.length, "💤", "Вернулись из отложенных: " + sbl.length, sbl.slice(0, 3).map(function (t) { return t.t; }).join(" · "), "today", t0); } catch (e) { /* ок */ }
 try { var sc = srsDueCount(); if (sc) add("srs:" + dk, "🔁", "Повторить карточки: " + sc, "", "srs", t0); } catch (e) { /* ок */ }
 try { var wd = new Date(t0).getDay(), wr = (S.opt.wrev || {})[wrKey()]; if ((wd === 0 || wd === 1 || wd === 5 || wd === 6) && !(wr && wr.done)) add("wr:" + wrKey(), "🧭", "Пора сделать обзор недели", "8 шагов, около 20 минут", "weekly", t0); } catch (e) { /* ок */ }
 try { var ib = inboxList().length; if (ib >= 10) add("inb:" + dk, "📥", "Во «Входящих» " + ib + " задач", "разберите — станет спокойнее", "inbox", t0); } catch (e) { /* ок */ }
@@ -17995,18 +18012,73 @@ e.preventDefault(); e.stopImmediatePropagation(); b.classList.remove("drop"); va
 }, true);
 function snzMenu(t) {
 var t0 = today0(), wd = new Date(t0).getDay(), mon = addDays(t0, ((8 - wd) % 7) || 7);
-return [[addDays(t0, 1), "Завтра"], [addDays(t0, 3), "Через 3 дня"], [mon, "До понедельника"], [addDays(t0, 7), "Через неделю"], [addDays(t0, 14), "Через 2 недели"], [addDays(t0, 30), "Через месяц"]].map(function (x) { return { c: "snz:" + dKey(x[0]), i: "💤", l: x[1] + " · " + new Date(x[0]).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) }; }).concat(t.snz ? ["-", { c: "snz:0", i: "↺", l: "Вернуть сейчас" }] : []);
+return [[addDays(t0, 1), "Завтра"], [mon, "До понедельника"], [addDays(t0, 7), "Через неделю"], [snzMon(1), "Через месяц"], [snzMon(2), "Через 2 месяца"], [snzMon(3), "Через 3 месяца"], [snzMon(6), "Через полгода"], [snzMon(12), "Через год"]].map(function (x) { return { c: "snz:" + dKey(x[0]), i: "💤", l: x[1] + " · " + new Date(x[0]).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) }; })
+.concat(["-", { c: "snz:pick", i: "📅", l: "Выбрать дату и пометку «зачем вернуться»…" }]);
 }
+function snzMon(n) { var d = new Date(today0()); d.setMonth(d.getMonth() + n); return d.getTime(); }
+var SNZD = null;
+function snzDlg(t) {
+SNZD = { id: t.id, d: t.snz && t.snz > today0() ? dKey(t.snz) : dKey(snzMon(1)) };
+var w = $("snzbox"); if (w) w.remove(); w = document.createElement("div"); w.id = "snzbox"; w.setAttribute("role", "dialog"); w.setAttribute("aria-label", "Вернуться к задаче");
+var ch = [[7, "неделя"], [14, "2 недели"], ["m1", "месяц"], ["m2", "2 месяца"], ["m3", "3 месяца"], ["m6", "полгода"], ["m12", "год"]];
+w.innerHTML = '<div class="snzw"><div class="imgth"><b>💤 Вернуться к задаче</b><button type="button" class="ibtn" data-a="snzx" aria-label="Закрыть">✕</button></div><p class="muted" style="margin:0">«' + esc(String(t.t).slice(0, 80)) + "» скроется из списков и в выбранный день появится в «Требует внимания» и в «Сегодня».</p>" +
+'<div class="r snzch">' + ch.map(function (c) { var d = typeof c[0] === "number" ? addDays(today0(), c[0]) : snzMon(+c[0].slice(1)); return '<button type="button" class="chip" data-a="snzq" data-x="' + dKey(d) + '">' + c[1] + "</button>"; }).join("") + "</div>" +
+'<label class="r" style="gap:8px">Вернуться <input type="date" class="inp" id="snzdate" value="' + SNZD.d + '" min="' + dKey(addDays(today0(), 1)) + '"></label>' +
+'<textarea class="inp" id="snzwhy" rows="2" placeholder="Зачем вернуться, что проверить — например: «посмотреть, снизились ли ставки»">' + esc(t.snzw || "") + "</textarea>" +
+'<div class="r"><button type="button" class="btn pri" data-a="snzok">💤 Отложить</button><button type="button" class="btn" data-a="snzx">Отмена</button></div></div>';
+document.body.appendChild(w); setTimeout(function () { var x = $("snzwhy"); if (x) x.focus(); }, 30);
+}
+document.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey && e.target && (e.target.id === "snzwhy" || e.target.id === "snzdate")) { e.preventDefault(); var b = document.querySelector('#snzbox [data-a="snzok"]'); if (b) b.click(); } if (e.key === "Escape" && $("snzbox")) { $("snzbox").remove(); SNZD = null; } });
+function snzBack() { var t0 = today0(); return live(S.tasks).filter(function (t) { return !t.done && t.snz && t.snz <= t0; }).sort(function (a, b) { return a.snz - b.snz; }); }
+function snzAgo(t) { var dd = Math.round((today0() - sod(t.snz)) / DAY); return dd <= 0 ? "сегодня" : dd === 1 ? "вчера" : dd + " " + plural(dd, ["день", "дня", "дней"]) + " назад"; }
+function snzWhen(t) { return t.snzAt ? "отложена " + new Date(t.snzAt).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) : ""; }
+function snzBackHTML() {
+var l = snzBack(); if (!l.length) return "";
+var b = function (t, x, lbl, cls) { return '<button type="button" class="btn sm' + (cls ? " " + cls : "") + '" data-a="snzd" data-x="' + x + '" data-id="' + t.id + '">' + lbl + "</button>"; };
+return '<div class="card snzbk"><div class="bulab">🔔 Вернулись из отложенных · ' + l.length + '</div><p class="muted" style="margin:0 0 4px">Вы просили напомнить. Решите по каждой — и блок исчезнет.</p>' + l.map(function (t) {
+var pp = proj(t.pid);
+return '<div class="snzr"><div><a href="#task-' + t.id + '">' + esc(t.t) + "</a>" + (pp ? ' <span class="muted">· ' + esc(pp.n) + "</span>" : "") + '<small class="muted"> · вернулась ' + snzAgo(t) + (t.snzAt ? ", " + snzWhen(t) : "") + "</small>" + (t.snzw ? '<div class="snzwy">💬 ' + esc(t.snzw) + "</div>" : "") + '</div><div class="r snzra">' +
+b(t, "today", "✓ Сделать сегодня", "pri") + b(t, "date", "📅 Назначить дату") + b(t, "m1", "💤 Ещё месяц") + b(t, "m6", "💤 Полгода") + b(t, "pick", "💤 Другой срок…") + b(t, "some", "⏳ Когда-нибудь") + b(t, "keep", "Оставить в списке") + b(t, "del", "🗑 Не нужна") + "</div></div>";
+}).join("") + "</div>";
+}
+function snzAct(a, el) {
+if (a === "snzx") { var w = $("snzbox"); if (w) w.remove(); SNZD = null; return true; }
+if (a === "snzq") { var di = $("snzdate"); if (di) di.value = el.dataset.x; document.querySelectorAll("#snzbox .snzch .chip").forEach(function (c) { c.classList.toggle("on", c === el); }); return true; }
+if (a === "snzok") {
+var t = SNZD && task(SNZD.id), dv = ($("snzdate") || {}).value || "", why = (($("snzwhy") || {}).value || "").trim().slice(0, 300); if (!t) return snzAct("snzx", el);
+if (!dv || new Date(dv + "T00:00").getTime() <= today0()) { toast("Выберите день позже сегодняшнего"); return true; }
+if (why) t.snzw = why; else delete t.snzw; snzAct("snzx", el); snzSet(t, dv); return true;
+}
+if (a !== "snzd") return false;
+var x = el.dataset.x, tk = task(el.dataset.id); if (!tk) return true;
+var done = function (msg) { delete tk.snz; delete tk.snzAt; touch(tk); save(); render(); if (msg) toast(msg); };
+if (x === "now") { snzSet(tk, "0"); return true; }
+if (x === "today") { delete tk.snz; delete tk.snzAt; taskCmd(tk, "d:0"); render(); toast("☀ «" + String(tk.t).slice(0, 40) + "» — на сегодня"); return true; }
+if (x === "date") { done(); openTask(tk.id); setTimeout(function () { var dd = document.querySelector('#panel input[type="date"]'); if (dd) dd.focus(); }, 120); return true; }
+if (x === "m1" || x === "m6") { snzSet(tk, dKey(snzMon(x === "m1" ? 1 : 6))); return true; }
+if (x === "pick") { snzDlg(tk); return true; }
+if (x === "some") { delete tk.snz; delete tk.snzAt; taskCmd(tk, "d:some"); tk.someAt = Date.now(); touch(tk); save(); render(); toast("⏳ В «Когда-нибудь» — напомню в обзоре недели через 3 месяца"); return true; }
+if (x === "keep") { done("Задача осталась в своём списке"); return true; }
+if (x === "del") { delete tk.snz; delete tk.snzAt; trashTask(tk); save(); render(); toast("🗑 В корзине — вернуть можно 30 дней"); return true; }
+if (x === "somekeep") { tk.someAt = Date.now(); touch(tk); save(); render(); toast("Оставлено — спрошу снова через 3 месяца"); return true; }
+return true;
+}
+setTimeout(function () { if (LS.get("zd-snzmig") === "1") return; var t0 = today0(), n = 0; live(S.tasks).forEach(function (t) { if (t.snz && t.snz <= t0) { delete t.snz; touch(t); n++; } }); LS.set("zd-snzmig", "1"); if (n) save(true); }, 1200);
 function snzSet(t, v) {
-var prev = t.snz; if (v === "0") delete t.snz; else t.snz = new Date(v + "T00:00").getTime(); touch(t); save(); if (OPEN === t.id && t.snz) closeTask(); render();
-if (t.snz) toastUndo("💤 Скрыта до " + new Date(t.snz).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + " — потом вернётся сама", function () { if (prev) t.snz = prev; else delete t.snz; touch(t); save(); render(); }); else toast("Задача снова на виду");
+var prev = t.snz; if (v === "0") { delete t.snz; delete t.snzAt; } else { t.snz = new Date(v + "T00:00").getTime(); t.snzAt = Date.now(); } touch(t); save(); if (OPEN === t.id && t.snz) closeTask(); render();
+if (t.snz) toastUndo("💤 Скрыта до " + new Date(t.snz).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: new Date(t.snz).getFullYear() !== new Date().getFullYear() ? "numeric" : undefined }) + " — в этот день напомню в «Требует внимания»", function () { if (prev) t.snz = prev; else delete t.snz; touch(t); save(); render(); }); else toast("Задача снова на виду");
 }
 function vSnoozed() {
-var t0 = today0(), l = live(S.tasks).filter(function (t) { return !t.done && t.snz > t0; }).sort(function (a, b) { return a.snz - b.snz; });
-var h = head("💤 Отложенные", "Задачи, скрытые до выбранного дня: в этот день они сами вернутся в списки. «Отложить до…» — в меню задачи (правый щелчок, клавиша «.» или долгое нажатие).");
+var t0 = today0(), l = live(S.tasks).filter(function (t) { return !t.done && t.snz > t0; }).sort(function (a, b) { return a.snz - b.snz; }), back = snzBack();
+var h = head("💤 Отложенные", "Задачи, к которым вы решили вернуться позже. В свой день каждая появится в «Требует внимания» и в «Сегодня». Отложить — в меню задачи (правый щелчок, клавиша «.», долгое нажатие) или прямо при вводе: «… вернуться через 3 месяца», «… ~2м».");
+if (back.length) h += snzBackHTML();
 if (!l.length) return h + '<p class="empty">Отложенных задач нет.</p>';
-var by = {}; l.forEach(function (t) { var k = dKey(t.snz); (by[k] = by[k] || []).push(t); });
-return h + Object.keys(by).map(function (k) { return '<div class="card snzg"><h3>До ' + esc(new Date(k + "T00:00").toLocaleDateString("ru-RU", { weekday: "short", day: "numeric", month: "long" })) + ' <span class="muted">· ' + by[k].length + "</span></h3>" + by[k].map(function (t) { var p = proj(t.pid); return '<div class="ritr"><a href="#task-' + t.id + '">' + esc(t.t) + "</a>" + (p ? '<span class="muted">' + esc(p.n) + "</span>" : "") + '<span class="ritra"><button type="button" class="btn sm" data-a="snzback" data-id="' + t.id + '">Вернуть сейчас</button></span></div>'; }).join("") + "</div>"; }).join("");
+var by = {}, keys = []; l.forEach(function (t) { var d = new Date(t.snz), k = d.getFullYear() * 100 + d.getMonth(); if (!by[k]) { by[k] = []; keys.push(k); } by[k].push(t); });
+h += '<div class="snztl">' + keys.map(function (k) { var c = by[k].length; return '<a class="snzm" href="#snzm-' + k + '"><b>' + esc(new Date(Math.floor(k / 100), k % 100, 1).toLocaleDateString("ru-RU", { month: "short", year: "2-digit" }).replace(".", "")) + "</b><span>" + c + "</span></a>"; }).join("") + "</div>";
+return h + keys.map(function (k) {
+var nm = new Date(Math.floor(k / 100), k % 100, 1).toLocaleDateString("ru-RU", { month: "long", year: "numeric" }).replace(/\s*г\.?$/, "");
+return '<div class="card snzg" id="snzm-' + k + '"><h3>' + esc(nm.charAt(0).toUpperCase() + nm.slice(1)) + ' <span class="muted">· ' + by[k].length + "</span></h3>" + by[k].map(function (t) { var pp = proj(t.pid); return '<div class="snzr"><div><b class="snzd">' + esc(new Date(t.snz).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })) + '</b> <a href="#task-' + t.id + '">' + esc(t.t) + "</a>" + (pp ? ' <span class="muted">· ' + esc(pp.n) + "</span>" : "") + (t.snzw ? '<div class="snzwy">💬 ' + esc(t.snzw) + "</div>" : "") + '</div><div class="r snzra"><button type="button" class="btn sm" data-a="snzd" data-x="now" data-id="' + t.id + '">Вернуть сейчас</button><button type="button" class="btn sm" data-a="snzd" data-x="pick" data-id="' + t.id + '">Другой срок…</button></div></div>'; }).join("") + "</div>";
+}).join("");
 }
 var STKT = 0;
 function stuckMap() { try { return JSON.parse(LS.get("zd-mv") || "{}") || {}; } catch (e) { return {}; } }
@@ -18699,6 +18771,7 @@ if (modOn("srs")) { var sc = srsDueCount(); if (sc) A.push(["🔁", "Повто�
 var wl = waitList().filter(function (t) { return t.wait && t.wait.ask && t.wait.ask < t0 + DAY; }).length; if (wl) A.push(["⏳", "Пора напомнить: " + wl, "#waiting"]);
 var sk = stuckList().length; if (sk) A.push(["🧱", "Застряли (переносили 3+ раз): " + sk, "#today"]);
 var cf = confList().length; if (cf) A.push(["⚠", "Конфликты синхронизации: " + cf, "#conflicts"]);
+var sb = snzBack().length; if (sb) A.unshift(["🔔", "Вернулись из отложенных: " + sb + " — решите, что с ними", "#today"]);
 b = A.length ? A.map(function (x) { return '<a class="hza" href="' + x[2] + '"><span>' + x[0] + "</span>" + esc(x[1]) + "</a>"; }).join("") : '<p class="okc">Всё спокойно ✓</p>';
 } else if (k === "cont") {
 var rc = recentItems(6);
@@ -20906,6 +20979,7 @@ if (ctx.pid && !t.pid) t.pid = ctx.pid;
 (ctx.tags || []).forEach(function (g) { if (t.tags.indexOf(g) < 0) t.tags.push(g); });
 if (ctx.flag) t.flag = ctx.flag === true ? defFlag() : ctx.flag;
 if (ctx.some && !t.at && !t.due) t.some = true;
+if (q.snz && q.snz > today0()) { t.snz = q.snz; t.snzAt = Date.now(); }
 if (ctx.day && !t.at && !t.due) { t.at = ctx.day; t.allday = true; }
 if (ctx.sprint) t.sprint = ctx.sprint;
 if (ctx.goal && goal(ctx.goal)) t.goal = ctx.goal;
@@ -21553,6 +21627,7 @@ if (a && spcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && tqAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && imgtAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && lbkAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+if (a && /^snz/.test(a) && snzAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -21976,6 +22051,7 @@ pb("flag", "flag", flagOf(t) ? "Флажок: " + flagOf(t).n : "Флажок", 
 '<button type="button" class="pnm" data-p="pnmore" title="Ещё: на весь экран, избранное, ИИ, ссылка, закрепить, удалить" aria-label="Ещё">⋯</button>' + pb("close", "close", "Закрыть (Esc)") + "</div>";
 if (anc.length) h += '<div class="pn-par">↑ Родительская задача: ' + anc.map(function (a) { return '<a data-p="open" data-id="' + a.id + '" title="Открыть «' + esc(a.t) + '»">' + esc(a.t.slice(0, 60)) + "</a>"; }).join(" › ") + "</div>";
 h += '<div class="pn-title"><button class="ck' + (t.prio ? " p" + t.prio : "") + (t.done ? " dn" : "") + '" type="button" data-p="toggle" aria-label="' + (t.done ? "Вернуть в работу" : "Готово") + '"></button><textarea id="pn-t" rows="1" aria-label="Название задачи" placeholder="Название задачи">' + esc(t.t) + "</textarea></div>";
+if (t.snz && t.snz > today0()) h += '<div class="snzpn">💤 Отложена до <b>' + esc(new Date(t.snz).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })) + "</b>" + (t.snzw ? " · " + esc(t.snzw) : "") + ' <button type="button" class="btn sm" data-a="snzd" data-x="pick" data-id="' + t.id + '">Изменить</button><button type="button" class="btn sm" data-a="snzd" data-x="now" data-id="' + t.id + '">Вернуть сейчас</button></div>';
 h += '<div class="props">' +
 '<span>Срок</span><div class="v"><input type="date" data-pf="date" value="' + date + '"><input type="time" data-pf="time" value="' + time + '"' + (date ? "" : " disabled") + '>' + (time ? '<input type="number" min="5" max="1440" step="5" data-pf="dur" value="' + (+t.dur || 30) + '" style="width:66px" title="Длительность, минут"><span class="muted">мин</span>' : "") + '<select data-pf="rep"' + (date ? "" : " disabled") + ">" + Object.keys(REPN).map(function (k) { return '<option value="' + k + '"' + ((t.rep || "") === k ? " selected" : "") + ">" + (k === "custom" && t.rep === "custom" ? "🔁 " + ruleText(t) : REPN[k]) + "</option>"; }).join("") + "</select>" + (date ? '<button class="btn sm" type="button" data-p="nodate" title="Убрать срок">✕</button>' : "") + '<div class="qdates">' + [["0", "Сегодня"], ["1", "Завтра"], ["mon", "Пн"], ["7", "+неделя"], ["some", "Когда-нибудь"]].map(function (q) { return '<button type="button" class="chip" data-p="qdate" data-v="' + q[0] + '">' + q[1] + "</button>"; }).join("") + "</div></div>" +
 (t.rep === "custom" && t.at ? rrBox(t) : "") +
@@ -22681,6 +22757,8 @@ fired[key] = now; add++;
 bnShow(key, (off ? "⏰ Через " + REMN[off] + ": " : "⏰ ") + t.t, whenTxt(t) + (t.pid && proj(t.pid) ? " · " + proj(t.pid).n : ""), t.id);
 });
 });
+var sbAt = t0 + (+S.opt.allDayHour || 9) * 3600000;
+if (now >= sbAt) snzBack().forEach(function (t) { var key = "snz:" + t.id + "@" + dKey(t.snz); if (fired[key] || sod(t.snz) !== t0) return; fired[key] = now; add++; bnShow(key, "💤 Пора вернуться: " + t.t, t.snzw ? t.snzw : "Вы просили напомнить — решите, что с ней делать", t.id); });
 habits().forEach(function (h) {
 if (h.arch || !/^\d\d:\d\d$/.test(h.time || "") || !hDue(h, t0) || hSt(h, dKey(t0))) return;
 var at = t0 + (+h.time.slice(0, 2) * 60 + +h.time.slice(3)) * 60000, key = "h:" + h.id + "@" + dKey(t0);
@@ -22845,6 +22923,7 @@ if (c.indexOf("prog:") === 0) { t.prog = +c.slice(5) || 0; touch(t); save(); ren
 if (c.indexOf("span:") === 0) { spanSet(t, +c.slice(5)); return; }
 if (c.indexOf("dsplit:") === 0) { daySplit(t, +c.slice(7)); return; }
 if (c === "lpsel") { SELMODE = true; SELS[t.id] = 1; LASTSEL = t.id; render(); return; }
+if (c === "snz:pick") { snzDlg(t); return; }
 if (c.indexOf("snz:") === 0) { snzSet(t, c.slice(4)); return; }
 if (c === "open") { openTask(t.id); return; }
 if (c.indexOf("d:") === 0) {
