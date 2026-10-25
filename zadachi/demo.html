@@ -1764,6 +1764,10 @@ html.prcalm .ck.p3 { border-color: color-mix(in srgb, var(--acc) 40%, var(--mute
 .sloc.sl-all { color: var(--acc); border-color: color-mix(in srgb, var(--acc) 35%, var(--line)) } .slocx { margin: 6px 0 0; font-size: calc(12px * var(--fs)) } .sloclg { margin: 0 0 10px; font-size: calc(12.5px * var(--fs)) }
 .featl { display: grid; gap: 6px; margin: 0 0 14px } .featr { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: inherit; text-decoration: none }
 .featr:hover { border-color: color-mix(in srgb, var(--acc) 40%, var(--line)) } .featr .fti { font-size: 1.2em; line-height: 1.2 } .featr b { display: block } .featr small { color: var(--muted) }
+.cyc { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 6px } .cycs { display: grid; gap: 2px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); color: inherit; text-decoration: none; min-width: 0 }
+.cycs b { font-size: calc(13px * var(--fs)) } .cycs small { color: var(--muted); font-size: calc(11.5px * var(--fs)); line-height: 1.3 } .cyci { font-size: 1.05em; color: var(--muted) }
+.cycs.ok .cyci { color: var(--acc); font-weight: 700 } .cycs.nx { border-color: var(--acc); background: color-mix(in srgb, var(--acc) 9%, transparent) }
+.cycn { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 10px; font-size: calc(13px * var(--fs)) }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -8401,7 +8405,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-223";
+var APPV = "zd-app-2026-10-16-224";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -9565,7 +9569,7 @@ case "sprint": if (v === "~") t.sprint = ""; else { ensureSprint(new Date(v.slic
 case "tag": if (v.charAt(0) !== "#") return; var n = v.slice(1); if ((t.tags || []).indexOf(n) < 0) t.tags = (t.tags || []).concat(n); break;
 case "date": if (v === "b2") { var evd = new Date(t0); evd.setHours(19, 0, 0, 0); t.at = evd.getTime(); t.allday = false; } else if (v === "z") noDate(); else if (v === "b") setDay(t0); else if (v === "c") setDay(t0 + DAY); else if (v === "d") setDay(t0 + 3 * DAY); else if (v === "e") setDay(t0 + 7 * DAY); else return; break;
 case "mx": var imp = v === "q1" || v === "q2", urg = v === "q1" || v === "q3", wasImp = isImp(t), wasUrg = isUrg(t);
-if (imp && !wasImp) { t.prio = 2; } else if (!imp && wasImp) { t.prio = 0; t.flag = ""; }
+if (imp && !wasImp) { t.prio = 2; } else if (!imp && wasImp) { t.prio = 0; t.flag = ""; topsDrop(t.id); }
 if (urg && !wasUrg) setDay(t0); else if (!urg && wasUrg) { setDay(t0 + 7 * DAY); if (t.due && t.due < t0 + urgDays() * DAY) t.due = t0 + 7 * DAY; }
 break;
 case "day": if (v === "z") noDate(); else if (/^\d{4}-\d\d-\d\d$/.test(v)) setDay(new Date(v + "T00:00").getTime()); else return; break;
@@ -10058,7 +10062,10 @@ t.t = ""; touch(t); save(); render(); openTask(t.id); var ti = $("pn-t"); if (ti
 });
 function calAfterRender() { if (V !== "cal" || CAL.mode === "month") return; var b = $("cbody"); if (b && !CAL.scrolled) { b.scrollTop = 7 * HOUR; CAL.scrolled = true; } }
 function urgDays() { return +S.opt.urgDays || 2; }
-function isImp(t) { return t.prio === 1 || t.prio === 2 || hasFlag(t); }
+var IMPC = { dv: -1, s: {} };
+function impTops() { if (IMPC.dv !== DV) { var st = {}; wrTopIds().forEach(function (id) { st[id] = 1; }); var r = dayRec(); ((r && r.top) || []).forEach(function (id) { st[id] = 1; }); IMPC = { dv: DV, s: st }; } return IMPC.s; }
+function isImp(t) { return t.prio === 1 || t.prio === 2 || hasFlag(t) || !!impTops()[t.id]; }
+function topsDrop(id) { var r = (S.opt.wrev || {})[wrKey()]; if (r && (r.top || []).indexOf(id) >= 0) { r.top = r.top.filter(function (x) { return x !== id; }); optTouch(); } var d = dayRec(); if (d && (d.top || []).indexOf(id) >= 0) { d.top = d.top.filter(function (x) { return x !== id; }); touch(d); } DV++; }
 function isUrg(t) { var e = effAt(t); return isLate(t) || (!!e && e < today0() + urgDays() * DAY); }
 var MXQ = { q1: ["🔥", "Важно и срочно", "сделать сейчас"], q2: ["🎯", "Важно, но не срочно", "запланировать"], q3: ["⚡", "Срочно, но не важно", "делегировать или сделать быстро"], q4: ["🌫", "Не важно и не срочно", "отложить или удалить"] };
 function quadOf(t) { var i = isImp(t), u = isUrg(t); return i && u ? "q1" : i ? "q2" : u ? "q3" : "q4"; }
@@ -10067,7 +10074,7 @@ function vMatrix() {
 var l = tasks().filter(function (t) { return !t.done; }), Q = { q1: [], q2: [], q3: [], q4: [] };
 l.forEach(function (t) { var i = isImp(t), u = isUrg(t); Q[i && u ? "q1" : i ? "q2" : u ? "q3" : "q4"].push(t); });
 var meta = [["q1", "🔥 Важно и срочно", "Сделать сейчас", "var(--p1)"], ["q2", "🎯 Важно, но не срочно", "Запланировать", "var(--acc)"], ["q3", "⚡ Срочно, но не важно", "Делегировать или сделать быстро", "var(--p2)"], ["q4", "🌫 Не важно и не срочно", "Отложить или удалить", "var(--muted)"]];
-var h = head("Матрица Эйзенхауэра", "Важное — приоритет 1–2 или флажок; срочное — просрочено или срок в ближайшие дни. Перетащите карточку в другой квадрант — изменятся приоритет и срок.");
+var h = head("Матрица Эйзенхауэра", "Важное — приоритет 1–2, флажок или «★ Главное» дня и недели; срочное — просрочено или срок в ближайшие дни. Перетащите карточку в другой квадрант — изменятся приоритет и срок.");
 h += '<div class="tbar"><button type="button" class="lt' + (mxRowOn() ? " on" : "") + '" data-a="mxrow"><span class="lbox"></span><span>Показывать квадрант в списках задач</span></button><label>Срочно — срок в ближайшие <select data-urg="1">' + [1, 2, 3, 5, 7].map(function (n) { return '<option value="' + n + '"' + (urgDays() === n ? " selected" : "") + ">" + n + " " + plural(n, ["день", "дня", "дней"]) + "</option>"; }).join("") + "</select></label></div>";
 h += '<div class="mxgrid">' + meta.map(function (m) {
 var items = Q[m[0]].sort(cmpBy("date")), ids = {}; items.forEach(function (t) { ids[t.id] = 1; });
@@ -17193,7 +17200,7 @@ return x ? '<span class="aptm">' + x + "</span>" : "";
 }
 var FEAT = [
 ["советник подсказки совет рекомендации", "🧭", "Советник", "блок «🧭 Советник» над списками задач и в «Целях»; карточка на рабочем столе", "all"],
-["матрица эйзенхауэр квадрант важно срочно", "⊞", "Матрица Эйзенхауэра", "«Задачи» → «Матрица»; в карточке задачи — строка «Матрица»; в списках — группировка «по матрице» и «⛃ Фильтр»", "matrix"],
+["матрица эйзенхауэр квадрант важно срочно", "⊞", "Матрица Эйзенхауэра", "важное — приоритет 1–2, флажок или «Главное» дня и недели. «Задачи» → «Матрица»; в карточке задачи — строка «Матрица»; в списках — группировка «по матрице» и «⛃ Фильтр»", "matrix"],
 ["челлендж челленджи марафон программа осанка лицо", "🏁", "Челленджи", "пространство «Челленджи» — 🏁 на полосе слева", "sp-chal"],
 ["спринт", "🏃", "Спринт", "«Задачи» → «Виды» → «Спринт»", "sprint"],
 ["помидор помидоры pomodoro таймер засечь время учёт времени", "🍅", "Помидоры и учёт времени", "карточка задачи — «▶ Засечь время», 🍅 вверху карточки; в строке задачи — 🍅 и «идёт»", "today"],
@@ -17228,6 +17235,7 @@ var FEAT = [
 ["шаблон шаблоны", "⧉", "Шаблоны проектов и задач", "«Задачи» → «Ещё»", "templates"],
 ["архив проектов", "🗄", "Архив проектов", "«Задачи» → «Ещё»", "archive"],
 ["корзина удалённые", "🗑", "Корзина", "⋯ в шапке боковой панели", "trash"],
+["цикл планирования неделя утро вечер итоги ритуалы следующий шаг", "🔁", "Цикл планирования", "карточка на главной и в «Моём дне»: цели → неделя → утро → день → вечер → итоги", "home"],
 ["рабочий стол карточки главной настроить главную", "✎", "Рабочий стол", "«✎ Рабочий стол» на главной и на странице каждого пространства", "home"],
 ["продолжить недавнее недавние", "↩", "Продолжить", "карточка на главной: недавно открытые проекты, заметки и задачи", "home"],
 ["энергия силы сколько сил", "⚡", "Задачи по силам", "кнопка «Сколько сил» в карточке «Сейчас» на главной", "home"],
@@ -17404,6 +17412,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["224", "Цикл планирования", ["🔁 Новая карточка на главной и в «Моём дне»: цели → неделя → утро → день → вечер → итоги. У каждого шага — состояние (✓ сделано), следующий подсвечен по дню недели и времени: в понедельник — обзор недели, утром — план дня, вечером — закрыть день. В «Дне» видно, сколько задач сегодня ведут к целям.", "«Важное» везде одно: приоритет 1–2, флажок или «★ Главное» дня и недели — так считают и матрица, и значки квадрантов."]],
 ["223", "«Где это?» — поиск возможностей", ["В поиске «▦ Все разделы» и в ⌘K находятся не только разделы, но и возможности внутри них: «советник», «копии», «помидор», «матрица», «распорядок», «челлендж»… — с подсказкой, где именно это лежит, и переходом туда одним щелчком."]],
 ["222", "Все пространства — по одной логике", ["Каждое пространство (Мой день, Задачи, Знания, Жизнь, Дом и деньги, Челленджи и ваши собственные) устроено одинаково: меню слева — из его пунктов, страница — шапка, «🎯 Фокус / ✎ Рабочий стол / ⚙ Настроить», рабочий стол с карточками и плитки всего, что есть в меню (разделы — с живой строкой, проекты и цели — с прогрессом).", "Поменяли меню в «⚙ Настроить пространство» — так же меняются и панель, и страница пространства.", "«＋ Создать…» в шапке панели — у всех пространств; что в нём, зависит от меню: задача, заметка, проект, привычка, цель, рецепт, задача в проект пространства…"]],
 ["221", "Настройки: где что хранится; быстрее «Планы»", ["У каждого раздела настроек — метка: ☁ «на всех устройствах» (едет через синхронизацию) или 📱 «только здесь» (тема, плотность, ключ ИИ, вход в Яндекс, уведомления браузера). Где смешано — подписано, что именно где.", "«Планы» перерисовываются втрое быстрее на больших списках; длинные списки показываются порциями по 200 задач (кнопка «Показать ещё»)."]],
@@ -18537,8 +18546,31 @@ return body ? (g.n ? '<h3 class="apph">' + esc(g.n) + "</h3>" : gi ? "" : "") + 
 }).join("");
 return out || '<p class="muted spcempty">Меню пространства пусто — «⚙ Настроить пространство»: добавьте разделы, проекты, заметки, цели.</p>';
 }
-var HZC = [["spt", "✅ Задачи пространства"], ["fst", "🚀 Первые шаги"], ["now", "⏱ Сейчас"], ["top", "★ Главное на сегодня"], ["prog", "📊 Прогресс дня"], ["att", "⚠ Требует внимания"], ["cont", "↩ Продолжить"], ["hab", "🌱 Привычки сегодня"], ["well", "🌿 Самочувствие"], ["pav", "🧭 Советник"], ["xp", "🏆 Уровень и очки"]], HZED = false;
-function hzOrder() { var wk = hzWKeys(), o = (HZS().homec || []).filter(function (k) { return HZC.some(function (c) { return c[0] === k; }) || wk.indexOf(k) >= 0; }); HZC.forEach(function (c) { if (o.indexOf(c[0]) < 0) { var ai = c[0] === "pav" ? o.indexOf("att") : c[0] === "xp" ? o.indexOf("prog") : -1; if (ai >= 0) o.splice(ai + 1, 0, c[0]); else o.push(c[0]); } }); wk.forEach(function (k) { if (o.indexOf(k) < 0) o.push(k); }); return o; }
+var HZC = [["spt", "✅ Задачи пространства"], ["fst", "🚀 Первые шаги"], ["cyc", "🔁 Цикл планирования"], ["now", "⏱ Сейчас"], ["top", "★ Главное на сегодня"], ["prog", "📊 Прогресс дня"], ["att", "⚠ Требует внимания"], ["cont", "↩ Продолжить"], ["hab", "🌱 Привычки сегодня"], ["well", "🌿 Самочувствие"], ["pav", "🧭 Советник"], ["xp", "🏆 Уровень и очки"]], HZED = false;
+function cycSteps() {
+var t0 = today0(), now = new Date(), hr = now.getHours(), wd = now.getDay(), gl = goals().filter(function (g) { return (g.st || "active") === "active"; });
+var wr = (S.opt.wrev || {})[wrKey()], wtop = wrTopIds().length, tl = todayList().length, dnT = tasks().filter(function (t) { return t.done && (t.dt || 0) >= t0; }).length;
+var gp = {}; gl.forEach(function (g) { goalPids(g).forEach(function (id) { gp[id] = g; }); });
+var toG = todayList().filter(function (t) { return (t.goal && goal(t.goal)) || gp[t.pid]; }).length;
+var mdn = tasks().filter(function (t) { return t.done && (t.dt || 0) >= new Date(now.getFullYear(), now.getMonth(), 1).getTime(); }).length;
+var st = [
+["goals", "🎯", "Цели", gl.length ? gl.length + " " + plural(gl.length, ["активная", "активные", "активных"]) : "нет целей", gl.length > 0, "#goals"],
+["week", "🗓", "Неделя", (wr && wr.done ? "обзор ✓" : "обзор не пройден") + " · главное " + wtop + "/3", !!(wr && wr.done), "#weekly"],
+["morn", "🌅", "Утро", hzMorn() ? "план есть" : "план не составлен", hzMorn(), "#morning"],
+["day", "☀", "День", "сделано " + dnT + " · осталось " + tl + (toG ? " · к целям " + toG : ""), tl === 0 && dnT > 0, "#today"],
+["eve", "🌙", "Вечер", hzEve() ? "день закрыт" : "не закрыт", hzEve(), "#shutdown"],
+["sum", "📊", "Итоги", "за месяц сделано " + mdn, null, "#recap"]
+];
+var nx = !hzMorn() && hr < 12 ? "morn" : !hzEve() && hr >= 17 ? "eve" : !(wr && wr.done) && (wd === 1 || wd === 0 || wd === 5 || wd === 6) ? "week" : !gl.length ? "goals" : now.getDate() <= 3 ? "sum" : "day";
+return { st: st, nx: nx };
+}
+var CYCNX = { goals: "Заведите цель — к ней будут вести проекты и задачи", week: "Обзор недели: 15 минут — и выбрать «Главное недели»", morn: "Утренний план: что главное сегодня и сколько времени", day: "Делайте главное — остальное подождёт", eve: "Закройте день: сделанное, хвосты, завтра", sum: "Загляните в итоги — что получилось за месяц" };
+function cycHTML() {
+var c = cycSteps(), n = c.st.filter(function (x) { return x[0] === c.nx; })[0];
+return '<div class="cyc">' + c.st.map(function (x) { return '<a class="cycs' + (x[4] === true ? " ok" : "") + (x[0] === c.nx ? " nx" : "") + '" href="' + x[5] + '"><span class="cyci">' + (x[4] === true ? "✓" : x[1]) + "</span><b>" + x[2] + "</b><small>" + esc(x[3]) + "</small></a>"; }).join("") + "</div>" +
+'<div class="cycn"><span>Следующий шаг: <b>' + n[1] + " " + n[2] + "</b> — " + esc(CYCNX[c.nx]) + '</span><a class="btn sm pri" href="' + n[5] + '">Перейти</a></div>';
+}
+function hzOrder() { var wk = hzWKeys(), o = (HZS().homec || []).filter(function (k) { return HZC.some(function (c) { return c[0] === k; }) || wk.indexOf(k) >= 0; }); HZC.forEach(function (c) { if (o.indexOf(c[0]) < 0) { var ai = c[0] === "pav" ? o.indexOf("att") : c[0] === "xp" ? o.indexOf("prog") : -1; if (c[0] === "cyc" && o.indexOf("now") >= 0) o.splice(o.indexOf("now"), 0, "cyc"); else if (ai >= 0) o.splice(ai + 1, 0, c[0]); else o.push(c[0]); } }); wk.forEach(function (k) { if (o.indexOf(k) < 0) o.push(k); }); return o; }
 function hzHid() { return HZS().homeh || []; }
 function hzName(k) { var c = HZC.filter(function (z) { return z[0] === k; })[0]; return c ? c[1] : k; }
 function hzMorn() { var r = dayRec(); return LS.get("zd-rit-morning") === dKey(today0()) || !!(r && r.planned); }
@@ -18611,6 +18643,8 @@ b = A.length ? A.map(function (x) { return '<a class="hza" href="' + x[2] + '"><
 } else if (k === "cont") {
 var rc = recentItems(6);
 b = rc.length ? rc.map(function (x) { return '<a class="hza" href="#' + esc(x.h) + '"><span>' + x.ic + "</span>" + esc(x.t) + '<small class="muted"> · ' + esc(x.k) + "</small></a>"; }).join("") : '<p class="muted">Здесь появятся проекты, заметки и доски, которые вы открывали.</p>';
+} else if (k === "cyc") {
+b = cycHTML();
 } else if (k === "hab") {
 b = habitsToday() || '<p class="muted">На сегодня привычек нет. <a href="#habits">Завести привычку</a></p>';
 more = '<a class="ibtn" href="#habits" title="Привычки" aria-label="Привычки">→</a>';
@@ -18852,8 +18886,8 @@ return false;
 function hzWeekSug() {
 var d = new Date(), wd = d.getDay(), t0 = today0(), out = "", dk = dKey(t0), hw = LS.get("zd-hzs2w"), hmo = LS.get("zd-hzs2m");
 var wr = (S.opt.wrev || {})[wrKey()];
-if ((wd === 5 || wd === 6 || wd === 0) && !(wr && wr.done) && hw !== dk)
-out += '<div class="hzs2"><span>🧭</span><div><b>' + (wd === 0 ? "Воскресенье" : wd === 6 ? "Суббота" : "Пятница") + " — время для обзора недели</b><small>15 минут: разобрать хвосты, проверить проекты, наметить неделю</small></div>" + '<a class="btn sm" href="#weekly">Начать</a><button type="button" class="ibtn" data-a="hzs2x" data-x="w" title="Не сегодня" aria-label="Не сегодня">✕</button></div>';
+if ((wd === 5 || wd === 6 || wd === 0 || wd === 1) && !(wr && wr.done) && hw !== dk && cycSteps().nx === "week")
+out += '<div class="hzs2"><span>🧭</span><div><b>' + (wd === 0 ? "Воскресенье" : wd === 6 ? "Суббота" : wd === 1 ? "Понедельник" : "Пятница") + " — время для обзора недели</b><small>15 минут: разобрать хвосты, проверить проекты, наметить неделю</small></div>" + '<a class="btn sm" href="#weekly">Начать</a><button type="button" class="ibtn" data-a="hzs2x" data-x="w" title="Не сегодня" aria-label="Не сегодня">✕</button></div>';
 if (d.getDate() <= 3 && hmo !== dk) {
 var pm = new Date(d.getFullYear(), d.getMonth() - 1, 1), key = pm.getFullYear() + "-" + (pm.getMonth() < 9 ? "0" : "") + (pm.getMonth() + 1), nm = pm.toLocaleDateString("ru-RU", { month: "long" });
 out += '<div class="hzs2"><span>🏁</span><div><b>Итоги ' + (nm.slice(-1) === "ь" || nm.slice(-1) === "й" ? nm.slice(0, -1) + "я" : nm + "а") + "</b><small>что получилось за прошлый месяц — можно сохранить картинкой</small></div>" + '<a class="btn sm" href="#recap-' + key + '">Посмотреть</a><button type="button" class="ibtn" data-a="hzs2x" data-x="m" title="Скрыть" aria-label="Скрыть">✕</button></div>';
@@ -19626,6 +19660,7 @@ function spcDesk(k) {
 var d = S.opt.spc = S.opt.spc || { l: [], ov: {} }; d.l = d.l || []; d.ov = d.ov || {};
 var o = d.l.filter(function (x) { return x.id === k; })[0]; if (!o) o = d.ov[k] = d.ov[k] || {};
 if (!o.desk) o.desk = { homeh: HZC.map(function (x) { return x[0]; }), homecols: 2 };
+if (!o.desk.cycSeen) { o.desk.cycSeen = 1; var hh = o.desk.homeh = (o.desk.homeh || []).filter(function (x) { return x !== "cyc"; }); if (k !== "day") hh.push("cyc"); }
 return o.desk;
 }
 function HZS() { return V === "sp" && ARG && ARG !== "home" && SPZ[ARG] ? spcDesk(ARG) : S.opt; }
