@@ -604,7 +604,8 @@ html.mmfullon, html.mmfullon body { overflow: hidden }
 .apsht { margin: 16px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted) } .apshg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 6px }
 .apsc { display: grid; justify-items: center; gap: 5px; text-align: center; color: var(--fg); text-decoration: none; font-size: 12px; line-height: 1.2; min-width: 0 } .apsc .apti { position: relative; width: 52px; height: 52px; border-radius: 16px; font-size: 26px } .apscn { position: absolute; top: -5px; right: -7px; font-style: normal; min-width: 18px; padding: 0 5px; border-radius: 999px; background: var(--ac); color: #fff; font-size: 11px; line-height: 18px }
 .apov { position: fixed; right: 0; bottom: 0; z-index: 60 } .apovbg { position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 55%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); opacity: 0; transition: opacity .18s } .apov.on .apovbg { opacity: 1 }
-.apovp { position: absolute; inset: 0; overflow: auto; overscroll-behavior: contain; padding: 12px 16px 40px; display: grid; gap: 10px; align-content: start; opacity: 0; transform: translateY(-6px); transition: opacity .18s, transform .18s; pointer-events: none } .apov.on .apovp { opacity: 1; transform: none } .apovp > * { pointer-events: auto }
+.apovp { position: absolute; inset: 0; overflow: auto; overscroll-behavior: contain; padding: 12px 16px 40px; display: grid; gap: 10px; align-content: start; opacity: 0; transform: translateY(-6px); transition: opacity .18s, transform .18s; pointer-events: none } .apov.on .apovp { opacity: 1; transform: none; pointer-events: auto } .apovp > * { pointer-events: auto }
+html.apopen, html.apopen body { overflow: hidden; overscroll-behavior: none }
 .apovbox, .apovg, .apovw, .apovs { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 2px 14px rgba(0, 0, 0, .07) }
 .apovbox { padding: 12px 16px 16px } .apovh { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: calc(16px * var(--fs)) }
 .apovcs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px }
@@ -3187,7 +3188,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-208";
+var APPV = "zd-app-2026-10-16-209";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -12020,8 +12021,10 @@ var big = appTopKeys(4).map(function (k) { return '<a class="apovc" href="#' + k
 var lk = [["apps", "▦", "Все разделы — плитки и папки"], ["market", "🧩", "Шаблоны"], ["news", "✨", "Что нового"]].map(function (x) { return '<a class="apovw" href="#' + x[0] + '"><span class="apovwi">' + x[1] + "</span><b>" + x[2] + '</b><span class="apovch">›</span></a>'; }).join("");
 return '<div class="apovbg" data-a="apshx"></div><div class="apovp" role="dialog" aria-label="Все разделы"><div class="apovbox"><div class="apovh"><b>Часто открываете</b><button type="button" class="ibtn" data-a="apshx" title="Закрыть (Esc)" aria-label="Закрыть">✕</button></div><div class="apovcs">' + big + '</div></div>' + appRecentHTML() + '<div class="apovws">' + lk + '</div><label class="apovs"><span aria-hidden="true">⌕</span><input type="search" id="apovq" placeholder="Поиск: разделы, задачи, заметки, люди, проекты…" autocomplete="off"></label><div id="apovl">' + appOvList("") + "</div></div>";
 }
+document.addEventListener("click", function (e) { if (e.target && e.target.classList && e.target.classList.contains("apovp")) appSheet(false); });
 function appSheet(on) {
 var w = $("appsh");
+document.documentElement.classList.toggle("apopen", !!on);
 if (!on) { if (w) { w.classList.remove("on"); setTimeout(function () { if (w.parentNode && !w.classList.contains("on")) w.parentNode.removeChild(w); }, 240); } return; }
 var ov = !window.matchMedia("(max-width: 700px)").matches;
 if (!w) { w = document.createElement("div"); w.id = "appsh"; document.body.appendChild(w); }
@@ -12098,6 +12101,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["209", "«Все разделы» листается правильно", ["Открытое окно «Все разделы» прокручивается само, а страница под ним больше не уезжает; щелчок по пустому месту закрывает окно."]],
 ["208", "Справка и курс — в новом оформлении", ["Картинки в справке и учебный курс (PDF) пересняты в новом оформлении; в курсе обновлён урок «Оформление» и добавлены свои пространства, челленджи, «Неделя в цифрах» и советник. В справке — новый раздел «Свои пространства»."]],
 ["207", "Ещё быстрее", ["Левая панель считает только то, что видно; счётчики тегов, фильтров и проектов, очки и уровень пересчитываются один раз на изменение; если на странице ничего не поменялось, она не перерисовывается вовсе.", "На 3000 задачах: обновление «Всех задач» — 28 мс (было 775), «Сегодня» — 26 мс, обычные страницы — 5–20 мс."]],
 ["206", "Быстрее на больших списках", ["Списки с тысячами задач открываются в несколько раз быстрее: «Все задачи» с 3000 задач — 0,2 с вместо 0,8 с, «Планы» — втрое быстрее.", "Очень длинный список показывается порциями: сначала 400 задач, внизу — «Показать ещё»."]],
