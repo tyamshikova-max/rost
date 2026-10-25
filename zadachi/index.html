@@ -1737,7 +1737,7 @@ html.st-glass .top .brand { background: transparent; border-right-color: var(--g
 .spcimg { width: 1.2em; height: 1.2em; border-radius: 6px; object-fit: cover; vertical-align: -.2em; display: inline-block }
 .rlb .spcimg { width: 24px; height: 24px; border-radius: 7px; vertical-align: middle } .rladd { color: var(--muted); font-size: 18px; border: 1px dashed var(--line) !important } .rladd:hover { color: var(--acc) }
 .spchi { display: inline-flex; vertical-align: -.08em } .spcbar { gap: 8px; margin: 6px 0 14px }
-.spcmenu { columns: 2 260px; column-gap: 24px } .spcmenu .spcg { break-inside: avoid; display: inline-block; width: 100% } .spcempty { margin: 6px 0 16px }
+.spcmenu { columns: 2 260px; column-gap: 24px } .spcmenu .spcg { break-inside: avoid; display: inline-block; width: 100% } .spcmenu .nav > *, .spcmenu .nav li { break-inside: avoid } .spcempty { margin: 6px 0 16px }
 .spzt.spztadd { border-style: dashed; color: var(--muted) } .spzt.spztadd .spzi { color: var(--acc) }
 .spcsec { margin: 16px 0 0; display: grid; gap: 8px } .spcsec > .lbl { font-weight: 600 } .spcprev { font-size: 28px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; background: var(--acc-soft) } .spcprev .spcimg { width: 44px; height: 44px; border-radius: 12px }
 .spcics { display: flex; flex-wrap: wrap; gap: 4px } .spcics button { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line); background: none; font-size: 19px; cursor: pointer; color: var(--fg) } .spcics button.on { border: 2px solid var(--acc); background: var(--acc-soft) } .spcics .spcimgb { width: auto; padding: 0 12px; font-size: calc(13px * var(--fs)) }
@@ -3260,7 +3260,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-221";
+var APPV = "zd-app-2026-10-16-222";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -12216,6 +12216,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["222", "Все пространства — по одной логике", ["Каждое пространство (Мой день, Задачи, Знания, Жизнь, Дом и деньги, Челленджи и ваши собственные) устроено одинаково: меню слева — из его пунктов, страница — шапка, «🎯 Фокус / ✎ Рабочий стол / ⚙ Настроить», рабочий стол с карточками и плитки всего, что есть в меню (разделы — с живой строкой, проекты и цели — с прогрессом).", "Поменяли меню в «⚙ Настроить пространство» — так же меняются и панель, и страница пространства.", "«＋ Создать…» в шапке панели — у всех пространств; что в нём, зависит от меню: задача, заметка, проект, привычка, цель, рецепт, задача в проект пространства…"]],
 ["221", "Настройки: где что хранится; быстрее «Планы»", ["У каждого раздела настроек — метка: ☁ «на всех устройствах» (едет через синхронизацию) или 📱 «только здесь» (тема, плотность, ключ ИИ, вход в Яндекс, уведомления браузера). Где смешано — подписано, что именно где.", "«Планы» перерисовываются втрое быстрее на больших списках; длинные списки показываются порциями по 200 задач (кнопка «Показать ещё»)."]],
 ["220", "Данные надёжнее", ["База переехала в собственное хранилище браузера (IndexedDB): больше нет предела в ~5 МБ, а сохранение быстрее — серия действий подряд записывается один раз. Переезд — сам, при первом запуске.", "Две вкладки с приложением больше не затирают изменения друг друга: каждая подхватывает правки другой.", "💽 Копии на этом устройстве: раз в день — полная копия прямо в браузере, последние 14 дней; «↺ Вернуть» — откат к нужному дню одной кнопкой (текущее состояние сохраняется отдельно — можно передумать). «Настройки» → «Резервная копия».", "Синхронизация сливает изменения по полям: поменяли название задачи на телефоне, а срок на компьютере — сохранятся оба. Если одно и то же поле поменяли на двух устройствах — останется более свежее, а другое — в «Конфликтах синхронизации»."]],
 ["219", "«План по часам» — на все сутки", ["Лента дня теперь с 00:00 до 24:00: можно поставить задачу и ночью, и поздно вечером. При открытии лента сама прокручивается к текущему часу (для другого дня — к началу рабочего дня), так что начинать с полуночи не придётся."]],
@@ -12566,7 +12567,7 @@ function cpStrip(html) { return String(html || "").replace(/^<div class="lab"[\s
 function cpBody(k) { return spzBody(k); }
 function cpHTML(fly) {
 var k = cpSpace(), s = SPACES[k];
-var h = '<div class="cph"' + (k === "task" ? ' data-droproot="1"' : "") + "><b>" + s[1] + "</b>" + (CPADD[k] || []).map(function (x) { return '<button type="button" class="ibtn" data-a="' + x[0] + '" title="' + x[2] + '" aria-label="' + x[2] + '">' + x[1] + "</button>"; }).join("") +
+var h = '<div class="cph"' + (k === "task" ? ' data-droproot="1"' : "") + "><b>" + s[1] + "</b>" + (SPZ[k] ? [["spzplus", "＋", "Создать…"]] : CPADD[k] || []).map(function (x) { return '<button type="button" class="ibtn" data-a="' + x[0] + '" title="' + x[2] + '" aria-label="' + x[2] + '">' + x[1] + "</button>"; }).join("") +
 '<button type="button" class="ibtn" data-a="spced" data-x="' + k + '" title="Настроить пространство: меню, название, значок" aria-label="Настроить пространство">✎</button>' +
 '<button type="button" class="ibtn" data-a="cpmore" title="Ещё: история, корзина, архив, настройка полосы" aria-label="Ещё">⋯</button>' +
 (fly ? '<button type="button" class="ibtn" data-a="cppin" title="Закрепить панель" aria-label="Закрепить панель">📌</button>' : '<button type="button" class="ibtn" data-a="cphide" title="Скрыть панель (или щёлкните значок ещё раз)" aria-label="Скрыть панель">⇤</button>') + "</div>";
@@ -13276,7 +13277,6 @@ life: ["🌿", "Жизнь", "Привычки, самочувствие, цел
 house: ["🔑", "Дом и деньги", "Меню, кухня, уборка, бюджет, документы, общие списки"],
 chal: ["🏁", "Челленджи", "Программы по дням: осанка и лицо, дом, финансы, кухня"]
 };
-var SPZK = { chal: ["chals"], day: ["inbox", "today", "plans", "cal", "morning", "shutdown", "weekly", "tbox", "dnote", "snoozed"], task: ["all", "flag", "waiting", "someday", "done", "sprint", "gantt", "matrix"], know: ["notes", "ngraph", "srs", "market"], life: ["habits", "chals", "goals", "health", "journal", "wheel", "people", "garden", "stats"], house: ["menu", "kitchen", "clean", "budget", "docs", "shared"] };
 var SPZV = { proj: "task", archive: "task", templates: "task", tag: "task", filter: "task", all: "task", waiting: "task", someday: "task", done: "task", tarch: "task", sprint: "task", sprints: "task", gantt: "task", matrix: "task", flag: "task", trash: "task",
 note: "know", nsec: "know", ntag: "know", notes: "know", ngraph: "know", srs: "know", market: "know",
 board: "home", home: "home", apps: "home", news: "home", mods: "home",
@@ -13290,39 +13290,18 @@ var MODOFF0 = ["sprint", "gantt", "matrix", "tbox", "dnote", "srs", "ngraph", "w
 function modOn(k) { var m = S.opt && S.opt.mods; return !m || MODCORE.indexOf(k) >= 0 || m[k] !== 0; }
 function modSet(k, on) { var m = Object.assign({}, S.opt.mods || {}); if (on) delete m[k]; else m[k] = 0; S.opt.mods = m; optTouch(); save(); }
 function modsOffList() { var D = appDef(); return Object.keys(D).filter(function (k) { return !modOn(k); }); }
-function spzKeys(k) { var D = appDef(); return (SPZK[k] || []).filter(function (x) { return D[x] && modOn(x); }); }
+function spzKeysAll(k) { var D = appDef(); return spcItemsOf(k).filter(function (it) { return it.t === "r" && D[it.k]; }).map(function (it) { return it.k; }); }
+function spzKeys(k) { return spzKeysAll(k).filter(modOn); }
 function spzLink(k) {
 var D = appDef(), x = D[k]; if (!x || !modOn(k)) return "";
 if (SIDEL[k]) return SIDEL[k]();
 var n = appCnt(k); return itemHTML("", "", k, '<span class="pic">' + x[1] + "</span>", x[2], typeof n === "number" ? n : 0, {});
 }
 function spzNav(keys) { var h = keys.map(spzLink).join(""); return h ? '<nav class="nav">' + h + "</nav>" : ""; }
-function spzBody(k) {
-var its = spcItems(k); if (its) return spcBody(k, its);
-var B = SIDEB, g = function (t) { return '<div class="cpg">' + t + "</div>"; };
-if (k === "home") {
-var rc = recentItems(6);
-return '<nav class="nav">' + itemHTML("", "", "home", '<span class="pic">🏠</span>', "Главная", 0, {}) + itemHTML("", "", "apps", '<span class="pic">▦</span>', "Все разделы", 0, {}) + "</nav>" +
-g("Избранное") + (B.fav ? cpStrip(B.fav) : '<div class="none">Отметьте ★ проект, заметку, тег или ☆ раздел в «Все разделы».</div>') +
-g("Доски") + cpStrip(B.boards || "") +
-(rc.length ? g("Недавние") + '<nav class="nav">' + rc.map(function (x) { return itemHTML("", "", x.h, '<span class="pic">' + x.ic + "</span>", x.t, 0, {}); }).join("") + "</nav>" : "");
-}
-if (k === "day") return S.opt.sidelists ? '<nav class="nav">' + listsOrder().filter(function (x) { return SIDEL[x]; }).map(function (x) { return SIDEL[x](); }).join("") + "</nav>" : spzNav(["inbox", "today", "plans", "cal"]) + g("Ритуалы") + spzNav(["morning", "shutdown", "weekly"]) + g("Ещё") + spzNav(["tbox", "dnote", "snoozed"]);
-if (k === "task") {
-var fl = flags();
-return g("Проекты") + cpStrip(B.projects) + g("Списки") + spzNav(["all", "flag", "waiting", "someday", "done"]) + (spzKeys("task").some(function (x) { return /^(sprint|gantt|matrix)$/.test(x); }) ? g("Виды") + spzNav(["sprint", "gantt", "matrix"]) : "") +
-g("Теги") + cpStrip(B.tags) + g("Фильтры") + cpStrip(B.filters) +
-(fl.length ? g("Флажки") + '<nav class="nav">' + fl.map(function (f) { var n = tasks().filter(function (t) { var o = !t.done && flagOf(t); return o && o.id === f.id; }).length; return itemHTML("", "", "flag-" + f.id, '<span class="pic">' + flagIc(f) + "</span>", f.n, n, {}); }).join("") + "</nav>" : "") +
-g("Ещё") + '<nav class="nav">' + itemHTML("", "", "archive", ic("archive"), "Архив проектов", archList().length, {}) + itemHTML("", "", "templates", ic("tpl"), "Шаблоны проектов и задач", 0, {}) + "</nav>";
-}
-if (k === "know") return cpStrip(B.notes) + g("Ещё") + spzNav(["ngraph", "srs", "market"]);
-if (k === "life") return spzNav(["habits", "chals", "goals", "health", "journal"]) + g("Обзор") + spzNav(["wheel", "people", "garden", "stats"]);
-if (k === "house") return spzNav(["menu", "kitchen", "clean", "budget"]) + g("Бумаги и близкие") + spzNav(["docs", "shared"]);
-if (k === "chal") return spzNav(["chals"]) + g("Программы") + chalNav();
-return "";
-}
+function spzBody(k) { return spcBody(k, spcItemsOf(k)); }
 function spzLine(k) {
 try {
+if (spcGet(k)) { var its = spcItemsOf(k), nm = its.filter(function (it) { return it.t !== "h"; }).length; if (spcCanFocus(k)) { var fs = spcFocusSet(k), on = live(S.tasks).filter(function (t) { return !t.done && (fs[t.pid] || (t.goal && fs.__g[t.goal])); }).length; return on + " " + plural(on, ["открытая задача", "открытые задачи", "открытых задач"]) + " · в меню " + nm; } return nm ? "в меню " + nm + " " + plural(nm, ["пункт", "пункта", "пунктов"]) : "своё пространство"; }
 if (k === "chal") { var na = chalList().filter(function (c) { return c.on; }).length; return na ? "идёт " + na + " " + plural(na, ["челлендж", "челленджа", "челленджей"]) : "осанка и лицо, дом, финансы, кухня"; }
 var t0 = today0();
 if (k === "day") { var tl = todayList().length, ib = inboxList().length; return "сегодня " + tl + " " + plural(tl, ["задача", "задачи", "задач"]) + (ib ? " · входящих " + ib : ""); }
@@ -13335,28 +13314,39 @@ return SPZ[k] ? SPZ[k][2] : "";
 }
 function spzTiles(cls) { return '<div class="spzg' + (cls ? " " + cls : "") + '">' + spcAll().filter(function (k) { return k !== "home"; }).map(function (k) { return '<a class="spzt" href="#sp-' + k + '"><span class="spzi">' + SPZ[k][0] + "</span><b>" + SPZ[k][1] + "</b><small>" + esc(spzLine(k)) + "</small></a>"; }).join("") + '<a class="spzt spztadd" href="#spced-new"><span class="spzi">＋</span><b>Своё пространство</b><small>меню и рабочий стол — из того, что нужно вам</small></a></div>'; }
 function vSpz() {
-var k = SPZ[ARG] ? ARG : "day"; if (k === "home") return vHome(); if (spcGet(k)) return vSpcPage(k); if (k === "chal") return vChals();
-var D = appDef(), col = appColMap(appLayout()), s = SPZ[k], h = head(s[0] + " " + s[1], s[2] + ". Слева — панель пространства; значок на полосе — сюда же.");
-h += spcBar(k) + spcDeskHTML(k);
-h += '<div class="aptg spzov">' + spzKeys(k).map(function (x) { var d = D[x], n = appCnt(x); return '<div class="apt" style="--ac:' + (col[x] || "var(--acc)") + '"><a class="aptl" href="#' + x + '"><span class="apti">' + d[1] + "</span><b>" + esc(d[2]) + (n !== "" && n !== 0 ? '<span class="aptn">' + esc(String(n)) + "</span>" : "") + "</b><small>" + esc(d[3]) + "</small>" + appMini(x) + "</a></div>"; }).join("") + "</div>";
-try {
-if (k === "task") {
-var pl = projects().filter(function (p) { return !isArch(p.id) && !p.parent; }).map(function (p) { var ids = pdesc(p.id), all = tasks().filter(function (t) { return ids.indexOf(t.pid) >= 0; }), dn = all.filter(function (t) { return t.done; }).length; return { p: p, n: all.length - dn, sub: ids.length - 1, pct: all.length ? Math.round(dn / all.length * 100) : 0 }; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 8);
-if (pl.length) h += '<h3 class="apph">Проекты</h3><div class="spzpl">' + pl.map(function (x) { return '<a class="spzp" href="#proj-' + x.p.id + '"><span>' + piconH(x.p) + "</span><b>" + esc(x.p.n) + "</b><small>" + x.n + " " + plural(x.n, ["открытая", "открытые", "открытых"]) + (x.sub ? " · " + x.sub + " " + plural(x.sub, ["подпроект", "подпроекта", "подпроектов"]) : "") + "</small>" + appBar(x.pct) + "</a>"; }).join("") + "</div>";
-} else if (k === "know") {
-var nl = notes().slice().sort(function (a, b) { return (b.upd || b.created || 0) - (a.upd || a.created || 0); }).slice(0, 8);
-if (nl.length) h += '<h3 class="apph">Недавно изменены</h3><div class="spzpl">' + nl.map(function (n) { return '<a class="spzp" href="#note-' + n.id + '"><span>' + esc(nIc(n)) + "</span><b>" + esc(nTitle(n)) + "</b><small>" + esc(new Date(n.upd || n.created || Date.now()).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })) + "</small></a>"; }).join("") + "</div>";
-} else if (k === "life") {
-var ht = habitsToday(); if (ht) h += '<h3 class="apph">Привычки сегодня</h3>' + ht;
-var gs = goals().filter(function (g) { return (g.st || "active") === "active"; }).slice(0, 6);
-if (gs.length) h += '<h3 class="apph">Цели</h3><div class="spzpl">' + gs.map(function (g) { var p = goalProg(g).pct; return '<a class="spzp" href="#goal-' + g.id + '"><span>' + esc(g.ic || "🎯") + "</span><b>" + esc(g.n) + "</b><small>" + p + " %</small>" + appBar(p) + "</a>"; }).join("") + "</div>";
-} else if (k === "day") {
-h += '<div class="r spzday"><a class="btn sm pri" href="#morning">🌅 Утренний план</a><a class="btn sm" href="#shutdown">🌙 Завершить день</a><a class="btn sm" href="#weekly">🧭 Обзор недели</a></div>';
-}
-} catch (e) { /* дополнения не обязательны */ }
-var off = (SPZK[k] || []).filter(function (x) { return D[x] && !modOn(x); });
+var k = SPZ[ARG] ? ARG : "day"; if (k === "home") return vHome();
+var c = spcGet(k), s = SPZ[k], D = appDef();
+var h = head('<span class="spchi">' + s[0] + "</span> " + esc(s[1]), (c ? "Своё пространство" : s[2]) + ". Слева — меню пространства, здесь — рабочий стол и всё, что в меню.");
+h += spcBar(k) + spcDeskHTML(k) + spcPageHTML(k, spcItemsOf(k));
+var off = spzKeysAll(k).filter(function (x) { return !modOn(x); });
 if (off.length) h += '<p class="muted spzoff">Выключено в этом пространстве: ' + off.map(function (x) { return D[x][1] + " " + esc(D[x][2]); }).join(", ") + ' — <a href="#mods">🧩 Модули</a></p>';
 return h;
+}
+function spcPageHTML(k, items) {
+var D = appDef(), col = appColMap(appLayout()), groups = [], cur = { n: null, it: [] }; groups.push(cur);
+items.forEach(function (it) { if (it.t === "h") { cur = { n: it.n || "", it: [] }; groups.push(cur); } else cur.it.push(it); });
+var pc = function (href, icH, name, small, pct) { return '<a class="spzp" href="#' + href + '"><span>' + icH + "</span><b>" + esc(name) + "</b><small>" + esc(small) + "</small>" + (pct === undefined ? "" : appBar(pct)) + "</a>"; };
+var projCard = function (p) { var ids = pdesc(p.id), all = tasks().filter(function (t) { return ids.indexOf(t.pid) >= 0; }), dn = all.filter(function (t) { return t.done; }).length, n = all.length - dn; return pc("proj-" + p.id, piconH(p), p.n, n + " " + plural(n, ["открытая", "открытые", "открытых"]) + (ids.length > 1 ? " · " + (ids.length - 1) + " " + plural(ids.length - 1, ["подпроект", "подпроекта", "подпроектов"]) : ""), all.length ? Math.round(dn / all.length * 100) : 0); };
+var out = groups.map(function (g, gi) {
+var tiles = "", cards = "", extra = "";
+g.it.forEach(function (it) {
+var o;
+if (it.t === "r") { var d = D[it.k]; if (!d || !modOn(it.k)) return; var n = appCnt(it.k); tiles += '<div class="apt" style="--ac:' + (col[it.k] || "var(--acc)") + '"><a class="aptl" href="#' + it.k + '"><span class="apti">' + d[1] + "</span><b>" + esc(d[2]) + (n !== "" && n !== 0 ? '<span class="aptn">' + esc(String(n)) + "</span>" : "") + "</b><small>" + esc(d[3]) + "</small>" + appMini(it.k) + "</a></div>"; }
+else if (it.t === "p") { if ((o = proj(it.id))) cards += projCard(o); }
+else if (it.t === "g") { if ((o = goal(it.id))) { var gp = goalProg(o).pct; cards += pc("goal-" + o.id, esc(o.ic || "🎯"), o.n, gp + " %", gp); } }
+else if (it.t === "n") { if ((o = note(it.id))) cards += pc("note-" + o.id, esc(nIc(o)), nTitle(o), new Date(o.upd || o.created || Date.now()).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })); }
+else if (it.t === "b") { if ((o = board(it.id))) cards += pc("board-" + o.id, esc(o.ic || "▦"), o.n, "доска"); }
+else if (it.t === "f") { if ((o = filt(it.id))) cards += pc("filter-" + o.id, "⛃", o.n, "фильтр"); }
+else if (it.t === "tag") { if ((o = tagObj(it.id))) { var tn = tasks().filter(function (t) { return !t.done && (t.tags || []).indexOf(o.n) >= 0; }).length; cards += pc("tag-" + o.n, "#", o.n, tn + " " + plural(tn, ["задача", "задачи", "задач"])); } }
+else if (it.t === "x" && it.k === "projects") projects().filter(function (p) { return !isArch(p.id) && !p.parent; }).map(function (p) { return { p: p, n: tasks().filter(function (t) { return !t.done && t.pid === p.id; }).length }; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 8).forEach(function (x) { cards += projCard(x.p); });
+else if (it.t === "x" && it.k === "notes") notes().slice().sort(function (a, b) { return (b.upd || b.created || 0) - (a.upd || a.created || 0); }).slice(0, 8).forEach(function (n) { cards += pc("note-" + n.id, esc(nIc(n)), nTitle(n), new Date(n.upd || n.created || Date.now()).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })); });
+else if (it.t === "x" && it.k === "chals") { var L = chalList(); extra += '<div class="chlg">' + L.filter(function (c) { return c.on; }).concat(L.filter(function (c) { return !c.on; })).map(chalCard).join("") + "</div>"; }
+else if (it.t === "x") { var x = spcItemHTML(it); if (x) extra += '<div class="spcmenu">' + (/^\s*<(nav|div)/.test(x) ? x : '<nav class="nav">' + x + "</nav>") + "</div>"; }
+});
+var body = (tiles ? '<div class="aptg spzov">' + tiles + "</div>" : "") + (cards ? '<div class="spzpl">' + cards + "</div>" : "") + extra;
+return body ? (g.n ? '<h3 class="apph">' + esc(g.n) + "</h3>" : gi ? "" : "") + body : "";
+}).join("");
+return out || '<p class="muted spcempty">Меню пространства пусто — «⚙ Настроить пространство»: добавьте разделы, проекты, заметки, цели.</p>';
 }
 var HZC = [["spt", "✅ Задачи пространства"], ["fst", "🚀 Первые шаги"], ["now", "⏱ Сейчас"], ["top", "★ Главное на сегодня"], ["prog", "📊 Прогресс дня"], ["att", "⚠ Требует внимания"], ["cont", "↩ Продолжить"], ["hab", "🌱 Привычки сегодня"], ["well", "🌿 Самочувствие"], ["pav", "🧭 Советник"], ["xp", "🏆 Уровень и очки"]], HZED = false;
 function hzOrder() { var wk = hzWKeys(), o = (HZS().homec || []).filter(function (k) { return HZC.some(function (c) { return c[0] === k; }) || wk.indexOf(k) >= 0; }); HZC.forEach(function (c) { if (o.indexOf(c[0]) < 0) { var ai = c[0] === "pav" ? o.indexOf("att") : c[0] === "xp" ? o.indexOf("prog") : -1; if (ai >= 0) o.splice(ai + 1, 0, c[0]); else o.push(c[0]); } }); wk.forEach(function (k) { if (o.indexOf(k) < 0) o.push(k); }); return o; }
@@ -13612,12 +13602,23 @@ function hzEveCard() {
 var t0 = today0(), dn = doneEvents().filter(function (e) { return e.d >= t0; }).length, md = dMood(dayRec() || {}), tr = dayRecOf(dKey(addDays(t0, 1))), ft = tr && (tr.top || []).length ? task(tr.top[0]) : null;
 return '<div class="hzs ev"><span class="hzsi">🌙</span><div><b>День закрыт ✓ Сделано: ' + dn + "</b><small>" + (md ? "настроение " + MOODS[md - 1] + " · " : "") + (ft ? "завтра первым делом: «" + esc(ft.t) + "»" : "первое дело на завтра не выбрано") + "</small></div>" + (ft ? '<a class="btn" href="#task-' + ft.id + '">Открыть</a>' : '<a class="btn" href="#shutdown">Выбрать</a>') + "</div>";
 }
-var SPZPLUS = { day: [["q", "☐", "Задача на сегодня", ""], ["go:morning", "🌅", "Утренний план", ""], ["go:tbox", "🧱", "План по часам", "tbox"], ["go:dnote", "📅", "День за днём", "dnote"]],
-life: [["hab", "🌱", "Привычка", ""], ["go:goals", "🎯", "Цель", "goals"], ["go:journal", "📔", "Запись в дневник", "journal"], ["go:health", "🌿", "Отметить самочувствие", "health"], ["go:people", "👥", "Человек", "people"]],
-house: [["go:menunew", "🍲", "Меню на неделю", "menu"], ["go:recipes", "📖", "Рецепт", "menu"], ["go:docs", "📑", "Документ или подписка", "docs"], ["go:clean", "🧹", "План уборки", "clean"], ["go:shared", "👨‍👩‍👧", "Общий список", "shared"]] };
-["day", "life", "house"].forEach(function (k) { CPADD[k] = [["spzplus", "＋", "Добавить…"]]; });
+var SPZADD = { inbox: [["qi", "☐", "Задача во «Входящие»"]], today: [["q", "☐", "Задача на сегодня"]], morning: [["go:morning", "🌅", "Утренний план"]], tbox: [["go:tbox", "🧱", "План по часам"]], dnote: [["go:dnote", "📅", "День за днём"]],
+habits: [["hab", "🌱", "Привычка"]], goals: [["go:goals", "🎯", "Цель"]], journal: [["go:journal", "📔", "Запись в дневник"]], health: [["go:health", "🌿", "Отметить самочувствие"]], people: [["go:people", "👥", "Человек"]], chals: [["go:chals", "🏁", "Начать челлендж"]],
+menu: [["go:menunew", "🍲", "Меню на неделю"], ["go:recipes", "📖", "Рецепт"]], docs: [["go:docs", "📑", "Документ или подписка"]], clean: [["go:clean", "🧹", "План уборки"]], shared: [["go:shared", "👨‍👩‍👧", "Общий список"]],
+notes: [["a:note-new", "📝", "Заметка"], ["a:nsec-new", "🗀", "Раздел заметок"]], "x:notes": [["a:note-new", "📝", "Заметка"], ["a:nsec-new", "🗀", "Раздел заметок"]], "x:projects": [["a:newproj", "📁", "Проект"], ["a:rev-on", "↻", "Проверка проектов"]],
+"x:boards": [["a:bnew", "▦", "Доска"]], "x:tags": [["a:newtag", "#", "Тег"]], "x:filters": [["a:newfilter", "⛃", "Фильтр"]], "x:chals": [["go:chals", "🏁", "Начать челлендж"]] };
+function spzAddList(k) {
+var l = [], seen = {}, add = function (x) { if (!seen[x[0]]) { seen[x[0]] = 1; l.push(x); } };
+spcItemsOf(k).forEach(function (it) {
+if (it.t === "r" && modOn(it.k)) (SPZADD[it.k] || []).forEach(add);
+else if (it.t === "x") (SPZADD["x:" + it.k] || []).forEach(add);
+else if (it.t === "p") { var o = proj(it.id); if (o) add(["qp:" + o.id, "☐", "Задача в «" + o.n + "»"]); }
+});
+if (!l.length) add(["q", "☐", "Задача на сегодня"]);
+return l;
+}
 function spzPlus(el) {
-var r = el.getBoundingClientRect(), l = (SPZPLUS[cpSpace()] || []).filter(function (x) { return !x[3] || modOn(x[3]); });
+var r = el.getBoundingClientRect(), l = spzAddList(cpSpace());
 if (!l.length) { toast("Здесь всё выключено — включите разделы в «🧩 Модули»"); return; }
 ctxShow(r.left, r.bottom + 4, l.map(function (x) { return { c: x[0], i: x[1], l: x[2] }; }), { k: "spzp" });
 }
@@ -13638,7 +13639,8 @@ else if (c.indexOf("p:") === 0) { var p = c.split(":"), on = (HZS().homew || [])
 return true;
 }
 if (k === "spzp") {
-if (c === "q") { go("today"); setTimeout(function () { try { qOpen(); } catch (e) { /* ок */ } }, 120); }
+if (c === "q" || c === "qi" || c.indexOf("qp:") === 0) { go(c === "qi" ? "inbox" : c === "q" ? "today" : "proj-" + c.slice(3)); setTimeout(function () { try { qOpen(); } catch (e) { /* ок */ } }, 120); }
+else if (c.indexOf("a:") === 0) { var hb = document.createElement("button"); hb.type = "button"; hb.hidden = true; hb.dataset.a = c.slice(2); document.body.appendChild(hb); hb.click(); hb.remove(); }
 else if (c === "hab") { go("habits"); setTimeout(function () { var i = document.querySelector("[data-hnew]"); if (i) { i.focus(); i.scrollIntoView({ block: "center" }); } }, 150); }
 else if (c.indexOf("go:") === 0) go(c.slice(3));
 return true;
@@ -14347,11 +14349,11 @@ return false;
 var SPCBASE = ["home", "day", "task", "know", "life", "house", "chal"], SPCORIG = {}, SPCSIG = "";
 SPCBASE.forEach(function (k) { SPCORIG[k] = { z: SPZ[k].slice(), s: SPACES[k].slice(), r: (RAILE[k] || []).slice() }; });
 var SPCICONS = ["📚", "🎓", "💼", "🏗", "🎨", "🎸", "🏃", "🧘", "🍳", "✈", "🐶", "👶", "💻", "📈", "🧾", "🏡", "🌱", "❤", "🧠", "🎯", "🛠", "📷", "🎮", "⚽", "🚗", "🌍", "☕", "🎵", "✍", "🔬", "💡", "⭐", "🏠", "☀", "✅", "📝", "🌿", "🔑"];
-var SPCX = { chals: "Список челленджей", homenav: "Главная и все разделы", projects: "Все проекты", notes: "Все заметки", tags: "Теги", filters: "Фильтры", flags: "Флажки", fav: "Избранное", boards: "Доски", recent: "Недавние", archtpl: "Архив и шаблоны" };
+var SPCX = { lists: "Пункты «Списков»", chals: "Список челленджей", homenav: "Главная и все разделы", projects: "Все проекты", notes: "Все заметки", tags: "Теги", filters: "Фильтры", flags: "Флажки", fav: "Избранное", boards: "Доски", recent: "Недавние", archtpl: "Архив и шаблоны" };
 var SPCDEF = {
 home: [{ t: "x", k: "homenav" }, { t: "h", n: "Избранное" }, { t: "x", k: "fav" }, { t: "h", n: "Доски" }, { t: "x", k: "boards" }, { t: "h", n: "Недавние" }, { t: "x", k: "recent" }],
 day: [{ t: "r", k: "inbox" }, { t: "r", k: "today" }, { t: "r", k: "plans" }, { t: "r", k: "cal" }, { t: "h", n: "Ритуалы" }, { t: "r", k: "morning" }, { t: "r", k: "shutdown" }, { t: "r", k: "weekly" }, { t: "h", n: "Ещё" }, { t: "r", k: "tbox" }, { t: "r", k: "dnote" }, { t: "r", k: "snoozed" }],
-task: [{ t: "h", n: "Проекты" }, { t: "x", k: "projects" }, { t: "h", n: "Списки" }, { t: "r", k: "all" }, { t: "r", k: "flag" }, { t: "r", k: "waiting" }, { t: "r", k: "someday" }, { t: "r", k: "done" }, { t: "h", n: "Виды" }, { t: "r", k: "sprint" }, { t: "r", k: "gantt" }, { t: "r", k: "matrix" }, { t: "h", n: "Теги" }, { t: "x", k: "tags" }, { t: "h", n: "Фильтры" }, { t: "x", k: "filters" }, { t: "x", k: "flags" }, { t: "h", n: "Ещё" }, { t: "x", k: "archtpl" }],
+task: [{ t: "h", n: "Проекты" }, { t: "x", k: "projects" }, { t: "h", n: "Списки" }, { t: "r", k: "all" }, { t: "r", k: "flag" }, { t: "r", k: "waiting" }, { t: "r", k: "someday" }, { t: "r", k: "done" }, { t: "h", n: "Виды" }, { t: "r", k: "sprint" }, { t: "r", k: "gantt" }, { t: "r", k: "matrix" }, { t: "h", n: "Теги" }, { t: "x", k: "tags" }, { t: "h", n: "Фильтры" }, { t: "x", k: "filters" }, { t: "h", n: "Флажки" }, { t: "x", k: "flags" }, { t: "h", n: "Ещё" }, { t: "x", k: "archtpl" }],
 know: [{ t: "x", k: "notes" }, { t: "h", n: "Ещё" }, { t: "r", k: "ngraph" }, { t: "r", k: "srs" }, { t: "r", k: "market" }],
 life: [{ t: "r", k: "habits" }, { t: "r", k: "chals" }, { t: "r", k: "goals" }, { t: "r", k: "health" }, { t: "r", k: "journal" }, { t: "h", n: "Обзор" }, { t: "r", k: "wheel" }, { t: "r", k: "people" }, { t: "r", k: "garden" }, { t: "r", k: "stats" }],
 chal: [{ t: "r", k: "chals" }, { t: "h", n: "Программы" }, { t: "x", k: "chals" }],
@@ -14371,6 +14373,8 @@ function spcGet(k) { return spcList().filter(function (x) { return x.id === k; }
 function spcOv(k) { return (spcData().ov || {})[k] || null; }
 function spcAll() { return SPCBASE.concat(spcList().map(function (x) { return x.id; })); }
 function spcItems(k) { var c = spcGet(k); if (c) return c.items || []; var o = spcOv(k); return o && o.items ? o.items : null; }
+function spcDefItems(k) { return k === "day" && S.opt.sidelists ? [{ t: "x", k: "lists" }] : SPCDEF[k] || []; }
+function spcItemsOf(k) { return spcItems(k) || spcDefItems(k); }
 function spcName(k) { return SPZ[k] ? SPZ[k][1] : k; }
 function spcIcH(o, dflt) { return o && o.img ? '<img class="spcimg" src="' + esc(o.img) + '" alt="">' : esc((o && o.ic) || dflt || "⭐"); }
 function spcSave(fn) { var d = JSON.parse(JSON.stringify(spcData())); d.l = d.l || []; d.ov = d.ov || {}; fn(d); S.opt.spc = d; optTouch(); save(); spcSync(true); }
@@ -14381,9 +14385,9 @@ SPCBASE.forEach(function (k) {
 var o = (d.ov || {})[k] || {}, O = SPCORIG[k], ic = o.img || o.ic ? spcIcH(o) : O.z[0], n = o.n || O.z[1];
 SPZ[k] = [ic, n, O.z[2]]; SPACES[k] = [ic, n, O.s[2]]; if (RAILE[k]) RAILE[k] = [ic, o.n ? esc(n) : O.r[1]];
 });
-Object.keys(SPZ).forEach(function (k) { if (SPCBASE.indexOf(k) < 0 && !spcGet(k)) { delete SPZ[k]; delete SPACES[k]; delete RAILE[k]; delete SPZK[k]; var i = RAILD.indexOf(k); if (i >= 0) RAILD.splice(i, 1); } });
+Object.keys(SPZ).forEach(function (k) { if (SPCBASE.indexOf(k) < 0 && !spcGet(k)) { delete SPZ[k]; delete SPACES[k]; delete RAILE[k]; var i = RAILD.indexOf(k); if (i >= 0) RAILD.splice(i, 1); } });
 spcList().forEach(function (x) {
-var ic = spcIcH(x); SPZ[x.id] = [ic, x.n || "Пространство", "Своё пространство"]; SPACES[x.id] = [ic, x.n || "Пространство", "x-spaces"]; RAILE[x.id] = [ic, esc(x.n || "Пространство") + ": своё пространство"]; SPZK[x.id] = [];
+var ic = spcIcH(x); SPZ[x.id] = [ic, x.n || "Пространство", "Своё пространство"]; SPACES[x.id] = [ic, x.n || "Пространство", "x-spaces"]; RAILE[x.id] = [ic, esc(x.n || "Пространство") + ": своё пространство"];
 if (RAILD.indexOf(x.id) < 0) { var j = RAILD.indexOf("find"); RAILD.splice(j < 0 ? RAILD.length : j, 0, x.id); }
 });
 if (!noRail) try { railSync(); } catch (e) { /* полоса — при следующей перерисовке */ }
@@ -14403,6 +14407,7 @@ if (it.k === "fav") return B.fav ? cpStrip(B.fav) : '<div class="none">Отме�
 if (it.k === "recent") return recentItems(6).map(function (x) { return itemHTML("", "", x.h, '<span class="pic">' + x.ic + "</span>", x.t, 0, {}); }).join("");
 if (it.k === "flags") return flags().map(function (f) { var n = tasks().filter(function (t) { var q = !t.done && flagOf(t); return q && q.id === f.id; }).length; return itemHTML("", "", "flag-" + f.id, '<span class="pic">' + flagIc(f) + "</span>", f.n, n, {}); }).join("");
 if (it.k === "chals") return chalNav();
+if (it.k === "lists") return '<nav class="nav">' + listsOrder().filter(function (x) { return SIDEL[x]; }).map(function (x) { return SIDEL[x](); }).join("") + "</nav>";
 if (it.k === "archtpl") return itemHTML("", "", "archive", ic("archive"), "Архив проектов", archList().length, {}) + itemHTML("", "", "templates", ic("tpl"), "Шаблоны проектов и задач", 0, {});
 return cpStrip(B[it.k] || "");
 }
@@ -14445,12 +14450,6 @@ return h;
 function spcBar(k) {
 var foc = FOCUS === "sp:" + k, can = spcCanFocus(k);
 return '<div class="r spcbar"><button type="button" class="btn sm' + (foc ? " pri" : "") + '" data-a="spcfocus" data-x="' + esc(k) + '"' + (can || foc ? "" : ' title="Добавьте в пространство проекты или цели — тогда фокус покажет только их задачи"') + ">🎯 " + (foc ? "Выйти из фокуса" : "Фокус") + '</button><button type="button" class="btn sm" data-a="hzed">' + (HZED ? "✓ Готово" : "✎ Рабочий стол") + '</button><a class="btn sm" href="#spced-' + esc(k) + '">⚙ Настроить пространство</a></div>';
-}
-function vSpcPage(k) {
-var c = spcGet(k), h = head('<span class="spchi">' + SPZ[k][0] + "</span> " + esc(c.n || "Пространство"), "Своё пространство: меню слева, рабочий стол — здесь.");
-h += spcBar(k) + spcDeskHTML(k);
-h += '<h3 class="apph">В этом пространстве</h3><div class="spcmenu">' + spcBody(k, c.items || []) + "</div>";
-return h;
 }
 function spcTasksCard() {
 if (V !== "sp" || !SPZ[ARG] || !spcCanFocus(ARG)) return "";
