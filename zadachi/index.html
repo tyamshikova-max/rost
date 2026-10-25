@@ -1766,6 +1766,8 @@ html.prcalm .ck.p2 { border-color: color-mix(in srgb, var(--acc) 70%, var(--mute
 html.prcalm .ck.p3 { border-color: color-mix(in srgb, var(--acc) 40%, var(--muted)); background: transparent }
 .sloc { font: 500 calc(11px * var(--fs)) / 1.6 var(--font, inherit); padding: 1px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); vertical-align: middle; white-space: nowrap; margin-left: 4px }
 .sloc.sl-all { color: var(--acc); border-color: color-mix(in srgb, var(--acc) 35%, var(--line)) } .slocx { margin: 6px 0 0; font-size: calc(12px * var(--fs)) } .sloclg { margin: 0 0 10px; font-size: calc(12.5px * var(--fs)) }
+.featl { display: grid; gap: 6px; margin: 0 0 14px } .featr { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: inherit; text-decoration: none }
+.featr:hover { border-color: color-mix(in srgb, var(--acc) 40%, var(--line)) } .featr .fti { font-size: 1.2em; line-height: 1.2 } .featr b { display: block } .featr small { color: var(--muted) }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -3260,7 +3262,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-222";
+var APPV = "zd-app-2026-10-16-223";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -12050,6 +12052,52 @@ else if (k === "stats") { if (xpOn()) { var xs = xpStats(); x = appBar(xs.next ?
 } catch (e) { x = ""; }
 return x ? '<span class="aptm">' + x + "</span>" : "";
 }
+var FEAT = [
+["советник подсказки совет рекомендации", "🧭", "Советник", "блок «🧭 Советник» над списками задач и в «Целях»; карточка на рабочем столе", "all"],
+["матрица эйзенхауэр квадрант важно срочно", "⊞", "Матрица Эйзенхауэра", "«Задачи» → «Матрица»; в карточке задачи — строка «Матрица»; в списках — группировка «по матрице» и «⛃ Фильтр»", "matrix"],
+["челлендж челленджи марафон программа осанка лицо", "🏁", "Челленджи", "пространство «Челленджи» — 🏁 на полосе слева", "sp-chal"],
+["спринт", "🏃", "Спринт", "«Задачи» → «Виды» → «Спринт»", "sprint"],
+["помидор помидоры pomodoro таймер засечь время учёт времени", "🍅", "Помидоры и учёт времени", "карточка задачи — «▶ Засечь время», 🍅 вверху карточки; в строке задачи — 🍅 и «идёт»", "today"],
+["копия копии резервная бэкап восстановить откат вернуть данные", "💽", "Резервные копии", "«Настройки» → «Данные и синхронизация» → «Резервная копия»: копии на устройстве и на Диске", "settings-backup"],
+["синхронизация диск яндекс телефон другое устройство", "☁", "Синхронизация", "«Настройки» → «Данные и синхронизация»", "settings-sync"],
+["распорядок блоки дня сон работа еда режим", "🧱", "Распорядок дня", "«Настройки» → «Общие» → «Распорядок дня»; цветной фон — в «Плане по часам»", "settings-routine"],
+["план по часам таймбоксинг лента дня", "🧱", "План по часам", "«Мой день» → «Ещё» → «План по часам»", "tbox"],
+["утро утренний план", "🌅", "Утренний план", "«Мой день» → «Ритуалы»", "morning"],
+["вечер завершение дня итоги дня", "🌙", "Завершение дня", "«Мой день» → «Ритуалы»", "shutdown"],
+["неделя обзор недели главное недели итоги недели", "🧭", "Обзор недели и «Главное недели»", "«Мой день» → «Ритуалы» → «Обзор недели»", "weekly"],
+["день за днём дневник дня", "📅", "День за днём", "«Мой день» → «Ещё»", "dnote"],
+["цели цель результат", "🎯", "Цели", "«Жизнь» → «Цели»", "goals"],
+["привычки привычка", "🌱", "Привычки", "«Жизнь» → «Привычки»; карточка на рабочем столе", "habits"],
+["самочувствие сон энергия боль здоровье", "🌿", "Самочувствие", "«Жизнь» → «Самочувствие»", "health"],
+["уровень очки xp достижения геймификация баллы", "🏆", "Уровень и очки", "карточка «🏆 Уровень и очки» на главной; «Жизнь» → «Статистика»", "stats"],
+["бюджет деньги расходы доходы выписка банк", "💰", "Бюджет", "«Дом и деньги» → «Бюджет»", "budget"],
+["меню рецепты кухня продукты покупки", "🍲", "Меню и рецепты", "«Дом и деньги» → «Меню»", "menu"],
+["уборка дом порядок", "🧹", "План уборки", "«Дом и деньги» → «Уборка»", "clean"],
+["документы подписки полисы страховка", "📑", "Документы и подписки", "«Дом и деньги» → «Документы»", "docs"],
+["заметки база знаний", "📝", "Заметки", "пространство «Знания»", "notes"],
+["повторение карточки запоминание", "🔁", "Повторение", "«Знания» → «Повторение»", "srs"],
+["картинка скриншот распознать фото задачи с картинки", "📷", "Задачи с картинки", "кнопка 📷 в строке новой задачи; скриншот можно вставить Ctrl+V", "inbox"],
+["голос диктовка микрофон надиктовать", "🎤", "Голосовой ввод", "кнопка 🎤 в строке новой задачи", "inbox"],
+["telegram телеграм бот сервер утренняя сводка", "✈", "Telegram и сервер", "«Настройки» → «Напоминания и Telegram»", "settings-srv"],
+["уведомления браузер напоминание оповещение", "🔔", "Напоминания в браузере", "«Настройки» → «Напоминания и Telegram»", "settings-bnotif"],
+["ии ai помощник нейросеть", "✨", "ИИ-помощник", "«Настройки» → «ИИ-помощник»", "settings-ai"],
+["оформление стиль тема тёмная светлая цвет шрифт кружки приоритет", "🎨", "Оформление", "«Настройки» → «Оформление»", "settings-look"],
+["пространство пространства своё меню панели настроить", "⭐", "Пространства", "＋ внизу полосы слева — своё; ✎ в шапке панели — настроить любое", "spced-new"],
+["модули выключить включить", "🧩", "Модули", "«Все разделы» → ⋯ → «🧩 Модули»", "mods"],
+["конфликты синхронизации", "⚠", "Конфликты синхронизации", "появляются в «Требует внимания», если одно поле поменяли на двух устройствах", "conflicts"],
+["несколько дней многодневная большая задача период", "◐", "Многодневные задачи", "карточка задачи → «Несколько дней»", "today"],
+["шаблон шаблоны", "⧉", "Шаблоны проектов и задач", "«Задачи» → «Ещё»", "templates"],
+["архив проектов", "🗄", "Архив проектов", "«Задачи» → «Ещё»", "archive"],
+["корзина удалённые", "🗑", "Корзина", "⋯ в шапке боковой панели", "trash"],
+["рабочий стол карточки главной настроить главную", "✎", "Рабочий стол", "«✎ Рабочий стол» на главной и на странице каждого пространства", "home"],
+["продолжить недавнее недавние", "↩", "Продолжить", "карточка на главной: недавно открытые проекты, заметки и задачи", "home"],
+["энергия силы сколько сил", "⚡", "Задачи по силам", "кнопка «Сколько сил» в карточке «Сейчас» на главной", "home"],
+["календарь", "🗓", "Календарь", "«Мой день» → «Календарь»", "cal"],
+["таймлайн гант сроки зависимости", "▤", "Таймлайн", "«Задачи» → «Виды» → «Таймлайн»", "gantt"],
+["демо пример тестовые данные", "▶", "Демо и тестовые данные", "«Настройки» → «Данные и синхронизация» → «Тестовые данные»", "settings-test"]
+];
+function featFind(q) { var ws = String(q || "").toLowerCase().split(/\s+/).filter(Boolean); if (!ws.length) return []; return FEAT.filter(function (f) { var t = (f[0] + " " + f[2] + " " + f[3]).toLowerCase(); return ws.every(function (w) { return t.indexOf(w) >= 0; }); }); }
+function featRows(l) { return '<div class="featl">' + l.map(function (f) { return '<a class="featr" href="#' + f[4] + '"><span class="fti">' + f[1] + "</span><span><b>" + esc(f[2]) + "</b><small>" + esc(f[3]) + "</small></span></a>"; }).join("") + "</div>"; }
 function vApps() {
 var FM = !S.opt.sidelists, fav = appFavs(), hid = hiddenLists(), q = String(INPV.appq || "").toLowerCase().trim(), u = appUseMap(), L = appLayout(), D = appDef();
 var tile = function (k, c, gid, i, n) {
@@ -12060,11 +12108,12 @@ else if (side) h += '<button type="button" class="aptp' + (on ? " on" : "") + '"
 return h + "</div>";
 };
 var h = head("▦ Все разделы", FM ? "Всё, что есть в приложении. ★ — раздел в «Избранном» боковой панели. Порядок и папки — свои: «✎ Порядок и папки». Открыть отовсюду — кнопка ▦ вверху." : "Всё, что есть в приложении, — плитками. ★ — раздел виден в левой панели, ☆ — только здесь (и в поиске Ctrl+K). Порядок и папки — свои: «✎ Порядок и папки».");
-h += '<div class="r appbar"><input type="search" class="inp" id="appq" placeholder="Найти раздел: «уборка», «деньги», «повтор»…" value="' + esc(INPV.appq || "") + '" autocomplete="off"' + (APPED ? " disabled" : "") + '>' + (APPED ? "" : '<div class="seg apvs"><button type="button" data-a="appv" data-v="tiles" class="' + (S.opt.appv === "list" ? "" : "on") + '">▦ Плитки</button><button type="button" data-a="appv" data-v="list" class="' + (S.opt.appv === "list" ? "on" : "") + '">☰ Список</button></div>') + '<button type="button" class="btn sm' + (APPED ? " pri" : "") + '" data-a="apped">' + (APPED ? "✓ Готово" : "✎ Порядок и папки") + "</button>" + (S.opt.start === "apps" ? '<span class="bstartb" title="Открывается при запуске приложения">🏠 стартовая</span>' : "") + '<button type="button" class="ibtn" data-a="appmenu" title="Ещё: панель, мини-виджеты, стартовый экран" aria-label="Ещё">⋯</button></div>';
+h += '<div class="r appbar"><input type="search" class="inp" id="appq" placeholder="Найти раздел или возможность: «советник», «копии», «помидор»…" value="' + esc(INPV.appq || "") + '" autocomplete="off"' + (APPED ? " disabled" : "") + '>' + (APPED ? "" : '<div class="seg apvs"><button type="button" data-a="appv" data-v="tiles" class="' + (S.opt.appv === "list" ? "" : "on") + '">▦ Плитки</button><button type="button" data-a="appv" data-v="list" class="' + (S.opt.appv === "list" ? "on" : "") + '">☰ Список</button></div>') + '<button type="button" class="btn sm' + (APPED ? " pri" : "") + '" data-a="apped">' + (APPED ? "✓ Готово" : "✎ Порядок и папки") + "</button>" + (S.opt.start === "apps" ? '<span class="bstartb" title="Открывается при запуске приложения">🏠 стартовая</span>' : "") + '<button type="button" class="ibtn" data-a="appmenu" title="Ещё: панель, мини-виджеты, стартовый экран" aria-label="Ещё">⋯</button></div>';
 if (S.opt.appv === "list" && !APPED) return h + '<div class="apovl inpage">' + appOvList(q) + "</div>";
 if (q && !APPED) {
 var f = []; L.forEach(function (g) { g.it.forEach(function (k) { if ((D[k][2] + " " + D[k][3] + " " + g.n).toLowerCase().indexOf(q) >= 0) f.push([k, g.c]); }); });
-return h + (f.length ? '<div class="aptg">' + f.map(function (z) { return tile(z[0], z[1]); }).join("") + "</div>" : '<p class="empty">Ничего не нашлось.</p>');
+var ff = featFind(q);
+return h + (ff.length ? '<h3 class="apph">Где это</h3>' + featRows(ff) : "") + (f.length ? (ff.length ? '<h3 class="apph">Разделы</h3>' : "") + '<div class="aptg">' + f.map(function (z) { return tile(z[0], z[1]); }).join("") + "</div>" : ff.length ? "" : '<p class="empty">Ничего не нашлось.</p>');
 }
 if (APPED) h += '<p class="muted aphint">Перетаскивайте плитки мышью (и между папками) или двигайте кнопками ‹ ›; ⇄ — в другую папку. Название папки — щёлкните и впишите своё; кружок — цвет.</p>';
 else {
@@ -12216,6 +12265,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["223", "«Где это?» — поиск возможностей", ["В поиске «▦ Все разделы» и в ⌘K находятся не только разделы, но и возможности внутри них: «советник», «копии», «помидор», «матрица», «распорядок», «челлендж»… — с подсказкой, где именно это лежит, и переходом туда одним щелчком."]],
 ["222", "Все пространства — по одной логике", ["Каждое пространство (Мой день, Задачи, Знания, Жизнь, Дом и деньги, Челленджи и ваши собственные) устроено одинаково: меню слева — из его пунктов, страница — шапка, «🎯 Фокус / ✎ Рабочий стол / ⚙ Настроить», рабочий стол с карточками и плитки всего, что есть в меню (разделы — с живой строкой, проекты и цели — с прогрессом).", "Поменяли меню в «⚙ Настроить пространство» — так же меняются и панель, и страница пространства.", "«＋ Создать…» в шапке панели — у всех пространств; что в нём, зависит от меню: задача, заметка, проект, привычка, цель, рецепт, задача в проект пространства…"]],
 ["221", "Настройки: где что хранится; быстрее «Планы»", ["У каждого раздела настроек — метка: ☁ «на всех устройствах» (едет через синхронизацию) или 📱 «только здесь» (тема, плотность, ключ ИИ, вход в Яндекс, уведомления браузера). Где смешано — подписано, что именно где.", "«Планы» перерисовываются втрое быстрее на больших списках; длинные списки показываются порциями по 200 задач (кнопка «Показать ещё»)."]],
 ["220", "Данные надёжнее", ["База переехала в собственное хранилище браузера (IndexedDB): больше нет предела в ~5 МБ, а сохранение быстрее — серия действий подряд записывается один раз. Переезд — сам, при первом запуске.", "Две вкладки с приложением больше не затирают изменения друг друга: каждая подхватывает правки другой.", "💽 Копии на этом устройстве: раз в день — полная копия прямо в браузере, последние 14 дней; «↺ Вернуть» — откат к нужному дню одной кнопкой (текущее состояние сохраняется отдельно — можно передумать). «Настройки» → «Резервная копия».", "Синхронизация сливает изменения по полям: поменяли название задачи на телефоне, а срок на компьютере — сохранятся оба. Если одно и то же поле поменяли на двух устройствах — останется более свежее, а другое — в «Конфликтах синхронизации»."]],
@@ -15095,7 +15145,7 @@ h += '<section class="card" id="s-wipe"><h2>Очистка базы</h2><p class
 return h;
 }
 var STABS = [["general", "settings", "Общие"], ["look", "palette", "Оформление"], ["flags", "flag", "Флажки"], ["srv", "timer", "Напоминания и Telegram"], ["sync", "cloud", "Данные и синхронизация"], ["ai", "spark", "ИИ-помощник"]];
-function stabOf(a) { a = { bnotif: "srv", lists: "general", "": "general", side: "general", theme: "general", backup: "sync", data: "sync", wipe: "sync" }[a] || a; return STABS.some(function (x) { return x[0] === a; }) ? a : "general"; }
+function stabOf(a) { a = { bnotif: "srv", lists: "general", "": "general", side: "general", theme: "general", backup: "sync", data: "sync", wipe: "sync", test: "sync", diag: "sync", digest: "srv" }[a] || a; return STABS.some(function (x) { return x[0] === a; }) ? a : "general"; }
 function vSettingsTabs() {
 var cur = stabOf(ARG), parts = vSettings().split('<section'), by = {};
 parts.slice(1).forEach(function (x) {
@@ -17765,6 +17815,7 @@ add("Действия", "🔗", "Поделиться открытым спис�
 add("Действия", "🖨", "Распечатать открытый список", "", function () { setTimeout(function () { window.print(); }, 50); });
 add("Действия", "⛃", "Новый фильтр", "", function () { var b = document.querySelector('[data-a="newfilter"]'); if (b) b.click(); });
 add("Действия", "☁", "Синхронизировать с Яндекс Диском", "", function () { SYNC.run().then(function () { toast(SYNC.st === "ok" ? "Синхронизировано" : "Синхронизация недоступна"); }); });
+if (ws.length) featFind(q).forEach(function (f) { out.push({ g: "Где это", i: f[1], l: f[2], h: f[3], fn: function () { go(f[4]); } }); });
 if (ws.length) {
 var n = 0;
 tasks().filter(function (t) { return !t.done; }).forEach(function (t) {
@@ -17772,7 +17823,7 @@ if (n >= 25) return; var p = proj(t.pid), h = (p ? picon(p) + " " + p.n : "Вх�
 if (hit(t.t + " " + (t.tags || []).map(function (g) { return "#" + g; }).join(" "))) { n++; out.push({ g: "Задачи", i: "☐", l: t.t, h: h, fn: function () { openTask(t.id); } }); }
 });
 }
-if (ws.length) { var rank = function (x) { return x.g === "Создать" ? -1 : x.l.toLowerCase().indexOf(ws[0]) === 0 ? 0 : 1; }; out.sort(function (a, b) { return rank(a) - rank(b); }); }
+if (ws.length) { var rank = function (x) { return x.g === "Создать" ? -1 : x.g === "Где это" ? 0.5 : x.l.toLowerCase().indexOf(ws[0]) === 0 ? 0 : 1; }; out.sort(function (a, b) { return rank(a) - rank(b); }); }
 PAL.items = out.slice(0, 60); PAL.i = q && out.length > 1 && out[0].g === "Создать" ? 1 : 0;
 palRender();
 }
