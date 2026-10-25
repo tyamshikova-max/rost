@@ -1745,6 +1745,11 @@ html.st-glass .top .brand { background: transparent; border-right-color: var(--g
 .spn { color: var(--acc); white-space: nowrap } .spn.late { color: var(--warn) }
 .wkdb { flex: none; width: 22px; height: 22px; margin-top: 1px; border-radius: 50%; border: 1.5px dashed var(--acc); background: none; color: var(--acc); font-size: 13px; line-height: 1; cursor: pointer; display: grid; place-items: center; padding: 0 } .wkdb:hover { background: var(--acc-soft) } .wkdb.on { border-style: solid; background: var(--acc-soft) }
 .spnv { gap: 6px; flex-wrap: wrap; align-items: center } .spnv .muted { font-size: calc(12.5px * var(--fs)) }
+#tqg .tqbd { left: 52px; right: 0; z-index: 0 } #tqg { cursor: copy } #tqg .tqb { cursor: grab } .tqtop { gap: 8px; align-items: center; flex-wrap: wrap; margin: 4px 0 10px } .tqtop .muted { font-size: calc(12.5px * var(--fs)) }
+#tqpop { position: fixed; z-index: 95; max-height: min(560px, calc(100vh - 16px)); overflow: auto; display: grid; gap: 10px; padding: 12px 14px; border-radius: 16px; background: var(--pop, var(--panel)); border: 1px solid var(--line); box-shadow: var(--shadow); box-sizing: border-box }
+.tqph { display: flex; align-items: baseline; gap: 8px } .tqph b { flex: none } .tqph .ibtn { margin-left: auto } .tqph .muted { font-size: calc(12.5px * var(--fs)) }
+.tqpd { display: flex; gap: 6px; flex-wrap: wrap; align-items: center } .tqpd .muted { font-size: calc(12.5px * var(--fs)); margin-right: 2px } .tqpb { justify-content: flex-end }
+.tqpl { display: grid; gap: 2px; max-height: 300px; overflow-y: auto } .tqpi { display: grid; gap: 1px; text-align: left; padding: 7px 10px; border: 0; border-radius: 9px; background: none; color: var(--fg); font: inherit; cursor: pointer } .tqpi:hover { background: var(--hover) } .tqpi b { font-weight: 500 } .tqpi small { color: var(--muted); font-size: calc(12px * var(--fs)) } .tqpi .late { color: var(--warn); font-style: normal }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -8334,7 +8339,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-213";
+var APPV = "zd-app-2026-10-16-214";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -17255,6 +17260,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["214", "«План по часам» удобнее", ["На ленте дня — цветным фоном блоки вашего распорядка (сон, работа, еда…), как в календаре.", "«＋ Задача» или щелчок по пустому месту ленты — окно новой задачи сразу на это время, с выбором длительности (15 мин … 2 ч).", "«📥 Из бэклога» — поставить на день или на время любую задачу, где бы она ни была: просроченное и «Входящие» — первыми, поиск по названию и проекту."]],
 ["213", "Большие задачи на несколько дней", ["В карточке задачи — «Несколько дней: до …»: такая задача каждый день периода стоит в «Сегодня», в календаре и «Планах» — на всех днях, и не уходит в просроченное до конца периода. В строке — «◐ 25–29 окт · день 2 из 5 · 50%».", "Кнопка ◐ рядом с галочкой — «Сегодня поработала»: задача уходит в «Выполнено сегодня», завтра снова в списке. В меню задачи «◐» — то же с учётом времени (+15 мин … +3 ч) и прогрессом (25–90%).", "Для обычной задачи — «◐ Частично — продолжить завтра»: перенос на завтра, который не считается переносом (задача не попадёт в «Застряли»).", "«🗂 Разбить на дни» — подзадачи «День 1 — …», «День 2 — …» на каждый день. В «Завершении дня» у хвостов — «◐ Поработала». Советник подскажет, если к задаче не прикасались 3 дня или темп отстаёт."]],
 ["212", "Пространство «Челленджи»", ["Челленджи — отдельное пространство: значок 🏁 на полосе слева (и в меню пространств на телефоне). В панели — «Все челленджи» и каждая программа со своим днём («6/42»); щелчок — на её страницу.", "Как любое пространство, его можно настроить (✎) или скрыть с полосы."]],
 ["211", "Демо обновлено, ссылка на демо; «Сколько сил» больше не прячет задачи", ["Фильтр «🔋 Сколько сил» скрывает только задачи тяжелее выбранного, а задачи без отметки сил видны всегда (раньше при «⚡ много сил» пропадали все задачи без отметки). Пока фильтр включён, над списком — полоса: сколько скрыто и «Показать все задачи».", "Демо-версия показывает новые возможности: своё пространство «Учёба 1С» с рабочим столом и фокусом, два идущих челленджа («Осанка и лицо» и «Дом»), советник по оценкам времени, выбор оформления, челленджи недели и «Неделю в цифрах».", "Ссылка на демо — в меню кружка профиля («▶ Демо-версия»), в справке «С чего начать» и в «Настройки» → «Тестовые данные». Демо открывается в новой вкладке и ваши данные не трогает."]],
@@ -18115,9 +18121,11 @@ var d0 = tqDay(), d1 = addDays(d0, 1), rg = tqRange(), k = dKey(d0), t0 = today0
 var timed = tasks().filter(function (t) { return !t.done && t.at && !t.allday && t.at >= d0 && t.at < d1; }).sort(function (a, b) { return a.at - b.at; });
 var un = (d0 === t0 ? todayList() : tasks().filter(function (t) { var d = t.at || t.due; return !t.done && d >= d0 && d < d1; })).filter(function (t) { return !t.at || t.allday; });
 var h = head("🧱 План по часам", "Задачи — блоками на ленте дня. Тяните блок, чтобы сдвинуть время, нижний край — чтобы изменить длительность (шаг 15 минут). Задачи без времени слева: перетащите на ленту или нажмите ⏰ — встанет в ближайшее свободное окно.");
+h += '<div class="r tqtop"><button type="button" class="btn pri" data-a="tqadd">＋ Задача</button><button type="button" class="btn" data-a="tqback">📥 Из бэклога</button><span class="muted">или щёлкните по пустому месту ленты — задача встанет на это время' + (tbCfg().on ? "; цветной фон — ваш распорядок дня" : "") + "</span></div>";
 h += '<div class="r dnnav"><a class="btn sm" href="#tbox-' + dKey(addDays(d0, -1)) + '">← День назад</a>' + (d0 !== t0 ? '<a class="btn sm" href="#tbox">Сегодня</a>' : "") + '<a class="btn sm" href="#tbox-' + dKey(d1) + '">День вперёд →</a><input type="date" class="inp" id="tqday" value="' + k + '" aria-label="День"></div>';
 var lanes = [], blocks = timed.map(function (t) { var st = (t.at - d0) / 60000, du = Math.max(15, +t.dur || (+t.est ? +t.est * 60 : 30)), ln = 0; while (lanes[ln] > st) ln++; lanes[ln] = st + du; return { t: t, st: st, du: du, ln: ln }; }), nl = Math.max(1, lanes.length);
 var g = '<div class="tqg" id="tqg" data-d0="' + d0 + '" data-h0="' + rg[0] + '" style="height:' + (rg[1] - rg[0]) * TQH + 'px">';
+g += tqBands(d0, rg[0]);
 for (var hr = rg[0]; hr < rg[1]; hr++) g += '<div class="tql" style="top:' + (hr - rg[0]) * TQH + 'px"><span>' + p2(hr) + ":00</span></div>";
 if (d0 === t0) { var nm = (Date.now() - d0) / 60000; if (nm >= rg[0] * 60 && nm <= rg[1] * 60) g += '<div class="tqnow" style="top:' + ((nm - rg[0] * 60) / 60 * TQH) + 'px"></div>'; }
 blocks.forEach(function (b) { var p = proj(b.t.pid), top = (b.st - rg[0] * 60) / 60 * TQH, hgt = b.du / 60 * TQH; if (top + hgt < 0 || top > (rg[1] - rg[0]) * TQH) return; g += '<div class="tqb" data-id="' + b.t.id + '" style="top:' + top + "px;height:" + Math.max(18, hgt) + "px;left:calc(56px + (100% - 60px) * " + b.ln + " / " + nl + ");width:calc((100% - 60px) / " + nl + " - 4px);--bc:" + (p ? col(p.c) : "var(--acc)") + '"><b>' + esc(b.t.t) + '</b><small class="tqtm">' + hm(b.t.at) + "–" + hm(b.t.at + b.du * 60000) + '</small><i class="tqh" title="Потяните — длительность"></i></div>'; });
@@ -19684,6 +19692,79 @@ return [
 { i: "🗂", l: "Разбить на дни", sub: sp ? [{ c: "dsplit:0", i: "", l: "По дням периода (" + Math.max(1, Math.round((t.till - Math.max(sod(t.at), today0())) / DAY) + 1) + ")" }] : [2, 3, 4, 5, 7].map(function (v) { return { c: "dsplit:" + v, i: "", l: v + " " + plural(v, ["день", "дня", "дней"]) + " с сегодня" }; }) }
 ];
 }
+var TQP = null;
+function tqBands(d0, h0) {
+var c = tbCfg(); if (!c.on) return ""; var lv = TBLVL[c.lvl] || TBLVL.lo, H = TQH;
+return tbCover(d0).map(function (b) {
+var st = Math.max(b.st, d0 + h0 * 3600000), en = Math.min(b.en, addDays(d0, 1)); if (en <= st) return "";
+var ct = tbCat(b.cat), top = ((st - d0) / 3600000 - h0) * H, ht = (en - st) / 3600000 * H;
+return '<div class="ctb tqbd" style="--bc:' + ct.c + ";--tbf:" + lv[1] + ";--tbb:" + lv[2] + ";--tbo:" + lv[3] + ";top:" + top + "px;height:" + ht + 'px" title="' + esc(ct.n + " · " + tbHM((b.st - sod(b.st)) / 6e4) + "–" + tbHM((b.en - sod(b.st)) / 6e4)) + '">' + (ht >= 16 ? '<span class="ctbl">' + esc(ct.i + " " + ct.n) + "</span>" : "") + "</div>";
+}).join("");
+}
+function tqFree(d0, du) {
+var o = apOpt(), now = Date.now(), busy = tasks().filter(function (x) { return !x.done && x.at && !x.allday && x.at >= d0 && x.at < addDays(d0, 1); }).map(function (x) { return [x.at, x.at + Math.max(15, +x.dur || (+x.est ? +x.est * 60 : 30)) * 60000]; });
+var s = Math.max(d0 + o.s * 3600000, d0 === today0() ? Math.ceil(now / 900000) * 900000 : 0), end = d0 + o.e * 3600000;
+for (var g = 0; g < 200 && s + du * 60000 <= end; g++) { var hit = busy.filter(function (b) { return s < b[1] && s + du * 60000 > b[0]; })[0]; if (!hit) return s; s = Math.ceil(hit[1] / 900000) * 900000; }
+return Math.max(d0 + o.s * 3600000, Math.ceil(now / 900000) * 900000);
+}
+function tqCands(d0, q) {
+var t0 = today0(); q = String(q || "").toLowerCase().trim();
+var l = tasks().filter(function (t) { if (t.done || t.del) return false; if (onDay(t, d0) || (d0 === t0 && todayList().indexOf(t) >= 0)) return false; return !q || t.t.toLowerCase().indexOf(q) >= 0 || (proj(t.pid) || {}).n && proj(t.pid).n.toLowerCase().indexOf(q) >= 0; });
+var rank = function (t) { return isLate(t) ? 0 : !t.pid && !t.at && !t.due && !t.some ? 1 : t.prio === 1 ? 2 : t.at || t.due ? 3 : isSome(t) ? 5 : 4; };
+return l.sort(function (a, b) { return (rank(a) - rank(b)) || ((a.prio || 9) - (b.prio || 9)) || ((effAt(a) || 9e15) - (effAt(b) || 9e15)); }).slice(0, 40);
+}
+function tqCandHTML() {
+if (!TQP) return ""; var l = tqCands(TQP.d0, TQP.q);
+var where = function (t) { var p = proj(t.pid), w = isLate(t) ? '<em class="late">просрочено</em>' : !t.pid && !t.at && !t.due && !t.some ? "📥 Входящие" : isSome(t) ? "⏳ Когда-нибудь" : t.at || t.due ? "📅 " + esc(dayName(t.at || t.due).toLowerCase()) : "без срока"; return w + (p ? " · " + esc(p.n) : ""); };
+return l.length ? l.map(function (t) { return '<button type="button" class="tqpi" data-a="tqput" data-id="' + t.id + '"><b>' + esc(t.t) + "</b><small>" + where(t) + (+t.est ? " · ⏱ " + estFmt(t.est) : "") + "</small></button>"; }).join("") : '<p class="muted">Ничего не нашлось</p>';
+}
+function tqPopHTML() {
+var P = TQP, tm = P.at ? hm(P.at) : "";
+var h = '<div class="tqph"><b>' + (P.mode === "pick" ? "📥 Поставить задачу" : "＋ Новая задача") + (P.at ? " на " + tm : " на день") + "</b>" + (P.at ? '<span class="muted">' + esc(dayName(P.d0).toLowerCase()) + "</span>" : "") + '<button type="button" class="ibtn" data-a="tqpx" aria-label="Закрыть">✕</button></div>';
+h += '<div class="seg tqpm"><button type="button" data-a="tqpmode" data-x="new" class="' + (P.mode !== "pick" ? "on" : "") + '">Новая</button><button type="button" data-a="tqpmode" data-x="pick" class="' + (P.mode === "pick" ? "on" : "") + '">Из бэклога</button></div>';
+if (P.at) h += '<div class="tqpd"><span class="muted">Длительность</span>' + [15, 30, 45, 60, 90, 120].map(function (m) { return '<button type="button" class="chip' + (P.dur === m ? " on" : "") + '" data-a="tqdur" data-x="' + m + '">' + (m < 60 ? m + " мин" : fmtH(m / 60) + " ч") + "</button>"; }).join("") + "</div>";
+if (P.mode === "pick") h += '<input class="inp" id="tqpq" type="search" placeholder="Найти задачу: название или проект" autocomplete="off" value="' + esc(P.q || "") + '"><div class="tqpl" id="tqpl">' + tqCandHTML() + "</div>";
+else h += '<input class="inp" id="tqpn" type="text" placeholder="Что сделать? Можно с #тегом и +Проектом" autocomplete="off"><div class="r tqpb"><button type="button" class="btn pri" data-a="tqnew">Добавить' + (P.at ? " на " + tm : "") + "</button></div>";
+return h;
+}
+function tqPop(at, mode, x, y) {
+var d0 = tqDay(); TQP = { d0: d0, at: at, dur: TQP && TQP.dur || 30, mode: mode || "new", q: "" };
+var w = $("tqpop"); if (!w) { w = document.createElement("div"); w.id = "tqpop"; w.setAttribute("role", "dialog"); document.body.appendChild(w); }
+w.innerHTML = tqPopHTML(); var W = Math.min(380, innerWidth - 16); w.style.width = W + "px";
+w.style.left = Math.max(8, Math.min((x || innerWidth / 2 - W / 2), innerWidth - W - 8)) + "px"; w.style.top = Math.max(8, Math.min(y || 120, innerHeight - 420)) + "px";
+setTimeout(function () { var i = $(TQP && TQP.mode === "pick" ? "tqpq" : "tqpn"); if (i) i.focus(); }, 20);
+}
+function tqPopRedraw() { var w = $("tqpop"); if (w && TQP) { w.innerHTML = tqPopHTML(); var i = $(TQP.mode === "pick" ? "tqpq" : "tqpn"); if (i) { i.focus(); if (TQP.mode === "pick") i.setSelectionRange(i.value.length, i.value.length); } } }
+function tqPopX() { TQP = null; var w = $("tqpop"); if (w) w.remove(); }
+function tqPlace(t) {
+var P = TQP; if (!P) return; delete t.some;
+if (P.at) { t.at = P.at; t.allday = false; if (!(+t.dur) && !(+t.est)) t.dur = P.dur; else if (P.durSet) t.dur = P.dur; } else { t.at = P.d0; t.allday = true; }
+touch(t); save(); tqPopX(); render(); toast((P.at ? "⏰ " + hm(P.at) + " — " : "На " + dayName(P.d0).toLowerCase() + ": ") + "«" + String(t.t).slice(0, 40) + "»");
+}
+function tqAct(a, el) {
+switch (a) {
+case "tqadd": var r = el.getBoundingClientRect(), d0 = tqDay(); tqPop(tqFree(d0, 30), "new", r.left, r.bottom + 6); return true;
+case "tqback": var r2 = el.getBoundingClientRect(); tqPop(0, "pick", r2.left, r2.bottom + 6); return true;
+case "tqpx": tqPopX(); return true;
+case "tqpmode": if (TQP) { TQP.mode = el.dataset.x; tqPopRedraw(); } return true;
+case "tqdur": if (TQP) { TQP.dur = +el.dataset.x; TQP.durSet = true; tqPopRedraw(); } return true;
+case "tqnew": var inp = $("tqpn"), v = inp ? inp.value.trim() : ""; if (!v) { if (inp) inp.focus(); toast("Напишите, что сделать"); return true; } var t = newTaskFrom(v, {}); TQP.durSet = true; tqPlace(t); return true;
+case "tqput": var tp = task(el.dataset.id); if (tp) tqPlace(tp); return true;
+}
+return false;
+}
+document.addEventListener("input", function (e) { if (e.target && e.target.id === "tqpq" && TQP) { TQP.q = e.target.value; var l = $("tqpl"); if (l) l.innerHTML = tqCandHTML(); } });
+document.addEventListener("keydown", function (e) {
+if (!TQP) return; if (e.key === "Escape") { e.preventDefault(); tqPopX(); return; }
+if (e.key === "Enter" && e.target && e.target.id === "tqpn") { e.preventDefault(); var b = document.createElement("i"); tqAct("tqnew", b); }
+if (e.key === "Enter" && e.target && e.target.id === "tqpq") { e.preventDefault(); var f = document.querySelector("#tqpl [data-a=tqput]"); if (f) f.click(); }
+});
+document.addEventListener("click", function (e) {
+var w = $("tqpop"); if (w && !w.contains(e.target) && !(e.target.closest && e.target.closest('[data-a="tqadd"], [data-a="tqback"]'))) { var g0 = e.target.closest && e.target.closest("#tqg"); tqPopX(); if (!g0) return; }
+var g = e.target.closest && e.target.closest("#tqg"); if (!g || e.target.closest(".tqb")) return;
+var r = g.getBoundingClientRect(), mins = Math.max(0, Math.floor((e.clientY - r.top) / TQH * 4) * 15), at = +g.dataset.d0 + (+g.dataset.h0 * 60 + mins) * 60000;
+tqPop(at, "new", e.clientX - 40, e.clientY + 12);
+});
 function chalsWidget() {
 var h = "", t0 = today0(), any = false;
 if (chOpt().on) { var c = chItems(t0), s = chalTaskStat(chTid(t0)); any = true; h += '<button type="button" class="chw" data-a="chgo"><b>🏁 Дом</b><span>' + (c ? "день " + c.day.n + (s ? " · " + s.d + " из " + s.n : "") : chOpt().paused ? "на паузе" : "сегодня заданий нет") + "</span>" + (s && s.n ? '<i style="--p:' + Math.round(s.d / s.n * 100) + '%"></i>' : "") + "</button>"; }
@@ -21022,6 +21103,7 @@ if (a && bavAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && pavAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && v204Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && spcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+if (a && tqAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
