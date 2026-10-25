@@ -3187,7 +3187,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-207";
+var APPV = "zd-app-2026-10-16-208";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -12098,6 +12098,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["208", "Справка и курс — в новом оформлении", ["Картинки в справке и учебный курс (PDF) пересняты в новом оформлении; в курсе обновлён урок «Оформление» и добавлены свои пространства, челленджи, «Неделя в цифрах» и советник. В справке — новый раздел «Свои пространства»."]],
 ["207", "Ещё быстрее", ["Левая панель считает только то, что видно; счётчики тегов, фильтров и проектов, очки и уровень пересчитываются один раз на изменение; если на странице ничего не поменялось, она не перерисовывается вовсе.", "На 3000 задачах: обновление «Всех задач» — 28 мс (было 775), «Сегодня» — 26 мс, обычные страницы — 5–20 мс."]],
 ["206", "Быстрее на больших списках", ["Списки с тысячами задач открываются в несколько раз быстрее: «Все задачи» с 3000 задач — 0,2 с вместо 0,8 с, «Планы» — втрое быстрее.", "Очень длинный список показывается порциями: сначала 400 задач, внизу — «Показать ещё»."]],
 ["205", "Свои пространства", ["＋ внизу полосы пространств — своё пространство: название, значок (или своя картинка), меню слева из чего угодно — разделы, проекты, цели, заметки, фильтры, теги, доски, готовые списки — и свой рабочий стол из карточек, как на главной. Заготовки: «Учёба», «Работа», «Хобби», «Ремонт или переезд», «Здоровье».", "Встроенные пространства тоже настраиваются: ✎ в шапке панели — меню, название и значок; на странице пространства — «✎ Рабочий стол». «↺ Вернуть как было» — к исходному виду.", "🎯 Фокус пространства: в списках, поиске и календаре видны только задачи его проектов и целей.", "Правый щелчок по проекту, тегу или фильтру → «🪐 В пространство» — добавить в любое пространство."]],
@@ -14681,7 +14682,7 @@ var HTABS = [["money", "budget", "Деньги и бюджет", ["mg-how", "mg-
 (function () {
 var add = function (k, ids) { var t = HTABS.filter(function (x) { return x[0] === k; })[0]; if (t) t[3] = t[3].concat(ids); };
 var si = 0; HTABS.forEach(function (x, i) { if (x[0] === "start") si = i + 1; });
-HTABS.splice(si, 0, ["howto", "goal", "Как применять: сценарии", ["x-sc-day", "x-sc-proj", "x-sc-study", "x-sc-home", "x-sc-health", "x-sc-read"]], ["nav", "all", "Навигация", ["x-home", "x-spaces", "x-profile", "x-mods", "x-rail", "x-apps", "x-crumbs", "x-ntf", "x-cmd", "x-keys2", "x-mobile", "x-news", "x-market"]], ["day", "today", "Ритм дня", ["x-morning", "x-shutdown", "x-tbox", "x-autoplan", "x-snooze", "x-stuck", "x-weekly", "x-dnote", "x-multi"]]);
+HTABS.splice(si, 0, ["howto", "goal", "Как применять: сценарии", ["x-sc-day", "x-sc-proj", "x-sc-study", "x-sc-home", "x-sc-health", "x-sc-read"]], ["nav", "all", "Навигация", ["x-home", "x-spaces", "myspace", "x-profile", "x-mods", "x-rail", "x-apps", "x-crumbs", "x-ntf", "x-cmd", "x-keys2", "x-mobile", "x-news", "x-market"]], ["day", "today", "Ритм дня", ["x-morning", "x-shutdown", "x-tbox", "x-autoplan", "x-snooze", "x-stuck", "x-weekly", "x-dnote", "x-multi"]]);
 add("notes", ["x-live", "x-btn", "x-tplvars", "x-ndb", "x-srs", "x-quotes", "x-canvas"]); add("lists", ["x-gantt2"]); add("money", ["x-bank"]); add("data", ["x-dens", "x-offline"]); add("rem", ["x-tg2"]);
 HTABS.push(["self", "habits", "Развитие и здоровье", ["x-health", "x-wheel", "x-xp", "x-garden", "x-recap", "x-bch"]], ["life", "wait", "Люди и документы", ["x-people", "x-docs"]], ["together", "cloud", "Вместе с близкими", ["x-shared", "x-dlg", "x-mail"]]);
 })();
