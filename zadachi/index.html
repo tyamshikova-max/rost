@@ -700,7 +700,7 @@ body.tclean #ntfBtn { order: 1 } body.tclean .prfb { order: 2 }
 .hzs.ev { background: color-mix(in srgb, #6b5bd2 10%, var(--bg)); border-color: color-mix(in srgb, #6b5bd2 25%, transparent) } .hzs.mo { background: color-mix(in srgb, #e8a33a 12%, var(--bg)); border-color: color-mix(in srgb, #e8a33a 30%, transparent) }
 .hzsi { font-size: 26px; line-height: 1 } .hzs > div { flex: 1; min-width: 0; display: grid; gap: 2px } .hzs small { color: var(--muted) }
 .hzq { display: flex; gap: 8px; margin: 0 0 14px } .hzq .inp { flex: 1; min-width: 0 }
-.hzgrid { display: grid; gap: 12px } .hzcols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start } .hzcol { display: grid; gap: 12px; align-content: start; min-height: 60px; border-radius: 14px } .hzone { display: grid; gap: 12px }
+.hzgrid { display: grid; gap: 12px; margin-bottom: 20px } .hzcols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start } .hzcol { display: grid; gap: 12px; align-content: start; min-height: 60px; border-radius: 14px } .hzone { display: grid; gap: 12px }
 .hzg { cursor: grab; color: var(--muted); opacity: 0; transition: opacity .15s; margin-left: -4px; padding: 0 2px; user-select: none } .hzc:hover .hzg, .hzedit .hzg { opacity: 1 } .hzone .hzg { display: none }
 .hzc.hzdrg { opacity: .4 } .hzc.hzdb { box-shadow: 0 -3px 0 var(--acc) } .hzc.hzda { box-shadow: 0 3px 0 var(--acc) } .hzcol.hzdc { outline: 2px dashed color-mix(in srgb, var(--acc) 50%, transparent); outline-offset: 2px }
 .hzedit .hzcol { outline: 1px dashed var(--line); outline-offset: 4px }
@@ -1775,6 +1775,7 @@ html.prcalm .ck.p3 { border-color: color-mix(in srgb, var(--acc) 40%, var(--mute
 .mtips { margin: 0 0 10px; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; background: var(--panel) } .mtips > summary { cursor: pointer; padding: 10px 0; font-weight: 600; list-style: none } .mtips > summary::-webkit-details-marker { display: none }
 .mtips > summary::after { content: "▸"; float: right; color: var(--muted) } .mtips[open] > summary::after { content: "▾" } .mtips[open] { padding-bottom: 8px } .mtips .modebar { margin: 6px 0 }
 @media (max-width: 600px) { .appbar #appq { flex: 1 1 100%; width: 100%; min-width: 0; max-width: none } }
+html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; background: none; overflow: visible; -webkit-backdrop-filter: none; backdrop-filter: none } html .hzc.hzw .wdg.hzwb > .wb { overflow: visible }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -3269,7 +3270,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-226";
+var APPV = "zd-app-2026-10-16-227";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -3712,7 +3713,7 @@ function parse(hh) {
 var h = hh !== undefined ? String(hh) : decodeURIComponent((location.hash || "").slice(1)), m;
 if ((m = h.match(/^task-(.+)$/))) return { v: "task", a: m[1] };
 if ((m = h.match(/^share-(.+)$/))) return { v: "share", a: m[1] };
-if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board|goal|menu|recipe|shop|rimp|rpt|srs|dnote|tbox|recap|sh|spced|sp)-(.+)$/))) return { v: m[1], a: m[2] };
+if ((m = h.match(/^(proj|tag|filter|sprint|flag|nsec|ntag|note|board|goal|menu|recipe|shop|rimp|rpt|srs|dnote|tbox|recap|sh|spced|sp|budget)-(.+)$/))) return { v: m[1], a: m[2] };
 if ((m = h.match(/^(settings|help)-?(.*)$/))) return { v: m[1], a: m[2] };
 if (["inbox", "today", "plans", "flag", "all", "done", "search", "sprint", "sprints", "trash", "cal", "gantt", "archive", "templates", "matrix", "habits", "stats", "someday", "notes", "goals", "waiting", "journal", "tarch", "menu", "menunew", "recipes", "rhave", "prods", "clean", "budget", "kitchen", "rpt", "ngraph", "srs", "weekly", "health", "people", "docs", "chals", "apps", "news", "market", "snoozed", "morning", "shutdown", "conflicts", "dnote", "tbox", "recap", "garden", "shared", "wheel", "home", "mods"].indexOf(h) >= 0) return { v: h, a: "" };
 if ((m = h.match(/^daily-?(.*)$/))) return { v: m[1] === "review" ? "shutdown" : "morning", a: "" };
@@ -7669,6 +7670,8 @@ function buSet(k, v) { var o = S.opt.bud = Object.assign({}, S.opt.bud || {}); o
 function buKind(cat) { var k = buOpt().kinds[buNorm(cat)]; return k || BKIND0[buNorm(cat)] || "flex"; }
 function buPid(ms) { var d = new Date(ms), y = d.getFullYear(), m = d.getMonth(); if (d.getDate() >= 11) { m++; if (m > 11) { m = 0; y++; } } return "bp:" + y + "-" + p2(m + 1); }
 function buPRange(pid) { var y = +pid.slice(3, 7), m = +pid.slice(8, 10) - 1; return { from: new Date(y, m - 1, 11).getTime(), to: new Date(y, m, 10).getTime() }; }
+function buLimTxt(T) { return T.lim > 0 ? buRub(T.fact) + " из " + buRub(T.lim) : buRub(T.fact) + " · лимит недели исчерпан"; }
+function buPDates(P) { var o = { day: "numeric", month: "short" }, f = function (d) { return new Date(d).toLocaleDateString("ru-RU", o).replace(".", ""); }; return f(P.from) + " – " + f(P.to); }
 function buPName(pid) { var m = +pid.slice(8, 10) - 1; return BMONS[m].charAt(0).toUpperCase() + BMONS[m].slice(1) + " " + pid.slice(3, 7); }
 function buPShift(pid, n) { var y = +pid.slice(3, 7), m = +pid.slice(8, 10) - 1 + n; y += Math.floor(m / 12); m = ((m % 12) + 12) % 12; return "bp:" + y + "-" + p2(m + 1); }
 function buPers() { return live(S.bpers || []).sort(function (a, b) { return a.id < b.id ? -1 : 1; }); }
@@ -7939,7 +7942,8 @@ x.st = x.d > today0() ? "wait" : paid + 1 >= need ? "ok" : x.d < today0() ? "lat
 });
 }
 var BUTAB = "", BUWK = 0, BUPER = "";
-function buTab() { return BUTAB || LS.get("zd-butab") || "week"; }
+var BUARG = "";
+function buTab() { if (V === "budget" && ARG !== BUARG) { BUARG = ARG; if (/^(week|per|regs|debts|wish|bank|fch)$/.test(ARG || "")) { BUTAB = ARG; LS.set("zd-butab", ARG); } } return BUTAB || LS.get("zd-butab") || "week"; }
 function vBudget() {
 var tab = buTab(), o = buOpt();
 var h = head("Бюджет", "Неделя — с понедельника по воскресенье, период — с 11-го по 10-е. Данные — из вашего файла Excel (туда пишет выгрузка из 1С); обновляйте выбранный период или неделю сколько угодно раз.");
@@ -8315,8 +8319,8 @@ return false;
 }
 function buWidget() {
 if (!buPers().length) return '<p class="wempty">Данных нет — откройте «Бюджет» и обновите из файла</p>';
-var w = buWeek(monday(today0())), P = buPer(buPid(today0())), T = w.tot, h = '<div class="buw"><div class="buwl"><b>Неделя ' + esc(buWName(w.mon)) + buPct(T.fact, T.lim) + '</b><span class="' + buCls(T.fact, T.lim) + '">' + buRub(T.fact) + " из " + buRub(T.lim) + "</span></div>" + buBar(T.fact, T.lim, -1, buCls(T.fact, T.lim)) + (w.dl ? '<small class="muted">можно в день до вс: ' + buRub(Math.max(0, T.perDay)) + "</small>" : "");
-if (P) { var r = buPeriod(P), ifa = r.inc.fact - r.exp.fact; h += '<div class="buwl"><span class="muted">Расходы периода' + buPct(r.exp.fact, r.exp.plan) + '</span><span class="' + (r.exp.fact > r.exp.plan ? "bad" : "") + '">' + buRub(r.exp.fact) + " из " + buRub(r.exp.plan) + "</span></div>" + '<div class="buwl"><span class="muted">' + esc(buPName(P.id)) + ": доход − расход</span><span class=\"" + (ifa < 0 ? "bad" : "ok") + '">' + buRub(ifa) + "</span></div>" + (P.bal ? '<div class="buwl"><span class="muted">Остаток сейчас</span><span>' + buRub(P.bal.end) + "</span></div>" : ""); }
+var w = buWeek(monday(today0())), P = buPer(buPid(today0())), T = w.tot, h = '<div class="buw"><div class="buwl"><b>Неделя ' + esc(buWName(w.mon)) + (T.lim > 0 ? buPct(T.fact, T.lim) : "") + '</b><span class="' + buCls(T.fact, T.lim) + '">' + buLimTxt(T) + "</span></div>" + buBar(T.fact, T.lim, -1, buCls(T.fact, T.lim)) + (w.dl ? '<small class="' + (T.perDay >= 0 ? "muted" : "bad") + '">' + (T.perDay >= 0 ? "можно в день до вс: " + buRub(T.perDay) : "сверх лимита недели: " + buRub(-T.left)) + "</small>" : "");
+if (P) { var r = buPeriod(P), ifa = r.inc.fact - r.exp.fact; h += '<div class="buwl"><span class="muted">Расходы периода' + buPct(r.exp.fact, r.exp.plan) + '</span><span class="' + (r.exp.fact > r.exp.plan ? "bad" : "") + '">' + buRub(r.exp.fact) + " из " + buRub(r.exp.plan) + "</span></div>" + '<div class="buwl"><span class="muted">' + esc(buPName(P.id)) + " (" + esc(buPDates(P)) + "): доход − расход</span><span class=\"" + (ifa < 0 ? "bad" : "ok") + '">' + buRub(ifa) + "</span></div>" + (P.bal ? '<div class="buwl"><span class="muted">Остаток сейчас</span><span>' + buRub(P.bal.end) + "</span></div>" : ""); }
 return h + "</div>";
 }
 var CKSTART = [
@@ -10642,18 +10646,29 @@ throw new Error("это не файл XMind");
 return Promise.resolve().then(function () {
 var s = dec();
 if (ext === "mm") { var d = xml(s), top = d.querySelector("map > node"); if (!top) throw new Error("в файле нет карты"); var tx = function (c) { return c.getAttribute("TEXT") || (c.querySelector(":scope > richcontent") || {}).textContent || ""; }; return { t: tx(top), k: mmXmlKids(top, "node", tx) }; }
+if (ext === "html" || ext === "htm") {
+var dh = new DOMParser().parseFromString(s, "text/html"), own = function (el) { var t = ""; [].forEach.call(el.childNodes, function (c) { if (c.nodeType === 3) t += c.textContent; else if (c.nodeType === 1 && !/^(UL|OL|DETAILS)$/.test(c.tagName)) t += c.textContent; }); return t.replace(/\s+/g, " ").trim(); };
+var walk = function (el) { var out = []; [].forEach.call(el.children, function (c) {
+if (c.tagName === "DETAILS") { var sm = c.querySelector(":scope > summary"); out.push({ id: uid(), t: (sm ? sm.textContent : "").replace(/\s+/g, " ").trim().slice(0, 300), k: walk(c) }); }
+else if (c.tagName === "UL" || c.tagName === "OL") [].forEach.call(c.children, function (li) { if (li.tagName === "LI") { var tx = own(li); if (tx) out.push({ id: uid(), t: tx.slice(0, 300), k: walk(li) }); } });
+else if (!/^(SUMMARY|SCRIPT|STYLE|BUTTON|H1)$/.test(c.tagName)) out = out.concat(walk(c));
+}); return out; };
+var hk = walk(dh.body), h1 = dh.querySelector("h1"), ht = (h1 ? h1.textContent : dh.title || name.replace(/\.[^.]+$/, "")).replace(/\s+/g, " ").trim();
+if (!hk.length) throw new Error("на странице нет разделов или списков");
+return { t: ht, k: hk };
+}
 if (ext === "opml") { var d2 = xml(s), b = d2.querySelector("body"), ti = d2.querySelector("head > title"), tx2 = function (c) { return c.getAttribute("text") || c.getAttribute("title") || ""; }, k = mmXmlKids(b, "outline", tx2); if (k.length === 1 && !ti) return { t: k[0].t, k: k[0].k }; return { t: ti ? ti.textContent : name.replace(/\.[^.]+$/, ""), k: k }; }
 var lines = s.replace(/\r/g, "").split("\n"), hd = -1, out = lines.map(function (l) { var m = /^(#{1,6})\s+(.*)$/.exec(l); if (m) { hd = m[1].length - 1; return new Array(hd + 1).join("\t") + m[2]; } return l.trim() ? new Array(hd + 2).join("\t") + l : ""; }).join("\n"), kk = mmParse(out);
-if (kk.length === 1) return { t: kk[0].t, k: kk[0].k }; return { t: name.replace(/\.[^.]+$/, ""), k: kk };
+if (kk.length === 1) { var c1 = kk[0]; if (hd >= 0 && c1.k.length === 1 && c1.k[0].k.length > 1) return { t: c1.t, k: c1.k[0].k, nt: c1.k[0].t }; return { t: c1.t, k: c1.k }; } return { t: name.replace(/\.[^.]+$/, ""), k: kk };
 });
 }
 function mmImportPick() {
-var i = document.createElement("input"); i.type = "file"; i.accept = ".xmind,.mm,.opml,.xml,.txt,.md"; i.style.display = "none"; document.body.appendChild(i);
+var i = document.createElement("input"); i.type = "file"; i.accept = ".xmind,.mm,.opml,.xml,.txt,.md,.html,.htm"; i.style.display = "none"; document.body.appendChild(i);
 i.addEventListener("change", function () {
 var f = i.files && i.files[0]; i.remove(); if (!f) return; var cur = mmCur();
 f.arrayBuffer().then(function (buf) { return mmParseFile(f.name, buf); }).then(function (r) {
 if (!r.k.length) { toast("В файле не нашлось веток"); return; }
-var n = mmNewMap((r.t || f.name.replace(/\.[^.]+$/, "")).slice(0, 200), r.k, "", cur && cur.parent ? note(cur.parent) : null); MMV[n.id] = { s: 1, rx: 0, ry: 0, fit: 1 };
+var n = mmNewMap((r.t || f.name.replace(/\.[^.]+$/, "")).slice(0, 200), r.k, "", cur && cur.parent ? note(cur.parent) : null); MMV[n.id] = { s: 1, rx: 0, ry: 0, fit: 1 }; if (r.nt) { n.mm.r.nt = r.nt; touch(n); save(); }
 toast("Карта «" + nTitle(n) + "» загружена: узлов " + mmCount(n.mm.r) + (r.sheets > 1 ? " (из файла взят первый лист из " + r.sheets + ")" : ""));
 }).catch(function (e) { toast("Не удалось открыть: " + ((e && e.message) || "неизвестный формат").replace("xlsx", "XMind").replace("Excel", "XMind")); });
 });
@@ -10685,7 +10700,7 @@ var n = mmNewMap(T.n, kids, "", cur && cur.parent ? note(cur.parent) : null); if
 }
 function mmEmptyHint(n, rd) {
 if (rd || MMTXT === "list" || (mmRoot(n).k || []).length) return "";
-return '<div class="ntplst mmtplst"><span class="muted">Начать с шаблона:</span>' + Object.keys(MMTPL).map(function (k) { return '<button type="button" class="chip" data-a="mmtpl" data-x="' + k + '">' + MMTPL[k].ic + " " + esc(MMTPL[k].n) + "</button>"; }).join("") + '<button type="button" class="chip" data-a="mmimp">📂 Открыть файл XMind, FreeMind, OPML</button></div>';
+return '<div class="ntplst mmtplst"><span class="muted">Начать с шаблона:</span>' + Object.keys(MMTPL).map(function (k) { return '<button type="button" class="chip" data-a="mmtpl" data-x="' + k + '">' + MMTPL[k].ic + " " + esc(MMTPL[k].n) + "</button>"; }).join("") + '<button type="button" class="chip" data-a="mmimp">📂 Открыть файл: XMind, FreeMind, OPML, Markdown, HTML</button></div>';
 }
 function mm8Act(a, el) {
 var n = mmCur(); if (!n) return false;
@@ -12051,7 +12066,7 @@ else if (k === "cal") { var nx = tasks().filter(function (t) { return !t.done &&
 else if (k === "plans") { var wk = tasks().filter(function (t) { var d = t.at || t.due; return !t.done && d >= t0 + DAY && d < t0 + 8 * DAY; }).length; x = em(wk ? "на 7 дней вперёд: " + wk + " " + plural(wk, ["задача", "задачи", "задач"]) : "следующая неделя пока свободна"); }
 else if (k === "habits") { var hs = habits().filter(function (h) { return !h.arch && hDue(h, t0); }); if (hs.length) { var hd = hs.filter(function (h) { return hDone(h, t0); }).length; x = appBar(hd / hs.length * 100) + em("сегодня " + hd + " из " + hs.length); } }
 else if (k === "goals") { var gs = live(S.goals || []).filter(function (g) { return (g.st || "active") === "active"; }); if (gs.length) { var avg = gs.reduce(function (s, g) { return s + goalProg(g).pct; }, 0) / gs.length; x = appBar(avg) + em("в среднем " + Math.round(avg) + " %"); } }
-else if (k === "budget") { if (buPers().length) { var T = buWeek(monday(t0)).tot; x = appBar(T.lim > 0 ? T.fact / T.lim * 100 : 0, buCls(T.fact, T.lim)) + em("неделя: " + buRub(T.fact) + " из " + buRub(T.lim)); } }
+else if (k === "budget") { if (buPers().length) { var T = buWeek(monday(t0)).tot; x = appBar(T.lim > 0 ? T.fact / T.lim * 100 : 0, buCls(T.fact, T.lim)) + em("неделя: " + buLimTxt(T)); } }
 else if (k === "people") { var bp = nOfTpl("person").filter(function (n) { return (n.pr || {}).bday; }).map(function (n) { return { n: n, d: nextBday(n.pr.bday) }; }).sort(function (a, b) { return a.d - b.d; })[0]; if (bp) { var dd = Math.round((bp.d - t0) / DAY); x = em("🎂 " + esc(nTitle(bp.n)) + " — " + (dd === 0 ? "сегодня" : dd === 1 ? "завтра" : "через " + dd + " " + plural(dd, ["день", "дня", "дней"]))); } }
 else if (k === "docs") { var dx = nOfTpl("doc").filter(function (n) { return (n.pr || {}).exp; }).map(function (n) { return { n: n, d: new Date(n.pr.exp + "T00:00").getTime() }; }).filter(function (z) { return z.d >= t0; }).sort(function (a, b) { return a.d - b.d; })[0]; if (dx) x = em("⏰ " + esc(nTitle(dx.n)) + " — до " + new Date(dx.d).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })); }
 else if (k === "health") { var hr = dayRecOf(dKey(t0)), hk = hr && hr.h ? Object.keys(hr.h).filter(function (f) { return f !== "at"; }).length : 0; x = em(hk ? "сегодня отмечено ✓" : "сегодня ещё не отмечено"); }
@@ -12081,10 +12096,12 @@ var FEAT = [
 ["самочувствие сон энергия боль здоровье", "🌿", "Самочувствие", "«Жизнь» → «Самочувствие»", "health"],
 ["уровень очки xp достижения геймификация баллы", "🏆", "Уровень и очки", "карточка «🏆 Уровень и очки» на главной; «Жизнь» → «Статистика»", "stats"],
 ["бюджет деньги расходы доходы выписка банк", "💰", "Бюджет", "«Дом и деньги» → «Бюджет»", "budget"],
+["денежный дневник импульсивные покупки эмоции дни без трат", "📒", "Денежный дневник", "«Бюджет» → вкладка «Челлендж» → блок «Дни без трат · дневник»: строка «что купила на эмоциях и почему» + галочка «импульсивная покупка», Enter — записано", "budget-fch"],
 ["меню рецепты кухня продукты покупки", "🍲", "Меню и рецепты", "«Дом и деньги» → «Меню»", "menu"],
 ["уборка дом порядок", "🧹", "План уборки", "«Дом и деньги» → «Уборка»", "clean"],
 ["документы подписки полисы страховка", "📑", "Документы и подписки", "«Дом и деньги» → «Документы»", "docs"],
 ["заметки база знаний", "📝", "Заметки", "пространство «Знания»", "notes"],
+["карта мыслей ментальная карта импорт xmind markdown файл", "🧠", "Карта мыслей из файла", "«Знания» → «＋ Создать…» → «Карта мыслей из файла»: XMind, FreeMind, OPML, Markdown-список, HTML-страница", "notes"],
 ["повторение карточки запоминание", "🔁", "Повторение", "«Знания» → «Повторение»", "srs"],
 ["картинка скриншот распознать фото задачи с картинки", "📷", "Задачи с картинки", "кнопка 📷 в строке новой задачи; скриншот можно вставить Ctrl+V", "inbox"],
 ["голос диктовка микрофон надиктовать", "🎤", "Голосовой ввод", "кнопка 🎤 в строке новой задачи", "inbox"],
@@ -12276,6 +12293,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["227", "Карты мыслей из файлов; бюджет на главной", ["Карточка «🔁 Цикл планирования» — во всю ширину рабочего стола, шаги в один ряд; рабочий стол пространства больше не прилегает вплотную к плиткам разделов.", "🧠 «Знания» → «＋ Создать…» → «Карта мыслей из файла»: XMind, FreeMind, OPML, Markdown-список или HTML-страница со сворачиваемыми разделами — получится карта с ветками. Если у заголовка один узел, его разделы раскладываются вокруг центра.", "Карточки-виджеты на главной (бюджет недели, сроки и другие) больше не срезают текст по углам в стилях «Стекло», «Бенто», «Экспрессив». «Бюджет недели»: у периода видны даты; если лимит недели исчерпан перерасходом прошлых недель — так и написано, без «из −3 000 ₽».", "Денежный дневник находится через поиск («денежный дневник») — сразу открывается нужная вкладка бюджета."]],
 ["226", "Под капотом: модули и автотесты", ["Код приложения разложен на 25 понятных модулей (задачи, заметки, бюджет, кухня, пространства, настройки…), а набор автотестов (242 проверки) запускается одной командой перед каждой выкладкой — чтобы новые возможности не ломали старые. Для вас ничего не меняется."]],
 ["225", "Телефон: сначала задачи", ["На телефоне в «Сегодня» все подсказки (закрыть день, до конца рабочего дня, застрявшие задачи, перегруз, главное недели, план) собраны в один свёрнутый блок «💡 Подсказки дня» — список задач виден сразу. Нажмите на блок — раскроется.", "Советы советника на узком экране больше не сжимаются в узкую колонку: текст — во всю ширину, кнопки — под ним. Поиск в «Все разделы» — во всю ширину."]],
 ["224", "Цикл планирования", ["🔁 Новая карточка на главной и в «Моём дне»: цели → неделя → утро → день → вечер → итоги. У каждого шага — состояние (✓ сделано), следующий подсвечен по дню недели и времени: в понедельник — обзор недели, утром — план дня, вечером — закрыть день. В «Дне» видно, сколько задач сегодня ведут к целям.", "«Важное» везде одно: приоритет 1–2, флажок или «★ Главное» дня и недели — так считают и матрица, и значки квадрантов."]],
@@ -13380,7 +13398,7 @@ if (k === "day") { var tl = todayList().length, ib = inboxList().length; return 
 if (k === "task") { var op = tasks().filter(function (t) { return !t.done; }).length, pr = projects().filter(function (p) { return !isArch(p.id); }).length; return op + " " + plural(op, ["открытая", "открытые", "открытых"]) + " · " + pr + " " + plural(pr, ["проект", "проекта", "проектов"]); }
 if (k === "know") { var nn = notes().length, sc = modOn("srs") ? srsDueCount() : 0; return nn + " " + plural(nn, ["заметка", "заметки", "заметок"]) + (sc ? " · повторить " + sc : ""); }
 if (k === "life") { var hs = habits().filter(function (h) { return !h.arch && hDue(h, t0); }), hd = hs.filter(function (h) { return hDone(h, t0); }).length; return hs.length ? "привычки сегодня " + hd + " из " + hs.length : "привычки, цели, самочувствие"; }
-if (k === "house") { if (modOn("budget") && buPers().length) { var T = buWeek(monday(t0)).tot; return "бюджет недели: " + buRub(T.fact) + " из " + buRub(T.lim); } return "меню, уборка, бюджет, документы"; }
+if (k === "house") { if (modOn("budget") && buPers().length) { var T = buWeek(monday(t0)).tot; return "бюджет недели: " + buLimTxt(T); } return "меню, уборка, бюджет, документы"; }
 } catch (e) { /* строка не обязательна */ }
 return SPZ[k] ? SPZ[k][2] : "";
 }
@@ -13702,7 +13720,7 @@ return '<div class="hzs ev"><span class="hzsi">🌙</span><div><b>День за�
 var SPZADD = { inbox: [["qi", "☐", "Задача во «Входящие»"]], today: [["q", "☐", "Задача на сегодня"]], morning: [["go:morning", "🌅", "Утренний план"]], tbox: [["go:tbox", "🧱", "План по часам"]], dnote: [["go:dnote", "📅", "День за днём"]],
 habits: [["hab", "🌱", "Привычка"]], goals: [["go:goals", "🎯", "Цель"]], journal: [["go:journal", "📔", "Запись в дневник"]], health: [["go:health", "🌿", "Отметить самочувствие"]], people: [["go:people", "👥", "Человек"]], chals: [["go:chals", "🏁", "Начать челлендж"]],
 menu: [["go:menunew", "🍲", "Меню на неделю"], ["go:recipes", "📖", "Рецепт"]], docs: [["go:docs", "📑", "Документ или подписка"]], clean: [["go:clean", "🧹", "План уборки"]], shared: [["go:shared", "👨‍👩‍👧", "Общий список"]],
-notes: [["a:note-new", "📝", "Заметка"], ["a:nsec-new", "🗀", "Раздел заметок"]], "x:notes": [["a:note-new", "📝", "Заметка"], ["a:nsec-new", "🗀", "Раздел заметок"]], "x:projects": [["a:newproj", "📁", "Проект"], ["a:rev-on", "↻", "Проверка проектов"]],
+notes: [["a:note-new", "📝", "Заметка"], ["a:nsec-new", "🗀", "Раздел заметок"], ["mmimp", "🧠", "Карта мыслей из файла"]], "x:notes": [["a:note-new", "📝", "Заметка"], ["a:nsec-new", "🗀", "Раздел заметок"], ["mmimp", "🧠", "Карта мыслей из файла"]], "x:projects": [["a:newproj", "📁", "Проект"], ["a:rev-on", "↻", "Проверка проектов"]],
 "x:boards": [["a:bnew", "▦", "Доска"]], "x:tags": [["a:newtag", "#", "Тег"]], "x:filters": [["a:newfilter", "⛃", "Фильтр"]], "x:chals": [["go:chals", "🏁", "Начать челлендж"]] };
 function spzAddList(k) {
 var l = [], seen = {}, add = function (x) { if (!seen[x[0]]) { seen[x[0]] = 1; l.push(x); } };
@@ -13737,6 +13755,7 @@ return true;
 }
 if (k === "spzp") {
 if (c === "q" || c === "qi" || c.indexOf("qp:") === 0) { go(c === "qi" ? "inbox" : c === "q" ? "today" : "proj-" + c.slice(3)); setTimeout(function () { try { qOpen(); } catch (e) { /* ок */ } }, 120); }
+else if (c === "mmimp") mmImportPick();
 else if (c.indexOf("a:") === 0) { var hb = document.createElement("button"); hb.type = "button"; hb.hidden = true; hb.dataset.a = c.slice(2); document.body.appendChild(hb); hb.click(); hb.remove(); }
 else if (c === "hab") { go("habits"); setTimeout(function () { var i = document.querySelector("[data-hnew]"); if (i) { i.focus(); i.scrollIntoView({ block: "center" }); } }, 150); }
 else if (c.indexOf("go:") === 0) go(c.slice(3));
@@ -13819,7 +13838,7 @@ return '<div class="card hzedb"><b>' + title + '</b>' + hzColsHTML() + '<p class
 }
 function hzN() { var n = +HZS().homecols; return n >= 1 && n <= 4 ? Math.round(n) : 2; }
 function hzColOf(k, i) { var m = HZS().homecol || {}, n = hzN(); return typeof m[k] === "number" ? Math.max(0, Math.min(n - 1, m[k])) : i % n; }
-function hzSpan(k) { var m = HZS().homespan || {}, n = hzN(); if (typeof m[k] === "number") return Math.max(1, Math.min(n, m[k])); return (HZS().homewide || {})[k] ? n : 1; }
+function hzSpan(k) { var m = HZS().homespan || {}, n = hzN(); if (typeof m[k] === "number") return Math.max(1, Math.min(n, m[k])); return (HZS().homewide || {})[k] || k === "cyc" ? n : 1; } // цикл планирования — по умолчанию во всю ширину: шаги в один ряд
 function hzDeco(k, html, c, s) {
 var n = hzN();
 html = html.replace('<div class="hzh">', '<div class="hzh"><span class="hzg" data-hzg="' + esc(k) + '" title="Перетащите, чтобы переставить (в любую колонку)" aria-hidden="true">⠿</span>');
