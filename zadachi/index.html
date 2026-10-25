@@ -749,7 +749,7 @@ body.hzrsing, body.hzrsing * { cursor: ew-resize !important; user-select: none !
 .drte img { max-width: 100%; border-radius: 10px } .jtags { margin: 0 0 8px } .jdh .jedit { margin-left: auto }
 .bav.bare { margin: 0 } .pav .pava { font-size: calc(11.5px * var(--fs)); opacity: .8 } .bav { margin: 0 0 12px } .bav.fold .bavh { margin: 0 } .bavtg { display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; padding: 0; cursor: pointer; color: var(--fg); font: inherit } .bavch { color: var(--muted); width: 12px } .bavh { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 6px } .bavt { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-top: 1px dashed var(--line) } .bavt > div { flex: 1; min-width: 0; display: grid; gap: 2px } .bavt small { color: var(--muted); font-size: calc(13px * var(--fs)) } .bavi { font-size: 20px; line-height: 1.2; flex: none; width: 26px; text-align: center } .bava { display: inline-flex; gap: 4px; align-items: center; flex: none }
 .bavt.warn b { color: var(--warn, #c0392b) } .bavt.good b { color: var(--acc) } .bavmore { margin-top: 6px } .bavconf, .bavai { display: grid; gap: 6px; padding: 10px 12px; margin: 6px 0; border-radius: 12px; background: color-mix(in srgb, var(--acc) 7%, transparent) } .bavconf span { color: var(--muted); font-size: calc(13px * var(--fs)) } .bavai p { margin: 0 } .bavaih { display: flex; align-items: center } .bavaih b { flex: 1 }
-@media (max-width: 600px) { .bavt { flex-wrap: wrap } .bava { margin-left: 36px } }
+@media (max-width: 600px) { .bavt { flex-wrap: wrap } .bavt > div { flex: 1 1 calc(100% - 40px) } .bava { margin-left: 36px; flex-wrap: wrap } }
 .rte.rtx { min-height: 64px; padding: 8px 14px 8px 28px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); margin: 4px 0; text-align: left; font-weight: 400 } .rte.rtx.empty::before { left: 28px; top: 8px; right: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis } .rtx:focus { border-color: var(--acc); outline: none } .rtx img, .rte img { max-width: 100%; border-radius: 10px } label.goal .rtx { display: block; margin-top: 6px }
 #toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 9px; font-size: calc(14px * var(--fs)); z-index: 50; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
 .foot { color: var(--muted); font-size: calc(12px * var(--fs)); margin-top: 40px }
@@ -1772,6 +1772,9 @@ html.prcalm .ck.p3 { border-color: color-mix(in srgb, var(--acc) 40%, var(--mute
 .cycs b { font-size: calc(13px * var(--fs)) } .cycs small { color: var(--muted); font-size: calc(11.5px * var(--fs)); line-height: 1.3 } .cyci { font-size: 1.05em; color: var(--muted) }
 .cycs.ok .cyci { color: var(--acc); font-weight: 700 } .cycs.nx { border-color: var(--acc); background: color-mix(in srgb, var(--acc) 9%, transparent) }
 .cycn { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 10px; font-size: calc(13px * var(--fs)) }
+.mtips { margin: 0 0 10px; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; background: var(--panel) } .mtips > summary { cursor: pointer; padding: 10px 0; font-weight: 600; list-style: none } .mtips > summary::-webkit-details-marker { display: none }
+.mtips > summary::after { content: "▸"; float: right; color: var(--muted) } .mtips[open] > summary::after { content: "▾" } .mtips[open] { padding-bottom: 8px } .mtips .modebar { margin: 6px 0 }
+@media (max-width: 600px) { .appbar #appq { flex: 1 1 100%; width: 100%; min-width: 0; max-width: none } }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -3266,7 +3269,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-224";
+var APPV = "zd-app-2026-10-16-225";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -4548,7 +4551,7 @@ return (NDBP && !rd ? nDbPropPanel() : "") + '<div class="npage' + (tocI.length 
 function noteDel(n) { n.del = 1; n.delAt = Date.now(); touch(n); save(); var back = n.sec && nsec(n.sec) ? "nsec-" + n.sec : "notes"; go(back); toastUndo("Заметка удалена", function () { delete n.del; delete n.delAt; touch(n); save(); render(); }); }
 function vWaiting() { return std("Жду ответа", "Задачи, переданные кому-то. В день «спросить» задача появится в «Сегодня» — напомнить о себе. Пометить задачу: меню задачи → «⏳ Жду ответа…» или строка «Жду ответа» в карточке.", waitList(), { empty: "Ничего не ждёте — хорошо. Когда отдадите задачу кому-то, отметьте её «⏳ Жду ответа».", scope: function (t) { return !!t.wait; } }); }
 function vSomeday() { return std("Когда-нибудь", "Идеи и дела «не сейчас». Они не попадают во «Входящие» и «Сегодня», пока вы не назначите им дату.", somedayList(), { empty: "Пусто. Отправить задачу сюда — меню задачи → «Установить дату» → «Когда-нибудь» (Alt+O).", scope: isSome }); }
-function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: tbNowHTML() + wrBanner() + apHTML() + todayLoadHTML() + aiBox() + todayPlanBox(), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
+function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: tipsFold((mobNarrow() ? todayBars() : []).concat([tbNowHTML(), wrBanner(), apHTML(), todayLoadHTML(), aiBox(), todayPlanBox()]), "today", "Подсказки дня"), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
 var PDAY = 0, PFROM = 0;
 function pFrom() { if (!PFROM) PFROM = monday(Date.now()); return PFROM; }
 function onDay(t, d0) { return (t.at && sod(t.at) === d0) || (t.due && sod(t.due) === d0) || spanIn(t, d0); }
@@ -12273,6 +12276,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["225", "Телефон: сначала задачи", ["На телефоне в «Сегодня» все подсказки (закрыть день, до конца рабочего дня, застрявшие задачи, перегруз, главное недели, план) собраны в один свёрнутый блок «💡 Подсказки дня» — список задач виден сразу. Нажмите на блок — раскроется.", "Советы советника на узком экране больше не сжимаются в узкую колонку: текст — во всю ширину, кнопки — под ним. Поиск в «Все разделы» — во всю ширину."]],
 ["224", "Цикл планирования", ["🔁 Новая карточка на главной и в «Моём дне»: цели → неделя → утро → день → вечер → итоги. У каждого шага — состояние (✓ сделано), следующий подсвечен по дню недели и времени: в понедельник — обзор недели, утром — план дня, вечером — закрыть день. В «Дне» видно, сколько задач сегодня ведут к целям.", "«Важное» везде одно: приоритет 1–2, флажок или «★ Главное» дня и недели — так считают и матрица, и значки квадрантов."]],
 ["223", "«Где это?» — поиск возможностей", ["В поиске «▦ Все разделы» и в ⌘K находятся не только разделы, но и возможности внутри них: «советник», «копии», «помидор», «матрица», «распорядок», «челлендж»… — с подсказкой, где именно это лежит, и переходом туда одним щелчком."]],
 ["222", "Все пространства — по одной логике", ["Каждое пространство (Мой день, Задачи, Знания, Жизнь, Дом и деньги, Челленджи и ваши собственные) устроено одинаково: меню слева — из его пунктов, страница — шапка, «🎯 Фокус / ✎ Рабочий стол / ⚙ Настроить», рабочий стол с карточками и плитки всего, что есть в меню (разделы — с живой строкой, проекты и цели — с прогрессом).", "Поменяли меню в «⚙ Настроить пространство» — так же меняются и панель, и страница пространства.", "«＋ Создать…» в шапке панели — у всех пространств; что в нём, зависит от меню: задача, заметка, проект, привычка, цель, рецепт, задача в проект пространства…"]],
@@ -12392,10 +12396,18 @@ function navBars() {
 var h = "", D = appDef();
 try {
 h += hzBars();
-if (V === "today") { h += ritualBar() + leftBar() + stuckHTML(); var dq = dayQuota(); if (dq) h += '<div class="modebar qbar"><b>⏱ Перегруз</b><span>' + esc(dq.t) + " — " + esc(dq.s) + '</span><button type="button" class="btn sm" data-a="dayq">Лимит…</button></div>'; }
+if (V === "today" && !mobNarrow()) h += todayBars().join("");
 } catch (e) { /* крошки не мешают */ }
 return h;
 }
+function todayBars() { var dq = dayQuota(); return [ritualBar(), leftBar(), stuckHTML(), dq ? '<div class="modebar qbar"><b>⏱ Перегруз</b><span>' + esc(dq.t) + " — " + esc(dq.s) + '</span><button type="button" class="btn sm" data-a="dayq">Лимит…</button></div>' : ""]; }
+var MTIPS = {};
+function mobNarrow() { try { return window.matchMedia("(max-width: 760px)").matches; } catch (e) { return false; } }
+function tipsFold(parts, key, name) {
+var l = parts.filter(function (x) { return x && String(x).trim(); }); if (!l.length) return ""; if (!mobNarrow()) return l.join("");
+return '<details class="mtips" data-k="' + key + '"' + (MTIPS[key] ? " open" : "") + "><summary>💡 " + name + ' <span class="muted">· ' + l.length + "</span></summary>" + l.join("") + "</details>";
+}
+document.addEventListener("toggle", function (e) { var d = e.target; if (d && d.classList && d.classList.contains("mtips")) MTIPS[d.dataset.k] = d.open; }, true);
 function dayQuota() {
 var hq = +S.opt.dayq || 0, nq = +S.opt.dayn || 0; if (!hq && !nq) return null;
 var l = todayList(), hs = l.reduce(function (a, t) { return a + tHours(t); }, 0);
