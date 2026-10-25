@@ -1756,6 +1756,10 @@ html.st-glass .top .brand { background: transparent; border-right-color: var(--g
 .imgth { display: flex; align-items: center } .imgth b { flex: 1 } .imgtp { max-height: 160px; max-width: 100%; justify-self: start; border-radius: 10px; border: 1px solid var(--line) }
 .imgtl { display: grid; gap: 8px } .imgtr { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px solid var(--line) } .imgtr.off .imgtf { opacity: .45 } .imgtr > input { margin-top: 10px } .imgtf { flex: 1; min-width: 0; display: grid; gap: 6px } .imgtf .r { gap: 6px; align-items: center; flex-wrap: wrap } .imgtd { width: 70px }
 .imgtraw summary { cursor: pointer; color: var(--muted); font-size: calc(13px * var(--fs)) } .imgtraw textarea { width: 100%; margin: 6px 0; box-sizing: border-box; font: 13px/1.4 var(--mono) }
+.mxm { font-size: .95em } .mxv { gap: 6px; flex-wrap: wrap }
+html.prcalm .ck.p1 { border-color: var(--acc); box-shadow: inset 0 0 0 1px var(--acc); background: color-mix(in srgb, var(--acc) 16%, transparent) }
+html.prcalm .ck.p2 { border-color: color-mix(in srgb, var(--acc) 70%, var(--muted)); background: color-mix(in srgb, var(--acc) 8%, transparent) }
+html.prcalm .ck.p3 { border-color: color-mix(in srgb, var(--acc) 40%, var(--muted)); background: transparent }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -8345,7 +8349,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-217";
+var APPV = "zd-app-2026-10-16-218";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -9087,6 +9091,7 @@ var DUEN = { any: "любой", late: "просрочено", yesterday: "вче
 var STATN = [["open", "невыполненные"], ["done", "выполненные"], ["canc", "отменённые"], ["rep", "повторяющиеся"], ["arch", "в архивных проектах"], ["del", "удалённые (в корзине)"], ["all", "все"]];
 function fdef() { return { pids: [], sub: true, tags: [], tagMode: "any", prio: [], flag: "any", due: "any", status: "open", text: "", sprint: "any" }; }
 function matchQ(t, q) {
+if (q.mx && q.mx.length && (t.done || q.mx.indexOf(quadOf(t)) < 0)) return false;
 if (q.status === "open" && t.done) return false;
 if (q.status === "done" && (!t.done || t.canc)) return false;
 if (q.status === "canc" && !t.canc) return false;
@@ -9123,7 +9128,7 @@ return true;
 }
 function filterRes(f) { var q = f.q || fdef(); return memo("fres|" + f.id + "|" + JSON.stringify(q), function () { return qSource(q).filter(function (t) { return matchQ(t, q); }); }).slice(); }
 function qSource(q) { if (q.status === "del") return S.tasks.filter(function (t) { return t.del && !t.purged; }); if (q.status === "arch") { var a = archIds() || {}; return live(S.tasks).filter(function (t) { return a[t.pid]; }); } return tasks(); }
-var GROUPN = { section: "по секциям", kcol: "по колонкам проекта", none: "без группировки", date: "по сроку", day: "по дням", project: "по проекту", prio: "по приоритету", tag: "по тегу", flag: "по флажку", status: "по статусу", sprint: "по спринту", tb: "по распорядку" };
+var GROUPN = { section: "по секциям", kcol: "по колонкам проекта", none: "без группировки", date: "по сроку", day: "по дням", project: "по проекту", prio: "по приоритету", tag: "по тегу", flag: "по флажку", status: "по статусу", sprint: "по спринту", tb: "по распорядку", matrix: "по матрице" };
 var SORTN = { smart: "умная", manual: "вручную (перетаскиванием)", date: "по сроку", due: "по дедлайну", prio: "по приоритету", name: "по названию", created: "сначала новые" };
 function smartB(t) { var ea = effAt(t); if (!ea) return isSome(t) ? 5 : t.prio === 1 ? 0 : 4; if (isPastDay(t)) return 2; if (ea < today0() + DAY) return 1; return 3; }
 function ordVal(t) { return t.ord !== undefined && t.ord !== null ? t.ord : t.parent ? (t.created || 0) / 1e3 : -(t.created || 0) / 1e3; }
@@ -9188,7 +9193,8 @@ else put("e", "Позже", t, 4);
 var eb = effAt(t); if (!eb) put("z", "Без срока", t, 9e15); else if (isPastDay(t)) put("a", "Просрочено", t, 0); else put(dKey(eb), dayName(eb), t, sod(eb));
 } else if (g === "project") {
 var p = proj(t.pid); if (!p) put("", "Без проекта", t, -1); else if (m[p.id]) m[p.id].items.push(t); else { if (!PTI) { PTI = {}; ptree().forEach(function (x, i) { PTI[x.p.id] = i; }); } put(p.id, pname(p), t, PTI[p.id] !== undefined ? PTI[p.id] : -1, col(p.c), piconH(p)); }
-} else if (g === "prio") { var pr = t.prio || 0; put("p" + pr, pr ? "Приоритет " + pr : "Обычный приоритет", t, pr || 9); }
+} else if (g === "matrix") { var mq0 = t.done ? "q4" : quadOf(t); put("mx:" + mq0, MXQ[mq0][0] + " " + MXQ[mq0][1], t, ["q1", "q2", "q3", "q4"].indexOf(mq0)); }
+else if (g === "prio") { var pr = t.prio || 0; put("p" + pr, pr ? "Приоритет " + pr : "Обычный приоритет", t, pr || 9); }
 else if (g === "flag") { var gf = flagOf(t); put(gf ? gf.id : "n", gf ? gf.n : "Без флажка", t, gf ? flags().indexOf(gf) : 999, gf ? col(gf.c) : undefined); }
 else if (g === "section") { var sk = secOf(t, gp), so = psecs(gp).map(function (x) { return x.id; }).indexOf(sk); put(sk, sk === "~" ? "Без секции" : psecs(gp)[so].n, t, so); }
 else if (g === "kcol") { var kc = kcolOf(t, gp), ko = pcols(gp).map(function (x) { return x.id; }).indexOf(kc); put(kc, kc === "done" ? "Готово" : pcols(gp)[ko].n, t, kc === "done" ? 999 : ko); }
@@ -9232,6 +9238,7 @@ if (t.goal && goal(t.goal) && V !== "goal") meta.push('<a class="tag" href="#goa
 var bt = bodyTodo(t); if (bt) meta.push("☑ " + bt[0] + "/" + bt[1]); else if (t.body || t.note) meta.push("📝");
 if (t.src === "tg") meta.push("из Telegram");
 if (t.fav) meta.push('<span style="color:var(--star)">★</span>');
+if (!t.done && !MXG && mxRowOn() && V !== "matrix") { var qd = quadOf(t); if (qd !== "q4") meta.push('<span class="mxm mx' + qd + '" title="Матрица: ' + MXQ[qd][1] + " — " + MXQ[qd][2] + '">' + MXQ[qd][0] + "</span>"); }
 var pl = pomoLive(t); if (pl) meta.push('<span title="Помидоры: с таймера Помодоро и каждые 25 минут учтённого времени">🍅 ' + pl + "</span>");
 var ntn = notesOfTask(t.id).length; if (ntn) meta.push("📝 " + ntn);
 if (t.ttOn) meta.push('<span class="ttrun">⏲ идёт</span>'); else if (t.tt) meta.push("⏲ " + ttFmt(t.tt));
@@ -9303,7 +9310,8 @@ h += '<div class="ngrp d' + depth + '">' + gHead(g, gr, depth, pk, f, gr.items.l
 });
 return h;
 }
-function renderGroups(list, vo, o) { var h = renderGroups0(list, vo, o); return !h || /^<p class="empty"/.test(h) ? h : '<div class="gsheet">' + h + "</div>"; }
+var MXG = false; // список уже сгруппирован по матрице — значок квадранта в строках не нужен
+function renderGroups(list, vo, o) { MXG = vo.group === "matrix" || (vo.groups || []).indexOf("matrix") >= 0; var h; try { h = renderGroups0(list, vo, o); } finally { MXG = false; } return !h || /^<p class="empty"/.test(h) ? h : '<div class="gsheet">' + h + "</div>"; }
 function renderGroups0(list, vo, o) {
 o = o || {};
 if (vo.group === "section" && V === "proj") return renderSections(list, vo, o);
@@ -9350,13 +9358,13 @@ return "<h1>" + title + (HXV[V] ? ' <a class="hq hxq" href="#help-' + HXV[V] + '
 function listOrBoard(list, vo, o) { list = qfApply(list); return vmode() === "board" ? boardHTML(list, vo, o || {}) : renderGroups(list, vo, o) + doneTodayHTML(o); }
 var QF = {}, QFO = {};
 function qfGet() { var k = curKey(); if (!QF[k]) { QF[k] = fdef(); QF[k].status = "any"; } return QF[k]; }
-function qfActive() { var q = QF[curKey()]; return !!(q && (q.prio.length || q.flag !== "any" || q.due !== "any" || q.tags.length || (q.text || "").trim())); }
+function qfActive() { var q = QF[curKey()]; return !!(q && ((q.mx || []).length || q.prio.length || q.flag !== "any" || q.due !== "any" || q.tags.length || (q.text || "").trim())); }
 function qfApply(list) { if (!qfActive()) return list; var q = QF[curKey()]; return list.filter(function (t) { return matchQ(t, q); }); }
 function qfBar() {
 if (!QFO[curKey()]) return "";
 var q = qfGet(), tg = tags().slice(0, 16);
 var chip = function (a, v, on, label) { return '<button type="button" class="chip' + (on ? " on" : "") + '" data-a="' + a + '"' + (v !== null ? ' data-v="' + esc(String(v)) + '"' : "") + ">" + label + "</button>"; };
-return '<div class="qfbar"><div class="qfr"><b>Приоритет</b>' + [1, 2, 3].map(function (n) { return chip("qfp", n, q.prio.indexOf(n) >= 0, "!" + n); }).join("") + chip("qff", null, q.flag === "yes", "⚑ с флажком") + "</div>" +
+return '<div class="qfbar"><div class="qfr"><b>Матрица</b>' + ["q1", "q2", "q3", "q4"].map(function (x) { return chip("qfm", x, (q.mx || []).indexOf(x) >= 0, MXQ[x][0] + " " + MXQ[x][1]); }).join("") + "</div>" + '<div class="qfr"><b>Приоритет</b>' + [1, 2, 3].map(function (n) { return chip("qfp", n, q.prio.indexOf(n) >= 0, "!" + n); }).join("") + chip("qff", null, q.flag === "yes", "⚑ с флажком") + "</div>" +
 '<div class="qfr"><b>Срок</b>' + [["any", "любой"], ["late", "просрочено"], ["today", "сегодня"], ["tomorrow", "завтра"], ["week", "7 дней"], ["nextweek", "след. неделя"], ["none", "без срока"]].map(function (x) { return chip("qfd", x[0], q.due === x[0], x[1]); }).join("") + "</div>" +
 (tg.length ? '<div class="qfr"><b>Теги</b>' + tg.map(function (g) { return chip("qft", g.n, q.tags.indexOf(g.n) >= 0, '<span style="color:' + col(g.c) + '">#</span>' + esc(g.n)); }).join("") + "</div>" : "") +
 '<div class="qfr"><b>Текст</b><input type="search" id="qftext" class="inp" placeholder="слова через пробел" value="' + esc(q.text || "") + '" autocomplete="off"><span class="r">' + (qfActive() ? '<button type="button" class="btn sm" data-a="qfreset">Сбросить</button>' : "") + '<button type="button" class="btn sm" data-a="qfsave"' + (qfActive() ? "" : " disabled") + ">★ Сохранить как фильтр</button></span></div></div>";
@@ -9972,12 +9980,15 @@ function calAfterRender() { if (V !== "cal" || CAL.mode === "month") return; var
 function urgDays() { return +S.opt.urgDays || 2; }
 function isImp(t) { return t.prio === 1 || t.prio === 2 || hasFlag(t); }
 function isUrg(t) { var e = effAt(t); return isLate(t) || (!!e && e < today0() + urgDays() * DAY); }
+var MXQ = { q1: ["🔥", "Важно и срочно", "сделать сейчас"], q2: ["🎯", "Важно, но не срочно", "запланировать"], q3: ["⚡", "Срочно, но не важно", "делегировать или сделать быстро"], q4: ["🌫", "Не важно и не срочно", "отложить или удалить"] };
+function quadOf(t) { var i = isImp(t), u = isUrg(t); return i && u ? "q1" : i ? "q2" : u ? "q3" : "q4"; }
+function mxRowOn() { return S.opt.mxrow !== false; }
 function vMatrix() {
 var l = tasks().filter(function (t) { return !t.done; }), Q = { q1: [], q2: [], q3: [], q4: [] };
 l.forEach(function (t) { var i = isImp(t), u = isUrg(t); Q[i && u ? "q1" : i ? "q2" : u ? "q3" : "q4"].push(t); });
 var meta = [["q1", "🔥 Важно и срочно", "Сделать сейчас", "var(--p1)"], ["q2", "🎯 Важно, но не срочно", "Запланировать", "var(--acc)"], ["q3", "⚡ Срочно, но не важно", "Делегировать или сделать быстро", "var(--p2)"], ["q4", "🌫 Не важно и не срочно", "Отложить или удалить", "var(--muted)"]];
 var h = head("Матрица Эйзенхауэра", "Важное — приоритет 1–2 или флажок; срочное — просрочено или срок в ближайшие дни. Перетащите карточку в другой квадрант — изменятся приоритет и срок.");
-h += '<div class="tbar"><label>Срочно — срок в ближайшие <select data-urg="1">' + [1, 2, 3, 5, 7].map(function (n) { return '<option value="' + n + '"' + (urgDays() === n ? " selected" : "") + ">" + n + " " + plural(n, ["день", "дня", "дней"]) + "</option>"; }).join("") + "</select></label></div>";
+h += '<div class="tbar"><button type="button" class="lt' + (mxRowOn() ? " on" : "") + '" data-a="mxrow"><span class="lbox"></span><span>Показывать квадрант в списках задач</span></button><label>Срочно — срок в ближайшие <select data-urg="1">' + [1, 2, 3, 5, 7].map(function (n) { return '<option value="' + n + '"' + (urgDays() === n ? " selected" : "") + ">" + n + " " + plural(n, ["день", "дня", "дней"]) + "</option>"; }).join("") + "</select></label></div>";
 h += '<div class="mxgrid">' + meta.map(function (m) {
 var items = Q[m[0]].sort(cmpBy("date")), ids = {}; items.forEach(function (t) { ids[t.id] = 1; });
 var roots = items.filter(function (t) { return !t.parent || !ids[t.parent]; });
@@ -17266,6 +17277,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["218", "Матрица в задачах; спокойные кружки приоритета", ["Квадрант матрицы Эйзенхауэра виден в задачах: значок 🔥 / 🎯 / ⚡ в строке (выключить — переключатель на странице «Матрица»), строка «Матрица» в карточке — переставить задачу в другой квадрант одним щелчком (меняются приоритет и срок).", "В любом списке — группировка «по матрице» и в быстром фильтре «⛃ Фильтр» — строка «Матрица»: например, только «🎯 Важно, но не срочно».", "Кружки приоритета — спокойными оттенками основного цвета стиля вместо красного, жёлтого и синего; чем важнее, тем насыщеннее. Вернуть цветные — «Настройки» → «Оформление» → «Приоритет задач»."]],
 ["217", "Помидоры видны снова", ["🍅 в строке задачи считает и время из «Засечь время» (каждые 25 минут — помидор), а не только таймер Помодоро; пока идёт учёт — учитывается и текущий отрезок.", "В карточке задачи помидоры видны всегда, вместе с идущим таймером и подсказкой «до следующего N мин»."]],
 ["216", "Задачи с картинки — бесплатно", ["📷 в строке новой задачи (и на главной) — выберите скриншот: расписание, записи в клуб, список дел. Текст распознаётся бесплатно прямо на устройстве (картинка никуда не уходит; в первый раз скачивается русский язык, ~15 МБ). Приложение находит день, время, длительность, «лист ожидания» и место — и показывает список для проверки: поправьте и снимите лишнее.", "Скриншот можно и просто вставить (Ctrl+V) в строку новой задачи. Распознанный текст можно поправить и разобрать заново. Если подключён ИИ-помощник — есть кнопка «✨ Точнее через ИИ» (платно, по вашему ключу)."]],
 ["215", "«День за днём»: главное — с галочками", ["В карточке «Главное» выполненные задачи зачёркнуты и отмечены ✓, перенесённые — «↷ перенесена»; отметить «готово» (или вернуть в работу) можно прямо там."]],
@@ -19589,6 +19601,7 @@ var x = el.dataset.x, D0 = SPCD;
 switch (a) {
 case "spcnew": SPCD = null; go("spced-new"); return true;
 case "chlopen": if (task(x)) openTask(x); return true;
+case "mxrow": S.opt.mxrow = !mxRowOn(); optTouch(); save(); render(); return true;
 case "wk": var wt = task(x); if (wt) { if (wkOn(wt)) toast("Сегодня уже отмечено — время и прогресс можно добавить в меню задачи «◐»"); else wkMark(wt, 0); } return true;
 case "enfoff": enCtx(0); return true;
 case "rowmore": RLIM[location.hash] = (RLIM[location.hash] || 400) + 800; render(); return true;
@@ -21539,6 +21552,7 @@ case "tarchclear": CONF = "tarchclear"; render(); return;
 case "tarchclear-yes": var nowa = Date.now(), cla = tArchList(); cla.forEach(function (x) { x.del = 1; x.delAt = nowa; x.delBy = x.id; touch(x); }); CONF = null; save(); render(); toastUndo("Архив (" + cla.length + ") перенесён в корзину", function () { cla.forEach(function (x) { delete x.del; delete x.delAt; delete x.delBy; touch(x); }); save(); render(); }); return;
 case "revdef": S.opt.revDays = +el.dataset.v; optTouch(); save(); render(); return;
 case "qf": QFO[curKey()] = !QFO[curKey()]; render(); return;
+case "qfm": var qm = qfGet(); qm.mx = (qm.mx || []).slice(); var mi = qm.mx.indexOf(el.dataset.v); if (mi >= 0) qm.mx.splice(mi, 1); else qm.mx.push(el.dataset.v); render(); return;
 case "qfp": var qp = qfGet(), pv = +el.dataset.v, pi2 = qp.prio.indexOf(pv); if (pi2 >= 0) qp.prio.splice(pi2, 1); else qp.prio.push(pv); render(); return;
 case "qff": var qf2 = qfGet(); qf2.flag = qf2.flag === "yes" ? "any" : "yes"; render(); return;
 case "qfd": qfGet().due = el.dataset.v; render(); return;
@@ -21674,6 +21688,7 @@ h += '<div class="pn-title"><button class="ck' + (t.prio ? " p" + t.prio : "") +
 h += '<div class="props">' +
 '<span>Срок</span><div class="v"><input type="date" data-pf="date" value="' + date + '"><input type="time" data-pf="time" value="' + time + '"' + (date ? "" : " disabled") + '>' + (time ? '<input type="number" min="5" max="1440" step="5" data-pf="dur" value="' + (+t.dur || 30) + '" style="width:66px" title="Длительность, минут"><span class="muted">мин</span>' : "") + '<select data-pf="rep"' + (date ? "" : " disabled") + ">" + Object.keys(REPN).map(function (k) { return '<option value="' + k + '"' + ((t.rep || "") === k ? " selected" : "") + ">" + (k === "custom" && t.rep === "custom" ? "🔁 " + ruleText(t) : REPN[k]) + "</option>"; }).join("") + "</select>" + (date ? '<button class="btn sm" type="button" data-p="nodate" title="Убрать срок">✕</button>' : "") + '<div class="qdates">' + [["0", "Сегодня"], ["1", "Завтра"], ["mon", "Пн"], ["7", "+неделя"], ["some", "Когда-нибудь"]].map(function (q) { return '<button type="button" class="chip" data-p="qdate" data-v="' + q[0] + '">' + q[1] + "</button>"; }).join("") + "</div></div>" +
 (t.rep === "custom" && t.at ? rrBox(t) : "") +
+(t.done ? "" : '<span>Матрица</span><div class="v mxv">' + ["q1", "q2", "q3", "q4"].map(function (q) { var on = quadOf(t) === q; return '<button type="button" class="chip' + (on ? " on" : "") + '" data-p="mxq" data-v="' + q + '" title="' + MXQ[q][1] + " — " + MXQ[q][2] + (on ? "" : ". Перенос меняет приоритет и срок") + '">' + MXQ[q][0] + " " + MXQ[q][1] + "</button>"; }).join("") + "</div>") +
 '<span>Несколько дней</span><div class="v spnv"><span class="muted">до</span><input type="date" data-pf="till" value="' + (t.till ? dKey(t.till) : "") + '"' + (t.at ? ' min="' + dKey(t.at) + '"' : "") + ' title="Последний день, когда занимаетесь задачей">' + (t.till ? '<select data-pf="prog" title="Сколько уже готово">' + [0, 10, 25, 50, 75, 90].map(function (v) { return '<option value="' + v + '"' + ((t.prog || 0) === v ? " selected" : "") + ">" + (v ? "готово " + v + "%" : "прогресс —") + "</option>"; }).join("") + '</select><button class="btn sm" type="button" data-p="wk"' + (wkOn(t) ? " disabled" : "") + ">◐ " + (wkOn(t) ? "Сегодня ✓" : "Сегодня поработала") + '</button><button class="btn sm" type="button" data-p="dsplit" title="Подзадачи «День N» на каждый день периода">🗂 По дням</button><button class="btn sm" type="button" data-p="notill" title="Убрать период">✕</button>' : '<span class="muted">— большая задача: будет в «Сегодня» каждый день до этой даты и не уйдёт в просроченное</span>') + "</div>" +
 '<span>Дедлайн</span><div class="v"><input type="date" data-pf="due" value="' + (t.due ? dKey(t.due) : "") + '">' + (t.due ? '<button class="btn sm" type="button" data-p="nodue" title="Убрать дедлайн">✕</button>' + (t.due < today0() && !t.done ? '<span class="warnc">просрочен</span>' : "") : '<span class="muted">крайний срок, если он отличается от даты начала</span>') + "</div>" +
 (psecs(proj(t.pid)).length ? '<span>Секция</span><div class="v"><select data-pf="sec"><option value="">— без секции —</option>' + psecs(proj(t.pid)).map(function (x) { return '<option value="' + x.id + '"' + (t.sec === x.id ? " selected" : "") + ">" + esc(x.n) + "</option>"; }).join("") + "</select></div>" : "") +
@@ -21726,7 +21741,7 @@ P.hidden = false; P.classList.toggle("full", full); document.body.classList.add(
 autoH($("pn-t"));
 try { document.execCommand("defaultParagraphSeparator", false, "p"); } catch (er) { /* старый браузер */ }
 }
-var PNROW = { "Ответственный": "resp", "Срок": "due", "Несколько дней": "span", "Дедлайн": "deadline", "Секция": "sec", "Проект": "proj", "Спринт": "sprint", "Статус": "status", "Приоритет": "prio", "Теги": "tags", "Учёт времени": "track", "Входит в": "parent", "Напоминание": "rem", "Сначала сделать": "after", "Ждут эту задачу": "blocks", "Жду ответа": "wait" };
+var PNROW = { "Ответственный": "resp", "Срок": "due", "Несколько дней": "span", "Матрица": "mx", "Дедлайн": "deadline", "Секция": "sec", "Проект": "proj", "Спринт": "sprint", "Статус": "status", "Приоритет": "prio", "Теги": "tags", "Учёт времени": "track", "Входит в": "parent", "Напоминание": "rem", "Сначала сделать": "after", "Ждут эту задачу": "blocks", "Жду ответа": "wait" };
 var PNSEC = ["props", "desc", "subs", "chat"], PDR = null;
 function pnOrder(keys, saved, def) { var out = saved.filter(function (k) { return keys.indexOf(k) >= 0; }); keys.forEach(function (k) { if (out.indexOf(k) >= 0) return; var di = def.indexOf(k), at = 0; for (var j = di - 1; j >= 0; j--) { var pi = out.indexOf(def[j]); if (pi >= 0) { at = pi + 1; break; } } out.splice(at, 0, k); }); return out; }
 function pnMerge(domKeys, saved, def) { var full = pnOrder(def.slice(), saved, def), i = 0; return full.map(function (k) { return domKeys.indexOf(k) >= 0 ? domKeys[i++] : k; }); }
@@ -21905,6 +21920,7 @@ if (a === "nodue") { setTask(function (x) { x.due = 0; }); return; }
 if (a === "wk") { var wq = task(OPEN); if (wq) wkMark(wq, 0); return; }
 if (a === "dsplit") { var dq = task(OPEN); if (dq) daySplit(dq, 0); return; }
 if (a === "notill") { setTask(function (x) { delete x.till; }); return; }
+if (a === "mxq") { var mq = task(OPEN); if (mq && quadOf(mq) !== el.dataset.v) { setGroupVal(mq, "mx:" + el.dataset.v, true); touch(mq); save(); render(); renderPanel(); toast(MXQ[el.dataset.v][0] + " " + MXQ[el.dataset.v][1]); } return; }
 if (a === "rrwd") { setTask(function (x) { var r = x.rr || ruleOf(x) || { f: "w", n: 1 }, v = +el.dataset.v; r.wd = (r.wd || []).slice(); var k = r.wd.indexOf(v); if (k >= 0) { if (r.wd.length > 1) r.wd.splice(k, 1); } else r.wd.push(v); x.rr = r; x.rep = "custom"; }); return; }
 if (a === "deppick") { DEPPICK = !DEPPICK; renderPanel(); var dq = $("depq"); if (dq) dq.focus(); return; }
 if (a === "depadd") { if (depAdd(t, el.dataset.v)) { save(); render(); renderPanel(); var dq2 = $("depq"); if (dq2) dq2.focus(); toast("⛓ Сначала: «" + taskAny(el.dataset.v).t.slice(0, 50) + "»"); } return; }
@@ -23059,7 +23075,7 @@ fi.click();
 function fontLink(fam, id, extra) { if (!fam) return; var l = $(id); if (!l) { l = document.createElement("link"); l.rel = "stylesheet"; l.id = id; document.head.appendChild(l); } var href = "https://fonts.googleapis.com/css2?" + fam + (extra || "") + "&display=swap"; if (l.getAttribute("href") !== href) l.setAttribute("href", href); }
 function hexMix(x, y, t) { var p = parseInt(x.slice(1), 16), q = parseInt(y.slice(1), 16), r = function (sh) { return Math.round(((p >> sh) & 255) * (1 - t) + ((q >> sh) & 255) * t); }; return "#" + ((1 << 24) + (r(16) << 16) + (r(8) << 8) + r(0)).toString(16).slice(1); }
 function hexLum(x) { var n = parseInt(x.slice(1), 16), f = function (v) { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(n >> 16 & 255) + .7152 * f(n >> 8 & 255) + .0722 * f(n & 255); }
-function lookCfg() { var l = S.opt.look || {}; return { style: STY[l.style] ? l.style : "cloud", acc: l.acc || "", pic: WPICS[l.pic] ? l.pic : "hills", dim: WDIM[l.dim] !== undefined ? +l.dim : 1, fs: FSIZES[l.fs] ? l.fs : "1", emo: l.emo === "color" ? "color" : "mono" }; }
+function lookCfg() { var l = S.opt.look || {}; return { prio: l.prio === "color" ? "color" : "calm", style: STY[l.style] ? l.style : "cloud", acc: l.acc || "", pic: WPICS[l.pic] ? l.pic : "hills", dim: WDIM[l.dim] !== undefined ? +l.dim : 1, fs: FSIZES[l.fs] ? l.fs : "1", emo: l.emo === "color" ? "color" : "mono" }; }
 function isDark() { var p = themePref(); return p === "dark" || (p === "system" && !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)); }
 function rgba(hex, a) { var n = parseInt(String(hex).slice(1), 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
 var LOOKKEY = "";
@@ -23081,7 +23097,7 @@ v["--hf"] = '"' + F[1] + '"' + emo + (F[3] ? ", Georgia, serif" : ', "Onest", sy
 var fam = ["family=" + F[0].replace(/ /g, "+") + ":wght@400;500;600;700"]; if (F[1] !== F[0]) fam.push("family=" + F[1].replace(/ /g, "+") + ":wght@400;500;600"); if (emo) fam.push("family=Noto+Emoji:wght@400");
 fontLink(fam.join("&"), "fontlink");
 Object.keys(v).forEach(function (x) { st.setProperty(x, v[x]); });
-var cl = document.documentElement.classList; Object.keys(STY).forEach(function (k) { cl.toggle("st-" + k, k === L.style); }); cl.toggle("glass", gl); cl.toggle("emomono", L.emo === "mono");
+var cl = document.documentElement.classList; Object.keys(STY).forEach(function (k) { cl.toggle("st-" + k, k === L.style); }); cl.toggle("glass", gl); cl.toggle("emomono", L.emo === "mono"); cl.toggle("prcalm", L.prio !== "color");
 var mt = document.querySelector('meta[name="theme-color"]'); if (mt) mt.setAttribute("content", c[0]);
 }
 if (lookCfg().style === "glass" && lookCfg().pic === "custom") wpLoad();
@@ -23101,6 +23117,7 @@ return '<button type="button" class="lkcard' + (L.style === k ? " on" : "") + '"
 }).join("") + "</div>";
 h += '<div class="lkrow"><span class="lbl">Оттенок</span><div class="sw lkacc"><button type="button" data-a="look" data-k="acc" data-v="" class="lkauto' + (!L.acc ? " on" : "") + '" title="Как в стиле">◐</button>' + ACCENTS.concat(L.acc && ACCENTS.indexOf(L.acc) < 0 ? [L.acc] : []).map(function (x) { return '<button type="button" data-a="look" data-k="acc" data-v="' + x + '" class="' + (L.acc === x ? "on" : "") + '" style="background:' + x + '" title="' + x + '"></button>'; }).join("") +
 '<label class="lkpick" title="Любой цвет — откроется палитра"><input type="color" id="lkaccpick" value="' + (/^#[0-9a-f]{6}$/i.test(L.acc || "") ? L.acc : "#4f7568") + '" aria-label="Выбрать любой цвет"><span>любой</span></label></div></div>';
+h += '<div class="lkrow"><span class="lbl">Приоритет задач</span>' + seg("prio", { calm: "Спокойно", color: "Цветом" }, L.prio) + '<span class="muted">спокойно — кружки оттенками основного цвета; цветом — красный, жёлтый, синий</span></div>';
 h += '<div class="lkrow"><span class="lbl">Значки</span>' + seg("emo", { mono: "Контурные", color: "Цветные" }, L.emo) + '<span class="muted">контурные — одним цветом с текстом, спокойнее для глаз</span></div>';
 if (L.style === "glass") {
 h += '<div class="lbl" style="margin-top:14px">Обои под стеклом</div>';
