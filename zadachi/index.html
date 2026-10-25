@@ -2507,7 +2507,19 @@ CREATE TABLE dlg (
   PRIMARY KEY (code)
 );
 </script>
-<script>(function () {
+<script>function zdBoot(main) {
+var done = false; function go() { if (done) return; done = true; main(); }
+try {
+var rq = indexedDB.open("zd-main", 1);
+rq.onupgradeneeded = function () { rq.result.createObjectStore("kv"); };
+rq.onsuccess = function () { var db = rq.result; try { var g = db.transaction("kv").objectStore("kv").get("state"); g.onsuccess = function () { if (done) return; window.__ZDB = db; window.__ZDS = typeof g.result === "string" ? g.result : null; go(); }; g.onerror = go; } catch (e) { go(); } };
+rq.onerror = go; rq.onblocked = go;
+var moved = false; try { moved = !!(localStorage.getItem("zd-idb") || localStorage.getItem("zdemo:zd-idb")); } catch (e) { /* нет */ }
+setTimeout(function () { if (!moved) go(); else { var v = document.getElementById("view"); if (v && !done) v.textContent = "Загружаю данные…"; } }, 4000);
+if (moved) setTimeout(go, 30000);
+} catch (e) { go(); }
+}
+zdBoot(function () {
 "use strict";
 var BOOT = { t0: performance.now(), au: {}, done: false };
 var $ = function (id) { return document.getElementById(id); };
@@ -2551,15 +2563,51 @@ parts.push(en); if (prev !== null && next < LZCAP) { dict.push(prev + en.charAt(
 return parts.join("");
 }
 var LZMIN = 1500000, SAVEWARN = 0;
-function saveLocal() {
-var js = JSON.stringify(S), ok = LS.set("zd-state", js.length > LZMIN ? lzPack(js) : js);
-if (!ok && Date.now() - SAVEWARN > 60000) { SAVEWARN = Date.now(); toast("⚠ В браузере не хватает места для данных — они сохраняются на Яндекс Диск, но обратитесь к разработчику"); }
+var ST = { db: window.__ZDB || null, t: null, dirty: false, off: false, lsHas: false, sz: 0, ms: 0, at: 0, me: uid(), ch: null, src: "" };
+window.__ZDB = null;
+function saveLocal(now) { ST.dirty = true; clearTimeout(ST.t); if (now) stFlush(); else ST.t = setTimeout(stFlush, 350); }
+function stLS(js) { var ok = LS.set("zd-state", js.length > LZMIN ? lzPack(js) : js); ST.lsHas = ok; if (!ok && Date.now() - SAVEWARN > 60000) { SAVEWARN = Date.now(); toast("⚠ В браузере не хватает места для данных — они сохраняются на Яндекс Диск, но обратитесь к разработчику"); } }
+function stFlush() {
+clearTimeout(ST.t); ST.t = null; if (!ST.dirty || ST.off) return; ST.dirty = false;
+var t0 = performance.now(), js = JSON.stringify(S); ST.sz = js.length;
+if (ST.db) {
+try {
+var tx = ST.db.transaction("kv", "readwrite"); tx.objectStore("kv").put(js, "state");
+tx.oncomplete = function () { ST.at = Date.now(); if (!ST.mark) { ST.mark = true; LS.set("zd-idb", "1"); } if (ST.lsHas) { LS.del("zd-state"); ST.lsHas = false; } try { if (ST.ch) ST.ch.postMessage({ from: ST.me, at: S.at }); } catch (e) { /* ок */ } };
+tx.onerror = tx.onabort = function () { ST.db = null; LS.del("zd-idb"); stLS(js); };
+} catch (e) { ST.db = null; LS.del("zd-idb"); stLS(js); }
+} else stLS(js);
+ST.ms = performance.now() - t0;
 }
-var S = (function () { try { var raw = LS.get("zd-state") || "null"; BOOT.sz = raw.length; if (raw.charCodeAt(0) === 1) raw = lzUnpack(raw); return JSON.parse(raw); } catch (e) { return null; } })() || {};
+function stGet(key) { return new Promise(function (ok) { if (!ST.db) { ok(null); return; } try { var g = ST.db.transaction("kv").objectStore("kv").get(key); g.onsuccess = function () { ok(g.result === undefined ? null : g.result); }; g.onerror = function () { ok(null); }; } catch (e) { ok(null); } }); }
+function stPut(key, v) { return new Promise(function (ok) { if (!ST.db) { ok(false); return; } try { var tx = ST.db.transaction("kv", "readwrite"); if (v === null) tx.objectStore("kv").delete(key); else tx.objectStore("kv").put(v, key); tx.oncomplete = function () { ok(true); }; tx.onerror = tx.onabort = function () { ok(false); }; } catch (e) { ok(false); } }); }
+document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") stFlush(); });
+window.addEventListener("pagehide", stFlush);
+var S = (function () {
+function parse(raw) { try { if (!raw) return null; if (raw.charCodeAt(0) === 1) raw = lzUnpack(raw); return JSON.parse(raw); } catch (e) { return null; } }
+var ir = window.__ZDS || null, lr = LS.get("zd-state"); window.__ZDS = null; ST.lsHas = lr !== null; BOOT.sz = (ir || lr || "").length;
+var a = parse(ir), b = parse(lr); ST.src = a && b ? "оба" : a ? "IndexedDB" : b ? "localStorage" : "пусто";
+if (a && b) return (b.at || 0) > (a.at || 0) ? b : a;
+return a || b;
+})() || {};
 BOOT.st = performance.now();
 S.recipes = S.recipes || []; S.menus = S.menus || []; S.prods = S.prods || []; S.chores = S.chores || []; S.chlog = S.chlog || []; S.tblog = S.tblog || []; S.sops = S.sops || []; S.bpers = S.bpers || []; S.bwk = S.bwk || []; S.bregs = S.bregs || []; S.chq = S.chq || []; S.ckr = S.ckr || []; S.dplaces = S.dplaces || []; S.dout = S.dout || []; S.debts = S.debts || []; S.dbal = S.dbal || []; S.wish = S.wish || []; S.nsd = S.nsd || []; S.mdiary = S.mdiary || []; S.fck = S.fck || []; S.env = S.env || []; S.pantry = S.pantry || []; S.kchk = S.kchk || []; S.kwaste = S.kwaste || []; S.reports = S.reports || [];
 S.v = 2; S.tasks = S.tasks || []; S.projects = S.projects || []; S.tags = S.tags || []; S.filters = S.filters || []; S.sprints = S.sprints || []; S.comments = S.comments || []; S.habits = S.habits || []; S.hlog = S.hlog || []; S.acts = S.acts || []; S.tpls = S.tpls || []; S.flags = S.flags || []; S.notes = S.notes || []; S.nsecs = S.nsecs || []; S.ntags = S.ntags || []; S.boards = S.boards || []; S.goals = S.goals || []; S.days = S.days || []; S.at = S.at || 0; S.opt = S.opt || { autoRem: true };
 var VIEWS = (function () { try { return JSON.parse(LS.get("zd-views") || "{}") || {}; } catch (e) { return {}; } })();
+if (ST.db && ST.lsHas) setTimeout(function () { saveLocal(true); }, 1500); // переезд: база перепишется в IndexedDB, копия в localStorage удалится
+if (ST.db) {
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); } catch (e) { /* ок */ }
+try { ST.ch = new BroadcastChannel("zd-st-" + ST.db.name); ST.ch.onmessage = function (e) { var m = e.data || {}; if (m.from && m.from !== ST.me) stFromTab(); }; } catch (e) { ST.ch = null; }
+}
+function stFromTab() {
+stGet("state").then(function (raw) {
+if (!raw) return; var d; try { d = JSON.parse(raw); } catch (e) { return; }
+var n = 0;
+LISTS.forEach(function (k) { if (!Array.isArray(d[k]) || !d[k].length) return; var m = {}; S[k].forEach(function (x, i) { m[x.id] = i; }); d[k].forEach(function (x) { var i = m[x.id]; if (i === undefined) { S[k].push(x); n++; } else if ((x.upd || 0) > (S[k][i].upd || 0)) { S[k][i] = x; n++; } }); });
+if (d.opt && (d.opt.upd || 0) > (S.opt.upd || 0)) { S.opt = d.opt; n++; }
+if (n) { DV++; softRender(); }
+});
+}
 function save(quiet) { try { unScan(); } catch (er) { /* отмена не мешает сохранению */ } try { histScan(); } catch (er) { /* история не мешает сохранению */ } if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); DV++; saveLocal(); if (!quiet) { SYNC.later(); SRV.later(); } }
 function live(a) { return a.filter(function (x) { return !x.del; }); }
 function optTouch() { S.opt.upd = Math.max(Date.now(), (S.opt.upd || 0) + 1); }
@@ -3210,7 +3258,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-219";
+var APPV = "zd-app-2026-10-16-220";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -3241,11 +3289,38 @@ function unz64(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 
 function zpack(obj) { var st = new Blob([JSON.stringify(obj)]).stream().pipeThrough(new CompressionStream("deflate")); return new Response(st).arrayBuffer().then(function (ab) { return z64(new Uint8Array(ab)); }); }
 function zunpack(z) { var st = new Blob([unz64(z)]).stream().pipeThrough(new DecompressionStream("deflate")); return new Response(st).text().then(function (t) { return JSON.parse(t); }); }
 function cname(i) { return ROOT + "/c" + ("00" + i).slice(-3); }
+var SBASE = { at: 0, r: null, dirty: {} };
+function fh(v) { return v === undefined ? "u" : hash32(JSON.stringify(v)); }
+function baseOf(o) { var b = { _u: o.upd || 0 }; Object.keys(o).forEach(function (f) { if (f !== "upd" && o[f] !== undefined) b[f] = fh(o[f]); }); return b; }
+function merge3(loc, rem, b) {
+var keys = {}, out = {}, lw = (loc.upd || 0) >= (rem.upd || 0), both = [], fromL = false, fromR = false;
+Object.keys(loc).concat(Object.keys(rem)).forEach(function (f) { keys[f] = 1; });
+Object.keys(keys).forEach(function (f) {
+if (f === "upd") return; var lv = loc[f], rv = rem[f], lh = fh(lv), rh = fh(rv), v;
+if (lh === rh) v = lv; else { var bh = b[f] || "u"; if (lh === bh) { v = rv; fromR = true; } else if (rh === bh) { v = lv; fromL = true; } else { both.push(f); v = lw ? lv : rv; if (lw) fromL = true; else fromR = true; } }
+if (v !== undefined) out[f] = v;
+});
+if (!fromR) return { o: loc, both: both }; if (!fromL) return { o: rem, both: both };
+out.upd = Math.max(loc.upd || 0, rem.upd || 0) + 1; return { o: out, both: both };
+}
 function mergeList(a, b, k) {
-var m = {}; (a || []).forEach(function (x) { m[x.id] = x; });
-(b || []).forEach(function (x) { var y = m[x.id]; if (k && y) confCheck(k, y, x); if (!y || (x.upd || 0) > (y.upd || 0)) m[x.id] = x; });
+var m = {}, fm = k && CONFK[k] && SBASE.r; (a || []).forEach(function (x) { m[x.id] = x; });
+(b || []).forEach(function (x) {
+var y = m[x.id];
+if (fm && y && (x.upd || 0) !== (y.upd || 0)) {
+var bb = SBASE.r[k + "|" + x.id];
+if (bb && (x.upd || 0) > bb._u && (y.upd || 0) > bb._u) { var r = merge3(y, x, bb); if (r.both.length) confCheck(k, y, x); m[x.id] = r.o; if (r.o !== y) SBASE.dirty[k + "|" + x.id] = 1; return; }
+}
+if (k && y) confCheck(k, y, x); if (!y || (x.upd || 0) > (y.upd || 0)) { m[x.id] = x; if (fm) SBASE.dirty[k + "|" + x.id] = 1; }
+});
 return Object.keys(m).map(function (k) { return m[k]; });
 }
+function baseUpd() {
+var full = !SBASE.r, since = SBASE.at, now = Date.now(); if (full) SBASE.r = {};
+Object.keys(CONFK).forEach(function (k) { (S[k] || []).forEach(function (x) { var key = k + "|" + x.id; if (full || (x.upd || 0) > since || SBASE.dirty[key]) SBASE.r[key] = baseOf(x); }); });
+SBASE.at = now; SBASE.dirty = {}; stPut("sbase", JSON.stringify({ at: SBASE.at, r: SBASE.r }));
+}
+stGet("sbase").then(function (j) { if (!j || SBASE.r) return; try { var o = JSON.parse(j); if (o && o.r) { SBASE.at = o.at || 0; SBASE.r = o.r; } } catch (e) { /* соберётся заново */ } });
 var LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "flags", "notes", "nsecs", "ntags", "boards", "goals", "days", "recipes", "menus", "prods", "chores", "chlog", "tblog", "sops", "bpers", "bwk", "bregs", "chq", "ckr", "dplaces", "dout", "debts", "dbal", "wish", "nsd", "mdiary", "fck", "env", "pantry", "kchk", "kwaste", "reports"];
 function snapshot() { return { v: 2, tasks: S.tasks, projects: S.projects, tags: S.tags, filters: S.filters, sprints: S.sprints, comments: S.comments, habits: S.habits, hlog: S.hlog, acts: S.acts, tpls: S.tpls, flags: S.flags, notes: S.notes, nsecs: S.nsecs, ntags: S.ntags, boards: S.boards, opt: S.opt }; }
 var SYNC = {
@@ -3334,6 +3409,7 @@ if (changed || JSON.stringify(LISTS.map(function (k) { return S[k].length; })) +
 return SYNC.push(remote);
 }).then(function () {
 if (SYNC.legacyNew) { LS.set("zd-legacy-h", SYNC.legacyNew); SYNC.legacyNew = ""; }
+try { baseUpd(); } catch (e) { /* база для слияния — не обязательна */ }
 SYNC.busy = false; SYNC.bad = 0; SYNC.st = "ok"; SYNC.at = Date.now(); if (SYNC.errAt) { SYNC.errAt = 0; render(); } SYNC.show(); var wm = wpMeta(); if (wm && !wm.p && typeof wpUpload === "function") wpUpload();
 }).catch(function (e) {
 if (!(e && e.bad)) return SYNC.fail(e);
@@ -12138,6 +12214,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["220", "Данные надёжнее", ["База переехала в собственное хранилище браузера (IndexedDB): больше нет предела в ~5 МБ, а сохранение быстрее — серия действий подряд записывается один раз. Переезд — сам, при первом запуске.", "Две вкладки с приложением больше не затирают изменения друг друга: каждая подхватывает правки другой.", "💽 Копии на этом устройстве: раз в день — полная копия прямо в браузере, последние 14 дней; «↺ Вернуть» — откат к нужному дню одной кнопкой (текущее состояние сохраняется отдельно — можно передумать). «Настройки» → «Резервная копия».", "Синхронизация сливает изменения по полям: поменяли название задачи на телефоне, а срок на компьютере — сохранятся оба. Если одно и то же поле поменяли на двух устройствах — останется более свежее, а другое — в «Конфликтах синхронизации»."]],
 ["219", "«План по часам» — на все сутки", ["Лента дня теперь с 00:00 до 24:00: можно поставить задачу и ночью, и поздно вечером. При открытии лента сама прокручивается к текущему часу (для другого дня — к началу рабочего дня), так что начинать с полуночи не придётся."]],
 ["218", "Матрица в задачах; спокойные кружки приоритета", ["Квадрант матрицы Эйзенхауэра виден в задачах: значок 🔥 / 🎯 / ⚡ в строке (выключить — переключатель на странице «Матрица»), строка «Матрица» в карточке — переставить задачу в другой квадрант одним щелчком (меняются приоритет и срок).", "В любом списке — группировка «по матрице» и в быстром фильтре «⛃ Фильтр» — строка «Матрица»: например, только «🎯 Важно, но не срочно».", "Кружки приоритета — спокойными оттенками основного цвета стиля вместо красного, жёлтого и синего; чем важнее, тем насыщеннее. Вернуть цветные — «Настройки» → «Оформление» → «Приоритет задач»."]],
 ["217", "Помидоры видны снова", ["🍅 в строке задачи считает и время из «Засечь время» (каждые 25 минут — помидор), а не только таймер Помодоро; пока идёт учёт — учитывается и текущий отрезок.", "В карточке задачи помидоры видны всегда, вместе с идущим таймером и подсказкой «до следующего N мин»."]],
@@ -15004,7 +15081,7 @@ h += lookSection();
 h += '<section class="card" id="s-flags"><h2>Флажки</h2><p class="muted" style="margin:0">У задачи может стоять один из этих флажков. Название и цвет меняются здесь, порядок — стрелкой ↑. Задачи с флажками собраны в списке «С флажком».</p><div class="fled">' +
 flags().map(function (f, i) { return '<div class="flrow">' + flagIc(f, "big") + '<input class="inp" data-fln="' + f.id + '" value="' + esc(f.n) + '" maxlength="30" aria-label="Название флажка"><button type="button" class="ddb" data-a="flcdd" data-id="' + f.id + '" title="Цвет флажка"><i class="swc" style="background:' + col(f.c) + '"></i>' + COLORS[f.c || 0][0] + '<span class="dda">▾</span></button><span class="r">' + (i ? '<button class="btn sm" type="button" data-a="flup" data-id="' + f.id + '" title="Выше">↑</button>' : "") + '<button class="btn sm warn" type="button" data-a="fldel" data-id="' + f.id + '" title="Удалить флажок">🗑</button></span></div>'; }).join("") +
 (flags().length ? "" : '<p class="muted">Флажков нет — добавьте хотя бы один.</p>') + '</div><div class="r"><button class="btn sm" type="button" data-a="fladd">＋ Добавить флажок</button></div></section>';
-h += '<section class="card" id="s-backup"><h2>Резервная копия</h2><p class="muted" style="margin:0">Все данные одним файлом: задачи, проекты, теги, фильтры, флажки, спринты, комментарии, привычки, заметки, доски, шаблоны, рецепты, меню и настройки. Файл сохраняется на этот компьютер или телефон — храните его где удобно.</p><div class="r"><button class="btn pri" type="button" data-a="export">💾 Сохранить всё в файл</button><button class="btn" type="button" data-a="impopen">📂 Восстановить из файла…</button></div>' + bkHTML() +
+h += '<section class="card" id="s-backup"><h2>Резервная копия</h2><p class="muted" style="margin:0">Все данные одним файлом: задачи, проекты, теги, фильтры, флажки, спринты, комментарии, привычки, заметки, доски, шаблоны, рецепты, меню и настройки. Файл сохраняется на этот компьютер или телефон — храните его где удобно.</p><div class="r"><button class="btn pri" type="button" data-a="export">💾 Сохранить всё в файл</button><button class="btn" type="button" data-a="impopen">📂 Восстановить из файла…</button></div>' + lbkHTML() + bkHTML() +
 (CONF === "import" ? '<div class="confirm"><b>Восстановить данные из файла «' + esc(IMPF ? IMPF.name : "") + '»?</b><span><b>Заменить</b> — всё станет точно как в файле: то, чего в файле нет, удалится (и на других устройствах после синхронизации). <b>Объединить</b> — записи из файла добавятся к текущим, совпадающие заменятся более свежими версиями.</span><div class="r"><button class="btn pri" type="button" data-a="imp-replace">Заменить всё данными из файла</button><button class="btn" type="button" data-a="imp-yes">Объединить с текущими</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : "") + "</section>";
 var tstN = tstCount();
 if (!tstN) h += '<section class="card" id="s-test"><h2>🧪 Тестовые данные</h2><p class="muted" style="margin:0 0 6px">Посмотреть возможности, вообще не трогая свои данные, — <a href="demo.html" target="_blank" rel="noopener">▶ демо-версия</a> в новой вкладке.</p><p class="muted" style="margin:0">Готовый набор для проверки возможностей: 10 проектов, 53 задачи (сроки, повторы, подзадачи, спринт, выполненные), теги, фильтры, привычки с отметками, заметки и 3 доски. Добавляется к вашим данным, ничего не заменяя, и удаляется отсюда же одной кнопкой — ваши записи при этом останутся.</p><div class="r"><button class="btn" type="button" data-a="tstload">🧪 Загрузить тестовые данные</button></div></section>';
@@ -15340,7 +15417,7 @@ function diagReport() {
 var sz = 0; try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); sz += k.length + (localStorage.getItem(k) || "").length; } } catch (e) { sz = -1; }
 return ["Задачи — отчёт диагностики " + new Date().toLocaleString("ru-RU"), "Адрес: " + location.href.split("?")[0] + location.hash, "Браузер: " + navigator.userAgent, "Экран: " + innerWidth + "×" + innerHeight,
 "Синхронизация: " + (YD.on ? (YD.token() ? "вход выполнен, " + SYNC.st + (SYNC.at ? ", " + new Date(SYNC.at).toLocaleTimeString("ru-RU") : "") : "без входа") : "выключена"), "Сервер: " + (SRV.usable() ? "задан" : "нет"),
-"Хранилище браузера: ~" + Math.round(sz / 1024) + " КБ (задачи: ~" + Math.round((LS.get("zd-state") || "").length / 1024) + " КБ)", "Скрытые пункты: " + JSON.stringify(hiddenLists()) + " · в настройках: " + JSON.stringify(S.opt.hideLists || []),
+"Хранилище браузера: ~" + Math.round(sz / 1024) + " КБ · база: " + (ST.db ? "IndexedDB" : "localStorage") + " ~" + Math.round((ST.sz || BOOT.sz || 0) / 1024) + " КБ, загружена из: " + ST.src + (ST.ms ? ", запись " + Math.round(ST.ms) + " мс" : ""), "Скрытые пункты: " + JSON.stringify(hiddenLists()) + " · в настройках: " + JSON.stringify(S.opt.hideLists || []),
 "Перерисовок за минуту: " + DIAG.renders.length, "", "Журнал:"].concat(DIAG.log).join("\n");
 }
 if (DIAG.on) {
@@ -15762,6 +15839,53 @@ return YD.folder("app:/tasks").then(function () { return YD.folder(BKDIR); })
 .catch(function (e) { BKBUSY = false; LS.del("zd-bkday"); if (force) toast("Копия не сохранилась: " + ((e && e.msg) || "нет связи с Диском")); return false; });
 }
 setTimeout(function () { bkTick(); }, 90000); setInterval(function () { bkTick(); }, 10 * 60000);
+var LBKKEEP = 14, LBK = null, LBKBUSY = false;
+function lbkMeta() { return stGet("bkm").then(function (m) { return Array.isArray(m) ? m : []; }); }
+function lbkSnap(key, force) {
+if (!ST.db) return Promise.resolve(false);
+return lbkMeta().then(function (m) {
+if (!force && m.some(function (x) { return x.d === key; })) return false;
+var js = JSON.stringify(bkObj()), n = live(S.tasks).length;
+return stPut("bk:" + key, js).then(function (ok) {
+if (!ok) return false;
+m = m.filter(function (x) { return x.d !== key; }); m.push({ d: key, at: Date.now(), sz: js.length, n: n, nn: live(S.notes).length });
+var days = m.filter(function (x) { return x.d !== "pre"; }).sort(function (a, b) { return a.d < b.d ? 1 : -1; }), old = days.slice(LBKKEEP);
+old.forEach(function (x) { stPut("bk:" + x.d, null); }); m = m.filter(function (x) { return old.indexOf(x) < 0; });
+return stPut("bkm", m).then(function () { LBK = m; return true; });
+});
+});
+}
+function lbkDaily() { if (!ST.db || LBKBUSY) return; var day = dKey(Date.now()); if (LS.get("zd-lbkday") === day) return; LBKBUSY = true; lbkSnap(day).then(function () { LS.set("zd-lbkday", day); LBKBUSY = false; if (V === "settings") softRender(); }, function () { LBKBUSY = false; }); }
+setTimeout(lbkDaily, 5000); setInterval(lbkDaily, 10 * 60000);
+function lbkWhen(x) { return x.d === "pre" ? "до последнего восстановления · " + new Date(x.at).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : new Date(x.d + "T12:00:00").toLocaleDateString("ru-RU", { weekday: "short", day: "numeric", month: "long" }); }
+function lbkHTML() {
+var h = '<h3 style="margin:14px 0 4px">💽 Копии на этом устройстве</h3>';
+if (!ST.db) return h + '<p class="muted" style="margin:0">Этот браузер не даёт приложению своё хранилище (IndexedDB) — копии на устройстве недоступны. Пользуйтесь файлом и автокопиями на Диске.</p>';
+if (!LBK) { lbkMeta().then(function (m) { LBK = m; if (V === "settings") softRender(); }); return h + '<p class="muted" style="margin:0">Загружаю список…</p>'; }
+h += '<p class="muted" style="margin:0">Раз в день приложение само сохраняет полную копию прямо здесь (без интернета и без Диска) и хранит последние ' + LBKKEEP + '. Вернуть данные к нужному дню — кнопка «↺ Вернуть».</p>';
+var l = LBK.slice().sort(function (a, b) { return a.d === "pre" ? -1 : b.d === "pre" ? 1 : a.d < b.d ? 1 : -1; });
+h += l.length ? '<ul class="bkl">' + l.map(function (x) {
+var conf = CONF === "lbk:" + x.d;
+return "<li><span>" + esc(lbkWhen(x)) + '</span><span class="muted">задач ' + x.n + (x.nn ? " · заметок " + x.nn : "") + " · " + Math.max(1, Math.round(x.sz / 1024)) + ' КБ</span><button class="btn sm" type="button" data-a="lbkres" data-d="' + esc(x.d) + '">↺ Вернуть</button><button class="btn sm" type="button" data-a="lbkget" data-d="' + esc(x.d) + '">⬇ Файлом</button></li>' +
+(conf ? '<li class="confirm"><b>Вернуть все данные к копии «' + esc(lbkWhen(x)) + '»?</b><span>Всё, что изменилось после, пропадёт — и на других устройствах после синхронизации. Текущее состояние перед этим сохранится отдельной копией «до последнего восстановления» — можно будет передумать.</span><div class="r"><button class="btn pri" type="button" data-a="lbkyes" data-d="' + esc(x.d) + '">Вернуть</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></li>' : "");
+}).join("") + "</ul>" : '<p class="muted">Первая копия появится через несколько секунд после запуска.</p>';
+return h + '<div class="r"><button class="btn" type="button" data-a="lbknow">💽 Сделать копию сейчас</button></div>';
+}
+function lbkAct(a, el) {
+var d = el.dataset.d;
+if (a === "lbkres") { CONF = CONF === "lbk:" + d ? null : "lbk:" + d; render(); return true; }
+if (a === "lbknow") { lbkSnap(dKey(Date.now()), true).then(function (ok) { toast(ok ? "Копия на устройстве сохранена" : "Копия не сохранилась"); render(); }); return true; }
+if (a === "lbkget") { stGet("bk:" + d).then(function (js) { if (!js) { toast("Копия не найдена"); return; } var ln = document.createElement("a"); ln.href = URL.createObjectURL(new Blob([js], { type: "application/json" })); ln.download = "Задачи — копия " + (d === "pre" ? "до восстановления" : d) + ".json"; document.body.appendChild(ln); ln.click(); ln.remove(); setTimeout(function () { URL.revokeObjectURL(ln.href); }, 60000); }); return true; }
+if (a === "lbkyes") {
+stGet("bk:" + d).then(function (js) {
+var j; try { j = JSON.parse(js); } catch (e) { j = null; } if (!j) { toast("Копия не читается"); return; }
+var go2 = function () { restoreAll(j); CONF = null; stFlush(); SYNC.later(); render(); toast("↺ Данные возвращены к копии «" + lbkWhen({ d: d, at: Date.now() }) + "»"); };
+if (d === "pre") go2(); else lbkSnap("pre", true).then(go2);
+});
+return true;
+}
+return false;
+}
 function bkHTML() {
 var h = '<h3 style="margin:14px 0 4px">☁️ Автокопии на Яндекс Диске</h3>';
 if (!YD.on) return h + '<p class="muted" style="margin:0">Работают в приложении на сайте, когда включена синхронизация с Яндекс Диском.</p>';
@@ -16125,6 +16249,7 @@ if (a && v204Act(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && spcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && tqAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && imgtAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
+if (a && lbkAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && wcAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && gdAct(a, el)) { if (el.tagName === "A") e.preventDefault(); return; }
 if (a && clAct(a, el)) { if (el.closest(".nav")) e.preventDefault(); if (el.tagName === "A") e.preventDefault(); return; }
@@ -18082,7 +18207,7 @@ LS.set("zd-daytopmig", "1");
 })();
 BOOT.end = performance.now();
 window.ZD = { touch: touch, save: save, bnTick: bnTick, bnAct: bnAct, food: { menuNeeds: menuNeeds, menuObj: menuObj, recCalc: recCalc, parseIng: parseIng, findProd: findProd, recipe: recipe, recFromHtml: recFromHtml, recFromText: recFromText, rosstatParse: rosstatParse, priceCalc: priceCalc }, AI: AI, aiApply: aiApply, setAIP: function (x) { AIP = x; render(); }, habits: habits, hMark: hMark, hStreak: hStreak, doneEvents: doneEvents, CAL: CAL, occIn: occIn, reorderTask: reorderTask, palBuild: function (q) { palBuild(q); return PAL.items; }, SELS: function () { return selIds(); }, taskCmd: taskCmd, pasteInto: pasteInto, taskMenu: taskMenu, ensureSprint: ensureSprint, monday: monday, setCol: setCol, S: S, parseQuick: parseQuick, nextOcc: nextOcc, ruleText: ruleText, ruleOf: ruleOf, nextAfterDone: nextAfterDone, remWanted: remWanted, mergeList: mergeList, SRV: SRV, filterRes: filterRes, moveProj: moveProj, moveTaskTo: moveTaskTo, task: task };
-})();</script>
+});</script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (r) { r.update(); }).catch(function () {});</script>
 
 </body>
