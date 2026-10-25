@@ -7711,7 +7711,7 @@ return set;
 function isArch(pid) { var a = archIds(); return !!(a && pid && a[pid]); }
 var FOCUS = LS.get("zd-focus") || "", FSC = null;
 function focusSet() { if (!FOCUS) return null; var k = FOCUS + "|" + S.projects.length + "|" + S.at; if (FSC && FSC.k === k) return FSC.s; var st = {}; if (/^sp:/.test(FOCUS)) st = spcFocusSet(FOCUS.slice(3)); else pdesc(FOCUS).forEach(function (id) { st[id] = 1; }); FSC = { k: k, s: st }; return st; }
-function tasks() { return memo("tasks|" + today0() + "|" + SHOWARCH + "|" + FOCUS + "|" + CTXF + "|" + ENF, function () { var a = SHOWARCH ? null : archIds(), l = live(S.tasks), fs = focusSet(), sz0 = today0(); l = l.filter(function (t) { return t.done || !t.snz || t.snz <= sz0; }); if (a) l = l.filter(function (t) { return !a[t.pid]; }); if (fs) l = l.filter(function (t) { return fs[t.pid] || (fs.__g && t.goal && fs.__g[t.goal]); }); if (CTXF) l = l.filter(function (t) { var c = (t.tags || []).filter(isCtx); return !c.length || c.indexOf(CTXF) >= 0; }); if (ENF) l = l.filter(function (t) { return t.done || (t.en && t.en <= ENF); }); return l; }).slice(); }
+function tasks() { return memo("tasks|" + today0() + "|" + SHOWARCH + "|" + FOCUS + "|" + CTXF + "|" + ENF, function () { var a = SHOWARCH ? null : archIds(), l = live(S.tasks), fs = focusSet(), sz0 = today0(); l = l.filter(function (t) { return t.done || !t.snz || t.snz <= sz0; }); if (a) l = l.filter(function (t) { return !a[t.pid]; }); if (fs) l = l.filter(function (t) { return fs[t.pid] || (fs.__g && t.goal && fs.__g[t.goal]); }); if (CTXF) l = l.filter(function (t) { var c = (t.tags || []).filter(isCtx); return !c.length || c.indexOf(CTXF) >= 0; }); if (ENF) l = l.filter(function (t) { return t.done || !t.en || t.en <= ENF; }); return l; }).slice(); }
 function setFocus(id) { FOCUS = id || ""; FSC = null; if (FOCUS) LS.set("zd-focus", FOCUS); else LS.del("zd-focus"); render(); toast(FOCUS ? "🎯 Фокус: «" + (/^sp:/.test(FOCUS) ? spcName(FOCUS.slice(3)) : (proj(FOCUS) || {}).n) + "» — видны только его задачи" : "Фокус снят — видны все задачи"); }
 function task(id) {
 if (!id) return null;
@@ -8330,7 +8330,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-210";
+var APPV = "zd-app-2026-10-16-211";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -9695,7 +9695,12 @@ var due = revDue(), p = V === "proj" ? proj(ARG) : null;
 return '<div class="modebar rev"><b>↻ Проверка проектов</b><span>' + (due.length ? "осталось проверить: " + due.length : "все проверены ✓") + (p ? " · «" + esc(p.n) + "»: " + (p.revAt ? "проверен " + new Date(p.revAt).toLocaleDateString("ru-RU") : "ещё не проверялся") + (revInt(p) ? ", интервал " + revInt(p) + " дн." : ", без проверки") : "") + '</span><span class="r"><button type="button" class="btn sm" data-a="rev-prev" title="Предыдущий">‹</button><button type="button" class="btn sm" data-a="rev-next" title="Следующий">›</button>' + (p ? '<button type="button" class="btn sm pri" data-a="rev-ok">✓ Проверено</button>' : "") + '<button type="button" class="btn sm" data-a="rev-off">Выйти</button></span></div>' +
 (p && V === "proj" ? '<p class="muted revhint">Уберите неактуальное, добавьте новое, проверьте приоритеты и сроки, назначьте даты задачам без срока — и нажмите «Проверено».</p>' : "");
 }
-function focusBar() { if (!FOCUS) return ""; if (/^sp:/.test(FOCUS)) { var fsk = FOCUS.slice(3); if (!SPZ[fsk]) { FOCUS = ""; LS.del("zd-focus"); return ""; } return '<div class="modebar foc"><b>🎯 Фокус</b><span>пространство «' + esc(spcName(fsk)) + '» — в списках, поиске и календаре видны только задачи его проектов и целей</span><span class="r"><a class="btn sm" href="#' + spzHref(fsk) + '">Открыть пространство</a><button type="button" class="btn sm" data-a="focus-off">Выйти из фокуса</button></span></div>'; } var p = proj(FOCUS); if (!p) { FOCUS = ""; LS.del("zd-focus"); return ""; } return '<div class="modebar foc"><b>🎯 Фокус</b><span>«' + esc(p.n) + '» — в списках, поиске и календаре видны только его задачи</span><span class="r"><a class="btn sm" href="#proj-' + p.id + '">Открыть проект</a><button type="button" class="btn sm" data-a="focus-off">Выйти из фокуса</button></span></div>'; }
+function enBar() {
+if (!ENF) return ""; var hid = live(S.tasks).filter(function (t) { return !t.done && !t.del && t.en && t.en > ENF; }).length;
+return '<div class="modebar foc enbar"><b>' + ["", "🪫", "🔋", "⚡"][ENF] + ' Сколько сил: ' + ENN[ENF].replace(/^\S+\s/, "") + "</b><span>" + (hid ? "скрыто задач тяжелее: " + hid : "ничего не скрыто") + ' — задачи без отметки сил видны всегда</span><span class="r"><button type="button" class="btn sm" data-a="enfoff">Показать все задачи</button></span></div>';
+}
+function focusBar() { return enBar() + focusBar0(); }
+function focusBar0() { if (!FOCUS) return ""; if (/^sp:/.test(FOCUS)) { var fsk = FOCUS.slice(3); if (!SPZ[fsk]) { FOCUS = ""; LS.del("zd-focus"); return ""; } return '<div class="modebar foc"><b>🎯 Фокус</b><span>пространство «' + esc(spcName(fsk)) + '» — в списках, поиске и календаре видны только задачи его проектов и целей</span><span class="r"><a class="btn sm" href="#' + spzHref(fsk) + '">Открыть пространство</a><button type="button" class="btn sm" data-a="focus-off">Выйти из фокуса</button></span></div>'; } var p = proj(FOCUS); if (!p) { FOCUS = ""; LS.del("zd-focus"); return ""; } return '<div class="modebar foc"><b>🎯 Фокус</b><span>«' + esc(p.n) + '» — в списках, поиске и календаре видны только его задачи</span><span class="r"><a class="btn sm" href="#proj-' + p.id + '">Открыть проект</a><button type="button" class="btn sm" data-a="focus-off">Выйти из фокуса</button></span></div>'; }
 function vProjIn(p) {
 var vo = vopt(), ids = vo.sub ? pdesc(p.id) : [p.id];
 var l = tasks().filter(function (t) { return ids.indexOf(t.pid) >= 0 && !t.done; });
@@ -16784,7 +16789,7 @@ return '<div class="r aprow"><button type="button" class="btn sm" data-a="apgo" 
 }
 var ENF = +(LS.get("zd-enf") || 0), ENN = ["", "🪫 мало сил", "🔋 средне", "⚡ много сил"];
 function enShowBtn() { var b = $("enBtn"); if (!b) return; b.classList.toggle("on", !!ENF); b.textContent = ENF ? ["", "🪫", "🔋", "⚡"][ENF] : "🔋"; b.title = ENF ? "Показаны задачи: " + ENN[ENF] + " и проще. Нажмите, чтобы сменить" : "Сколько сил сейчас: показать только подходящие задачи"; }
-function enCtx(c) { ENF = +c; if (ENF) LS.set("zd-enf", String(ENF)); else LS.del("zd-enf"); DV++; render(); toast(ENF ? "Показаны задачи с энергией «" + ENN[ENF] + "» и проще (у остальных энергия не указана — в «🔋» меню задачи)" : "Показаны все задачи"); }
+function enCtx(c) { ENF = +c; if (ENF) LS.set("zd-enf", String(ENF)); else LS.del("zd-enf"); DV++; render(); toast(ENF ? "Скрыты задачи тяжелее, чем «" + ENN[ENF] + "». Задачи без отметки сил видны всегда" : "Показаны все задачи"); }
 var WRVS = [["inbox", "📥 Разобрать «Входящие»", "Каждой задаче — проект, дата или «Когда-нибудь»; лишнее удалить."], ["late", "⏰ Просроченное", "Перенести на реальные даты или отменить то, что уже не нужно."], ["proj", "📁 Проекты без следующего шага", "У каждого живого проекта должна быть хотя бы одна открытая задача. Проекты-«папки» с подпроектами не считаются — шаги у них в подпроектах."], ["wait", "⏳ «Жду ответа»", "Кому напомнить? Что уже можно закрыть?"], ["some", "💭 «Когда-нибудь»", "Пролистать: что пора взять в работу, что удалить."], ["goals", "🎯 Цели", "Есть ли движение? Какой шаг сделать на этой неделе?"], ["top", "⭐ Три главных дела недели", "Выберите до трёх задач — они будут видны в «Сегодня» всю неделю."], ["note", "✍ Итоги прошлой недели", "Что получилось, что нет, что поменять."]];
 function wrKey() { return dKey(monday(today0())); }
 function wrRec() { var o = S.opt.wrev = S.opt.wrev || {}, k = wrKey(); return o[k] = o[k] || { st: {}, top: [] }; }
@@ -16862,7 +16867,7 @@ case "shrtask": shareSave("task"); return true;
 case "shrnote": shareSave("note"); return true;
 case "shrx": SHR = null; render(); return true;
 case "fsnd": fsMenu(el); return true;
-case "enf": var r = el.getBoundingClientRect(); ctxShow(Math.max(8, r.left - 160), r.bottom + 4, [{ c: "0", i: ENF ? "" : "✓", l: "Все задачи" }, "-", { c: "1", i: ENF === 1 ? "✓" : "🪫", l: "Мало сил — только простое" }, { c: "2", i: ENF === 2 ? "✓" : "🔋", l: "Средне — простое и среднее" }, { c: "3", i: ENF === 3 ? "✓" : "⚡", l: "Много сил — всё с указанной энергией" }], { k: "enf", id: "" }); return true;
+case "enf": var r = el.getBoundingClientRect(); ctxShow(Math.max(8, r.left - 160), r.bottom + 4, [{ c: "0", i: ENF ? "" : "✓", l: "Все задачи" }, "-", { c: "1", i: ENF === 1 ? "✓" : "🪫", l: "Мало сил — скрыть средние и тяжёлые" }, { c: "2", i: ENF === 2 ? "✓" : "🔋", l: "Средне — скрыть тяжёлые" }, { c: "3", i: ENF === 3 ? "✓" : "⚡", l: "Много сил — показать всё" }], { k: "enf", id: "" }); return true;
 case "apgo": apMake(); return true;
 case "apok": apApply(); return true;
 case "apx": APV = null; render(); return true;
@@ -17243,6 +17248,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["211", "Демо обновлено, ссылка на демо; «Сколько сил» больше не прячет задачи", ["Фильтр «🔋 Сколько сил» скрывает только задачи тяжелее выбранного, а задачи без отметки сил видны всегда (раньше при «⚡ много сил» пропадали все задачи без отметки). Пока фильтр включён, над списком — полоса: сколько скрыто и «Показать все задачи».", "Демо-версия показывает новые возможности: своё пространство «Учёба 1С» с рабочим столом и фокусом, два идущих челленджа («Осанка и лицо» и «Дом»), советник по оценкам времени, выбор оформления, челленджи недели и «Неделю в цифрах».", "Ссылка на демо — в меню кружка профиля («▶ Демо-версия»), в справке «С чего начать» и в «Настройки» → «Тестовые данные». Демо открывается в новой вкладке и ваши данные не трогает."]],
 ["210", "Все челленджи в одном месте", ["Новая страница «🏁 Челленджи» (🌿 Жизнь и «Все разделы»): «Осанка и лицо», «Дом», «Финансы», «Кухня» — что идёт сейчас (день, прогресс программы, сколько сделано сегодня, кнопка «Задание на сегодня»), что можно начать — «Подробнее и старт»."]],
 ["209", "«Все разделы» листается правильно", ["Открытое окно «Все разделы» прокручивается само, а страница под ним больше не уезжает; щелчок по пустому месту закрывает окно."]],
 ["208", "Справка и курс — в новом оформлении", ["Картинки в справке и учебный курс (PDF) пересняты в новом оформлении; в курсе обновлён урок «Оформление» и добавлены свои пространства, челленджи, «Неделя в цифрах» и советник. В справке — новый раздел «Свои пространства»."]],
@@ -18502,12 +18508,15 @@ var b = $("prfBtn"); if (!b) return; var sp = b.querySelector("span"), ini = prf
 var d = b.querySelector(".prfdot"), err = YD.on && SYNC.st === "err"; if (d) { d.hidden = !err && !(YD.on && !YD.token()); d.classList.toggle("err", !!err); }
 document.body.classList.toggle("tclean", S.opt.topfull !== true);
 }
+function isDemo() { return !!document.getElementById("demo-data"); }
+function demoOpen() { var u = isDemo() ? "./" : "demo.html"; var w = window.open(u, "_blank", "noopener"); if (!w) location.href = u; }
 function prfMenu(el) {
 var r = el.getBoundingClientRect(), dark = themePref() === "dark" || (themePref() === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches), xs = xpOn() ? xpStats() : null;
 var it = [];
 if (YD.on) it.push({ c: "sync", i: "☁", l: !YD.token() ? "Войти через Яндекс" : SYNC.st === "err" ? "Нет связи с Диском — повторить" : "Синхронизировать" + (SYNC.at ? " · " + hm(SYNC.at) : "") });
 it = it.concat([{ c: "theme", i: "🌓", l: "Тема: " + (dark ? "тёмная → светлая" : "светлая → тёмная") }, { c: "settings", i: "⚙", l: "Настройки" }, { c: "mods", i: "🧩", l: "Модули" }, "-", { c: "help", i: "?", l: "Справка" }, { c: "keys", i: "⌨", l: "Горячие клавиши" }, { c: "news", i: "✨", l: "Что нового" }]);
 if (xs) it.push({ c: "xp", i: "⭐", l: "Уровень " + xs.lvl + " · " + xs.xp + " очков" });
+it.push(isDemo() ? { c: "demo", i: "↗", l: "Открыть основное приложение" } : { c: "demo", i: "▶", l: "Демо-версия — все возможности на примерах" });
 it = it.concat(["-", { c: "topfull", i: "▭", l: "Все кнопки в верхней строке", k: S.opt.topfull === true ? "✓" : "" }]);
 ctxShow(Math.max(8, r.right - 260), r.bottom + 4, it, { k: "prf" });
 }
@@ -18525,6 +18534,7 @@ ctxShow(r.left, r.bottom + 4, it, { k: "pgm" });
 }
 function hzCtx(k, id, c) {
 if (k === "prf") {
+if (c === "demo") { demoOpen(); return true; }
 if (c === "sync") $("syncBtn").click(); else if (c === "theme") { $("themeBtn").click(); render(); } else if (c === "keys") keysShow(); else if (c === "xp") { STTAB = "xp"; LS.set("zd-sttab", "xp"); go("stats"); }
 else if (c === "topfull") { S.opt.topfull = S.opt.topfull === true ? false : true; optTouch(); save(); prfSync(); railSync(); toast(S.opt.topfull ? "В верхней строке снова все кнопки" : "Верхняя строка — только главное; остальное в меню профиля"); }
 else go(c); return true;
@@ -19542,6 +19552,7 @@ var x = el.dataset.x, D0 = SPCD;
 switch (a) {
 case "spcnew": SPCD = null; go("spced-new"); return true;
 case "chlopen": if (task(x)) openTask(x); return true;
+case "enfoff": enCtx(0); return true;
 case "rowmore": RLIM[location.hash] = (RLIM[location.hash] || 400) + 800; render(); return true;
 case "spced": go("spced-" + (x || cpSpace())); return true;
 case "spcfocus": setFocus(FOCUS === "sp:" + x ? "" : "sp:" + x); return true;
@@ -19836,7 +19847,7 @@ flags().map(function (f, i) { return '<div class="flrow">' + flagIc(f, "big") + 
 h += '<section class="card" id="s-backup"><h2>Резервная копия</h2><p class="muted" style="margin:0">Все данные одним файлом: задачи, проекты, теги, фильтры, флажки, спринты, комментарии, привычки, заметки, доски, шаблоны, рецепты, меню и настройки. Файл сохраняется на этот компьютер или телефон — храните его где удобно.</p><div class="r"><button class="btn pri" type="button" data-a="export">💾 Сохранить всё в файл</button><button class="btn" type="button" data-a="impopen">📂 Восстановить из файла…</button></div>' + bkHTML() +
 (CONF === "import" ? '<div class="confirm"><b>Восстановить данные из файла «' + esc(IMPF ? IMPF.name : "") + '»?</b><span><b>Заменить</b> — всё станет точно как в файле: то, чего в файле нет, удалится (и на других устройствах после синхронизации). <b>Объединить</b> — записи из файла добавятся к текущим, совпадающие заменятся более свежими версиями.</span><div class="r"><button class="btn pri" type="button" data-a="imp-replace">Заменить всё данными из файла</button><button class="btn" type="button" data-a="imp-yes">Объединить с текущими</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : "") + "</section>";
 var tstN = tstCount();
-if (!tstN) h += '<section class="card" id="s-test"><h2>🧪 Тестовые данные</h2><p class="muted" style="margin:0">Готовый набор для проверки возможностей: 10 проектов, 53 задачи (сроки, повторы, подзадачи, спринт, выполненные), теги, фильтры, привычки с отметками, заметки и 3 доски. Добавляется к вашим данным, ничего не заменяя, и удаляется отсюда же одной кнопкой — ваши записи при этом останутся.</p><div class="r"><button class="btn" type="button" data-a="tstload">🧪 Загрузить тестовые данные</button></div></section>';
+if (!tstN) h += '<section class="card" id="s-test"><h2>🧪 Тестовые данные</h2><p class="muted" style="margin:0 0 6px">Посмотреть возможности, вообще не трогая свои данные, — <a href="demo.html" target="_blank" rel="noopener">▶ демо-версия</a> в новой вкладке.</p><p class="muted" style="margin:0">Готовый набор для проверки возможностей: 10 проектов, 53 задачи (сроки, повторы, подзадачи, спринт, выполненные), теги, фильтры, привычки с отметками, заметки и 3 доски. Добавляется к вашим данным, ничего не заменяя, и удаляется отсюда же одной кнопкой — ваши записи при этом останутся.</p><div class="r"><button class="btn" type="button" data-a="tstload">🧪 Загрузить тестовые данные</button></div></section>';
 if (tstN) h += '<section class="card" id="s-test"><h2>🧪 Тестовые данные</h2><p class="muted" style="margin:0">Загружено тестовых записей: ' + tstN + ' (проекты, задачи, теги, фильтры, привычки, заметки, доски). Кнопка ниже удалит только их — ваши собственные задачи и проекты останутся. Если вы положили свою задачу в тестовый проект, она останется, но без проекта.</p>' +
 (CONF === "tstwipe" ? '<div class="confirm"><b>Удалить все тестовые данные?</b><div class="r"><button class="btn warn" type="button" data-a="tstwipe-yes">Удалить тестовые</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : '<div class="r"><button class="btn warn" type="button" data-a="tstwipe">🧪 Удалить тестовые данные…</button></div>') + "</section>";
 h += '<section class="card" id="s-diag"><h2>Диагностика</h2>' + bootHTML() + '<p class="muted" style="margin:0">Если что-то работает странно (теряется курсор, не нажимается галочка), включите диагностику, повторите действие и нажмите «Скопировать отчёт» в окошке справа внизу — пришлите текст разработчику. В отчёте нет текста задач, только служебные сведения.</p><div class="r"><button class="btn" type="button" data-a="diag">' + (DIAG.on ? "Выключить диагностику" : "🔍 Включить диагностику") + '</button><label class="chk" title="Если после обновления что-то показывается странно — включите и напишите разработчику"><input type="checkbox" data-a="nomorph"' + (LS.get("zd-nomorph") === "1" ? " checked" : "") + "> Перерисовывать страницу целиком (по-старому, с миганием)</label></div></section>";
@@ -19855,7 +19866,7 @@ by[k] = (by[k] || "") + "<section" + x;
 if (STQ.trim()) return auxHead("Настройки") + stqBar() + stqRes(parts);
 return auxHead("Настройки") + stqBar() + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
 }
-var HTABS = [["money", "budget", "Деньги и бюджет", ["mg-how", "mg-kinds", "mg-week", "mg-per", "mg-regs", "mg-debts", "mg-wish", "mg-hab", "mg-hour", "mg-chal", "mg-sv", "mg-faq", "budget"]], ["home", "clean", "Гайд: порядок дома", ["hg-why", "hg-princ", "hg-levels", "hg-base", "hg-clean", "hg-zone", "hg-decl", "hg-sos", "hg-check", "hg-inv", "hg-family", "hg-mist", "hg-app", "hg-chal", "hg-places", "hg-faq", "hg-read"]], ["start", "help", "С чего начать", ["start", "flow", "switch", "phone", "ptabs", "quick", "mini", "pal", "keys"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "resp", "undo", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "food", "clean", "routine", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
+var HTABS = [["money", "budget", "Деньги и бюджет", ["mg-how", "mg-kinds", "mg-week", "mg-per", "mg-regs", "mg-debts", "mg-wish", "mg-hab", "mg-hour", "mg-chal", "mg-sv", "mg-faq", "budget"]], ["home", "clean", "Гайд: порядок дома", ["hg-why", "hg-princ", "hg-levels", "hg-base", "hg-clean", "hg-zone", "hg-decl", "hg-sos", "hg-check", "hg-inv", "hg-family", "hg-mist", "hg-app", "hg-chal", "hg-places", "hg-faq", "hg-read"]], ["start", "help", "С чего начать", ["start", "demo", "flow", "switch", "phone", "ptabs", "quick", "mini", "pal", "keys"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "resp", "undo", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "food", "clean", "routine", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
 (function () {
 var add = function (k, ids) { var t = HTABS.filter(function (x) { return x[0] === k; })[0]; if (t) t[3] = t[3].concat(ids); };
 var si = 0; HTABS.forEach(function (x, i) { if (x[0] === "start") si = i + 1; });
@@ -22893,7 +22904,7 @@ BOOT.end = performance.now();
 (function () {
 SYNC.enabled = function () { return false; };
 SRV.ready = function () { return false; };
-var DEMOV = "v172";
+var DEMOV = "v211";
 function pad(n) { return (n < 10 ? "0" : "") + n; }
 function seed() {
 var j = JSON.parse($("demo-data").textContent);
@@ -22930,6 +22941,17 @@ S.opt.dayq = 6; S.opt.appfav = ["inbox", "today", "habits"];
 delete S.opt.mods; // в демо видно всё: все модули включены
 var hb = boards().filter(function (b) { return b.homeb && (b.w || []).length; })[0] || bCreate("🏠 Карточки главной", [{ type: "dead", sz: "m", cfg: { days: 7 } }, { type: "goals", sz: "m" }], { homeb: 1 });
 S.opt.homew = hb.w.map(function (w) { return { b: hb.id, w: w.id }; });
+var pr = function (n) { return projects().filter(function (p) { return p.n === n; })[0]; }, gl = function (n) { return goals().filter(function (g) { return g.n === n; })[0]; };
+var items = [{ t: "h", n: "Учёба" }], pk1 = pr("Курс Харина"), pk2 = pr("Английский"), g1 = gl("Сдать экзамен по 1С"), n1 = nk("Урок 5. Проведение документов");
+if (pk1) items.push({ t: "p", id: pk1.id }); if (pk2) items.push({ t: "p", id: pk2.id }); if (g1) items.push({ t: "g", id: g1.id });
+items.push({ t: "h", n: "Знания" }); if (n1) items.push({ t: "n", id: n1.id }); items.push({ t: "r", k: "srs" }, { t: "r", k: "tbox" });
+var dk = ["spt", "now", "xp"];
+S.opt.spc = { l: [{ id: "cdemostudy", n: "Учёба 1С", ic: "🎓", img: "", items: items, desk: { homec: dk, homeh: HZC.map(function (c) { return c[0]; }).filter(function (c) { return dk.indexOf(c) < 0; }), homecols: 2 } }], ov: {} };
+S.opt.clean = Object.assign({}, S.opt.clean || {}); S.opt.clean.chal = { on: true, start: addDays(t0, -9) };
+var pw = pr("Работа"); ["Сверить акты с бухгалтерией", "Подготовить шаблон отчёта", "Обновить прайс-лист", "Созвон с поставщиком", "Разобрать рабочую почту", "Настроить отбор в 1С"].forEach(function (n, i) {
+var t = newTaskFrom(n, {}); t.pid = pw ? pw.id : ""; t.est = 1; t.tt = Math.round((1.2 + (i % 3) * .2) * 3600000); t.done = true; t.dt = addDays(t0, -(i + 2)) + 11 * 3600000; t.at = 0; touch(t);
+});
+try { spcSync(true); } catch (e) { /* пространства — при перерисовке */ }
 optTouch(); save();
 }
 if (LS.get("demo-seeded") !== DEMOV) { try { seed(); render(); } catch (e) { toast("Демо: не удалось загрузить данные — " + e.message); } }
