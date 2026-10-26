@@ -1789,6 +1789,8 @@ html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; backgro
 .spwf { gap: 6px; flex-wrap: wrap; margin: 8px 0 } .spwtake { gap: 10px; align-items: center; margin: 6px 0 } .spwcap { display: grid; gap: 4px; margin: 6px 0 10px } .spwcapr { gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0 } .spwcapr input { width: 70px }
 .spwg { padding: 6px 0; border-top: 1px dashed var(--line) } .spwdays { display: grid; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); gap: 6px; margin: 8px 0 } .spwday { display: grid; justify-items: center; padding: 6px; border: 1px solid var(--line); border-radius: 10px; font-size: calc(13px * var(--fs)) } .spwday.we { opacity: .7 } .spwday.over { border-color: #c94a3a; color: #c94a3a }
 .spwdb { gap: 3px; flex-wrap: wrap } .spwsum li { margin: 4px 0 } .spwin summary { cursor: pointer; margin: 4px 0 }
+.bfxmul { display: inline-flex; gap: 4px; align-items: center; flex-wrap: wrap } .bfxmul .bfxma { width: 90px } .bfxmul .bfxmn { width: 46px } .bfxsub td { font-size: calc(12.5px * var(--fs)); color: var(--muted) } .bfxsub td:first-child { padding-left: 14px } .bfxsub .bfxnal { width: 150px }
+.bkkeep { gap: 8px; align-items: center; flex-wrap: wrap; margin: 10px 0 0 }
 .lkst { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) }
 .lkst .lkcard { align-content: start }
 .lkd { color: var(--muted); font-size: calc(12px * var(--fs)); line-height: 1.35 }
@@ -8430,7 +8432,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-233";
+var APPV = "zd-app-2026-10-16-234";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -13268,7 +13270,20 @@ function bfxRub(v) { return v === null || v === undefined ? "—" : buRub(v); }
 function bfxMap(G, name) {
 var all = Object.keys(G.cells).map(function (k) { var p = k.split(","); return [+p[0], +p[1]]; });
 var find = function (txt, pred) { txt = buNorm(txt); return all.filter(function (rc) { return buNorm(G.txt(rc[0], rc[1])) === txt && (!pred || pred(rc)); }).sort(function (a, b) { return a[1] - b[1] || a[0] - b[0]; }); };
-var cell = function (r, c, lab) { var x = G.get(r, c), v = x && (x.v !== null || x.f) ? buNum(G, r, c) : null; return { c: lab, ref: bfxColL(c) + (r + 1), f: !!(x && x.f), v: v === null || isNaN(v) ? null : Math.round(v * 100) / 100 }; };
+var cell = function (r, c, lab) {
+var x = G.get(r, c), v = x && (x.v !== null || x.f) ? buNum(G, r, c) : null, o = { c: lab, ref: bfxColL(c) + (r + 1), f: !!(x && x.f), fx: x && x.f ? String(x.f).trim() : "", v: v === null || isNaN(v) ? null : Math.round(v * 100) / 100 };
+var mm = o.fx && /^\s*(\d+(?:\.\d+)?)\s*\*\s*(\d+(?:\.\d+)?)\s*$/.exec(o.fx);
+if (mm) { var p1 = +mm[1], p2 = +mm[2], isN = function (q) { return q >= 1 && q <= 12 && q === Math.round(q); }; if (isN(p2) && !isN(p1)) o.mul = { a: p1, n: p2, ord: "an" }; else if (isN(p1) && !isN(p2)) o.mul = { a: p2, n: p1, ord: "na" }; else if (isN(p2)) o.mul = { a: p1, n: p2, ord: "an" }; }
+if (o.mul && v === null) o.v = Math.round(o.mul.a * o.mul.n * 100) / 100;
+return o;
+};
+var fgFind = function (x) {
+var m = /^\$?([A-Z]+)\$?(\d+)$/.exec(x.fx || ""); if (!m) return null; var tc = colIdx(m[1]), tr = +m[2] - 1, t = G.get(tr, tc);
+var sm = t && t.f && /^SUM\(\$?([A-Z]+)\$?(\d+):\$?([A-Z]+)\$?(\d+)\)$/i.exec(String(t.f).replace(/\s+/g, "")); if (!sm || sm[1] !== sm[3]) return null;
+var col = colIdx(sm[1]), rows = []; if (col < 1) return null;
+for (var rr = +sm[2] - 1; rr <= +sm[4] - 1; rr++) { var lb = G.txt(rr, col - 1), c0 = cell(rr, col, lb || ""); c0.lref = bfxColL(col - 1) + (rr + 1); c0.lab = lb || ""; c0.fgr = 1; rows.push(c0); }
+return { ref: bfxColL(tc) + (tr + 1), head: G.txt(tr, tc - 1) || "", rows: rows };
+};
 var ph = find("План", function (rc) { for (var r = rc[0] + 1; r < rc[0] + 6; r++) if (buNorm(G.txt(r, rc[1] - 1)) === "траты") return true; return false; })[0];
 if (!ph) throw new Error("на листе «" + name + "» не нашлась таблица «План» со статьёй «Траты»");
 var exp = [], inc = [];
@@ -13278,16 +13293,28 @@ if (zh) for (var r3 = zh[0] + 1; r3 < zh[0] + 4; r3++) if (buNorm(G.txt(r3, zh[1
 for (var c3 = zh[1]; c3 < zh[1] + 12; c3++) { var h3 = G.txt(zh[0], c3); if (!h3 || /^всего|^к получ/i.test(h3)) break; inc.push(cell(r3, c3, h3)); }
 break;
 }
+exp.forEach(function (x) { var g = x.f && !x.mul ? fgFind(x) : null; if (g) x.fg = g; });
 return { exp: exp, inc: inc };
 }
-function bfxVal(D, x) { var s = D.nv[x.ref]; if (x.f || s === undefined || String(s).trim() === "") return x.v; var n = bfxNum(s); return n === null || isNaN(n) ? x.v : n; }
+function bfxAll(m) { var l = m.exp.concat(m.inc); m.exp.forEach(function (x) { if (x.fg) l = l.concat(x.fg.rows); }); return l; }
+function bfxMulF(m, a, n) { var as = String(Math.round(a * 100) / 100); return m.ord === "na" ? n + "*" + as : as + "*" + n; }
+function bfxNa(D) { return D.na && D.na.ref && String(D.na.lab || "").trim() && bfxNum(D.na.amt) !== null && !isNaN(bfxNum(D.na.amt)) ? D.na : null; }
+function bfxMort() { var o = (S.opt.bud || {}).mort || {}; return o.d0 ? { d0: new Date(o.d0 + "T00:00").getTime(), step: +o.step || 14 } : null; }
+function bfxMortN(pid) { var m = bfxMort(); if (!m) return null; var P = buPer(pid), rg = P ? { from: P.from, to: P.to } : buPRange(pid), a = sod(rg.from), b = sod(rg.to), st = m.step * DAY, k = Math.ceil((a - m.d0) / st), out = []; for (var d = m.d0 + k * st; d <= b + 1000; d += st) if (d >= a - 1000) out.push(d); return out; }
+function bfxVal(D, x) {
+if (x.mul) { var mq = D.nm && D.nm[x.ref]; return mq ? Math.round(mq.a * mq.n * 100) / 100 : x.v; }
+if (x.fg) { var na = bfxNa(D), sm0 = x.fg.rows.reduce(function (a, r) { return a + (bfxVal(D, r) || 0); }, 0) + (na ? bfxNum(na.amt) : 0); return Math.round(sm0 * 100) / 100; } var s = D.nv[x.ref]; if (x.f || s === undefined || String(s).trim() === "") return x.v; var n = bfxNum(s); return n === null || isNaN(n) ? x.v : n; }
 function bfxChanges(D) {
 if (D.chg) return D.chg;
 var out = [];
-D.exp.concat(D.inc).forEach(function (x) { var n = bfxVal(D, x); if (x.f || n === x.v || Math.abs((n || 0) - (x.v || 0)) < 0.005 && (n === null) === (x.v === null)) return; out.push({ ref: x.ref, c: x.c, from: x.v, to: n, inc: D.inc.indexOf(x) >= 0 }); });
+D.exp.concat(D.inc).forEach(function (x) {
+if (x.mul) { var mq = D.nm && D.nm[x.ref]; if (mq && (Math.abs(mq.a - x.mul.a) >= 0.005 || mq.n !== x.mul.n)) out.push({ ref: x.ref, c: x.c, kind: "mul", from: x.v, to: bfxVal(D, x), fromF: x.fx, toF: bfxMulF(x.mul, mq.a, mq.n), fn: x.mul.n, tn: mq.n }); return; }
+if (x.fg) { x.fg.rows.forEach(function (r) { var n2 = bfxVal(D, r); if (r.f || n2 === r.v || Math.abs((n2 || 0) - (r.v || 0)) < 0.005 && (n2 === null) === (r.v === null)) return; out.push({ ref: r.ref, c: x.c + ": " + (r.lab || r.ref), from: r.v, to: n2 }); }); var na = bfxNa(D); if (na) { out.push({ ref: na.lref, c: x.c + ": новая строка", kind: "str", from: "", to: String(na.lab).trim().slice(0, 60) }); out.push({ ref: na.ref, c: x.c + ": " + String(na.lab).trim().slice(0, 60), from: null, to: bfxNum(na.amt) }); } return; }
+var n = bfxVal(D, x); if (x.f || n === x.v || Math.abs((n || 0) - (x.v || 0)) < 0.005 && (n === null) === (x.v === null)) return; out.push({ ref: x.ref, c: x.c, from: x.v, to: n, inc: D.inc.indexOf(x) >= 0 });
+});
 return out;
 }
-function bfxBad(D) { return D.exp.concat(D.inc).filter(function (x) { var s = D.nv[x.ref]; if (x.f || s === undefined || String(s).trim() === "") return false; var n = bfxNum(s); return isNaN(n) || n < 0; }).map(function (x) { return x.c; }); }
+function bfxBad(D) { var fgr = []; D.exp.forEach(function (x) { if (x.fg) fgr = fgr.concat(x.fg.rows); }); var mb = D.exp.filter(function (x) { var mq = x.mul && D.nm && D.nm[x.ref]; return mq && (!(mq.a > 0) || !(mq.n >= 1 && mq.n <= 12 && mq.n === Math.round(mq.n))); }).map(function (x) { return x.c; }); return mb.concat(D.exp.concat(D.inc).concat(fgr).filter(function (x) { var s = D.nv[x.ref]; if (x.f || s === undefined || String(s).trim() === "") return false; var n = bfxNum(s); return isNaN(n) || n < 0; }).map(function (x) { return x.c; })); }
 function bfxTotHTML(D) {
 var ex = D.exp.filter(function (x) { return buKind(x.c) !== "off"; }), sum = function (l, nw) { return l.reduce(function (a, x) { return a + ((nw ? bfxVal(D, x) : x.v) || 0); }, 0); };
 var e0 = sum(ex), e1 = sum(ex, 1), i0 = sum(D.inc), i1 = sum(D.inc, 1), arr = function (a, b) { return Math.abs(a - b) < 0.5 ? buRub(a) : buRub(a) + " → <b>" + buRub(b) + "</b>"; };
@@ -13305,17 +13332,33 @@ var P = buPer(pid), h = '<div class="card bfx">';
 if (D.step === "confirm") {
 var ch = bfxChanges(D);
 h += "<b>" + (D.undo ? "Вернуть прежний план" : "Проверьте и запишите") + " — лист «" + esc(D.sheet) + "»</b>";
-h += '<ul class="bfxch">' + ch.map(function (c) { var d = (c.to || 0) - (c.from || 0); return "<li>" + (c.inc ? "доход " : "") + "«" + esc(c.c) + "»: " + bfxRub(c.from) + " → <b>" + bfxRub(c.to) + "</b>" + (c.from !== null && c.to !== null ? ' <small class="muted">(' + (d > 0 ? "+" : "−") + buRub(Math.abs(d)).replace("−", "") + ")</small>" : "") + ' <small class="muted">' + c.ref + "</small></li>"; }).join("") + "</ul>";
+h += '<ul class="bfxch">' + ch.map(function (c) { var d = (c.to || 0) - (c.from || 0); if (c.kind === "str") return "<li>«" + esc(c.c) + "»: " + (c.to ? "название «<b>" + esc(c.to) + "</b>»" : "убрать название «" + esc(c.from) + "»") + ' <small class="muted">' + c.ref + "</small></li>"; return "<li>" + (c.inc ? "доход " : "") + "«" + esc(c.c) + "»: " + (c.kind === "mul" ? "платежей " + c.fn + " → <b>" + c.tn + "</b>, " : "") + bfxRub(c.from) + " → <b>" + bfxRub(c.to) + "</b>" + (c.from !== null && c.to !== null ? ' <small class="muted">(' + (d > 0 ? "+" : "−") + buRub(Math.abs(d)).replace("−", "") + ")</small>" : "") + ' <small class="muted">' + c.ref + "</small></li>"; }).join("") + "</ul>";
 h += '<div class="bfxwarn">Если файл «' + esc(buOpt().fname || "Финансы") + "» сейчас открыт в Excel или LibreOffice — закройте его без сохранения: иначе при сохранении там эти изменения пропадут. Меняются только эти ячейки; формулы книга пересчитает при открытии. Копия файла до записи останется в браузере.</div>";
 if (D.err) h += '<p class="bad" style="margin:0">' + esc(D.err) + "</p>";
 return h + '<div class="r"><button type="button" class="btn sm pri" data-a="bfxwrite">' + (D.undo ? "↶ Вернуть в Excel" : "💾 Записать в Excel") + '</button><button type="button" class="btn sm" data-a="bfxback">' + (D.undo ? "Отмена" : "‹ Назад") + "</button></div></div>";
 }
+var mortN = bfxMortN(D.pid), mort = bfxMort();
 var row = function (x, inc) {
 var fact = !P ? null : inc ? +((P.inc || {}).fact || {})[x.c] || 0 : buFact(P, x.c), s = D.nv[x.ref];
+if (x.mul) {
+var mq = (D.nm || {})[x.ref] || { a: x.mul.a, n: x.mul.n }, isM = /ипотек/i.test(x.c), sug = isM && mortN ? mortN.length : 0;
+var hint = isM ? '<tr class="bfxsub"><td colspan="4"><small class="muted">' + (mortN ? "По графику (каждые " + mort.step + " дней) в периоде " + mortN.length + " " + plural(mortN.length, ["платёж", "платежа", "платежей"]) + ": " + mortN.map(function (d) { return new Date(d).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }); }).join(", ") + (sug !== mq.n ? ' <button type="button" class="btn sm pri" data-a="bfxmn" data-ref="' + x.ref + '" data-x="' + sug + '">Подставить ' + sug + "</button>" : " ✓") + ' · <label>известный платёж <input type="date" class="inp" data-bfxsch="1" value="' + esc(((S.opt.bud || {}).mort || {}).d0 || "") + '"></label>' : 'Платежи каждые 14 дней: укажите дату любого платежа — <input type="date" class="inp" data-bfxsch="1" value="">, и я подскажу, сколько их в каждом периоде.') + "</small></td></tr>" : "";
+return '<tr><td>' + esc(x.c) + "</td><td>" + bfxRub(fact) + "</td><td>" + bfxRub(x.v) + ' <small class="muted">' + esc(String(x.mul.a).replace(".", ",")) + " × " + x.mul.n + '</small></td><td><span class="bfxmul"><input type="text" inputmode="decimal" class="bfxin bfxma" data-bfxm="' + x.ref + '" data-k="a" value="' + esc(String(mq.a).replace(".", ",")) + '" aria-label="Платёж"> × <span class="seg">' + [2, 3].map(function (n) { return '<button type="button" data-a="bfxmn" data-ref="' + x.ref + '" data-x="' + n + '" class="' + (mq.n === n ? "on" : "") + '">' + n + "</button>"; }).join("") + '</span><input type="number" min="1" max="12" class="bfxin bfxmn" data-bfxm="' + x.ref + '" data-k="n" value="' + mq.n + '" aria-label="Количество платежей"> = <b id="bfxmv-' + x.ref + '">' + bfxRub(Math.round(mq.a * mq.n * 100) / 100) + "</b></span></td></tr>" + hint;
+}
+if (x.fg) {
+var sv = goals().filter(function (g) { return svOn(g) && (g.st || "active") === "active"; }), free = x.fg.rows.filter(function (r) { return !r.f && !r.lab && r.v === null; })[0];
+var sub = x.fg.rows.filter(function (r) { return r.lab || r.v !== null; }).map(function (r) {
+var s2 = D.nv[r.ref], g = sv.filter(function (q) { var a1 = buNorm(q.n), b1 = buNorm(r.lab); return a1 && b1 && (a1 === b1 || a1.indexOf(b1) >= 0 || b1.indexOf(a1) >= 0); })[0], pl = g ? svStat(g).plan : 0;
+return '<tr class="bfxsub"><td>↳ ' + esc(r.lab || "(без названия)") + (g && pl ? ' <button type="button" class="btn sm" data-a="bfxsv" data-ref="' + r.ref + '" data-v="' + pl + '" title="Цель «' + esc(g.n) + '»: сколько откладывать в этом месяце, чтобы успеть к сроку">по графику цели: ' + buRub(pl) + "</button>" : "") + "</td><td></td><td>" + bfxRub(r.v) + "</td><td>" + (r.f ? '<small class="muted">формула в Excel</small>' : '<input type="text" inputmode="decimal" class="bfxin" data-bfx="' + r.ref + '" value="' + esc(s2 === undefined ? "" : s2) + '" placeholder="' + esc(r.v === null ? "" : String(r.v)) + '" aria-label="Новый план: ' + esc(r.lab) + '">') + "</td></tr>";
+}).join("");
+var na = D.na || {};
+var add = free ? '<tr class="bfxsub"><td>＋ <input type="text" class="inp bfxnal" data-bfxna="lab" data-ref="' + free.ref + '" data-lref="' + free.lref + '" value="' + esc(na.lab || "") + '" placeholder="Новая цель" maxlength="60"></td><td></td><td></td><td><input type="text" inputmode="decimal" class="bfxin" data-bfxna="amt" data-ref="' + free.ref + '" data-lref="' + free.lref + '" value="' + esc(na.amt || "") + '" placeholder="сумма"></td></tr>' : '<tr class="bfxsub"><td colspan="4"><small class="muted">Свободных строк в блоке нет — новую цель добавьте в Excel внутри диапазона суммы</small></td></tr>';
+return '<tr><td>' + esc(x.c) + ' <small class="muted">сумма строк ниже</small></td><td>' + bfxRub(fact) + "</td><td>" + bfxRub(x.v) + '</td><td><b id="bfxfg-' + x.ref + '">' + bfxRub(bfxVal(D, x)) + "</b></td></tr>" + sub + add;
+}
 return '<tr><td>' + esc(x.c) + (inc || buKind(x.c) !== "off" ? "" : ' <small class="muted">не в расходах</small>') + "</td><td>" + bfxRub(fact) + "</td><td>" + bfxRub(x.v) + "</td><td>" +
 (x.f ? '<small class="muted" title="План посчитан формулой — меняется в самом Excel">формула в Excel</small>' : '<input type="text" inputmode="decimal" class="bfxin' + (s !== undefined && bfxBad({ exp: [x], inc: [], nv: D.nv }).length ? " bad" : "") + '" id="bfx-' + x.ref + '" data-bfx="' + x.ref + '" value="' + esc(s === undefined ? "" : s) + '" placeholder="' + esc(x.v === null ? "" : String(x.v)) + '" aria-label="Новый план: ' + esc(x.c) + '">') + "</td></tr>";
 };
-h += "<b>✏️ Корректировка плана — " + esc(buPName(pid)) + '</b><span class="muted">Впишите новые суммы только там, где план меняется; пустое поле — без изменений. Статьи с формулой (например, «Ипотека») меняются в самом Excel.</span>';
+h += "<b>✏️ Корректировка плана — " + esc(buPName(pid)) + '</b><span class="muted">Впишите новые суммы только там, где план меняется; пустое поле — без изменений. «Ипотека» — платёж × количество платежей; «Фин. цели» — по строкам. Остальные формулы меняются в самом Excel.</span>';
 h += '<div class="bfxtw"><table><thead><tr><th>Статья</th><th>Факт</th><th>План</th><th>Новый план</th></tr></thead><tbody>' +
 '<tr class="bfxsec"><td colspan="4">Расходы</td></tr>' + D.exp.map(function (x) { return row(x, false); }).join("") +
 (D.inc.length ? '<tr class="bfxsec"><td colspan="4">Доходы</td></tr>' + D.inc.map(function (x) { return row(x, true); }).join("") : "") + "</tbody></table></div>";
@@ -13327,9 +13370,21 @@ document.addEventListener("input", function (e) {
 var t = e.target; if (!t || !t.dataset || !t.dataset.bfx || !BFX || BFX.step !== "edit") return;
 BFX.nv[t.dataset.bfx] = t.value;
 var n = bfxNum(t.value); t.classList.toggle("bad", t.value.trim() !== "" && (isNaN(n) || n < 0));
-var tot = $("bfxtot"); if (tot) tot.innerHTML = bfxTotHTML(BFX);
+bfxLive();
 var nb = $("bfxnext"); if (nb) nb.disabled = !bfxChanges(BFX).length || bfxBad(BFX).length > 0;
 });
+function bfxLive() {
+var D = BFX; if (!D) return;
+D.exp.forEach(function (x) { if (x.fg) { var b = $("bfxfg-" + x.ref); if (b) b.textContent = bfxRub(bfxVal(D, x)); } if (x.mul) { var b2 = $("bfxmv-" + x.ref); if (b2) b2.textContent = bfxRub(bfxVal(D, x)); } });
+var tot = $("bfxtot"); if (tot) tot.innerHTML = bfxTotHTML(D);
+var nb = $("bfxnext"); if (nb) nb.disabled = !bfxChanges(D).length || bfxBad(D).length > 0;
+}
+document.addEventListener("input", function (e) {
+var t = e.target, D = BFX; if (!t || !t.dataset || !D || D.step !== "edit") return;
+if (t.dataset.bfxm) { var x = D.exp.filter(function (q) { return q.ref === t.dataset.bfxm; })[0]; if (!x) return; D.nm = D.nm || {}; var mq = D.nm[x.ref] = D.nm[x.ref] || { a: x.mul.a, n: x.mul.n }; if (t.dataset.k === "a") { var a = bfxNum(t.value); if (a !== null && !isNaN(a)) mq.a = a; } else mq.n = Math.round(+t.value || 0); bfxLive(); }
+if (t.dataset.bfxna) { D.na = D.na || {}; D.na.ref = t.dataset.ref; D.na.lref = t.dataset.lref; D.na[t.dataset.bfxna] = t.value; bfxLive(); }
+});
+document.addEventListener("change", function (e) { var t = e.target; if (!t || !t.dataset || !t.dataset.bfxsch) return; buSet("mort", t.value ? { d0: t.value, step: 14 } : null); render(); });
 function bfxOpen(pid) {
 if (!buCanRemember()) { toast("Записать план в Excel можно на компьютере в Chrome или Edge — там приложение получает доступ к файлу"); return; }
 BFX = { pid: pid, busy: 1, step: "read" }; render();
@@ -13351,11 +13406,17 @@ if (sets.length) {
 var rows = {}; [].forEach.call(d.getElementsByTagNameNS(NS, "row"), function (r) { rows[+r.getAttribute("r")] = r; });
 sets.forEach(function (s) {
 var m = /^([A-Z]+)(\d+)$/.exec(s.ref), cn = colIdx(m[1]), row = rows[+m[2]];
-if (!row) throw new Error("на листе нет строки " + m[2]);
+if (!row) {
+if (s.to === null || s.to === "") return;
+var sd = d.getElementsByTagNameNS(NS, "sheetData")[0]; if (!sd) throw new Error("на листе нет строки " + m[2]);
+row = d.createElementNS(NS, "row"); row.setAttribute("r", m[2]); sd.insertBefore(row, [].filter.call(sd.childNodes, function (n) { return n.localName === "row" && +n.getAttribute("r") > +m[2]; })[0] || null); rows[+m[2]] = row;
+}
 var cs = [].filter.call(row.childNodes, function (n) { return n.localName === "c"; }), c = cs.filter(function (x) { return x.getAttribute("r") === s.ref; })[0];
-if (!c) { if (s.to === null) return; c = d.createElementNS(NS, "c"); c.setAttribute("r", s.ref); row.insertBefore(c, cs.filter(function (x) { return colIdx(x.getAttribute("r")) > cn; })[0] || null); }
+if (!c) { if (s.to === null || s.to === "") return; c = d.createElementNS(NS, "c"); c.setAttribute("r", s.ref); row.insertBefore(c, cs.filter(function (x) { return colIdx(x.getAttribute("r")) > cn; })[0] || null); }
+if (s.kind === "mul") { var fe = c.getElementsByTagNameNS(NS, "f")[0]; if (!fe) throw new Error("в ячейке " + s.ref + " нет формулы"); fe.textContent = s.toF; fe.removeAttribute("t"); fe.removeAttribute("si"); fe.removeAttribute("ref"); [].slice.call(c.getElementsByTagNameNS(NS, "v")).forEach(function (q) { c.removeChild(q); }); c.removeAttribute("t"); changed = true; return; }
 if (c.getElementsByTagNameNS(NS, "f").length) throw new Error("в ячейке " + s.ref + " формула — её не меняем");
 while (c.firstChild) c.removeChild(c.firstChild); c.removeAttribute("t");
+if (s.kind === "str") { if (s.to) { c.setAttribute("t", "inlineStr"); var is = d.createElementNS(NS, "is"), te = d.createElementNS(NS, "t"); te.textContent = s.to; is.appendChild(te); c.appendChild(is); } changed = true; return; }
 if (s.to !== null) { var v = d.createElementNS(NS, "v"); v.textContent = String(s.to); c.appendChild(v); }
 changed = true;
 });
@@ -13426,9 +13487,11 @@ return buBook(buf).then(function (bk) {
 bk0 = bk; spath = bk.path(sheet); if (!spath) throw new Error("в файле нет листа «" + sheet + "»");
 return bk.grid(sheet);
 }).then(function (G) {
-var m = bfxMap(G, sheet), cur = {}; m.exp.concat(m.inc).forEach(function (x) { cur[x.ref] = x; });
+var m = bfxMap(G, sheet), cur = {}; bfxAll(m).forEach(function (x) { cur[x.ref] = x; });
 ch.forEach(function (c) {
+if (c.kind === "str") { var mt = /^([A-Z]+)(\d+)$/.exec(c.ref), gx = G.get(+mt[2] - 1, colIdx(mt[1])), gt = gx && typeof gx.v === "string" ? gx.v.trim() : gx && gx.v !== null && gx.v !== undefined ? String(gx.v) : ""; if (gx && gx.f) throw new Error("в ячейке " + c.ref + " формула"); if (gt !== String(c.from || "")) throw new Error("в ячейке " + c.ref + " уже «" + gt + "» — файл изменился, откройте корректировку заново"); return; }
 var x = cur[c.ref]; if (!x) throw new Error("ячейка " + c.ref + " («" + c.c + "») не найдена на листе");
+if (c.kind === "mul") { if (String(x.fx).replace(/\s+/g, "") !== String(c.fromF).replace(/\s+/g, "")) throw new Error("«" + c.c + "»: формула в файле уже другая (" + x.fx + ") — откройте корректировку заново"); return; }
 if (x.f) throw new Error("в ячейке " + c.ref + " («" + c.c + "») теперь формула");
 if ((x.v === null) !== (c.from === null) || Math.abs((x.v || 0) - (c.from || 0)) >= 0.005) throw new Error("«" + c.c + "» в файле уже " + bfxRub(x.v) + ", а не " + bfxRub(c.from) + " — файл изменился, откройте корректировку заново");
 });
@@ -13441,8 +13504,11 @@ return bfxZip(buf, edits);
 }).then(function (out) {
 var ab = out.buffer.slice(out.byteOffset, out.byteOffset + out.byteLength);
 return buBook(ab).then(function (bk) { return bk.grid(sheet); }).then(function (G) {
-var m = bfxMap(G, sheet), cur = {}; m.exp.concat(m.inc).forEach(function (x) { cur[x.ref] = x; });
-ch.forEach(function (c) { var x = cur[c.ref]; if (!x || (x.v === null) !== (c.to === null) || Math.abs((x.v || 0) - (c.to || 0)) >= 0.005) throw new Error("контрольное чтение не сошлось («" + c.c + "») — файл не изменён"); });
+var m = bfxMap(G, sheet), cur = {}; bfxAll(m).forEach(function (x) { cur[x.ref] = x; });
+ch.forEach(function (c) {
+if (c.kind === "str") { var mt2 = /^([A-Z]+)(\d+)$/.exec(c.ref); if (G.txt(+mt2[2] - 1, colIdx(mt2[1])) !== String(c.to || "")) throw new Error("контрольное чтение не сошлось («" + c.c + "») — файл не изменён"); return; }
+if (c.kind === "mul") { var xm = cur[c.ref]; if (!xm || String(xm.fx).replace(/\s+/g, "") !== String(c.toF).replace(/\s+/g, "")) throw new Error("контрольное чтение не сошлось («" + c.c + "») — файл не изменён"); return; }
+var x = cur[c.ref]; if (!x || (x.v === null) !== (c.to === null) || Math.abs((x.v || 0) - (c.to || 0)) >= 0.005) throw new Error("контрольное чтение не сошлось («" + c.c + "») — файл не изменён"); });
 return out;
 });
 });
@@ -13475,10 +13541,12 @@ D.busy = 0; D.step = "confirm"; D.err = e && e.name === "NotAllowedError" ? "З�
 function bfxAct(a, el) {
 switch (a) {
 case "bfxopen": bfxOpen(BUPER || buPid(today0())); return true;
+case "bfxmn": if (BFX) { var xm = BFX.exp.filter(function (q) { return q.ref === el.dataset.ref; })[0]; if (xm) { BFX.nm = BFX.nm || {}; var mq2 = BFX.nm[xm.ref] = BFX.nm[xm.ref] || { a: xm.mul.a, n: xm.mul.n }; mq2.n = +el.dataset.x; render(); } } return true;
+case "bfxsv": if (BFX) { BFX.nv[el.dataset.ref] = String(el.dataset.v); render(); } return true;
 case "bfxclose": BFX = null; render(); return true;
 case "bfxnext": if (BFX && bfxChanges(BFX).length && !bfxBad(BFX).length) { BFX.step = "confirm"; render(); } return true;
 case "bfxback": if (BFX) { if (BFX.undo) BFX = null; else { BFX.step = "edit"; delete BFX.err; } render(); } return true;
-case "bfxundo": if (BFXLAST) { BFX = { pid: BFXLAST.pid, sheet: BFXLAST.sheet, step: "confirm", undo: true, nv: {}, exp: [], inc: [], chg: BFXLAST.ch.map(function (c) { return { ref: c.ref, c: c.c, from: c.to, to: c.from, inc: c.inc }; }) }; render(); } return true;
+case "bfxundo": if (BFXLAST) { BFX = { pid: BFXLAST.pid, sheet: BFXLAST.sheet, step: "confirm", undo: true, nv: {}, exp: [], inc: [], chg: BFXLAST.ch.map(function (c) { return { ref: c.ref, c: c.c, from: c.to, to: c.from, inc: c.inc, kind: c.kind, fromF: c.toF, toF: c.fromF, fn: c.tn, tn: c.fn }; }) }; render(); } return true;
 case "bfxwrite": if (BFX && !BFX.busy) bfxWrite(); return true;
 }
 return false;
@@ -17271,7 +17339,7 @@ var FEAT = [
 ["челлендж челленджи марафон программа осанка лицо", "🏁", "Челленджи", "пространство «Челленджи» — 🏁 на полосе слева", "sp-chal"],
 ["спринт", "🏃", "Спринт", "«Задачи» → «Виды» → «Спринт»", "sprint"],
 ["помидор помидоры pomodoro таймер засечь время учёт времени", "🍅", "Помидоры и учёт времени", "карточка задачи — «▶ Засечь время», 🍅 вверху карточки; в строке задачи — 🍅 и «идёт»", "today"],
-["копия копии резервная бэкап восстановить откат вернуть данные", "💽", "Резервные копии", "«Настройки» → «Данные и синхронизация» → «Резервная копия»: копии на устройстве и на Диске", "settings-backup"],
+["копия копии резервная бэкап восстановить откат вернуть данные автокопии хранить", "💽", "Резервные копии", "«Настройки» → «Данные и синхронизация» → «Резервная копия»: копии на устройстве и на Диске, срок хранения — 3, 7, 14 или 30 дней", "settings-backup"],
 ["синхронизация диск яндекс телефон другое устройство", "☁", "Синхронизация", "«Настройки» → «Данные и синхронизация»", "settings-sync"],
 ["распорядок блоки дня сон работа еда режим", "🧱", "Распорядок дня", "«Настройки» → «Общие» → «Распорядок дня»; цветной фон — в «Плане по часам»", "settings-routine"],
 ["план по часам таймбоксинг лента дня", "🧱", "План по часам", "«Мой день» → «Ещё» → «План по часам»", "tbox"],
@@ -17485,6 +17553,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["234", "Корректировка плана: ипотека и фин. цели; срок хранения копий", ["Резервные копии: срок хранения выбирается — 3, 7, 14 или 30 дней (по умолчанию 3) — один для Диска и для копий на устройстве. Лишние удаляются сразу при смене срока и потом раз в день; удалённые с Диска лежат в его «Корзине».", "«Ипотека» (в Excel — формула «платёж × количество»): в корректировке плана — платёж и переключатель 2 / 3 платежа (или своё число). В Excel записывается та же формула с новыми числами. Платежи каждые 14 дней: укажите дату любого платежа — приложение посчитает, сколько их в каждом периоде 11-е → 10-е, и предложит «Подставить».", "«Фин. цели» (в Excel — сумма строк блока ниже): правятся строки по отдельности — итог пересчитывается сам; «＋ Новая цель» добавляет название и сумму в свободную строку блока. Если строка совпадает с вашей целью-накоплением, рядом — «по графику цели: N ₽».", "Перед записью — «было → станет», после — контрольное чтение; «↶ Вернуть прежний план» возвращает и формулы, и названия."]],
 ["233", "🧭 Планирование спринта", ["Мастер на 5 минут: итоги прошлой недели (что не успели — в новый спринт, в бэклог или «готово»), цель недели и вместимость (с подсказкой по прошлым спринтам), набор задач из бэклога галочками (без повторяющейся рутины) с фильтрами «срок на неделе», «к целям», «приоритет» и по проекту, «⭐ Главное недели», раскладка по дням — вручную или «⚡ автоматически» по сроку, приоритету и часам.", "В пятницу–воскресенье планируется следующая неделя, в понедельник–четверг — текущая. Шаг есть в «Обзоре недели», в «🔁 Цикле планирования» и в 🔔; кнопка «🧭 Спланировать» — на странице спринта и в «Спринтах»."]],
 ["232", "🔔 Напоминания — не задачи", ["Напомнить о чём-то, что не задача: в любой строке ввода начните с «напомни» — «напомни завтра в 9 взять документы», «напомни через 2 часа выключить духовку», «напомни каждый понедельник полить цветы». Без времени — завтра утром.", "В нужный момент — уведомление браузера, сообщение в Telegram (если подключён сервер), строка в 🔔 и в «Требует внимания», блок на главной и в «Сегодня»: «✓ Ок», «ещё через час», «завтра утром», «сделать задачей».", "Все напоминания — «Мой день» → «Ещё» → «🔔 Напоминания» (или Ctrl+K → «напоминания»). В утренней сводке Telegram — напоминания дня и задачи, которые сегодня вернутся из отложенных."]],
 ["231", "💤 Вернуться к задаче", ["Утренний план, шаг «Главное»: задачи спринта этой недели без даты — отдельным блоком «🏃 Из спринта этой недели», все сразу, с оценкой и дедлайном.", "«Отложить до…» — теперь и на 2, 3 месяца, полгода, год или свою дату, с пометкой «зачем вернуться». Прямо при вводе: «позвонить в страховую вернуться через 3 месяца» или «… ~3м» (д — дни, н — недели, м — месяцы, г — годы).", "В свой день задача не теряется: появляется в «Требует внимания» на главной, блоком «🔔 Вернулись из отложенных» в «Сегодня», в колокольчике и уведомлением браузера (в 9:00). Решения в один щелчок: сделать сегодня, назначить дату, отложить ещё, в «Когда-нибудь», оставить в списке или удалить.", "«Когда-нибудь» не забывается: то, что лежит там 3+ месяца, всплывает в обзоре недели — оставить, назначить дату или удалить.", "«💤 Отложенные» — лента по месяцам: что и когда к вам вернётся, с пометками; любую задачу можно вернуть раньше."]],
@@ -20592,7 +20661,7 @@ h += lookSection();
 h += '<section class="card" id="s-flags"><h2>Флажки</h2><p class="muted" style="margin:0">У задачи может стоять один из этих флажков. Название и цвет меняются здесь, порядок — стрелкой ↑. Задачи с флажками собраны в списке «С флажком».</p><div class="fled">' +
 flags().map(function (f, i) { return '<div class="flrow">' + flagIc(f, "big") + '<input class="inp" data-fln="' + f.id + '" value="' + esc(f.n) + '" maxlength="30" aria-label="Название флажка"><button type="button" class="ddb" data-a="flcdd" data-id="' + f.id + '" title="Цвет флажка"><i class="swc" style="background:' + col(f.c) + '"></i>' + COLORS[f.c || 0][0] + '<span class="dda">▾</span></button><span class="r">' + (i ? '<button class="btn sm" type="button" data-a="flup" data-id="' + f.id + '" title="Выше">↑</button>' : "") + '<button class="btn sm warn" type="button" data-a="fldel" data-id="' + f.id + '" title="Удалить флажок">🗑</button></span></div>'; }).join("") +
 (flags().length ? "" : '<p class="muted">Флажков нет — добавьте хотя бы один.</p>') + '</div><div class="r"><button class="btn sm" type="button" data-a="fladd">＋ Добавить флажок</button></div></section>';
-h += '<section class="card" id="s-backup"><h2>Резервная копия</h2><p class="muted" style="margin:0">Все данные одним файлом: задачи, проекты, теги, фильтры, флажки, спринты, комментарии, привычки, заметки, доски, шаблоны, рецепты, меню и настройки. Файл сохраняется на этот компьютер или телефон — храните его где удобно.</p><div class="r"><button class="btn pri" type="button" data-a="export">💾 Сохранить всё в файл</button><button class="btn" type="button" data-a="impopen">📂 Восстановить из файла…</button></div>' + lbkHTML() + bkHTML() +
+h += '<section class="card" id="s-backup"><h2>Резервная копия</h2><p class="muted" style="margin:0">Все данные одним файлом: задачи, проекты, теги, фильтры, флажки, спринты, комментарии, привычки, заметки, доски, шаблоны, рецепты, меню и настройки. Файл сохраняется на этот компьютер или телефон — храните его где удобно.</p><div class="r"><button class="btn pri" type="button" data-a="export">💾 Сохранить всё в файл</button><button class="btn" type="button" data-a="impopen">📂 Восстановить из файла…</button></div>' + bkKeepHTML() + lbkHTML() + bkHTML() +
 (CONF === "import" ? '<div class="confirm"><b>Восстановить данные из файла «' + esc(IMPF ? IMPF.name : "") + '»?</b><span><b>Заменить</b> — всё станет точно как в файле: то, чего в файле нет, удалится (и на других устройствах после синхронизации). <b>Объединить</b> — записи из файла добавятся к текущим, совпадающие заменятся более свежими версиями.</span><div class="r"><button class="btn pri" type="button" data-a="imp-replace">Заменить всё данными из файла</button><button class="btn" type="button" data-a="imp-yes">Объединить с текущими</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : "") + "</section>";
 var tstN = tstCount();
 if (!tstN) h += '<section class="card" id="s-test"><h2>🧪 Тестовые данные</h2><p class="muted" style="margin:0 0 6px">Посмотреть возможности, вообще не трогая свои данные, — <a href="demo.html" target="_blank" rel="noopener">▶ демо-версия</a> в новой вкладке.</p><p class="muted" style="margin:0">Готовый набор для проверки возможностей: 10 проектов, 53 задачи (сроки, повторы, подзадачи, спринт, выполненные), теги, фильтры, привычки с отметками, заметки и 3 доски. Добавляется к вашим данным, ничего не заменяя, и удаляется отсюда же одной кнопкой — ваши записи при этом останутся.</p><div class="r"><button class="btn" type="button" data-a="tstload">🧪 Загрузить тестовые данные</button></div></section>';
@@ -21347,7 +21416,10 @@ var g = UNDOS[UNDOS.length - 1], d = g ? unDesc(g).t : "";
 if (unDo(g)) { $("toast").hidden = true; UNDOF = null; toast("↶ Отменено — " + d); }
 });
 function bkObj() { var o = { format: "zadachi-backup", v: 2, at: new Date().toISOString() }; LISTS.forEach(function (k) { o[k] = S[k] || []; }); o.opt = S.opt; return o; }
-var BKDIR = "app:/tasks/backups", BKKEEP = 14, BKL = null, BKBUSY = false;
+var BKDIR = "app:/tasks/backups", BKL = null, BKBUSY = false;
+function bkKeep() { var n = +S.opt.bkkeep; return [3, 7, 14, 30].indexOf(n) >= 0 ? n : 3; }
+function bkPrune() { if (!SYNC.enabled()) return Promise.resolve(); return bkList().then(function (items) { var old = items.slice(bkKeep()); if (!old.length) return 0; return Promise.all(old.map(function (it) { return YD.api("/resources?path=" + encodeURIComponent(it.path), { method: "DELETE", ok: [202, 204, 404] }); })).then(function () { return bkList(); }).then(function () { return old.length; }); }).catch(function () { return 0; }); }
+function bkKeepHTML() { return '<div class="r bkkeep"><span class="muted">Хранить копии:</span><div class="seg">' + [3, 7, 14, 30].map(function (n) { return '<button type="button" data-a="bkkeep" data-v="' + n + '" class="' + (bkKeep() === n ? "on" : "") + '">' + n + " " + plural(n, ["день", "дня", "дней"]) + "</button>"; }).join("") + '</div><span class="muted">на Диске и на этом устройстве; старые удаляются сами</span></div>'; }
 function bkOn() { return S.opt.autobk !== false; }
 function bkList() {
 return YD.api("/resources?path=" + encodeURIComponent(BKDIR) + "&limit=200&sort=name", { ok: [404] }).then(function (j) {
@@ -21363,12 +21435,12 @@ return YD.folder("app:/tasks").then(function () { return YD.folder(BKDIR); })
 .then(function () { return YD.api("/resources/upload?overwrite=true&path=" + encodeURIComponent(path)); })
 .then(function (j) { return fetch(j.href, { method: "PUT", body: blob }); })
 .then(function (r) { if (!r.ok && r.status !== 201 && r.status !== 202) throw { msg: "ошибка " + r.status }; LS.set("zd-bklast", String(Date.now())); return bkList(); })
-.then(function (items) { return Promise.all(items.slice(BKKEEP).map(function (it) { return YD.api("/resources?path=" + encodeURIComponent(it.path), { method: "DELETE", ok: [202, 204, 404] }); })).then(function () { return bkList(); }); })
+.then(function (items) { return Promise.all(items.slice(bkKeep()).map(function (it) { return YD.api("/resources?path=" + encodeURIComponent(it.path), { method: "DELETE", ok: [202, 204, 404] }); })).then(function () { return bkList(); }); })
 .then(function () { BKBUSY = false; if (V === "settings") render(); return true; })
 .catch(function (e) { BKBUSY = false; LS.del("zd-bkday"); if (force) toast("Копия не сохранилась: " + ((e && e.msg) || "нет связи с Диском")); return false; });
 }
 setTimeout(function () { bkTick(); }, 90000); setInterval(function () { bkTick(); }, 10 * 60000);
-var LBKKEEP = 14, LBK = null, LBKBUSY = false;
+var LBK = null, LBKBUSY = false;
 function lbkMeta() { return stGet("bkm").then(function (m) { return Array.isArray(m) ? m : []; }); }
 function lbkSnap(key, force) {
 if (!ST.db) return Promise.resolve(false);
@@ -21378,7 +21450,7 @@ var js = JSON.stringify(bkObj()), n = live(S.tasks).length;
 return stPut("bk:" + key, js).then(function (ok) {
 if (!ok) return false;
 m = m.filter(function (x) { return x.d !== key; }); m.push({ d: key, at: Date.now(), sz: js.length, n: n, nn: live(S.notes).length });
-var days = m.filter(function (x) { return x.d !== "pre"; }).sort(function (a, b) { return a.d < b.d ? 1 : -1; }), old = days.slice(LBKKEEP);
+var days = m.filter(function (x) { return x.d !== "pre"; }).sort(function (a, b) { return a.d < b.d ? 1 : -1; }), old = days.slice(bkKeep());
 old.forEach(function (x) { stPut("bk:" + x.d, null); }); m = m.filter(function (x) { return old.indexOf(x) < 0; });
 return stPut("bkm", m).then(function () { LBK = m; return true; });
 });
@@ -21386,12 +21458,13 @@ return stPut("bkm", m).then(function () { LBK = m; return true; });
 }
 function lbkDaily() { if (!ST.db || LBKBUSY) return; var day = dKey(Date.now()); if (LS.get("zd-lbkday") === day) return; LBKBUSY = true; lbkSnap(day).then(function () { LS.set("zd-lbkday", day); LBKBUSY = false; if (V === "settings") softRender(); }, function () { LBKBUSY = false; }); }
 setTimeout(lbkDaily, 5000); setInterval(lbkDaily, 10 * 60000);
+setTimeout(function () { if (LS.get("zd-bkprune") !== dKey(today0())) { LS.set("zd-bkprune", dKey(today0())); bkPrune(); } }, 60000);
 function lbkWhen(x) { return x.d === "pre" ? "до последнего восстановления · " + new Date(x.at).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : new Date(x.d + "T12:00:00").toLocaleDateString("ru-RU", { weekday: "short", day: "numeric", month: "long" }); }
 function lbkHTML() {
 var h = '<h3 style="margin:14px 0 4px">💽 Копии на этом устройстве</h3>';
 if (!ST.db) return h + '<p class="muted" style="margin:0">Этот браузер не даёт приложению своё хранилище (IndexedDB) — копии на устройстве недоступны. Пользуйтесь файлом и автокопиями на Диске.</p>';
 if (!LBK) { lbkMeta().then(function (m) { LBK = m; if (V === "settings") softRender(); }); return h + '<p class="muted" style="margin:0">Загружаю список…</p>'; }
-h += '<p class="muted" style="margin:0">Раз в день приложение само сохраняет полную копию прямо здесь (без интернета и без Диска) и хранит последние ' + LBKKEEP + '. Вернуть данные к нужному дню — кнопка «↺ Вернуть».</p>';
+h += '<p class="muted" style="margin:0">Раз в день приложение само сохраняет полную копию прямо здесь (без интернета и без Диска) и хранит последние ' + bkKeep() + " " + plural(bkKeep(), ["день", "дня", "дней"]) + '. Вернуть данные к нужному дню — кнопка «↺ Вернуть».</p>';
 var l = LBK.slice().sort(function (a, b) { return a.d === "pre" ? -1 : b.d === "pre" ? 1 : a.d < b.d ? 1 : -1; });
 h += l.length ? '<ul class="bkl">' + l.map(function (x) {
 var conf = CONF === "lbk:" + x.d;
@@ -21403,6 +21476,12 @@ return h + '<div class="r"><button class="btn" type="button" data-a="lbknow">�
 function lbkAct(a, el) {
 var d = el.dataset.d;
 if (a === "lbkres") { CONF = CONF === "lbk:" + d ? null : "lbk:" + d; render(); return true; }
+if (a === "bkkeep") {
+S.opt.bkkeep = +el.dataset.v; optTouch(); save(); render();
+lbkMeta().then(function (m) { var days = m.filter(function (x) { return x.d !== "pre"; }).sort(function (a2, b2) { return a2.d < b2.d ? 1 : -1; }), old = days.slice(bkKeep()); if (!old.length) return; old.forEach(function (x) { stPut("bk:" + x.d, null); }); var rest = m.filter(function (x) { return old.indexOf(x) < 0; }); return stPut("bkm", rest).then(function () { LBK = rest; if (V === "settings") render(); }); });
+bkPrune().then(function (n) { toast("Храню копии " + bkKeep() + " " + plural(bkKeep(), ["день", "дня", "дней"]) + (n ? " · удалено старых на Диске: " + n + " (в «Корзине» Диска)" : "")); if (V === "settings") render(); });
+return true;
+}
 if (a === "lbknow") { lbkSnap(dKey(Date.now()), true).then(function (ok) { toast(ok ? "Копия на устройстве сохранена" : "Копия не сохранилась"); render(); }); return true; }
 if (a === "lbkget") { stGet("bk:" + d).then(function (js) { if (!js) { toast("Копия не найдена"); return; } var ln = document.createElement("a"); ln.href = URL.createObjectURL(new Blob([js], { type: "application/json" })); ln.download = "Задачи — копия " + (d === "pre" ? "до восстановления" : d) + ".json"; document.body.appendChild(ln); ln.click(); ln.remove(); setTimeout(function () { URL.revokeObjectURL(ln.href); }, 60000); }); return true; }
 if (a === "lbkyes") {
@@ -21420,7 +21499,7 @@ var h = '<h3 style="margin:14px 0 4px">☁️ Автокопии на Яндек
 if (!YD.on) return h + '<p class="muted" style="margin:0">Работают в приложении на сайте, когда включена синхронизация с Яндекс Диском.</p>';
 if (!SYNC.enabled()) return h + '<p class="muted" style="margin:0">Включатся сами, когда вы войдёте через Яндекс (раздел «Синхронизация» выше).</p>';
 var last = +LS.get("zd-bklast") || 0;
-h += '<p class="muted" style="margin:0">Раз в день приложение кладёт полную копию в папку «Приложения → Задачи → backups» на вашем Диске и хранит последние ' + BKKEEP + '. Если что-то пошло не так — скачайте копию за нужный день и загрузите её кнопкой «Восстановить из файла».' +
+h += '<p class="muted" style="margin:0">Раз в день приложение кладёт полную копию в папку «Приложения → Задачи → backups» на вашем Диске и хранит последние ' + bkKeep() + " " + plural(bkKeep(), ["день", "дня", "дней"]) + '. Если что-то пошло не так — скачайте копию за нужный день и загрузите её кнопкой «Восстановить из файла».' +
 (last ? " Последняя копия с этого устройства: " + esc(new Date(last).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })) + "." : "") + "</p>";
 h += '<div class="r"><button class="btn' + (bkOn() ? " pri" : "") + '" type="button" data-a="bkset" data-v="1">Включены</button><button class="btn' + (bkOn() ? "" : " pri") + '" type="button" data-a="bkset" data-v="0">Выключены</button>' +
 '<button class="btn" type="button" data-a="bknow">' + (BKBUSY ? "Сохраняю…" : "☁️ Сделать копию сейчас") + '</button><button class="btn" type="button" data-a="bklist">Показать копии</button></div>';
