@@ -422,6 +422,7 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .fcnsd i.auto { background: color-mix(in srgb, var(--ok) 55%, var(--hover)) }
 .burnav { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px } .burrg { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 10px }
 .burep { gap: 10px } .burep > .bulab { margin-top: 8px } .burep > .bulab:first-child, .burep > .burrg + .bulab { margin-top: 0 } .burtx { margin: -4px 0 2px; max-width: 78ch } .burins { margin: 2px 0; font-size: calc(13.5px * var(--fs)); line-height: 1.5 }
+.burdts { margin-top: -4px } .burdts label { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: calc(13px * var(--fs)) } .burdts input[type=date] { width: auto; padding: 4px 8px }
 .burchw { overflow-x: auto } .burch { min-width: 520px; max-width: 980px } .burst { display: grid; gap: 4px } .burst > .burow { padding: 4px 6px; margin: 0 -6px; border-radius: 8px } .burst > .burow.drlc:hover { background: var(--hover) }
 .buchart .bcz { stroke: var(--muted) } .buchart .bcl { fill: none; stroke: var(--fg); stroke-width: 2 } .buchart .bcl.alt { stroke: #8a6fd1; stroke-dasharray: 5 4 } .buchart .bcd { fill: var(--fg) } .buchart .bcd.alt { fill: #8a6fd1 }
 .bcg { fill: var(--ok) } .bcn2 { fill: #d4574a } .bcs { fill: #2f9e8f } .bcf { fill: var(--acc) } .bk0 { fill: #378add } .bk1 { fill: #2f9e8f } .bk2 { fill: #e9a83a } .bk3 { fill: #8a6fd1 } .bk4 { fill: #d4574a } .bk5 { fill: var(--acc) }
@@ -8474,7 +8475,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-248";
+var APPV = "zd-app-2026-10-16-249";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -14437,15 +14438,23 @@ function burN() { var n = +LS.get("zd-burn") || 12; return [3, 6, 12, 24].indexO
 function burSaveCat(c) { return /накоп|фин\.? ?цел|365|сбереж|подушк|вклад|инвест/i.test(c) || buKind(c) === "off"; }
 function burDebtCat(c) { return /кредит|ипотек|займ|рассроч|долг/i.test(c); }
 function burSh(pid) { return BMONS[+pid.slice(8, 10) - 1].slice(0, 3) + " " + pid.slice(5, 7); }
-function burRows(n) {
-var t0 = today0(), ps = buPers().filter(function (P) { return P.days && P.from <= t0; });
+function burRows(n, cl) {
+var t0 = today0(), ps = buPers().filter(function (P) { return P.days && P.from <= t0 && (!cl || (P.to + DAY > cl.a && P.from < cl.b)); });
 if (n) ps = ps.slice(-n);
 return ps.map(function (P) {
-var r = buPeriod(P), sv = 0, svc = {}, svp = 0, k = { pay: 0, flex: 0, off: 0 }, dbt = 0;
-(P.cats || []).forEach(function (c) { var f = buFact(P, c); k[buKind(c)] += f; if (burSaveCat(c)) { sv += f; svc[c] = f; svp += +P.plan[c] || 0; } if (burDebtCat(c)) dbt += f; });
-return { P: P, id: P.id, n: buPName(P.id), sh: burSh(P.id), r: r, inc: r.inc.fact, incp: r.inc.plan, exp: r.exp.fact, expp: r.exp.plan, bal: r.inc.fact - r.exp.fact, sv: sv, svc: svc, svp: svp, k: k, dbt: dbt, cur: today0() <= P.to, a: P.from, b: P.to + DAY };
+var a = cl ? Math.max(P.from, cl.a) : P.from, b = cl ? Math.min(P.to + DAY, cl.b) : P.to + DAY, ka = dKey(a), kb = dKey(b - DAY), nd = Math.round((b - a) / DAY), pd = buDaysIn(P.from, P.to), frac = nd / pd;
+var r = buPeriod(P), sv = 0, svc = {}, svp = 0, k = { pay: 0, flex: 0, off: 0 }, dbt = 0, cf = {}, exp = 0;
+(P.cats || []).forEach(function (c) { var f = buFact(P, c, ka, kb), kd = buKind(c); cf[c] = f; k[kd] += f; if (kd !== "off") exp += f; if (burSaveCat(c)) { sv += f; svc[c] = f; svp += (+P.plan[c] || 0) * frac; } if (burDebtCat(c)) dbt += f; });
+var inc = r.inc.fact * frac, cur = t0 <= P.to, elf = cur ? Math.max(0, Math.min(1, (Math.min(t0 + DAY, b) - a) / (b - a))) : 1;
+return { P: P, id: P.id, n: buPName(P.id) + (nd < pd ? " · " + burDd(a, b) : ""), sh: burSh(P.id), r: r, cf: cf, frac: frac, part: nd < pd, elf: elf, inc: inc, incp: r.inc.plan * frac, exp: exp, expp: r.exp.plan * frac, bal: inc - exp, sv: sv, svc: svc, svp: svp, k: k, dbt: dbt, cur: cur, a: a, b: b };
 });
 }
+function burDd(a, b) { var o = { day: "numeric", month: "short" }, f = function (d) { return new Date(d).toLocaleDateString("ru-RU", o).replace(".", ""); }; return f(a) + "–" + f(b - DAY); }
+function burCus() { if (LS.get("zd-burn") !== "c") return null; var m = /^(\d{4}-\d\d-\d\d),(\d{4}-\d\d-\d\d)$/.exec(LS.get("zd-burr") || ""); if (!m) return null; var a = new Date(m[1] + "T00:00").getTime(), b = new Date(m[2] + "T00:00").getTime(); if (b < a) { var t = a; a = b; b = t; } return { a: a, b: b + DAY, fa: dKey(a), fb: dKey(b) }; }
+function burSel(cap) { var c = burCus(); return c ? burRows(0, c) : burRows(cap ? Math.min(burN(), cap) : burN()); }
+function burLbl(rs) { return burCus() ? "период" : burMonths(rs.length); }
+function burMc(rs) { return rs.reduce(function (s, x) { return s + x.frac; }, 0) || 1; }
+function burSetR(a, b) { if (a > b) { var t = a; a = b; b = t; } LS.set("zd-burr", dKey(a) + "," + dKey(b)); LS.set("zd-burn", "c"); }
 function burDA(k, a, b, f) { return drlAttr(k, a + "," + b + "," + (f || "")); }
 function burTile(l, v, sub, cls, drl) { return '<div class="butile' + (drl ? " drlc" : "") + '"' + (drl || "") + "><small>" + l + '</small><span class="' + (cls || "") + '">' + v + "</span>" + (sub ? '<small class="muted">' + sub + "</small>" : "") + "</div>"; }
 function burPct(a, b) { return b ? Math.round(a / b * 100) + "%" : "—"; }
@@ -14482,22 +14491,27 @@ return h + '</svg></div><div class="r buleg">' + ser.map(function (s) { return '
 function burHTML() {
 var rp = burRp(), all = burRows(), h = '<div class="burnav" role="tablist">' + BURPS.map(function (x) { return '<button type="button" class="chip' + (x[0] === rp ? " on" : "") + '" data-a="burp" data-x="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>";
 if (["debt", "bank"].indexOf(rp) < 0 && !all.length) return h + '<div class="card bunone"><b>Для этого отчёта нужны данные из файла.</b><p class="muted">«⟳ Обновить из файла» → «Несколько периодов» — загрузите хотя бы 3–6 месяцев, лучше год: отчёты сравнивают месяцы между собой. Отчёты «💳 Долги» и «🧾 По выписке» работают и без файла.</p></div>';
-if (["flow", "worth", "save", "struct", "disc", "fixed", "rhythm", "inc", "bank"].indexOf(rp) >= 0) h += '<div class="r burrg"><span class="muted">За последние</span>' + [3, 6, 12, 24].map(function (n) { return '<button type="button" class="chip' + (burN() === n ? " on" : "") + '" data-a="burn" data-x="' + n + '">' + n + " мес.</button>"; }).join("") + (rp !== "bank" ? '<span class="muted">· загружено периодов: ' + all.length + (all.length < burN() ? " — больше: «⟳ Обновить из файла» → «Несколько периодов»" : "") + "</span>" : "") + "</div>";
+var cu = burCus(), rng = ["flow", "worth", "save", "struct", "disc", "fixed", "rhythm", "inc", "bank"].indexOf(rp) >= 0;
+if (rng) h += '<div class="r burrg"><span class="muted">За последние</span>' + [3, 6, 12, 24].map(function (n) { return '<button type="button" class="chip' + (!cu && burN() === n ? " on" : "") + '" data-a="burn" data-x="' + n + '">' + n + " мес.</button>"; }).join("") + '<button type="button" class="chip' + (cu ? " on" : "") + '" data-a="burn" data-x="c">📅 Свой период</button>' +
+(!cu && rp !== "bank" ? '<span class="muted">· загружено периодов: ' + all.length + (all.length < burN() ? " — больше: «⟳ Обновить из файла» → «Несколько периодов»" : "") + "</span>" : "") + "</div>" +
+(cu ? '<div class="r burrg burdts"><label>с <input type="date" class="inp" data-burr="a" value="' + cu.fa + '"></label><label>по <input type="date" class="inp" data-burr="b" value="' + cu.fb + '"></label>' + [["m0", "Этот месяц"], ["m1", "Прошлый месяц"], ["q", "3 месяца"], ["y0", "С начала года"], ["y1", "Прошлый год"]].map(function (x) { return '<button type="button" class="btn sm" data-a="burq" data-x="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>" +
+(rp !== "bank" ? '<p class="muted burtx">' + esc(drlPer(cu.a, cu.b).replace(/\.$/, "")) + ". Траты и накопления — точно по датам. У месяца бюджета (11-е → 10-е), попавшего в период частично, доходы и план считаются пропорционально дням — это оценка.</p>" : "") : "");
+if (cu && rng && rp !== "bank" && !burSel().length) return h + '<div class="card bunone"><b>В эти даты нет загруженных данных.</b><p class="muted">Выберите другие даты или загрузите месяцы: «⟳ Обновить из файла» → «Несколько периодов».</p></div>';
 var f = { flow: burFlow, worth: burWorth, save: burSave, struct: burStruct, disc: burDisc, fixed: burFixed, rhythm: burRhythm, inc: burInc, debt: burDebt, fcst: burFcst, year: burYear, bank: burBank }[rp];
 return h + '<div class="card busec burep" data-rp="' + rp + '">' + f() + "</div>";
 }
 function burFlow() {
-var rs = burRows(burN()), done = rs.filter(function (x) { return !x.cur; }), a = rs[0].a, b = rs[rs.length - 1].b, ti = 0, te = 0, acc = 0;
+var rs = burSel(), done = rs.filter(function (x) { return !x.cur && !x.part; }), a = rs[0].a, b = rs[rs.length - 1].b, ti = 0, te = 0, acc = 0;
 rs.forEach(function (x) { ti += x.inc; te += x.exp; x.drl = burDA("buc", x.a, x.b); });
 var avg = done.length ? done.reduce(function (s, x) { return s + x.bal; }, 0) / done.length : 0, pos = done.filter(function (x) { return x.bal >= 0; }).length;
 var h = burHead("Доход − расход по месяцам", "Расходы — как во вкладке «Период»: все статьи, кроме отмеченных «не считать». Плюс — деньги остались, минус — потрачено больше, чем пришло. Нажмите на цифру, строку или столбик — откроется, из чего она сложилась.");
-h += '<div class="butiles">' + burTile("Доходы за " + burMonths(rs.length), buRub(ti), "", "", burDA("bui", a, b)) + burTile("Расходы", buRub(te), ti ? burPct(te, ti) + " дохода" : "", "", burDA("buc", a, b)) +
+h += '<div class="butiles">' + burTile("Доходы за " + burLbl(rs), buRub(ti), "", "", burDA("bui", a, b)) + burTile("Расходы", buRub(te), ti ? burPct(te, ti) + " дохода" : "", "", burDA("buc", a, b)) +
 burTile("Доход − расход", buRub(ti - te), ti ? "осталось " + burPct(ti - te, ti) + " дохода" : "", ti - te < 0 ? "bad" : "ok", burDA("bup", a, b)) +
 burTile("В среднем за месяц", buRub(avg), done.length ? "в плюсе " + pos + " из " + burOfM(done.length) : "", avg < 0 ? "bad" : "ok", burDA("bup", a, b)) + "</div>";
 h += burChart(rs, [{ k: "inc", cls: "bci", l: "доход" }, { k: "exp", cls: "bce", l: "расход" }], [{ k: "bal", l: "доход − расход" }], { al: "Доход и расход по месяцам" });
 h += '<div class="butbl"><table><thead><tr><th>Период</th><th>Доход</th><th>Расход</th><th>Доход − расход</th><th>% дохода</th><th>Нарастающим итогом</th><th>По плану</th></tr></thead><tbody>' + rs.map(function (x) {
 acc += x.bal; var pl = x.incp - x.expp;
-return '<tr class="' + (x.cur ? "cur" : "") + '"><td>' + esc(x.n) + (x.cur ? ' <small class="muted">идёт</small>' : "") + '</td><td class="drlc"' + burDA("bui", x.a, x.b) + ">" + buRub(x.inc) + '</td><td class="drlc"' + burDA("buc", x.a, x.b) + ">" + buRub(x.exp) + '</td><td class="' + (x.bal < 0 ? "bad" : "ok") + '">' + buRub(x.bal) + "</td><td>" + burPct(x.bal, x.inc) + '</td><td class="' + (acc < 0 ? "bad" : "") + '">' + buRub(acc) + '</td><td class="' + (pl < 0 ? "bad" : "") + '">' + buRub(pl) + "</td></tr>";
+return '<tr class="' + (x.cur ? "cur" : "") + '"><td>' + esc(x.n) + (x.cur ? ' <small class="muted">идёт</small>' : "") + '</td><td class="drlc"' + burDA("bui", x.a, x.b) + ">" + (x.part ? "≈ " : "") + buRub(x.inc) + '</td><td class="drlc"' + burDA("buc", x.a, x.b) + ">" + buRub(x.exp) + '</td><td class="' + (x.bal < 0 ? "bad" : "ok") + '">' + buRub(x.bal) + "</td><td>" + burPct(x.bal, x.inc) + '</td><td class="' + (acc < 0 ? "bad" : "") + '">' + buRub(acc) + '</td><td class="' + (pl < 0 ? "bad" : "") + '">' + buRub(pl) + "</td></tr>";
 }).join("") + '<tr class="butot"><td>Итого</td><td>' + buRub(ti) + "</td><td>" + buRub(te) + '</td><td class="' + (ti - te < 0 ? "bad" : "ok") + '">' + buRub(ti - te) + "</td><td>" + burPct(ti - te, ti) + "</td><td></td><td></td></tr></tbody></table></div>";
 if (done.length >= 2) { var s = done.slice().sort(function (p, q) { return q.bal - p.bal; }); h += '<p class="burins">Лучший месяц — <b>' + esc(s[0].n) + "</b> (" + buRub(s[0].bal) + "), самый тяжёлый — <b>" + esc(s[s.length - 1].n) + "</b> (" + buRub(s[s.length - 1].bal) + ").</p>"; }
 return h;
@@ -14505,13 +14519,13 @@ return h;
 function burDebtAt(t) { var s = 0; live(S.debts || []).filter(function (d) { return !d.off; }).forEach(function (d) { var bs = live(S.dbal || []).filter(function (x) { return x.debt === d.id && x.d < t; }).sort(function (p, q) { return q.d - p.d; })[0]; s += bs ? +bs.v || 0 : +d.start || 0; }); return s; }
 function burDebtNow() { return live(S.debts || []).filter(function (d) { return !d.off; }).reduce(function (s, d) { return s + fcDebtCur(d); }, 0); }
 function burWorth() {
-var rs = burRows(burN()), hasD = live(S.debts || []).some(function (d) { return !d.off; });
+var rs = burSel(), hasD = live(S.debts || []).some(function (d) { return !d.off; });
 rs.forEach(function (x) { var bl = x.P.bal; x.end = bl ? bl.end : null; x.gain = bl ? (bl.gain !== null && bl.gain !== undefined ? bl.gain : bl.end - bl.start) : null; x.debt = hasD ? (x.cur ? burDebtNow() : burDebtAt(x.b)) : null; x.net = x.end !== null && hasD ? x.end - x.debt : null; x.drl = burDA("bup", x.a, x.b, "end"); });
 var wb = rs.filter(function (x) { return x.end !== null; }), h = burHead("Изменение финансового состояния", "Остаток — ячейка «Конец» листа месяца в вашем файле (начало + доходы − расходы ± корректировка). Долги — из вкладки «Долги» (без ипотеки и выключенных); до первой записи остатка берётся начальная сумма долга. «Остаток − долги» — сколько денег ваших на самом деле.");
 if (!wb.length) return h + '<p class="warnc">В загруженных периодах нет строки «Начало · Доход · Расход · Конец» — её читает «⟳ Обновить из файла». Пока могу показать только долги — см. отчёт «💳 Долги».</p>';
 var f = wb[0], l = wb[wb.length - 1], st = f.P.bal.start !== null && f.P.bal.start !== undefined ? f.P.bal.start : f.end - (f.gain || 0), ch = l.end - st;
 h += '<div class="butiles">' + burTile(l.cur ? "Остаток сейчас" : "Остаток на " + esc(l.n), buRub(l.end), "", "", burDA("bup", wb[0].a, l.b, "end")) +
-burTile("Изменение за " + burMonths(wb.length), (ch > 0 ? "+" : "") + buRub(ch), "было " + buRub(st), ch < 0 ? "bad" : "ok", burDA("bup", wb[0].a, l.b, "end")) +
+burTile("Изменение за " + burLbl(wb), (ch > 0 ? "+" : "") + buRub(ch), "было " + buRub(st), ch < 0 ? "bad" : "ok", burDA("bup", wb[0].a, l.b, "end")) +
 (hasD ? burTile("Долги сейчас", buRub(burDebtNow()), "было " + buRub(f.debt), burDebtNow() > f.debt ? "bad" : "ok", burDA("bud", 0, 0)) + burTile("Остаток − долги", buRub(l.end - burDebtNow()), "было " + buRub(st - f.debt), l.end - burDebtNow() < st - f.debt ? "bad" : "ok") : "") + "</div>";
 h += burChart(rs, [{ k: "gain", cls: function (v) { return v < 0 ? "bcn2" : "bcg"; }, lc: "bcg", l: "за месяц прибавилось / убыло" }], [{ k: "end", l: "остаток на конец" }].concat(hasD ? [{ k: "net", l: "остаток − долги", cls: "alt" }] : []), { al: "Остаток и изменение по месяцам" });
 h += '<div class="butbl"><table><thead><tr><th>Период</th><th>Начало</th><th>Доходы</th><th>Расходы</th><th>Конец</th><th>За месяц</th>' + (hasD ? "<th>Долги</th><th>Остаток − долги</th>" : "") + "</tr></thead><tbody>" + rs.map(function (x) {
@@ -14522,13 +14536,13 @@ if (!hasD) h += '<p class="muted">Долги не заведены — доба�
 return h;
 }
 function burSave() {
-var rs = burRows(burN()), cats = [], a = rs[0].a, b = rs[rs.length - 1].b;
+var rs = burSel(), cats = [], a = rs[0].a, b = rs[rs.length - 1].b;
 rs.forEach(function (x) { (x.P.cats || []).forEach(function (c) { if (burSaveCat(c) && cats.indexOf(c) < 0) cats.push(c); }); x.drl = burDA("buc", x.a, x.b, "s:"); });
 var h = burHead("Накопления", "Отложено — статьи-накопления: «Накопл», «Фин цели», «365 days», вклады, подушка и всё, что в настройках бюджета отмечено «не считать». Цель-ориентир — 10–20% дохода.");
 if (!cats.length) return h + '<p class="muted">Не нашлось статей-накоплений. Статья считается накоплением, если в названии есть «накопл», «фин цели», «365», «вклад», «подушка», «инвест» — или она отмечена «не считать» в «Настройки» → «Бюджет».</p>';
 var ts = 0, tp = 0, ti = 0; rs.forEach(function (x) { ts += x.sv; tp += x.svp; ti += x.inc; });
 var done = rs.filter(function (x) { return !x.cur; }), avg = done.length ? done.reduce(function (s, x) { return s + x.sv; }, 0) / done.length : ts / rs.length, rate = ti ? ts / ti * 100 : 0;
-h += '<div class="butiles">' + burTile("Отложено за " + burMonths(rs.length), buRub(ts), tp ? "план " + buRub(tp) + " · " + burPct(ts, tp) : "", ts >= tp ? "ok" : "", burDA("buc", a, b, "s:")) +
+h += '<div class="butiles">' + burTile("Отложено за " + burLbl(rs), buRub(ts), tp ? "план " + buRub(tp) + " · " + burPct(ts, tp) : "", ts >= tp ? "ok" : "", burDA("buc", a, b, "s:")) +
 burTile("В среднем за месяц", buRub(avg), "", "", burDA("bup", a, b, "sv")) + burTile("Доля дохода", Math.round(rate) + "%", rate >= 20 ? "отлично — 20% и больше" : rate >= 10 ? "хорошо — ориентир 10–20%" : "меньше ориентира 10%", rate >= 10 ? "ok" : "warn") +
 burTile("Месяцев с план выполнен", done.filter(function (x) { return x.svp && x.sv >= x.svp - 1; }).length + " из " + done.filter(function (x) { return x.svp; }).length, "") + "</div>";
 h += burChart(rs, [{ k: "sv", cls: "bcs", l: "отложено" }], [{ k: "svp", l: "план", cls: "alt" }], { al: "Отложено по месяцам" });
@@ -14537,18 +14551,18 @@ return '<tr class="' + (x.cur ? "cur" : "") + '"><td>' + esc(x.n) + "</td>" + ca
 }).join("") + "</tbody></table></div>";
 return h;
 }
-function burCatSum(rs, onlyExp) { var o = {}; rs.forEach(function (x) { (x.P.cats || []).forEach(function (c) { if (onlyExp && buKind(c) === "off") return; o[c] = (o[c] || 0) + buFact(x.P, c); }); }); return o; }
+function burCatSum(rs, onlyExp) { var o = {}; rs.forEach(function (x) { (x.P.cats || []).forEach(function (c) { if (onlyExp && buKind(c) === "off") return; o[c] = (o[c] || 0) + (x.cf[c] || 0); }); }); return o; }
 function burStruct() {
-var n = burN(), rs = burRows(n), all = burRows(), prev = all.slice(Math.max(0, all.length - rs.length * 2), all.length - rs.length), a = rs[0].a, b = rs[rs.length - 1].b;
+var cu = burCus(), rs = burSel(), all = burRows(), prev = cu ? burRows(0, { a: cu.a - (cu.b - cu.a), b: cu.a }) : all.slice(Math.max(0, all.length - rs.length * 2), all.length - rs.length), mr = burMc(rs), mp = burMc(prev), pl = cu ? "тем же числом дней до них" : prev.length + " мес. до них", a = rs[0].a, b = rs[rs.length - 1].b;
 var cs = burCatSum(rs, true), ps = burCatSum(prev, true), tot = buSum(cs), mx = 0, keys = Object.keys(cs).filter(function (c) { return cs[c] > 0; }).sort(function (p, q) { return cs[q] - cs[p]; });
 keys.forEach(function (c) { mx = Math.max(mx, cs[c]); });
-var h = burHead("Структура расходов", "Куда уходят деньги за выбранные месяцы: доля каждой статьи, сколько в среднем за месяц и как это изменилось по сравнению с месяцами до них" + (prev.length ? " (" + prev.length + " мес.)" : " — их пока нет в загруженных данных") + ".");
-h += '<div class="butiles">' + burTile("Расходы за " + burMonths(rs.length), buRub(tot), "в среднем " + buRub(tot / rs.length) + " в месяц", "", burDA("buc", a, b)) + (keys.length ? burTile("Главная статья", esc(keys[0]), burPct(cs[keys[0]], tot) + " всех расходов", "", burDA("buc", a, b, "c:" + keys[0])) : "") +
-(prev.length ? (function () { var m1 = tot / rs.length, m0 = buSum(ps) / prev.length; return burTile("Средний месяц к прошлым " + prev.length + " мес.", (m1 >= m0 ? "+" : "") + burPct(m1 - m0, m0), "было в среднем " + buRub(m0) + " в месяц", m1 > m0 * 1.03 ? "bad" : "ok"); })() : "") + "</div>";
+var h = burHead("Структура расходов", "Куда уходят деньги за выбранное время: доля каждой статьи, сколько в среднем за месяц и как это изменилось по сравнению с " + pl + (prev.length ? "" : " — их пока нет в загруженных данных") + ".");
+h += '<div class="butiles">' + burTile("Расходы за " + burLbl(rs), buRub(tot), "в среднем " + buRub(tot / mr) + " в месяц", "", burDA("buc", a, b)) + (keys.length ? burTile("Главная статья", esc(keys[0]), burPct(cs[keys[0]], tot) + " всех расходов", "", burDA("buc", a, b, "c:" + keys[0])) : "") +
+(prev.length ? (function () { var m1 = tot / mr, m0 = buSum(ps) / mp; return burTile("Средний месяц к " + pl, (m1 >= m0 ? "+" : "") + burPct(m1 - m0, m0), "было в среднем " + buRub(m0) + " в месяц", m1 > m0 * 1.03 ? "bad" : "ok"); })() : "") + "</div>";
 h += '<div class="burst">' + keys.map(function (c) {
-var v = cs[c], pv = ps[c] || 0, d = prev.length && pv ? Math.round((v / rs.length - pv / prev.length) / (pv / prev.length) * 100) : null;
+var v = cs[c], pv = ps[c] || 0, d = prev.length && pv ? Math.round((v / mr - pv / mp) / (pv / mp) * 100) : null;
 return '<div class="burow drlc"' + burDA("buc", a, b, "c:" + c) + "><span>" + esc(c) + ' <small class="muted">' + BKN[buKind(c)][0] + "</small></span>" + '<div class="bubr"><i class="' + (buKind(c) === "pay" ? "pay" : "ok") + '" style="width:' + (v / mx * 100).toFixed(1) + '%"></i></div><span class="bunum">' + buRub(v) + " · " + burPct(v, tot) + "</span>" +
-'<small class="muted buadj">в среднем ' + buRub(v / rs.length) + " в месяц" + (d !== null ? ' · <span class="' + (d > 10 ? "bad" : d < -10 ? "ok" : "") + '">' + (d > 0 ? "+" : "") + d + "% к прошлым " + prev.length + " мес.</span>" : prev.length && !pv ? " · раньше не было" : "") + "</small></div>";
+'<small class="muted buadj">в среднем ' + buRub(v / mr) + " в месяц" + (d !== null ? ' · <span class="' + (d > 10 ? "bad" : d < -10 ? "ok" : "") + '">' + (d > 0 ? "+" : "") + d + "% к " + pl + "</span>" : prev.length && !pv ? " · раньше не было" : "") + "</small></div>";
 }).join("") + "</div>";
 var done = all.filter(function (x) { return !x.cur; });
 if (done.length >= 4) {
@@ -14559,13 +14573,13 @@ if (up.length || dn.length) h += '<p class="burins"><b>' + esc(last.n) + "</b> �
 return h;
 }
 function burDisc() {
-var rs = burRows(Math.min(burN(), 12)), cats = [];
+var rs = burSel(12), cats = [];
 rs.forEach(function (x) { (x.P.cats || []).forEach(function (c) { if (cats.indexOf(c) < 0) cats.push(c); }); });
 var h = burHead("План и факт по статьям", "Клетка — сколько процентов плана потрачено. Зелёная — уложились, жёлтая — перерасход до 10%, красная — больше. У накоплений наоборот: зелёная — отложили не меньше плана. У идущего месяца клетка сравнивается с тем, сколько «положено» к сегодня. Нажмите на клетку — откроются траты по дням.");
 var stat = {}, okM = 0, dn = rs.filter(function (x) { return !x.cur; });
 dn.forEach(function (x) { if (x.exp <= x.expp + 1) okM++; });
 var cell = function (x, c) {
-var P = x.P, pl = +P.plan[c] || 0, f = buFact(P, c), sv = burSaveCat(c), sh = x.cur && buKind(c) === "flex" ? pl * x.r.el / x.r.pd : pl, p = sh ? f / sh * 100 : f ? 999 : -1, cls;
+var P = x.P, pl = (+P.plan[c] || 0) * x.frac, f = x.cf[c] || 0, sv = burSaveCat(c), sh = x.cur && buKind(c) === "flex" ? pl * x.elf : pl, p = sh ? f / sh * 100 : f ? 999 : -1, cls;
 if (p < 0) return '<td class="muted">—</td>';
 cls = sv ? (p >= 99 ? "bmg" : p >= 70 ? "bmy" : "bmr") : (p <= 100.5 ? "bmg" : p <= 110 ? "bmy" : "bmr");
 if (!x.cur && pl) { var s = stat[c] = stat[c] || { ok: 0, n: 0, over: 0 }; s.n++; if (cls === "bmg") s.ok++; if (!sv && f > pl) s.over += f - pl; }
@@ -14576,18 +14590,18 @@ var best = cats.filter(function (c) { return stat[c] && stat[c].n >= 2 && !burSa
 h += '<div class="butiles">' + burTile("Месяцы в рамках плана", okM + " из " + dn.length, "итого расходы не больше плана", okM >= dn.length / 2 ? "ok" : "warn") + (best.length ? burTile("Самая послушная статья", esc(best[0]), "в плане " + stat[best[0]].ok + " из " + burOfM(stat[best[0]].n), "ok") : "") +
 (worst.length && stat[worst[0]].over ? burTile("Чаще всего перерасход", esc(worst[0]), "сверх плана всего " + buRub(stat[worst[0]].over), "bad", burDA("buc", rs[0].a, rs[rs.length - 1].b, "c:" + worst[0])) : "") + "</div>";
 h += '<div class="butbl burmt"><table><thead><tr><th>Статья</th>' + rs.map(function (x) { return "<th>" + esc(x.sh) + "</th>"; }).join("") + "<th>В плане</th><th>Сверх плана</th></tr></thead><tbody>" + body +
-'<tr class="butot"><td>Итого расходы</td>' + rs.map(function (x) { var sh = x.cur ? x.expp * x.r.el / x.r.pd : x.expp, p = sh ? x.exp / sh * 100 : 0; return '<td class="burm ' + (p <= 100.5 ? "bmg" : p <= 110 ? "bmy" : "bmr") + ' drlc"' + burDA("buc", x.a, x.b) + ">" + burPct(x.exp, x.expp) + "</td>"; }).join("") + "<td>" + okM + " из " + dn.length + "</td><td></td></tr></tbody></table></div>";
+'<tr class="butot"><td>Итого расходы</td>' + rs.map(function (x) { var sh = x.cur ? x.expp * x.elf : x.expp, p = sh ? x.exp / sh * 100 : 0; return '<td class="burm ' + (p <= 100.5 ? "bmg" : p <= 110 ? "bmy" : "bmr") + ' drlc"' + burDA("buc", x.a, x.b) + ">" + burPct(x.exp, x.expp) + "</td>"; }).join("") + "<td>" + okM + " из " + dn.length + "</td><td></td></tr></tbody></table></div>";
 return h;
 }
 function burFixed() {
-var rs = burRows(burN()), a = rs[0].a, b = rs[rs.length - 1].b, ti = 0, tp = 0, tf = 0, ts = 0, td = 0;
-rs.forEach(function (x) { ti += x.inc; x.fix = 0; x.flex = x.k.flex; (x.P.cats || []).forEach(function (c) { if (buKind(c) === "pay" && !burSaveCat(c)) x.fix += buFact(x.P, c); }); tp += x.fix; tf += x.flex; ts += x.sv; td += x.dbt; x.drl = burDA("buc", x.a, x.b, "k:pay"); });
-var mins = live(S.debts || []).filter(function (d) { return !d.off && fcDebtCur(d) > 0; }).reduce(function (s, d) { return s + (+d.min || 0); }, 0), avgI = ti / rs.length, dl = ti ? td / ti * 100 : 0;
+var rs = burSel(), mr = burMc(rs), a = rs[0].a, b = rs[rs.length - 1].b, ti = 0, tp = 0, tf = 0, ts = 0, td = 0;
+rs.forEach(function (x) { ti += x.inc; x.fix = 0; x.flex = x.k.flex; (x.P.cats || []).forEach(function (c) { if (buKind(c) === "pay" && !burSaveCat(c)) x.fix += x.cf[c] || 0; }); tp += x.fix; tf += x.flex; ts += x.sv; td += x.dbt; x.drl = burDA("buc", x.a, x.b, "k:pay"); });
+var mins = live(S.debts || []).filter(function (d) { return !d.off && fcDebtCur(d) > 0; }).reduce(function (s, d) { return s + (+d.min || 0); }, 0), avgI = ti / mr, dl = ti ? td / ti * 100 : 0;
 var h = burHead("Обязательные и гибкие расходы", "Обязательные — статьи «платёж» (ипотека, кредиты, коммунальные, налоги): их почти не сократить. Гибкие — то, чем управляете каждую неделю. Ориентир «50/30/20»: до 50% дохода — обязательное, около 30% — гибкое, от 20% — отложить.");
-var bar = function (l, v, ref, cls, drl) { var p = ti ? v / ti * 100 : 0; return '<div class="burow' + (drl ? " drlc" : "") + '"' + (drl || "") + "><span>" + l + '</span><div class="bubr"><i class="' + cls + '" style="width:' + Math.min(100, p).toFixed(1) + '%"></i><u style="left:' + ref + '%"></u></div><span class="bunum">' + Math.round(p) + "% · " + buRub(v / rs.length) + "/мес</span></div>"; };
+var bar = function (l, v, ref, cls, drl) { var p = ti ? v / ti * 100 : 0; return '<div class="burow' + (drl ? " drlc" : "") + '"' + (drl || "") + "><span>" + l + '</span><div class="bubr"><i class="' + cls + '" style="width:' + Math.min(100, p).toFixed(1) + '%"></i><u style="left:' + ref + '%"></u></div><span class="bunum">' + Math.round(p) + "% · " + buRub(v / mr) + "/мес</span></div>"; };
 h += '<div class="burst">' + bar("Обязательные", tp, 50, tp / (ti || 1) > .5 ? "bad" : "pay", burDA("buc", a, b, "k:pay")) + bar("Гибкие", tf, 30, tf / (ti || 1) > .35 ? "warn" : "ok", burDA("buc", a, b, "k:flex")) + bar("Отложено", ts, 20, ts / (ti || 1) >= .2 ? "ok" : "warn", burDA("buc", a, b, "s:")) + '<small class="muted">Черта на полосе — ориентир 50 / 30 / 20 % дохода.</small></div>';
 h += '<div class="butiles">' + burTile("Платежи по кредитам и ипотеке", Math.round(dl) + "% дохода", dl <= 30 ? "в норме — до 30%" : dl <= 50 ? "высокая нагрузка — 30–50%" : "опасно — больше 50%", dl <= 30 ? "ok" : dl <= 50 ? "warn" : "bad", burDA("buc", a, b, "d:")) +
-(mins ? burTile("Минимальные платежи по долгам", buRub(mins) + "/мес", avgI ? burPct(mins, avgI) + " среднего дохода" : "", "", burDA("bud", 0, 0)) : "") + burTile("Свободно после обязательных", buRub((ti - tp) / rs.length) + "/мес", "доход − обязательные, в среднем", ti - tp < 0 ? "bad" : "ok") + "</div>";
+(mins ? burTile("Минимальные платежи по долгам", buRub(mins) + "/мес", avgI ? burPct(mins, avgI) + " среднего дохода" : "", "", burDA("bud", 0, 0)) : "") + burTile("Свободно после обязательных", buRub((ti - tp) / mr) + "/мес", "доход − обязательные, в среднем", ti - tp < 0 ? "bad" : "ok") + "</div>";
 h += burChart(rs, [{ k: "fix", cls: "bcf", l: "обязательные" }, { k: "flex", cls: "bce", l: "гибкие" }, { k: "sv", cls: "bcs", l: "отложено" }], [{ k: "inc", l: "доход" }], { stack: true, al: "Структура месяца: обязательные, гибкие, отложено" });
 h += '<div class="butbl"><table><thead><tr><th>Период</th><th>Доход</th><th>Обязательные</th><th>%</th><th>Гибкие</th><th>%</th><th>Отложено</th><th>%</th><th>Кредиты, ипотека</th><th>%</th></tr></thead><tbody>' + rs.map(function (x) {
 return '<tr class="' + (x.cur ? "cur" : "") + '"><td>' + esc(x.n) + "</td><td>" + buRub(x.inc) + '</td><td class="drlc"' + burDA("buc", x.a, x.b, "k:pay") + ">" + buRub(x.fix) + "</td><td>" + burPct(x.fix, x.inc) + '</td><td class="drlc"' + burDA("buc", x.a, x.b, "k:flex") + ">" + buRub(x.flex) + "</td><td>" + burPct(x.flex, x.inc) + '</td><td class="drlc"' + burDA("buc", x.a, x.b, "s:") + ">" + buRub(x.sv) + "</td><td>" + burPct(x.sv, x.inc) + '</td><td class="drlc"' + burDA("buc", x.a, x.b, "d:") + ">" + buRub(x.dbt) + "</td><td>" + burPct(x.dbt, x.inc) + "</td></tr>";
@@ -14596,15 +14610,15 @@ return h;
 }
 function burFlexDay(P, key) { var row = P.days[key] || {}, s = 0; for (var c in row) if (buKind(c) === "flex") s += +row[c] || 0; return s; }
 function burRhythm() {
-var rs = burRows(burN()), t0 = today0(), wd = [0, 0, 0, 0, 0, 0, 0], wn = [0, 0, 0, 0, 0, 0, 0], pdS = [], pdN = [], days = [], zero = 0, run = 0, best = 0, a = rs[0].a, b = rs[rs.length - 1].b, early = [], tot = 0;
+var rs = burSel(), t0 = today0(), wd = [0, 0, 0, 0, 0, 0, 0], wn = [0, 0, 0, 0, 0, 0, 0], pdS = [], pdN = [], days = [], zero = 0, run = 0, best = 0, a = rs[0].a, b = rs[rs.length - 1].b, early = [], tot = 0;
 rs.forEach(function (x) {
 var P = x.P, ff = 0, f10 = 0;
-for (var d = P.from; d <= Math.min(P.to, t0); d = addDays(d, 1)) {
+for (var d = x.a; d < Math.min(x.b, t0 + DAY); d = addDays(d, 1)) {
 var key = dKey(d); if (!(key in (P.days || {}))) continue; var v = burFlexDay(P, key), w = (new Date(d).getDay() + 6) % 7, i = Math.round((d - P.from) / DAY);
 wd[w] += v; wn[w]++; pdS[i] = (pdS[i] || 0) + v; pdN[i] = (pdN[i] || 0) + 1; days.push({ d: d, v: v }); tot += v; ff += v; if (i < 10) f10 += v;
 if (v < 1) { zero++; run++; best = Math.max(best, run); } else run = 0;
 }
-if (!x.cur && ff) early.push(f10 / ff);
+if (!x.cur && !x.part && ff) early.push(f10 / ff);
 });
 var h = burHead("Ритм трат", "Только гибкие статьи — те, что зависят от ежедневных решений. Средние — по дням, за которые есть данные.");
 if (!days.length) return h + '<p class="muted">Нет дней с данными.</p>';
@@ -14620,18 +14634,18 @@ h += '<div class="bulab">Самые дорогие дни</div><div class="burst
 return h;
 }
 function burInc() {
-var rs = burRows(burN()), src = [], a = rs[0].a, b = rs[rs.length - 1].b;
-rs.forEach(function (x) { var inc = x.P.inc || {}; Object.keys(Object.assign({}, inc.plan, inc.fact)).forEach(function (s) { if (src.indexOf(s) < 0) src.push(s); }); src.forEach(function (s, i) { x["s" + i] = +((inc.fact || {})[s]) || 0; }); x.drl = burDA("bui", x.a, x.b); });
-rs.forEach(function (x) { src.forEach(function (s, i) { if (x["s" + i] === undefined) x["s" + i] = +(((x.P.inc || {}).fact || {})[s]) || 0; }); });
+var rs = burSel(), src = [], a = rs[0].a, b = rs[rs.length - 1].b;
+rs.forEach(function (x) { var inc = x.P.inc || {}; Object.keys(Object.assign({}, inc.plan, inc.fact)).forEach(function (s) { if (src.indexOf(s) < 0) src.push(s); }); src.forEach(function (s, i) { x["s" + i] = (+((inc.fact || {})[s]) || 0) * x.frac; }); x.drl = burDA("bui", x.a, x.b); });
+rs.forEach(function (x) { src.forEach(function (s, i) { if (x["s" + i] === undefined) x["s" + i] = (+(((x.P.inc || {}).fact || {})[s]) || 0) * x.frac; }); });
 var h = burHead("Доходы", "Строки «план» и «факт» под «Зарплата …» на листе месяца — по источникам.");
 if (!src.length) return h + '<p class="muted">На листах месяцев не нашлась строка «Зарплата … Всего» с планом и фактом.</p>';
-var done = rs.filter(function (x) { return !x.cur; }), vals = done.map(function (x) { return x.inc; }), ti = rs.reduce(function (s, x) { return s + x.inc; }, 0), tp = rs.reduce(function (s, x) { return s + x.incp; }, 0);
+var done = rs.filter(function (x) { return !x.cur && !x.part; }), vals = done.map(function (x) { return x.inc; }), ti = rs.reduce(function (s, x) { return s + x.inc; }, 0), tp = rs.reduce(function (s, x) { return s + x.incp; }, 0);
 var mean = vals.length ? vals.reduce(function (s, v) { return s + v; }, 0) / vals.length : 0, sd = vals.length > 1 ? Math.sqrt(vals.reduce(function (s, v) { return s + (v - mean) * (v - mean); }, 0) / vals.length) : 0, cv = mean ? sd / mean * 100 : 0;
-h += '<div class="butiles">' + burTile("Доходы за " + burMonths(rs.length), buRub(ti), tp ? "план " + buRub(tp) + " · " + burPct(ti, tp) : "", ti >= tp ? "ok" : "", burDA("bui", a, b)) + burTile("В среднем за месяц", buRub(mean), vals.length ? "от " + buRub(Math.min.apply(null, vals)) + " до " + buRub(Math.max.apply(null, vals)) : "") +
+h += '<div class="butiles">' + burTile("Доходы за " + burLbl(rs), buRub(ti), tp ? "план " + buRub(tp) + " · " + burPct(ti, tp) : "", ti >= tp ? "ok" : "", burDA("bui", a, b)) + burTile("В среднем за месяц", buRub(mean), vals.length ? "от " + buRub(Math.min.apply(null, vals)) + " до " + buRub(Math.max.apply(null, vals)) : "") +
 (vals.length >= 3 ? burTile("Стабильность", cv < 10 ? "стабильный" : cv < 30 ? "колеблется" : "нестабильный", "разброс ±" + Math.round(cv) + "% от среднего", cv < 10 ? "ok" : cv < 30 ? "warn" : "bad") : "") + "</div>";
 h += burChart(rs, src.map(function (s, i) { return { k: "s" + i, cls: "bk" + (i % 6), l: s }; }), [{ k: "incp", l: "план" }], { stack: true, al: "Доходы по источникам" });
 h += '<div class="butbl"><table><thead><tr><th>Период</th>' + src.map(function (s) { return "<th>" + esc(s) + "</th>"; }).join("") + "<th>Всего</th><th>План</th><th>%</th></tr></thead><tbody>" + rs.map(function (x) {
-return '<tr class="' + (x.cur ? "cur" : "") + '"><td>' + esc(x.n) + "</td>" + src.map(function (s, i) { return x["s" + i] ? '<td class="drlc"' + burDA("bui", x.a, x.b, s) + ">" + buRub(x["s" + i]) + "</td>" : '<td class="muted">—</td>'; }).join("") + "<td><b>" + buRub(x.inc) + "</b></td><td>" + buRub(x.incp) + '</td><td class="' + (x.inc < x.incp - 1 && !x.cur ? "bad" : "") + '">' + burPct(x.inc, x.incp) + "</td></tr>";
+return '<tr class="' + (x.cur ? "cur" : "") + '"><td>' + esc(x.n) + "</td>" + src.map(function (s, i) { return x["s" + i] ? '<td class="drlc"' + burDA("bui", x.a, x.b, s) + ">" + (x.part ? "≈ " : "") + buRub(x["s" + i]) + "</td>" : '<td class="muted">—</td>'; }).join("") + "<td><b>" + buRub(x.inc) + "</b></td><td>" + buRub(x.incp) + '</td><td class="' + (x.inc < x.incp - 1 && !x.cur ? "bad" : "") + '">' + burPct(x.inc, x.incp) + "</td></tr>";
 }).join("") + '<tr class="butot"><td>Доля</td>' + src.map(function (s, i) { var v = rs.reduce(function (t, x) { return t + x["s" + i]; }, 0); return "<td>" + burPct(v, ti) + "</td>"; }).join("") + "<td>100%</td><td></td><td></td></tr></tbody></table></div>";
 return h;
 }
@@ -14702,7 +14716,7 @@ function burBank() {
 if (!BKOPS) { bkLoad().then(render); return '<p class="muted">Загружаю выписку…</p>'; }
 var h = burHead("По выписке банка", "Операции из CSV интернет-банка (вкладка «🏦 Выписка»). Хранятся только на этом устройстве.");
 if (!BKOPS.length) return h + '<p class="muted">Выписка не загружена. Вкладка «🏦 Выписка» → загрузите CSV из интернет-банка (Т-Банк, Сбер, Альфа и др.) — здесь появятся подписки, магазины и крупные покупки.</p>';
-var cur = buPid(today0()), a = buPRange(buPShift(cur, -(burN() - 1))).from, b = today0() + DAY, ops = BKOPS.filter(function (o) { return o.d >= a && o.d < b; }), ex = ops.filter(function (o) { return o.a < 0; }), te = ex.reduce(function (s, o) { return s - o.a; }, 0), ti = ops.filter(function (o) { return o.a > 0; }).reduce(function (s, o) { return s + o.a; }, 0);
+var cur = buPid(today0()), cu = burCus(), a = cu ? cu.a : buPRange(buPShift(cur, -(burN() - 1))).from, b = cu ? cu.b : today0() + DAY, ops = BKOPS.filter(function (o) { return o.d >= a && o.d < b; }), ex = ops.filter(function (o) { return o.a < 0; }), te = ex.reduce(function (s, o) { return s - o.a; }, 0), ti = ops.filter(function (o) { return o.a > 0; }).reduce(function (s, o) { return s + o.a; }, 0);
 var subs = burSubs(), sm = subs.reduce(function (s, x) { return s + x.md; }, 0);
 h += '<div class="butiles">' + burTile("Расходы по выписке", buRub(te), ex.length + " " + plural(ex.length, ["операция", "операции", "операций"]) + " · " + drlPer(a, b), "", burDA("bub", a, b)) + burTile("Поступления", buRub(ti), "") + burTile("Средний чек", ex.length ? buRub(te / ex.length) : "—", "") +
 burTile("Регулярные списания", buRub(sm) + "/мес", subs.length + " " + plural(subs.length, ["подписка или платёж", "подписки или платежа", "подписок и платежей"]) + " · ≈ " + buRub(sm * 12) + " в год", "") + "</div>";
@@ -14733,10 +14747,13 @@ sum += v; R.push({ d: d, t: c, h: "", s: buPName(P.id), v: buRub(v) });
 });
 } else if (k === "bui") {
 T = "💰 Доходы" + (f ? " · " + f : "");
-buPers().forEach(function (P) { if (P.to + DAY <= from || P.from >= to) return; var inc = P.inc || {}; Object.keys(Object.assign({}, inc.plan, inc.fact)).forEach(function (s) { if (f && s !== f) return; var v = +((inc.fact || {})[s]) || 0, pl = +((inc.plan || {})[s]) || 0; if (!v && !pl) return; sum += v; R.push({ d: P.from, t: buPName(P.id) + " · " + s, h: "", s: pl ? "план " + buRub(pl) : "", v: buRub(v) }); }); });
+buPers().forEach(function (P) {
+if (P.to + DAY <= from || P.from >= to) return; var inc = P.inc || {}, a2 = Math.max(P.from, from), b2 = Math.min(P.to + DAY, to), fr = Math.round((b2 - a2) / DAY) / buDaysIn(P.from, P.to), pt = fr < .999;
+Object.keys(Object.assign({}, inc.plan, inc.fact)).forEach(function (s) { if (f && s !== f) return; var v = (+((inc.fact || {})[s]) || 0) * fr, pl = (+((inc.plan || {})[s]) || 0) * fr; if (!v && !pl) return; sum += v; R.push({ d: P.from, t: buPName(P.id) + " · " + s, h: "", s: (pt ? "≈ " + Math.round(fr * 100) + "% месяца · " : "") + (pl ? "план " + buRub(pl) : ""), v: (pt ? "≈ " : "") + buRub(v) }); });
+});
 } else if (k === "bup") {
 T = f === "sv" ? "🏦 Отложено по месяцам" : f === "end" ? "📈 Остаток на конец месяца" : "💸 Доход − расход по месяцам"; noSum = f === "end";
-burRows().forEach(function (x) { if (x.b <= from || x.a >= to) return; var v = f === "sv" ? x.sv : f === "end" ? (x.P.bal ? x.P.bal.end : null) : x.bal; if (v === null || v === undefined) return; sum += v; R.push({ d: x.a, t: x.n + (x.cur ? " · идёт" : ""), h: "", s: f === "sv" ? Object.keys(x.svc).filter(function (c) { return x.svc[c]; }).map(function (c) { return c + " " + buRub(x.svc[c]); }).join(" · ") : f === "end" ? "начало " + buRub(x.P.bal.start || 0) + " · доходы " + buRub(x.P.bal.inc || 0) + " · расходы " + buRub(x.P.bal.exp || 0) : "доход " + buRub(x.inc) + " · расход " + buRub(x.exp), v: buRub(v) }); });
+burRows(0, { a: from, b: to }).forEach(function (x) { var v = f === "sv" ? x.sv : f === "end" ? (x.P.bal ? x.P.bal.end : null) : x.bal; if (v === null || v === undefined) return; sum += v; R.push({ d: x.a, t: x.n + (x.cur ? " · идёт" : ""), h: "", s: f === "sv" ? Object.keys(x.svc).filter(function (c) { return x.svc[c]; }).map(function (c) { return c + " " + buRub(x.svc[c]); }).join(" · ") : f === "end" ? "начало " + buRub(x.P.bal.start || 0) + " · доходы " + buRub(x.P.bal.inc || 0) + " · расходы " + buRub(x.P.bal.exp || 0) : "доход " + buRub(x.inc) + " · расход " + buRub(x.exp), v: buRub(v) }); });
 } else if (k === "bud") {
 var dl = live(S.debts || []).filter(function (d) { return f ? d.id === f : !d.off; }); T = "💳 " + (f && dl[0] ? dl[0].n : "Остатки долгов"); sub = "все записи остатка"; noSum = true;
 dl.forEach(function (d) { R.push({ d: 0, t: d.n + " — начальный долг", s: (+d.rate || 0) + "% · мин. платёж " + buRub(+d.min || 0), h: "#budget-debts", v: buRub(+d.start || 0) }); live(S.dbal || []).filter(function (x) { return x.debt === d.id; }).forEach(function (x) { R.push({ d: x.d, t: d.n, s: "остаток", h: "#budget-debts", v: buRub(+x.v || 0) }); }); });
@@ -14749,10 +14766,20 @@ return { t: T, sub: sub, rows: R, sum: sum && !noSum ? "всего " + buRub(sum
 }
 function burAct(a, el) {
 if (a === "burp") { LS.set("zd-burp", el.dataset.x); render(); return true; }
-if (a === "burn") { LS.set("zd-burn", el.dataset.x); render(); return true; }
+if (a === "burn") { if (el.dataset.x === "c" && !burCus()) { var t0 = today0(); LS.set("zd-burr", dKey(buPRange(buPShift(buPid(t0), -2)).from) + "," + dKey(t0)); } LS.set("zd-burn", el.dataset.x); render(); return true; }
+if (a === "burq") {
+var d = new Date(today0()), y = d.getFullYear(), m = d.getMonth(), x = el.dataset.x;
+if (x === "m0") burSetR(new Date(y, m, 1).getTime(), today0()); else if (x === "m1") burSetR(new Date(y, m - 1, 1).getTime(), new Date(y, m, 0).getTime());
+else if (x === "q") burSetR(new Date(y, m - 3, d.getDate() + 1).getTime(), today0()); else if (x === "y0") burSetR(new Date(y, 0, 1).getTime(), today0()); else burSetR(new Date(y - 1, 0, 1).getTime(), new Date(y - 1, 11, 31).getTime());
+render(); return true;
+}
 if (a === "bury") { BURY = +el.dataset.x; render(); return true; }
 return false;
 }
+document.addEventListener("change", function (e) {
+var t = e.target; if (!t.dataset || !t.dataset.burr || !/^\d{4}-\d\d-\d\d$/.test(t.value)) return; var c = burCus(); if (!c) return;
+var v = new Date(t.value + "T00:00").getTime(); if (t.dataset.burr === "a") burSetR(v, c.b - DAY); else burSetR(c.a, v); render();
+});
 function chalTaskStat(id) { var t = S.tasks.filter(function (x) { return x.id === id && !x.del; })[0]; if (!t) return null; TXTD.innerHTML = t.body || ""; var lis = TXTD.querySelectorAll("ul.todo > li"); return { n: lis.length, d: [].filter.call(lis, function (l) { return l.getAttribute("data-checked") === "1"; }).length }; }
 var KPL = [["fr", "🧊 Холодильник"], ["fz", "❄ Морозилка"], ["gr", "🌾 Крупы и бакалея"], ["cn", "🥫 Консервы и соусы"], ["vg", "🥔 Овощи и фрукты"], ["sp", "🧂 Специи и чай"]];
 var KPLA = { "Овощи и фрукты": "vg", "Мясо и птица": "fr", "Рыба": "fr", "Молочное и яйца": "fr", "Бакалея": "gr", "Хлеб": "gr", "Консервы и соусы": "cn", "Замороженное": "fz", "Специи": "sp" };
@@ -18017,6 +18044,7 @@ var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
 ["238", "Заметки: создать по-разному, загрузить из файла, фильтр по разделу", ["«+» в панели «Знаний» — меню: пустая заметка, карта мыслей, холст, из шаблона, заметка из файла, карта мыслей из файла. То же — в «📋 Из шаблона ▾» в разделе.", "📂 в любой открытой заметке — загрузить из файла: Markdown, HTML или текст встают с оформлением (заголовки, списки, галочки, таблицы, ссылки); в пустую — вместо текста, в заполненную — в конец (прежний вариант — в истории страницы). В карте мыслей: пустая заполняется из файла (XMind, OPML, FreeMind, Markdown, HTML), в непустую файл встаёт веткой — под выбранный узел.", "В списке всех заметок — фильтр «Раздел»: любая папка (вместе с вложенными) или «без раздела», рядом с фильтрами «Тип» и «Статус».", "Теги в панели «Знаний» — свёрнутой строкой «◆ Теги · N»: развёрнуто — 8 самых используемых и «Все теги →» (страница с поиском и облаком тегов). Поле «Теги» в заметке подсказывает существующие теги."]],
+["249", "📅 Отчёты бюджета за свои даты", ["В «Бюджет» → «📊 Отчёты» рядом с «3 / 6 / 12 / 24 мес.» — «📅 Свой период»: две даты «с … по …» и быстрые кнопки «Этот месяц», «Прошлый месяц», «3 месяца», «С начала года», «Прошлый год».", "Траты и накопления считаются точно по датам. Если месяц бюджета (11-е → 10-е) попал в период частично, его доходы и план берутся пропорционально дням — это оценка, такие суммы помечены «≈»."]],
 ["248", "📊 Отчёты по бюджету", ["«Бюджет» → вкладка «📊 Отчёты» — 12 отчётов: 💸 доход − расход по месяцам, 📈 финансовое состояние (остаток, долги, «остаток − долги»), 🏦 накопления, 🧩 структура расходов, 🎯 план и факт по статьям, ⚖️ обязательные и гибкие (ориентир 50/30/20, кредитная нагрузка), 📅 ритм трат, 💰 доходы, 💳 долги, 🔮 прогноз, 🗓 итоги года, 🧾 подписки и магазины по выписке.", "Любую цифру, строку или столбик можно нажать — откроются дни, статьи или операции, из которых она сложилась."]],
 ["247", "✨ Мысль дня — блоком в «Сегодня»", ["Мысль дня ушла из карточки задачи и стала отдельным блоком вверху «Сегодня» — с кнопками ♡ В избранное, ↻ Другая и «Не показывать». Выключить блок — «✨ Мотивация» → «🗓 Блок в «Сегодня»»."]],
 ["246", "✨ Мысль дня — в карточке задачи", ["Мысль дня теперь видна и в открытой задаче — строкой под названием (у невыполненных задач). Выключить — «✨ Мотивация» → «📌 В карточке задачи»."]],
