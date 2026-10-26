@@ -3293,7 +3293,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-234";
+var APPV = "zd-app-2026-10-16-235";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -3344,7 +3344,7 @@ var m = {}, fm = k && CONFK[k] && SBASE.r; (a || []).forEach(function (x) { m[x.
 var y = m[x.id];
 if (fm && y && (x.upd || 0) !== (y.upd || 0)) {
 var bb = SBASE.r[k + "|" + x.id];
-if (bb && (x.upd || 0) > bb._u && (y.upd || 0) > bb._u) { var r = merge3(y, x, bb); if (r.both.length) confCheck(k, y, x); m[x.id] = r.o; if (r.o !== y) SBASE.dirty[k + "|" + x.id] = 1; return; }
+if (bb && (x.upd || 0) > bb._u && (y.upd || 0) > bb._u) { var r = merge3(y, x, bb); if (r.both.length) confCheck(k, y, x, r.both); m[x.id] = r.o; if (r.o !== y) SBASE.dirty[k + "|" + x.id] = 1; return; }
 }
 if (k && y) confCheck(k, y, x); if (!y || (x.upd || 0) > (y.upd || 0)) { m[x.id] = x; if (fm) SBASE.dirty[k + "|" + x.id] = 1; }
 });
@@ -12414,6 +12414,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["235", "Меньше ложных «конфликтов синхронизации»", ["Конфликт теперь — только когда на двух устройствах поменяли то, что вы правите сами (название, описание, срок, приоритет, проект…), и по-разному. Служебное, что приложение меняет само (история изменений, счётчик переносов, таймер, отметки «поработала», задания челленджей), конфликтом больше не считается — слияние по полям и так берёт более свежее.", "В «Требует внимания» и 🔔 — только свежие конфликты (за 3 дня), и только пока вы их не открыли; записи старше 2 недель уходят сами. На странице конфликтов — «✓ Всё в порядке — убрать список»."]],
 ["234", "Корректировка плана: ипотека и фин. цели; срок хранения копий", ["Резервные копии: срок хранения выбирается — 3, 7, 14 или 30 дней (по умолчанию 3) — один для Диска и для копий на устройстве. Лишние удаляются сразу при смене срока и потом раз в день; удалённые с Диска лежат в его «Корзине».", "«Ипотека» (в Excel — формула «платёж × количество»): в корректировке плана — платёж и переключатель 2 / 3 платежа (или своё число). В Excel записывается та же формула с новыми числами. Платежи каждые 14 дней: укажите дату любого платежа — приложение посчитает, сколько их в каждом периоде 11-е → 10-е, и предложит «Подставить».", "«Фин. цели» (в Excel — сумма строк блока ниже): правятся строки по отдельности — итог пересчитывается сам; «＋ Новая цель» добавляет название и сумму в свободную строку блока. Если строка совпадает с вашей целью-накоплением, рядом — «по графику цели: N ₽».", "Перед записью — «было → станет», после — контрольное чтение; «↶ Вернуть прежний план» возвращает и формулы, и названия."]],
 ["233", "🧭 Планирование спринта", ["Мастер на 5 минут: итоги прошлой недели (что не успели — в новый спринт, в бэклог или «готово»), цель недели и вместимость (с подсказкой по прошлым спринтам), набор задач из бэклога галочками (без повторяющейся рутины) с фильтрами «срок на неделе», «к целям», «приоритет» и по проекту, «⭐ Главное недели», раскладка по дням — вручную или «⚡ автоматически» по сроку, приоритету и часам.", "В пятницу–воскресенье планируется следующая неделя, в понедельник–четверг — текущая. Шаг есть в «Обзоре недели», в «🔁 Цикле планирования» и в 🔔; кнопка «🧭 Спланировать» — на странице спринта и в «Спринтах»."]],
 ["232", "🔔 Напоминания — не задачи", ["Напомнить о чём-то, что не задача: в любой строке ввода начните с «напомни» — «напомни завтра в 9 взять документы», «напомни через 2 часа выключить духовку», «напомни каждый понедельник полить цветы». Без времени — завтра утром.", "В нужный момент — уведомление браузера, сообщение в Telegram (если подключён сервер), строка в 🔔 и в «Требует внимания», блок на главной и в «Сегодня»: «✓ Ок», «ещё через час», «завтра утром», «сделать задачей».", "Все напоминания — «Мой день» → «Ещё» → «🔔 Напоминания» (или Ctrl+K → «напоминания»). В утренней сводке Telegram — напоминания дня и задачи, которые сегодня вернутся из отложенных."]],
@@ -12611,7 +12612,7 @@ try { var bv = bavTips().filter(function (x) { return x.lvl === "warn"; }); if (
 try { var pv = pavTips().filter(function (x) { return x.lvl === "warn"; }); if (pv.length) add("pav:" + dKey(monday(t0)) + ":" + pv.length, "🧭", "Советник: " + pv.length + " " + plural(pv.length, ["важный совет", "важных совета", "важных советов"]) + " по целям и планам", pv[0].t, "weekly", t0); } catch (e) { /* ок */ }
 try { var dq = dayQuota(); if (dq) add("dq:" + dk, "⏱", dq.t, dq.s, "today", t0); } catch (e) { /* ок */ }
 try { var hr0 = new Date(now).getHours(); if (hr0 >= 6 && hr0 < 12 && !ritDone("morning")) add("mr:" + dk, "🌅", "Утренний план на 2 минуты", "хвосты, главное, время", "morning", t0 + 6 * 3600000); if (hr0 >= 18 && !ritDone("shutdown")) add("sd:" + dk, "🌙", "Завершить день", "сделанное, хвосты, дневник, завтра", "shutdown", t0 + 18 * 3600000); } catch (e) { /* ок */ }
-try { var cf = confList(); if (cf.length) add("cf:" + cf[0].at, "⚠", "Конфликты синхронизации: " + cf.length, "запись менялась на двух устройствах — посмотрите", "conflicts", cf[0].at); } catch (e) { /* ок */ }
+try { var cf = confFresh(); if (cf.length) add("cf:" + cf[0].at, "⚠", "Конфликты синхронизации: " + cf.length, "запись менялась на двух устройствах — посмотрите", "conflicts", cf[0].at); } catch (e) { /* ок */ }
 try { var skn = stuckList().length; if (skn) add("stk:" + dk, "🧱", "Застряли задачи: " + skn, "их переносили 3 раза и больше", "today", t0); } catch (e) { /* ок */ }
 if (LS.get("zd-seenv") !== APPV) add("new:" + APPV, "✨", "Приложение обновилось", "посмотрите, что нового", "news", now);
 return L.sort(function (a, b) { return b.at - a.at; });
@@ -13294,19 +13295,25 @@ else if (!off && b) b.remove();
 window.addEventListener("online", function () { netSync(); toast("Связь вернулась"); try { if (SYNC.enabled()) SYNC.later(); } catch (e) { /* ок */ } });
 window.addEventListener("offline", function () { netSync(); toast("Нет сети — всё сохраняется на устройстве"); });
 var CONFK = { tasks: "Задача", notes: "Заметка", projects: "Проект", goals: "Цель", boards: "Доска" };
-function confList() { try { return JSON.parse(LS.get("zd-conf") || "[]") || []; } catch (e) { return []; } }
-function confCheck(k, loc, rem) {
+function confList() { var l; try { l = JSON.parse(LS.get("zd-conf") || "[]") || []; } catch (e) { l = []; } var lim = Date.now() - 14 * DAY, k = l.filter(function (x) { return (x.at || 0) > lim; }); if (k.length !== l.length) LS.set("zd-conf", JSON.stringify(k)); return k; }
+function confFresh() { var seen = +LS.get("zd-confseen") || 0, lim = Date.now() - 3 * DAY; return confList().filter(function (x) { return x.at > lim && x.at > seen; }); }
+var CONFF = { tasks: ["t", "note", "body", "at", "due", "allday", "done", "canc", "prio", "pid", "tags", "flag", "sprint", "goal", "est", "rep", "rr", "parent", "some", "snzw", "till", "resp", "sec"], notes: ["t", "body", "sec", "tags", "ic", "cov", "parent", "tpl"], projects: ["n", "c", "parent", "note", "desc", "secs", "cols", "arch", "done"], goals: ["n", "due", "st", "ic", "note", "c"], boards: ["n", "w", "ic"] };
+function confAuto(k, o) { return !o || /^(fch|chl|ch|bc|kc|cl|tb|d|wk|xp|ck|bp)[-:]/.test(String(o.id || "")) || !!o.auto || !!o.tst; }
+function confDiff(k, a, b, only) { var fl = (CONFF[k] || []).filter(function (f) { return !only || only.indexOf(f) >= 0; }); return fl.filter(function (f) { return JSON.stringify(a[f] === undefined ? null : a[f]) !== JSON.stringify(b[f] === undefined ? null : b[f]); }); }
+function confCheck(k, loc, rem, both) {
 try {
 if (!CONFK[k] || !SYNC.at) return; var la = loc.upd || 0, ra = rem.upd || 0; if (la === ra || la <= SYNC.at || ra <= SYNC.at) return;
-var strip = function (o) { var c = {}; Object.keys(o).sort().forEach(function (q) { if (q !== "upd") c[q] = o[q]; }); return JSON.stringify(c); };
-if (strip(loc) === strip(rem)) return;
+if (confAuto(k, loc) || confAuto(k, rem)) return;
+if (!confDiff(k, loc, rem, both).length) return;
 var lose = la > ra ? rem : loc, js = JSON.stringify(lose); if (js.length > 60000) return;
 var l = confList().filter(function (x) { return !(x.k === k && x.id === loc.id); }); l.unshift({ k: k, id: loc.id, at: Date.now(), win: la > ra ? "с этого устройства" : "с другого устройства", lose: JSON.parse(js) }); LS.set("zd-conf", JSON.stringify(l.slice(0, 20)));
 } catch (e) { /* конфликты не мешают синхронизации */ }
 }
 function vConflicts() {
 var l = confList(), h = head("⚠ Конфликты синхронизации", "Одна и та же запись менялась на двух устройствах почти одновременно. Приложение оставило более новую версию; другую можно вернуть здесь.");
+LS.set("zd-confseen", String(Date.now()));
 if (!l.length) return h + '<p class="empty">Конфликтов нет ✓</p>';
+h += '<div class="r" style="margin:0 0 10px"><button type="button" class="btn sm" data-a="confall">✓ Всё в порядке — убрать список</button><span class="muted">записи старше 2 недель уходят сами</span></div>';
 return h + l.map(function (x, i) { var o = x.lose || {}, cur = (S[x.k] || []).filter(function (y) { return y.id === x.id; })[0], tt = function (z) { return z ? z.t || z.n || "Без названия" : "—"; }, tx = String(o.body || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 return '<div class="card cnf"><h3>' + esc(CONFK[x.k]) + ": " + esc(tt(cur || o)) + '</h3><p class="muted">' + esc(new Date(x.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) + " · оставлена версия " + esc(x.win) + "</p><p><b>Другая версия:</b> «" + esc(tt(o)) + "»" + (tx ? " — " + esc(tx.slice(0, 200)) + (tx.length > 200 ? "…" : "") : "") + '</p><div class="r" style="gap:8px"><button type="button" class="btn sm pri" data-a="confuse" data-i="' + i + '">Вернуть другую версию</button><button type="button" class="btn sm" data-a="confx" data-i="' + i + '">Оставить как есть</button></div></div>'; }).join("");
 }
@@ -13347,6 +13354,7 @@ if (cur) { var keep = JSON.parse(JSON.stringify(cur)); Object.keys(cur).forEach(
 else { arr.push(touch(it.lose)); cl.splice(+el.dataset.i, 1); }
 LS.set("zd-conf", JSON.stringify(cl)); save(); render(); toast("Другая версия возвращена — прежнюю можно вернуть тут же"); return true;
 case "confx": var cx = confList(); cx.splice(+el.dataset.i, 1); LS.set("zd-conf", JSON.stringify(cx)); render(); return true;
+case "confall": LS.set("zd-conf", "[]"); render(); toast("Список конфликтов очищен"); return true;
 }
 return false;
 }
@@ -13849,7 +13857,7 @@ if (modOn("docs")) nOfTpl("doc").filter(function (n) { return (n.pr || {}).exp; 
 if (modOn("srs")) { var sc = srsDueCount(); if (sc) A.push(["🔁", "Повторить карточек: " + sc, "#srs"]); }
 var wl = waitList().filter(function (t) { return t.wait && t.wait.ask && t.wait.ask < t0 + DAY; }).length; if (wl) A.push(["⏳", "Пора напомнить: " + wl, "#waiting"]);
 var sk = stuckList().length; if (sk) A.push(["🧱", "Застряли (переносили 3+ раз): " + sk, "#today"]);
-var cf = confList().length; if (cf) A.push(["⚠", "Конфликты синхронизации: " + cf, "#conflicts"]);
+var cf = confFresh().length; if (cf) A.push(["⚠", "Конфликты синхронизации: " + cf, "#conflicts"]);
 var sb = snzBack().length; if (sb) A.unshift(["💤", "Вернулись из отложенных: " + sb + " — решите, что с ними", "#today"]);
 remsFired().slice(0, 3).forEach(function (r) { A.unshift(["🔔", "Напоминание: " + r.t, "#rems"]); });
 b = A.length ? A.map(function (x) { return '<a class="hza" href="' + x[2] + '"><span>' + x[0] + "</span>" + esc(x[1]) + "</a>"; }).join("") : '<p class="okc">Всё спокойно ✓</p>';
