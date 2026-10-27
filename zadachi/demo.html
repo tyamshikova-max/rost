@@ -8545,7 +8545,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-272";
+var APPV = "zd-app-2026-10-16-273";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -18438,6 +18438,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["273", "🗂 Карточка задачи: заполненные поля тоже значками", ["Если у задачи заполнены редкие поля — секция, спринт и оценка, ответственный, дедлайн, «Несколько дней», учёт времени, «Входит в», напоминание, «Сначала сделать», «Жду ответа», — они появляются в той же строке значков. Нажмите на значок, чтобы изменить поле.", "Пустые поля по-прежнему спрятаны в «Ещё поля: …»; режим «Списком» — «Настройки» → «Общие» → «Поля в карточке задачи»."]],
 ["272", "🧭 Вкладки между близкими разделами", ["Под заголовком «Сегодня», «По часам», «Календаря», «Планов» и «Дня за днём» теперь вкладки для быстрого перехода между ними, справа — «Утро», «Вечер», «Неделя». У «Меню» и «Кухни» — тоже вкладки.", "Боковая панель и «Все разделы» остались как были. Убрать вкладки: «Настройки» → «Общие» → «Вкладки в разделах»."]],
 ["271", "🏷 Карточка задачи: поля значками", ["В карточке задачи срок, проект, приоритет, статус и теги теперь — одна строка значков: «📅 Сегодня · 📁 Проект · ❗ Приоритет 1 · ▶ В работе · 🏷 #срочно». Нажмите на значок — под ним раскроется поле, как раньше; выбрали быстрый вариант (дату, приоритет, статус) — оно закроется само.", "Описание и подзадачи теперь сразу под значками, без прокрутки. Остальные поля — «Ещё поля: …».", "Вернуть столбик полей: «Настройки» → «Общие» → «Поля в карточке задачи» → «Списком»."]],
 ["270", "✓ Карточка задачи: кнопки всегда под рукой", ["Внизу открытой карточки теперь закреплена панель: «✓ Готово», «Завтра», «+ неделя» и «💤 Отложить…». Она не уезжает при прокрутке — отметить задачу или перенести её можно, не листая карточку до конца.", "У выполненной задачи вместо них — «↺ Вернуть в работу»."]],
@@ -23877,7 +23878,18 @@ if (k === "due") return t.at ? whenTxt(t) + (t.rep ? " · 🔁" : "") : t.some ?
 if (k === "proj") { var pj = proj(t.pid); return pj ? pj.n : "Входящие"; }
 if (k === "prio") return "Приоритет " + (t.prio || "—");
 if (k === "status") return t.st === "doing" ? "В работе" : "Нужно сделать";
-return (t.tags || []).length ? t.tags.map(tlab).join(" ") : "＋ Тег";
+if (k === "tags") return (t.tags || []).length ? t.tags.map(tlab).join(" ") : "＋ Тег";
+if (k === "span") return t.till ? "Несколько дней" : "";
+if (k === "deadline") return t.due ? "до " + dayName(t.due).toLowerCase() : "";
+if (k === "sec") { var sx = psecs(proj(t.pid)).filter(function (x) { return x.id === t.sec; })[0]; return sx ? sx.n : ""; }
+if (k === "sprint") return t.sprint ? spLabel(t.sprint) + (+t.est ? " · " + estFmt(t.est) : "") : +t.est ? "Оценка " + estFmt(t.est) : "";
+if (k === "resp") return t.resp && personName(t.resp) ? personName(t.resp) : "";
+if (k === "track") return t.ttOn ? "Время идёт" : t.tt ? "Учтено " + ttFmt(t.tt) : "";
+if (k === "parent") { var pp = task(t.parent); return pp ? "Входит в «" + pp.t.slice(0, 22) + "»" : ""; }
+if (k === "rem") return t.rem ? "Напоминание" : "";
+if (k === "after") return (t.after || []).length ? "Сначала: " + t.after.length : "";
+if (k === "wait") return t.wait ? "Жду ответа" + (t.wait.who ? ": " + t.wait.who : "") : "";
+return "";
 }
 function pchCls(t, k) { return k === "due" && t.at && !t.done && isLate(t) ? " late" : k === "prio" && t.prio === 1 ? " warn" : k === "status" && t.st === "doing" ? " doing" : ""; }
 function pnOrder(keys, saved, def) { var out = saved.filter(function (k) { return keys.indexOf(k) >= 0; }); keys.forEach(function (k) { if (out.indexOf(k) >= 0) return; var di = def.indexOf(k), at = 0; for (var j = di - 1; j >= 0; j--) { var pi = out.indexOf(def[j]); if (pi >= 0) { at = pi + 1; break; } } out.splice(at, 0, k); }); return out; }
@@ -23897,9 +23909,10 @@ pr.dataset.sec = "props"; pr.insertAdjacentHTML("afterbegin", '<span class="sgri
 var tq = task(OPEN), emp = tq ? { mx: true /* считается из приоритета, флажка и срока — отдельно задавать нужно редко */, span: !tq.till, resp: !tq.resp, deadline: !tq.due, sec: !tq.sec, sprint: !tq.sprint && !tq.est, status: tq.st !== "doing", track: !tq.tt && !tq.ttOn, parent: !tq.parent, rem: !tq.rem, after: !(tq.after || []).length, wait: !tq.wait } : {}, nm = 0;
 rows.forEach(function (r) { if (emp[r.k]) { r.w.classList.add("pmore"); nm++; } });
 if (!S.opt.pnlist && tq) { /* срок, проект, приоритет, статус и теги — значками; нажатие раскрывает прежнюю строку поля */
-var chh = "", CHM = { due: "📅", proj: "📁", prio: "❗", status: "▶", tags: "🏷" };
-["due", "proj", "prio", "status", "tags"].forEach(function (k) {
+var chh = "", CHM = { due: "📅", proj: "📁", prio: "❗", status: "▶", tags: "🏷", span: "📆", deadline: "⏰", sec: "🗂", sprint: "🏃", resp: "👤", track: "⏲", parent: "↑", rem: "🔔", after: "⛓", wait: "⏳" };
+["due", "proj", "prio", "status", "tags", "span", "deadline", "sec", "sprint", "resp", "track", "parent", "rem", "after", "wait"].forEach(function (k) {
 var rw = rows.filter(function (x) { return x.k === k; })[0]; if (!rw) return;
+if (["due", "proj", "prio", "status", "tags"].indexOf(k) < 0 && (rw.w.classList.contains("pmore") || !pchTxt(tq, k))) return;
 rw.w.classList.remove("pmore"); rw.w.classList.add("pchip"); if (PNCH[k]) rw.w.classList.add("pshow");
 chh += '<button type="button" class="pchb' + (PNCH[k] ? " on" : "") + pchCls(tq, k) + '" data-p="pchip" data-v="' + k + '" aria-expanded="' + !!PNCH[k] + '">' + CHM[k] + " " + esc(pchTxt(tq, k)) + "</button>";
 });
