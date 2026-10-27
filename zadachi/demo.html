@@ -1829,6 +1829,8 @@ html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; backgro
 .mottd { margin: 0 0 12px; display: grid; gap: 8px } .mottdh { display: flex; align-items: center; justify-content: space-between; gap: 8px } .mottdh b { font-size: calc(13px * var(--fs)); color: var(--muted); font-weight: 600 } .mottd .motb { margin-top: 2px }
 .motq { margin: 0; padding: 2px 0 2px 14px; border-left: 3px solid var(--acc); font-family: Georgia, "Times New Roman", serif; font-style: italic; line-height: 1.45 } .motq.big { font-size: calc(17px * var(--fs)) } .motq cite { display: block; margin-top: 4px; font-family: inherit; font-style: normal; font-size: calc(12.5px * var(--fs)); color: var(--muted) }
 .motb { margin-top: 10px; gap: 6px; flex-wrap: wrap } .motl { display: block; margin: 0 0 10px; padding: 6px 10px; border-radius: 8px; background: var(--hover); color: var(--fg); text-decoration: none; font-size: calc(13px * var(--fs)); line-height: 1.4 } .motl span { font-family: Georgia, "Times New Roman", serif; font-style: italic } .motl i { color: var(--muted); font-style: normal }
+.pchips { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px } .pchb { font: inherit; font-size: calc(13px * var(--fs)); padding: 4px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis } .pchb:hover { background: var(--hover) } .pchb.on { background: var(--acc-soft); border-color: var(--acc); color: var(--acc) } .pchb.warn { color: var(--warn) } .pchb.late { color: var(--warn); border-color: var(--warn) } .pchb.doing { background: var(--acc-soft); color: var(--acc) }
+.props.pchipmode .prow.pchip:not(.pshow) { display: none }
 .pn-act { position: sticky; bottom: 0; z-index: 3; display: flex; flex-wrap: wrap; gap: 8px; margin: 18px -22px -60px; padding: 10px 22px 14px; background: var(--panel); border-top: 1px solid var(--line) } #panel.full .pn-act { margin-inline: -32px; padding-inline: 32px }
 @media (max-width: 860px) { .pn-act { margin-inline: -16px; padding-inline: 16px } }
 .tdadv > summary { font-weight: 500; font-size: calc(13px * var(--fs)); padding: 7px 0 } .tdadv > summary .muted { font-weight: 400 }
@@ -8542,7 +8544,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-270";
+var APPV = "zd-app-2026-10-16-271";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -18424,6 +18426,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["271", "🏷 Карточка задачи: поля значками", ["В карточке задачи срок, проект, приоритет, статус и теги теперь — одна строка значков: «📅 Сегодня · 📁 Проект · ❗ Приоритет 1 · ▶ В работе · 🏷 #срочно». Нажмите на значок — под ним раскроется поле, как раньше; выбрали быстрый вариант (дату, приоритет, статус) — оно закроется само.", "Описание и подзадачи теперь сразу под значками, без прокрутки. Остальные поля — «Ещё поля: …».", "Вернуть столбик полей: «Настройки» → «Общие» → «Поля в карточке задачи» → «Списком»."]],
 ["270", "✓ Карточка задачи: кнопки всегда под рукой", ["Внизу открытой карточки теперь закреплена панель: «✓ Готово», «Завтра», «+ неделя» и «💤 Отложить…». Она не уезжает при прокрутке — отметить задачу или перенести её можно, не листая карточку до конца.", "У выполненной задачи вместо них — «↺ Вернуть в работу»."]],
 ["269", "🌱 Первый запуск спокойнее, главная проще", ["Новому человеку на главной теперь показывают по одному вопросу за раз: сначала оформление, потом «Для чего вам приложение?», и только потом «Первые шаги». Пока вопрос на экране, подсказки дня («Вечер — закройте день» и другие) не мешают.", "«✎ Настроить главную» → «Простая главная»: одной кнопкой прячет цикл планирования, прогресс дня, уровень и очки, самочувствие и советника. Вернуть всё — «↺ Как было»; отдельные карточки — «＋» под списком скрытых."]],
 ["268", "🧹 Меньше лишнего над списком задач", ["«Сегодня»: шкала дня, «Расставить по времени» и нагрузка собраны в одну строку «📊 День · Запланировано … ч». Привычки и кнопки планирования остались на виду, список задач начинается выше.", "«Советник» на страницах задач, спринта и целей по умолчанию свёрнут до строки «N советов»: нажмите на заголовок, чтобы развернуть, — выбор запоминается.", "Вернуть всё как раньше: «Настройки» → «Общие» → «Советы в «Сегодня»» — снять галочку; советник — кнопка ▸ в его заголовке."]],
@@ -18611,6 +18614,10 @@ function todayDayHTML() {
 var ld = todayLoadHTML(), nr = mobNarrow(), plan = todayPlanBox(), l = [tbNowHTML(), wrBanner(), apHTML(), ld, aiBox()].concat(nr ? [plan] : []).filter(function (x) { return x && String(x).trim(); });
 var sm = String(ld).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().split("Без оценки")[0].trim();
 return (l.length ? '<details class="mtips tdadv" data-k="tdday"' + (MTIPS.tdday ? " open" : "") + "><summary>📊 День" + (sm ? ' <span class="muted">· ' + esc(sm) + "</span>" : "") + "</summary>" + l.join("") + "</details>" : "") + (nr ? "" : plan);
+}
+function pnSetHTML() {
+return '<section class="card" id="s-pnmode"><h2>Поля в карточке задачи</h2><p class="muted" style="margin:0">«Значками» — срок, проект, приоритет, статус и теги одной строкой: нажмите на значок, чтобы изменить. «Списком» — все поля столбиком, как раньше.</p>' +
+'<div class="r"><select class="inp" id="opt-pnmode" aria-label="Поля в карточке задачи"><option value="chips"' + (S.opt.pnlist ? "" : " selected") + '>Значками</option><option value="list"' + (S.opt.pnlist ? " selected" : "") + ">Списком</option></select></div></section>";
 }
 function rowSetHTML() {
 return '<section class="card" id="s-rowmode"><h2>Что показывать в строке задачи</h2><p class="muted" style="margin:0">«Минимум» — название, срок, проект, теги, флажок и подзадачи. Энергия, оценка времени, помидоры, комментарии, заметки и спринт остаются в карточке задачи и на страницах «Спринт» и «План по часам».</p>' +
@@ -22128,7 +22135,7 @@ h += '<p class="muted" style="margin:8px 0 0;font-size:calc(12px * var(--fs))">�
 h += "</section>";
 var th = LS.get("zd-theme") || "system";
 var hid = hiddenLists();
-h += peopleHTML() + rowSetHTML() + tdSetHTML() + tbSetHTML() + buSetHTML();
+h += peopleHTML() + pnSetHTML() + rowSetHTML() + tdSetHTML() + tbSetHTML() + buSetHTML();
 h += '<section class="card" id="s-lists"><h2>Пункты «Списков»</h2><p class="muted" style="margin:0">Снимите галочку, чтобы скрыть пункт из левой панели (в Ctrl+K он останется). «Входящие» видны всегда. Скрыть можно и правым кликом по пункту.</p><div class="lchk">' +
 listsAll().map(function (k) { var on = k === "inbox" || hid.indexOf(k) < 0; return '<button type="button" class="lt' + (on ? " on" : "") + '" data-a="lhide" data-id="' + k + '" role="switch" aria-checked="' + on + '"' + (k === "inbox" ? " disabled" : "") + '><span class="lbox"></span>' + ic(k) + "<span>" + LISTN[k] + "</span></button>"; }).join("") + "</div></section>";
 h += '<section class="card"><h2>Левая панель</h2><p class="muted" style="margin:0">Блоки («Избранное», «Списки», «Проекты», «Фильтры», «Теги», «Служебное») переставляются перетаскиванием за заголовок, пункты «Списков» — перетаскиванием самих пунктов. Порядок синхронизируется между устройствами.</p><div class="r"><button class="btn" type="button" data-a="side-reset">Вернуть исходный порядок</button><button class="btn" type="button" data-a="mini">' + (document.body.classList.contains("mini") ? "Развернуть панель" : "Свернуть панель до иконок") + "</button></div></section>";
@@ -23732,6 +23739,7 @@ touch(f); save(); render(); return;
 if (t.id === "pparent") { var p = proj(ARG); if (p) { if (t.value && pdesc(p.id).indexOf(t.value) >= 0) { toast("Нельзя вложить проект сам в себя"); return; } moveProj(p.id, t.value || null, "in"); toast(t.value ? "Проект вложен в «" + proj(t.value).n + "»" : "Проект на верхнем уровне"); } return; }
 if (t.id === "ai-prov") { var c2 = AI.cfg(); c2.prov = t.value; AI.setCfg(c2); render(); return; }
 if (t.id === "opt-autorem") { S.opt.autoRem = t.checked; optTouch(); save(); return; }
+if (t.id === "opt-pnmode") { if (t.value === "list") S.opt.pnlist = 1; else delete S.opt.pnlist; optTouch(); save(); render(); renderPanel(); return; }
 if (t.id === "opt-rowmode") { if (t.value === "full") S.opt.rowfull = 1; else delete S.opt.rowfull; optTouch(); save(); render(); return; }
 if (t.id === "opt-tdfold") { if (t.checked) delete S.opt.tdfold; else S.opt.tdfold = 0; optTouch(); save(); render(); return; }
 if (t.id === "opt-hour") { S.opt.allDayHour = +t.value; optTouch(); save(); return; }
@@ -23770,6 +23778,7 @@ function renderPanel() {
 var t = task(OPEN), P = $("panel"), pa = document.activeElement;
 if (t && pa && P.contains(pa) && (pa.tagName === "SELECT" || /^(date|time|datetime-local|color)$/.test(pa.type || ""))) { PEND = true; RHOLD = pa; return; }
 if (!t) { OPEN = null; P.hidden = true; document.body.classList.remove("pnopen", "pnfull"); return; }
+if (PNID !== t.id) PNCH = {};
 var p = proj(t.pid), par = task(t.parent), tg = t.tags || [], kids = tkids(t.id), date = t.at ? dKey(t.at) : "", time = t.at && !t.allday ? hm(t.at) : "";
 var ex = {}; ex[t.id] = 1; tdesc(t.id).forEach(function (d) { ex[d.id] = 1; });
 var cand = tasks().filter(function (x) { return !x.done && !ex[x.id] && (x.pid || "") === (t.pid || ""); }).slice(0, 300);
@@ -23844,6 +23853,15 @@ try { document.execCommand("defaultParagraphSeparator", false, "p"); } catch (er
 }
 var PNROW = { "Ответственный": "resp", "Срок": "due", "Несколько дней": "span", "Матрица": "mx", "Дедлайн": "deadline", "Секция": "sec", "Проект": "proj", "Спринт": "sprint", "Статус": "status", "Приоритет": "prio", "Теги": "tags", "Учёт времени": "track", "Входит в": "parent", "Напоминание": "rem", "Сначала сделать": "after", "Ждут эту задачу": "blocks", "Жду ответа": "wait" };
 var PNSEC = ["props", "desc", "subs", "chat"], PDR = null;
+var PNCH = {};
+function pchTxt(t, k) {
+if (k === "due") return t.at ? whenTxt(t) + (t.rep ? " · 🔁" : "") : t.some ? "Когда-нибудь" : "Без срока";
+if (k === "proj") { var pj = proj(t.pid); return pj ? pj.n : "Входящие"; }
+if (k === "prio") return "Приоритет " + (t.prio || "—");
+if (k === "status") return t.st === "doing" ? "В работе" : "Нужно сделать";
+return (t.tags || []).length ? t.tags.map(tlab).join(" ") : "＋ Тег";
+}
+function pchCls(t, k) { return k === "due" && t.at && !t.done && isLate(t) ? " late" : k === "prio" && t.prio === 1 ? " warn" : k === "status" && t.st === "doing" ? " doing" : ""; }
 function pnOrder(keys, saved, def) { var out = saved.filter(function (k) { return keys.indexOf(k) >= 0; }); keys.forEach(function (k) { if (out.indexOf(k) >= 0) return; var di = def.indexOf(k), at = 0; for (var j = di - 1; j >= 0; j--) { var pi = out.indexOf(def[j]); if (pi >= 0) { at = pi + 1; break; } } out.splice(at, 0, k); }); return out; }
 function pnMerge(domKeys, saved, def) { var full = pnOrder(def.slice(), saved, def), i = 0; return full.map(function (k) { return domKeys.indexOf(k) >= 0 ? domKeys[i++] : k; }); }
 function pmoreTxt(pr) { var rw = pr ? [].slice.call(pr.querySelectorAll(".prow.pmore")) : [], n = rw.length, nm = rw.map(function (r) { return r.firstElementChild.textContent.replace("⋮⋮", "").trim().toLowerCase(); }).filter(Boolean); return pr && pr.classList.contains("pcol") ? "Ещё поля: " + nm.slice(0, 4).join(", ") + (n > 4 ? " и ещё " + (n - 4) : "") + " ▾" : "Скрыть пустые поля ▴"; }
@@ -23860,6 +23878,16 @@ pnOrder(rows.map(function (r) { return r.k; }), S.opt.pnRows || [], defR).forEac
 pr.dataset.sec = "props"; pr.insertAdjacentHTML("afterbegin", '<span class="sgrip psg" title="Перетащите, чтобы переставить блок свойств">⋮⋮</span>');
 var tq = task(OPEN), emp = tq ? { mx: true /* считается из приоритета, флажка и срока — отдельно задавать нужно редко */, span: !tq.till, resp: !tq.resp, deadline: !tq.due, sec: !tq.sec, sprint: !tq.sprint && !tq.est, status: tq.st !== "doing", track: !tq.tt && !tq.ttOn, parent: !tq.parent, rem: !tq.rem, after: !(tq.after || []).length, wait: !tq.wait } : {}, nm = 0;
 rows.forEach(function (r) { if (emp[r.k]) { r.w.classList.add("pmore"); nm++; } });
+if (!S.opt.pnlist && tq) { /* срок, проект, приоритет, статус и теги — значками; нажатие раскрывает прежнюю строку поля */
+var chh = "", CHM = { due: "📅", proj: "📁", prio: "❗", status: "▶", tags: "🏷" };
+["due", "proj", "prio", "status", "tags"].forEach(function (k) {
+var rw = rows.filter(function (x) { return x.k === k; })[0]; if (!rw) return;
+rw.w.classList.remove("pmore"); rw.w.classList.add("pchip"); if (PNCH[k]) rw.w.classList.add("pshow");
+chh += '<button type="button" class="pchb' + (PNCH[k] ? " on" : "") + pchCls(tq, k) + '" data-p="pchip" data-v="' + k + '" aria-expanded="' + !!PNCH[k] + '">' + CHM[k] + " " + esc(pchTxt(tq, k)) + "</button>";
+});
+pr.classList.add("pchipmode"); var pg = pr.querySelector(".psg"), chbox = '<div class="pchips">' + chh + "</div>"; if (pg) pg.insertAdjacentHTML("afterend", chbox); else pr.insertAdjacentHTML("afterbegin", chbox);
+nm = pr.querySelectorAll(".prow.pmore").length;
+}
 if (nm) { var pmo = LS.get("zd-pnmore"); if (pmo !== "1") pr.classList.add("pcol"); pr.insertAdjacentHTML("beforeend", '<button type="button" class="pmoreb" data-p="pmore">' + pmoreTxt(pr) + "</button>"); }
 }
 var secs = pr ? [pr] : [];
@@ -23994,7 +24022,8 @@ if (a === "del") { flushBody(); del(t); return; }
 if (a === "flag") { var rpf = el.getBoundingClientRect(); ctxShow(rpf.left - 170, rpf.bottom + 4, flagMenu(t), { k: "task", id: t.id }); return; }
 if (a === "pin") { setTask(function (x) { x.pin = !x.pin; }); return; }
 if (a === "pnmore") { var pmr = el.getBoundingClientRect(), fl0 = document.body.classList.contains("pnfull"); ctxShow(pmr.right - 250, pmr.bottom + 4, (innerWidth > 860 ? [{ c: "full", i: fl0 ? "⤡" : "⤢", l: fl0 ? "Свернуть в панель" : "Развернуть на весь экран" }] : []).concat([{ c: "fav", i: t.fav ? "★" : "☆", l: t.fav ? "Убрать из избранного" : "В избранное" }, { c: "pin", i: "📌", l: t.pin ? "Открепить" : "Закрепить наверху списка" }, { c: "ai", i: "✨", l: "ИИ-помощник" }, { c: "share", i: "📤", l: "Поделиться текстом задачи" }, { c: "link", i: "🔗", l: "Скопировать ссылку на задачу" }, "-", { c: "del", i: "🗑", l: "Удалить в корзину", warn: 1 }]), { k: "pnmore", id: t.id }); return; }
-if (a === "qdate") { taskCmd(t, "d:" + el.dataset.v); return; }
+if (a === "pchip") { var pk = el.dataset.v; PNCH[pk] = !PNCH[pk]; var prw = $("panel").querySelector('.prow[data-row="' + pk + '"]'); if (prw) prw.classList.toggle("pshow", !!PNCH[pk]); el.classList.toggle("on", !!PNCH[pk]); el.setAttribute("aria-expanded", !!PNCH[pk]); return; }
+if (a === "qdate") { PNCH.due = false; taskCmd(t, "d:" + el.dataset.v); return; }
 if (a === "snzbar") { var rsb = el.getBoundingClientRect(); ctxShow(rsb.left, rsb.top - 4, snzMenu(t), { k: "task", id: t.id }); return; }
 if (a === "pmore") { LS.set("zd-pnmore", LS.get("zd-pnmore") === "1" ? "0" : "1"); var pr0 = $("panel").querySelector(".props"); if (pr0) pr0.classList.toggle("pcol"); var bm = $("panel").querySelector(".pmoreb"); if (bm) bm.innerHTML = pmoreTxt(pr0); return; }
 if (a === "pntab") { var v = /^(chat|hist|files|notes)$/.test(el.dataset.v) ? el.dataset.v : "chat"; pnTabSet(el.closest(".pn-tabs"), v); if (v === "chat") { var ci2 = $("pn-c"); if (ci2) ci2.focus(); } return; }
@@ -24021,9 +24050,9 @@ if (a === "link") { copyLink(t); return; }
 if (a === "share") { flushBody(); shareOut(t.t, shareTaskText(task(t.id) || t), "Текст задачи"); return; }
 if (a === "ai") { var rc = el.getBoundingClientRect(); ctxShow(rc.left - 180, rc.bottom + 4, [{ c: "sub", i: "⊞", l: "Разбить на подзадачи" }, { c: "check", i: "☑", l: "Чек-лист в описание" }, { c: "est", i: "⏱", l: "Оценить время" }, "-", { c: "cfg", i: "⚙", l: AI.ready() ? "ИИ: " + AI.name() + " — настройки" : "Подключить ИИ…" }], { k: "ai", id: t.id }); return; }
 if (a === "toggle") { flushBody(); toggle(t); renderPanel(); return; }
-if (a === "prio") { setTask(function (x) { x.prio = +el.dataset.v; }); return; }
+if (a === "prio") { PNCH.prio = false; setTask(function (x) { x.prio = +el.dataset.v; }); return; }
 if (a === "remoff") { setTask(function (x) { var v = +el.dataset.v, o = remOffs(x).slice(), k = o.indexOf(v); if (k >= 0) { if (o.length > 1) o.splice(k, 1); } else o.push(v); x.remOff = o.sort(function (p, q) { return p - q; }); }); return; }
-if (a === "st") { setTask(function (x) { x.st = el.dataset.v; }); return; }
+if (a === "st") { PNCH.status = false; setTask(function (x) { x.st = el.dataset.v; }); return; }
 if (a === "csend") { sendComment(); return; }
 if (a === "cedit") { CED = el.closest("[data-cid]").dataset.cid; renderPanel(); var ci = $("pn-c"); if (ci) { ci.focus(); autoH(ci); } return; }
 if (a === "ccancel") { e.preventDefault(); CED = null; renderPanel(); return; }
