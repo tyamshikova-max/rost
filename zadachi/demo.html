@@ -8540,7 +8540,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-267";
+var APPV = "zd-app-2026-10-16-268";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -9837,7 +9837,7 @@ return (NDBP && !rd ? nDbPropPanel() : "") + '<div class="npage' + (side ? " has
 function noteDel(n) { n.del = 1; n.delAt = Date.now(); touch(n); save(); var back = n.sec && nsec(n.sec) ? "nsec-" + n.sec : "notes"; go(back); toastUndo("Заметка удалена", function () { delete n.del; delete n.delAt; touch(n); save(); render(); }); }
 function vWaiting() { return std("Жду ответа", "Задачи, переданные кому-то. В день «спросить» задача появится в «Сегодня» — напомнить о себе. Пометить задачу: меню задачи → «⏳ Жду ответа…» или строка «Жду ответа» в карточке.", waitList(), { empty: "Ничего не ждёте — хорошо. Когда отдадите задачу кому-то, отметьте её «⏳ Жду ответа».", scope: function (t) { return !!t.wait; } }); }
 function vSomeday() { return std("Когда-нибудь", "Идеи и дела «не сейчас». Они не попадают во «Входящие» и «Сегодня», пока вы не назначите им дату.", somedayList(), { empty: "Пусто. Отправить задачу сюда — меню задачи → «Установить дату» → «Когда-нибудь» (Alt+O).", scope: isSome }); }
-function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: motHeadHTML() + motTodayHTML() + todayAdviceHTML() + remFiredHTML() + snzBackHTML() + tipsFold((mobNarrow() && !tdFoldOn() ? todayBars() : []).concat([tbNowHTML(), wrBanner(), apHTML(), todayLoadHTML(), aiBox(), todayPlanBox()]), "today", "Подсказки дня"), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
+function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: motHeadHTML() + motTodayHTML() + todayAdviceHTML() + remFiredHTML() + snzBackHTML() + (tdFoldOn() ? todayDayHTML() : tipsFold((mobNarrow() ? todayBars() : []).concat([tbNowHTML(), wrBanner(), apHTML(), todayLoadHTML(), aiBox(), todayPlanBox()]), "today", "Подсказки дня")), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
 var PDAY = 0, PFROM = 0;
 function pFrom() { if (!PFROM) PFROM = monday(Date.now()); return PFROM; }
 function onDay(t, d0) { return (t.at && sod(t.at) === d0) || (t.due && sod(t.due) === d0) || spanIn(t, d0); }
@@ -18422,6 +18422,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["268", "🧹 Меньше лишнего над списком задач", ["«Сегодня»: шкала дня, «Расставить по времени» и нагрузка собраны в одну строку «📊 День · Запланировано … ч». Привычки и кнопки планирования остались на виду, список задач начинается выше.", "«Советник» на страницах задач, спринта и целей по умолчанию свёрнут до строки «N советов»: нажмите на заголовок, чтобы развернуть, — выбор запоминается.", "Вернуть всё как раньше: «Настройки» → «Общие» → «Советы в «Сегодня»» — снять галочку; советник — кнопка ▸ в его заголовке."]],
 ["267", "☰ Меню задачи помещается на экран", ["Контекстное меню задачи (правый клик, долгое нажатие) было длиннее экрана: нижние пункты, включая «Удалить», нельзя было достать. Теперь меню прокручивается, если не помещается, и сделано короче.", "Сверху — частое: «Открыть», дата, «Завершить», «Отложить», приоритет, флажок, проект, теги, подзадача. Редкое — в пункте «Ещё»: помодоро, учёт времени, закрепить, избранное, «Сначала сделать», копирование, дублирование, ссылка. Сочетания клавиш работают как раньше."]],
 ["266", "🗂 Карточка задачи короче", ["В карточке задачи пустые и редко нужные поля («Матрица», «Дедлайн», «Спринт», «Ответственный», «Учёт времени», «Напоминание» и другие) теперь свёрнуты и на большом экране: описание и подзадачи видны сразу, без прокрутки.", "Под полями — строка «Ещё поля: …» с названиями спрятанного; нажмите, чтобы показать всё. Выбор запоминается.", "«Матрица» считается из приоритета, флажка и срока, поэтому тоже лежит в «Ещё поля»."]],
 ["265", "☰ Строка задачи — без лишних значков", ["В списках у задачи теперь видно главное: название, срок, проект, теги, флажок и подзадачи. Энергия, оценка времени, помидоры, комментарии и заметки не загромождают строку — они в карточке задачи.", "На страницах «Спринт» и «План по часам» всё осталось как было. Вернуть прежний вид везде: «Настройки» → «Общие» → «Что показывать в строке задачи» → «Всё, как раньше»."]],
@@ -18602,13 +18603,18 @@ var l = todayBars().filter(function (x) { return x && String(x).trim(); }); if (
 var nm = l.map(function (x) { var m = /<b>([^<]*)<\/b>/.exec(x); return m ? m[1] : ""; }).filter(Boolean);
 return '<details class="mtips tdadv" data-k="tdadv"' + (MTIPS.tdadv ? " open" : "") + "><summary>💡 " + l.length + " " + plural(l.length, ["совет", "совета", "советов"]) + (nm.length ? ' <span class="muted">· ' + esc(nm.join(" · ")) + "</span>" : "") + "</summary>" + l.join("") + "</details>";
 }
+function todayDayHTML() {
+var ld = todayLoadHTML(), nr = mobNarrow(), plan = todayPlanBox(), l = [tbNowHTML(), wrBanner(), apHTML(), ld, aiBox()].concat(nr ? [plan] : []).filter(function (x) { return x && String(x).trim(); });
+var sm = String(ld).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().split("Без оценки")[0].trim();
+return (l.length ? '<details class="mtips tdadv" data-k="tdday"' + (MTIPS.tdday ? " open" : "") + "><summary>📊 День" + (sm ? ' <span class="muted">· ' + esc(sm) + "</span>" : "") + "</summary>" + l.join("") + "</details>" : "") + (nr ? "" : plan);
+}
 function rowSetHTML() {
 return '<section class="card" id="s-rowmode"><h2>Что показывать в строке задачи</h2><p class="muted" style="margin:0">«Минимум» — название, срок, проект, теги, флажок и подзадачи. Энергия, оценка времени, помидоры, комментарии, заметки и спринт остаются в карточке задачи и на страницах «Спринт» и «План по часам».</p>' +
 '<div class="r"><select class="inp" id="opt-rowmode" aria-label="Что показывать в строке задачи"><option value="min"' + (S.opt.rowfull === 1 ? "" : " selected") + '>Минимум</option><option value="full"' + (S.opt.rowfull === 1 ? " selected" : "") + ">Всё, как раньше</option></select></div></section>";
 }
 function tdSetHTML() {
-return '<section class="card" id="s-tdadv"><h2>Советы в «Сегодня»</h2><p class="muted" style="margin:0">Напоминания над списком — «Завершить день», застрявшие задачи, перегруз — собраны в одну строку «💡 Советы»: нажмите на неё, чтобы развернуть. Снимите галочку, чтобы они всегда показывались целиком.</p>' +
-'<div class="r"><label class="f"><span><input type="checkbox" id="opt-tdfold"' + (tdFoldOn() ? " checked" : "") + "> Сворачивать советы в одну строку</span></label></div></section>";
+return '<section class="card" id="s-tdadv"><h2>Советы в «Сегодня»</h2><p class="muted" style="margin:0">Напоминания над списком — «Завершить день», застрявшие задачи, перегруз — собраны в одну строку «💡 Советы», а шкала дня и нагрузка — в строку «📊 День»: нажмите на строку, чтобы развернуть. Снимите галочку, чтобы всё показывалось целиком.</p>' +
+'<div class="r"><label class="f"><span><input type="checkbox" id="opt-tdfold"' + (tdFoldOn() ? " checked" : "") + "> Сворачивать советы и сводку дня в строки</span></label></div></section>";
 }
 function dayQuota() {
 var hq = +S.opt.dayq || 0, nq = +S.opt.dayn || 0; if (!hq && !nq) return null;
@@ -21210,11 +21216,12 @@ var hid = pavHid(); L = L.filter(function (x) { return !hid[x.id]; }).sort(funct
 PAVC = { dv: DV, d: today0(), at: Date.now(), L: L };
 return L;
 }
+function pavIsFold(key) { var v = (S.opt.pavfold || {})[key]; return !!(v === undefined ? key !== "all" : v); }
 function pavHTML(areas, opt) {
 opt = opt || {}; var ak = areas === "all" ? null : areas.split(","), L = pavTips().filter(function (x) { return !ak || ak.indexOf(x.a) >= 0; });
 if (opt.warnOnly) L = L.filter(function (x) { return x.lvl === "warn"; });
 if (!L.length && opt.hideEmpty) return "";
-var key = areas, lim = opt.lim || 5, show = PAVALL[key] ? L : L.slice(0, lim), fold = !!(S.opt.pavfold || {})[key], nw = L.filter(function (x) { return x.lvl === "warn"; }).length;
+var key = areas, lim = opt.lim || 5, show = PAVALL[key] ? L : L.slice(0, lim), fold = !opt.bare && pavIsFold(key), nw = L.filter(function (x) { return x.lvl === "warn"; }).length;
 var h = (opt.bare ? '<div class="bav pav bare">' : '<div class="card bav pav' + (fold ? " fold" : "") + '">') + (opt.bare ? "" : '<div class="bavh"><button type="button" class="bavtg" data-a="pavfold" data-x="' + esc(key) + '" aria-expanded="' + !fold + '" title="' + (fold ? "Развернуть советы" : "Свернуть советника") + '"><span class="bavch">' + (fold ? "▸" : "▾") + "</span><b>🧭 Советник" + (ak && ak.length === 1 ? " · " + PAVAREA[ak[0]].replace(/^\S+\s/, "").toLowerCase() : "") + "</b></button><span class=\"muted\">" + (L.length ? (fold && nw ? nw + " " + plural(nw, ["важный", "важных", "важных"]) + " · " : "") + L.length + " " + plural(L.length, ["совет", "совета", "советов"]) : "всё спокойно") + '</span><span class="nowsp"></span>' + (!fold && areas === "all" && AI.ready() ? '<button type="button" class="btn sm" data-a="pavai">✨ Спросить ИИ</button>' : "") + "</div>");
 if (fold) return h + "</div>";
 if (areas === "all" && PAVCONF) h += '<div class="bavconf"><b>Отправить ИИ (' + esc(AI.name()) + ") цифры по целям и задачам?</b><span>Уйдут только числа: сколько задач открыто, просрочено, во «Входящих», прогресс и сроки целей (без названий), часы плана и факта. Названия задач, целей и проектов не отправляются.</span><div class=\"r\"><button type=\"button\" class=\"btn sm pri\" data-a=\"pavaigo\">Отправить</button><button type=\"button\" class=\"btn sm\" data-a=\"pavaix\">Отмена</button></div></div>";
@@ -21241,7 +21248,7 @@ var x = el.dataset.x;
 switch (a) {
 case "pavx": var m = Object.assign({}, S.opt.pavx || {}); m[x] = Date.now() + 30 * DAY; S.opt.pavx = m; optTouch(); save(); PAVC = null; render(); toast("Совет спрятан на месяц"); return true;
 case "pavall": PAVALL[x] = !PAVALL[x]; render(); return true;
-case "pavfold": var f = Object.assign({}, S.opt.pavfold || {}); if (f[x]) delete f[x]; else f[x] = 1; S.opt.pavfold = f; optTouch(); save(); render(); return true;
+case "pavfold": var f = Object.assign({}, S.opt.pavfold || {}); f[x] = pavIsFold(x) ? 0 : 1; S.opt.pavfold = f; optTouch(); save(); render(); return true;
 case "pavdo": var tip = pavTips().filter(function (z) { return z.id === x; })[0]; if (!tip || !tip.act) return true; var A = tip.act;
 if (A.run) { A.run(); var mm = Object.assign({}, S.opt.pavx || {}); mm[x] = Date.now() + 30 * DAY; S.opt.pavx = mm; optTouch(); save(); PAVC = null; render(); }
 else if (A.open) openTask(A.open);
