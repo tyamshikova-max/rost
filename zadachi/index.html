@@ -3401,7 +3401,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-264";
+var APPV = "zd-app-2026-10-16-265";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -4304,22 +4304,23 @@ else put("all", "", t, 0);
 });
 return out.sort(function (a, b) { return a.ord < b.ord ? -1 : a.ord > b.ord ? 1 : 0; });
 }
+function rowMini(o) { return S.opt.rowfull !== 1 && !o.take && !o.untake && !o.dnblock && V !== "sprints" && V !== "sprint"; }
 function taskRow(t, depth, inSet, o) {
-var late = isLate(t), meta = [], kids = tkids(t.id), kidsOpen = kids.filter(function (k) { return !k.done; }).length;
+var late = isLate(t), meta = [], kids = tkids(t.id), kidsOpen = kids.filter(function (k) { return !k.done; }).length, mini = rowMini(o);
 var hasKidsHere = kids.some(function (k) { return inSet[k.id]; });
 var lag = late ? Math.floor((today0() - sod(t.at || t.due)) / DAY) : 0, lcls = late ? "late" + (lag >= 5 ? " l3" : lag >= 3 ? " l2" : lag >= 1 ? " l1" : "") : "when";
 if (t.till && t.at && !t.done) meta.push('<span class="spn' + (late ? " late" : "") + '" title="Задача на несколько дней">' + esc(spanMeta(t)) + "</span>");
 else if (t.at && !(o.noDate && !t.allday && false)) meta.push('<span class="' + lcls + '"' + (lag ? ' title="Просрочено на ' + lag + " " + plural(lag, ["день", "дня", "дней"]) + '"' : "") + ">" + esc(o.noDay && !late ? (t.allday ? "" : hm(t.at)) : whenTxt(t)) + "</span>");
-if (t.en) meta.push('<span title="Энергия: ' + ENN[t.en] + '">' + ["", "🪫", "🔋", "⚡"][t.en] + "</span>");
+if (t.en && !mini) meta.push('<span title="Энергия: ' + ENN[t.en] + '">' + ["", "🪫", "🔋", "⚡"][t.en] + "</span>");
 if (t.rep) meta.push("🔁 " + esc(ruleText(t)));
 if (t.due && !t.done) { var dlate = t.due < today0(), dtoday = !dlate && t.due < today0() + DAY; meta.push('<span class="' + (dlate ? "late" : dtoday ? "late" : "") + '" title="Дедлайн">⏰ до ' + esc(dayName(t.due).toLowerCase()) + "</span>"); }
-if (t.rem && t.at && SRV.ready()) meta.push('<span title="Напоминание в Telegram">🔔</span>');
+if (t.rem && t.at && SRV.ready() && !mini) meta.push('<span title="Напоминание в Telegram">🔔</span>');
 var fo = flagOf(t); if (fo) meta.push('<span class="fl" title="Флажок: ' + esc(fo.n) + '">' + flagIc(fo) + "</span>");
 if (t.st === "doing" && !t.done) meta.push('<span class="when">▶ в работе</span>');
-if (!t.till && t.prog && !t.done) meta.push('<span class="spn">◐ ' + t.prog + "%</span>");
-if (+t.est) meta.push("⏱ " + estFmt(t.est));
-if (t.sprint && !o.noSprint) meta.push("🏃 " + esc(spLabel(t.sprint)));
-if (ccount(t.id)) meta.push("💬 " + ccount(t.id));
+if (!t.till && t.prog && !t.done && !mini) meta.push('<span class="spn">◐ ' + t.prog + "%</span>");
+if (+t.est && !mini) meta.push("⏱ " + estFmt(t.est));
+if (t.sprint && !o.noSprint && !mini) meta.push("🏃 " + esc(spLabel(t.sprint)));
+if (ccount(t.id) && !mini) meta.push("💬 " + ccount(t.id));
 if (kids.length) meta.push("☐ " + (kids.length - kidsOpen) + "/" + kids.length);
 var par = task(t.parent);
 if (par && !inSet[par.id]) meta.push('<a class="tag" href="#" data-a="openpar" data-x="' + par.id + '" title="Открыть родительскую задачу">↳ ' + esc(par.t.slice(0, 40)) + "</a>");
@@ -4328,13 +4329,13 @@ if (p && !o.noProj) meta.push(pdotHTML(p, true));
 if (t.resp && personName(t.resp)) meta.push('<span class="tag tresp" title="Ответственный">👤 ' + esc(personName(t.resp)) + "</span>");
 if (t.goal && goal(t.goal) && V !== "goal") meta.push('<a class="tag" href="#goal-' + t.goal + '" title="Цель">' + (goal(t.goal).ic || "🎯") + " " + esc(goal(t.goal).n.slice(0, 30)) + "</a>");
 (t.tags || []).forEach(function (g) { meta.push('<a class="tag" href="#tag-' + esc(g) + '" style="color:' + tcolor(g) + '">' + esc(tlab(g)) + "</a>"); });
-var bt = bodyTodo(t); if (bt) meta.push("☑ " + bt[0] + "/" + bt[1]); else if (t.body || t.note) meta.push("📝");
-if (t.src === "tg") meta.push("из Telegram");
+var bt = bodyTodo(t); if (bt) meta.push("☑ " + bt[0] + "/" + bt[1]); else if ((t.body || t.note) && !mini) meta.push("📝");
+if (t.src === "tg" && !mini) meta.push("из Telegram");
 if (t.fav) meta.push('<span style="color:var(--star)">★</span>');
-if (!t.done && !MXG && mxRowOn() && V !== "matrix") { var qd = quadOf(t); if (qd !== "q4") meta.push('<span class="mxm mx' + qd + '" title="Матрица: ' + MXQ[qd][1] + " — " + MXQ[qd][2] + '">' + MXQ[qd][0] + "</span>"); }
-var pl = pomoLive(t); if (pl) meta.push('<span title="Помидоры: с таймера Помодоро и каждые 25 минут учтённого времени">🍅 ' + pl + "</span>");
-var ntn = notesOfTask(t.id).length; if (ntn) meta.push("📝 " + ntn);
-if (t.ttOn) meta.push('<span class="ttrun">⏲ идёт</span>'); else if (t.tt) meta.push("⏲ " + ttFmt(t.tt));
+if (!t.done && !MXG && mxRowOn() && V !== "matrix" && !mini) { var qd = quadOf(t); if (qd !== "q4") meta.push('<span class="mxm mx' + qd + '" title="Матрица: ' + MXQ[qd][1] + " — " + MXQ[qd][2] + '">' + MXQ[qd][0] + "</span>"); }
+var pl = mini ? 0 : pomoLive(t); if (pl) meta.push('<span title="Помидоры: с таймера Помодоро и каждые 25 минут учтённого времени">🍅 ' + pl + "</span>");
+var ntn = mini ? 0 : notesOfTask(t.id).length; if (ntn) meta.push("📝 " + ntn);
+if (t.ttOn) meta.push('<span class="ttrun">⏲ идёт</span>'); else if (t.tt && !mini) meta.push("⏲ " + ttFmt(t.tt));
 meta = meta.filter(function (x) { return x && x !== '<span class="when"></span>'; });
 var ftd = o.dnblock && !t.done && t.ftd === dKey(Date.now());
 if (t.pin && !t.done) meta.unshift('<span class="when" title="Закреплена наверху">📌</span>');
@@ -13282,6 +13283,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["265", "☰ Строка задачи — без лишних значков", ["В списках у задачи теперь видно главное: название, срок, проект, теги, флажок и подзадачи. Энергия, оценка времени, помидоры, комментарии и заметки не загромождают строку — они в карточке задачи.", "На страницах «Спринт» и «План по часам» всё осталось как было. Вернуть прежний вид везде: «Настройки» → «Общие» → «Что показывать в строке задачи» → «Всё, как раньше»."]],
 ["264", "💡 «Сегодня»: советы одной строкой", ["Напоминания над списком — «Завершить день», «Застряли», «Перегруз» — теперь собраны в одну строку «💡 3 совета» под датой. Задачи видны сразу; нажмите на строку, чтобы развернуть советы.", "Вернуть прежний вид: «Настройки» → «Общие» → «Советы в «Сегодня»» → снять галочку."]],
 ["263", "✨ Мысль дня — одной строкой под датой", ["В «Сегодня» и на главной мысль дня теперь не большая карточка, а одна строка под датой: не занимает место, но всегда на виду. Нажмите на текст — мысль раскроется целиком.", "Кнопки ♡ ↻ ✕ — справа от строки. Прежний вид вернуть можно: «✨ Мотивация» → «▭ Карточкой вместо строки»."]],
 ["238", "Заметки: создать по-разному, загрузить из файла, фильтр по разделу", ["«+» в панели «Знаний» — меню: пустая заметка, карта мыслей, холст, из шаблона, заметка из файла, карта мыслей из файла. То же — в «📋 Из шаблона ▾» в разделе.", "📂 в любой открытой заметке — загрузить из файла: Markdown, HTML или текст встают с оформлением (заголовки, списки, галочки, таблицы, ссылки); в пустую — вместо текста, в заполненную — в конец (прежний вариант — в истории страницы). В карте мыслей: пустая заполняется из файла (XMind, OPML, FreeMind, Markdown, HTML), в непустую файл встаёт веткой — под выбранный узел.", "В списке всех заметок — фильтр «Раздел»: любая папка (вместе с вложенными) или «без раздела», рядом с фильтрами «Тип» и «Статус».", "Теги в панели «Знаний» — свёрнутой строкой «◆ Теги · N»: развёрнуто — 8 самых используемых и «Все теги →» (страница с поиском и облаком тегов). Поле «Теги» в заметке подсказывает существующие теги."]],
@@ -13458,6 +13460,10 @@ if (!tdFoldOn()) return "";
 var l = todayBars().filter(function (x) { return x && String(x).trim(); }); if (!l.length) return "";
 var nm = l.map(function (x) { var m = /<b>([^<]*)<\/b>/.exec(x); return m ? m[1] : ""; }).filter(Boolean);
 return '<details class="mtips tdadv" data-k="tdadv"' + (MTIPS.tdadv ? " open" : "") + "><summary>💡 " + l.length + " " + plural(l.length, ["совет", "совета", "советов"]) + (nm.length ? ' <span class="muted">· ' + esc(nm.join(" · ")) + "</span>" : "") + "</summary>" + l.join("") + "</details>";
+}
+function rowSetHTML() {
+return '<section class="card" id="s-rowmode"><h2>Что показывать в строке задачи</h2><p class="muted" style="margin:0">«Минимум» — название, срок, проект, теги, флажок и подзадачи. Энергия, оценка времени, помидоры, комментарии, заметки и спринт остаются в карточке задачи и на страницах «Спринт» и «План по часам».</p>' +
+'<div class="r"><select class="inp" id="opt-rowmode" aria-label="Что показывать в строке задачи"><option value="min"' + (S.opt.rowfull === 1 ? "" : " selected") + '>Минимум</option><option value="full"' + (S.opt.rowfull === 1 ? " selected" : "") + ">Всё, как раньше</option></select></div></section>";
 }
 function tdSetHTML() {
 return '<section class="card" id="s-tdadv"><h2>Советы в «Сегодня»</h2><p class="muted" style="margin:0">Напоминания над списком — «Завершить день», застрявшие задачи, перегруз — собраны в одну строку «💡 Советы»: нажмите на неё, чтобы развернуть. Снимите галочку, чтобы они всегда показывались целиком.</p>' +
@@ -16967,7 +16973,7 @@ h += '<p class="muted" style="margin:8px 0 0;font-size:calc(12px * var(--fs))">�
 h += "</section>";
 var th = LS.get("zd-theme") || "system";
 var hid = hiddenLists();
-h += peopleHTML() + tdSetHTML() + tbSetHTML() + buSetHTML();
+h += peopleHTML() + rowSetHTML() + tdSetHTML() + tbSetHTML() + buSetHTML();
 h += '<section class="card" id="s-lists"><h2>Пункты «Списков»</h2><p class="muted" style="margin:0">Снимите галочку, чтобы скрыть пункт из левой панели (в Ctrl+K он останется). «Входящие» видны всегда. Скрыть можно и правым кликом по пункту.</p><div class="lchk">' +
 listsAll().map(function (k) { var on = k === "inbox" || hid.indexOf(k) < 0; return '<button type="button" class="lt' + (on ? " on" : "") + '" data-a="lhide" data-id="' + k + '" role="switch" aria-checked="' + on + '"' + (k === "inbox" ? " disabled" : "") + '><span class="lbox"></span>' + ic(k) + "<span>" + LISTN[k] + "</span></button>"; }).join("") + "</div></section>";
 h += '<section class="card"><h2>Левая панель</h2><p class="muted" style="margin:0">Блоки («Избранное», «Списки», «Проекты», «Фильтры», «Теги», «Служебное») переставляются перетаскиванием за заголовок, пункты «Списков» — перетаскиванием самих пунктов. Порядок синхронизируется между устройствами.</p><div class="r"><button class="btn" type="button" data-a="side-reset">Вернуть исходный порядок</button><button class="btn" type="button" data-a="mini">' + (document.body.classList.contains("mini") ? "Развернуть панель" : "Свернуть панель до иконок") + "</button></div></section>";
@@ -18571,6 +18577,7 @@ touch(f); save(); render(); return;
 if (t.id === "pparent") { var p = proj(ARG); if (p) { if (t.value && pdesc(p.id).indexOf(t.value) >= 0) { toast("Нельзя вложить проект сам в себя"); return; } moveProj(p.id, t.value || null, "in"); toast(t.value ? "Проект вложен в «" + proj(t.value).n + "»" : "Проект на верхнем уровне"); } return; }
 if (t.id === "ai-prov") { var c2 = AI.cfg(); c2.prov = t.value; AI.setCfg(c2); render(); return; }
 if (t.id === "opt-autorem") { S.opt.autoRem = t.checked; optTouch(); save(); return; }
+if (t.id === "opt-rowmode") { if (t.value === "full") S.opt.rowfull = 1; else delete S.opt.rowfull; optTouch(); save(); render(); return; }
 if (t.id === "opt-tdfold") { if (t.checked) delete S.opt.tdfold; else S.opt.tdfold = 0; optTouch(); save(); render(); return; }
 if (t.id === "opt-hour") { S.opt.allDayHour = +t.value; optTouch(); save(); return; }
 if (t.id === "imp") { if (t.files[0]) { IMPF = t.files[0]; CONF = "import"; render(); } t.value = ""; }
