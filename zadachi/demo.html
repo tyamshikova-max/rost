@@ -8538,7 +8538,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-261";
+var APPV = "zd-app-2026-10-16-262";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -14261,7 +14261,7 @@ var v = r ? r.a[q[0]] : undefined;
 return '<div class="ckq"><span>' + esc(q[1]) + (q[0] === "lim" && auto !== null ? ' <small class="muted">по файлу: ' + (auto === 2 ? "да" : auto === 1 ? "почти" : "нет") + "</small>" : "") + '</span><span class="seg ckseg">' + CKV.map(function (x) { return '<button type="button" data-a="fcans" data-q="' + q[0] + '" data-v="' + x[0] + '" class="' + (v === x[0] ? "on v" + x[0] : "") + '">' + x[1] + "</button>"; }).join("") + "</span></div>";
 }).join("") + "</div>";
 }
-function fcDebtCur(d) { var b = live(S.dbal || []).filter(function (x) { return x.debt === d.id; }).sort(function (a, c) { return c.d - a.d; })[0]; return b ? +b.v : +d.start || 0; }
+function fcDebtCur(d) { var b = null; live(S.dbal || []).forEach(function (x) { if (x.debt === d.id && (!b || x.d >= b.d)) b = x; }); return b ? +b.v : +d.start || 0; }
 var FCHOT = 50;
 function fcGroup(rate, dep) { return rate >= FCHOT ? 0 : rate <= 0 || (dep > 0 && rate <= dep) ? 2 : 1; }
 function fcCmp(strat, dep) { return function (a, b) { var ga = fcGroup(a.rate, dep), gb = fcGroup(b.rate, dep); if (ga !== gb) return ga - gb; if (ga === 0) return b.r - a.r || a.b - b.b; return strat === "sb" ? a.b - b.b || b.r - a.r : b.r - a.r || a.b - b.b; }; }
@@ -14289,7 +14289,7 @@ if (tab === "what") return h + (fcWhatHTML() || '<p class="muted">Сначала
 h += strat;
 var card = function (d) {
 var c = fcDebtCur(d), done = +d.start > 0 && c <= 0, p = +d.start ? Math.max(0, Math.min(100, Math.round((+d.start - c) / +d.start * 100))) : 0, lastB = live(S.dbal || []).filter(function (x) { return x.debt === d.id; }).sort(function (a, b) { return b.d - a.d; })[0], ed = FCDED === d.id, isF = focus && d.id === focus.id, e = ends[d.id];
-var meta = []; if (+d.min) meta.push("платёж <b>" + buRub(+d.min) + "</b>" + (+d.day ? " · " + d.day + "-го" : "")); else if (!done) meta.push('<span class="warnc">нет платежа</span>'); if (!d.off && !done && e) meta.push("закроется в <b>" + esc(fcMonthIn(e)) + "</b>"); if (lastB) meta.push("обновлён " + esc(new Date(lastB.d).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })));
+var meta = []; if (+d.min) meta.push("платёж <b>" + buRub(+d.min) + "</b>" + (+d.day ? " · " + d.day + "-го" : "") + (fcBregFor(d) ? ' <span title="Задача — из «Регулярных платежей»">· 🔁</span>' : "")); else if (!done) meta.push('<span class="warnc">нет платежа</span>'); if (!d.off && !done && e) meta.push("закроется в <b>" + esc(fcMonthIn(e)) + "</b>"); if (lastB) meta.push("обновлён " + esc(new Date(lastB.d).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })));
 return '<div class="fcdc' + (isF ? " focus" : "") + (done ? " closed" : "") + (d.off ? " off" : "") + '">' +
 '<div class="fcdch">' + (!d.off && !done && qn[d.id] ? '<span class="fcq" title="Очередь досрочного погашения">' + qn[d.id] + "</span>" : "") + (+d.rate || !done ? '<span class="fcrb ' + fcRateCls(d.rate) + '" title="Ставка, % годовых">' + String(+d.rate || 0).replace(".", ",") + "%</span>" : "") + '<span class="fcsp"></span><button type="button" class="ibtn" data-a="fcded" data-id="' + d.id + '" title="' + (ed ? "Готово" : "Изменить: остаток, ставка, платёж") + '" aria-label="Изменить">' + (ed ? "✓" : "✎") + "</button></div>" +
 '<div class="fcdnm" title="' + esc(d.n) + '">' + esc(d.n) + "</div>" +
@@ -14442,7 +14442,7 @@ var gain = Math.max(0, prev.interest - sim.interest);
 var body = "<p>По плану погашения долгов (взнос " + (si + 1) + ", " + esc(fcMonth(k)) + "): " + (sn.to.length > 1 ? "сумма делится между долгами" : "весь взнос — на один долг") + ".</p><ul>" + sn.to.map(function (q) { return "<li>" + esc(q.n) + " — <b>" + buRub(q.p) + "</b>" + (q.cl ? " (закроется полностью ✓)" : "") + "</li>"; }).join("") + "</ul>" +
 "<p>Долг после взноса ≈ " + buRub(sn.left) + ". Этот взнос сэкономит ≈ " + buRub(gain) + " процентов.</p><p>В банке оформите досрочное погашение «" + (w.m === "pay" ? "в уменьшение платежа" : "в уменьшение срока") + "» до даты списания. После платежа обновите остаток: <a href=\"#budget-debts\">Бюджет → Долги</a> (или «✓ Внести взнос этого месяца» в «🧮 Что если внести»).</p>";
 if (!t) { t = newTaskFrom("Досрочный взнос", {}); x.tid = t.id; fcWiSave(w); }
-t.t = title; t.at = at; t.allday = true; t.due = 0; t.rem = false; t.body = body; delete t.note; touch(t); save();
+t.t = title; t.at = at; t.allday = true; t.due = 0; t.rem = false; t.body = body; delete t.note; t.fin = { d: sn.to.map(function (q) { return { id: q.id, p: Math.round(q.p) }; }) }; touch(t); save();
 return t;
 }
 function fcWiSteps(w) { return w.st.map(function (x, i) { return { x: x, i: i }; }).filter(function (o) { return o.x.a > 0; }).sort(function (p, q) { return fcYmOff(p.x.ym) - fcYmOff(q.x.ym) || p.i - q.i; }).map(function (o) { return { k: fcYmOff(o.x.ym), id: o.x.id, amt: o.x.a, i: o.i }; }); }
@@ -14541,12 +14541,12 @@ case "svptask":
 var sp0 = svpSim("smart", svpCfg()), pi = +el.dataset.x, pp = sp0.plan[pi]; if (!pp || !(pp.sav > 0.5)) return true;
 var ymk = fcYmAt(pp.mo - 1), now1 = new Date(), at1 = Math.max(today0(), new Date(now1.getFullYear(), now1.getMonth() + pp.mo - 1, 11).getTime());
 var tn = newTaskFrom("Отложить", {}); tn.t = "📈 Отложить " + buRub(pp.sav) + (pp.adds.some(function (x) { return x.id; }) ? ": " + pp.adds.map(function (x) { return x.n + " " + buRub(x.p); }).join(", ") : " в накопления"); tn.at = at1; tn.allday = true; tn.rem = false;
-tn.body = "<p>По плану накоплений (" + esc(fcMonth(pp.mo - 1)) + "):</p><ul>" + pp.adds.map(function (x) { return "<li>" + esc(x.n) + " — <b>" + buRub(x.p) + "</b></li>"; }).join("") + "</ul>" + (pp.dpay > 0.5 ? "<p>И досрочно на долги: " + buRub(pp.dpay) + ".</p>" : "") + '<p>Отложили — отметьте пополнение в цели или нажмите «✓ Отложить в этом месяце» на вкладке <a href="#budget-sav">Бюджет → Накопления</a>.</p>'; touch(tn);
+tn.body = "<p>По плану накоплений (" + esc(fcMonth(pp.mo - 1)) + "):</p><ul>" + pp.adds.map(function (x) { return "<li>" + esc(x.n) + " — <b>" + buRub(x.p) + "</b></li>"; }).join("") + "</ul>" + (pp.dpay > 0.5 ? "<p>И досрочно на долги: " + buRub(pp.dpay) + ".</p>" : "") + '<p>Отложили — отметьте пополнение в цели или нажмите «✓ Отложить в этом месяце» на вкладке <a href="#budget-sav">Бюджет → Накопления</a>.</p>'; tn.fin = { s: pp.adds.filter(function (x) { return x.id; }).map(function (x) { return { g: x.id, p: Math.round(x.p) }; }) }; touch(tn);
 var tkm = svpTk(); tkm[ymk] = tn.id; LS.set("zd-svtk", JSON.stringify(tkm)); save(); render(); toast("Задача на " + new Date(at1).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + ": «" + tn.t.slice(0, 60) + "»"); return true;
 case "svpgo":
 var sp1 = svpSim("smart", svpCfg()), p0 = sp1.plan[0]; if (!p0) return true; S.sops = S.sops || []; var dn2 = [];
 p0.adds.forEach(function (x) { var g3 = x.id && goal(x.id); if (!g3) return; S.sops.push(touch({ id: uid(), g: g3.id, d: Date.now(), a: Math.round(x.p), n: "по плану накоплений" })); dn2.push("«" + g3.n + "» +" + buRub(x.p)); });
-var tk0 = svpTk()[fcYmAt(0)], tt0 = tk0 && task(tk0); if (tt0 && !tt0.done) toggle(tt0);
+var tk0 = svpTk()[fcYmAt(0)], tt0 = tk0 && task(tk0); if (tt0 && !tt0.done) { tt0.finrec = []; toggle(tt0); }
 save(); render(); toast(dn2.length ? "✓ Записано: " + dn2.join(", ") : "Целей-копилок в плане нет"); return true;
 case "fcded": FCDED = FCDED === el.dataset.id ? "" : el.dataset.id; render(); return true;
 case "fcwim": var wm = fcWi(); wm.m = el.dataset.v === "pay" ? "pay" : "term"; fcWiSave(wm); render(); return true;
@@ -14557,7 +14557,7 @@ case "fcwidel": var wd = fcWi(); wd.st.splice(+el.dataset.x, 1); fcWiSave(wd); r
 case "fcwigo":
 var wi = fcWi(), now0 = fcWiSteps(wi).filter(function (x) { return x.k === 0; }), sim = now0.length ? fcSim(fcStrat(), +((S.opt.bud || {}).fch || {}).extra || 0, false, { mode: wi.m, steps: now0 }) : null; if (!sim) return true; S.dbal = S.dbal || []; var done = [];
 sim.ds.forEach(function (d) { if (!(d.lump > 0)) return; var dd = live(S.debts).filter(function (x) { return x.id === d.id; })[0]; if (!dd) return; S.dbal.push(touch({ id: uid(), debt: dd.id, d: Date.now(), v: Math.max(0, Math.round(fcDebtCur(dd) - d.lump)) })); if (wi.m === "pay" && !d.now && d.m !== +dd.min) { dd.min = d.m; touch(dd); } done.push("«" + dd.n + "» −" + buRub(d.lump)); });
-wi.st.forEach(function (x) { if (x.a > 0 && fcYmOff(x.ym) === 0 && x.tid) { var tt = task(x.tid); if (tt && !tt.done) toggle(tt); } });
+wi.st.forEach(function (x) { if (x.a > 0 && fcYmOff(x.ym) === 0 && x.tid) { var tt = task(x.tid); if (tt && !tt.done) { tt.finrec = []; toggle(tt); } } }); // остаток уже записан — задача не вычитает второй раз
 wi.st = wi.st.filter(function (x) { return !(x.a > 0 && fcYmOff(x.ym) === 0); }); if (wi.st.length) fcWiSave(wi); else LS.del("zd-fcwi");
 fcSync(today0()); save(); render(); toast("✓ Записано: " + done.join(", ") + ". Не забудьте сам платёж в банке."); return true;
 case "fcenv": var to = el.dataset.to || "", amt = +el.dataset.v || 0, wk = el.dataset.wk; if (!amt) return true; S.env = S.env || []; var nm2 = "";
@@ -14708,6 +14708,40 @@ st(ck, "4. Финансовый чекап", "Пять вопросов — ни
 st(!ready, "5. Желания", ready ? ready + " " + plural(ready, ["желание «остыло»", "желания «остыли»", "желаний «остыли»"]) + ' — решите: <button type="button" class="btn sm" data-a="butab" data-x="wish">Желания</button>' : "остывших нет") +
 st(!!live(S.env || []).filter(function (x) { return x.wk === dKey(mon); })[0] || w.tot.left <= 0, "6. Остаток — в конверт или на долг", fcEnvHTML(mon)) +
 st(true, "7. Следующая неделя", nw.miss.length ? '<span class="muted">период ещё не загружен</span>' : "лимит гибких трат " + buRub(nw.tot.lim) + " (≈ " + buRub(nw.tot.lim / 7) + " в день)" + (Math.abs(nw.tot.lim - nw.tot.norm) >= 50 ? ' <span class="muted">обычно ' + buRub(nw.tot.norm) + "</span>" : "")) + "</div>";
+}
+function fcNameHit(a, b) { var x = buNorm(a), y = buNorm(b); return !!x && !!y && (x === y || (y.length >= 4 && x.indexOf(y) >= 0) || (x.length >= 4 && y.indexOf(x) >= 0)); }
+function fcDebtOf(name) { var l = live(S.debts || []); return l.filter(function (d) { return buNorm(d.n) === buNorm(name); })[0] || l.filter(function (d) { return fcNameHit(name, d.n); })[0] || null; }
+function fcBregFor(d) { var l = live(S.bregs || []).filter(bregOk), own = function (g) { var x = fcDebtOf(g.n); return x && x.id === d.id; }; return l.filter(function (g) { return buNorm(g.n) === buNorm(d.n); })[0] || l.filter(function (g) { return fcNameHit(g.n, d.n) && own(g); })[0] || null; }
+function fcDebtPaySync() {
+if ((S.opt.bud || {}).payrem === false) return false; var ch = false, t0 = today0(), now = new Date(t0);
+live(S.debts || []).forEach(function (d) {
+if (!(+d.min > 0) || !(+d.day > 0) || fcDebtCur(d) <= 0 || fcBregFor(d)) return;
+var day = Math.min(28, +d.day), due = new Date(now.getFullYear(), now.getMonth(), day).getTime(); if (due < t0) due = new Date(now.getFullYear(), now.getMonth() + 1, day).getTime();
+if (due - t0 > 2 * DAY) return; var id = "dpay-" + d.id + "-" + dKey(due); if (S.tasks.some(function (x) { return x.id === id; })) return;
+var t = newTaskFrom("Платёж", { day: t0 }); t.id = id; t.t = "💳 Платёж по долгу «" + d.n + "» · " + rub(+d.min) + " · до " + day + "-го"; t.at = t0; t.allday = true; t.due = due; t.rem = true; t.tags = []; t.fin = { d: [{ id: d.id, p: +d.min, int: 1 }] }; touch(t); ch = true;
+});
+return ch;
+}
+function fcFinOf(t) {
+if (t.fin) return t.fin; var m = /^pay-(.+)-(\d{4}-\d\d-\d\d)$/.exec(t.id || ""); if (!m) return null;
+var g = live(S.bregs || []).filter(function (x) { return x.id === m[1]; })[0], d = g && fcDebtOf(g.n); return d ? { d: [{ id: d.id, p: +g.amt || +d.min || 0, int: 1 }] } : null;
+}
+function fcFinDone(t) {
+var f = fcFinOf(t); if (!f || t.finrec) return; var recs = [], msg = [], now = Date.now(); S.dbal = S.dbal || []; S.sops = S.sops || [];
+(f.d || []).forEach(function (x) {
+var d = live(S.debts || []).filter(function (y) { return y.id === x.id; })[0]; if (!d || !(x.p > 0)) return; var b = fcDebtCur(d);
+var last = live(S.dbal).filter(function (y) { return y.debt === d.id; }).sort(function (p, q) { return q.d - p.d; })[0];
+if (x.int && last && t.due && last.d >= t.due - 3 * DAY) { msg.push("«" + d.n + "»: остаток уже обновлён — " + buRub(b)); return; }
+var it = x.int ? b * (+d.rate || 0) / 1200 : 0, nb = Math.max(0, Math.round(b + it - x.p)), r = touch({ id: uid(), debt: d.id, d: now, v: nb }); S.dbal.push(r); recs.push({ k: "b", id: r.id });
+msg.push("«" + d.n + "» " + buRub(b) + " → " + buRub(nb) + (it >= 1 ? " (платёж " + buRub(x.p) + ", проценты ≈ " + buRub(it) + ")" : ""));
+});
+(f.s || []).forEach(function (x) { var g = goal(x.g); if (!g || !(x.p > 0)) return; var op = touch({ id: uid(), g: g.id, d: now, a: Math.round(x.p), n: "по задаче «" + String(t.t || "").slice(0, 60) + "»" }); S.sops.push(op); recs.push({ k: "s", id: op.id }); msg.push("«" + g.n + "» +" + buRub(x.p)); });
+if (!recs.length && !msg.length) return; t.finrec = recs; touch(t); try { fcSync(today0()); } catch (e) { /* челлендж не обязателен */ }
+setTimeout(function () { if (recs.length) toastUndo((f.s && f.s.length && !(f.d || []).length ? "Накопления: " : "Остаток долга: ") + msg.join(", "), function () { fcFinUndo(t); save(); render(); }); else toast(msg.join(", ")); }, 150);
+}
+function fcFinUndo(t) {
+(t.finrec || []).forEach(function (r) { var l = r.k === "b" ? S.dbal || [] : S.sops || [], x = l.filter(function (y) { return y.id === r.id; })[0]; if (x && !x.del) { x.del = 1; x.delAt = Date.now(); touch(x); } });
+delete t.finrec; touch(t);
 }
 function bpaySync() {
 if ((S.opt.bud || {}).payrem === false) return false; var ch = false, t0 = today0(), d = new Date(t0);
@@ -18386,6 +18420,7 @@ var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
 ["238", "Заметки: создать по-разному, загрузить из файла, фильтр по разделу", ["«+» в панели «Знаний» — меню: пустая заметка, карта мыслей, холст, из шаблона, заметка из файла, карта мыслей из файла. То же — в «📋 Из шаблона ▾» в разделе.", "📂 в любой открытой заметке — загрузить из файла: Markdown, HTML или текст встают с оформлением (заголовки, списки, галочки, таблицы, ссылки); в пустую — вместо текста, в заполненную — в конец (прежний вариант — в истории страницы). В карте мыслей: пустая заполняется из файла (XMind, OPML, FreeMind, Markdown, HTML), в непустую файл встаёт веткой — под выбранный узел.", "В списке всех заметок — фильтр «Раздел»: любая папка (вместе с вложенными) или «без раздела», рядом с фильтрами «Тип» и «Статус».", "Теги в панели «Знаний» — свёрнутой строкой «◆ Теги · N»: развёрнуто — 8 самых используемых и «Все теги →» (страница с поиском и облаком тегов). Поле «Теги» в заметке подсказывает существующие теги."]],
+["262", "💳 Платёж сделан — остаток долга меняется сам", ["За 2 дня до числа платежа по долгу появляется задача «💳 Платёж по долгу …» (если платежа нет в «Регулярных платежах» — там своя задача, и она тоже работает).", "Отметили задачу ✓ — остаток уменьшается: прежний + проценты за месяц − платёж; «Отменить» или снятая отметка — запись убирается.", "Задачи досрочных взносов из плана и «Отложить» из накоплений при отметке тоже записывают остатки и пополнения целей."]],
 ["261", "Мелочи", ["Долги: длинные названия больше не наезжают на соседние карточки — название отдельной строкой, до трёх строк; на шкале «План закрытия» многоточие в середине, чтобы был виден конец названия."]],
 ["260", "📈 Накопления: горизонт по годам", ["Горизонт расчёта накоплений — любой от 1 до 30 лет с шагом в год: ползунок или кнопки − / ＋."]],
 ["259", "📈 Накопления со сложным процентом", ["«Бюджет» → новая вкладка «📈 Накопления» — расчёт вместе с долгами: минимум в накопления каждый месяц, свободные деньги — на долг, если он дороже вклада, иначе в накопления.", "Сложный процент, галочка «налог на проценты», горизонт 1–10 лет; цели-копилки — по очереди по сроку (подушка — отдельно, по умолчанию не в расчёте).", "График долгов и накоплений, граница «гасить или копить», этапы, три варианта для сравнения, план на ближайшие месяцы с задачами."]],
@@ -22089,7 +22124,7 @@ by[k] = (by[k] || "") + "<section" + x;
 if (STQ.trim()) return auxHead("Настройки") + stqBar() + stqRes(parts);
 return auxHead("Настройки") + stqBar() + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
 }
-var HTABS = [["money", "budget", "Деньги и бюджет", ["mg-how", "mg-kinds", "mg-week", "mg-per", "mg-regs", "mg-debts", "mg-whatif", "mg-sav", "mg-wish", "mg-hab", "mg-hour", "mg-chal", "mg-sv", "mg-faq", "budget"]], ["home", "clean", "Гайд: порядок дома", ["hg-why", "hg-princ", "hg-levels", "hg-base", "hg-clean", "hg-zone", "hg-decl", "hg-sos", "hg-check", "hg-inv", "hg-family", "hg-mist", "hg-app", "hg-chal", "hg-places", "hg-faq", "hg-read"]], ["start", "help", "С чего начать", ["start", "demo", "flow", "switch", "phone", "ptabs", "quick", "mini", "pal", "keys"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "resp", "undo", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "food", "clean", "routine", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
+var HTABS = [["money", "budget", "Деньги и бюджет", ["mg-how", "mg-kinds", "mg-week", "mg-per", "mg-regs", "mg-debts", "mg-paid", "mg-whatif", "mg-sav", "mg-wish", "mg-hab", "mg-hour", "mg-chal", "mg-sv", "mg-faq", "budget"]], ["home", "clean", "Гайд: порядок дома", ["hg-why", "hg-princ", "hg-levels", "hg-base", "hg-clean", "hg-zone", "hg-decl", "hg-sos", "hg-check", "hg-inv", "hg-family", "hg-mist", "hg-app", "hg-chal", "hg-places", "hg-faq", "hg-read"]], ["start", "help", "С чего начать", ["start", "demo", "flow", "switch", "phone", "ptabs", "quick", "mini", "pal", "keys"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "resp", "undo", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "food", "clean", "routine", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data"]]];
 (function () {
 var add = function (k, ids) { var t = HTABS.filter(function (x) { return x[0] === k; })[0]; if (t) t[3] = t[3].concat(ids); };
 var si = 0; HTABS.forEach(function (x, i) { if (x[0] === "start") si = i + 1; });
@@ -22458,6 +22493,7 @@ if (BOOT.done) {
 try { setTimeout(xpCheck, 0); } catch (er) { /* очки не мешают */ }
 try { topMvScan(); } catch (er) { /* пометка переноса главного не мешает */ }
 try { if (SETGATE && bpaySync()) save(); } catch (er) { /* напоминания о платежах не мешают */ }
+try { if (SETGATE && fcDebtPaySync()) save(); } catch (er) { /* задачи на платежи по долгам не мешают */ }
 }
 try { applyLook(); } catch (er) { /* оформление не мешает работе */ }
 var ae0 = document.activeElement;
@@ -22747,6 +22783,7 @@ t.at = nx; touch(t); save(); render(); toast("Следующий раз: " + whe
 }
 t.done = !t.done; t.dt = t.done ? Date.now() : 0; if (!t.done) delete t.canc; delete t.ftd; delete t.ftdPrev; touch(t); if (t.done) depFreed(t);
 if (t.done) logAct("done", t.id); else { var la = S.acts.filter(function (a) { return a.k === "done" && a.t === t.id && !a.del && a.d > Date.now() - DAY; }).pop(); if (la) { la.del = 1; touch(la); } }
+try { if (t.done) fcFinDone(t); else if (t.finrec) fcFinUndo(t); } catch (er) { /* остаток долга — не обязателен */ }
 var n = 0;
 if (t.done) tdesc(t.id).forEach(function (k) { if (!k.done) { k.done = true; k.dt = t.dt; touch(k); n++; } });
 save(); render();
