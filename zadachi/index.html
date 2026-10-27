@@ -3336,7 +3336,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-249";
+var APPV = "zd-app-2026-10-16-250";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -12905,6 +12905,7 @@ var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
 ["238", "Заметки: создать по-разному, загрузить из файла, фильтр по разделу", ["«+» в панели «Знаний» — меню: пустая заметка, карта мыслей, холст, из шаблона, заметка из файла, карта мыслей из файла. То же — в «📋 Из шаблона ▾» в разделе.", "📂 в любой открытой заметке — загрузить из файла: Markdown, HTML или текст встают с оформлением (заголовки, списки, галочки, таблицы, ссылки); в пустую — вместо текста, в заполненную — в конец (прежний вариант — в истории страницы). В карте мыслей: пустая заполняется из файла (XMind, OPML, FreeMind, Markdown, HTML), в непустую файл встаёт веткой — под выбранный узел.", "В списке всех заметок — фильтр «Раздел»: любая папка (вместе с вложенными) или «без раздела», рядом с фильтрами «Тип» и «Статус».", "Теги в панели «Знаний» — свёрнутой строкой «◆ Теги · N»: развёрнуто — 8 самых используемых и «Все теги →» (страница с поиском и облаком тегов). Поле «Теги» в заметке подсказывает существующие теги."]],
+["250", "📖 Справка снова открывается", ["Справка зависала на «Загружаю справку…»: в одном разделе была ошибка, из-за которой файл справки не читался. Исправлено, справка открывается сразу.", "Вкладки справки и поиск по ней теперь переключаются быстрее: текст разбирается на разделы один раз."]],
 ["249", "📅 Отчёты бюджета за свои даты", ["В «Бюджет» → «📊 Отчёты» рядом с «3 / 6 / 12 / 24 мес.» — «📅 Свой период»: две даты «с … по …» и быстрые кнопки «Этот месяц», «Прошлый месяц», «3 месяца», «С начала года», «Прошлый год».", "Траты и накопления считаются точно по датам. Если месяц бюджета (11-е → 10-е) попал в период частично, его доходы и план берутся пропорционально дням — это оценка, такие суммы помечены «≈»."]],
 ["248", "📊 Отчёты по бюджету", ["«Бюджет» → вкладка «📊 Отчёты» — 12 отчётов: 💸 доход − расход по месяцам, 📈 финансовое состояние (остаток, долги, «остаток − долги»), 🏦 накопления, 🧩 структура расходов, 🎯 план и факт по статьям, ⚖️ обязательные и гибкие (ориентир 50/30/20, кредитная нагрузка), 📅 ритм трат, 💰 доходы, 💳 долги, 🔮 прогноз, 🗓 итоги года, 🧾 подписки и магазины по выписке.", "Любую цифру, строку или столбик можно нажать — откроются дни, статьи или операции, из которых она сложилась."]],
 ["247", "✨ Мысль дня — блоком в «Сегодня»", ["Мысль дня ушла из карточки задачи и стала отдельным блоком вверху «Сегодня» — с кнопками ♡ В избранное, ↻ Другая и «Не показывать». Выключить блок — «✨ Мотивация» → «🗓 Блок в «Сегодня»»."]],
@@ -16549,7 +16550,7 @@ HTABS.push(["self", "habits", "Развитие и здоровье", ["x-health
 })();
 var HQ = "";
 function htabOf(a) { if (HTABS.some(function (x) { return x[0] === a; })) return a; var f = HTABS.filter(function (x) { return x[3].indexOf(a) >= 0; })[0]; return f ? f[0] : "start"; }
-var HLPF = null, HLPL = false;
+var HLPF = null, HLPL = false, HLPB = null;
 function helpReady() {
 if (HLPF) return true;
 if (typeof vHelp === "function") { HLPF = vHelp; return true; }
@@ -16561,11 +16562,11 @@ return false;
 }
 function vHelpTabs() {
 if (!helpReady()) return auxHead("Справка") + '<p class="empty">Загружаю справку…</p>';
-var raw = HLPF(), parts = raw.split('<h2 id="h-'), by = {}, order = [];
-parts.slice(1).forEach(function (x) { var id = x.slice(0, x.indexOf('"')), body = '<h2 id="h-' + x; var fi = body.indexOf('<p class="foot">'); if (fi >= 0) body = body.slice(0, fi); by[id] = body; order.push(id); });
+if (!HLPB) { HLPB = { by: {}, order: [], txt: {} }; HLPF().split('<h2 id="h-').slice(1).forEach(function (x) { var id = x.slice(0, x.indexOf('"')), body = '<h2 id="h-' + x; var fi = body.indexOf('<p class="foot">'); if (fi >= 0) body = body.slice(0, fi); HLPB.by[id] = body; HLPB.order.push(id); }); }
+var by = HLPB.by, order = HLPB.order;
 var cur = htabOf(ARG), q = HQ.trim().toLowerCase(), html = "";
 if (q) {
-var hits = order.filter(function (id) { return by[id].replace(/<[^>]+>/g, " ").toLowerCase().indexOf(q) >= 0; });
+var hits = order.filter(function (id) { return (HLPB.txt[id] || (HLPB.txt[id] = by[id].replace(/<[^>]+>/g, " ").toLowerCase())).indexOf(q) >= 0; });
 html = hits.length ? hits.map(function (id) { return by[id]; }).join("") : '<p class="empty">Ничего не нашлось. Попробуйте другое слово.</p>';
 } else {
 var tab = HTABS.filter(function (x) { return x[0] === cur; })[0];
