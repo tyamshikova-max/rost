@@ -1833,6 +1833,7 @@ html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; backgro
 .mottd { margin: 0 0 12px; display: grid; gap: 8px } .mottdh { display: flex; align-items: center; justify-content: space-between; gap: 8px } .mottdh b { font-size: calc(13px * var(--fs)); color: var(--muted); font-weight: 600 } .mottd .motb { margin-top: 2px }
 .motq { margin: 0; padding: 2px 0 2px 14px; border-left: 3px solid var(--acc); font-family: Georgia, "Times New Roman", serif; font-style: italic; line-height: 1.45 } .motq.big { font-size: calc(17px * var(--fs)) } .motq cite { display: block; margin-top: 4px; font-family: inherit; font-style: normal; font-size: calc(12.5px * var(--fs)); color: var(--muted) }
 .motb { margin-top: 10px; gap: 6px; flex-wrap: wrap } .motl { display: block; margin: 0 0 10px; padding: 6px 10px; border-radius: 8px; background: var(--hover); color: var(--fg); text-decoration: none; font-size: calc(13px * var(--fs)); line-height: 1.4 } .motl span { font-family: Georgia, "Times New Roman", serif; font-style: italic } .motl i { color: var(--muted); font-style: normal }
+.ntabs { display: flex; align-items: flex-end; gap: 2px; margin: 4px 0 14px; border-bottom: 1px solid var(--line); overflow-x: auto; white-space: nowrap; scrollbar-width: none } .ntabs::-webkit-scrollbar { display: none } .ntabs a { padding: 7px 12px; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: calc(14px * var(--fs)) } .ntabs a:hover { color: var(--fg) } .ntabs a.on { color: var(--fg); font-weight: 500; border-bottom-color: var(--acc) } .ntabs .ntm { margin-left: auto; display: flex; gap: 2px } .ntabs .ntm a { font-size: calc(13px * var(--fs)); padding-inline: 8px }
 .pchips { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px } .pchb { font: inherit; font-size: calc(13px * var(--fs)); padding: 4px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis } .pchb:hover { background: var(--hover) } .pchb.on { background: var(--acc-soft); border-color: var(--acc); color: var(--acc) } .pchb.warn { color: var(--warn) } .pchb.late { color: var(--warn); border-color: var(--warn) } .pchb.doing { background: var(--acc-soft); color: var(--acc) }
 .props.pchipmode .prow.pchip:not(.pshow) { display: none }
 .pn-act { position: sticky; bottom: 0; z-index: 3; display: flex; flex-wrap: wrap; gap: 8px; margin: 18px -22px -60px; padding: 10px 22px 14px; background: var(--panel); border-top: 1px solid var(--line) } #panel.full .pn-act { margin-inline: -32px; padding-inline: 32px }
@@ -3405,7 +3406,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-271";
+var APPV = "zd-app-2026-10-16-272";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -4451,7 +4452,18 @@ function subHidden() { try { var a = JSON.parse(LS.get("zd-subhide") || "[]"); r
 function head(title, sub) {
 var long = sub && sub.replace(/<[^>]+>/g, "").length > 45;
 if (long && subHidden().indexOf(V) >= 0) sub = "";
-return "<h1>" + title + (HXV[V] ? ' <a class="hq hxq" href="#help-' + HXV[V] + '" title="Справка: как этим пользоваться, примеры" aria-label="Справка">?</a>' : "") + (V !== "settings" && V !== "help" ? ' <button type="button" class="pgmb" data-a="pgmore" title="Ещё: в избранное, на полосу, при запуске, ссылка" aria-label="Ещё">⋯</button>' : "") + "</h1>" + (sub ? '<p class="sub' + (long ? ' clamp" data-a="subtog" title="Нажмите, чтобы прочитать целиком' : "") + '">' + sub + (long ? ' <button type="button" class="subx" data-a="subhide" title="Скрыть это пояснение">✕</button>' : "") + "</p>" : "");
+return "<h1>" + title + (HXV[V] ? ' <a class="hq hxq" href="#help-' + HXV[V] + '" title="Справка: как этим пользоваться, примеры" aria-label="Справка">?</a>' : "") + (V !== "settings" && V !== "help" ? ' <button type="button" class="pgmb" data-a="pgmore" title="Ещё: в избранное, на полосу, при запуске, ссылка" aria-label="Ещё">⋯</button>' : "") + "</h1>" + (sub ? '<p class="sub' + (long ? ' clamp" data-a="subtog" title="Нажмите, чтобы прочитать целиком' : "") + '">' + sub + (long ? ' <button type="button" class="subx" data-a="subhide" title="Скрыть это пояснение">✕</button>' : "") + "</p>" : "") + navTabsHTML();
+}
+var NAVTABS = [
+{ v: ["today", "tbox", "cal", "plans", "dnote"], t: [["today", "☀ Сегодня"], ["tbox", "🧱 По часам"], ["cal", "📅 Календарь"], ["plans", "🗓 Планы"], ["dnote", "📝 День за днём"]], more: [["morning", "🌅 Утро"], ["shutdown", "🌙 Вечер"], ["weekly", "🧭 Неделя"]] },
+{ v: ["menu", "menunew", "recipes", "rhave", "prods", "kitchen"], t: [["menu", "🍲 Меню"], ["kitchen", "🍳 Кухня"]] }
+];
+function navTabsHTML() {
+if (S.opt.navtabs === 0) return "";
+var g = NAVTABS.filter(function (x) { return x.v.indexOf(V) >= 0; })[0]; if (!g) return "";
+var cur = /^(menunew|recipes|rhave|prods)$/.test(V) ? "menu" : V;
+return '<nav class="ntabs" aria-label="Вкладки раздела">' + g.t.filter(function (x) { return modOn(x[0]); }).map(function (x) { return '<a href="#' + x[0] + '"' + (x[0] === cur ? ' class="on" aria-current="page"' : "") + ">" + x[1] + "</a>"; }).join("") +
+(g.more ? '<span class="ntm">' + g.more.map(function (x) { return '<a href="#' + x[0] + '">' + x[1] + "</a>"; }).join("") + "</span>" : "") + "</nav>";
 }
 function listOrBoard(list, vo, o) { list = qfApply(list); return vmode() === "board" ? boardHTML(list, vo, o || {}) : renderGroups(list, vo, o) + doneTodayHTML(o); }
 var QF = {}, QFO = {};
@@ -13287,6 +13299,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["272", "🧭 Вкладки между близкими разделами", ["Под заголовком «Сегодня», «По часам», «Календаря», «Планов» и «Дня за днём» теперь вкладки для быстрого перехода между ними, справа — «Утро», «Вечер», «Неделя». У «Меню» и «Кухни» — тоже вкладки.", "Боковая панель и «Все разделы» остались как были. Убрать вкладки: «Настройки» → «Общие» → «Вкладки в разделах»."]],
 ["271", "🏷 Карточка задачи: поля значками", ["В карточке задачи срок, проект, приоритет, статус и теги теперь — одна строка значков: «📅 Сегодня · 📁 Проект · ❗ Приоритет 1 · ▶ В работе · 🏷 #срочно». Нажмите на значок — под ним раскроется поле, как раньше; выбрали быстрый вариант (дату, приоритет, статус) — оно закроется само.", "Описание и подзадачи теперь сразу под значками, без прокрутки. Остальные поля — «Ещё поля: …».", "Вернуть столбик полей: «Настройки» → «Общие» → «Поля в карточке задачи» → «Списком»."]],
 ["270", "✓ Карточка задачи: кнопки всегда под рукой", ["Внизу открытой карточки теперь закреплена панель: «✓ Готово», «Завтра», «+ неделя» и «💤 Отложить…». Она не уезжает при прокрутке — отметить задачу или перенести её можно, не листая карточку до конца.", "У выполненной задачи вместо них — «↺ Вернуть в работу»."]],
 ["269", "🌱 Первый запуск спокойнее, главная проще", ["Новому человеку на главной теперь показывают по одному вопросу за раз: сначала оформление, потом «Для чего вам приложение?», и только потом «Первые шаги». Пока вопрос на экране, подсказки дня («Вечер — закройте день» и другие) не мешают.", "«✎ Настроить главную» → «Простая главная»: одной кнопкой прячет цикл планирования, прогресс дня, уровень и очки, самочувствие и советника. Вернуть всё — «↺ Как было»; отдельные карточки — «＋» под списком скрытых."]],
@@ -13475,6 +13488,10 @@ function todayDayHTML() {
 var ld = todayLoadHTML(), nr = mobNarrow(), plan = todayPlanBox(), l = [tbNowHTML(), wrBanner(), apHTML(), ld, aiBox()].concat(nr ? [plan] : []).filter(function (x) { return x && String(x).trim(); });
 var sm = String(ld).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().split("Без оценки")[0].trim();
 return (l.length ? '<details class="mtips tdadv" data-k="tdday"' + (MTIPS.tdday ? " open" : "") + "><summary>📊 День" + (sm ? ' <span class="muted">· ' + esc(sm) + "</span>" : "") + "</summary>" + l.join("") + "</details>" : "") + (nr ? "" : plan);
+}
+function navSetHTML() {
+return '<section class="card" id="s-navtabs"><h2>Вкладки в разделах</h2><p class="muted" style="margin:0">Под заголовком «Сегодня», «По часам», «Календаря», «Планов» и «Дня за днём» — вкладки для перехода между ними, у «Меню» и «Кухни» — тоже. Боковая панель и «Все разделы» не меняются.</p>' +
+'<div class="r"><label class="f"><span><input type="checkbox" id="opt-navtabs"' + (S.opt.navtabs === 0 ? "" : " checked") + "> Показывать вкладки между близкими разделами</span></label></div></section>";
 }
 function pnSetHTML() {
 return '<section class="card" id="s-pnmode"><h2>Поля в карточке задачи</h2><p class="muted" style="margin:0">«Значками» — срок, проект, приоритет, статус и теги одной строкой: нажмите на значок, чтобы изменить. «Списком» — все поля столбиком, как раньше.</p>' +
@@ -16996,7 +17013,7 @@ h += '<p class="muted" style="margin:8px 0 0;font-size:calc(12px * var(--fs))">�
 h += "</section>";
 var th = LS.get("zd-theme") || "system";
 var hid = hiddenLists();
-h += peopleHTML() + pnSetHTML() + rowSetHTML() + tdSetHTML() + tbSetHTML() + buSetHTML();
+h += peopleHTML() + navSetHTML() + pnSetHTML() + rowSetHTML() + tdSetHTML() + tbSetHTML() + buSetHTML();
 h += '<section class="card" id="s-lists"><h2>Пункты «Списков»</h2><p class="muted" style="margin:0">Снимите галочку, чтобы скрыть пункт из левой панели (в Ctrl+K он останется). «Входящие» видны всегда. Скрыть можно и правым кликом по пункту.</p><div class="lchk">' +
 listsAll().map(function (k) { var on = k === "inbox" || hid.indexOf(k) < 0; return '<button type="button" class="lt' + (on ? " on" : "") + '" data-a="lhide" data-id="' + k + '" role="switch" aria-checked="' + on + '"' + (k === "inbox" ? " disabled" : "") + '><span class="lbox"></span>' + ic(k) + "<span>" + LISTN[k] + "</span></button>"; }).join("") + "</div></section>";
 h += '<section class="card"><h2>Левая панель</h2><p class="muted" style="margin:0">Блоки («Избранное», «Списки», «Проекты», «Фильтры», «Теги», «Служебное») переставляются перетаскиванием за заголовок, пункты «Списков» — перетаскиванием самих пунктов. Порядок синхронизируется между устройствами.</p><div class="r"><button class="btn" type="button" data-a="side-reset">Вернуть исходный порядок</button><button class="btn" type="button" data-a="mini">' + (document.body.classList.contains("mini") ? "Развернуть панель" : "Свернуть панель до иконок") + "</button></div></section>";
@@ -18600,6 +18617,7 @@ touch(f); save(); render(); return;
 if (t.id === "pparent") { var p = proj(ARG); if (p) { if (t.value && pdesc(p.id).indexOf(t.value) >= 0) { toast("Нельзя вложить проект сам в себя"); return; } moveProj(p.id, t.value || null, "in"); toast(t.value ? "Проект вложен в «" + proj(t.value).n + "»" : "Проект на верхнем уровне"); } return; }
 if (t.id === "ai-prov") { var c2 = AI.cfg(); c2.prov = t.value; AI.setCfg(c2); render(); return; }
 if (t.id === "opt-autorem") { S.opt.autoRem = t.checked; optTouch(); save(); return; }
+if (t.id === "opt-navtabs") { if (t.checked) delete S.opt.navtabs; else S.opt.navtabs = 0; optTouch(); save(); render(); return; }
 if (t.id === "opt-pnmode") { if (t.value === "list") S.opt.pnlist = 1; else delete S.opt.pnlist; optTouch(); save(); render(); renderPanel(); return; }
 if (t.id === "opt-rowmode") { if (t.value === "full") S.opt.rowfull = 1; else delete S.opt.rowfull; optTouch(); save(); render(); return; }
 if (t.id === "opt-tdfold") { if (t.checked) delete S.opt.tdfold; else S.opt.tdfold = 0; optTouch(); save(); render(); return; }
