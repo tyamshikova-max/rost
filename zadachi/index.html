@@ -860,7 +860,7 @@ body.mini #panel.full { left: 0 }
 #pomo.break .pt { color: var(--ok) }
 #pomo .pn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: calc(13px * var(--fs)); cursor: pointer }
 #pomo button { border: 1px solid var(--line); background: var(--bg); border-radius: 7px; width: 30px; height: 28px; cursor: pointer; flex: none }
-#ctx { position: fixed; z-index: 70; min-width: 220px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 4px }
+#ctx { position: fixed; z-index: 70; min-width: 220px; max-height: calc(100vh - 12px); max-height: calc(100dvh - 12px); overflow-y: auto; overscroll-behavior: contain; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 4px }
 #ctx button { display: block; width: 100%; text-align: left; border: 0; background: none; border-radius: 7px; padding: 7px 10px; cursor: pointer; font-size: calc(14px * var(--fs)); color: var(--fg) }
 #ctx button:hover { background: var(--hover) }
 #ctx button.warn { color: var(--warn) }
@@ -3401,7 +3401,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-266";
+var APPV = "zd-app-2026-10-16-267";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -13283,6 +13283,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["267", "☰ Меню задачи помещается на экран", ["Контекстное меню задачи (правый клик, долгое нажатие) было длиннее экрана: нижние пункты, включая «Удалить», нельзя было достать. Теперь меню прокручивается, если не помещается, и сделано короче.", "Сверху — частое: «Открыть», дата, «Завершить», «Отложить», приоритет, флажок, проект, теги, подзадача. Редкое — в пункте «Ещё»: помодоро, учёт времени, закрепить, избранное, «Сначала сделать», копирование, дублирование, ссылка. Сочетания клавиш работают как раньше."]],
 ["266", "🗂 Карточка задачи короче", ["В карточке задачи пустые и редко нужные поля («Матрица», «Дедлайн», «Спринт», «Ответственный», «Учёт времени», «Напоминание» и другие) теперь свёрнуты и на большом экране: описание и подзадачи видны сразу, без прокрутки.", "Под полями — строка «Ещё поля: …» с названиями спрятанного; нажмите, чтобы показать всё. Выбор запоминается.", "«Матрица» считается из приоритета, флажка и срока, поэтому тоже лежит в «Ещё поля»."]],
 ["265", "☰ Строка задачи — без лишних значков", ["В списках у задачи теперь видно главное: название, срок, проект, теги, флажок и подзадачи. Энергия, оценка времени, помидоры, комментарии и заметки не загромождают строку — они в карточке задачи.", "На страницах «Спринт» и «План по часам» всё осталось как было. Вернуть прежний вид везде: «Настройки» → «Общие» → «Что показывать в строке задачи» → «Всё, как раньше»."]],
 ["264", "💡 «Сегодня»: советы одной строкой", ["Напоминания над списком — «Завершить день», «Застряли», «Перегруз» — теперь собраны в одну строку «💡 3 совета» под датой. Задачи видны сразу; нажмите на строку, чтобы развернуть советы.", "Вернуть прежний вид: «Настройки» → «Общие» → «Советы в «Сегодня»» → снять галочку."]],
@@ -19472,30 +19473,17 @@ place(m, x, rc.top - 4);
 function taskMenu(t) {
 var t0 = today0(), mon = monday(Date.now()) + 7 * DAY, cur = curSprintId(), nxt = sprintId(addDays(monday(Date.now()), 7));
 var ck = function (on) { return on ? "✓" : ""; };
-return [
-{ c: "open", i: "↗", l: "Открыть", k: "Enter" },
-{ i: "📅", l: "Установить дату и время", sub: [{ c: "d:0", i: "☀", l: "Сегодня", k: "Alt+T" }, { c: "d:eve", i: "🌙", l: "Сегодня вечером", k: "Alt+V" }, { c: "d:1", i: "→", l: "Завтра", k: "Alt+K" }, { c: "d:2", i: "⇉", l: "Послезавтра" }, { c: "d:wknd", i: "🏖", l: "До выходных", k: "Alt+J" }, { c: "d:mon", i: "📆", l: "В понедельник" }, { c: "d:7", i: "⏭", l: "Через неделю" }, { c: "d:month", i: "🗓", l: "Через месяц", k: "Alt+U" }, { c: "d:some", i: "⏳", l: "Когда-нибудь", k: "Alt+O" }, { c: "d:pick", i: "🕑", l: "Выбрать дату и время…" }, "-", { c: "d:none", i: "∅", l: "Без срока", k: "Alt+R" }] },
+var more = [
 { c: "pomo", i: "🍅", l: POMO && POMO.tid === t.id ? "Остановить Помодоро" : "Запустить Помодоро" },
-].concat(t.done ? [] : wkMenuItems(t)).concat([
 { c: "now", i: "◉", l: "Работать сейчас (одна задача на экране)" },
 { c: "track", i: "⏲", l: t.ttOn ? "Остановить учёт времени" : "Засечь время" + (t.tt ? " (учтено " + ttFmt(t.tt) + ")" : "") },
-{ i: "🔋", l: "Энергия", sub: [[1, "🪫 мало сил — простое"], [2, "🔋 средне"], [3, "⚡ много сил — сложное"], [0, "не указано"]].map(function (x) { return { c: "en:" + x[0], i: ck((t.en || 0) === x[0]), l: x[1] }; }) },
-{ i: "❗", l: "Приоритет", sub: [[1, "1 — срочно"], [2, "2 — важно"], [3, "3 — желательно"], [0, "обычный"]].map(function (x) { return { c: "p:" + x[0], i: ck((t.prio || 0) === x[0]), l: x[1], k: "Alt+" + x[0] }; }) },
-{ i: "🏷", l: "Теги", k: "Ctrl+G", sub: tags().map(function (g) { return { c: "t:" + g.n, i: ck((t.tags || []).indexOf(g.n) >= 0), l: tlab(g.n) }; }).concat(["-", { c: "t:+", i: "＋", l: "Новый тег…" }]) },
-{ c: "check", i: "☑", l: "Чек-лист", k: "Ctrl+I" },
-{ i: "💤", l: "Отложить до…", sub: snzMenu(t) },
 { c: "dlg", i: "📨", l: "Поручить через Telegram…" },
-t.done ? { c: "undone", i: "↺", l: "Вернуть в работу" } : { i: "✅", l: "Завершить задачу", sub: [{ c: "done", i: "✓", l: t.rep ? "Завершить (перенести на следующий раз)" : "Завершить", k: "Shift+Пробел" }, { c: "cancel", i: "✕", l: t.rep ? "Отменить этот раз" : "Завершить как отменённую", k: "Alt+−" }, { c: "ftd", i: "★", l: "Завершить на сегодня", k: "Alt+." }, t.rep ? { c: "done-stop", i: "⏹", l: "Завершить и больше не повторять" } : null, { c: "doing", i: "▶", l: t.st === "doing" ? "Снять «В работе»" : "Отметить «В работе»" }].filter(Boolean) },
-{ i: flagIc(flagOf(t)), l: "Флажок", sub: flagMenu(t) },
+"-",
 { c: "pin", i: "📌", l: t.pin ? "Открепить" : "Закрепить наверху списка", k: "Alt+P" },
 { c: "fav", i: t.fav ? "★" : "☆", l: t.fav ? "Убрать из избранного" : "Добавить в избранное", k: "Ctrl+Shift+L" },
-{ i: "✥", l: "Изменить проект", k: "Ctrl+Shift+M", sub: [{ c: "m:", i: ck(!t.pid), l: "📥 Входящие (без проекта)" }].concat(ptree().map(function (x) { return { c: "m:" + x.p.id, i: ck(t.pid === x.p.id), l: picon(x.p) + " " + x.p.n, pad: x.d }; })) },
-psecs(proj(t.pid)).length ? { i: "▤", l: "Секция", sub: [{ c: "sx:~", i: ck(secOf(t, proj(t.pid)) === "~"), l: "Без секции" }].concat(psecs(proj(t.pid)).map(function (x) { return { c: "sx:" + x.id, i: ck(t.sec === x.id), l: x.n }; })) } : null,
-{ i: "🏃", l: "Спринт", sub: [{ c: "s:" + cur, i: ck(t.sprint === cur), l: spLabel(cur) + " · текущий" }, { c: "s:" + nxt, i: ck(t.sprint === nxt), l: spLabel(nxt) + " · следующий" }, { c: "s:", i: ck(!t.sprint), l: "Бэклог (без спринта)" }] },
-{ i: "🎯", l: "Цель", sub: goalMenu(t.goal || "", "g:") },
+"-",
 { c: "dep", i: "⛓", l: "Сначала сделать…" + ((t.after || []).length ? " (" + t.after.length + ")" : "") },
 { c: "wait", i: "⏳", l: t.wait ? "Ответ получен" : "Жду ответа…" },
-{ c: "sub", i: "⊞", l: "Новая подзадача", k: "Alt+Shift+N" },
 t.parent ? { c: "par", i: "↑", l: "Открыть родительскую задачу" } : null,
 "-",
 { c: "cut", i: "✂", l: "Вырезать", k: "Ctrl+X" },
@@ -19505,8 +19493,29 @@ CLIP && task(CLIP.id) ? { c: "paste", i: "📋", l: "Вставить как п�
 { c: "link", i: "🔗", l: "Скопировать ссылку на задачу" },
 { c: "tplsave", i: "⧉", l: "Сохранить как шаблон" },
 "-",
-{ c: "del", i: "🗑", l: "Удалить в корзину", k: "Delete", warn: 1 },
 { c: "help:menu", i: "?", l: "Справка: меню задачи и клавиши" },
+];
+return [
+{ c: "open", i: "↗", l: "Открыть", k: "Enter" },
+{ i: "📅", l: "Установить дату и время", sub: [{ c: "d:0", i: "☀", l: "Сегодня", k: "Alt+T" }, { c: "d:eve", i: "🌙", l: "Сегодня вечером", k: "Alt+V" }, { c: "d:1", i: "→", l: "Завтра", k: "Alt+K" }, { c: "d:2", i: "⇉", l: "Послезавтра" }, { c: "d:wknd", i: "🏖", l: "До выходных", k: "Alt+J" }, { c: "d:mon", i: "📆", l: "В понедельник" }, { c: "d:7", i: "⏭", l: "Через неделю" }, { c: "d:month", i: "🗓", l: "Через месяц", k: "Alt+U" }, { c: "d:some", i: "⏳", l: "Когда-нибудь", k: "Alt+O" }, { c: "d:pick", i: "🕑", l: "Выбрать дату и время…" }, "-", { c: "d:none", i: "∅", l: "Без срока", k: "Alt+R" }] },
+].concat(t.done ? [] : wkMenuItems(t)).concat([
+t.done ? { c: "undone", i: "↺", l: "Вернуть в работу" } : { i: "✅", l: "Завершить задачу", sub: [{ c: "done", i: "✓", l: t.rep ? "Завершить (перенести на следующий раз)" : "Завершить", k: "Shift+Пробел" }, { c: "cancel", i: "✕", l: t.rep ? "Отменить этот раз" : "Завершить как отменённую", k: "Alt+−" }, { c: "ftd", i: "★", l: "Завершить на сегодня", k: "Alt+." }, t.rep ? { c: "done-stop", i: "⏹", l: "Завершить и больше не повторять" } : null, { c: "doing", i: "▶", l: t.st === "doing" ? "Снять «В работе»" : "Отметить «В работе»" }].filter(Boolean) },
+{ i: "💤", l: "Отложить до…", sub: snzMenu(t) },
+{ i: "❗", l: "Приоритет", sub: [[1, "1 — срочно"], [2, "2 — важно"], [3, "3 — желательно"], [0, "обычный"]].map(function (x) { return { c: "p:" + x[0], i: ck((t.prio || 0) === x[0]), l: x[1], k: "Alt+" + x[0] }; }) },
+{ i: flagIc(flagOf(t)), l: "Флажок", sub: flagMenu(t) },
+{ i: "✥", l: "Изменить проект", k: "Ctrl+Shift+M", sub: [{ c: "m:", i: ck(!t.pid), l: "📥 Входящие (без проекта)" }].concat(ptree().map(function (x) { return { c: "m:" + x.p.id, i: ck(t.pid === x.p.id), l: picon(x.p) + " " + x.p.n, pad: x.d }; })) },
+{ i: "🏷", l: "Теги", k: "Ctrl+G", sub: tags().map(function (g) { return { c: "t:" + g.n, i: ck((t.tags || []).indexOf(g.n) >= 0), l: tlab(g.n) }; }).concat(["-", { c: "t:+", i: "＋", l: "Новый тег…" }]) },
+{ c: "sub", i: "⊞", l: "Новая подзадача", k: "Alt+Shift+N" },
+{ c: "check", i: "☑", l: "Чек-лист", k: "Ctrl+I" },
+"-",
+{ i: "🔋", l: "Энергия", sub: [[1, "🪫 мало сил — простое"], [2, "🔋 средне"], [3, "⚡ много сил — сложное"], [0, "не указано"]].map(function (x) { return { c: "en:" + x[0], i: ck((t.en || 0) === x[0]), l: x[1] }; }) },
+psecs(proj(t.pid)).length ? { i: "▤", l: "Секция", sub: [{ c: "sx:~", i: ck(secOf(t, proj(t.pid)) === "~"), l: "Без секции" }].concat(psecs(proj(t.pid)).map(function (x) { return { c: "sx:" + x.id, i: ck(t.sec === x.id), l: x.n }; })) } : null,
+{ i: "🏃", l: "Спринт", sub: [{ c: "s:" + cur, i: ck(t.sprint === cur), l: spLabel(cur) + " · текущий" }, { c: "s:" + nxt, i: ck(t.sprint === nxt), l: spLabel(nxt) + " · следующий" }, { c: "s:", i: ck(!t.sprint), l: "Бэклог (без спринта)" }] },
+{ i: "🎯", l: "Цель", sub: goalMenu(t.goal || "", "g:") },
+"-",
+{ i: "⋯", l: "Ещё: время, закрепить, копирование…", sub: more },
+"-",
+{ c: "del", i: "🗑", l: "Удалить в корзину", k: "Delete", warn: 1 },
 { foot: "Создана " + new Date(t.created || t.upd || Date.now()).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) + (t.upd && t.upd !== t.created ? " · изменена " + new Date(t.upd).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "") }
 ]);
 }
@@ -19693,7 +19702,7 @@ $("ctx").addEventListener("click", ctxClick);
 $("ctx2").addEventListener("click", ctxClick);
 $("ctx").addEventListener("mouseover", function (e) { var sb = e.target.closest("[data-sub]"); if (sb) subShow(sb); else if (e.target.closest("[data-c]")) { $("ctx2").hidden = true; [].forEach.call($("ctx").querySelectorAll("button.open"), function (b) { b.classList.remove("open"); }); } });
 document.addEventListener("mousedown", function (e) { if (!$("ctx").hidden && !e.target.closest("#ctx,#ctx2")) ctxHide(); }, true);
-window.addEventListener("scroll", function (e) { if (!$("ctx").hidden && !(e.target.closest && e.target.closest("#ctx2"))) ctxHide(); }, true);
+window.addEventListener("scroll", function (e) { if ($("ctx").hidden) return; if (e.target.id === "ctx") { $("ctx2").hidden = true; return; } if (!(e.target.closest && e.target.closest("#ctx2"))) ctxHide(); }, true);
 window.addEventListener("resize", ctxHide);
 var PAL = { items: [], i: 0 };
 function palOpen() { $("pal").hidden = false; var q = $("pal-q"); q.value = ""; palBuild(""); q.focus(); }
