@@ -1833,6 +1833,7 @@ html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; backgro
 .mottd { margin: 0 0 12px; display: grid; gap: 8px } .mottdh { display: flex; align-items: center; justify-content: space-between; gap: 8px } .mottdh b { font-size: calc(13px * var(--fs)); color: var(--muted); font-weight: 600 } .mottd .motb { margin-top: 2px }
 .motq { margin: 0; padding: 2px 0 2px 14px; border-left: 3px solid var(--acc); font-family: Georgia, "Times New Roman", serif; font-style: italic; line-height: 1.45 } .motq.big { font-size: calc(17px * var(--fs)) } .motq cite { display: block; margin-top: 4px; font-family: inherit; font-style: normal; font-size: calc(12.5px * var(--fs)); color: var(--muted) }
 .motb { margin-top: 10px; gap: 6px; flex-wrap: wrap } .motl { display: block; margin: 0 0 10px; padding: 6px 10px; border-radius: 8px; background: var(--hover); color: var(--fg); text-decoration: none; font-size: calc(13px * var(--fs)); line-height: 1.4 } .motl span { font-family: Georgia, "Times New Roman", serif; font-style: italic } .motl i { color: var(--muted); font-style: normal }
+.tdadv > summary { font-weight: 500; font-size: calc(13px * var(--fs)); padding: 7px 0 } .tdadv > summary .muted { font-weight: 400 }
 .mothd { display: flex; align-items: flex-start; gap: 6px; margin: 0 0 10px; min-width: 0 } .mothq { flex: 1; min-width: 0; padding: 4px 0; border: 0; background: none; text-align: left; font: inherit; font-size: calc(13px * var(--fs)); line-height: 1.4; color: var(--muted); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis } .mothq span { font-family: Georgia, "Times New Roman", serif; font-style: italic } .mothq i { font-style: normal } .mothq.mothqx { white-space: normal } .mothb { display: flex; flex: none; gap: 2px }
 .motcur, .motset, .motadd { margin: 0 0 12px; display: grid; gap: 10px } .motset .r { gap: 6px; flex-wrap: wrap; align-items: center } .motset .r > b { min-width: 90px } .motadd .r { gap: 8px } .motadd .r .inp { flex: 1; min-width: 0 }
 .motr { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line) } .motr.hid > span:first-child { opacity: .45; text-decoration: line-through } .motra { display: flex; gap: 2px; flex: none } .motcat { margin: 0 0 6px } .motcat summary { cursor: pointer; padding: 4px 0 }
@@ -3400,7 +3401,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-263";
+var APPV = "zd-app-2026-10-16-264";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -4696,7 +4697,7 @@ return (NDBP && !rd ? nDbPropPanel() : "") + '<div class="npage' + (side ? " has
 function noteDel(n) { n.del = 1; n.delAt = Date.now(); touch(n); save(); var back = n.sec && nsec(n.sec) ? "nsec-" + n.sec : "notes"; go(back); toastUndo("Заметка удалена", function () { delete n.del; delete n.delAt; touch(n); save(); render(); }); }
 function vWaiting() { return std("Жду ответа", "Задачи, переданные кому-то. В день «спросить» задача появится в «Сегодня» — напомнить о себе. Пометить задачу: меню задачи → «⏳ Жду ответа…» или строка «Жду ответа» в карточке.", waitList(), { empty: "Ничего не ждёте — хорошо. Когда отдадите задачу кому-то, отметьте её «⏳ Жду ответа».", scope: function (t) { return !!t.wait; } }); }
 function vSomeday() { return std("Когда-нибудь", "Идеи и дела «не сейчас». Они не попадают во «Входящие» и «Сегодня», пока вы не назначите им дату.", somedayList(), { empty: "Пусто. Отправить задачу сюда — меню задачи → «Установить дату» → «Когда-нибудь» (Alt+O).", scope: isSome }); }
-function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: motHeadHTML() + motTodayHTML() + remFiredHTML() + snzBackHTML() + tipsFold((mobNarrow() ? todayBars() : []).concat([tbNowHTML(), wrBanner(), apHTML(), todayLoadHTML(), aiBox(), todayPlanBox()]), "today", "Подсказки дня"), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
+function vToday() { var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return std("Сегодня", d.charAt(0).toUpperCase() + d.slice(1), todayList(), { pre: motHeadHTML() + motTodayHTML() + todayAdviceHTML() + remFiredHTML() + snzBackHTML() + tipsFold((mobNarrow() && !tdFoldOn() ? todayBars() : []).concat([tbNowHTML(), wrBanner(), apHTML(), todayLoadHTML(), aiBox(), todayPlanBox()]), "today", "Подсказки дня"), empty: "На сегодня задач нет. Добавьте новую или загляните в «Планы».", scope: function (t) { return t.at && t.at < today0() + DAY; } }); }
 var PDAY = 0, PFROM = 0;
 function pFrom() { if (!PFROM) PFROM = monday(Date.now()); return PFROM; }
 function onDay(t, d0) { return (t.at && sod(t.at) === d0) || (t.due && sod(t.due) === d0) || spanIn(t, d0); }
@@ -13281,6 +13282,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["264", "💡 «Сегодня»: советы одной строкой", ["Напоминания над списком — «Завершить день», «Застряли», «Перегруз» — теперь собраны в одну строку «💡 3 совета» под датой. Задачи видны сразу; нажмите на строку, чтобы развернуть советы.", "Вернуть прежний вид: «Настройки» → «Общие» → «Советы в «Сегодня»» → снять галочку."]],
 ["263", "✨ Мысль дня — одной строкой под датой", ["В «Сегодня» и на главной мысль дня теперь не большая карточка, а одна строка под датой: не занимает место, но всегда на виду. Нажмите на текст — мысль раскроется целиком.", "Кнопки ♡ ↻ ✕ — справа от строки. Прежний вид вернуть можно: «✨ Мотивация» → «▭ Карточкой вместо строки»."]],
 ["238", "Заметки: создать по-разному, загрузить из файла, фильтр по разделу", ["«+» в панели «Знаний» — меню: пустая заметка, карта мыслей, холст, из шаблона, заметка из файла, карта мыслей из файла. То же — в «📋 Из шаблона ▾» в разделе.", "📂 в любой открытой заметке — загрузить из файла: Markdown, HTML или текст встают с оформлением (заголовки, списки, галочки, таблицы, ссылки); в пустую — вместо текста, в заполненную — в конец (прежний вариант — в истории страницы). В карте мыслей: пустая заполняется из файла (XMind, OPML, FreeMind, Markdown, HTML), в непустую файл встаёт веткой — под выбранный узел.", "В списке всех заметок — фильтр «Раздел»: любая папка (вместе с вложенными) или «без раздела», рядом с фильтрами «Тип» и «Статус».", "Теги в панели «Знаний» — свёрнутой строкой «◆ Теги · N»: развёрнуто — 8 самых используемых и «Все теги →» (страница с поиском и облаком тегов). Поле «Теги» в заметке подсказывает существующие теги."]],
 ["262", "💳 Платёж сделан — остаток долга меняется сам", ["За 2 дня до числа платежа по долгу появляется задача «💳 Платёж по долгу …» (если платежа нет в «Регулярных платежах» — там своя задача, и она тоже работает).", "Отметили задачу ✓ — остаток уменьшается: прежний + проценты за месяц − платёж; «Отменить» или снятая отметка — запись убирается.", "Задачи досрочных взносов из плана и «Отложить» из накоплений при отметке тоже записывают остатки и пополнения целей."]],
@@ -13438,7 +13440,7 @@ function navBars() {
 var h = "", D = appDef();
 try {
 h += hzBars();
-if (V === "today" && !mobNarrow()) h += todayBars().join("");
+if (V === "today" && !mobNarrow() && !tdFoldOn()) h += todayBars().join("");
 } catch (e) { /* крошки не мешают */ }
 return h;
 }
@@ -13450,6 +13452,17 @@ var l = parts.filter(function (x) { return x && String(x).trim(); }); if (!l.len
 return '<details class="mtips" data-k="' + key + '"' + (MTIPS[key] ? " open" : "") + "><summary>💡 " + name + ' <span class="muted">· ' + l.length + "</span></summary>" + l.join("") + "</details>";
 }
 document.addEventListener("toggle", function (e) { var d = e.target; if (d && d.classList && d.classList.contains("mtips")) MTIPS[d.dataset.k] = d.open; }, true);
+function tdFoldOn() { return S.opt.tdfold !== 0; }
+function todayAdviceHTML() {
+if (!tdFoldOn()) return "";
+var l = todayBars().filter(function (x) { return x && String(x).trim(); }); if (!l.length) return "";
+var nm = l.map(function (x) { var m = /<b>([^<]*)<\/b>/.exec(x); return m ? m[1] : ""; }).filter(Boolean);
+return '<details class="mtips tdadv" data-k="tdadv"' + (MTIPS.tdadv ? " open" : "") + "><summary>💡 " + l.length + " " + plural(l.length, ["совет", "совета", "советов"]) + (nm.length ? ' <span class="muted">· ' + esc(nm.join(" · ")) + "</span>" : "") + "</summary>" + l.join("") + "</details>";
+}
+function tdSetHTML() {
+return '<section class="card" id="s-tdadv"><h2>Советы в «Сегодня»</h2><p class="muted" style="margin:0">Напоминания над списком — «Завершить день», застрявшие задачи, перегруз — собраны в одну строку «💡 Советы»: нажмите на неё, чтобы развернуть. Снимите галочку, чтобы они всегда показывались целиком.</p>' +
+'<div class="r"><label class="f"><span><input type="checkbox" id="opt-tdfold"' + (tdFoldOn() ? " checked" : "") + "> Сворачивать советы в одну строку</span></label></div></section>";
+}
 function dayQuota() {
 var hq = +S.opt.dayq || 0, nq = +S.opt.dayn || 0; if (!hq && !nq) return null;
 var l = todayList(), hs = l.reduce(function (a, t) { return a + tHours(t); }, 0);
@@ -16954,7 +16967,7 @@ h += '<p class="muted" style="margin:8px 0 0;font-size:calc(12px * var(--fs))">�
 h += "</section>";
 var th = LS.get("zd-theme") || "system";
 var hid = hiddenLists();
-h += peopleHTML() + tbSetHTML() + buSetHTML();
+h += peopleHTML() + tdSetHTML() + tbSetHTML() + buSetHTML();
 h += '<section class="card" id="s-lists"><h2>Пункты «Списков»</h2><p class="muted" style="margin:0">Снимите галочку, чтобы скрыть пункт из левой панели (в Ctrl+K он останется). «Входящие» видны всегда. Скрыть можно и правым кликом по пункту.</p><div class="lchk">' +
 listsAll().map(function (k) { var on = k === "inbox" || hid.indexOf(k) < 0; return '<button type="button" class="lt' + (on ? " on" : "") + '" data-a="lhide" data-id="' + k + '" role="switch" aria-checked="' + on + '"' + (k === "inbox" ? " disabled" : "") + '><span class="lbox"></span>' + ic(k) + "<span>" + LISTN[k] + "</span></button>"; }).join("") + "</div></section>";
 h += '<section class="card"><h2>Левая панель</h2><p class="muted" style="margin:0">Блоки («Избранное», «Списки», «Проекты», «Фильтры», «Теги», «Служебное») переставляются перетаскиванием за заголовок, пункты «Списков» — перетаскиванием самих пунктов. Порядок синхронизируется между устройствами.</p><div class="r"><button class="btn" type="button" data-a="side-reset">Вернуть исходный порядок</button><button class="btn" type="button" data-a="mini">' + (document.body.classList.contains("mini") ? "Развернуть панель" : "Свернуть панель до иконок") + "</button></div></section>";
@@ -18558,6 +18571,7 @@ touch(f); save(); render(); return;
 if (t.id === "pparent") { var p = proj(ARG); if (p) { if (t.value && pdesc(p.id).indexOf(t.value) >= 0) { toast("Нельзя вложить проект сам в себя"); return; } moveProj(p.id, t.value || null, "in"); toast(t.value ? "Проект вложен в «" + proj(t.value).n + "»" : "Проект на верхнем уровне"); } return; }
 if (t.id === "ai-prov") { var c2 = AI.cfg(); c2.prov = t.value; AI.setCfg(c2); render(); return; }
 if (t.id === "opt-autorem") { S.opt.autoRem = t.checked; optTouch(); save(); return; }
+if (t.id === "opt-tdfold") { if (t.checked) delete S.opt.tdfold; else S.opt.tdfold = 0; optTouch(); save(); render(); return; }
 if (t.id === "opt-hour") { S.opt.allDayHour = +t.value; optTouch(); save(); return; }
 if (t.id === "imp") { if (t.files[0]) { IMPF = t.files[0]; CONF = "import"; render(); } t.value = ""; }
 });
