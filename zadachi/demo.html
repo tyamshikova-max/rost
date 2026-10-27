@@ -8540,7 +8540,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-265";
+var APPV = "zd-app-2026-10-16-266";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -18422,6 +18422,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["266", "🗂 Карточка задачи короче", ["В карточке задачи пустые и редко нужные поля («Матрица», «Дедлайн», «Спринт», «Ответственный», «Учёт времени», «Напоминание» и другие) теперь свёрнуты и на большом экране: описание и подзадачи видны сразу, без прокрутки.", "Под полями — строка «Ещё поля: …» с названиями спрятанного; нажмите, чтобы показать всё. Выбор запоминается.", "«Матрица» считается из приоритета, флажка и срока, поэтому тоже лежит в «Ещё поля»."]],
 ["265", "☰ Строка задачи — без лишних значков", ["В списках у задачи теперь видно главное: название, срок, проект, теги, флажок и подзадачи. Энергия, оценка времени, помидоры, комментарии и заметки не загромождают строку — они в карточке задачи.", "На страницах «Спринт» и «План по часам» всё осталось как было. Вернуть прежний вид везде: «Настройки» → «Общие» → «Что показывать в строке задачи» → «Всё, как раньше»."]],
 ["264", "💡 «Сегодня»: советы одной строкой", ["Напоминания над списком — «Завершить день», «Застряли», «Перегруз» — теперь собраны в одну строку «💡 3 совета» под датой. Задачи видны сразу; нажмите на строку, чтобы развернуть советы.", "Вернуть прежний вид: «Настройки» → «Общие» → «Советы в «Сегодня»» → снять галочку."]],
 ["263", "✨ Мысль дня — одной строкой под датой", ["В «Сегодня» и на главной мысль дня теперь не большая карточка, а одна строка под датой: не занимает место, но всегда на виду. Нажмите на текст — мысль раскроется целиком.", "Кнопки ♡ ↻ ✕ — справа от строки. Прежний вид вернуть можно: «✨ Мотивация» → «▭ Карточкой вместо строки»."]],
@@ -23829,7 +23830,7 @@ var PNROW = { "Ответственный": "resp", "Срок": "due", "Неск
 var PNSEC = ["props", "desc", "subs", "chat"], PDR = null;
 function pnOrder(keys, saved, def) { var out = saved.filter(function (k) { return keys.indexOf(k) >= 0; }); keys.forEach(function (k) { if (out.indexOf(k) >= 0) return; var di = def.indexOf(k), at = 0; for (var j = di - 1; j >= 0; j--) { var pi = out.indexOf(def[j]); if (pi >= 0) { at = pi + 1; break; } } out.splice(at, 0, k); }); return out; }
 function pnMerge(domKeys, saved, def) { var full = pnOrder(def.slice(), saved, def), i = 0; return full.map(function (k) { return domKeys.indexOf(k) >= 0 ? domKeys[i++] : k; }); }
-function pmoreTxt(pr) { var n = pr ? pr.querySelectorAll(".prow.pmore").length : 0; return pr && pr.classList.contains("pcol") ? "Ещё поля (" + n + ") ▾" : "Скрыть пустые поля ▴"; }
+function pmoreTxt(pr) { var rw = pr ? [].slice.call(pr.querySelectorAll(".prow.pmore")) : [], n = rw.length, nm = rw.map(function (r) { return r.firstElementChild.textContent.replace("⋮⋮", "").trim().toLowerCase(); }).filter(Boolean); return pr && pr.classList.contains("pcol") ? "Ещё поля: " + nm.slice(0, 4).join(", ") + (n > 4 ? " и ещё " + (n - 4) : "") + " ▾" : "Скрыть пустые поля ▴"; }
 function pnFire(a) { var b = document.createElement("button"); b.type = "button"; b.hidden = true; b.dataset.p = a; var P = $("panel"); P.appendChild(b); b.click(); b.remove(); }
 function fireA(a) { var b = document.createElement("button"); b.type = "button"; b.hidden = true; b.dataset.a = a; document.body.appendChild(b); b.click(); b.remove(); }
 function pnLayout(P) {
@@ -23841,9 +23842,9 @@ rows.forEach(function (r) { var w = document.createElement("div"); w.className =
 var defR = Object.keys(PNROW).map(function (x) { return PNROW[x]; });
 pnOrder(rows.map(function (r) { return r.k; }), S.opt.pnRows || [], defR).forEach(function (k) { var r = rows.filter(function (x) { return x.k === k; })[0]; if (r) pr.appendChild(r.w); });
 pr.dataset.sec = "props"; pr.insertAdjacentHTML("afterbegin", '<span class="sgrip psg" title="Перетащите, чтобы переставить блок свойств">⋮⋮</span>');
-var tq = task(OPEN), emp = tq ? { span: !tq.till, resp: !tq.resp, deadline: !tq.due, sec: !tq.sec, sprint: !tq.sprint && !tq.est, status: tq.st !== "doing", track: !tq.tt && !tq.ttOn, parent: !tq.parent, rem: !tq.rem, after: !(tq.after || []).length, wait: !tq.wait } : {}, nm = 0;
+var tq = task(OPEN), emp = tq ? { mx: true /* считается из приоритета, флажка и срока — отдельно задавать нужно редко */, span: !tq.till, resp: !tq.resp, deadline: !tq.due, sec: !tq.sec, sprint: !tq.sprint && !tq.est, status: tq.st !== "doing", track: !tq.tt && !tq.ttOn, parent: !tq.parent, rem: !tq.rem, after: !(tq.after || []).length, wait: !tq.wait } : {}, nm = 0;
 rows.forEach(function (r) { if (emp[r.k]) { r.w.classList.add("pmore"); nm++; } });
-if (nm) { var pmo = LS.get("zd-pnmore"); if (pmo === "0" || (pmo !== "1" && innerWidth <= 860)) pr.classList.add("pcol"); pr.insertAdjacentHTML("beforeend", '<button type="button" class="pmoreb" data-p="pmore">' + pmoreTxt(pr) + "</button>"); }
+if (nm) { var pmo = LS.get("zd-pnmore"); if (pmo !== "1") pr.classList.add("pcol"); pr.insertAdjacentHTML("beforeend", '<button type="button" class="pmoreb" data-p="pmore">' + pmoreTxt(pr) + "</button>"); }
 }
 var secs = pr ? [pr] : [];
 [].forEach.call(inn.querySelectorAll(":scope > .pn-sec"), function (x) { var k = x.classList.contains("pn-subs") ? "subs" : x.classList.contains("pn-files") ? "files" : x.classList.contains("pn-notes") ? "notes" : x.classList.contains("pn-chat") ? "chat" : "desc"; x.dataset.sec = k; secs.push(x); var h3 = x.querySelector("h3"); if (h3) h3.insertAdjacentHTML("afterbegin", '<span class="sgrip" title="Перетащите, чтобы переставить блок">⋮⋮</span>'); });
