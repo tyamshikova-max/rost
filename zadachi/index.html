@@ -2725,6 +2725,23 @@ var FOCUS = LS.get("zd-focus") || "", FSC = null;
 function focusSet() { if (!FOCUS) return null; var k = FOCUS + "|" + S.projects.length + "|" + S.at; if (FSC && FSC.k === k) return FSC.s; var st = {}; if (/^sp:/.test(FOCUS)) st = spcFocusSet(FOCUS.slice(3)); else pdesc(FOCUS).forEach(function (id) { st[id] = 1; }); FSC = { k: k, s: st }; return st; }
 function tasks() { return memo("tasks|" + today0() + "|" + SHOWARCH + "|" + FOCUS + "|" + CTXF + "|" + ENF, function () { var a = SHOWARCH ? null : archIds(), l = live(S.tasks), fs = focusSet(), sz0 = today0(); l = l.filter(function (t) { return t.done || !t.snz || t.snz <= sz0; }); if (a) l = l.filter(function (t) { return !a[t.pid]; }); if (fs) l = l.filter(function (t) { return fsHas(fs, t); }); if (CTXF) l = l.filter(function (t) { var c = (t.tags || []).filter(isCtx); return !c.length || c.indexOf(CTXF) >= 0; }); if (ENF) l = l.filter(function (t) { return t.done || !t.en || t.en <= ENF; }); return l; }).slice(); }
 function fsHas(fs, t) { return !!(fs[t.pid] || (fs.__g && t.goal && fs.__g[t.goal]) || (fs.__t && (t.tags || []).some(function (g) { return fs.__t[g]; }))); }
+function tasksF() { var fs = focusSet(); return fs ? live(S.tasks).filter(function (t) { return fsHas(fs, t); }) : live(S.tasks); }
+function focTask(t) { var fs = focusSet(); return !fs || (!!t && fsHas(fs, t)); }
+function actsF() { var fs = focusSet(); return fs ? live(S.acts).filter(function (a) { var t = a.t ? taskAnyId(a.t) : null; return !!t && fsHas(fs, t); }) : live(S.acts); }
+function doneEventsF() { var fs = focusSet(), ev = doneEvents(); return fs ? ev.filter(function (e) { var t = taskAnyId(e.t); return !!t && fsHas(fs, t); }) : ev; }
+function spFocK() { var k = /^sp:/.test(FOCUS) ? FOCUS.slice(3) : ""; return k && spcGet(k) ? k : ""; }
+function noteSetF() {
+var k = spFocK(); if (!k) return null;
+return memo("nsetf|" + FOCUS, function () {
+var c = spcGet(k), fs = focusSet(), o = {}, tg = {}, add = function (id) { if (o[id]) return; o[id] = 1; nKids(id).forEach(function (x) { add(x.id); }); };
+(c.items || []).forEach(function (it) { if (it.t === "n" && note(it.id)) add(it.id); if (it.t === "tag") tg[it.id] = 1; });
+notes().forEach(function (n) { if (n.sp === k || (n.tasks || []).some(function (id) { var t = task(id); return t && fsHas(fs, t); }) || (c.tagm && (n.tags || []).some(function (g) { return tg[g]; }))) add(n.id); });
+return o;
+});
+}
+function notesF() { var s = noteSetF(); return s ? notes().filter(function (n) { return s[n.id]; }) : notes(); }
+function goalsF() { var k = spFocK(); if (!k) return goals(); var g = focusSet().__g || {}; return goals().filter(function (x) { return g[x.id]; }); }
+function habitsF() { var k = spFocK(); if (!k) return habits(); var hs = spcGet(k).habs || []; return habits().filter(function (h) { return h.sp === k || hs.indexOf(h.id) >= 0; }); }
 function setFocus(id) { FOCUS = id || ""; FSC = null; if (FOCUS) LS.set("zd-focus", FOCUS); else LS.del("zd-focus"); render(); toast(FOCUS ? "🎯 Фокус: «" + (/^sp:/.test(FOCUS) ? spcName(FOCUS.slice(3)) : (proj(FOCUS) || {}).n) + "» — видны только его задачи" : "Фокус снят — видны все задачи"); }
 function task(id) {
 if (!id) return null;
@@ -3002,7 +3019,7 @@ function nSort(a, b) { return (a.ord || 0) - (b.ord || 0) || ((a.t || "").toLowe
 function nKids(id) { return memo("nkids", function () { var o = {}; notes().forEach(function (x) { if (x.parent && x.parent !== x.id && note(x.parent)) (o[x.parent] = o[x.parent] || []).push(x); }); Object.keys(o).forEach(function (k) { o[k].sort(nSort); }); return o; })[id] || []; }
 function nDesc(id) { var out = [id], i = 0; while (i < out.length && i < 3000) { nKids(out[i++]).forEach(function (x) { if (out.indexOf(x.id) < 0) out.push(x.id); }); } return out; }
 function nPath(n) { var a = [], g = 0, x = nParent(n); while (x && g++ < 40) { a.unshift(x); x = nParent(x); } return a; }
-function nRoots(sec) { return notes().filter(function (x) { return (x.sec || "") === (sec || "") && !nParent(x); }).sort(nSort); }
+function nRoots(sec) { return notesF().filter(function (x) { return (x.sec || "") === (sec || "") && !nParent(x); }).sort(nSort); }
 function nSetSec(n, sec) { nDesc(n.id).forEach(function (id) { var x = note(id); if (x && (x.sec || "") !== (sec || "")) { x.sec = sec || ""; touch(x); } }); }
 function nMoveInto(n, par) { if (!n || !par || nDesc(n.id).indexOf(par.id) >= 0) return false; n.parent = par.id; touch(n); nSetSec(n, par.sec || ""); return true; }
 function nOpen() { try { var a = JSON.parse(LS.get("zd-nopen") || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
@@ -3162,7 +3179,8 @@ ctxShow(rc.left, rc.bottom + 4, [{ c: "~", i: nParent(n) ? "" : "✓", l: "— �
 }
 return false;
 }
-function newNote(o) { var n = touch({ id: uid(), t: (o && o.t) || "", body: "", sec: (o && o.sec) || "", tags: (o && o.tags) || [], tasks: (o && o.tasks) || [], created: Date.now() }); S.notes.push(n); return n; }
+function newNote(o) { var n = newNote0(o); if (spFocK()) { n.sp = spFocK(); touch(n); } return n; }
+function newNote0(o) { var n = touch({ id: uid(), t: (o && o.t) || "", body: "", sec: (o && o.sec) || "", tags: (o && o.tags) || [], tasks: (o && o.tasks) || [], created: Date.now() }); S.notes.push(n); return n; }
 function filters() { return live(S.filters).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0); }); }
 function filt(id) { return id ? filters().filter(function (f) { return f.id === id; })[0] || null : null; }
 function monday(ms) { var d = new Date(ms); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.getTime(); }
@@ -3380,7 +3398,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-257";
+var APPV = "zd-app-2026-10-16-258";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -4087,7 +4105,7 @@ health: function () { return itemHTML("smart", "health", "health", '<span class=
 people: function () { var t0 = today0(), n = nOfTpl("person").filter(function (x) { var c = pContactDue(x), b = (x.pr || {}).bday ? nextBday(x.pr.bday) : 0; return (c && c <= t0) || (b && b - t0 <= 7 * DAY); }).length; return itemHTML("smart", "people", "people", '<span class="pic">👥</span>', "Люди", n || 0, { drag: true }); },
 docs: function () { return itemHTML("smart", "docs", "docs", '<span class="pic">📑</span>', "Документы", 0, { drag: true }); },
 waiting: function () { var wl = waitList(), due = wl.filter(function (t) { return t.wait.ask && t.wait.ask < today0() + DAY; }).length; return itemHTML("smart", "waiting", "waiting", ic("wait"), "Жду ответа", wl.length ? wl.length + (due ? '</span><span class="n od" title="Пора спросить: ' + due + '">' + due : "") : 0, { drag: true }); },
-goals: function () { return itemHTML("smart", "goals", "goals", ic("goal"), "Цели", goals().filter(function (g) { return (g.st || "active") === "active"; }).length, { drag: true }); },
+goals: function () { return itemHTML("smart", "goals", "goals", ic("goal"), "Цели", goalsF().filter(function (g) { return (g.st || "active") === "active"; }).length, { drag: true }); },
 menu: function () { return itemHTML("smart", "menu", "menu", ic("food"), "Меню", 0, { drag: true }); },
 budget: function () { return itemHTML("smart", "budget", "budget", ic("budget"), "Бюджет", 0, {}); },
 clean: function () { var cn = cOpt().on ? cPlanFor(today0()).on.length : 0; return itemHTML("smart", "clean", "clean", ic("clean"), "План уборки", cn, {}); },
@@ -4615,7 +4633,7 @@ var sx = V === "nsec" ? nsec(ARG) : null, tg = V === "ntag" ? ntagObj(ARG) || nT
 if (V === "nsec" && !sx) return head("Раздел не найден", '<a href="#notes">Все заметки</a>');
 if (V === "ntag" && !tg) return head("Тег не найден", '<a href="#notes">Все заметки</a>');
 var ids = sx ? nsDesc(sx.id) : null, q = NQ.trim().toLowerCase();
-var l = notes().filter(function (n) { return (!ids || ids.indexOf(n.sec) >= 0) && (!tg || nTagHas(n, tg.n)) && (!q || (n.t + " " + noteText(n)).toLowerCase().indexOf(q) >= 0) && nFltOk(n) && (!sx || q || nFltOn() || !nParent(n) || ids.indexOf(nParent(n).sec) < 0); }).sort(function (a, b) { return (b.upd || 0) - (a.upd || 0); });
+var l = notesF().filter(function (n) { return (!ids || ids.indexOf(n.sec) >= 0) && (!tg || nTagHas(n, tg.n)) && (!q || (n.t + " " + noteText(n)).toLowerCase().indexOf(q) >= 0) && nFltOk(n) && (!sx || q || nFltOn() || !nParent(n) || ids.indexOf(nParent(n).sec) < 0); }).sort(function (a, b) { return (b.upd || 0) - (a.upd || 0); });
 var h = "";
 if (sx) {
 var path = nsPath(sx).slice(0, -1), rn = RNX && RNX.k === "nsec" && RNX.id === sx.id;
@@ -4798,7 +4816,7 @@ if (!ENF) return ""; var hid = live(S.tasks).filter(function (t) { return !t.don
 return '<div class="modebar foc enbar"><b>' + ["", "🪫", "🔋", "⚡"][ENF] + ' Сколько сил: ' + ENN[ENF].replace(/^\S+\s/, "") + "</b><span>" + (hid ? "скрыто задач тяжелее: " + hid : "ничего не скрыто") + ' — задачи без отметки сил видны всегда</span><span class="r"><button type="button" class="btn sm" data-a="enfoff">Показать все задачи</button></span></div>';
 }
 function focusBar() { return enBar() + focusBar0(); }
-function focusBar0() { if (!FOCUS) return ""; if (/^sp:/.test(FOCUS)) { var fsk = FOCUS.slice(3); if (!SPZ[fsk]) { FOCUS = ""; LS.del("zd-focus"); return ""; } var fsc = spcGet(fsk); return '<div class="modebar foc"><b>' + (fsc && fsc.autof ? "🔒 " + esc(spcName(fsk)) : "🎯 Фокус") + "</b><span>" + (fsc && fsc.autof ? "показано только это пространство — списки, поиск и календарь; на Главной фокус снимется сам" : "пространство «" + esc(spcName(fsk)) + "» — в списках, поиске и календаре видны только задачи его проектов и целей") + '</span><span class="r"><a class="btn sm" href="#' + spzHref(fsk) + '">Открыть пространство</a><button type="button" class="btn sm" data-a="focus-off">Выйти из фокуса</button></span></div>'; } var p = proj(FOCUS); if (!p) { FOCUS = ""; LS.del("zd-focus"); return ""; } return '<div class="modebar foc"><b>🎯 Фокус</b><span>«' + esc(p.n) + '» — в списках, поиске и календаре видны только его задачи</span><span class="r"><a class="btn sm" href="#proj-' + p.id + '">Открыть проект</a><button type="button" class="btn sm" data-a="focus-off">Выйти из фокуса</button></span></div>'; }
+function focusBar0() { if (!FOCUS) return ""; if (/^sp:/.test(FOCUS)) { var fsk = FOCUS.slice(3); if (!SPZ[fsk]) { FOCUS = ""; LS.del("zd-focus"); return ""; } var fsc = spcGet(fsk), fau = fsc && (fsc.autof || fsc.iso); if (fsc && fsc.iso) return '<div class="modebar foc"><b>🔒 ' + esc(spcName(fsk)) + "</b><span>показано только это пространство — задачи, аналитика, заметки, цели, привычки</span><span class=\"r\"><a class=\"btn sm\" href=\"#" + spzHref(fsk) + '">Открыть пространство</a><a class="btn sm" href="#home">Выйти на Главную</a></span></div>'; return '<div class="modebar foc"><b>' + (fau ? "🔒 " + esc(spcName(fsk)) : "🎯 Фокус") + "</b><span>" + (fau ? "показано только это пространство — списки, поиск и календарь; на Главной фокус снимется сам" : "пространство «" + esc(spcName(fsk)) + "» — в списках, поиске и календаре видны только задачи его проектов и целей") + '</span><span class="r"><a class="btn sm" href="#' + spzHref(fsk) + '">Открыть пространство</a><button type="button" class="btn sm" data-a="focus-off">Выйти из фокуса</button></span></div>'; } var p = proj(FOCUS); if (!p) { FOCUS = ""; LS.del("zd-focus"); return ""; } return '<div class="modebar foc"><b>🎯 Фокус</b><span>«' + esc(p.n) + '» — в списках, поиске и календаре видны только его задачи</span><span class="r"><a class="btn sm" href="#proj-' + p.id + '">Открыть проект</a><button type="button" class="btn sm" data-a="focus-off">Выйти из фокуса</button></span></div>'; }
 function vProjIn(p) {
 var vo = vopt(), ids = vo.sub ? pdesc(p.id) : [p.id];
 var l = tasks().filter(function (t) { return ids.indexOf(t.pid) >= 0 && !t.done; });
@@ -5564,9 +5582,9 @@ function gBar(g, pr) { return '<div class="gpbar"><i style="width:' + pr.pct + "
 function gDue(g) { if (!g.due) return ""; var dl = dleft(g.due); return '<span class="gdue ' + dl.c + '">' + (g.st === "done" ? "срок был " + dayName(g.due).toLowerCase() : "⏳ " + dl.t + " · " + esc(dayName(g.due).toLowerCase())) + "</span>"; }
 function goalChip(g) { if (!g) return ""; var pr = goalProg(g); return '<a class="gchip" href="#goal-' + g.id + '" title="Цель: ' + esc(g.n) + '" style="--gc:' + col(g.c || 0) + '">' + (g.ic || "🎯") + " " + esc(g.n) + " · " + pr.pct + "%</a>"; }
 function goalMenu(cur, pre) { return [{ c: pre + "", i: cur ? "" : "✓", l: "— без цели —" }].concat(goals().filter(function (g) { return (g.st || "active") === "active" || g.id === cur; }).map(function (g) { return { c: pre + g.id, i: g.ic || "🎯", l: g.n, k: cur === g.id ? "✓" : "" }; })).concat(["-", { c: pre + "__new", i: "＋", l: "Новая цель…" }]); }
-function goalCreate(name) { var mx = goals().reduce(function (a, x) { return Math.max(a, x.ord || 0); }, -1); var g = touch({ id: uid(), n: name.slice(0, 120), ic: "🎯", c: Math.floor(Math.random() * COLORS.length), st: "active", ord: mx + 1, created: Date.now(), desc: "", log: [] }); S.goals.push(g); save(); return g; }
+function goalCreate(name) { var mx = goals().reduce(function (a, x) { return Math.max(a, x.ord || 0); }, -1); var g = touch({ id: uid(), n: name.slice(0, 120), ic: "🎯", c: Math.floor(Math.random() * COLORS.length), st: "active", ord: mx + 1, created: Date.now(), desc: "", log: [] }); S.goals.push(g); var gk = spFocK(); if (gk) { spcSave(function (d) { var c = d.l.filter(function (x) { return x.id === gk; })[0]; if (c) c.items = (c.items || []).concat({ t: "g", id: g.id }); }); FSC = null; } save(); return g; }
 function vGoals() {
-var all = goals(), h = head("Цели", "Большие результаты, к которым ведут проекты и задачи. Привяжите к цели проекты (правая кнопка по проекту → «🎯 Цель») или отдельные задачи — прогресс посчитается сам.");
+var all = goalsF(), h = head("Цели", "Большие результаты, к которым ведут проекты и задачи. Привяжите к цели проекты (правая кнопка по проекту → «🎯 Цель») или отдельные задачи — прогресс посчитается сам.");
 h += '<div class="htabs">' + Object.keys(GST).map(function (k) { var n = all.filter(function (g) { return (g.st || "active") === k; }).length; return k !== "active" && !n ? "" : '<button type="button" class="tb' + (GTAB === k ? " on" : "") + '" data-a="gtab" data-x="' + k + '">' + GST[k] + ' <span class="c">' + n + "</span></button>"; }).join("") + "</div>";
 if (GTAB === "active" && gjGoals().length) { var gm = gjMissing().length; h += '<div class="r" style="margin:0 0 10px"><a class="btn sm' + (gm && [5, 6, 0, 1].indexOf(new Date().getDay()) >= 0 ? " pri" : "") + '" href="#goaljr">📔 Дневник целей недели</a>' + (gm ? '<span class="muted">без записи на этой неделе: ' + gm + "</span>" : '<span class="okc">✓ все цели с записью</span>') + "</div>"; }
 if (GTAB === "active") h += pavHTML("goal", { hideEmpty: true });
@@ -6268,7 +6286,7 @@ HMICO.map(function (g) { return '<div class="hicg"><span class="muted">' + g[0] 
 "</aside>";
 }
 function vHabits() {
-var all = habits(), act = all.filter(function (h) { return !h.arch; }), arch = all.filter(function (h) { return h.arch; }), t0 = today0();
+var all = habitsF(), act = all.filter(function (h) { return !h.arch; }), arch = all.filter(function (h) { return h.arch; }), t0 = today0();
 if (HED && !hab(HED)) HED = null;
 if (HV.tab === "arch" && !arch.length) HV.tab = "act";
 var end = addDays(t0, HV.wk * 7), days = []; for (var i = 6; i >= 0; i--) days.push(addDays(end, -i));
@@ -6299,11 +6317,11 @@ return h + '<div class="hwrap' + (det ? " det" : "") + '"><div class="hmain">' +
 }
 function hCreate(name) {
 var mx = habits().reduce(function (a, x) { return Math.max(a, x.ord || 0); }, -1);
-var hx = touch({ id: uid(), created: Date.now(), ord: mx + 1, n: name.slice(0, 80), desc: "", ic: "", c: Math.floor(Math.random() * COLORS.length), days: [], goal: 1, time: "" });
+var hx = touch({ id: uid(), created: Date.now(), ord: mx + 1, n: name.slice(0, 80), desc: "", ic: "", c: Math.floor(Math.random() * COLORS.length), days: [], goal: 1, time: "" }); if (spFocK()) hx.sp = spFocK();
 S.habits.push(hx); save(); HV.tab = "act"; HED = hx.id; HDEL = null; render(); return hx;
 }
 function habitsToday() {
-var l = habits().filter(function (h) { return !h.arch && hDue(h, today0()); }); if (!l.length) return "";
+var l = habitsF().filter(function (h) { return !h.arch && hDue(h, today0()); }); if (!l.length) return "";
 var tk = dKey(today0());
 return '<div class="htoday">' + l.map(function (x) { var st = hSt(x, tk), n = hCount(x, tk), g = x.goal || 1; return '<button type="button" class="hchip' + (st ? " " + st : "") + '" data-a="hmark" data-h="' + x.id + '" data-d="' + tk + '" style="--hc:' + col(x.c || 0) + '" title="' + esc(HSTN[st] || "Клик — выполнено, ещё клик — частично") + '">' + (x.ic ? hIcoH(x) + " " : '<i class="hdot"></i>') + esc(x.n) + (g > 1 ? " · " + n + "/" + g : st === "done" ? " ✓" : st === "part" ? " ½" : st === "skip" ? " ‖" : "") + "</button>"; }).join("") + '<a class="muted" href="#habits" style="align-self:center">все привычки →</a></div>';
 }
@@ -6346,7 +6364,7 @@ var STTAB = LS.get("zd-sttab") || "ov";
 function hfmt(min) { var h = min / 60; return h >= 10 ? Math.round(h) + " ч" : fmtH(Math.round(h * 10) / 10) + " ч"; }
 function taskAnyId(id) { return S.tasks.filter(function (x) { return x.id === id; })[0] || null; }
 function focusSessions(from, to) {
-return live(S.acts).filter(function (a) { return (a.k === "time" || a.k === "pomo") && a.d >= from && a.d < to; }).map(function (a) { var m = +a.m || (a.k === "pomo" ? 25 : 0); return { k: a.k, end: a.d, start: a.d - m * 60000, m: m, t: a.t }; });
+return actsF().filter(function (a) { return (a.k === "time" || a.k === "pomo") && a.d >= from && a.d < to; }).map(function (a) { var m = +a.m || (a.k === "pomo" ? 25 : 0); return { k: a.k, end: a.d, start: a.d - m * 60000, m: m, t: a.t }; });
 }
 function rootProj(pid) { var p = proj(pid); if (!p) return null; var pa = ppath(p); return pa[0] || p; }
 function taskActual(t) { return t.tt ? t.tt / 3600000 : t.pomo ? t.pomo * 25 / 60 : 0; }
@@ -6367,7 +6385,7 @@ var pr = Object.keys(byP).map(function (k) { var p = proj(k); return { l: p ? pi
 var gr = Object.keys(byG).map(function (k) { var g = goal(k); return { l: (g.ic || "🎯") + " " + g.n, v: byG[k], c: col(g.c || 0), href: "#goal-" + g.id, f: "g:" + k }; }).sort(function (a, b) { return b.v - a.v; });
 var bars = function (l) { var mx = l.length ? l[0].v : 1; return l.map(function (x) { return '<div class="hbar wide"><span>' + (x.href ? '<a href="' + x.href + '">' + esc(x.l) + "</a>" : esc(x.l)) + '</span><i class="drlc"' + drlAttr("focus", from + "," + to + "," + x.f) + ' style="width:' + Math.round(x.v / mx * 100) + "%;background:" + x.c + '"></i><b class="drlc"' + drlAttr("focus", from + "," + to + "," + x.f) + ">" + hfmt(x.v) + " · " + Math.round(x.v / tot * 100) + "%</b></div>"; }).join(""); };
 h += '<div class="st2"><div><h2>По проектам</h2>' + (pr.length ? bars(pr) : '<p class="muted">Нет данных.</p>') + '</div><div><h2>По целям</h2>' + (gr.length ? bars(gr) : '<p class="muted">Время по задачам целей появится здесь.</p>') + "</div></div>";
-var est = live(S.tasks).filter(function (t) { return +t.est > 0 && taskActual(t) > 0 && t.done && !t.canc && (t.dt || 0) >= from; }).map(function (t) { var a = taskActual(t); return { t: t, e: +t.est, a: a, r: a / +t.est }; });
+var est = tasksF().filter(function (t) { return +t.est > 0 && taskActual(t) > 0 && t.done && !t.canc && (t.dt || 0) >= from; }).map(function (t) { var a = taskActual(t); return { t: t, e: +t.est, a: a, r: a / +t.est }; });
 h += "<h2>Точность оценок</h2>";
 if (est.length) {
 var se = est.reduce(function (a, x) { return a + x.e; }, 0), sa = est.reduce(function (a, x) { return a + x.a; }, 0), k = sa / se;
@@ -6378,7 +6396,7 @@ h += '<div class="tscroll"><table class="esttbl"><tr><th>Задача</th><th>О
 } else h += '<p class="muted">Нужны выполненные за период задачи, у которых есть и оценка в часах, и засечённое время (или помидоры). Поставьте оценку в карточке задачи или в плане дня, засекайте время — и после выполнения задачи здесь появится сравнение.</p>';
 var grid = []; for (var w = 0; w < 7; w++) { grid.push([]); for (var hh = 0; hh < 24; hh++) grid[w].push(0); }
 ss.forEach(function (x) { var c = x.start; while (c < x.end) { var dt = new Date(c), nx = Math.min(x.end, new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), dt.getHours() + 1).getTime()); grid[(dt.getDay() + 6) % 7][dt.getHours()] += (nx - c) / 60000; c = nx; } });
-var ev = doneEvents().filter(function (e) { return e.d >= from; }), dn = []; for (var w2 = 0; w2 < 7; w2++) { dn.push([]); for (var h2 = 0; h2 < 24; h2++) dn[w2].push(0); }
+var ev = doneEventsF().filter(function (e) { return e.d >= from; }), dn = []; for (var w2 = 0; w2 < 7; w2++) { dn.push([]); for (var h2 = 0; h2 < 24; h2++) dn[w2].push(0); }
 ev.forEach(function (e) { var dt = new Date(e.d); dn[(dt.getDay() + 6) % 7][dt.getHours()]++; });
 var score = grid.map(function (row, w) { return row.map(function (m, hh) { return m + dn[w][hh] * 20; }); }), mx = 0; score.forEach(function (r) { r.forEach(function (v) { if (v > mx) mx = v; }); });
 var hFrom = 6, hTo = 23; score.forEach(function (r) { r.forEach(function (v, hh) { if (v && hh < hFrom) hFrom = hh; if (v && hh > hTo) hTo = hh; }); });
@@ -6424,7 +6442,7 @@ var a = String(p || "").split(","), from = +a[0] || 0, to = +a[1] || 0, f = a.sl
 var mins = function (m) { m = Math.round(m); return m >= 60 ? fmtH(Math.round(m / 6) / 10) + " ч" : m + " мин"; };
 if (k === "done") {
 T = "✓ Выполнено";
-doneEvents().forEach(function (e) { if (e.d < from || e.d >= to) return; var t = taskAnyId(e.t); if (!t || t.canc) return; if (/^w:/.test(f) && (new Date(e.d).getDay() + 6) % 7 !== +f.slice(2)) return; if (!drlFlt(f, t)) return; R.push(drlT(t, e.d, "", true)); });
+doneEventsF().forEach(function (e) { if (e.d < from || e.d >= to) return; var t = taskAnyId(e.t); if (!t || t.canc) return; if (/^w:/.test(f) && (new Date(e.d).getDay() + 6) % 7 !== +f.slice(2)) return; if (!drlFlt(f, t)) return; R.push(drlT(t, e.d, "", true)); });
 } else if (k === "created") {
 T = "➕ Создано задач";
 S.tasks.forEach(function (t) { if ((t.created || 0) >= from && t.created < to && !t.purged) R.push(drlT(t, t.created, t.del ? "в корзине" : t.done ? "✓ сделана" : "открыта")); });
@@ -6433,7 +6451,7 @@ T = k === "late" ? "⏰ Просрочено" : "○ Открыто сейчас
 tasks().filter(function (t) { return !t.done && (k === "open" || isLate(t)); }).forEach(function (t) { R.push(drlT(t, t.at || t.due || 0, t.at || t.due ? whenTxt(t) : "без срока")); });
 } else if (k === "miss") {
 T = "○ Не сделано в срок";
-live(S.tasks).forEach(function (t) { var d = t.at || t.due; if (!t.done && !t.canc && d && d >= from && d < Math.min(to, today0())) R.push(drlT(t, d, "срок")); });
+tasksF().forEach(function (t) { var d = t.at || t.due; if (!t.done && !t.canc && d && d >= from && d < Math.min(to, today0())) R.push(drlT(t, d, "срок")); });
 } else if (k === "focus" || k === "pomo") {
 T = k === "pomo" ? "🍅 Помидоры" : "⏲ Время фокуса"; var hw = /^h:/.test(f) ? f.slice(2).split(":").map(Number) : null;
 focusSessions(from, to).forEach(function (x) {
@@ -6442,7 +6460,7 @@ var m = x.m;
 if (hw) { m = 0; var c = x.start; while (c < x.end) { var dt = new Date(c), nx = Math.min(x.end, new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), dt.getHours() + 1).getTime()); if ((dt.getDay() + 6) % 7 === hw[0] && dt.getHours() === hw[1]) m += (nx - c) / 60000; c = nx; } if (m < 0.5) return; }
 sum += m; var r = t ? drlT(t, x.end, "", true) : { d: x.end, tm: true, t: "Без задачи", h: "", s: "" }; r.v = (x.k === "pomo" ? "🍅 " : "⏲ ") + mins(m); R.push(r);
 });
-if (hw) doneEvents().forEach(function (e) { if (e.d < from || e.d >= to) return; var dt = new Date(e.d); if ((dt.getDay() + 6) % 7 !== hw[0] || dt.getHours() !== hw[1]) return; var t = taskAnyId(e.t); if (t && !t.canc) R.push(drlT(t, e.d, "✓ выполнено", true)); });
+if (hw) doneEventsF().forEach(function (e) { if (e.d < from || e.d >= to) return; var dt = new Date(e.d); if ((dt.getDay() + 6) % 7 !== hw[0] || dt.getHours() !== hw[1]) return; var t = taskAnyId(e.t); if (t && !t.canc) R.push(drlT(t, e.d, "✓ выполнено", true)); });
 sumT = sum ? "всего " + mins(sum) : "";
 } else if (k === "hab") {
 T = "🌱 Привычки"; var dd = +a[0] || 7; sub = "за " + dd + " " + plural(dd, ["день", "дня", "дней"]) + " — процент выполнения";
@@ -6454,12 +6472,12 @@ if (hb) for (var d2 = Math.max(hStart(hb), from); d2 < Math.min(to, today0() + D
 T = "🌱 Отметки привычек";
 live(S.hlog).forEach(function (x) { var d = new Date(x.day + "T12:00").getTime(); if (d < from || d >= to || x.s || !((+x.n || 0) > 0)) return; var hb2 = habits().filter(function (h) { return h.id === x.h; })[0]; R.push({ d: sod(d), t: hb2 ? hb2.n : "привычка", h: "#habits", s: "", v: "✓" + (+x.n > 1 ? " ×" + x.n : "") }); });
 } else if (k === "notes") {
-T = "📝 Новые заметки"; notes().forEach(function (n) { if ((n.created || 0) >= from && n.created < to) R.push({ d: n.created, t: nTitle(n), h: "#note-" + n.id, s: "", v: "" }); });
+T = "📝 Новые заметки"; notesF().forEach(function (n) { if ((n.created || 0) >= from && n.created < to) R.push({ d: n.created, t: nTitle(n), h: "#note-" + n.id, s: "", v: "" }); });
 } else if (k === "jr") {
 T = "📔 Записи в дневнике"; live(S.days).forEach(function (x) { var key = String(x.id).slice(2), d = new Date(key + "T12:00").getTime(); if (d < from || d >= to || !dNote(x)) return; R.push({ d: sod(d), t: String(dNote(x)).slice(0, 140), h: "#dnote-" + key, s: "", v: dMood(x) ? MOODS[dMood(x) - 1] : "" }); });
 } else if (k === "sprint") {
 var sp = sprints().filter(function (x) { return x.id === a[0]; })[0]; T = "🏃 " + (sp ? spName(sp) : "Спринт"); sub = "выполненные задачи спринта";
-if (sp) live(S.tasks).forEach(function (t) { if (t.sprint === sp.id && t.done && !t.canc) R.push(drlT(t, t.dt || 0, "", true)); });
+if (sp) tasksF().forEach(function (t) { if (t.sprint === sp.id && t.done && !t.canc) R.push(drlT(t, t.dt || 0, "", true)); });
 }
 var fn = drlFltName(f); if (fn) sub += (sub ? " · " : "") + fn;
 R.sort(function (x, y) { return (y.d || 0) - (x.d || 0); });
@@ -6499,11 +6517,11 @@ function rpDay(ms) { return new Date(ms).toLocaleDateString("ru-RU", { weekday: 
 function vReport() {
 var r = rpRange(ARG), now = Date.now(), endEff = Math.min(r.to, today0() + DAY), cur = r.off === 0;
 var done = [], byDay = {}, fByDay = {}, byP = {};
-doneEvents().forEach(function (e) { if (e.d < r.from || e.d >= r.to) return; var t = taskAnyId(e.t); if (!t || t.canc) return; done.push({ t: t, d: e.d }); var k = dKey(e.d); byDay[k] = (byDay[k] || 0) + 1; var rp = t.pid ? rootProj(t.pid) : null, pk = rp ? rp.id : ""; (byP[pk] = byP[pk] || { d: 0, m: 0 }).d++; });
+doneEventsF().forEach(function (e) { if (e.d < r.from || e.d >= r.to) return; var t = taskAnyId(e.t); if (!t || t.canc) return; done.push({ t: t, d: e.d }); var k = dKey(e.d); byDay[k] = (byDay[k] || 0) + 1; var rp = t.pid ? rootProj(t.pid) : null, pk = rp ? rp.id : ""; (byP[pk] = byP[pk] || { d: 0, m: 0 }).d++; });
 var ss = focusSessions(r.from, r.to), fmin = 0, pomo = 0;
 ss.forEach(function (x) { fmin += x.m; if (x.k === "pomo") pomo++; var k = dKey(x.end); fByDay[k] = (fByDay[k] || 0) + x.m; var t = taskAnyId(x.t), rp = t && t.pid ? rootProj(t.pid) : null, pk = rp ? rp.id : ""; (byP[pk] = byP[pk] || { d: 0, m: 0 }).m += x.m; });
-var created = S.tasks.filter(function (t) { return (t.created || 0) >= r.from && t.created < r.to && !t.purged; }).length;
-var miss = live(S.tasks).filter(function (t) { var d = t.at || t.due; return !t.done && d && d >= r.from && d < Math.min(r.to, today0()); }).sort(function (a, b) { return (a.at || a.due) - (b.at || b.due); });
+var created = tasksF().filter(function (t) { return (t.created || 0) >= r.from && t.created < r.to && !t.purged; }).length;
+var miss = tasksF().filter(function (t) { var d = t.at || t.due; return !t.done && d && d >= r.from && d < Math.min(r.to, today0()); }).sort(function (a, b) { return (a.at || a.due) - (b.at || b.due); });
 var actDays = Object.keys(byDay).length;
 var h = '<div class="tbar rpbar"><div class="seg"><a class="' + (r.kind === "w" ? "on" : "") + '" href="#report-w0">Неделя</a><a class="' + (r.kind === "m" ? "on" : "") + '" href="#report-m0">Месяц</a></div>' +
 '<a class="btn sm" href="#report-' + r.kind + (r.off - 1) + '" aria-label="Раньше">‹</a>' + (cur ? "" : '<a class="btn sm" href="#report-' + r.kind + '0">' + (r.kind === "w" ? "Эта неделя" : "Этот месяц") + "</a>") + '<a class="btn sm' + (r.off >= 0 ? " dis" : "") + '" href="#report-' + r.kind + Math.min(0, r.off + 1) + '" aria-label="Позже">›</a>' +
@@ -6518,9 +6536,9 @@ h += '<div class="rpblk"><h2>Выполнено по дням</h2>' + barsSVG(pe
 if (fmin) h += '<div class="rpblk"><h2>Часы фокуса по дням</h2>' + barsSVG(fper) + "</div>";
 var pk = Object.keys(byP).sort(function (a, b) { return (byP[b].m - byP[a].m) || (byP[b].d - byP[a].d); });
 if (pk.length) h += '<div class="rpblk"><h2>По проектам</h2><table class="rptbl"><tr><th>Проект</th><th class="n">Выполнено</th><th class="n">Время</th></tr>' + pk.map(function (k) { var p = proj(k), x = byP[k]; return "<tr><td>" + (p ? esc(picon(p) + " " + p.n) : "📥 Без проекта") + '</td><td class="n' + (x.d ? ' drlc"' + drlAttr("done", rr + ",p:" + k) : '"') + ">" + (x.d || "—") + '</td><td class="n' + (x.m ? ' drlc"' + drlAttr("focus", rr + ",p:" + k) : '"') + ">" + (x.m ? hfmt(x.m) : "—") + "</td></tr>"; }).join("") + "</table></div>";
-var gl = goals().filter(function (g) { return g.st !== "paused"; });
+var gl = goalsF().filter(function (g) { return g.st !== "paused"; });
 if (gl.length) h += '<div class="rpblk"><h2>Цели</h2><table class="rptbl"><tr><th>Цель</th><th class="n">Прогресс</th><th class="n">Сделано за период</th></tr>' + gl.map(function (g) { var pr = goalProg(g), ids = {}; goalTasks(g).forEach(function (t) { ids[t.id] = 1; }); var n = done.filter(function (x) { return ids[x.t.id]; }).length; return "<tr><td>" + esc((g.ic || "🎯") + " " + g.n) + (g.st === "done" ? " ✓" : "") + '</td><td class="n">' + pr.pct + ' %</td><td class="n' + (n ? ' drlc"' + drlAttr("done", rr + ",g:" + g.id) : '"') + ">" + (n || "—") + "</td></tr>"; }).join("") + "</table></div>";
-var hb = habits().filter(function (x) { return !x.arch; }).map(function (x) {
+var hb = habitsF().filter(function (x) { return !x.arch; }).map(function (x) {
 var due = 0, ok = 0, st = Math.max(hStart(x), r.from);
 for (var d2 = st; d2 < endEff; d2 = addDays(d2, 1)) { var v = hSt(x, dKey(d2)); if (v === "skip") continue; if (hDue(x, d2) || v) { due++; ok += hV(v); } }
 return { x: x, due: due, ok: ok };
@@ -10407,7 +10425,7 @@ if (rs.length) { CSS.highlights.set("nq", new Highlight(rs[0])); rs.slice(1).for
 }
 var NGALL = false;
 function vNGraph() {
-var ns = notes(), idx = {}, E = [], seen = {};
+var ns = notesF(), idx = {}, E = [], seen = {};
 ns.forEach(function (n, i) { idx[n.id] = i; });
 ns.forEach(function (n) { var p = nParent(n); if (p && idx[p.id] !== undefined) E.push([idx[n.id], idx[p.id], "p"]); });
 var lm = nLinksMap(); Object.keys(lm).forEach(function (to) { (lm[to] || []).forEach(function (x) { if (x.k !== "n" || idx[to] === undefined || idx[x.o.id] === undefined || x.o.id === to) return; var key = [idx[x.o.id], idx[to]].sort().join("-"); if (seen[key]) return; seen[key] = 1; E.push([idx[x.o.id], idx[to], "l"]); }); });
@@ -11651,7 +11669,7 @@ return nSmartBar() + '<div class="chips ndbvs"><span class="muted">Мои вид
 }
 function nViewList(vw) {
 var r = parse(vw.r), ids = r.v === "nsec" ? (nsec(r.a) ? nsDesc(r.a) : []) : null, tg = r.v === "ntag" ? r.a : "", q = (vw.q || "").toLowerCase(), keep = NFLT; NFLT = vw.f || {};
-var l = notes().filter(function (n) { return (!ids || ids.indexOf(n.sec) >= 0) && (!tg || nTagHas(n, tg)) && (!q || (n.t + " " + noteText(n)).toLowerCase().indexOf(q) >= 0) && nFltOk(n); }); NFLT = keep;
+var l = notesF().filter(function (n) { return (!ids || ids.indexOf(n.sec) >= 0) && (!tg || nTagHas(n, tg)) && (!q || (n.t + " " + noteText(n)).toLowerCase().indexOf(q) >= 0) && nFltOk(n); }); NFLT = keep;
 if (vw.sort) { LS.set("zd-ndbs:vw:" + vw.id, JSON.stringify(vw.sort)); return nDbSort(l, "vw:" + vw.id); } return l.sort(function (a, b) { return (b.upd || 0) - (a.upd || 0); });
 }
 function nViewWidget(w) {
@@ -11733,7 +11751,7 @@ var m, re = /\{\{(.+?)\}\}/g, cz = []; while ((m = re.exec(t))) cz.push(m); cz.f
 });
 return out;
 }
-function srsAll() { return memo("srsall", function () { var l = []; notes().forEach(function (n) { l = l.concat(srsFromNote(n)); }); return l; }); }
+function srsAll() { return memo("srsall|" + FOCUS, function () { var l = []; notesF().forEach(function (n) { l = l.concat(srsFromNote(n)); }); return l; }); }
 function srsSt() { S.opt.srs = S.opt.srs || {}; return S.opt.srs; }
 function srsNewLeft() { var d = srsDay(), nd = S.opt.srsnd || {}; return Math.max(0, (+S.opt.srsnew || 15) - (nd.d === d ? nd.c : 0)); }
 function srsQueue(nid) {
@@ -12871,7 +12889,7 @@ try {
 if (k === "inbox") return inboxList().length; if (k === "today") return todayList().length; if (k === "srs") return srsDueCount(); if (k === "waiting") return waitList().length;
 if (k === "people") { var t0 = today0(); return nOfTpl("person").filter(function (x) { var c = pContactDue(x), b = (x.pr || {}).bday ? nextBday(x.pr.bday) : 0; return (c && c <= t0) || (b && b - t0 <= 7 * DAY); }).length; }
 if (k === "weekly") { var w = (S.opt.wrev || {})[wrKey()]; return w && w.done ? "✓" : ""; } if (k === "goals") return live(S.goals || []).filter(function (g) { return (g.st || "active") === "active"; }).length;
-if (k === "flag") return tasks().filter(function (t) { return t.flag && !t.done; }).length; if (k === "notes") return notes().length;
+if (k === "flag") return tasks().filter(function (t) { return t.flag && !t.done; }).length; if (k === "notes") return notesF().length;
 } catch (e) { /* счётчик не важен */ }
 return "";
 }
@@ -12892,7 +12910,7 @@ else if (k === "docs") { var dx = nOfTpl("doc").filter(function (n) { return (n.
 else if (k === "health") { var hr = dayRecOf(dKey(t0)), hk = hr && hr.h ? Object.keys(hr.h).filter(function (f) { return f !== "at"; }).length : 0; x = em(hk ? "сегодня отмечено ✓" : "сегодня ещё не отмечено"); }
 else if (k === "weekly") { var wr = (S.opt.wrev || {})[wrKey()]; x = em(wr && wr.done ? "на этой неделе пройден ✓" : "на этой неделе ещё не пройден"); }
 else if (k === "srs") { var sc = srsDueCount(); x = em(sc ? "на сегодня " + sc + " " + plural(sc, ["карточка", "карточки", "карточек"]) : "на сегодня всё повторено ✓"); }
-else if (k === "notes") { var ln = notes().slice().sort(function (a, b) { return (b.upd || b.created || 0) - (a.upd || a.created || 0); })[0]; if (ln) x = em("последняя: " + esc(nTitle(ln).slice(0, 40))); }
+else if (k === "notes") { var ln = notesF().slice().sort(function (a, b) { return (b.upd || b.created || 0) - (a.upd || a.created || 0); })[0]; if (ln) x = em("последняя: " + esc(nTitle(ln).slice(0, 40))); }
 else if (k === "stats") { if (xpOn()) { var xs = xpStats(); x = appBar(xs.next ? xs.cur / xs.next * 100 : 0) + em("⭐ уровень " + xs.lvl + " · " + xs.xp + " очков"); } }
 } catch (e) { x = ""; }
 return x ? '<span class="aptm">' + x + "</span>" : "";
@@ -13125,6 +13143,7 @@ var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
 ["238", "Заметки: создать по-разному, загрузить из файла, фильтр по разделу", ["«+» в панели «Знаний» — меню: пустая заметка, карта мыслей, холст, из шаблона, заметка из файла, карта мыслей из файла. То же — в «📋 Из шаблона ▾» в разделе.", "📂 в любой открытой заметке — загрузить из файла: Markdown, HTML или текст встают с оформлением (заголовки, списки, галочки, таблицы, ссылки); в пустую — вместо текста, в заполненную — в конец (прежний вариант — в истории страницы). В карте мыслей: пустая заполняется из файла (XMind, OPML, FreeMind, Markdown, HTML), в непустую файл встаёт веткой — под выбранный узел.", "В списке всех заметок — фильтр «Раздел»: любая папка (вместе с вложенными) или «без раздела», рядом с фильтрами «Тип» и «Статус».", "Теги в панели «Знаний» — свёрнутой строкой «◆ Теги · N»: развёрнуто — 8 самых используемых и «Все теги →» (страница с поиском и облаком тегов). Поле «Теги» в заметке подсказывает существующие теги."]],
+["258", "🔒 Изолированное пространство — во всех разделах", ["Пока вы в изолированном пространстве (на его странице или в разделе из его меню), только его данные показывают: «Сегодня», календарь, планы, аналитика (статистика, время, отчёты, итоги месяца, сад), «День за днём», отложенные, заметки (список, дерево слева, граф, повторение, поиск), цели, привычки.", "Заметки пространства — из его меню с вложенными, привязанные к его задачам и созданные в нём; привычки — отмеченные в настройке пространства («Привычки пространства») и созданные в нём; новые цели сразу попадают в его меню.", "Сверху — полоса «🔒 Название»; на Главной изоляция снимается сама."]],
 ["257", "☐ Задачи на взносы по плану погашения", ["В «🧮 Что если внести» у каждой строки плана — кнопка «☐ Задача»: задача на взнос именно этого месяца, только там, где нажмёте.", "Дата — за 2 дня до списания по долгу; в задаче — куда и сколько внести, долг после взноса и сколько процентов сэкономит взнос.", "Поменяли план — задачи обновятся сами; «✓ Внести взнос этого месяца» отмечает задачу сделанной."]],
 ["256", "💳 Страница долгов — нагляднее", ["Сверху — сводка: сколько долгов и прогресс, когда станете без долгов, платежи в месяц и нагрузка от дохода, проценты впереди, фокус-долг.", "Три вкладки: «💳 Мои долги» — карточки с остатком, ставкой (цветом: дорогие — красным), платежом, очередью и месяцем закрытия; правка — по ✎. «📅 План закрытия» — шкала, когда закроется каждый долг, и подробный расчёт. «🧮 Что если внести» — план досрочных взносов.", "Закрытые и долги вне расчёта (ипотека) — в свёрнутых списках."]],
 ["255", "🧮 План досрочных взносов на несколько месяцев", ["В карточке «🧮 Что если внести» — несколько взносов: месяц, сумма, куда. «＋ Взнос в следующем месяце» добавляет строку.", "Каждый следующий взнос считается по остаткам после предыдущих: таблица «Шаг за шагом» показывает долг после каждого взноса, когда закроются долги и сколько сэкономит именно этот взнос.", "«✓ Внести» записывает только взнос текущего месяца — остальные остаются в плане."]],
@@ -13535,7 +13554,7 @@ var b = document.querySelector(".side .cpb"); if (!b) return; var q = CPQ.toLowe
 [].forEach.call(b.querySelectorAll(".cpg, .none"), function (x) { x.hidden = !!q; });
 }
 function cpRedraw() { try { $("side").innerHTML = sideHTML(); cpFilter(); railSync(); } catch (e) { render(); } }
-function cpFollow(v, a) { if (FLY) return; try { if (v !== "sp" && spcCovers(cpSpace(), v, a)) return; } catch (e) { /* ок */ } var k = spzOf(v, a); if (k && SPACES[k] && k !== cpSpace()) { cpSet(k); CPQ = ""; } }
+function cpFollow(v, a) { if (FLY) return; try { if (v !== "sp" && spcCovers(cpSpace(), v, a)) return; var ci = spcGet(cpSpace()); if (ci && ci.iso && v !== "sp" && v !== "home") return; } catch (e) { /* ок; из изолированного пространства выходят только на Главную или в другое пространство */ } var k = spzOf(v, a); if (k && SPACES[k] && k !== cpSpace()) { cpSet(k); CPQ = ""; } }
 function cpFlyOff() { if (!FLY) return; FLY = ""; document.body.classList.remove("sidefly"); cpRedraw(); }
 var RAILD = ["apps", "home", "day", "task", "know", "life", "house", "chal", "find", "fav", "rec"];
 var RAILE = { apps: ["▦", "Все разделы (Alt+A)"], home: ["🏠", "Главная: сводка дня, избранное, доски"], day: ["☀", "Мой день: входящие, сегодня, планы, утро и вечер"], task: ["✅", "Задачи: проекты, списки, теги и фильтры"], know: ["📝", "Знания: заметки, карты, повторение"], life: ["🌿", "Жизнь: привычки, цели, самочувствие, люди"], house: ["🔑", "Дом и деньги: меню, уборка, бюджет, документы"], chal: ["🏁", "Челленджи: осанка и лицо, дом, финансы, кухня"], find: ["⌕", "Поиск и команды (Ctrl+K)"], fav: ["★", "Избранное"], rec: ["🕘", "Недавние"] };
@@ -14358,7 +14377,7 @@ var prev = t.snz; if (v === "0") { delete t.snz; delete t.snzAt; } else { t.snz 
 if (t.snz) toastUndo("💤 Скрыта до " + new Date(t.snz).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: new Date(t.snz).getFullYear() !== new Date().getFullYear() ? "numeric" : undefined }) + " — в этот день напомню в «Требует внимания»", function () { if (prev) t.snz = prev; else delete t.snz; touch(t); save(); render(); }); else toast("Задача снова на виду");
 }
 function vSnoozed() {
-var t0 = today0(), l = live(S.tasks).filter(function (t) { return !t.done && t.snz > t0; }).sort(function (a, b) { return a.snz - b.snz; }), back = snzBack();
+var t0 = today0(), l = tasksF().filter(function (t) { return !t.done && t.snz > t0; }).sort(function (a, b) { return a.snz - b.snz; }), back = snzBack();
 var h = head("💤 Отложенные", "Задачи, к которым вы решили вернуться позже. В свой день каждая появится в «Требует внимания» и в «Сегодня». Отложить — в меню задачи (правый щелчок, клавиша «.», долгое нажатие) или прямо при вводе: «… вернуться через 3 месяца», «… ~2м».");
 if (back.length) h += snzBackHTML();
 if (!l.length) return h + '<p class="empty">Отложенных задач нет.</p>';
@@ -14760,14 +14779,14 @@ return '<div class="leftb' + (need > left ? " over" : "") + '">⌛ До конц
 function rcRange() { var a = ARG || "", m; if ((m = /^(\d{4})-(\d{2})$/.exec(a))) return { y: +m[1], m: +m[2] - 1 }; if ((m = /^(\d{4})$/.exec(a))) return { y: +m[1], m: -1 }; var d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; }
 function rcData() {
 var r = rcRange(), from = r.m < 0 ? new Date(r.y, 0, 1).getTime() : new Date(r.y, r.m, 1).getTime(), to = r.m < 0 ? new Date(r.y + 1, 0, 1).getTime() : new Date(r.y, r.m + 1, 1).getTime();
-var ev = doneEvents().filter(function (e) { return e.d >= from && e.d < to; }), byDay = {}, byP = {};
+var ev = doneEventsF().filter(function (e) { return e.d >= from && e.d < to; }), byDay = {}, byP = {};
 ev.forEach(function (e) { var k = dKey(e.d); byDay[k] = (byDay[k] || 0) + 1; var t = taskAnyId(e.t), rp = t && t.pid ? rootProj(t.pid) : null; if (rp) byP[rp.id] = (byP[rp.id] || 0) + 1; });
 var ks = Object.keys(byDay).sort(), best = 0, run = 0, prev = null; ks.forEach(function (k) { var ms = new Date(k + "T00:00").getTime(); run = prev !== null && Math.round((ms - prev) / DAY) === 1 ? run + 1 : 1; prev = ms; if (run > best) best = run; });
 var bd = ks.sort(function (a, b) { return byDay[b] - byDay[a]; })[0];
-var acts = live(S.acts).filter(function (a) { return (a.k === "pomo" || a.k === "time") && a.d >= from && a.d < to; }), focus = acts.reduce(function (a, x) { return a + (+x.m || (x.k === "pomo" ? 25 : 0)); }, 0);
+var acts = actsF().filter(function (a) { return (a.k === "pomo" || a.k === "time") && a.d >= from && a.d < to; }), focus = acts.reduce(function (a, x) { return a + (+x.m || (x.k === "pomo" ? 25 : 0)); }, 0);
 var hl = live(S.hlog).filter(function (x) { var d = new Date(x.day + "T12:00").getTime(); return d >= from && d < to && !x.s && (+x.n || 0) > 0; }).length;
 var days = live(S.days).filter(function (x) { var d = new Date(String(x.id).slice(2) + "T12:00").getTime(); return d >= from && d < to; }), avg = function (k) { var v = days.map(function (x) { return x.h && x.h[k]; }).filter(function (x) { return x !== undefined && x !== null && x !== ""; }).map(Number); return v.length ? Math.round(v.reduce(function (a, b) { return a + b; }, 0) / v.length * 10) / 10 : null; };
-var nn = notes().filter(function (n) { return (n.created || 0) >= from && (n.created || 0) < to; }).length, jn = days.filter(function (x) { return x.note; }).length;
+var nn = notesF().filter(function (n) { return (n.created || 0) >= from && (n.created || 0) < to; }).length, jn = days.filter(function (x) { return x.note; }).length;
 var tp = Object.keys(byP).sort(function (a, b) { return byP[b] - byP[a]; }).slice(0, 3).map(function (id) { return [proj(id), byP[id]]; }).filter(function (x) { return x[0]; });
 var name = r.m < 0 ? r.y + " год" : new Date(r.y, r.m, 1).toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
 return { r: r, from: from, to: to, name: name, done: ev.length, act: ks.length, best: best, bd: bd, bdn: bd ? byDay[bd] : 0, focus: focus, pomo: acts.filter(function (a) { return a.k === "pomo"; }).length + Math.floor(Math.max(0, acts.reduce(function (a, x) { return a + (x.k === "time" ? +x.m || 0 : 0); }, 0)) / POMOM), hl: hl, sl: avg("sl"), md: avg("md"), en: avg("en"), nn: nn, jn: jn, tp: tp };
@@ -14795,7 +14814,7 @@ cv.toBlob(function (b) { if (!b) { toast("Не получилось сохран
 }
 function gdPlant(n) { return n >= 6 ? "🌲" : n >= 4 ? "🌳" : n >= 2 ? "🌿" : "🌱"; }
 function vGarden() {
-var t0 = today0(), mon = monday(t0), acts = live(S.acts), pom = acts.filter(function (a) { return a.k === "pomo"; }), bad = acts.filter(function (a) { return a.k === "pomox"; });
+var t0 = today0(), mon = monday(t0), acts = actsF(), pom = acts.filter(function (a) { return a.k === "pomo"; }), bad = acts.filter(function (a) { return a.k === "pomox"; });
 var day = function (l, d) { return l.filter(function (a) { return a.d >= d && a.d < addDays(d, 1); }).length + (l === pom ? pomoEqIn(d, addDays(d, 1)) : 0); }, pomTot = pom.length + pomoEqIn(0, 9e15);
 var h = head("🌳 Сад фокуса", "Каждый завершённый помидор сажает растение; чем больше помидоров за день — тем выше дерево. Если бросить помидор раньше времени — росток вянет 🥀. Запустить помидор — в меню задачи или 🎧.");
 var wk = 0; for (var i = 0; i < 7; i++) wk += day(pom, addDays(mon, i));
@@ -15505,9 +15524,10 @@ b = '<div class="r dzmood"><span class="muted">Настроение:</span><span
 '<div class="dzqs">' + (w < 15 ? dzQs(C.k).map(function (i) { return '<button type="button" class="chip" data-a="dzq" data-x="' + i + '" title="Вставить вопрос заголовком">＋ ' + esc(DZQ[i]) + "</button>"; }).join("") : "") + '<button type="button" class="chip" data-a="dztpl" title="Готовые шаблоны записей (ещё — через «/»)">▤ Шаблон…</button></div>';
 }
 else if (k === "well") { var hh = r.h || {}, hk = HMX.filter(function (m) { return hh[m[0]] !== undefined; }); b = hk.length ? "<p>" + hk.map(function (m) { return m[1] + " <b>" + hh[m[0]] + "</b>" + (m[2] ? " " + m[2] : ""); }).join(" · ") + "</p>" : '<p class="muted">Не отмечено. <a href="#health">Отметить →</a></p>'; }
-else if (k === "hab") { var hb = habits().filter(function (x) { return !x.arch && hDue(x, d0); }); empty = !hb.length; t = "🌱 Привычки" + (hb.length ? " · " + hb.filter(function (x) { return hDone(x, d0); }).length + " из " + hb.length : ""); b = hb.length ? '<div class="chips">' + hb.map(function (x) { var s2 = hSt(x, C.k); return '<span class="chip' + (s2 === "done" ? " on" : "") + '">' + (s2 === "done" ? "✓ " : s2 === "part" ? "◐ " : "○ ") + esc(x.n) + "</span>"; }).join("") + "</div>" : '<p class="muted">Привычек на этот день нет.</p>'; }
-else if (k === "notes") { var nl = notes().filter(function (n) { return (n.created >= d0 && n.created < d1) || (n.upd >= d0 && n.upd < d1); }); empty = !nl.length; t = "📝 Заметки" + (nl.length ? " · " + nl.length : ""); b = nl.length ? nl.slice(0, 20).map(function (n) { return '<div class="ritr"><a href="#note-' + n.id + '">' + esc(nIc(n)) + " " + esc(nTitle(n)) + '</a><span class="muted">' + (n.created >= d0 && n.created < d1 ? "новая" : "изменена") + "</span></div>"; }).join("") : '<p class="muted">Заметок в этот день нет.</p>'; }
-else if (k === "focus") { var pm = live(S.acts).filter(function (a) { return (a.k === "pomo" || a.k === "time") && a.d >= d0 && a.d < d1; }), mins = pm.reduce(function (a, x) { return a + (+x.m || (x.k === "pomo" ? 25 : 0)); }, 0), pc = pm.filter(function (a) { return a.k === "pomo"; }).length + pomoEqIn(d0, d1); empty = !mins; b = mins ? "<p><b>" + ttFmt(mins * 60000) + "</b> фокуса · 🍅 " + pc + "</p>" : '<p class="muted">Ни помидоров, ни учтённого времени.</p>'; }
+else if (k === "hab") { var hb = habitsF().filter(function (x) { return !x.arch && hDue(x, d0); }); empty = !hb.length; t = "🌱 Привычки" + (hb.length ? " · " + hb.filter(function (x) { return hDone(x, d0); }).length + " из " + hb.length : ""); b = hb.length ? '<div class="chips">' + hb.map(function (x) { var s2 = hSt(x, C.k); return '<span class="chip' + (s2 === "done" ? " on" : "") + '">' + (s2 === "done" ? "✓ " : s2 === "part" ? "◐ " : "○ ") + esc(x.n) + "</span>"; }).join("") + "</div>" : '<p class="muted">Привычек на этот день нет.</p>'; }
+else if (k === "notes") { var nl = notesF().filter(function (n) { return (n.created >= d0 && n.created < d1) || (n.upd >= d0 && n.upd < d1); }); empty = !nl.length; t = "📝 Заметки" + (nl.length ? " · " + nl.length : ""); b = nl.length ? nl.slice(0, 20).map(function (n) { return '<div class="ritr"><a href="#note-' + n.id + '">' + esc(nIc(n)) + " " + esc(nTitle(n)) + '</a><span class="muted">' + (n.created >= d0 && n.created < d1 ? "новая" : "изменена") + "</span></div>"; }).join("") : '<p class="muted">Заметок в этот день нет.</p>'; }
+else if (k === "focus") { var pm = actsF().filter(function (a) { return (a.k === "pomo" || a.k === "time") && a.d >= d0 && a.d < d1; }), mins = pm.reduce(function (a, x) { return a + (+x.m || (x.k === "pomo" ? 25 : 0)); }, 0), pc = pm.filter(function (a) { return a.k === "pomo"; }).length + pomoEqIn(d0, d1); empty = !mins; b = mins ? "<p><b>" + ttFmt(mins * 60000) + "</b> фокуса · 🍅 " + pc + "</p>" : '<p class="muted">Ни помидоров, ни учтённого времени.</p>'; }
+else if (k === "money" && spFocK()) return "";
 else if (k === "money") {
 var P = buPers().length ? buPer(buPid(d0)) : null, dd = P && P.days ? P.days[C.k] : null, cats = dd ? Object.keys(dd).filter(function (c) { return +dd[c]; }).sort(function (a, b2) { return dd[b2] - dd[a]; }) : [], sum = cats.reduce(function (a, c) { return a + (+dd[c] || 0); }, 0);
 empty = !sum; b = sum ? "<p><b>" + buRub(sum) + "</b></p>" + cats.slice(0, 6).map(function (c) { return '<div class="ritr"><span>' + esc(c) + '</span><span class="muted">' + buRub(dd[c]) + "</span></div>"; }).join("") : '<p class="muted">' + (P ? "Трат в этот день нет." : "Нет данных бюджета за этот период.") + "</p>";
@@ -15527,9 +15547,9 @@ var k = dnKey(), d0 = new Date(k + "T00:00").getTime(), d1 = addDays(d0, 1), r =
 var h = head("📅 " + new Date(d0).toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long", year: d0 < addDays(t0, -300) ? "numeric" : undefined }), "Всё о дне на одной странице. Карточки переставляются за ⠿ и растягиваются за уголок; «✎ Настроить страницу» — колонки и скрытые карточки.");
 h += '<div class="r dnnav"><a class="btn sm" href="#dnote-' + dKey(addDays(d0, -1)) + '">← Вчера</a>' + (k !== dKey(t0) ? '<a class="btn sm" href="#dnote">Сегодня</a>' : "") + '<a class="btn sm" href="#dnote-' + dKey(d1) + '">Завтра →</a><input type="date" class="inp" id="dnday" value="' + k + '" aria-label="Выбрать день"><span class="nowsp"></span><button type="button" class="btn sm" data-a="dzed">' + (DZED ? "✓ Готово" : "✎ Настроить страницу") + "</button></div>";
 if (DZED) { var hid = dzHid(); h += '<div class="card hzedb"><b>Настройка страницы «День за днём»</b><div class="r hzcolsel"><span class="muted">Колонок:</span><div class="seg">' + [1, 2, 3, 4].map(function (v) { return '<button type="button" data-a="dzncols" data-x="' + v + '" class="' + (dzN() === v ? "on" : "") + '">' + v + "</button>"; }).join("") + '</div></div><p class="muted">Перетаскивайте карточки за ⠿ или двигайте стрелками ↑ ↓ (выше и ниже в своей колонке), ← → — в соседнюю колонку, ↔ или уголок справа внизу — ширина. Пустые карточки видны только здесь. Скрытые:</p><div class="chips">' + (hid.length ? hid.map(function (x) { return '<button type="button" class="chip" data-a="dzshow" data-x="' + x + '">＋ ' + dzName(x) + "</button>"; }).join("") : '<span class="muted">нет</span>') + '</div><div class="r" style="gap:8px;margin-top:10px"><button type="button" class="btn pri" data-a="dzed">Готово</button><button type="button" class="btn" data-a="dzreset">↺ Как было</button></div></div>'; }
-var C = { k: k, d0: d0, d1: d1, r: r, t0: t0, top: (r.top || []).map(task).filter(Boolean),
-dn: doneEvents().filter(function (e) { return e.d >= d0 && e.d < d1; }).map(function (e) { return taskAnyId(e.t); }).filter(Boolean),
-plan: live(S.tasks).filter(function (t) { var d = t.at || t.due; return !t.done && d >= d0 && d < d1; }), i: 0 };
+var C = { k: k, d0: d0, d1: d1, r: r, t0: t0, top: (r.top || []).map(task).filter(Boolean).filter(focTask),
+dn: doneEventsF().filter(function (e) { return e.d >= d0 && e.d < d1; }).map(function (e) { return taskAnyId(e.t); }).filter(Boolean),
+plan: tasksF().filter(function (t) { var d = t.at || t.due; return !t.done && d >= d0 && d < d1; }), i: 0 };
 C.col = function (key, s) { return Math.max(0, Math.min(dzColOf(key, C.i++), dzN() - s)); };
 var hid2 = dzHid(), cards = dzOrder().filter(function (x) { return hid2.indexOf(x) < 0; }).map(function (x) { return dzCard(x, C); }).join("");
 setTimeout(function () { dzMas(); try { attImgs(); } catch (er) { /* картинки подгрузятся позже */ } }, 0);
@@ -16119,9 +16139,9 @@ if (out.length < n) (spcItems(k) || []).forEach(function (it) { var h = { p: "pr
 return out;
 }
 function spcAutoFocus() {
-var a = LS.get("zd-focauto") || "", c = V === "sp" && ARG && ARG !== "home" ? spcGet(ARG) : null;
-if (c && c.autof) { if (FOCUS !== "sp:" + ARG) { FOCUS = "sp:" + ARG; FSC = null; LS.set("zd-focus", FOCUS); } LS.set("zd-focauto", ARG); return; }
-if (a && (V === "home" || V === "sp")) { if (FOCUS === "sp:" + a) { FOCUS = ""; FSC = null; LS.del("zd-focus"); } LS.del("zd-focauto"); }
+var a = LS.get("zd-focauto") || "", k = V === "sp" ? (ARG !== "home" ? ARG : "") : V === "home" ? "" : LS.get("zd-space") || "", c = k ? spcGet(k) : null;
+if (c && (c.autof || c.iso)) { if (FOCUS !== "sp:" + k) { FOCUS = "sp:" + k; FSC = null; LS.set("zd-focus", FOCUS); } LS.set("zd-focauto", k); return; }
+if (a) { if (FOCUS === "sp:" + a) { FOCUS = ""; FSC = null; LS.del("zd-focus"); } LS.del("zd-focauto"); }
 }
 function spcDefPid() {
 var k = V === "sp" ? ARG : /^sp:/.test(FOCUS) ? FOCUS.slice(3) : "", c = k ? spcGet(k) : null;
@@ -16144,20 +16164,20 @@ return h;
 }
 function spcBar(k) {
 var foc = FOCUS === "sp:" + k, can = spcCanFocus(k), iso = (spcGet(k) || {}).iso;
-return '<div class="r spcbar">' + (iso ? '<a class="btn sm" href="#spced-' + esc(k) + '" title="Карточки рабочего стола показывают только дела этого пространства. Настроить — здесь">🔒 Изолированное</a>' : "") + '<button type="button" class="btn sm pri" data-a="spzplus" data-x="' + esc(k) + '" title="Что можно создать в этом пространстве">＋ Создать</button><button type="button" class="btn sm' + (foc ? " pri" : "") + '" data-a="spcfocus" data-x="' + esc(k) + '"' + (can || foc ? "" : ' title="Добавьте в пространство проекты или цели — тогда фокус покажет только их задачи"') + ">🎯 " + (foc ? "Выйти из фокуса" : "Фокус") + '</button><button type="button" class="btn sm" data-a="hzed">' + (HZED ? "✓ Готово" : "✎ Рабочий стол") + '</button><a class="btn sm" href="#spced-' + esc(k) + '">⚙ Настроить пространство</a></div>';
+return '<div class="r spcbar">' + (iso ? '<a class="btn sm" href="#spced-' + esc(k) + '" title="Пока вы в этом пространстве, все разделы показывают только его. Настроить — здесь">🔒 Изолированное</a>' : "") + '<button type="button" class="btn sm pri" data-a="spzplus" data-x="' + esc(k) + '" title="Что можно создать в этом пространстве">＋ Создать</button>' + (iso ? "" : '<button type="button" class="btn sm' + (foc ? " pri" : "") + '" data-a="spcfocus" data-x="' + esc(k) + '"' + (can || foc ? "" : ' title="Добавьте в пространство проекты или цели — тогда фокус покажет только их задачи"') + ">🎯 " + (foc ? "Выйти из фокуса" : "Фокус") + "</button>") + '<button type="button" class="btn sm" data-a="hzed">' + (HZED ? "✓ Готово" : "✎ Рабочий стол") + '</button><a class="btn sm" href="#spced-' + esc(k) + '">⚙ Настроить пространство</a></div>';
 }
 function spcTasksCard() {
 if (V !== "sp" || !SPZ[ARG] || !spcCanFocus(ARG)) return "";
 var fs = spcFocusSet(ARG), l = live(S.tasks).filter(function (t) { return !t.done && !t.canc && !t.del && fsHas(fs, t); }).sort(cmpBy("smart"));
 if (!l.length) return '<p class="muted">Открытых задач нет — всё сделано.</p>';
-return l.slice(0, 8).map(function (t) { return hzRow(t); }).join("") + (l.length > 8 ? '<a class="muted" href="#all" data-a="spcfocus" data-x="' + esc(ARG) + '">ещё ' + (l.length - 8) + " — в фокусе пространства</a>" : "");
+return l.slice(0, 8).map(function (t) { return hzRow(t); }).join("") + (l.length > 8 ? '<a class="muted" href="#all"' + ((spcGet(ARG) || {}).iso || FOCUS === "sp:" + ARG ? "" : ' data-a="spcfocus" data-x="' + esc(ARG) + '"') + ">ещё " + (l.length - 8) + " — в фокусе пространства</a>" : "");
 }
 var SPCD = null, SPCQ = "";
 function spcDraft(k) {
 if (SPCD && SPCD.k === k) return SPCD;
 var c = spcGet(k), o = spcOv(k) || {};
 if (k === "new") SPCD = { k: "new", n: "", ic: "⭐", img: "", items: [], desk: ["spt", "top", "now", "cont"], tpl: "blank", iso: true, autof: false, tagm: false, defp: "" };
-else if (c) SPCD = { k: k, n: c.n || "", ic: c.ic || "⭐", img: c.img || "", items: JSON.parse(JSON.stringify(c.items || [])), iso: !!c.iso, autof: !!c.autof, tagm: !!c.tagm, defp: c.defp || "" };
+else if (c) SPCD = { k: k, n: c.n || "", ic: c.ic || "⭐", img: c.img || "", items: JSON.parse(JSON.stringify(c.items || [])), iso: !!c.iso, autof: !!c.autof, tagm: !!c.tagm, defp: c.defp || "", habs: (c.habs || []).slice() };
 else SPCD = { k: k, n: o.n || SPCORIG[k].z[1], ic: o.ic || SPCORIG[k].z[0], img: o.img || "", items: JSON.parse(JSON.stringify(o.items || SPCDEF[k] || [])), base: true };
 SPCQ = ""; return SPCD;
 }
@@ -16201,9 +16221,10 @@ if (!D0.base) {
 var ps = D0.items.filter(function (it) { return it.t === "p" && proj(it.id); }).map(function (it) { return proj(it.id); }), dp = spcDraftDefp(D0);
 var ck = function (x, lab) { return '<label class="chk"><input type="checkbox" data-a="spcopt" data-x="' + x + '"' + (D0[x] ? " checked" : "") + "> " + lab + "</label>"; };
 h += '<div class="spcsec"><div class="lbl">🔒 Изоляция</div>' +
-ck("iso", "<b>Изолированное пространство</b> — карточки рабочего стола («★ Главное на сегодня», «↩ Продолжить», «📊 Прогресс дня», «⚠ Требует внимания», «⏱ Сейчас») показывают только его дела, а ★ главного здесь свои") +
-ck("autof", "<b>Фокус, пока я здесь</b> — списки, поиск и календарь тоже показывают только это пространство; на Главной и в другом пространстве фокус снимается сам") +
+ck("iso", "<b>Изолированное пространство</b> — пока вы в нём, все разделы показывают только его: задачи, «Сегодня» и календарь, аналитика, «День за днём», отчёты, заметки, цели, привычки; карточки рабочего стола — только его дела, ★ главного здесь свои") +
+(D0.iso ? "" : ck("autof", "<b>Фокус, пока я здесь</b> — списки, поиск и календарь тоже показывают только это пространство; на Главной и в другом пространстве фокус снимается сам")) +
 ck("tagm", "<b>Теги из меню тоже считаются</b> — задача с таким тегом относится к пространству, даже если она в другом проекте") +
+(D0.iso ? '<div class="lbl">Привычки пространства</div><div class="chips">' + (habits().filter(function (h) { return !h.arch; }).map(function (h) { var on = (D0.habs || []).indexOf(h.id) >= 0 || h.sp === k; return '<button type="button" class="chip' + (on ? " on" : "") + '" data-a="spchab" data-x="' + h.id + '"' + (h.sp === k ? ' disabled title="Создана в этом пространстве"' : "") + ">" + (on ? "✓ " : "＋ ") + esc((h.ic ? h.ic + " " : "") + h.n) + "</button>"; }).join("") || '<span class="muted">Привычек пока нет</span>') + "</div>" : "") +
 '<div class="lbl">Проект для новых задач</div><div class="chips">' + ps.map(function (p) { return '<button type="button" class="chip' + (dp === p.id ? " on" : "") + '" data-a="spcdefp" data-x="' + p.id + '">' + (dp === p.id ? "✓ " : "") + esc(p.n) + "</button>"; }).join("") +
 '<button type="button" class="chip' + (dp ? "" : " on") + '" data-a="spcdefp" data-x="-">' + (dp ? "" : "✓ ") + "Не выбран</button></div>" +
 '<p class="muted">' + (ps.length ? "Задача, созданная на странице пространства или в его фокусе, попадёт в этот проект — и сразу будет видна здесь." : "Добавьте в меню проект — тогда новые задачи из пространства будут попадать в него.") +
@@ -16273,6 +16294,7 @@ case "spcdel": D0.items.splice(+x, 1); render(); return true;
 case "spcaddh": D0.items.push({ t: "h", n: "Группа" }); render(); return true;
 case "spcpick": var t = el.dataset.t, f = -1; D0.items.forEach(function (q, n) { if (q.t === t && (q.id === x || q.k === x)) f = n; }); if (f >= 0) D0.items.splice(f, 1); else D0.items.push(t === "r" || t === "x" ? { t: t, k: x } : { t: t, id: x }); render(); return true;
 case "spcopt": D0[x] = !D0[x]; render(); return true;
+case "spchab": D0.habs = D0.habs || []; var hi2 = D0.habs.indexOf(x); if (hi2 >= 0) D0.habs.splice(hi2, 1); else D0.habs.push(x); render(); return true;
 case "spcdefp": D0.defp = x; render(); return true;
 case "spcdk": var di = D0.desk.indexOf(x); if (di >= 0) D0.desk.splice(di, 1); else D0.desk.push(x); render(); return true;
 case "spccancel": var back = D0.k === "new" ? "home" : spzHref(D0.k); SPCD = null; go(back); return true;
@@ -16285,14 +16307,14 @@ var sk = D0.k;
 if (sk === "new") {
 sk = "c" + uid().replace(/[^a-z0-9]/gi, "").toLowerCase().slice(0, 9);
 var dsk = D0.desk.slice(); if (dsk.indexOf("spt") < 0 && D0.items.some(function (q) { return q.t === "p" || q.t === "g"; })) dsk.unshift("spt");
-spcSave(function (d) { d.l.push({ id: sk, n: nm, ic: D0.ic, img: D0.img, items: D0.items, iso: !!D0.iso, autof: !!D0.autof, tagm: !!D0.tagm, defp: D0.defp === "-" ? "-" : spcDraftDefp(D0), desk: { homec: dsk, homeh: HZC.map(function (c) { return c[0]; }).filter(function (c) { return dsk.indexOf(c) < 0; }), homecols: 2 } }); });
+spcSave(function (d) { d.l.push({ id: sk, n: nm, ic: D0.ic, img: D0.img, items: D0.items, iso: !!D0.iso, autof: !!D0.autof, tagm: !!D0.tagm, defp: D0.defp === "-" ? "-" : spcDraftDefp(D0), habs: (D0.habs || []).slice(), desk: { homec: dsk, homeh: HZC.map(function (c) { return c[0]; }).filter(function (c) { return dsk.indexOf(c) < 0; }), homecols: 2 } }); });
 toast("Пространство «" + nm + "» создано — значок на полосе слева");
 } else if (D0.base) {
 var O = SPCORIG[sk].z; spcSave(function (d) { var o = d.ov[sk] = d.ov[sk] || {}; o.items = D0.items; if (nm && nm !== O[1]) o.n = nm; else delete o.n; if (D0.img) o.img = D0.img; else delete o.img; if (D0.ic && D0.ic !== O[0]) o.ic = D0.ic; else delete o.ic; });
 toast("Сохранено");
 } else {
-spcSave(function (d) { var c = d.l.filter(function (q) { return q.id === sk; })[0]; if (c) { c.n = nm; c.ic = D0.ic; c.img = D0.img; c.items = D0.items; c.iso = !!D0.iso; c.autof = !!D0.autof; c.tagm = !!D0.tagm; c.defp = D0.defp === "-" ? "-" : spcDraftDefp(D0); } });
-if (!D0.autof && LS.get("zd-focauto") === sk) { if (FOCUS === "sp:" + sk) { FOCUS = ""; FSC = null; LS.del("zd-focus"); } LS.del("zd-focauto"); }
+spcSave(function (d) { var c = d.l.filter(function (q) { return q.id === sk; })[0]; if (c) { c.n = nm; c.ic = D0.ic; c.img = D0.img; c.items = D0.items; c.iso = !!D0.iso; c.autof = !!D0.autof; c.tagm = !!D0.tagm; c.habs = (D0.habs || []).slice(); c.defp = D0.defp === "-" ? "-" : spcDraftDefp(D0); } });
+if (!D0.autof && !D0.iso && LS.get("zd-focauto") === sk) { if (FOCUS === "sp:" + sk) { FOCUS = ""; FSC = null; LS.del("zd-focus"); } LS.del("zd-focauto"); }
 toast("Сохранено");
 }
 FSC = null; SPCD = null; cpSet(sk); LS.set("zd-sideoff", "0"); go(spzHref(sk)); return true;
@@ -16700,17 +16722,17 @@ case "gdok": if (g) { g.gdOk = 1; touch(g); save(); render(); } return true;
 return false;
 }
 function vStats() {
-var days = perDays(), t0 = today0(), from = addDays(t0, -days + 1), ev = doneEvents().filter(function (e) { return e.d >= from; }), pom = live(S.acts).filter(function (a) { return a.k === "pomo" && a.d >= from; });
+var days = perDays(), t0 = today0(), from = addDays(t0, -days + 1), ev = doneEventsF().filter(function (e) { return e.d >= from; }), pom = actsF().filter(function (a) { return a.k === "pomo" && a.d >= from; });
 var per = []; for (var i = 0; i < days; i++) { var d = addDays(from, i), e2 = addDays(d, 1); per.push({ l: days <= 14 ? WDS[new Date(d).getDay()] : String(new Date(d).getDate()), title: dayName(d), v: ev.filter(function (e) { return e.d >= d && e.d < e2; }).length, drl: ["done", d + "," + e2] }); }
-var created = S.tasks.filter(function (t) { return (t.created || 0) >= from && !t.purged; }).length, late = tasks().filter(function (t) { return isLate(t); }).length, open = tasks().filter(function (t) { return !t.done; }).length;
-var all = doneEvents(), dset = {}; all.forEach(function (e) { dset[dKey(e.d)] = 1; });
+var created = tasksF().filter(function (t) { return (t.created || 0) >= from && !t.purged; }).length, late = tasks().filter(function (t) { return isLate(t); }).length, open = tasks().filter(function (t) { return !t.done; }).length;
+var all = doneEventsF(), dset = {}; all.forEach(function (e) { dset[dKey(e.d)] = 1; });
 var cs = 0, d0 = dset[dKey(t0)] ? t0 : addDays(t0, -1); while (dset[dKey(d0)]) { cs++; d0 = addDays(d0, -1); }
 var keys = Object.keys(dset).sort(), best = 0, run = 0, prev = null; keys.forEach(function (k) { var ms = new Date(k + "T00:00").getTime(); run = prev !== null && Math.round((ms - prev) / DAY) === 1 ? run + 1 : 1; prev = ms; if (run > best) best = run; });
 var byP = {}; ev.forEach(function (e) { var t = S.tasks.filter(function (x) { return x.id === e.t; })[0], k = t && t.pid && proj(t.pid) ? t.pid : ""; byP[k] = (byP[k] || 0) + 1; });
 var pr = Object.keys(byP).map(function (k) { var p = proj(k); return { l: p ? picon(p) + " " + p.n : "📥 Входящие", v: byP[k], c: p ? col(p.c) : "var(--muted)", k: k }; }).sort(function (a, b) { return b.v - a.v; }).slice(0, 8);
 var wd = [0, 0, 0, 0, 0, 0, 0]; ev.forEach(function (e) { wd[(new Date(e.d).getDay() + 6) % 7]++; });
-var hl = habits().filter(function (h) { return !h.arch; }), hr = hl.length ? Math.round(hl.reduce(function (a, h) { return a + hRate(h, days); }, 0) / hl.length) : null;
-var trk = live(S.acts).filter(function (a) { return a.k === "time" && a.d >= from; }).reduce(function (a, x) { return a + (+x.m || 0); }, 0);
+var hl = habitsF().filter(function (h) { return !h.arch; }), hr = hl.length ? Math.round(hl.reduce(function (a, h) { return a + hRate(h, days); }, 0) / hl.length) : null;
+var trk = actsF().filter(function (a) { return a.k === "time" && a.d >= from; }).reduce(function (a, x) { return a + (+x.m || 0); }, 0);
 var h = head("📈 Аналитика", "Статистика, время, баланс сфер, уровень, итоги месяца и отчёты — в одном месте. Цифры, столбики и строки можно нажать — откроется список записей, из которых они посчитаны.");
 h += '<div class="tbar">' + anlTabs(/^(time|bal|xp)$/.test(STTAB) ? STTAB : "ov") + '<a class="btn sm" href="#report-w0" title="Отчёт за неделю или месяц — можно сохранить в PDF">📄 Отчёт недели</a>' + perSegHTML(days) + "</div>";
 if (STTAB === "time") return h + vTime(days);
@@ -19512,7 +19534,7 @@ add("Действия", "/", "Команды: начните ввод с «/»",
 add("Действия", "▦", "Все разделы", "Alt+A", function () { appSheet(true); });
 add("Действия", "🔔", "Уведомления", "Alt+B", function () { ntfShow(true, document.querySelector(".rlb[data-r=ntf]") || $("ntfBtn")); });
 nsecs().forEach(function (x) { add("Разделы заметок", "📁", nsPath(x).map(function (y) { return y.n; }).join(" / "), "", function () { go("nsec-" + x.id); }); });
-if (ws.length) notes().forEach(function (n) { if (hit((n.t || "") + " " + noteText(n).slice(0, 400))) add("Заметки", "📝", n.t || "Без названия", noteText(n).slice(0, 60), function () { go("note-" + n.id); }); });
+if (ws.length) notesF().forEach(function (n) { if (hit((n.t || "") + " " + noteText(n).slice(0, 400))) add("Заметки", "📝", n.t || "Без названия", noteText(n).slice(0, 60), function () { go("note-" + n.id); }); });
 projects().filter(function (p) { return !isArch(p.id); }).forEach(function (p) { add("Проекты", piconH(p), pname(p), (function (n) { return n + " " + plural(n, ["задача", "задачи", "задач"]); })(tasks().filter(function (t) { return t.pid === p.id && !t.done; }).length), function () { go("proj-" + p.id); }); });
 filters().forEach(function (f) { add("Фильтры", "⛃", f.n, "", function () { go("filter-" + f.id); }); });
 tags().forEach(function (g) { add("Теги", "#", g.n, "", function () { go("tag-" + g.n); }); });
