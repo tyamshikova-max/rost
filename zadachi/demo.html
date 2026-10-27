@@ -8540,7 +8540,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-268";
+var APPV = "zd-app-2026-10-16-269";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -18422,6 +18422,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["269", "🌱 Первый запуск спокойнее, главная проще", ["Новому человеку на главной теперь показывают по одному вопросу за раз: сначала оформление, потом «Для чего вам приложение?», и только потом «Первые шаги». Пока вопрос на экране, подсказки дня («Вечер — закройте день» и другие) не мешают.", "«✎ Настроить главную» → «Простая главная»: одной кнопкой прячет цикл планирования, прогресс дня, уровень и очки, самочувствие и советника. Вернуть всё — «↺ Как было»; отдельные карточки — «＋» под списком скрытых."]],
 ["268", "🧹 Меньше лишнего над списком задач", ["«Сегодня»: шкала дня, «Расставить по времени» и нагрузка собраны в одну строку «📊 День · Запланировано … ч». Привычки и кнопки планирования остались на виду, список задач начинается выше.", "«Советник» на страницах задач, спринта и целей по умолчанию свёрнут до строки «N советов»: нажмите на заголовок, чтобы развернуть, — выбор запоминается.", "Вернуть всё как раньше: «Настройки» → «Общие» → «Советы в «Сегодня»» — снять галочку; советник — кнопка ▸ в его заголовке."]],
 ["267", "☰ Меню задачи помещается на экран", ["Контекстное меню задачи (правый клик, долгое нажатие) было длиннее экрана: нижние пункты, включая «Удалить», нельзя было достать. Теперь меню прокручивается, если не помещается, и сделано короче.", "Сверху — частое: «Открыть», дата, «Завершить», «Отложить», приоритет, флажок, проект, теги, подзадача. Редкое — в пункте «Ещё»: помодоро, учёт времени, закрепить, избранное, «Сначала сделать», копирование, дублирование, ссылка. Сочетания клавиш работают как раньше."]],
 ["266", "🗂 Карточка задачи короче", ["В карточке задачи пустые и редко нужные поля («Матрица», «Дедлайн», «Спринт», «Ответственный», «Учёт времени», «Напоминание» и другие) теперь свёрнуты и на большом экране: описание и подзадачи видны сразу, без прокрутки.", "Под полями — строка «Ещё поля: …» с названиями спрятанного; нажмите, чтобы показать всё. Выбор запоминается.", "«Матрица» считается из приоритета, флажка и срока, поэтому тоже лежит в «Ещё поля»."]],
@@ -20375,7 +20376,7 @@ if (/^w:/.test(k)) return hzWCard(k);
 var t0 = today0(), b = "", more = "", isk = spcIsoK(), ifs = isk ? spcFocusSet(isk) : null, inS = function (t) { return !ifs || (!!t && fsHas(ifs, t)); };
 try {
 if (k === "fst") {
-if (!fstShow()) return "";
+if (!fstShow() || HZONB) return "";
 var st = fstSteps(), dn = st.filter(function (x) { return x[3]; }).length;
 b = '<div class="fstp">' + appBar(dn / st.length * 100) + "<small>" + dn + " из " + st.length + "</small></div>" + st.map(function (x) { return '<div class="fstr' + (x[3] ? " ok" : "") + '"><span class="fstc">' + (x[3] ? "✓" : "") + "</span><div><b>" + x[1] + "</b><small>" + x[2] + "</small></div>" + (x[3] ? "" : x[4]) + "</div>"; }).join("");
 more = '<button type="button" class="ibtn" data-a="fstoff" title="Скрыть «Первые шаги»" aria-label="Скрыть">✕</button>';
@@ -20438,14 +20439,16 @@ more = '<a class="ibtn" href="#health" title="Самочувствие полн�
 var ed = HZED ? '<span class="hzed"><button type="button" class="ibtn" data-a="hzmv" data-x="' + k + '" data-d="-1" title="Выше" aria-label="Выше">↑</button><button type="button" class="ibtn" data-a="hzmv" data-x="' + k + '" data-d="1" title="Ниже" aria-label="Ниже">↓</button><button type="button" class="ibtn" data-a="hzhide" data-x="' + k + '" title="Скрыть карточку" aria-label="Скрыть">✕</button></span>' : more;
 return '<section class="card hzc hz-' + k + '" data-hz="' + k + '"><div class="hzh"><b>' + hzName(k) + "</b>" + ed + "</div>" + b + "</section>";
 }
+var HZONB = false;
 function vHome() {
 var d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }), nm = String(S.opt.shname && S.opt.shname !== "Я" ? S.opt.shname : "").trim();
 var h = head(hzGreet() + (nm ? ", " + esc(nm) : ""), d.charAt(0).toUpperCase() + d.slice(1));
-h += motHeadHTML(true) + remFiredHTML() + hzSug() + hzWeekSug();
-h += stPickHTML();
+var sp = stPickHTML(), mq = sp ? "" : hzModQ(); HZONB = !!(sp || mq);
+h += motHeadHTML(true) + remFiredHTML() + (HZONB ? "" : hzSug() + hzWeekSug());
+h += sp;
 h += '<div class="hzq"><input class="inp" id="hzq" type="text" placeholder="Записать задачу: «завтра в 10 позвонить маме #дела» — Enter" autocomplete="off" aria-label="Новая задача"><button type="button" class="btn mic" data-a="mic" data-for="hzq" title="Надиктовать задачу" aria-label="Надиктовать задачу">🎤</button><button type="button" class="btn mic" data-a="imgt" title="Задачи с картинки: скриншот расписания, записи, списка дел" aria-label="Задачи с картинки">📷</button><button type="button" class="btn pri" data-a="hzadd">＋</button></div>';
 var hid = hzHid();
-h += hzModQ() + '<div class="hzgrid' + (HZED ? " hzedit" : "") + '">' + hzLayout(hzOrder().filter(function (k) { return hid.indexOf(k) < 0; })) + "</div>";
+h += mq + '<div class="hzgrid' + (HZED ? " hzedit" : "") + '">' + hzLayout(hzOrder().filter(function (k) { return hid.indexOf(k) < 0; })) + "</div>";
 if (HZED) h += hzEdBlock("Настройка главной");
 h += '<h3 class="apph">Пространства</h3>' + spzTiles();
 h += '<div class="r hzfoot"><button type="button" class="btn sm" data-a="hzed">' + (HZED ? "✓ Готово" : "✎ Настроить главную") + '</button><a class="btn sm" href="#apps">▦ Все разделы</a><a class="btn sm" href="#mods">🧩 Модули</a></div>';
@@ -20535,7 +20538,8 @@ case "hzqf": var q2 = $("hzq"); if (q2) { q2.focus(); q2.scrollIntoView({ block:
 case "hzed": HZED = !HZED; render(); return true;
 case "hzmv": L = hzOrder(); var j = L.indexOf(x), k = j + (+el.dataset.d); if (j < 0 || k < 0 || k >= L.length) return true; L.splice(j, 1); L.splice(k, 0, x); HZS().homec = L; optTouch(); save(); render(); return true;
 case "hzhide": if (/^w:/.test(x)) { hzWDel(x); return true; } var hh = hzHid().slice(); if (hh.indexOf(x) < 0) hh.push(x); HZS().homeh = hh; optTouch(); save(); render(); return true;
-case "hzshow": HZS().homeh = hzHid().filter(function (z) { return z !== x; }); optTouch(); save(); render(); return true;
+case "hzlean": var hl = hzHid().slice(); ["cyc", "prog", "xp", "well", "pav"].forEach(function (k) { if (hl.indexOf(k) < 0) hl.push(k); }); HZS().homeh = hl; optTouch(); save(); render(); toast("Главная упрощена. Вернуть всё — «✎ Настроить главную» → «↺ Как было»"); return true;
+case "hzshow": HZS().homeh =hzHid().filter(function (z) { return z !== x; }); optTouch(); save(); render(); return true;
 case "hzreset": delete HZS().homec; delete HZS().homeh; delete HZS().homecol; delete HZS().homewide; delete HZS().homespan; delete HZS().homecols; if (HZS() !== S.opt) HZS().homeh = HZC.map(function (c) { return c[0]; }); optTouch(); save(); render(); return true;
 case "hzctx": var b = $("ctxBtn"); if (b) { var hd = b.hidden; b.hidden = false; b.click(); b.hidden = hd; var m = $("ctx"), rr = el.getBoundingClientRect(); if (m && !m.hidden) place(m, rr.left, rr.bottom + 4); } return true;
 case "fstoff": S.opt.fstoff = 1; optTouch(); save(); render(); toast("«Первые шаги» скрыты. Вернуть — «✎ Настроить главную»"); return true;
@@ -20720,7 +20724,7 @@ row("Фоновые расчёты", x.bg, "уже после показа: ав
 var HZDRAG = "", HZRS = null, HZMO = null, HZMT = 0;
 function hzEdBlock(title) {
 var hid = hzHid(), hs = hid.filter(function (k) { return HZC.some(function (c) { return c[0] === k; }); });
-return '<div class="card hzedb"><b>' + title + '</b>' + hzColsHTML() + '<p class="muted">Перетаскивайте карточки мышью за ⠿ — куда угодно, в том числе в другую колонку; ширину меняйте, потянув за уголок справа внизу карточки (это можно и без режима настройки). Здесь: ↑ ↓ — порядок, ← → — в соседнюю колонку, ↔ — ширина в колонках, ✕ — скрыть. Свои карточки — любой виджет, как на досках:</p><div class="r" style="gap:8px;margin:0 0 10px"><button type="button" class="btn sm" data-a="hzwnew">＋ Новая карточка…</button><button type="button" class="btn sm" data-a="hzwpick">＋ Виджет с доски…</button></div><p class="muted">Скрытые можно вернуть:</p><div class="chips">' + (hs.length ? hs.map(function (k) { return '<button type="button" class="chip" data-a="hzshow" data-x="' + k + '">＋ ' + hzName(k) + "</button>"; }).join("") : '<span class="muted">скрытых нет</span>') + (S.opt.fstoff ? '<button type="button" class="chip" data-a="fston">＋ 🚀 Первые шаги</button>' : "") + '</div><div class="r" style="gap:8px;margin-top:10px"><button type="button" class="btn pri" data-a="hzed">Готово</button><button type="button" class="btn" data-a="hzreset">↺ Как было</button></div></div>';
+return '<div class="card hzedb"><b>' + title + '</b>' + hzColsHTML() + '<p class="muted">Перетаскивайте карточки мышью за ⠿ — куда угодно, в том числе в другую колонку; ширину меняйте, потянув за уголок справа внизу карточки (это можно и без режима настройки). Здесь: ↑ ↓ — порядок, ← → — в соседнюю колонку, ↔ — ширина в колонках, ✕ — скрыть. Свои карточки — любой виджет, как на досках:</p><div class="r" style="gap:8px;margin:0 0 10px"><button type="button" class="btn sm" data-a="hzwnew">＋ Новая карточка…</button><button type="button" class="btn sm" data-a="hzwpick">＋ Виджет с доски…</button></div><p class="muted">Скрытые можно вернуть:</p><div class="chips">' + (hs.length ? hs.map(function (k) { return '<button type="button" class="chip" data-a="hzshow" data-x="' + k + '">＋ ' + hzName(k) + "</button>"; }).join("") : '<span class="muted">скрытых нет</span>') + (S.opt.fstoff ? '<button type="button" class="chip" data-a="fston">＋ 🚀 Первые шаги</button>' : "") + '</div><div class="r" style="gap:8px;margin-top:10px"><button type="button" class="btn pri" data-a="hzed">Готово</button><button type="button" class="btn" data-a="hzlean" title="Скрыть цикл планирования, прогресс дня, уровень и очки, самочувствие и советника">Простая главная</button><button type="button" class="btn" data-a="hzreset">↺ Как было</button></div></div>';
 }
 function hzN() { var n = +HZS().homecols; return n >= 1 && n <= 4 ? Math.round(n) : 2; }
 function hzColOf(k, i) { var m = HZS().homecol || {}, n = hzN(); return typeof m[k] === "number" ? Math.max(0, Math.min(n - 1, m[k])) : i % n; }
