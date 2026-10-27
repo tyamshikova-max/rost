@@ -932,6 +932,7 @@ html.glass .side { backdrop-filter: blur(var(--blur)) saturate(1.4); -webkit-bac
 html.glass #ctx, html.glass #ctx2, html.glass #slash, html.glass #fmt, html.glass .tagdd, html.glass #pomo, html.glass .add.qfloat, html.glass #pal .box {
 background: var(--pop); backdrop-filter: blur(calc(var(--blur) + 8px)) saturate(1.7); -webkit-backdrop-filter: blur(calc(var(--blur) + 8px)) saturate(1.7) }
 html.glass #pal input { background: transparent }
+html.glass .npage .nmain, html.glass .npage.hasside > .nside { background: color-mix(in srgb, var(--solid) 84%, transparent); backdrop-filter: blur(var(--blur)) saturate(1.4); -webkit-backdrop-filter: blur(var(--blur)) saturate(1.4); border-radius: 18px; box-shadow: 0 6px 22px rgba(0, 0, 0, .06) } html.glass .npage .nmain { padding: 14px 26px 26px 48px } html.glass .npage.hasside > .nside { padding: 14px 16px; border-left: 0 } @media (hover: none) { html.glass .npage .nmain { padding: 12px 16px 20px } }
 html.glass #pal { background: rgba(0, 0, 0, .18); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px) }
 html.glass .card, html.glass .wdg, html.glass .hdet, html.glass .btc { box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 6px 22px rgba(0, 0, 0, .05) }
 html.glass .inp, html.glass input[type="text"], html.glass input[type="search"], html.glass textarea { background-color: color-mix(in srgb, var(--solid) 55%, transparent) }
@@ -3368,7 +3369,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-252";
+var APPV = "zd-app-2026-10-16-253";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -12974,6 +12975,7 @@ var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
 ["238", "Заметки: создать по-разному, загрузить из файла, фильтр по разделу", ["«+» в панели «Знаний» — меню: пустая заметка, карта мыслей, холст, из шаблона, заметка из файла, карта мыслей из файла. То же — в «📋 Из шаблона ▾» в разделе.", "📂 в любой открытой заметке — загрузить из файла: Markdown, HTML или текст встают с оформлением (заголовки, списки, галочки, таблицы, ссылки); в пустую — вместо текста, в заполненную — в конец (прежний вариант — в истории страницы). В карте мыслей: пустая заполняется из файла (XMind, OPML, FreeMind, Markdown, HTML), в непустую файл встаёт веткой — под выбранный узел.", "В списке всех заметок — фильтр «Раздел»: любая папка (вместе с вложенными) или «без раздела», рядом с фильтрами «Тип» и «Статус».", "Теги в панели «Знаний» — свёрнутой строкой «◆ Теги · N»: развёрнуто — 8 самых используемых и «Все теги →» (страница с поиском и облаком тегов). Поле «Теги» в заметке подсказывает существующие теги."]],
+["253", "🔗 Ссылки следуют за названием, подложка под заметкой", ["Переименовали страницу или задачу — ссылки на неё в заметках, задачах, описаниях проектов и записях дня получают новое название (если текст ссылки совпадал с прежним; ссылки со своим текстом не меняются).", "Со стилем «Стекло» и обоями у страницы заметки и колонки связей — полупрозрачная подложка: текст хорошо читается на любом фоне."]],
 ["252", "📝 Удобный редактор заметок", ["Страница заметки — как в Notion: текст на всю страницу без рамки, заголовок крупнее, обложка ниже.", "Свойства — одной строкой под заголовком (тип, теги, статус, задачи, файлы); нажмите — раскроются все. Пустые не мешают.", "Справа — колонка связей: оглавление, вложенные страницы, «Ссылаются сюда», задачи, файлы.", "Кнопки под текстом, «Раздел» и «Вложить в страницу» — в меню «•••» справа вверху. Там же «Во всю ширину», «Мелкий шрифт» и «Только текст» (Ctrl+Shift+F).", "«/» — «Вложенная страница», «Файл», «Привязать задачу»; выделите текст → «☐ Задача»."]],
 ["251", "🔒 Изолированное пространство", ["В настройке своего пространства — блок «🔒 Изоляция». Карточки рабочего стола («★ Главное на сегодня», «↩ Продолжить», «📊 Прогресс дня», «⚠ Требует внимания», «⏱ Сейчас») показывают только дела этого пространства.", "★ главного у пространства свои — общий план дня они не меняют.", "«Проект для новых задач»: созданная в пространстве задача сразу попадает в его проект.", "По желанию: «Фокус, пока я здесь» — списки, поиск и календарь тоже только по пространству; «Теги из меню тоже считаются»."]],
 ["250", "📖 Справка снова открывается", ["Справка зависала на «Загружаю справку…»: в одном разделе была ошибка, из-за которой файл справки не читался. Исправлено, справка открывается сразу.", "Вкладки справки и поиск по ней теперь переключаются быстрее: текст разбирается на разделы один раз."]],
@@ -17172,6 +17174,7 @@ if (NFOCUS && $("ntitle")) { NFOCUS = false; $("ntitle").focus(); }
 var sci = $("secin"); if (sci && document.activeElement !== sci && !rx) sci.focus();
 }
 function updPreview() { var i = $("qa"), pv = $("qpv"); if (!i || !pv) return; var qs = i.value.trim() ? qSplit(i.value) : []; pv.textContent = qs.length > 1 ? "→ " + qs.length + " " + plural(qs.length, ["задача", "задачи", "задач"]) + ": " + qs.map(function (x) { return "«" + (parseQuick(x).t || x) + "»"; }).join(", ") : i.value.trim() ? quickPreview(parseQuick(i.value)) : ""; }
+var NTOLD = {};
 function newTaskFrom(raw, ctx) {
 var q = parseQuick(raw);
 if (q.newProj) q.pid = newProject(q.newProj, "").id;
@@ -18201,7 +18204,7 @@ if (e.target.id === "qa") { QPV = e.target.value; updPreview(); }
 if (e.target.id === "helpq") { HQ = e.target.value; render(); }
 if (e.target.id === "qftext") { qfGet().text = e.target.value; render(); }
 if (e.target.id === "nq") { NQ = e.target.value; render(); }
-if (e.target.id === "ntitle") { var nt2 = note(e.target.dataset.note); if (nt2) { nt2.t = e.target.value.slice(0, 200); touch(nt2); clearTimeout(window.__ntt); window.__ntt = setTimeout(function () { save(); }, 400); } }
+if (e.target.id === "ntitle") { var nt2 = note(e.target.dataset.note); if (nt2) { if (NTOLD.id !== nt2.id) NTOLD = { id: nt2.id, t: nTitle(nt2) }; nt2.t = e.target.value.slice(0, 200); touch(nt2); clearTimeout(window.__ntt); window.__ntt = setTimeout(function () { var nn = linkRename("note", nt2.id, NTOLD.t, nTitle(nt2)); NTOLD = { id: nt2.id, t: nTitle(nt2) }; save(); if (nn) toast("Ссылки на страницу обновлены: " + nn); }, 700); } }
 if (e.target.id === "tpq") { var nt3 = note(ARG), tr = $("tpres"); if (nt3 && tr) tr.innerHTML = noteTaskPick(nt3, e.target.value); }
 if (e.target.id === "npq") { var tk = task(OPEN), npr = $("npres"); if (tk && npr) npr.innerHTML = taskNotePick(tk, e.target.value); }
 if (e.target.id === "q") { if (V !== "search") go("search"); else render(); $("q").focus(); }
@@ -18458,8 +18461,19 @@ if (be && be.id === "nrte") { var nb = note(be.dataset.note); if (nb && document
 if (be && be.id === "drte") { if (!document.contains(be)) return; var dk = be.dataset.day, dr = dayRecOf(dk), dh = bodyEmpty(be) ? "" : clean(be.innerHTML); if (dh !== ((dr && dr.nb) || "")) { dr = dr || dayRecOf(dk, true); dr.nb = dh; dr.note = dnText(dh).slice(0, 5000); touch(dr); save(); } return; }
 if (be && be.id === "prte") { var pp = proj(be.dataset.proj); if (pp && document.contains(be)) { var pb = bodyEmpty(be) ? "" : clean(be.innerHTML); if (pb !== (pp.body || "")) { pp.body = pb; touch(pp); save(); } } return; }
 var t = task(OPEN), r = $("rte"); if (!t || !r) return; var b = bodyEmpty(r) ? "" : clean(r.innerHTML); if (b !== (t.body || "")) { t.body = b; delete t.note; touch(t); save(); render(); } }
+function linkRename(kind, id, oldT, newT) {
+oldT = String(oldT || "").trim(); newT = String(newT || "").trim(); if (!oldT || !newT || oldT === newT) return 0;
+var href = "#" + kind + "-" + id, cnt = 0, fix = function (o, f) {
+var b = o[f]; if (!b || b.indexOf('href="' + href + '"') < 0) return;
+TXTD.innerHTML = b; var ch = false;
+[].forEach.call(TXTD.querySelectorAll('a[href="' + href + '"]'), function (a) { var m = /^(📄\s*|☐\s*|✓\s*)?([\s\S]*)$/.exec(a.textContent), pre = m[1] || ""; if (m[2].trim() === oldT) { a.textContent = pre + newT.slice(0, 80); ch = true; } });
+if (ch) { o[f] = TXTD.innerHTML; touch(o); cnt++; }
+};
+live(S.notes).forEach(function (o) { fix(o, "body"); }); live(S.tasks).forEach(function (o) { fix(o, "body"); }); live(S.projects).forEach(function (o) { fix(o, "body"); }); live(S.days).forEach(function (o) { fix(o, "nb"); });
+if (cnt) save(); return cnt;
+}
 function flushBody() { if (BT) saveBody(); if (TT) saveTitle(); }
-function saveTitle() { clearTimeout(TT); TT = null; var t = task(OPEN), el = $("pn-t"); if (!t || !el) return; var v = el.value.replace(/\s+/g, " ").trim(); if (v && v !== t.t) { t.t = v.slice(0, 1000); touch(t); save(); render(); } }
+function saveTitle() { clearTimeout(TT); TT = null; var t = task(OPEN), el = $("pn-t"); if (!t || !el) return; var v = el.value.replace(/\s+/g, " ").trim(); if (v && v !== t.t) { var ot = t.t; t.t = v.slice(0, 1000); touch(t); linkRename("task", t.id, ot, t.t); save(); render(); } }
 function bodyLater() { var r = rteEl(); if (BTE && BTE !== r) saveBody(); BTE = r; clearTimeout(BT); BT = setTimeout(saveBody, 500); }
 $("panel").addEventListener("click", function (e) {
 var mb = e.target.closest('[data-a="mic"]'); if (mb) { voice(mb); return; }
