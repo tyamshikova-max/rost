@@ -3474,7 +3474,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-284";
+var APPV = "zd-app-2026-10-16-285";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -9659,8 +9659,8 @@ fcSync(today0()); save(); render(); toast("✓ Записано: " + done.join("
 case "fcenv": var to = el.dataset.to || "", amt = +el.dataset.v || 0, wk = el.dataset.wk; if (!amt) return true; S.env = S.env || []; var nm2 = "";
 if (to.indexOf("g:") === 0) { var gg = goal(to.slice(2)); if (!gg) return true; nm2 = gg.n; S.env.push(touch({ id: uid(), wk: wk, a: amt, to: to, n: nm2 })); svAddOp(gg, amt, "конверт недели " + buWName(new Date(wk + "T00:00").getTime())); return true; }
 var dd2 = live(S.debts || []).filter(function (x) { return x.id === to.slice(2); })[0]; if (!dd2) return true; nm2 = dd2.n; S.dbal = S.dbal || []; S.dbal.push(touch({ id: uid(), debt: dd2.id, d: Date.now(), v: Math.max(0, fcDebtCur(dd2) - amt) })); S.env.push(touch({ id: uid(), wk: wk, a: amt, to: to, n: nm2 })); save(); render(); toast("✓ " + buRub(amt) + " — на «" + nm2 + "». Не забудьте сам платёж в банке."); return true;
-case "chgo": CLTAB = "chal"; LS.set("zd-cltab", "chal"); go("clean"); return true;
-case "fcgo": BUTAB = "fch"; LS.set("zd-butab", "fch"); go("budget"); return true;
+case "chgo": CLTAB = "chal"; LS.set("zd-cltab", "chal"); chFromSet(); go("clean"); return true;
+case "fcgo": BUTAB = "fch"; LS.set("zd-butab", "fch"); chFromSet(); go("budget"); return true;
 case "bupayrem": buSet("payrem", el.dataset.v === "1"); render(); return true;
 case "fcstart": var sd = el.dataset.x === "today" ? dKey(today0()) : ($("fcstartd") || {}).value; delete INPV.fcstartd; if (!sd) { toast("Выберите дату"); return true; } var dd = new Date(sd + "T00:00"); if (dd.getDate() !== 11) toast("Удобнее с 11-го — начала бюджетного периода"); fcSet("start", dd.getTime()); fcSet("on", true); FCVIEW = 0; fcAutoRun(); render(); return true;
 case "fcstop": fcSet("on", false); var t = S.tasks.filter(function (x) { return x.id === fcTid(today0()); })[0]; if (t && !t.done) { t.del = 1; t.delAt = Date.now(); touch(t); save(); } render(); toast("Челлендж остановлен. Долги, желания и дневник сохранены."); return true;
@@ -10448,7 +10448,7 @@ function kcAct(a, el) {
 var id = el.dataset.id;
 switch (a) {
 case "ktab": KTAB = el.dataset.x; LS.set("zd-ktab", KTAB); if (V !== "kitchen") go("kitchen"); else render(); return true;
-case "kcgo": KTAB = "chal"; LS.set("zd-ktab", "chal"); go("kitchen"); return true;
+case "kcgo": KTAB = "chal"; LS.set("zd-ktab", "chal"); chFromSet(); go("kitchen"); return true;
 case "kcstart": var sd = el.dataset.x === "today" ? dKey(today0()) : ($("kcstartd") || {}).value; delete INPV.kcstartd; if (!sd) { toast("Выберите дату старта"); return true; } kcSet("start", new Date(sd + "T00:00").getTime()); kcSet("on", true); KCVIEW = 0; kcAutoRun(); render(); toast("Челлендж начат — задание дня появится в «Сегодня»"); return true;
 case "kcstop": kcSet("on", false); var tt = S.tasks.filter(function (x) { return x.id === kcTid(today0()) && !x.done && !x.del; })[0]; if (tt) { tt.del = 1; tt.delAt = Date.now(); touch(tt); save(); } render(); toast("Челлендж остановлен. Кладовая, чеки и выброшенное сохранены"); return true;
 case "kcday": KCVIEW = el.dataset.x === "0" ? 0 : KCVIEW + (+el.dataset.x || 0); render(); return true;
@@ -12907,7 +12907,7 @@ switch (a) {
 case "bcstart": var sd = el.dataset.x === "mon" ? (new Date(today0()).getDay() === 1 ? today0() : monday(addDays(today0(), 7))) : today0(); bcSet("start", sd); bcSet("on", true); bcAutoRun(); render(); toast(sd === today0() ? "Челлендж начат — задача дня уже в «Сегодня»" : "Старт — " + new Date(sd).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })); return true;
 case "bcstop": bcSet("on", false); render(); toast("Челлендж остановлен — начать заново можно в любой момент"); return true;
 case "bcck": bcToggle(el.dataset.x); return true;
-case "bcgo": go("habits"); return true;
+case "bcgo": chFromSet(); go("habits"); return true;
 case "bkload": bkImport(); return true;
 case "bkclr": BKOPS = []; bkKV("ops", []).then(render); toast("Операции выписки удалены с этого устройства"); return true;
 case "pushon": pushOn(); return true;
@@ -13515,6 +13515,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["285", "🏁 Страница челленджа — не уводит из «Челленджей»", ["«Страница челленджа» из списка челленджей по-прежнему открывает бюджет, уборку, привычки, кухню или цель, но панель слева остаётся в том пространстве, откуда вы пришли, а в крошках сверху — путь «🏁 Челленджи», чтобы вернуться. Перейдёте в любой другой раздел — панель снова следует за ним, как обычно."]],
 ["284", "🧩 Вернуть из копии только пространства и челленджи", ["При восстановлении из файла и у копий на устройстве появилась кнопка «Только пространства и челленджи»: добавляет пространства, которых сейчас нет, и снова включает челленджи, которые в копии шли, — с прежней датой старта. Ничего не удаляет и не заменяет; что идёт сейчас, не трогает.", "Пространства, группы карточек и раскладки главной, «Близкие» и зоны уборки теперь сливаются между устройствами по каждой записи: пространство или группа, добавленные в один день на двух устройствах, больше не затирают друг друга, а удалённое не возвращается."]],
 ["283", "🖥 Основной компьютер для загрузки из 1С", ["В настройках файла бюджета (на компьютере) можно отметить «Сделать этот компьютер основным» — тот, куда 1С выгружает файл.", "После этого загрузка из файла — «⟳ Обновить из файла», выбор файла, «Записать план в Excel», долги из файла — остаётся только на нём. На остальных компьютерах, как и на телефоне, суммы приходят синхронизацией, а вверху «Бюджета» написано, какой компьютер основной, и есть кнопка «Сделать основным этот».", "Пока основной не выбран, загружать можно с любого компьютера. «Снять» на основном компьютере возвращает так, как было."]],
 ["282", "📱 На телефоне — без загрузки из файла", ["На телефоне и планшете в «Бюджете» больше нет кнопок «⟳ Обновить из файла», выбора файла, «Записать план в Excel» и загрузки долгов из файла: 1С там нет, а суммы приходят с компьютера синхронизацией. Вверху «Бюджета» об этом короткая подсказка.", "На компьютере всё как было."]],
@@ -13986,7 +13987,7 @@ var b = document.querySelector(".side .cpb"); if (!b) return; var q = CPQ.toLowe
 [].forEach.call(b.querySelectorAll(".cpg, .none"), function (x) { x.hidden = !!q; });
 }
 function cpRedraw() { try { $("side").innerHTML = sideHTML(); cpFilter(); railSync(); } catch (e) { render(); } }
-function cpFollow(v, a) { if (FLY) return; try { if (v !== "sp" && spcCovers(cpSpace(), v, a)) return; var ci = spcGet(cpSpace()); if (ci && ci.iso && v !== "sp" && v !== "home") return; } catch (e) { /* ок; из изолированного пространства выходят только на Главную или в другое пространство */ } var k = spzOf(v, a); if (k && SPACES[k] && k !== cpSpace()) { cpSet(k); CPQ = ""; } }
+function cpFollow(v, a) { if (FLY) return; try { chFromKeep(v); if (v !== "sp" && spcCovers(cpSpace(), v, a)) return; var ci = spcGet(cpSpace()); if (ci && ci.iso && v !== "sp" && v !== "home") return; } catch (e) { /* ок; из изолированного пространства выходят только на Главную или в другое пространство */ } var k = spzOf(v, a); if (k && SPACES[k] && k !== cpSpace()) { cpSet(k); CPQ = ""; } }
 function cpFlyOff() { if (!FLY) return; FLY = ""; document.body.classList.remove("sidefly"); cpRedraw(); }
 var RAILD = ["apps", "home", "day", "task", "know", "life", "house", "chal", "find", "fav", "rec"];
 var RAILE = { apps: ["▦", "Все разделы (Alt+A)"], home: ["🏠", "Главная: сводка дня, избранное, доски"], day: ["☀", "Мой день: входящие, сегодня, планы, утро и вечер"], task: ["✅", "Задачи: проекты, списки, теги и фильтры"], know: ["📝", "Знания: заметки, карты, повторение"], life: ["🌿", "Жизнь: привычки, цели, самочувствие, люди"], house: ["🔑", "Дом и деньги: меню, уборка, бюджет, документы"], chal: ["🏁", "Челленджи: осанка и лицо, дом, финансы, кухня"], find: ["⌕", "Поиск и команды (Ctrl+K)"], fav: ["★", "Избранное"], rec: ["🕘", "Недавние"] };
@@ -14443,7 +14444,7 @@ return '<div class="r">' + (why === "clear" ? b("clear", "Задача «опр�
 }
 function gchEnd(g, res) { var c = g.gch; if (!c) return; var st = gchStat(g); c.hist = (c.hist || []).concat([{ start: c.start, end: Date.now(), ok: st.ok, all: st.all, res: res }]).slice(-5); c.on = 0; c.end = Date.now(); touch(g); var t = S.tasks.filter(function (x) { return x.id === gchTid(g, today0()) && !x.done && !x.del; })[0]; if (t) { t.del = 1; t.delAt = Date.now(); touch(t); } }
 function gchAct(a, el) {
-if (a === "gchgo") { go("gch-" + el.dataset.x); return true; }
+if (a === "gchgo") { chFromSet(); go("gch-" + el.dataset.x); return true; }
 if (a === "gchpick") { go("gch"); return true; }
 if (a === "gchto") { var se = $("gchh-" + el.dataset.x); if (se) se.scrollIntoView({ behavior: "smooth", block: "start" }); return true; }
 if (a !== "gch") return false;
@@ -15691,11 +15692,11 @@ var st = (r && r.st) || {}, dn = WRVS.filter(function (x) { return st[x[0]]; }).
 return '<div class="modebar wrback"><b>🗓 Идёт обзор недели</b><span>шаг ' + Math.min(WRVS.length, dn + 1) + " из " + WRVS.length + (nx ? " · " + esc(nx[1]) : "") + '</span><a class="btn sm pri" href="#weekly">↩ Вернуться к обзору</a><button type="button" class="ibtn" data-a="wrbackx" title="Убрать полосу (обзор останется как есть)" aria-label="Убрать">✕</button></div>';
 }
 function hzBars() {
-var D = appDef(), h = wrBackBar(), sk = spzOf(V, ARG);
+var D = appDef(), h = wrBackBar(), cf = chFromKeep(V), sk = cf || spzOf(V, ARG);
 if (D[V] && !modOn(V)) h += '<div class="modebar"><b>⏻ Модуль выключен</b><span>«' + esc(D[V][2]) + "» не видно в навигации. Данные на месте.</span>" + '<button type="button" class="btn sm pri" data-a="modon" data-x="' + V + '">Включить</button></div>';
 if (sk && V !== "home" && V !== "sp" && V !== "apps" && !(V === "proj" || V === "note" || V === "nsec")) {
 var t = D[V] && !ARG ? D[V][2] : V === "goal" ? '<a href="#goals">Цели</a>' : V === "board" ? "Доски" : V === "tag" ? "Теги" : V === "filter" ? "Фильтры" : V === "flag" && ARG ? '<a href="#flag">С флажком</a>' : "";
-h += '<div class="crumbs appcr"><a href="#home">🏠 Главная</a> / ' + (sk !== "home" ? '<a href="#sp-' + sk + '">' + SPZ[sk][0] + " " + SPZ[sk][1] + "</a> / " : "") + (t && !(D[V] && !ARG) ? t + " /" : "") + "</div>";
+h += '<div class="crumbs appcr"><a href="#home">🏠 Главная</a> / ' + (sk !== "home" ? '<a href="#sp-' + sk + '">' + SPZ[sk][0] + " " + SPZ[sk][1] + "</a> / " : "") + (cf && V !== "chals" ? '<a href="#chals">🏁 Челленджи</a> / ' : "") + (t && !(D[V] && !ARG) ? t + " /" : "") + "</div>";
 }
 if (V === "sp" || V === "home") return h;
 if (V === "apps") { var off = modsOffList().length; if (off) h += '<div class="modebar"><b>🧩 Модули</b><span>выключено ' + off + " — их здесь не видно</span><a class=\"btn sm\" href=\"#mods\">Настроить</a></div>"; }
@@ -16874,7 +16875,10 @@ FSC = null; SPCD = null; cpSet(sk); LS.set("zd-sideoff", "0"); go(spzHref(sk)); 
 }
 return false;
 }
-function spcCovers(k, v, a) { var t = { proj: "p", goal: "g", note: "n", filter: "f", tag: "tag", board: "b" }[v]; return t ? spcHas(k, t, a) : !!a ? false : spcHas(k, "r", v); }
+function spcCovers(k, v, a) { if (CHFROM && CHFROM === k && CHVIEWS[v]) return true; var t = { proj: "p", goal: "g", note: "n", filter: "f", tag: "tag", board: "b" }[v]; return t ? spcHas(k, t, a) : !!a ? false : spcHas(k, "r", v); }
+var CHFROM = "", CHVIEWS = { budget: 1, clean: 1, habits: 1, kitchen: 1, gch: 1, chals: 1 };
+function chFromSet() { var k = cpSpace(); CHFROM = (spcItemsOf(k) || []).some(function (it) { return (it.t === "x" || it.t === "r") && it.k === "chals"; }) ? k : ""; }
+function chFromKeep(v) { if (!CHVIEWS[v]) CHFROM = ""; return CHFROM && SPZ[CHFROM] ? CHFROM : ""; }
 spcSync(true, true);
 function chalList() {
 var t0 = today0();
