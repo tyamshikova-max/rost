@@ -1831,6 +1831,7 @@ html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; backgro
 .motb { margin-top: 10px; gap: 6px; flex-wrap: wrap } .motl { display: block; margin: 0 0 10px; padding: 6px 10px; border-radius: 8px; background: var(--hover); color: var(--fg); text-decoration: none; font-size: calc(13px * var(--fs)); line-height: 1.4 } .motl span { font-family: Georgia, "Times New Roman", serif; font-style: italic } .motl i { color: var(--muted); font-style: normal }
 li.task.chalt { background: color-mix(in srgb, var(--acc) 7%, transparent); box-shadow: inset 3px 0 0 var(--acc); border-radius: 8px } li.task.chalt.done { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--acc) 35%, transparent) } .chalh { color: var(--acc) } .chalg { margin-bottom: 6px }
 li.task.sprt { background: color-mix(in srgb, #6b8fd6 8%, transparent); box-shadow: inset 3px 0 0 #6b8fd6; border-radius: 8px } li.task.sprt.done { box-shadow: inset 3px 0 0 color-mix(in srgb, #6b8fd6 35%, transparent) } .sprh { color: #5b7fc7 } .sprg { margin-bottom: 6px }
+.hzpu { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); margin: 0 4px 4px 0; padding: 0 4px 0 10px } .hzpa, .hzpx { font: inherit; font-size: calc(13px * var(--fs)); border: 0; background: none; color: var(--fg); cursor: pointer; padding: 4px 3px } .hzpx { color: var(--muted) } .hzpx:hover { color: var(--warn) }
 .hzcl { width: 24px; height: 24px; min-width: 24px; padding: 0; font-size: 12px; color: var(--muted); margin-left: -2px } .hzc.hzcoll > :not(.hzh):not(.hzrs) { display: none } .hzc.hzcoll .hzh { margin-bottom: 0 } .hzc.hzcoll .hzrs { display: none }
 .hzgt { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 10px } .hzgtb { font: inherit; font-size: calc(13px * var(--fs)); padding: 3px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer } .hzgtb:hover { background: var(--hover) } .hzgtb.on { background: var(--acc-soft); border-color: var(--acc); color: var(--acc) } .hzgnew { margin: 10px 0 } .hz-g .hzwb { border: 0; background: none; box-shadow: none; padding: 0; min-height: 0; margin: 0 } .hz-g .hzwb .wb { padding: 0 }
 .hzc.hzfix { display: flex; flex-direction: column; overflow: hidden } .hzc.hzfix > .hzb { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain }
@@ -8550,7 +8551,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-277";
+var APPV = "zd-app-2026-10-16-278";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -18466,6 +18467,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["278", "🗂 Раскладки главной и отмена перестановок", ["Внизу главной появился выбор «Раскладка…»: готовые «Всё», «Простая», «Фокус» (только главное, «Сейчас» и привычки), «Утро» и «Вечер» одним нажатием прячут лишние карточки. Порядок и размеры карточек при этом не меняются.", "В «✎ Настроить главную» можно сохранить свою раскладку (порядок, размеры, группы, свёрнутое) под названием и переключаться на неё; ✕ рядом с названием удаляет её.", "Кнопка «↶ Отменить последнее изменение» в настройке главной возвращает раскладку на шаг назад (до 20 шагов, пока приложение открыто). Работает и в пространствах."]],
 ["277", "🏁🏃 Челленджи и спринт — выделены и в одном месте", ["Задачи челленджей («Осанка и лицо», «Дом», «Финансы», «Кухня» и челленджи целей) теперь отмечены цветной полоской в любом списке, а задачи текущего спринта — синей.", "В «Сегодня» и «Все задачи» они собраны в отдельные группы «🏁 Челленджи» и «🏃 Спринт» в самом начале: ▾ сворачивает группу, число рядом — сколько задач ещё не сделано. Группы можно отключить: «Настройки» → «Общие» → «Выделение задач челленджей и спринта» (полоска останется)."]],
 ["276", "▾ Свернуть карточку и сделать копию", ["У каждой карточки на главной и в пространствах рядом с ⠿ появилась стрелка ▾: нажмите — карточка свернётся до заголовка (▸ — развернуть). Свёрнутое остаётся на месте и не мешает смотреть остальное.", "У собственных карточек (виджетов с досок) в «✎ Настроить главную» есть кнопка ⧉ «копия»: получается такая же карточка, которую можно настроить по-другому на доске (например, два списка задач — «на сегодня» и «по проекту»)."]],
 ["275", "🗂 Группа с вкладками на главной", ["В «✎ Настроить главную» → «＋ Группа с вкладками…»: отметьте две карточки или больше (например, «Привычки», «Самочувствие» и «Прогресс дня») — они соберутся в одну рамку с переключателем вкладок. Открытая вкладка запоминается на этом устройстве.", "Группу можно двигать, растягивать по ширине и высоте, как любую карточку. Кнопка ✕ у группы разбирает её: карточки снова становятся отдельными. То же работает в пространствах."]],
@@ -20522,7 +20524,7 @@ var hid = hzHid();
 h += mq + '<div class="hzgrid' + (HZED ? " hzedit" : "") + '">' + hzLayout(hzOrder().filter(function (k) { return hid.indexOf(k) < 0; })) + "</div>";
 if (HZED) h += hzEdBlock("Настройка главной");
 h += '<h3 class="apph">Пространства</h3>' + spzTiles();
-h += '<div class="r hzfoot"><button type="button" class="btn sm" data-a="hzed">' + (HZED ? "✓ Готово" : "✎ Настроить главную") + '</button><a class="btn sm" href="#apps">▦ Все разделы</a><a class="btn sm" href="#mods">🧩 Модули</a></div>';
+h += '<div class="r hzfoot"><button type="button" class="btn sm" data-a="hzed">' + (HZED ? "✓ Готово" : "✎ Настроить главную") + '</button><a class="btn sm" href="#apps">▦ Все разделы</a><a class="btn sm" href="#mods">🧩 Модули</a>' + hzPreSel() + "</div>";
 return h;
 }
 function hzAddText(raw) {
@@ -20696,6 +20698,42 @@ var g = hzGrp(k); if (!g) return; hzFix(); var o = (HZS().homec || []).slice(), 
 HZS().homegrp = (HZS().homegrp || []).filter(function (x) { return x.id !== g.id; }); if (i >= 0) o.splice.apply(o, [i, 1].concat(m)); else o = o.concat(m);
 m.forEach(function (z) { HZS().homecol[z] = typeof col === "number" ? col : 0; HZS().homespan[z] = 1; }); HZS().homec = o; LS.del("zd-hzg:" + g.id); optTouch(); save(); render(); toast("Группа разобрана — карточки снова отдельно");
 }
+var HZLK = ["homec", "homeh", "homecol", "homespan", "homerow", "homecoll", "homegrp", "homecols", "homewide"], HZLASTS = {}, HZUNDS = {}, HZUNDOING = false;
+function hzScope() { return HZS() === S.opt ? "home" : "sp:" + ARG; }
+function hzLayoutJSON() { var o = HZS(), r = {}; HZLK.forEach(function (k) { if (o[k] !== undefined) r[k] = o[k]; }); return JSON.stringify(r); }
+function hzUndoWatch() {
+var sc = hzScope(), j = hzLayoutJSON();
+if (HZUNDOING) { HZUNDOING = false; HZLASTS[sc] = j; return; }
+if (HZLASTS[sc] !== undefined && HZLASTS[sc] !== j) { var st = HZUNDS[sc] = HZUNDS[sc] || []; st.push(HZLASTS[sc]); if (st.length > 20) st.shift(); }
+HZLASTS[sc] = j;
+}
+function hzLayoutSet(d) { var o = HZS(); HZLK.forEach(function (k) { delete o[k]; }); Object.keys(d || {}).forEach(function (k) { if (HZLK.indexOf(k) >= 0) o[k] = d[k]; }); }
+function hzUndo() {
+var sc = hzScope(), st = HZUNDS[sc] || []; if (!st.length) { toast("Нечего отменять"); return; }
+hzLayoutSet(JSON.parse(st.pop())); HZUNDOING = true; optTouch(); save(); render(); toast("Раскладка: последнее изменение отменено");
+}
+function hzBuiltin() {
+var keys = hzOrder(), except = function (ks) { return keys.filter(function (k) { return ks.indexOf(k) < 0; }); };
+return [{ id: "all", n: "Всё", h: null }, { id: "simple", n: "Простая", h: ["cyc", "prog", "xp", "well", "pav"] }, { id: "focus", n: "Фокус", h: except(["top", "now", "hab"]) },
+{ id: "morning", n: "Утро", h: ["prog", "xp", "well", "cont", "pav"] }, { id: "evening", n: "Вечер", h: ["now", "att", "cyc", "cont"] }];
+}
+function hzPresetApply(x) {
+var o = HZS(), nm = "";
+if (/^b:/.test(x)) { var b = hzBuiltin().filter(function (p) { return "b:" + p.id === x; })[0]; if (!b) return; if (b.h) o.homeh = b.h.slice(); else delete o.homeh; nm = b.n; }
+else { var p = (o.homepre || []).filter(function (q) { return "u:" + q.id === x; })[0]; if (!p) return; hzLayoutSet(JSON.parse(JSON.stringify(p.d))); nm = p.n; }
+optTouch(); save(); render(); toast("Раскладка «" + nm + "»");
+}
+function hzPreSave(name) { var o = HZS(), l = (o.homepre || []).slice(), nm = name || "Раскладка " + (l.length + 1); l.push({ id: uid(), n: nm, d: JSON.parse(hzLayoutJSON()) }); o.homepre = l; optTouch(); save(); render(); toast("Раскладка «" + nm + "» сохранена"); }
+function hzPreHTML() {
+var home = HZS() === S.opt, cu = HZS().homepre || [], un = (HZUNDS[hzScope()] || []).length;
+return '<p class="muted">Раскладки — готовые и ваши. Готовые показывают и прячут карточки, свои запоминают и порядок, и размеры:</p><div class="chips">' + (home ? hzBuiltin().map(function (p) { return '<button type="button" class="chip" data-a="hzpapply" data-x="b:' + p.id + '">' + esc(p.n) + "</button>"; }).join("") : "") +
+cu.map(function (p) { return '<span class="hzpu"><button type="button" class="hzpa" data-a="hzpapply" data-x="u:' + esc(p.id) + '">★ ' + esc(p.n) + '</button><button type="button" class="hzpx" data-a="hzpdel" data-x="' + esc(p.id) + '" title="Удалить раскладку" aria-label="Удалить раскладку">✕</button></span>'; }).join("") + "</div>" +
+'<div class="r" style="gap:8px;margin:8px 0"><input class="inp" id="hzpn" maxlength="30" placeholder="Название раскладки" style="max-width:220px"><button type="button" class="btn sm" data-a="hzpsave">Сохранить текущую раскладку</button>' + (un ? '<button type="button" class="btn sm" data-a="hzundo">↶ Отменить последнее изменение (' + un + ")</button>" : "") + "</div>";
+}
+function hzPreSel() {
+if (HZS() !== S.opt) return ""; var cu = HZS().homepre || [];
+return '<select class="inp sm" id="hzpreset" aria-label="Раскладка главной" title="Готовые и ваши раскладки главной"><option value="">Раскладка…</option>' + hzBuiltin().map(function (p) { return '<option value="b:' + p.id + '">' + esc(p.n) + "</option>"; }).join("") + cu.map(function (p) { return '<option value="u:' + esc(p.id) + '">★ ' + esc(p.n) + "</option>"; }).join("") + "</select>";
+}
 function hzBoard() { var b = boards().filter(function (x) { return x.homeb; })[0]; return b || bCreate("🏠 Карточки главной", [], { homeb: 1 }); }
 function hzWPin(bid, wid) { var l = (HZS().homew || []).filter(function (x) { return !(x.b === bid && x.w === wid); }); l.push({ b: bid, w: wid }); HZS().homew = l; optTouch(); save(); render(); }
 function hzWDel(k) { var p = String(k).split(":"); HZS().homew = (HZS().homew || []).filter(function (x) { return !(x.b === p[1] && x.w === p[2]); }); HZS().homec = (HZS().homec || []).filter(function (z) { return z !== k; }); optTouch(); save(); render(); }
@@ -20835,7 +20873,7 @@ row("Фоновые расчёты", x.bg, "уже после показа: ав
 var HZDRAG = "", HZRS = null, HZMO = null, HZMT = 0;
 function hzEdBlock(title) {
 var hid = hzHid(), hs = hid.filter(function (k) { return HZC.some(function (c) { return c[0] === k; }); });
-return '<div class="card hzedb"><b>' + title + '</b>' + hzColsHTML() + '<p class="muted">Перетаскивайте карточки мышью за ⠿ — куда угодно, в том числе в другую колонку; ширину и высоту меняйте, потянув за уголок справа внизу карточки (это можно и без режима настройки; двойной щелчок по уголку — высота по содержимому). Здесь: ↑ ↓ — порядок, ← → — в соседнюю колонку, ↔ — ширина в колонках, ↕ — высота в клетках, ✕ — скрыть. Свои карточки — любой виджет, как на досках:</p><div class="r" style="gap:8px;margin:0 0 10px"><button type="button" class="btn sm" data-a="hzwnew">＋ Новая карточка…</button><button type="button" class="btn sm" data-a="hzwpick">＋ Виджет с доски…</button><button type="button" class="btn sm" data-a="hzgnew">＋ Группа с вкладками…</button></div>' + hzGNewHTML() + '<p class="muted">Скрытые можно вернуть:</p><div class="chips">' + (hs.length ? hs.map(function (k) { return '<button type="button" class="chip" data-a="hzshow" data-x="' + k + '">＋ ' + hzName(k) + "</button>"; }).join("") : '<span class="muted">скрытых нет</span>') + (S.opt.fstoff ? '<button type="button" class="chip" data-a="fston">＋ 🚀 Первые шаги</button>' : "") + '</div><div class="r" style="gap:8px;margin-top:10px"><button type="button" class="btn pri" data-a="hzed">Готово</button><button type="button" class="btn" data-a="hzlean" title="Скрыть цикл планирования, прогресс дня, уровень и очки, самочувствие и советника">Простая главная</button><button type="button" class="btn" data-a="hzreset">↺ Как было</button></div></div>';
+return '<div class="card hzedb"><b>' + title + '</b>' + hzColsHTML() + '<p class="muted">Перетаскивайте карточки мышью за ⠿ — куда угодно, в том числе в другую колонку; ширину и высоту меняйте, потянув за уголок справа внизу карточки (это можно и без режима настройки; двойной щелчок по уголку — высота по содержимому). Здесь: ↑ ↓ — порядок, ← → — в соседнюю колонку, ↔ — ширина в колонках, ↕ — высота в клетках, ✕ — скрыть. Свои карточки — любой виджет, как на досках:</p><div class="r" style="gap:8px;margin:0 0 10px"><button type="button" class="btn sm" data-a="hzwnew">＋ Новая карточка…</button><button type="button" class="btn sm" data-a="hzwpick">＋ Виджет с доски…</button><button type="button" class="btn sm" data-a="hzgnew">＋ Группа с вкладками…</button></div>' + hzGNewHTML() + '' + hzPreHTML() + '<p class="muted">Скрытые можно вернуть:</p><div class="chips">' + (hs.length ? hs.map(function (k) { return '<button type="button" class="chip" data-a="hzshow" data-x="' + k + '">＋ ' + hzName(k) + "</button>"; }).join("") : '<span class="muted">скрытых нет</span>') + (S.opt.fstoff ? '<button type="button" class="chip" data-a="fston">＋ 🚀 Первые шаги</button>' : "") + '</div><div class="r" style="gap:8px;margin-top:10px"><button type="button" class="btn pri" data-a="hzed">Готово</button><button type="button" class="btn" data-a="hzlean" title="Скрыть цикл планирования, прогресс дня, уровень и очки, самочувствие и советника">Простая главная</button><button type="button" class="btn" data-a="hzreset">↺ Как было</button></div></div>';
 }
 function hzN() { var n = +HZS().homecols; return n >= 1 && n <= 4 ? Math.round(n) : 2; }
 function hzColOf(k, i) { var m = HZS().homecol || {}, n = hzN(); return typeof m[k] === "number" ? Math.max(0, Math.min(n - 1, m[k])) : i % n; }
@@ -20852,7 +20890,7 @@ html = html.replace(/<\/section>$/, '<span class="hzrs" data-hzrs="' + esc(k) + 
 return html.replace('<section class="card hzc', '<section data-hzk="' + esc(k) + '" data-c="' + c + '" data-s="' + s + '" data-r="' + (r || 0) + '" class="card hzc' + (cl ? " hzcoll" : ""));
 }
 function hzLayout(keys) {
-var out = "", i = 0;
+hzUndoWatch(); var out = "", i = 0;
 keys.forEach(function (k) { var html = hzCard(k); if (!html) return; var s = hzSpan(k), c = Math.min(hzColOf(k, i), hzN() - s); out += hzDeco(k, html, Math.max(0, c), s, hzRows(k), hzColl(k)); i++; });
 setTimeout(hzMas, 0);
 return '<div class="hzms" id="hzms">' + out + "</div>";
@@ -20922,6 +20960,10 @@ function hz4Act(a, el) {
 var x = el.dataset.x;
 if (a === "hzspan") { hzFix(); var n = hzN(), s = hzSpan(x) % n + 1; HZS().homespan[x] = s; HZS().homecol[x] = Math.min(HZS().homecol[x], n - s); optTouch(); save(); render(); return true; }
 if (a === "hzrow") { var hr = Object.assign({}, HZS().homerow || {}), cur = hzRows(x), nx = cur >= 4 ? 0 : cur + 1; if (nx) hr[x] = nx; else delete hr[x]; HZS().homerow = hr; optTouch(); save(); render(); return true; }
+if (a === "hzpapply") { hzPresetApply(x); return true; }
+if (a === "hzpsave") { var pnm = $("hzpn"); hzPreSave(pnm ? pnm.value.trim() : ""); return true; }
+if (a === "hzpdel") { HZS().homepre = (HZS().homepre || []).filter(function (p) { return p.id !== x; }); optTouch(); save(); render(); return true; }
+if (a === "hzundo") { hzUndo(); return true; }
 if (a === "hzcoll") { var cm = Object.assign({}, HZS().homecoll || {}); if (cm[x]) delete cm[x]; else cm[x] = 1; HZS().homecoll = cm; optTouch(); save(); render(); return true; }
 if (a === "hzwdup") { hzWDup(x); return true; }
 if (a === "hzgtab") { LS.set("zd-hzg:" + x, el.dataset.v); render(); return true; }
@@ -23860,6 +23902,7 @@ touch(f); save(); render(); return;
 if (t.id === "pparent") { var p = proj(ARG); if (p) { if (t.value && pdesc(p.id).indexOf(t.value) >= 0) { toast("Нельзя вложить проект сам в себя"); return; } moveProj(p.id, t.value || null, "in"); toast(t.value ? "Проект вложен в «" + proj(t.value).n + "»" : "Проект на верхнем уровне"); } return; }
 if (t.id === "ai-prov") { var c2 = AI.cfg(); c2.prov = t.value; AI.setCfg(c2); render(); return; }
 if (t.id === "opt-autorem") { S.opt.autoRem = t.checked; optTouch(); save(); return; }
+if (t.id === "hzpreset") { if (t.value) hzPresetApply(t.value); return; }
 if (t.id === "opt-sprgrp") { if (t.checked) delete S.opt.sprgrp; else S.opt.sprgrp = 0; optTouch(); save(); render(); return; }
 if (t.id === "opt-chalgrp") { if (t.checked) delete S.opt.chalgrp; else S.opt.chalgrp = 0; optTouch(); save(); render(); return; }
 if (t.id === "opt-navtabs") { if (t.checked) delete S.opt.navtabs; else S.opt.navtabs = 0; optTouch(); save(); render(); return; }
