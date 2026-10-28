@@ -1852,7 +1852,9 @@ body.bunofile [data-a="buupd"], body.bunofile [data-a="bufile"], body.bunofile [
 .pgb { font: inherit; font-size: calc(13px * var(--fs)); padding: 5px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left }
 .pgb:hover { background: var(--hover) } .pgb.on { border-color: var(--acc); box-shadow: 0 0 0 1px var(--acc) } .pgb[data-v="when"] { background: var(--acc-soft); color: var(--acc); border-color: color-mix(in srgb, var(--acc) 45%, transparent) } .pgb.late { background: color-mix(in srgb, var(--warn) 10%, transparent); color: var(--warn); border-color: var(--warn) } .pgb.warn { color: var(--warn) } .pgb.doing { color: var(--acc) }
 .pgpop { position: absolute; left: 0; top: calc(100% + 6px); z-index: 6; width: min(480px, 100%); display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 8px 10px; align-items: center; padding: 10px 12px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--solid, var(--panel)); box-shadow: var(--shadow), 0 0 0 1px color-mix(in srgb, var(--fg) 6%, transparent); font-size: calc(14px * var(--fs)) } /* фон плотный: в «Стекле» --panel полупрозрачный, и поля под окошком просвечивали */
-.pncal { max-width: 296px; font-size: calc(13.5px * var(--fs)) } .pncal .dpkh b { font-size: calc(13.5px * var(--fs)) } .pncal .dpkh button { width: 28px; height: 28px; font-size: 18px; color: var(--fg) }
+.pstar { background: none; border: 0; padding: 0 3px; cursor: pointer; color: var(--muted); font-size: calc(14px * var(--fs)); line-height: 1; vertical-align: -1px; opacity: .55 } .pstar:hover, .pstar.on { opacity: 1; color: var(--star) }
+.pgph > span { display: inline-flex; align-items: center; gap: 4px } .pgb.pin.emp { color: var(--muted) }
+.props .v.pncal { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; max-width: 296px; font-size: calc(13.5px * var(--fs)) } .pncal .dpkh b { font-size: calc(13.5px * var(--fs)) } .pncal .dpkh button { width: 28px; height: 28px; font-size: 18px; color: var(--fg) }
 .pncal .dpkg button { height: 30px; position: relative; padding: 0 } .pncal .dpkg button::after { content: ""; position: absolute; left: 50%; bottom: 3px; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 2px; background: transparent }
 .pncal .dpkg button.ld1::after { background: var(--muted) } .pncal .dpkg button.ld2::after { background: var(--muted); width: 10px } .pncal .dpkg button.ld3::after { background: var(--warn); width: 14px } .pncal .dpkg button.on::after { background: #fff }
 .pnnav { display: inline-flex; align-items: center; gap: 1px; margin-right: 2px; flex: none } .pnnav .pnni { font-size: calc(12px * var(--fs)); color: var(--muted); font-variant-numeric: tabular-nums; padding: 0 2px; white-space: nowrap }
@@ -1861,7 +1863,11 @@ body.bunofile [data-a="buupd"], body.bunofile [data-a="bufile"], body.bunofile [
 .pgpop > .prow > span:first-child { color: var(--muted); font-size: calc(13px * var(--fs)); position: relative } .pgpop .rgrip { display: none } .pgpop .pmoreb { display: none }
 .pnside { display: flex; flex-wrap: wrap; gap: 2px 14px; margin: 8px 0 2px; font-size: calc(13px * var(--fs)) } .pskv { font: inherit; font-size: inherit; border: 0; background: none; color: var(--fg); cursor: pointer; padding: 2px 0; text-align: left } .pskv:hover { color: var(--acc) } .pskv.pskm { color: var(--muted) } .pskv.pskm:hover, .pskv.pskm.on { color: var(--acc) }
 #panel.pnwide .pn-in { display: grid; grid-template-columns: minmax(0, 1fr) 200px; column-gap: 22px; align-content: start } #panel.pnwide .pn-in > * { grid-column: 1 / -1; min-width: 0 } #panel.pnwide .pn-in > [data-sec] { grid-column: 1 } #panel.pnwide .pn-in > .pnside { grid-column: 2; grid-row: span 40; align-self: start; display: block; margin: 14px 0 0; padding-left: 16px; border-left: 1px solid var(--line) } #panel.pnwide .pnside .pskv { display: block; width: 100%; padding: 4px 0; white-space: normal }
-@media (max-width: 700px) { #panel.pgnew .pn-in { display: flex; flex-direction: column } #panel.pgnew .pn-in > .pn-top { order: -10 } #panel.pgnew .pn-in > .pn-par { order: -9 } #panel.pgnew .pn-in > .pn-title { order: -8 } #panel.pgnew .pn-in > .snzpn { order: -7 } #panel.pgnew .pn-in > .pn-act { order: -6; position: static; margin: 10px 0 0; padding: 0 0 10px; border-top: 0; border-bottom: 1px solid var(--line) } #panel.pgnew .pn-in > .pn-act .btn { flex: 1 } .pgpop { width: 100% } }
+@media (max-width: 700px) { #panel.pgnew .pn-in { display: flex; flex-direction: column } #panel.pgnew .pn-in > .pn-top { order: -10 } #panel.pgnew .pn-in > .pn-par { order: -9 } #panel.pgnew .pn-in > .pn-title { order: -8 } #panel.pgnew .pn-in > .snzpn { order: -7 } #panel.pgnew .pn-in > .pn-act { order: -6; position: static; margin: 10px 0 0; padding: 0 0 10px; border-top: 0; border-bottom: 1px solid var(--line) } #panel.pgnew .pn-in > .pn-act .btn { flex: 1 } .pgpop .prow[data-row="cal"] > span { display: none } .pgpop .pncal { grid-column: 1 / -1; max-width: none }
+#panel.pgnew .pgpop { position: fixed; left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 82vh; max-height: 82dvh; overflow: auto; overscroll-behavior: contain; border-radius: 18px 18px 0 0; border-bottom: 0; z-index: 40; padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -10px 30px rgba(0, 0, 0, .25) }
+#panel.pgnew .pgpop > .pgph { position: sticky; top: 0; background: inherit; padding: 8px 0 6px; margin: 0; z-index: 1 } #panel.pgnew .pgpop > .pgph::before { content: ""; position: absolute; top: 2px; left: 50%; transform: translateX(-50%); width: 44px; height: 5px; border-radius: 3px; background: var(--line) } #panel.pgnew .pgpop > .pgph b { padding-top: 8px }
+#panel.pgnew .pgpop .qdates .chip, #panel.pgnew .pgpop .seg button { padding: 8px 12px; font-size: calc(15px * var(--fs)) } #panel.pgnew .pgpop .pncal .dpkg button { height: 36px }
+body.pgsheet::after { content: ""; position: fixed; inset: 0; background: rgba(0, 0, 0, .25); z-index: 39 } }
 .pn-act { position: sticky; bottom: 0; z-index: 3; display: flex; flex-wrap: wrap; gap: 8px; margin: 18px -22px -60px; padding: 10px 22px 14px; background: var(--panel); border-top: 1px solid var(--line) } #panel.full .pn-act { margin-inline: -32px; padding-inline: 32px }
 @media (max-width: 860px) { .pn-act { margin-inline: -16px; padding-inline: 16px } }
 .tdadv > summary { font-weight: 500; font-size: calc(13px * var(--fs)); padding: 7px 0 } .tdadv > summary .muted { font-weight: 400 }
@@ -8635,7 +8641,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-302";
+var APPV = "zd-app-2026-10-16-305";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -9210,7 +9216,7 @@ var same = r.v === V && r.a === ARG, ptj = PTJUMP && ptKey(nh) === PTJUMP ? ptab
 if (r.v === "cal" && V !== "cal") CAL.scrolled = false;
 if (r.v === "help" && (V !== "help" || r.a !== ARG)) HQ = "";
 if (r.v !== "settings" && r.v !== "help") LASTH = location.hash.slice(1) || "today";
-else if (OPEN) { flushBody(); OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); }
+else if (OPEN) { flushBody(); OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull", "pgsheet"); }
 if (r.v !== V || r.a !== ARG) { if (!(RNX && RNX.k === "nsec" && r.v === "nsec" && r.a === RNX.id)) RNX = null; SECADD = null; TPICK = false; NPOP = null; NFLT = {}; }
 V = r.v; ARG = r.a; try { spcAutoFocus(); } catch (er) { /* фокус не обязателен */ } if (V !== "note" && NZEN) { NZEN = false; document.body.classList.remove("nzen"); } if (!same) { CONF = null; POP = null; SUB = null; if (RN && RN.where === "page" && RN.id !== r.a) RN = null; }
 document.body.classList.remove("menu");
@@ -18810,6 +18816,9 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["305", "📱 Окошки карточки на телефоне — шторкой снизу", ["На узком экране окошко «когда / где / как» выезжает снизу на всю ширину: крупные кнопки «Сегодня · Завтра · Пн», удобный календарик; фон за шторкой затемняется. Закрыть — смахнуть за шапку вниз, × или нажать мимо."]],
+["304", "☆ Свои поля в кнопки под названием", ["В окошке «Ещё» у каждого поля — звёздочка ☆. Отметьте, например, «Ответственный» или «Учёт времени» — поле станет отдельной кнопкой рядом с «когда, где, как», на всех ваших устройствах. ★ в окошке поля возвращает его в «Ещё»."]],
+["303", "⌨ Клавиши для окошек карточки", ["Alt+1, Alt+2, Alt+3 открывают окошки «когда», «где», «как», Alt+4 — «Ещё»; повторное нажатие закрывает. Esc закрывает открытое окошко, а карточка остаётся (второй Esc закроет и её).", "На телефоне календарик в окошке «когда» растянут на всю ширину."]],
 ["302", "📅 Календарик в окошке «когда»", ["Под сроком — сетка месяца: дата ставится одним нажатием, время (если было) сохраняется. Стрелки листают месяцы.", "Точка под числом — на этот день уже есть задачи: короткая — одна, длинная — две-три, оранжевая — четыре и больше. Так видно, куда лучше поставить задачу."]],
 ["301", "🪟 «Стекло»: всплывающие блоки стали плотнее", ["Плашки «Помодоро», «Учёт времени», «Доступна версия», окна-подсказки и блок диагностики в стиле «Стекло» получили такой же матовый плотный фон, как у меню — под ними больше не просвечивает текст."]],
 ["300", "‹ › Следующая задача, не закрывая карточку", ["В шапке карточки — стрелки «‹ 3/12 ›»: открывают предыдущую и следующую задачу из списка на экране. С клавиатуры — Alt+↑ и Alt+↓.", "Удобно разбирать «Входящие» или «Сегодня» одну за другой."]],
@@ -23587,7 +23596,7 @@ for (var j = 0; j < a.length; j++) if (a[j] && a[j].id === x.id) { idx = j; brea
 if (x.j) { var o = JSON.parse(x.j); o.upd = Math.max(now, ((idx >= 0 && a[idx].upd) || 0) + 1); if (idx >= 0) a[idx] = o; else a.push(o); }
 else if (idx >= 0) { var c = a[idx]; c.del = 1; c.delAt = now; c.purged = 1; c.upd = Math.max(now, (c.upd || 0) + 1); }
 });
-if (OPEN && !task(OPEN)) { OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); }
+if (OPEN && !task(OPEN)) { OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull", "pgsheet"); }
 DV++; save();
 } finally { UNDOING = false; }
 render(); if (OPEN) renderPanel();
@@ -23875,7 +23884,7 @@ return h;
 function del(t) {
 if (!t) return;
 var all = trashTask(t);
-if (OPEN && all.some(function (x) { return x.id === OPEN; })) { OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); slashClose(); fmtHide(); }
+if (OPEN && all.some(function (x) { return x.id === OPEN; })) { OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull", "pgsheet"); slashClose(); fmtHide(); }
 save(); render();
 toastUndo(all.length > 1 ? "Задача и подзадачи (" + (all.length - 1) + ") в корзине" : "Задача в корзине", function () { restoreTask(t); });
 }
@@ -23966,7 +23975,7 @@ function tstCount() { var n = 0; LISTS.forEach(function (k) { S[k].forEach(funct
 function wipeTest() { var now = Date.now(), n = 0; LISTS.forEach(function (k) { S[k].forEach(function (x) { if (x.tst && !x.purged) { if (!x.del && k === "tasks") n++; wipeRec(x, now); } }); }); save(); SYNC.later(); return n; }
 function wipeRec(x, now) { x.del = 1; x.delAt = now; x.purged = 1; ["t", "body", "note", "text", "n", "goal", "retro"].forEach(function (f) { if (typeof x[f] === "string") x[f] = ""; }); x.upd = now; }
 var WIPE_LISTS = ["tasks", "projects", "tags", "filters", "sprints", "comments", "habits", "hlog", "acts", "tpls", "notes", "nsecs", "ntags", "boards", "goals", "days"];
-function resetUI() { if (OPEN) { OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); } SELS = {}; CLIP = null; POP = null; CONF = null; RN = null; }
+function resetUI() { if (OPEN) { OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull", "pgsheet"); } SELS = {}; CLIP = null; POP = null; CONF = null; RN = null; }
 function wipeAll() { var now = Date.now(), n = 0; WIPE_LISTS.forEach(function (k) { S[k].forEach(function (x) { if (!x.purged) { if (!x.del && k === "tasks") n++; wipeRec(x, now); } }); }); resetUI(); save(); return n; }
 function restoreAll(j) {
 var now = Date.now();
@@ -24482,7 +24491,7 @@ document.addEventListener("click", function (e) {
 var was = OCL; OCL = null; if (!was || (e.target.closest && e.target.closest(OCL_KEEP))) return;
 setTimeout(function () { if (OPEN === was && !$("panel").hidden && !document.body.classList.contains("pnfull") && $("ctx").hidden && $("pal").hidden) closeTask(); }, 0);
 });
-function closeTask() { if (/^#task-/.test(location.hash)) try { history.replaceState(null, "", "#" + V + (ARG ? "-" + ARG : "")); } catch (er) { /* ok */ } flushBody(); OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull"); slashClose(); fmtHide(); render(); }
+function closeTask() { if (/^#task-/.test(location.hash)) try { history.replaceState(null, "", "#" + V + (ARG ? "-" + ARG : "")); } catch (er) { /* ok */ } flushBody(); OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull", "pgsheet"); slashClose(); fmtHide(); render(); }
 function setPW(w) { w = Math.round(Math.max(380, Math.min(w, innerWidth - 80))); document.documentElement.style.setProperty("--pw", w + "px"); return w; }
 (function () { var w = +LS.get("zd-pw"); if (w) setPW(w); })();
 var PWD = null;
@@ -24505,14 +24514,20 @@ var sc = $("panel").querySelector(".pn-sc"); if (sc) sc.scrollTop = 0;
 return true;
 }
 document.addEventListener("keydown", function (e) {
-if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
 if (!OPEN || $("panel").hidden || !$("ctx").hidden || !$("pal").hidden) return;
-e.preventDefault(); e.stopImmediatePropagation(); pnNav(e.key === "ArrowDown" ? 1 : -1);
+if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && (e.key === "ArrowUp" || e.key === "ArrowDown")) { e.preventDefault(); e.stopImmediatePropagation(); pnNav(e.key === "ArrowDown" ? 1 : -1); return; }
+if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && /^(Digit|Numpad)[1-4]$/.test(e.code) && pnNew()) {
+var gk = ["when", "where", "how", "more"][+e.code.slice(-1) - 1]; if (!$("panel").querySelector('.pgpop[data-g="' + gk + '"]')) return;
+e.preventDefault(); e.stopImmediatePropagation(); pgSet(PNCH.g === gk ? null : gk);
+if (PNCH.g) { var f1 = $("panel").querySelector('.pgpop[data-g="' + gk + '"] input:not([disabled]), .pgpop[data-g="' + gk + '"] select, .pgpop[data-g="' + gk + '"] button'); if (f1) try { f1.focus(); } catch (er) { /* ок */ } }
+return;
+}
+if (e.key === "Escape" && PNCH.g && $("slash").hidden && !DPK && !(e.target.closest && e.target.closest("#tagdd, #fmt"))) { e.preventDefault(); e.stopImmediatePropagation(); var gb = $("panel").querySelector('.pgb[data-v="' + PNCH.g + '"], .pskm'); pgSet(null); if (gb) try { gb.focus(); } catch (er) { /* ок */ } }
 }, true);
 function renderPanel() {
 var t = task(OPEN), P = $("panel"), pa = document.activeElement;
 if (t && pa && P.contains(pa) && (pa.tagName === "SELECT" || /^(date|time|datetime-local|color)$/.test(pa.type || ""))) { PEND = true; RHOLD = pa; return; }
-if (!t) { OPEN = null; P.hidden = true; document.body.classList.remove("pnopen", "pnfull"); return; }
+if (!t) { OPEN = null; P.hidden = true; document.body.classList.remove("pnopen", "pnfull", "pgsheet"); return; }
 if (PNID !== t.id) PNCH = {};
 var p = proj(t.pid), par = task(t.parent), tg = t.tags || [], kids = tkids(t.id), date = t.at ? dKey(t.at) : "", time = t.at && !t.allday ? hm(t.at) : "";
 var ex = {}; ex[t.id] = 1; tdesc(t.id).forEach(function (d) { ex[d.id] = 1; });
@@ -24585,7 +24600,7 @@ var SECH = { desc: "editor", subs: "sub", files: "files", notes: "notes", chat: 
 var pt = NP.querySelector(".pn-top"); if (pt && !pt.querySelector(".hq")) { var cl = pt.querySelector('[data-p="close"]'); if (cl) cl.insertAdjacentHTML("beforebegin", hq("card", "Справка: карточка задачи")); }
 setHTML(P, NP.innerHTML, P.hidden || PNID !== t.id); PNID = t.id;
 P.hidden = false; P.classList.toggle("full", full); document.body.classList.add("pnopen"); document.body.classList.toggle("pnfull", full);
-P.classList.toggle("pgnew", pnNew()); pnWide();
+P.classList.toggle("pgnew", pnNew()); pnWide(); document.body.classList.toggle("pgsheet", !!PNCH.g && pnNew() && innerWidth <= 700);
 autoH($("pn-t"));
 try { document.execCommand("defaultParagraphSeparator", false, "p"); } catch (er) { /* старый браузер */ }
 }
@@ -24630,7 +24645,13 @@ PNCH.g = g || null; var P = $("panel");
 [].forEach.call(P.querySelectorAll(".pgpop"), function (x) { x.hidden = x.dataset.g !== PNCH.g; });
 [].forEach.call(P.querySelectorAll(".pgb"), function (b) { var on = b.dataset.v === PNCH.g; b.classList.toggle("on", on); b.setAttribute("aria-expanded", on); });
 var pm = P.querySelector(".pskm"); if (pm) pm.classList.toggle("on", PNCH.g === "more");
+document.body.classList.toggle("pgsheet", !!PNCH.g && pnNew() && innerWidth <= 700); /* v305: затемнение под шторкой на телефоне */
 }
+(function () {
+var y0 = null;
+document.addEventListener("touchstart", function (e) { var ph = e.target.closest && e.target.closest("#panel .pgpop > .pgph"); y0 = ph ? e.touches[0].clientY : null; }, { passive: true });
+document.addEventListener("touchend", function (e) { if (y0 === null) return; var dy = e.changedTouches[0].clientY - y0; y0 = null; if (dy > 50 && PNCH.g) pgSet(null); }, { passive: true });
+})();
 document.addEventListener("mousedown", function (e) { if (!PNCH.g || !e.target.closest) return; if (e.target.closest(".pgwrap, .pnside, #ctx, #ctx2, #tagdd, .dpk, #fmt, #slash")) return; pgSet(null); }, true);
 function pnCalHTML(t) {
 var base = new Date(t.at || Date.now()), d0 = new Date(base.getFullYear(), base.getMonth() + (PNCH.calm || 0), 1), y = d0.getFullYear(), m = d0.getMonth();
@@ -24642,6 +24663,7 @@ for (var i = 0; i < shift; i++) h += "<span></span>";
 for (var dd = 1; dd <= days; dd++) { var k = y + "-" + p2(m + 1) + "-" + p2(dd), wd = (shift + dd - 1) % 7, n = load[k] || 0; h += '<button type="button" data-p="pcald" data-v="' + k + '" class="' + (k === tk ? "td " : "") + (k === cur ? "on " : "") + (wd > 4 ? "we " : "") + (n ? "ld" + (n >= 4 ? 3 : n >= 2 ? 2 : 1) : "") + '"' + (n ? ' title="На этот день: ' + n + " " + plural(n, ["задача", "задачи", "задач"]) + '"' : "") + ">" + dd + "</button>"; }
 return '<div class="prow" data-row="cal"><span>Календарь</span><div class="v pncal">' + h + "</div>" + (PNCH.calm ? '<button type="button" class="btn sm" data-p="pcalm" data-v="0" style="margin-top:4px">К текущему месяцу</button>' : "") + "</div>";
 }
+function pnPins() { return Array.isArray(S.opt.pnpin) ? S.opt.pnpin.filter(function (k) { return typeof k === "string"; }) : []; }
 function pnCalPick(k) {
 PNCH.calm = 0;
 setTask(function (x) { var d = new Date(k + "T00:00"); if (x.at && !x.allday) { var o = new Date(x.at); d.setHours(o.getHours(), o.getMinutes(), 0, 0); x.at = d.getTime(); } else { x.at = d.getTime(); x.allday = true; } delete x.some; if (x.till && x.till < sod(x.at)) delete x.till; });
@@ -24649,18 +24671,22 @@ setTask(function (x) { var d = new Date(k + "T00:00"); if (x.at && !x.allday) { 
 function pnGroups(pr, rows, t) {
 var by = {}, used = {}; rows.forEach(function (r) { r.w.classList.remove("pmore"); by[r.k] = r; });
 var wrap = document.createElement("div"); wrap.className = "pgwrap"; var bar = '<div class="pgbar">';
-PNG.forEach(function (g) {
+PNG.forEach(function (g) { g[2].forEach(function (k) { if (by[k]) used[k] = 1; }); });
+var pins = pnPins().filter(function (k) { return by[k] && !used[k]; }), groups = PNG.concat(pins.map(function (k) { return [k, PNGI[k] || "▪", [k]]; }));
+groups.forEach(function (g) {
 var ks = g[2].filter(function (k) { return by[k]; }); if (!ks.length) return; ks.forEach(function (k) { used[k] = 1; });
-var on = PNCH.g === g[0];
-bar += '<button type="button" class="pgb' + (on ? " on" : "") + pngCls(t, g[0]) + '" data-p="pgrp" data-v="' + g[0] + '" aria-expanded="' + on + '" title="' + PNGN[g[0]] + ': нажмите, чтобы изменить">' + g[1] + " " + esc(pngTxt(t, g[0])) + "</button>";
+var on = PNCH.g === g[0], pin = pins.indexOf(g[0]) >= 0, nm = pin ? by[g[0]].lab : PNGN[g[0]], tx = pin ? (pchTxt(t, g[0]) || nm.toLowerCase()) : pngTxt(t, g[0]);
+bar += '<button type="button" class="pgb' + (on ? " on" : "") + (pin ? " pin" + (pchTxt(t, g[0]) ? "" : " emp") : pngCls(t, g[0])) + '" data-p="pgrp" data-v="' + g[0] + '" aria-expanded="' + on + '" title="' + esc(nm) + ': нажмите, чтобы изменить">' + g[1] + " " + esc(tx) + "</button>";
 });
 wrap.innerHTML = bar + "</div>";
 var rest = rows.filter(function (r) { return !used[r.k]; });
-PNG.concat([["more", "", rest.map(function (r) { return r.k; })]]).forEach(function (g) {
+var star = function (k, on) { return '<button type="button" class="pstar' + (on ? " on" : "") + '" data-p="pnpin" data-v="' + k + '" title="' + (on ? "Убрать из кнопок под названием" : "Сделать отдельной кнопкой под названием — на всех устройствах") + '" aria-label="' + (on ? "Убрать из кнопок" : "В кнопки") + '">' + (on ? "★" : "☆") + "</button>"; };
+groups.concat([["more", "", rest.map(function (r) { return r.k; })]]).forEach(function (g) {
 var ks = g[2].filter(function (k) { return by[k]; }); if (!ks.length) return;
+var pin = pins.indexOf(g[0]) >= 0;
 var pop = document.createElement("div"); pop.className = "pgpop"; pop.dataset.g = g[0]; pop.hidden = PNCH.g !== g[0];
-pop.innerHTML = '<div class="pgph"><b>' + PNGN[g[0]] + '</b><button type="button" class="ibtn" data-p="pgrp" data-v="' + g[0] + '" title="Закрыть" aria-label="Закрыть">×</button></div>';
-ks.forEach(function (k) { pop.appendChild(by[k].w); });
+pop.innerHTML = '<div class="pgph"><b>' + esc(pin ? by[g[0]].lab : PNGN[g[0]]) + "</b><span>" + (pin ? star(g[0], true) : "") + '<button type="button" class="ibtn" data-p="pgrp" data-v="' + g[0] + '" title="Закрыть" aria-label="Закрыть">×</button></span></div>';
+ks.forEach(function (k) { pop.appendChild(by[k].w); if (g[0] === "more") { var ls = by[k].w.querySelector("span"); if (ls) ls.insertAdjacentHTML("beforeend", " " + star(k, false)); } });
 if (g[0] === "when" && by.due) by.due.w.insertAdjacentHTML("afterend", pnCalHTML(t)); /* v302: календарик под сроком */
 wrap.appendChild(pop);
 });
@@ -24869,6 +24895,7 @@ if (a === "toggle") { flushBody(); toggle(t); renderPanel(); return; }
 if (a === "pnnav") { pnNav(+el.dataset.v); return; }
 if (a === "pcalm") { PNCH.calm = el.dataset.v === "0" ? 0 : (PNCH.calm || 0) + (+el.dataset.v); renderPanel(); return; }
 if (a === "pcald") { pnCalPick(el.dataset.v); return; }
+if (a === "pnpin") { var pk = el.dataset.v, pa = pnPins().slice(), pi = pa.indexOf(pk); if (pi >= 0) pa.splice(pi, 1); else pa.push(pk); S.opt.pnpin = pa; optTouch(); save(); PNCH.g = pi >= 0 ? "more" : pk; renderPanel(); toast(pi >= 0 ? "Поле снова в «Ещё»" : "Поле теперь отдельной кнопкой под названием"); return; }
 if (a === "prio") { PNCH.prio = false; setTask(function (x) { x.prio = +el.dataset.v; }); return; }
 if (a === "remoff") { setTask(function (x) { var v = +el.dataset.v, o = remOffs(x).slice(), k = o.indexOf(v); if (k >= 0) { if (o.length > 1) o.splice(k, 1); } else o.push(v); x.remOff = o.sort(function (p, q) { return p - q; }); }); return; }
 if (a === "st") { PNCH.status = false; setTask(function (x) { x.st = el.dataset.v; }); return; }
