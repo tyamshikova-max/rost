@@ -1808,6 +1808,7 @@ html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; backgro
 .fcfoc { font-size: calc(12.5px * var(--fs)); color: var(--acc) } .fcdv { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap } .fcbig2 { font-size: calc(20px * var(--fs)); font-weight: 700; font-variant-numeric: tabular-nums } .fcdm { font-size: calc(12.5px * var(--fs)); color: var(--muted); line-height: 1.5 } .fcdm b { color: var(--fg); font-weight: 600 }
 .fcdedit { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; padding-top: 8px; border-top: 1px dashed var(--line) } .fcdedit label { display: grid; gap: 3px; font-size: calc(12px * var(--fs)); color: var(--muted) } .fcdedit .r { grid-column: 1 / -1; gap: 6px }
 .svpmo > summary { cursor: pointer; list-style: none } .svpmo > summary::-webkit-details-marker { display: none } .svpmo > summary::before { content: "▸ "; } .svpmo[open] > summary::before { content: "▾ " } .svpyrs { gap: 6px; margin: 8px 0; flex-wrap: wrap; align-items: center } .svpyrs .seg { flex-wrap: wrap } .svpmt td, .svpmt th { white-space: nowrap } .svpmt tr:not(.butot) td:first-child { text-transform: capitalize }
+#updbar { position: fixed; left: 50%; top: calc(var(--toph, 52px) + 8px); transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; max-width: calc(100% - 24px); padding: 8px 14px; border-radius: 12px; background: var(--panel); border: 1px solid color-mix(in srgb, var(--acc) 45%, transparent); box-shadow: var(--shadow); font-size: calc(13.5px * var(--fs)) } #updbar b { font-weight: 600 } #updbar .btn { padding: 4px 10px }
 .fcmore { margin: 6px 0 } .fcmore > summary { cursor: pointer; color: var(--muted); font-size: calc(13.5px * var(--fs)) }
 .fctl text { fill: var(--fg); font-size: 12.5px } .svpf { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px } .svpf label { display: grid; gap: 4px; font-size: calc(12.5px * var(--fs)); color: var(--muted) } .svpf .seg { justify-self: start } .svphor { display: flex; align-items: center; gap: 6px; min-width: 0 } .svphor input[type=range] { flex: 1 1 60px; min-width: 0; width: 100%; accent-color: var(--acc) } .svphor b { flex: none; min-width: 46px; color: var(--fg); font-variant-numeric: tabular-nums }
 .svpch .svpdebt { fill: none; stroke: #d4574a; stroke-width: 2.5 } .svpch .svpsav { fill: none; stroke: var(--ok); stroke-width: 2.5 } .buleg i.bcd2 { width: 8px; height: 8px; border-radius: 50%; background: var(--fg) } .svpdc.hi { background: color-mix(in srgb, #d4574a 16%, transparent) } .svpdc.lo { background: color-mix(in srgb, var(--ok) 14%, transparent) } .svpev { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: calc(13.5px * var(--fs)) } .fctlg { display: flex; flex-wrap: wrap; gap: 6px 16px } .fctlg span { display: inline-flex; align-items: center; gap: 5px } .fctl .fctlv { fill: var(--muted); font-size: 11.5px } .fcwst { display: grid; gap: 6px } .fcwrow { gap: 6px; align-items: center; flex-wrap: wrap } .fcwrow select[data-fcwm] { flex: 0 0 200px } .fcwrow select[data-fcwt] { flex: 1 1 200px; min-width: 0; max-width: 330px } .fcwtk { white-space: nowrap } .fcwtk.dn { opacity: .7 } .fcwno { width: 18px; color: var(--muted); font-variant-numeric: tabular-nums } .fcwsteps td { vertical-align: top } .fcrules ul { margin: 6px 0; padding-left: 18px; font-size: calc(13px * var(--fs)) } .fcrules li { margin: 3px 0 }
@@ -1910,6 +1911,7 @@ body.bunofile [data-a="buupd"], body.bunofile [data-a="bufile"], body.bunofile [
 <div id="bulk" hidden></div>
 <div id="pal" hidden role="dialog" aria-label="Команды и поиск"><div class="box"><input id="pal-q" type="text" autocomplete="off" placeholder="Команда, проект, тег или задача… (Enter — открыть)"><div class="res" id="pal-r"></div><div class="foot">↑ ↓ — выбор · Enter — выполнить · Esc — закрыть · напишите текст и выберите «Создать задачу»</div></div></div>
 <div id="toast" hidden></div>
+<div id="updbar" hidden role="status"></div>
 <div id="errbar" hidden role="alert"></div>
 <script type="text/plain" id="srv-index">// «Задачи» — сервер в Яндекс Облаке (одна облачная функция).
 // Обслуживает три входа:
@@ -3475,7 +3477,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-289";
+var APPV = "zd-app-2026-10-16-290";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -13536,6 +13538,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["290", "✨ Плашка «Доступна новая версия»", ["Приложение само проверяет раз в полчаса (и когда вы возвращаетесь во вкладку), не вышла ли новая версия на сайте. Если вышла — сверху появляется плашка «Доступна версия N» с кнопкой «Обновить»: больше не нужно помнить про Ctrl+F5. «Позже» — скроет до следующей версии."]],
 ["289", "📈 Накопления: проценты — на остаток конца прошлого месяца", ["Проценты за месяц теперь считаются на остаток на конец прошлого месяца. Положили деньги в этом месяце — они начнут приносить проценты со следующего, а не сразу (раньше текущие пополнения попадали в проценты текущего месяца).", "Взнос текущего месяца в «Ближайших месяцах» уменьшается на то, что уже отложено в этом месяце (подпись «уже отложено …»), чтобы не считать и не записывать его дважды."]],
 ["288", "📈 Накопления: своя ставка вклада и точные месяцы", ["Проценты по накоплениям теперь считаются по ставке, которую вы вписываете в самих «Накоплениях» («Ставка вашего вклада, % годовых»). Раньше туда незаметно подставлялась ставка из поля на вкладке «Долги» — оно нужно только для сравнения, какие долги гасить досрочно, и теперь так и называется: «ставка вклада для сравнения». Пока ставка в «Накоплениях» пустая, проценты считаются как 0, и приложение об этом напоминает — впишите ставку своего вклада.", "Проценты за месяц = остаток на начало месяца × ставка ÷ 12, с капитализацией; формула и ставка подписаны под таблицей.", "Первый месяц расчёта — текущий (в нём взнос этого месяца и проценты на то, что уже лежит); раньше график, события и таблица показывали месяцы со сдвигом на один вперёд относительно «Ближайших месяцев». Теперь подписи везде совпадают."]],
 ["287", "📈 Накопления — таблица по месяцам", ["В «Бюджет → 📈 Накопления» под графиком появилась таблица «По месяцам»: по каждому месяцу — сколько вложено, проценты по вкладу (и налог, если он учитывается), накоплено на конец месяца, а при долгах — платежи, проценты по долгам и остаток долга.", "На экране один год; годы переключаются кнопками вверху таблицы (‹ ›). Внизу — «Итого за год» и «Всего с начала». Таблицу можно свернуть щелчком по заголовку — приложение это запомнит."]],
@@ -13714,6 +13717,29 @@ add("Теги", tags().filter(function (g) { return has(g.n); }).slice(0, 6).map
 return G;
 }
 function navHitsHTML(G) { return G.map(function (g) { return '<section class="apovg"><h3>' + esc(g[0]) + '</h3><div class="apovgl">' + g[1].map(function (x) { return '<a class="apovi" href="#' + esc(x.h) + '"><span class="apovic">' + x.ic + "</span><span>" + esc(x.t) + (x.s ? ' <small class="muted">· ' + esc(x.s) + "</small>" : "") + "</span></a>"; }).join("") + "</div></section>"; }).join(""); }
+var UPDV = "", UPDT = 0;
+function updNum(v) { var m = /zd-app-\d{4}-\d\d-\d\d-(\d+)/.exec(v || ""); return m ? +m[1] : 0; }
+function updCheck(force) {
+if (!/^https?:$/.test(location.protocol) || (!force && Date.now() - UPDT < 25 * 60000) || (!force && document.hidden)) return Promise.resolve(false);
+UPDT = Date.now();
+return fetch("sw.js?x=" + Date.now(), { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); }).then(function (t) {
+var m = /zd-app-\d{4}-\d\d-\d\d-\d+/.exec(t), v = m ? m[0] : ""; if (!v || updNum(v) <= updNum(APPV)) { UPDV = ""; updBar(); return false; }
+UPDV = v; updBar(); return true;
+}).catch(function () { return false; });
+}
+function updBar() {
+var el = $("updbar"); if (!el) return;
+if (!UPDV || LS.get("zd-updlater") === UPDV) { el.hidden = true; el.innerHTML = ""; return; }
+el.innerHTML = "<b>✨ Доступна версия " + updNum(UPDV) + '</b><span class="muted">у вас ' + updNum(APPV) + '</span><button type="button" class="btn sm pri" data-a="updnow">Обновить</button><button type="button" class="btn sm" data-a="updlater" title="Напомню, когда выйдет следующая">Позже</button>';
+el.hidden = false;
+}
+function updNow() {
+toast("Обновляю…"); var go = function () { try { location.reload(); } catch (e) { /* ок */ } };
+if (!navigator.serviceWorker || !navigator.serviceWorker.getRegistration) { go(); return; }
+navigator.serviceWorker.getRegistration().then(function (reg) { return reg ? reg.update() : null; }).then(go, go); setTimeout(go, 4000);
+}
+setTimeout(function () { updCheck(); }, 8000); setInterval(function () { updCheck(); }, 30 * 60000);
+document.addEventListener("visibilitychange", function () { if (!document.hidden) updCheck(); });
 function navBars() {
 var h = "", D = appDef();
 try {
@@ -14069,6 +14095,8 @@ var r;
 switch (a) {
 case "cphide": LS.set("zd-sideoff", "1"); FLY = ""; document.body.classList.remove("sidefly"); railSync(); return true;
 case "cppin": if (FLY) cpSet(FLY); FLY = ""; document.body.classList.remove("sidefly"); LS.set("zd-sideoff", "0"); cpRedraw(); return true;
+case "updnow": updNow(); return true;
+case "updlater": LS.set("zd-updlater", UPDV); updBar(); toast("Хорошо — напомню, когда выйдет следующая версия"); return true;
 case "cpmore": r = el.getBoundingClientRect(); RCXY = [r.left, r.bottom + 4]; var tn = trashItems().length, an = archList().length;
 ctxShow(r.left, r.bottom + 4, [{ c: "done", i: "✓", l: "Сделано — история" }, { c: "trash", i: "🗑", l: "Корзина" + (tn ? " · " + tn : "") }, { c: "archive", i: "🗄", l: "Архив проектов" + (an ? " · " + an : "") }, { c: "templates", i: "📋", l: "Шаблоны проектов и задач" }, { c: "snoozed", i: "💤", l: "Отложенные" }].concat(confList().length ? [{ c: "conflicts", i: "⚠", l: "Конфликты синхронизации · " + confList().length }] : []).concat(["-", { c: "dens:c", i: "▤", l: "Компактно", k: densOf() === "c" ? "✓" : "" }, { c: "dens:", i: "▥", l: "Обычно", k: densOf() === "" ? "✓" : "" }, { c: "dens:l", i: "▦", l: "Просторно", k: densOf() === "l" ? "✓" : "" }, { c: "ptabs", i: "🗂", l: "Вкладки страниц", k: LS.get("zd-ptabs") === "on" ? "✓" : "" }, "-", { c: "rail", i: "✎", l: "Настроить полосу значков…" }, { c: "help", i: "?", l: "Справка об этой панели" }, "-", { c: "ver", i: "ⓘ", l: "Версия " + APPV.replace("zd-app-", "") }]), { k: "cpmore" }); return true;
 case "bnapps": appSheet(true); return true;
