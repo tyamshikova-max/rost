@@ -932,6 +932,7 @@ html.glass .side { backdrop-filter: blur(var(--blur)) saturate(1.4); -webkit-bac
 html.glass #ctx, html.glass #ctx2, html.glass #slash, html.glass #fmt, html.glass .tagdd, html.glass #pomo, html.glass .add.qfloat, html.glass #pal .box {
 background: var(--pop); backdrop-filter: blur(calc(var(--blur) + 8px)) saturate(1.7); -webkit-backdrop-filter: blur(calc(var(--blur) + 8px)) saturate(1.7) }
 html.glass #pal input { background: transparent }
+html.glass :is(.pop, #ttw, #diagbox, #updbar, #pomo) { background: var(--pop); backdrop-filter: blur(calc(var(--blur) + 8px)) saturate(1.7); -webkit-backdrop-filter: blur(calc(var(--blur) + 8px)) saturate(1.7) }
 html.glass .npage .nmain, html.glass .npage.hasside > .nside { background: color-mix(in srgb, var(--solid) 84%, transparent); backdrop-filter: blur(var(--blur)) saturate(1.4); -webkit-backdrop-filter: blur(var(--blur)) saturate(1.4); border-radius: 18px; box-shadow: 0 6px 22px rgba(0, 0, 0, .06) } html.glass .npage .nmain { padding: 14px 26px 26px 48px } html.glass .npage.hasside > .nside { padding: 14px 16px; border-left: 0 } @media (hover: none) { html.glass .npage .nmain { padding: 12px 16px 20px } }
 html.glass #pal { background: rgba(0, 0, 0, .18); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px) }
 html.glass .card, html.glass .wdg, html.glass .hdet, html.glass .btc { box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 6px 22px rgba(0, 0, 0, .05) }
@@ -1855,6 +1856,9 @@ body.bunofile [data-a="buupd"], body.bunofile [data-a="bufile"], body.bunofile [
 .pgb { font: inherit; font-size: calc(13px * var(--fs)); padding: 5px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left }
 .pgb:hover { background: var(--hover) } .pgb.on { border-color: var(--acc); box-shadow: 0 0 0 1px var(--acc) } .pgb[data-v="when"] { background: var(--acc-soft); color: var(--acc); border-color: color-mix(in srgb, var(--acc) 45%, transparent) } .pgb.late { background: color-mix(in srgb, var(--warn) 10%, transparent); color: var(--warn); border-color: var(--warn) } .pgb.warn { color: var(--warn) } .pgb.doing { color: var(--acc) }
 .pgpop { position: absolute; left: 0; top: calc(100% + 6px); z-index: 6; width: min(480px, 100%); display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 8px 10px; align-items: center; padding: 10px 12px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--solid, var(--panel)); box-shadow: var(--shadow), 0 0 0 1px color-mix(in srgb, var(--fg) 6%, transparent); font-size: calc(14px * var(--fs)) } /* фон плотный: в «Стекле» --panel полупрозрачный, и поля под окошком просвечивали */
+.pncal { max-width: 296px; font-size: calc(13.5px * var(--fs)) } .pncal .dpkh b { font-size: calc(13.5px * var(--fs)) } .pncal .dpkh button { width: 28px; height: 28px; font-size: 18px; color: var(--fg) }
+.pncal .dpkg button { height: 30px; position: relative; padding: 0 } .pncal .dpkg button::after { content: ""; position: absolute; left: 50%; bottom: 3px; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 2px; background: transparent }
+.pncal .dpkg button.ld1::after { background: var(--muted) } .pncal .dpkg button.ld2::after { background: var(--muted); width: 10px } .pncal .dpkg button.ld3::after { background: var(--warn); width: 14px } .pncal .dpkg button.on::after { background: #fff }
 .pnnav { display: inline-flex; align-items: center; gap: 1px; margin-right: 2px; flex: none } .pnnav .pnni { font-size: calc(12px * var(--fs)); color: var(--muted); font-variant-numeric: tabular-nums; padding: 0 2px; white-space: nowrap }
 .pn-top button.pnnb { width: 26px; height: 28px; font-size: calc(19px * var(--fs)); line-height: 1; padding-bottom: 3px } .pn-top button.pnnb:disabled { opacity: .35; cursor: default; background: none; color: var(--muted) }
 .pgpop[hidden] { display: none } .pgph { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px } .pgph b { font-size: calc(13px * var(--fs)); color: var(--muted); font-weight: 500 }
@@ -3492,7 +3496,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-300";
+var APPV = "zd-app-2026-10-16-302";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -13667,6 +13671,8 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["302", "📅 Календарик в окошке «когда»", ["Под сроком — сетка месяца: дата ставится одним нажатием, время (если было) сохраняется. Стрелки листают месяцы.", "Точка под числом — на этот день уже есть задачи: короткая — одна, длинная — две-три, оранжевая — четыре и больше. Так видно, куда лучше поставить задачу."]],
+["301", "🪟 «Стекло»: всплывающие блоки стали плотнее", ["Плашки «Помодоро», «Учёт времени», «Доступна версия», окна-подсказки и блок диагностики в стиле «Стекло» получили такой же матовый плотный фон, как у меню — под ними больше не просвечивает текст."]],
 ["300", "‹ › Следующая задача, не закрывая карточку", ["В шапке карточки — стрелки «‹ 3/12 ›»: открывают предыдущую и следующую задачу из списка на экране. С клавиатуры — Alt+↑ и Alt+↓.", "Удобно разбирать «Входящие» или «Сегодня» одну за другой."]],
 ["299", "🗂 Окошки «когда, где, как» — на плотном фоне", ["В стиле «Стекло» окошко полей просвечивало, и описание под ним мешало читать. Теперь фон окошка непрозрачный во всех стилях, добавлена тонкая кромка."]],
 ["298", "🗂 Карточка задачи: «когда, где, как»", ["Под названием задачи вместо строки значков — три кнопки: «📅 когда» (срок, время, повтор, несколько дней, дедлайн, напоминание), «📁 где» (проект, секция, спринт) и «❗ как» (приоритет, статус, матрица, теги). Нажатие открывает окошко поверх карточки — остальное не сдвигается. Редкие поля (ответственный, учёт времени, входит в, зависимости, жду ответа) — строкой под кнопками, а на широкой карточке (от 760 px, потяните левый край) — столбиком справа от описания.", "Внизу вместо четырёх кнопок — «✓ Готово» и «📅 Перенести ▾»: сегодня, завтра, понедельник, через неделю, выбрать дату, когда-нибудь, отложить, убрать срок. На телефоне эти кнопки стоят сразу под названием.", "Вернуть прежний вид: «Настройки» → «Поля в карточке задачи» → «Значками» или «Списком»."]],
@@ -19487,6 +19493,20 @@ PNCH.g = g || null; var P = $("panel");
 var pm = P.querySelector(".pskm"); if (pm) pm.classList.toggle("on", PNCH.g === "more");
 }
 document.addEventListener("mousedown", function (e) { if (!PNCH.g || !e.target.closest) return; if (e.target.closest(".pgwrap, .pnside, #ctx, #ctx2, #tagdd, .dpk, #fmt, #slash")) return; pgSet(null); }, true);
+function pnCalHTML(t) {
+var base = new Date(t.at || Date.now()), d0 = new Date(base.getFullYear(), base.getMonth() + (PNCH.calm || 0), 1), y = d0.getFullYear(), m = d0.getMonth();
+var shift = (d0.getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate(), tk = dKey(Date.now()), cur = t.at ? dKey(t.at) : "", load = {};
+tasks().forEach(function (x) { if (x.done || x.id === t.id || !x.at) return; var k = dKey(x.at); load[k] = (load[k] || 0) + 1; });
+var h = '<div class="dpkh"><button type="button" data-p="pcalm" data-v="-1" aria-label="Предыдущий месяц">‹</button><b>' + DPKMON[m] + " " + y + '</b><button type="button" data-p="pcalm" data-v="1" aria-label="Следующий месяц">›</button></div><div class="dpkg">' +
+["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map(function (x, i) { return '<span class="dpkw' + (i > 4 ? " we" : "") + '">' + x + "</span>"; }).join("");
+for (var i = 0; i < shift; i++) h += "<span></span>";
+for (var dd = 1; dd <= days; dd++) { var k = y + "-" + p2(m + 1) + "-" + p2(dd), wd = (shift + dd - 1) % 7, n = load[k] || 0; h += '<button type="button" data-p="pcald" data-v="' + k + '" class="' + (k === tk ? "td " : "") + (k === cur ? "on " : "") + (wd > 4 ? "we " : "") + (n ? "ld" + (n >= 4 ? 3 : n >= 2 ? 2 : 1) : "") + '"' + (n ? ' title="На этот день: ' + n + " " + plural(n, ["задача", "задачи", "задач"]) + '"' : "") + ">" + dd + "</button>"; }
+return '<div class="prow" data-row="cal"><span>Календарь</span><div class="v pncal">' + h + "</div>" + (PNCH.calm ? '<button type="button" class="btn sm" data-p="pcalm" data-v="0" style="margin-top:4px">К текущему месяцу</button>' : "") + "</div>";
+}
+function pnCalPick(k) {
+PNCH.calm = 0;
+setTask(function (x) { var d = new Date(k + "T00:00"); if (x.at && !x.allday) { var o = new Date(x.at); d.setHours(o.getHours(), o.getMinutes(), 0, 0); x.at = d.getTime(); } else { x.at = d.getTime(); x.allday = true; } delete x.some; if (x.till && x.till < sod(x.at)) delete x.till; });
+}
 function pnGroups(pr, rows, t) {
 var by = {}, used = {}; rows.forEach(function (r) { r.w.classList.remove("pmore"); by[r.k] = r; });
 var wrap = document.createElement("div"); wrap.className = "pgwrap"; var bar = '<div class="pgbar">';
@@ -19502,6 +19522,7 @@ var ks = g[2].filter(function (k) { return by[k]; }); if (!ks.length) return;
 var pop = document.createElement("div"); pop.className = "pgpop"; pop.dataset.g = g[0]; pop.hidden = PNCH.g !== g[0];
 pop.innerHTML = '<div class="pgph"><b>' + PNGN[g[0]] + '</b><button type="button" class="ibtn" data-p="pgrp" data-v="' + g[0] + '" title="Закрыть" aria-label="Закрыть">×</button></div>';
 ks.forEach(function (k) { pop.appendChild(by[k].w); });
+if (g[0] === "when" && by.due) by.due.w.insertAdjacentHTML("afterend", pnCalHTML(t)); /* v302: календарик под сроком */
 wrap.appendChild(pop);
 });
 pr.appendChild(wrap); pr.classList.add("pgmode");
@@ -19707,6 +19728,8 @@ if (a === "share") { flushBody(); shareOut(t.t, shareTaskText(task(t.id) || t), 
 if (a === "ai") { var rc = el.getBoundingClientRect(); ctxShow(rc.left - 180, rc.bottom + 4, [{ c: "sub", i: "⊞", l: "Разбить на подзадачи" }, { c: "check", i: "☑", l: "Чек-лист в описание" }, { c: "est", i: "⏱", l: "Оценить время" }, "-", { c: "cfg", i: "⚙", l: AI.ready() ? "ИИ: " + AI.name() + " — настройки" : "Подключить ИИ…" }], { k: "ai", id: t.id }); return; }
 if (a === "toggle") { flushBody(); toggle(t); renderPanel(); return; }
 if (a === "pnnav") { pnNav(+el.dataset.v); return; }
+if (a === "pcalm") { PNCH.calm = el.dataset.v === "0" ? 0 : (PNCH.calm || 0) + (+el.dataset.v); renderPanel(); return; }
+if (a === "pcald") { pnCalPick(el.dataset.v); return; }
 if (a === "prio") { PNCH.prio = false; setTask(function (x) { x.prio = +el.dataset.v; }); return; }
 if (a === "remoff") { setTask(function (x) { var v = +el.dataset.v, o = remOffs(x).slice(), k = o.indexOf(v); if (k >= 0) { if (o.length > 1) o.splice(k, 1); } else o.push(v); x.remOff = o.sort(function (p, q) { return p - q; }); }); return; }
 if (a === "st") { PNCH.status = false; setTask(function (x) { x.st = el.dataset.v; }); return; }
