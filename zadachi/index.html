@@ -3435,7 +3435,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-282";
+var APPV = "zd-app-2026-10-16-283";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -8101,7 +8101,7 @@ i.addEventListener("change", function () { var f = i.files && i.files[0]; i.remo
 });
 }
 function buChoose() {
-if (buMobile()) return Promise.reject(new Error(BUMOBMSG));
+if (buNoFile()) return Promise.reject(new Error(buNoFileMsg()));
 if (!buCanRemember()) return buPickInput().then(function (f) { buSet("fname", f.name); BUFINFO = { n: f.name, mt: f.lastModified }; render(); toast("Файл выбран: " + f.name + " — в этом браузере его придётся выбирать при каждом обновлении"); return f; });
 return window.showOpenFilePicker({ types: [{ description: "Книга Excel", accept: { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"] } }], multiple: false }).then(function (hs) {
 BUFH = hs[0]; return buKV("fh", BUFH).catch(function () { /* не запомнился — выберете снова */ }).then(function () { return BUFH.getFile(); });
@@ -8110,6 +8110,25 @@ BUFH = hs[0]; return buKV("fh", BUFH).catch(function () { /* не запомни
 var BUMOB = null;
 function buMobile() { if (BUMOB !== null) return BUMOB; var ua = navigator.userAgent || ""; return /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1); }
 var BUMOBMSG = "на телефоне файл бюджета не загружается — суммы приходят с компьютера синхронизацией";
+function buDevId() { var d = LS.get("zd-devid"); if (!d) { d = "d" + uid(); LS.set("zd-devid", d); } return d; }
+function buDevName() { var ua = navigator.userAgent || ""; return (/Windows/.test(ua) ? "Компьютер с Windows" : /Mac/.test(ua) ? "Mac" : /Linux/.test(ua) ? "Компьютер с Linux" : "Компьютер") + (/Edg\//.test(ua) ? " · Edge" : /YaBrowser/.test(ua) ? " · Яндекс Браузер" : /Chrome\//.test(ua) ? " · Chrome" : ""); }
+function buMain() { var m = (S.opt.bud || {}).main; return m && m.d ? m : null; }
+function buIsMain() { var m = buMain(); return !!m && m.d === buDevId(); }
+function buNoFile() { return buMobile() || (!!buMain() && !buIsMain()); }
+function buNoFileMsg() { return buMobile() ? BUMOBMSG : "на этом компьютере загрузка из файла выключена — основной компьютер для 1С: «" + buMain().n + "»"; }
+function buMainSet(on) {
+var m = buMain(), nm = String((($("bumainn") || {}).value || "")).trim() || buDevName();
+if (on && m && m.d !== buDevId() && !window.confirm("Сейчас основной компьютер для загрузки из 1С — «" + m.n + "». Сделать основным этот компьютер? На «" + m.n + "» загрузка из файла скроется.")) return;
+buSet("main", on ? { d: buDevId(), n: (on && m && m.d === buDevId() ? m.n : nm).slice(0, 40), at: Date.now() } : null); render();
+toast(on ? "Этот компьютер — основной для загрузки из 1С. На других компьютерах загрузка из файла скрыта" : "Основной компьютер не выбран — загружать из файла можно с любого компьютера");
+}
+function buMainHTML() {
+if (buMobile()) return ""; var m = buMain(), me = buIsMain();
+return '<div class="wcr"><span>Основной компьютер</span><div class="r">' + (me ? "<span>🖥 Этот компьютер — основной для загрузки из 1С ✓</span>" + '<button type="button" class="btn sm" data-a="bumainoff" title="Снова разрешить загрузку из файла на любом компьютере">Снять</button>'
+: m ? "<span>🖥 Основной — «" + esc(m.n) + "»</span>" + '<button type="button" class="btn sm" data-a="bumainme">Сделать основным этот</button>'
+: '<input class="inp" id="bumainn" maxlength="40" placeholder="Название, например: ' + esc(buDevName()) + '" style="max-width:240px"><button type="button" class="btn sm" data-a="bumainme">Сделать этот компьютер основным</button>') + "</div></div>" +
+'<p class="muted">Загрузка из файла — «Обновить из файла», выбор файла, «Записать план в Excel», долги из файла — остаётся только на основном компьютере, там, куда 1С выгружает файл. На остальных компьютерах, как и на телефоне, суммы приходят с него синхронизацией. Пока основной не выбран — загружать можно с любого компьютера.</p>';
+}
 function buLocal() {
 return buHandle().then(function (h) {
 if (!h) return null; var go2 = function () { return h.getFile(); };
@@ -8118,7 +8137,7 @@ return h.queryPermission({ mode: "read" }).then(function (p) { if (p === "grante
 }).catch(function () { return null; });
 }
 function buFile() {
-if (buMobile()) return Promise.reject(new Error(BUMOBMSG));
+if (buNoFile()) return Promise.reject(new Error(buNoFileMsg()));
 return Promise.all([buLocal(), buDiskOn() ? BUDK.meta().catch(function () { return null; }) : Promise.resolve(null)]).then(function (r) {
 var loc = r[0], dm = r[1];
 return (loc ? buLocMt(loc) : Promise.resolve(0)).then(function (lm) {
@@ -8162,7 +8181,7 @@ return BUDK.put(f, mt).then(function () { BUDM = { n: f.name, mt: mt, sz: f.size
 }).catch(function (e) { toast("Копию файла на Диск сохранить не удалось: " + (e && (e.msg || e.message) || e)); return false; });
 }
 function buDiskPeek(force) {
-if (buMobile() || !buDiskOn() || (!force && Date.now() - BUDMAT < 5 * 60000)) return Promise.resolve(); BUDMAT = Date.now();
+if (buNoFile() || !buDiskOn() || (!force && Date.now() - BUDMAT < 5 * 60000)) return Promise.resolve(); BUDMAT = Date.now();
 return BUDK.meta().then(function (dm) {
 var was = BUDM ? BUDM.mt : -1; BUDM = dm; if (dm && was !== dm.mt && V === "budget") softRender(); if (!dm) return;
 return buHandle().then(function (h) {
@@ -8338,11 +8357,12 @@ function buTab() { if (V === "budget" && ARG !== BUARG) { BUARG = ARG; if (/^(we
 function vBudget() {
 var tab = buTab(), o = buOpt();
 var h = head("Бюджет", "Неделя — с понедельника по воскресенье, период — с 11-го по 10-е. Данные — из вашего файла Excel (туда пишет выгрузка из 1С); обновляйте выбранный период или неделю сколько угодно раз.");
-document.body.classList.toggle("bunofile", buMobile());
-if (buMobile()) h += '<div class="bubar"><span class="muted">📱 На телефоне бюджет обновляется сам: суммы приходят с компьютера синхронизацией. Загрузка из файла — на компьютере.</span>' + buStaleHTML() + "</div>"; else
+document.body.classList.toggle("bunofile", buNoFile());
+if (buMobile()) h += '<div class="bubar"><span class="muted">📱 На телефоне бюджет обновляется сам: суммы приходят с компьютера синхронизацией. Загрузка из файла — на компьютере.</span>' + buStaleHTML() + "</div>";
+else if (buNoFile()) h += '<div class="bubar"><span class="muted">🖥 Загрузка из 1С — на основном компьютере «' + esc(buMain().n) + '». Здесь суммы приходят с него синхронизацией.</span><button type="button" class="btn sm" data-a="bumainme" title="Если 1С теперь выгружает файл на этот компьютер">Сделать основным этот</button>' + buStaleHTML() + "</div>"; else
 h += '<div class="bubar"><button type="button" class="btn sm pri" data-a="buupd" aria-expanded="' + BUUPD + '">⟳ Обновить из файла ▾</button>' +
 buStaleHTML() + (o.fname ? '<span class="muted">📄 ' + esc(o.fname) + (BUFINFO ? " · изменён " + esc(new Date(BUFINFO.mt).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) : "") + "</span>" + (BUFINFO && o.fmt && BUFINFO.mt > o.fmt ? '<span class="buchg">в файле есть изменения — обновите</span>' : "") : '<span class="muted">Файл не выбран — <a href="#" data-a="bufile">выбрать файл</a> (запомнится в настройках)</span>') + buDiskHTML(o) + "</div>";
-if (BUUPD && !buMobile()) h += buUpdHTML();
+if (BUUPD && !buNoFile()) h += buUpdHTML();
 if (BULAST) h += '<div class="bulast"><b>Обновлено: ' + esc(BULAST.what) + "</b>" + (BULAST.diff.length ? '<span class="muted">' + esc(BULAST.diff.slice(0, 12).join(" · ")) + (BULAST.diff.length > 12 ? " …" : "") + "</span>" : '<span class="muted">изменений нет</span>') + (BULAST.msgs.length ? '<span class="warnc">' + esc(BULAST.msgs.join("; ")) + "</span>" : "") + (BULAST.warns.length ? '<span class="muted">⚠ ' + esc(BULAST.warns.join("; ")) + "</span>" : "") + (BUUNDO ? '<button type="button" class="btn sm" data-a="buundo" title="Вернуть периоды такими, какими они были до этого обновления">↶ Вернуть как было</button>' : "") + '<button type="button" class="ibtn" data-a="bulastx" title="Скрыть">×</button></div>';
 h += '<div class="htabs butabs">' + [["week", "Неделя"], ["per", "Период"], ["rep", "📊 Отчёты"], ["regs", "Регулярные платежи"], ["debts", "Долги"], ["sav", "📈 Накопления"], ["wish", "Желания"], ["bank", "🏦 Выписка"], ["fch", fcOpt().on ? "💰 Челлендж" : "Челлендж"]].map(function (x) { return '<button type="button" class="tb' + (tab === x[0] ? " on" : "") + '" data-a="butab" data-x="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>";
 if (tab === "bank") return h + bankHTML();
@@ -8452,7 +8472,7 @@ return h;
 function buSetHTML() {
 var o = buOpt(), cats = buCatsKnown();
 return '<section class="card" id="s-budget"><h2>Бюджет</h2><p class="muted" style="margin:0">Откуда раздел «Бюджет» берёт данные и как считать статьи.</p>' +
-'<div class="wcr bufrow"><span>Файл</span><div class="r"><button type="button" class="btn sm" data-a="bufile">📄 ' + (o.fname ? "Другой файл…" : "Выбрать файл…") + "</button>" + (o.fname ? '<span>' + esc(o.fname) + "</span>" : '<span class="muted">не выбран</span>') + (o.fname && buCanRemember() ? '<button type="button" class="ibtn" data-a="bufilex" title="Забыть файл на этом компьютере">✕</button>' : "") + "</div></div>" +
+buMainHTML() + '<div class="wcr bufrow"><span>Файл</span><div class="r"><button type="button" class="btn sm" data-a="bufile">📄 ' + (o.fname ? "Другой файл…" : "Выбрать файл…") + "</button>" + (o.fname ? '<span>' + esc(o.fname) + "</span>" : '<span class="muted">не выбран</span>') + (o.fname && buCanRemember() ? '<button type="button" class="ibtn" data-a="bufilex" title="Забыть файл на этом компьютере">✕</button>' : "") + "</div></div>" +
 '<p class="muted bufrow">' + (buCanRemember() ? "Файл запоминается на этом компьютере (Chrome, Edge) — дальше «Обновить» читает его сам; при первом чтении за сеанс браузер спросит разрешение. На телефоне файл не нужен: обновлённые суммы приходят синхронизацией." : "В этом браузере файл нельзя запомнить — его нужно выбирать при каждом обновлении. На компьютере в Chrome или Edge он запоминается.") + (buOpt().fdisk === false ? " Сам файл никуда не отправляется — в «Задачи» попадают только суммы." : " Копия файла хранится на вашем Яндекс Диске (папка «Приложения → Задачи → budget»): на другом компьютере «Обновить» берёт её оттуда, если она новее, а файл этого компьютера, если он новее, сам попадает на Диск. Выгрузка из 1С в файл на компьютере — как раньше.") + "</p>" +
 '<div class="r bufrow"><label class="f"><span><input type="checkbox" id="opt-fdisk"' + (buOpt().fdisk === false ? "" : " checked") + "> Хранить копию файла на моём Яндекс Диске и брать самую свежую версию</span></label></div>" +
 '<div class="wcr"><span>Статьи</span><div class="bukinds">' + cats.map(function (c) { var k = buKind(c); return '<div class="r bukr"><span class="bukn">' + esc(c) + '</span><div class="seg">' + Object.keys(BKN).map(function (x) { return '<button type="button" data-a="bukind" data-c="' + esc(c) + '" data-v="' + x + '" class="' + (k === x ? "on" : "") + '" title="' + BKN[x][1] + '">' + BKN[x][0] + "</button>"; }).join("") + "</div></div>"; }).join("") + "</div></div>" +
@@ -8476,6 +8496,8 @@ else buUpdate({ k: "week", mon: +(($("bu3") || {}).value) });
 return true;
 case "bufile": buChoose().catch(function (e) { if (e && e.name !== "AbortError") toast("Файл не выбран: " + (e.message || e)); }); return true;
 case "buundo": buUndo(); return true;
+case "bumainme": buMainSet(true); return true;
+case "bumainoff": buMainSet(false); return true;
 case "busavecopy": buSaveCopy(); return true;
 case "budiskchk": buDiskPeek(true).then(function () { toast(BUDM ? "Копия на Диске от " + new Date(BUDM.mt).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "На Диске копии файла пока нет"); }); return true;
 case "bufilex": BUFH = null; BUFINFO = null; buKV("fh", null).catch(function () {}); buSet("fname", ""); render(); toast("Файл забыт на этом компьютере"); return true;
@@ -8616,7 +8638,7 @@ if (t.dataset.bfxna) { D.na = D.na || {}; D.na.ref = t.dataset.ref; D.na.lref = 
 });
 document.addEventListener("change", function (e) { var t = e.target; if (!t || !t.dataset || !t.dataset.bfxsch) return; buSet("mort", t.value ? { d0: t.value, step: 14 } : null); render(); });
 function bfxOpen(pid) {
-if (buMobile() || !buCanRemember()) { toast("Записать план в Excel можно на компьютере в Chrome или Edge — там приложение получает доступ к файлу"); return; }
+if (buNoFile() || !buCanRemember()) { toast(buNoFile() && !buMobile() ? "Записать план в Excel можно на основном компьютере «" + buMain().n + "»" : "Записать план в Excel можно на компьютере в Chrome или Edge — там приложение получает доступ к файлу"); return; }
 BFX = { pid: pid, busy: 1, step: "read" }; render();
 var file;
 buFile().then(function (f) { file = f; return f.arrayBuffer(); }).then(buBook).then(function (bk) {
@@ -13454,6 +13476,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["283", "🖥 Основной компьютер для загрузки из 1С", ["В настройках файла бюджета (на компьютере) можно отметить «Сделать этот компьютер основным» — тот, куда 1С выгружает файл.", "После этого загрузка из файла — «⟳ Обновить из файла», выбор файла, «Записать план в Excel», долги из файла — остаётся только на нём. На остальных компьютерах, как и на телефоне, суммы приходят синхронизацией, а вверху «Бюджета» написано, какой компьютер основной, и есть кнопка «Сделать основным этот».", "Пока основной не выбран, загружать можно с любого компьютера. «Снять» на основном компьютере возвращает так, как было."]],
 ["282", "📱 На телефоне — без загрузки из файла", ["На телефоне и планшете в «Бюджете» больше нет кнопок «⟳ Обновить из файла», выбора файла, «Записать план в Excel» и загрузки долгов из файла: 1С там нет, а суммы приходят с компьютера синхронизацией. Вверху «Бюджета» об этом короткая подсказка.", "На компьютере всё как было."]],
 ["281", "☁ Файл бюджета — один для всех устройств", ["Копия файла Excel с бюджетом теперь хранится на вашем Яндекс Диске («Приложения → Задачи → budget»). Выгрузка из 1С — как раньше, в файл на компьютере: когда он стал новее копии, приложение само кладёт его на Диск (при открытии «Бюджета» или после «Обновить»).", "На другом компьютере «Обновить» берёт самую свежую версию: свою или с Диска. Если на этом компьютере запомнен свой файл и он старее — приложение обновит его копией с Диска. «💾 Копию на этот компьютер» — сохранить копию там, где своего файла ещё нет.", "Защита: если файл старее того, из которого уже загружены данные, приложение спросит, прежде чем заменять. После обновления есть «↶ Вернуть как было». Отключить копию на Диске — в настройках файла бюджета."]],
 ["280", "🏆 История прохождения челленджей", ["На странице «🏁 Челленджи» появилась «🏆 История прохождения»: каждое прохождение «Осанки и лица», «Дома», «Финансов», «Кухни» и челленджей целей — даты, сколько дней из скольких, сколько сделано, частично и пропущено, и полоска по дням.", "У прохождения видно состояние: «▶ идёт», «✓ пройден» или «⏸ прерван». История собирается из ежедневных заданий, поэтому видна, даже если сам челлендж выключился.", "У прерванного прохождения есть кнопка «▶ Продолжить с …»: челлендж снова включается с прежней датой старта, и дни идут дальше с того места."]],
