@@ -7851,25 +7851,64 @@ if (n) { DV++; softRender(); }
 }
 function save(quiet) { try { unScan(); } catch (er) { /* отмена не мешает сохранению */ } try { histScan(); } catch (er) { /* история не мешает сохранению */ } if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); DV++; saveLocal(); if (!quiet) { SYNC.later(); SRV.later(); } }
 function live(a) { return a.filter(function (x) { return !x.del; }); }
-var OPTSNAP = null;
-function optSnapKeys() { var r = {}; Object.keys(S.opt).forEach(function (k) { if (k !== "upd" && k !== "ku") r[k] = JSON.stringify(S.opt[k]); }); return r; }
+var OPTSNAP = null, OPTMETA = { upd: 1, ku: 1, ki: 1, kx: 1 };
+function optSnapKeys() { var r = {}; Object.keys(S.opt).forEach(function (k) { if (!OPTMETA[k]) r[k] = JSON.stringify(S.opt[k]); }); return r; }
 function optSnapReset() { OPTSNAP = optSnapKeys(); }
+var OPTIDL = { spc: "l", homegrp: "", homepre: "", people: "", clean: "zl" }, OPTKXTTL = 90 * 86400000;
+function optIdList(k, v) { var p = OPTIDL[k]; if (p === undefined || !v) return null; var l = p ? (typeof v === "object" ? v[p] : null) : v; return Array.isArray(l) ? l.filter(function (x) { return x && x.id; }) : null; }
+function optIdMap(l) { var m = {}; (l || []).forEach(function (x) { m[x.id] = JSON.stringify(x); }); return m; }
 function optTouch() {
-var now = Math.max(Date.now(), (S.opt.upd || 0) + 1), cur = optSnapKeys(), ku = Object.assign({}, S.opt.ku || {});
-if (OPTSNAP) { Object.keys(cur).forEach(function (k) { if (OPTSNAP[k] !== cur[k]) ku[k] = now; }); Object.keys(OPTSNAP).forEach(function (k) { if (cur[k] === undefined) ku[k] = now; }); }
+var now = Math.max(Date.now(), (S.opt.upd || 0) + 1), cur = optSnapKeys(), ku = Object.assign({}, S.opt.ku || {}), ki = S.opt.ki = Object.assign({}, S.opt.ki || {}), kx = S.opt.kx = Object.assign({}, S.opt.kx || {});
+if (OPTSNAP) {
+Object.keys(cur).forEach(function (k) { if (OPTSNAP[k] !== cur[k]) ku[k] = now; }); Object.keys(OPTSNAP).forEach(function (k) { if (cur[k] === undefined) ku[k] = now; });
+Object.keys(OPTIDL).forEach(function (k) {
+if (OPTSNAP[k] === cur[k]) return; var was, mi = Object.assign({}, ki[k] || {}), mx = Object.assign({}, kx[k] || {});
+try { was = optIdMap(optIdList(k, OPTSNAP[k] === undefined ? null : JSON.parse(OPTSNAP[k]))); } catch (e) { was = {}; }
+var is = optIdMap(optIdList(k, S.opt[k]));
+Object.keys(is).forEach(function (id) { if (was[id] !== is[id]) { mi[id] = now; delete mx[id]; } });
+Object.keys(was).forEach(function (id) { if (is[id] === undefined) { mx[id] = now; delete mi[id]; } });
+Object.keys(mx).forEach(function (id) { if (now - mx[id] > OPTKXTTL) delete mx[id]; });
+ki[k] = mi; kx[k] = mx;
+});
+}
 S.opt.ku = ku; S.opt.upd = now; OPTSNAP = cur;
+}
+function optMergeIdList(Lv, Rv, pl, Lki, Rki, Lkx, Rkx) {
+var W = pl ? Lv : Rv, Lo = pl ? Rv : Lv, Wki = pl ? Lki : Rki, Loki = pl ? Rki : Lki, ids = [], out = [], ki = {}, kx = {};
+var wm = {}, lm = {}; W.forEach(function (x) { wm[x.id] = x; }); Lo.forEach(function (x) { lm[x.id] = x; });
+W.forEach(function (x) { ids.push(x.id); }); Lo.forEach(function (x) { if (ids.indexOf(x.id) < 0) ids.push(x.id); });
+ids.forEach(function (id) {
+var ta = Math.max(Lki[id] || 0, Rki[id] || 0), td = Math.max(Lkx[id] || 0, Rkx[id] || 0), w = wm[id], l = lm[id];
+if (td) kx[id] = td; if (ta) ki[id] = ta;
+if (ta || td) { if (td > ta) return; } else if (!w && !l) return;
+var src = w && l ? ((Wki[id] || 0) >= (Loki[id] || 0) ? w : l) : w || l;
+if (src) out.push(src);
+});
+return { l: out, ki: ki, kx: kx };
+}
+function optMergeKeyList(k, L, R, pl, ki, kx) {
+var Ll = optIdList(k, L[k]), Rl = optIdList(k, R[k]); if (!Ll || !Rl) return (pl ? L : R)[k];
+var m = optMergeIdList(Ll, Rl, pl, (L.ki || {})[k] || {}, (R.ki || {})[k] || {}, (L.kx || {})[k] || {}, (R.kx || {})[k] || {}), p = OPTIDL[k], W = (pl ? L : R)[k], Lo = (pl ? R : L)[k], out;
+if (Object.keys(m.ki).length) ki[k] = m.ki; if (Object.keys(m.kx).length) kx[k] = m.kx;
+if (!p) return m.l;
+out = Object.assign({}, W); out[p] = m.l;
+if (k === "spc") { var ov = Object.assign({}, (Lo && Lo.ov) || {}, (W && W.ov) || {}); if (Object.keys(ov).length) out.ov = ov; }
+return out;
 }
 function optMerge(L, R) {
 if (!R || typeof R !== "object") return L; if (!L || !Object.keys(L).length) return R;
 if (!L.ku && !R.ku) return (R.upd || 0) > (L.upd || 0) ? R : L;
-var Lk = L.ku || {}, Rk = R.ku || {}, lw = (L.upd || 0) >= (R.upd || 0), keys = {}, out = {}, ku = {};
-Object.keys(L).concat(Object.keys(R)).forEach(function (k) { if (k !== "upd" && k !== "ku") keys[k] = 1; });
+var Lk = L.ku || {}, Rk = R.ku || {}, lw = (L.upd || 0) >= (R.upd || 0), keys = {}, out = {}, ku = {}, ki = {}, kx = {};
+Object.keys(L).concat(Object.keys(R)).forEach(function (k) { if (!OPTMETA[k]) keys[k] = 1; });
 Object.keys(Lk).concat(Object.keys(Rk)).forEach(function (k) { keys[k] = 1; });
 Object.keys(keys).forEach(function (k) {
 var tl = Lk[k] || 0, tr = Rk[k] || 0, pl = tl !== tr ? tl > tr : L[k] === undefined ? false : R[k] === undefined ? true : lw, src = pl ? L : R;
-if (src[k] !== undefined) out[k] = src[k]; if (tl || tr) ku[k] = Math.max(tl, tr);
+if (OPTIDL[k] !== undefined && L[k] !== undefined && R[k] !== undefined && JSON.stringify(L[k]) !== JSON.stringify(R[k])) out[k] = optMergeKeyList(k, L, R, pl, ki, kx);
+else if (src[k] !== undefined) out[k] = src[k];
+if (tl || tr) ku[k] = Math.max(tl, tr);
 });
-out.ku = ku; out.upd = Math.max(L.upd || 0, R.upd || 0); return out;
+Object.keys(OPTIDL).forEach(function (k) { if (ki[k] || kx[k]) return; var a = (L.ki || {})[k], b = (R.ki || {})[k], c = (L.kx || {})[k], d = (R.kx || {})[k], mx = function (x, y) { var r = Object.assign({}, x || {}); Object.keys(y || {}).forEach(function (id) { r[id] = Math.max(r[id] || 0, y[id]); }); return r; }; if (a || b) ki[k] = mx(a, b); if (c || d) kx[k] = mx(c, d); });
+out.ku = ku; if (Object.keys(ki).length) out.ki = ki; if (Object.keys(kx).length) out.kx = kx; out.upd = Math.max(L.upd || 0, R.upd || 0); return out;
 }
 function optMergeIn(d) { if (!d || typeof d !== "object") return false; var m = optMerge(S.opt, d); if (JSON.stringify(m) === JSON.stringify(S.opt)) return false; S.opt = m; optSnapReset(); return true; }
 function touch(o) { o.upd = Date.now(); DV++; if (o && o.due && o.at && typeof o.t === "string") dlWatch(o); return o; }
@@ -8574,7 +8613,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-283";
+var APPV = "zd-app-2026-10-16-284";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -18615,6 +18654,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["284", "🧩 Вернуть из копии только пространства и челленджи", ["При восстановлении из файла и у копий на устройстве появилась кнопка «Только пространства и челленджи»: добавляет пространства, которых сейчас нет, и снова включает челленджи, которые в копии шли, — с прежней датой старта. Ничего не удаляет и не заменяет; что идёт сейчас, не трогает.", "Пространства, группы карточек и раскладки главной, «Близкие» и зоны уборки теперь сливаются между устройствами по каждой записи: пространство или группа, добавленные в один день на двух устройствах, больше не затирают друг друга, а удалённое не возвращается."]],
 ["283", "🖥 Основной компьютер для загрузки из 1С", ["В настройках файла бюджета (на компьютере) можно отметить «Сделать этот компьютер основным» — тот, куда 1С выгружает файл.", "После этого загрузка из файла — «⟳ Обновить из файла», выбор файла, «Записать план в Excel», долги из файла — остаётся только на нём. На остальных компьютерах, как и на телефоне, суммы приходят синхронизацией, а вверху «Бюджета» написано, какой компьютер основной, и есть кнопка «Сделать основным этот».", "Пока основной не выбран, загружать можно с любого компьютера. «Снять» на основном компьютере возвращает так, как было."]],
 ["282", "📱 На телефоне — без загрузки из файла", ["На телефоне и планшете в «Бюджете» больше нет кнопок «⟳ Обновить из файла», выбора файла, «Записать план в Excel» и загрузки долгов из файла: 1С там нет, а суммы приходят с компьютера синхронизацией. Вверху «Бюджета» об этом короткая подсказка.", "На компьютере всё как было."]],
 ["281", "☁ Файл бюджета — один для всех устройств", ["Копия файла Excel с бюджетом теперь хранится на вашем Яндекс Диске («Приложения → Задачи → budget»). Выгрузка из 1С — как раньше, в файл на компьютере: когда он стал новее копии, приложение само кладёт его на Диск (при открытии «Бюджета» или после «Обновить»).", "На другом компьютере «Обновить» берёт самую свежую версию: свою или с Диска. Если на этом компьютере запомнен свой файл и он старее — приложение обновит его копией с Диска. «💾 Копию на этот компьютер» — сохранить копию там, где своего файла ещё нет.", "Защита: если файл старее того, из которого уже загружены данные, приложение спросит, прежде чем заменять. После обновления есть «↶ Вернуть как было». Отключить копию на Диске — в настройках файла бюджета."]],
@@ -22527,7 +22567,7 @@ h += '<section class="card" id="s-flags"><h2>Флажки</h2><p class="muted" s
 flags().map(function (f, i) { return '<div class="flrow">' + flagIc(f, "big") + '<input class="inp" data-fln="' + f.id + '" value="' + esc(f.n) + '" maxlength="30" aria-label="Название флажка"><button type="button" class="ddb" data-a="flcdd" data-id="' + f.id + '" title="Цвет флажка"><i class="swc" style="background:' + col(f.c) + '"></i>' + COLORS[f.c || 0][0] + '<span class="dda">▾</span></button><span class="r">' + (i ? '<button class="btn sm" type="button" data-a="flup" data-id="' + f.id + '" title="Выше">↑</button>' : "") + '<button class="btn sm warn" type="button" data-a="fldel" data-id="' + f.id + '" title="Удалить флажок">🗑</button></span></div>'; }).join("") +
 (flags().length ? "" : '<p class="muted">Флажков нет — добавьте хотя бы один.</p>') + '</div><div class="r"><button class="btn sm" type="button" data-a="fladd">＋ Добавить флажок</button></div></section>';
 h += '<section class="card" id="s-backup"><h2>Резервная копия</h2><p class="muted" style="margin:0">Все данные одним файлом: задачи, проекты, теги, фильтры, флажки, спринты, комментарии, привычки, заметки, доски, шаблоны, рецепты, меню и настройки. Файл сохраняется на этот компьютер или телефон — храните его где удобно.</p><div class="r"><button class="btn pri" type="button" data-a="export">💾 Сохранить всё в файл</button><button class="btn" type="button" data-a="impopen">📂 Восстановить из файла…</button></div>' + bkKeepHTML() + lbkHTML() + bkHTML() +
-(CONF === "import" ? '<div class="confirm"><b>Восстановить данные из файла «' + esc(IMPF ? IMPF.name : "") + '»?</b><span><b>Заменить</b> — всё станет точно как в файле: то, чего в файле нет, удалится (и на других устройствах после синхронизации). <b>Объединить</b> — записи из файла добавятся к текущим, совпадающие заменятся более свежими версиями.</span><div class="r"><button class="btn pri" type="button" data-a="imp-replace">Заменить всё данными из файла</button><button class="btn" type="button" data-a="imp-yes">Объединить с текущими</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : "") + "</section>";
+(CONF === "import" ? '<div class="confirm"><b>Восстановить данные из файла «' + esc(IMPF ? IMPF.name : "") + '»?</b><span><b>Заменить</b> — всё станет точно как в файле: то, чего в файле нет, удалится (и на других устройствах после синхронизации). <b>Объединить</b> — записи из файла добавятся к текущим, совпадающие заменятся более свежими версиями. <b>Только пространства и челленджи</b> — ничего не удаляет: добавит пространства, которых сейчас нет, и снова включит челленджи, которые в копии шли, с прежней датой старта.</span><div class="r"><button class="btn pri" type="button" data-a="imp-replace">Заменить всё данными из файла</button><button class="btn" type="button" data-a="imp-yes">Объединить с текущими</button><button class="btn" type="button" data-a="imp-part">Только пространства и челленджи</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></div>' : "") + "</section>";
 var tstN = tstCount();
 if (!tstN) h += '<section class="card" id="s-test"><h2>🧪 Тестовые данные</h2><p class="muted" style="margin:0 0 6px">Посмотреть возможности, вообще не трогая свои данные, — <a href="demo.html" target="_blank" rel="noopener">▶ демо-версия</a> в новой вкладке.</p><p class="muted" style="margin:0">Готовый набор для проверки возможностей: 10 проектов, 53 задачи (сроки, повторы, подзадачи, спринт, выполненные), теги, фильтры, привычки с отметками, заметки и 3 доски. Добавляется к вашим данным, ничего не заменяя, и удаляется отсюда же одной кнопкой — ваши записи при этом останутся.</p><div class="r"><button class="btn" type="button" data-a="tstload">🧪 Загрузить тестовые данные</button></div></section>';
 if (tstN) h += '<section class="card" id="s-test"><h2>🧪 Тестовые данные</h2><p class="muted" style="margin:0">Загружено тестовых записей: ' + tstN + ' (проекты, задачи, теги, фильтры, привычки, заметки, доски). Кнопка ниже удалит только их — ваши собственные задачи и проекты останутся. Если вы положили свою задачу в тестовый проект, она останется, но без проекта.</p>' +
@@ -23338,7 +23378,7 @@ var l = LBK.slice().sort(function (a, b) { return a.d === "pre" ? -1 : b.d === "
 h += l.length ? '<ul class="bkl">' + l.map(function (x) {
 var conf = CONF === "lbk:" + x.d;
 return "<li><span>" + esc(lbkWhen(x)) + '</span><span class="muted">задач ' + x.n + (x.nn ? " · заметок " + x.nn : "") + " · " + Math.max(1, Math.round(x.sz / 1024)) + ' КБ</span><button class="btn sm" type="button" data-a="lbkres" data-d="' + esc(x.d) + '">↺ Вернуть</button><button class="btn sm" type="button" data-a="lbkget" data-d="' + esc(x.d) + '">⬇ Файлом</button></li>' +
-(conf ? '<li class="confirm"><b>Вернуть все данные к копии «' + esc(lbkWhen(x)) + '»?</b><span>Всё, что изменилось после, пропадёт — и на других устройствах после синхронизации. Текущее состояние перед этим сохранится отдельной копией «до последнего восстановления» — можно будет передумать.</span><div class="r"><button class="btn pri" type="button" data-a="lbkyes" data-d="' + esc(x.d) + '">Вернуть</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></li>' : "");
+(conf ? '<li class="confirm"><b>Вернуть все данные к копии «' + esc(lbkWhen(x)) + '»?</b><span>Всё, что изменилось после, пропадёт — и на других устройствах после синхронизации. Текущее состояние перед этим сохранится отдельной копией «до последнего восстановления» — можно будет передумать.</span><div class="r"><button class="btn pri" type="button" data-a="lbkyes" data-d="' + esc(x.d) + '">Вернуть</button><button class="btn" type="button" data-a="lbkpart" data-d="' + esc(x.d) + '" title="Ничего не удаляет: добавит пространства, которых сейчас нет, и снова включит челленджи, которые тогда шли">Только пространства и челленджи</button><button class="btn" type="button" data-a="cancel">Отмена</button></div></li>' : "");
 }).join("") + "</ul>" : '<p class="muted">Первая копия появится через несколько секунд после запуска.</p>';
 return h + '<div class="r"><button class="btn" type="button" data-a="lbknow">💽 Сделать копию сейчас</button></div>';
 }
@@ -23353,6 +23393,10 @@ return true;
 }
 if (a === "lbknow") { lbkSnap(dKey(Date.now()), true).then(function (ok) { toast(ok ? "Копия на устройстве сохранена" : "Копия не сохранилась"); render(); }); return true; }
 if (a === "lbkget") { stGet("bk:" + d).then(function (js) { if (!js) { toast("Копия не найдена"); return; } var ln = document.createElement("a"); ln.href = URL.createObjectURL(new Blob([js], { type: "application/json" })); ln.download = "Задачи — копия " + (d === "pre" ? "до восстановления" : d) + ".json"; document.body.appendChild(ln); ln.click(); ln.remove(); setTimeout(function () { URL.revokeObjectURL(ln.href); }, 60000); }); return true; }
+if (a === "lbkpart") {
+stGet("bk:" + d).then(function (js) { var j; try { j = JSON.parse(js); } catch (e) { j = null; } if (!j) { toast("Копия не читается"); return; } var got = restorePart(j); CONF = null; render(); restorePartToast(got); });
+return true;
+}
 if (a === "lbkyes") {
 stGet("bk:" + d).then(function (js) {
 var j; try { j = JSON.parse(js); } catch (e) { j = null; } if (!j) { toast("Копия не читается"); return; }
@@ -23659,6 +23703,27 @@ S[k] = keep.concat(file.filter(function (x) { return x && x.id; }).map(function 
 });
 if (j.opt && typeof j.opt === "object") { S.opt = JSON.parse(JSON.stringify(j.opt)); optTouch(); LS.set("zd-hide", JSON.stringify(S.opt.hideLists || [])); }
 resetUI(); save();
+}
+function restorePart(j) {
+var o = j && j.opt; if (!o || typeof o !== "object") return null;
+var got = { sp: [], ch: [] }, sp = o.spc || {}, d = JSON.parse(JSON.stringify(spcData())); d.l = d.l || []; d.ov = d.ov || {};
+(sp.l || []).forEach(function (x) { if (x && x.id && !d.l.some(function (q) { return q && q.id === x.id; })) { d.l.push(JSON.parse(JSON.stringify(x))); got.sp.push(x.n || x.id); } });
+Object.keys(sp.ov || {}).forEach(function (k) { if (SPCBASE.indexOf(k) >= 0 && !d.ov[k] && sp.ov[k]) { d.ov[k] = JSON.parse(JSON.stringify(sp.ov[k])); got.sp.push(spcName(k) + " (настройка)"); } });
+if (got.sp.length) S.opt.spc = d;
+var when = function (c) { return c.start ? " (с " + new Date(+c.start).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + ")" : ""; };
+[["Осанка и лицо", o.bch || {}, bcOpt().on, function (c) { S.opt.bch = Object.assign({}, S.opt.bch || {}, c); }],
+["Дом", (o.clean || {}).chal || {}, chOpt().on, function (c) { var cl = S.opt.clean = Object.assign({}, S.opt.clean || {}); cl.chal = Object.assign({}, cl.chal || {}, c); }],
+["Финансы", (o.bud || {}).fch || {}, fcOpt().on, function (c) { var b = S.opt.bud = Object.assign({}, S.opt.bud || {}); b.fch = Object.assign({}, b.fch || {}, c); }],
+["Кухня", o.kch || {}, kcOpt().on, function (c) { S.opt.kch = Object.assign({}, S.opt.kch || {}, c); }]
+].forEach(function (c) { if (c[1].on && !c[2]) { c[3](JSON.parse(JSON.stringify(c[1]))); got.ch.push(c[0] + when(c[1])); } });
+(Array.isArray(j.goals) ? j.goals : []).forEach(function (g0) { var g = g0 && g0.id && !g0.del && g0.gch && g0.gch.on ? goal(g0.id) : null; if (g && !gchOf(g)) { g.gch = JSON.parse(JSON.stringify(g0.gch)); touch(g); got.ch.push("Цель: " + g.n + when(g0.gch)); } });
+if (got.sp.length || got.ch.length) { optTouch(); save(); spcSync(true); bcAutoRun(); chAuto(); fcAutoRun(); kcAutoRun(); SYNC.later(); }
+return got;
+}
+function restorePartToast(got) {
+if (!got) { toast("В этой копии нет настроек"); return; }
+if (!got.sp.length && !got.ch.length) { toast("В копии нет пространств и челленджей, которых не хватает сейчас — ничего не менял"); return; }
+toast("Вернул из копии" + (got.sp.length ? " · пространства: " + got.sp.map(function (n) { return "«" + n + "»"; }).join(", ") : "") + (got.ch.length ? " · челленджи: " + got.ch.join(", ") : ""));
 }
 document.addEventListener("click", function (e) {
 if (e.target.closest && e.target.closest("a.hq")) return;
@@ -24054,6 +24119,12 @@ if (!IMPF) return;
 impParse(IMPF).then(function (j) {
 if (j.test) { tstMerge(j); IMPF = null; CONF = null; render(); toast("Это тестовый файл — он не заменяет ваши данные, а добавлен к ним"); return; }
 restoreAll(j); IMPF = null; render(); toast("Данные восстановлены из файла");
+}).catch(function (er) { toast("Не удалось: " + (er.message || "ошибка")); }); return;
+case "imp-part":
+if (!IMPF) return;
+impParse(IMPF).then(function (j) {
+if (j.test) { toast("Это тестовый файл — в нём нет ваших пространств и челленджей"); return; }
+var got = restorePart(j); IMPF = null; CONF = null; render(); restorePartToast(got);
 }).catch(function (er) { toast("Не удалось: " + (er.message || "ошибка")); }); return;
 case "imp-yes":
 if (!IMPF) return;
