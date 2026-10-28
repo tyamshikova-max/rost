@@ -1829,6 +1829,8 @@ html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; backgro
 .mottd { margin: 0 0 12px; display: grid; gap: 8px } .mottdh { display: flex; align-items: center; justify-content: space-between; gap: 8px } .mottdh b { font-size: calc(13px * var(--fs)); color: var(--muted); font-weight: 600 } .mottd .motb { margin-top: 2px }
 .motq { margin: 0; padding: 2px 0 2px 14px; border-left: 3px solid var(--acc); font-family: Georgia, "Times New Roman", serif; font-style: italic; line-height: 1.45 } .motq.big { font-size: calc(17px * var(--fs)) } .motq cite { display: block; margin-top: 4px; font-family: inherit; font-style: normal; font-size: calc(12.5px * var(--fs)); color: var(--muted) }
 .motb { margin-top: 10px; gap: 6px; flex-wrap: wrap } .motl { display: block; margin: 0 0 10px; padding: 6px 10px; border-radius: 8px; background: var(--hover); color: var(--fg); text-decoration: none; font-size: calc(13px * var(--fs)); line-height: 1.4 } .motl span { font-family: Georgia, "Times New Roman", serif; font-style: italic } .motl i { color: var(--muted); font-style: normal }
+li.task.chalt { background: color-mix(in srgb, var(--acc) 7%, transparent); box-shadow: inset 3px 0 0 var(--acc); border-radius: 8px } li.task.chalt.done { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--acc) 35%, transparent) } .chalh { color: var(--acc) } .chalg { margin-bottom: 6px }
+li.task.sprt { background: color-mix(in srgb, #6b8fd6 8%, transparent); box-shadow: inset 3px 0 0 #6b8fd6; border-radius: 8px } li.task.sprt.done { box-shadow: inset 3px 0 0 color-mix(in srgb, #6b8fd6 35%, transparent) } .sprh { color: #5b7fc7 } .sprg { margin-bottom: 6px }
 .hzcl { width: 24px; height: 24px; min-width: 24px; padding: 0; font-size: 12px; color: var(--muted); margin-left: -2px } .hzc.hzcoll > :not(.hzh):not(.hzrs) { display: none } .hzc.hzcoll .hzh { margin-bottom: 0 } .hzc.hzcoll .hzrs { display: none }
 .hzgt { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 10px } .hzgtb { font: inherit; font-size: calc(13px * var(--fs)); padding: 3px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer } .hzgtb:hover { background: var(--hover) } .hzgtb.on { background: var(--acc-soft); border-color: var(--acc); color: var(--acc) } .hzgnew { margin: 10px 0 } .hz-g .hzwb { border: 0; background: none; box-shadow: none; padding: 0; min-height: 0; margin: 0 } .hz-g .hzwb .wb { padding: 0 }
 .hzc.hzfix { display: flex; flex-direction: column; overflow: hidden } .hzc.hzfix > .hzb { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain }
@@ -8548,7 +8550,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-276";
+var APPV = "zd-app-2026-10-16-277";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -9491,7 +9493,7 @@ if (blk) { var fb = depBlockers(t).filter(function (b) { return !b.done; }); met
 if (t.wait && !t.done) { var wl = t.wait.ask && t.wait.ask < today0() + DAY; meta.unshift('<span class="wt' + (wl ? " due" : "") + '" title="Жду ответа">⏳ ' + (wl ? "пора спросить" : "жду ответа") + (t.wait.who ? ": " + esc(t.wait.who) : "") + (t.wait.ask && !wl ? " · " + esc(dayName(t.wait.ask).toLowerCase()) : "") + "</span>"); }
 if (t.canc) meta.unshift('<span class="muted">отменена</span>');
 if (ftd) meta.unshift('<span class="muted">★ на сегодня всё, завтра снова в списке</span>');
-var h = '<li class="task' + (blk ? " blocked" : "") + (t.done || ftd ? " done" : "") + (t.canc ? " canc" : "") + (ftd ? " ftd" : "") + (OPEN === t.id ? " open" : "") + (SELS[t.id] ? " sel" : "") + '" data-id="' + t.id + '" draggable="true" style="padding-left:' + (4 + depth * 26) + 'px">' +
+var h = '<li class="task' + (blk ? " blocked" : "") + (t.done || ftd ? " done" : "") + (t.canc ? " canc" : "") + (ftd ? " ftd" : "") + (isChalTask(t) ? " chalt" : isSprintTask(t) ? " sprt" : "") + (OPEN === t.id ? " open" : "") + (SELS[t.id] ? " sel" : "") + '" data-id="' + t.id + '" draggable="true" style="padding-left:' + (4 + depth * 26) + 'px">' +
 '<button class="fold' + (hasKidsHere ? "" : " sp") + '" type="button" data-a="fold" aria-label="' + (t.fold ? "Показать подзадачи" : "Скрыть подзадачи") + '">' + (t.fold ? "▸" : "▾") + "</button>" +
 (SELMODE ? '<button type="button" class="selbox' + (SELS[t.id] ? " on" : "") + '" data-a="seltog" aria-label="Выбрать">' + (SELS[t.id] ? "✓" : "") + "</button>" : "") +
 '<button class="ck' + (t.prio ? " p" + t.prio : "") + (t.pin && !t.done ? " pin" : "") + '" type="button" data-a="toggle" aria-label="' + (t.done || ftd ? "Вернуть в работу" : "Готово") + '"></button>' + (t.till && !t.done && !ftd && spanIn(t, today0()) ? '<button type="button" class="wkdb' + (wkOn(t) ? " on" : "") + '" data-a="wk" data-x="' + t.id + '" title="' + (wkOn(t) ? "Сегодня уже поработали" : "Сегодня поработала — завтра продолжу") + '" aria-label="Сегодня поработала">◐</button>' : "") +
@@ -9552,7 +9554,30 @@ h += '<div class="ngrp d' + depth + '">' + gHead(g, gr, depth, pk, f, gr.items.l
 return h;
 }
 var MXG = false; // список уже сгруппирован по матрице — значок квадранта в строках не нужен
-function renderGroups(list, vo, o) { MXG = vo.group === "matrix" || (vo.groups || []).indexOf("matrix") >= 0; var h; try { h = renderGroups0(list, vo, o); } finally { MXG = false; } return !h || /^<p class="empty"/.test(h) ? h : '<div class="gsheet">' + h + "</div>"; }
+function isChalTask(t) { return !!t && /^(bch|kch|fch|chal|gch)-/.test(t.id || ""); }
+function chalUnder(t) { var q = t, g = 0; while (q && g++ < 6) { if (isChalTask(q)) return true; q = q.parent ? task(q.parent) : null; } return false; }
+function chalGroupHTML(ch, vo, o) {
+var f = !!((VIEWS[curKey()] || {}).gfold || {}).chal, top = ch.filter(function (t) { return isChalTask(t) && !t.done; }).length;
+return '<div class="ngrp d0 chalg"><h2 class="ngh d0 chalh"><button type="button" class="gf" data-a="gfold" data-k="chal">' + (f ? "▸" : "▾") + "</button>🏁 Челленджи" + ' <span class="c">' + top + "</span></h2>" + (f ? "" : renderTree(ch, vo.sort, o)) + "</div>";
+}
+function isSprintTask(t) { var c = ""; try { c = curSprintId(); } catch (e) { /* без спринта */ } return !!t && !!c && t.sprint === c; }
+function sprUnder(t) { var q = t, g = 0; while (q && g++ < 6) { if (isSprintTask(q)) return true; q = q.parent ? task(q.parent) : null; } return false; }
+function sprGroupHTML(sl, vo, o) {
+var f = !!((VIEWS[curKey()] || {}).gfold || {}).spr, top = sl.filter(function (t) { return isSprintTask(t) && !t.done; }).length, nm = ""; try { nm = spLabel(curSprintId()); } catch (e) { /* ок */ }
+return '<div class="ngrp d0 sprg"><h2 class="ngh d0 sprh"><button type="button" class="gf" data-a="gfold" data-k="spr">' + (f ? "▸" : "▾") + "</button>🏃 Спринт" + (nm ? ' <span class="muted">· ' + esc(nm) + "</span>" : "") + ' <span class="c">' + top + "</span></h2>" + (f ? "" : renderTree(sl, vo.sort, o)) + "</div>";
+}
+function renderGroups(list, vo, o) {
+MXG = vo.group === "matrix" || (vo.groups || []).indexOf("matrix") >= 0; var h, pre = "";
+try {
+if ((V === "today" || V === "all") && !MXG && !(o && o.plans) && vo.group !== "section") {
+if (S.opt.chalgrp !== 0) { var ch = list.filter(chalUnder); if (ch.length) { list = list.filter(function (t) { return !chalUnder(t); }); pre += chalGroupHTML(ch, vo, o || {}); } }
+if (S.opt.sprgrp !== 0) { var sl = list.filter(sprUnder); if (sl.length) { list = list.filter(function (t) { return !sprUnder(t); }); pre += sprGroupHTML(sl, vo, o || {}); } }
+}
+h = renderGroups0(list, vo, o);
+} finally { MXG = false; }
+var body = h && !/^<p class="empty"/.test(h) ? h : "";
+return !pre && !body ? h : '<div class="gsheet">' + pre + body + "</div>";
+}
 function renderGroups0(list, vo, o) {
 o = o || {};
 if (vo.group === "section" && V === "proj") return renderSections(list, vo, o);
@@ -18441,6 +18466,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["277", "🏁🏃 Челленджи и спринт — выделены и в одном месте", ["Задачи челленджей («Осанка и лицо», «Дом», «Финансы», «Кухня» и челленджи целей) теперь отмечены цветной полоской в любом списке, а задачи текущего спринта — синей.", "В «Сегодня» и «Все задачи» они собраны в отдельные группы «🏁 Челленджи» и «🏃 Спринт» в самом начале: ▾ сворачивает группу, число рядом — сколько задач ещё не сделано. Группы можно отключить: «Настройки» → «Общие» → «Выделение задач челленджей и спринта» (полоска останется)."]],
 ["276", "▾ Свернуть карточку и сделать копию", ["У каждой карточки на главной и в пространствах рядом с ⠿ появилась стрелка ▾: нажмите — карточка свернётся до заголовка (▸ — развернуть). Свёрнутое остаётся на месте и не мешает смотреть остальное.", "У собственных карточек (виджетов с досок) в «✎ Настроить главную» есть кнопка ⧉ «копия»: получается такая же карточка, которую можно настроить по-другому на доске (например, два списка задач — «на сегодня» и «по проекту»)."]],
 ["275", "🗂 Группа с вкладками на главной", ["В «✎ Настроить главную» → «＋ Группа с вкладками…»: отметьте две карточки или больше (например, «Привычки», «Самочувствие» и «Прогресс дня») — они соберутся в одну рамку с переключателем вкладок. Открытая вкладка запоминается на этом устройстве.", "Группу можно двигать, растягивать по ширине и высоте, как любую карточку. Кнопка ✕ у группы разбирает её: карточки снова становятся отдельными. То же работает в пространствах."]],
 ["274", "↕ Высота карточек на главной", ["Карточки главной и пространств теперь можно растягивать не только вширь, но и вниз: потяните уголок справа внизу — высота меняется клетками от 1 до 4 (как на досках). Если карточка не помещается, внутри неё появляется прокрутка.", "В «✎ Настроить главную» у каждой карточки есть кнопка «↕» — высота по кругу: авто, 1, 2, 3, 4 клетки. Двойной щелчок по уголку — снова «по содержимому». На телефоне высота всегда по содержимому."]],
@@ -18634,6 +18660,11 @@ function todayDayHTML() {
 var ld = todayLoadHTML(), nr = mobNarrow(), plan = todayPlanBox(), l = [tbNowHTML(), wrBanner(), apHTML(), ld, aiBox()].concat(nr ? [plan] : []).filter(function (x) { return x && String(x).trim(); });
 var sm = String(ld).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().split("Без оценки")[0].trim();
 return (l.length ? '<details class="mtips tdadv" data-k="tdday"' + (MTIPS.tdday ? " open" : "") + "><summary>📊 День" + (sm ? ' <span class="muted">· ' + esc(sm) + "</span>" : "") + "</summary>" + l.join("") + "</details>" : "") + (nr ? "" : plan);
+}
+function chalSetHTML() {
+return '<section class="card" id="s-chalgrp"><h2>Выделение задач челленджей и спринта</h2><p class="muted" style="margin:0">Задачи челленджей («Осанка и лицо», «Дом», «Финансы», «Кухня», челленджи целей) отмечены полоской цвета оформления, задачи текущего спринта — синей. Галочки собирают их в отдельные группы «🏁 Челленджи» и «🏃 Спринт» в начале «Сегодня» и «Всех задач»; полоска остаётся в любом случае.</p>' +
+'<div class="r"><label class="f"><span><input type="checkbox" id="opt-chalgrp"' + (S.opt.chalgrp === 0 ? "" : " checked") + "> Собирать задачи челленджей в одну группу</span></label></div>" +
+'<div class="r"><label class="f"><span><input type="checkbox" id="opt-sprgrp"' + (S.opt.sprgrp === 0 ? "" : " checked") + "> Собирать задачи текущего спринта в одну группу</span></label></div></section>";
 }
 function navSetHTML() {
 return '<section class="card" id="s-navtabs"><h2>Вкладки в разделах</h2><p class="muted" style="margin:0">Под заголовком «Сегодня», «По часам», «Календаря», «Планов» и «Дня за днём» — вкладки для перехода между ними, у «Меню» и «Кухни» — тоже. Боковая панель и «Все разделы» не меняются.</p>' +
@@ -22225,7 +22256,7 @@ h += '<p class="muted" style="margin:8px 0 0;font-size:calc(12px * var(--fs))">�
 h += "</section>";
 var th = LS.get("zd-theme") || "system";
 var hid = hiddenLists();
-h += peopleHTML() + navSetHTML() + pnSetHTML() + rowSetHTML() + tdSetHTML() + tbSetHTML() + buSetHTML();
+h += peopleHTML() + chalSetHTML() + navSetHTML() + pnSetHTML() + rowSetHTML() + tdSetHTML() + tbSetHTML() + buSetHTML();
 h += '<section class="card" id="s-lists"><h2>Пункты «Списков»</h2><p class="muted" style="margin:0">Снимите галочку, чтобы скрыть пункт из левой панели (в Ctrl+K он останется). «Входящие» видны всегда. Скрыть можно и правым кликом по пункту.</p><div class="lchk">' +
 listsAll().map(function (k) { var on = k === "inbox" || hid.indexOf(k) < 0; return '<button type="button" class="lt' + (on ? " on" : "") + '" data-a="lhide" data-id="' + k + '" role="switch" aria-checked="' + on + '"' + (k === "inbox" ? " disabled" : "") + '><span class="lbox"></span>' + ic(k) + "<span>" + LISTN[k] + "</span></button>"; }).join("") + "</div></section>";
 h += '<section class="card"><h2>Левая панель</h2><p class="muted" style="margin:0">Блоки («Избранное», «Списки», «Проекты», «Фильтры», «Теги», «Служебное») переставляются перетаскиванием за заголовок, пункты «Списков» — перетаскиванием самих пунктов. Порядок синхронизируется между устройствами.</p><div class="r"><button class="btn" type="button" data-a="side-reset">Вернуть исходный порядок</button><button class="btn" type="button" data-a="mini">' + (document.body.classList.contains("mini") ? "Развернуть панель" : "Свернуть панель до иконок") + "</button></div></section>";
@@ -23829,6 +23860,8 @@ touch(f); save(); render(); return;
 if (t.id === "pparent") { var p = proj(ARG); if (p) { if (t.value && pdesc(p.id).indexOf(t.value) >= 0) { toast("Нельзя вложить проект сам в себя"); return; } moveProj(p.id, t.value || null, "in"); toast(t.value ? "Проект вложен в «" + proj(t.value).n + "»" : "Проект на верхнем уровне"); } return; }
 if (t.id === "ai-prov") { var c2 = AI.cfg(); c2.prov = t.value; AI.setCfg(c2); render(); return; }
 if (t.id === "opt-autorem") { S.opt.autoRem = t.checked; optTouch(); save(); return; }
+if (t.id === "opt-sprgrp") { if (t.checked) delete S.opt.sprgrp; else S.opt.sprgrp = 0; optTouch(); save(); render(); return; }
+if (t.id === "opt-chalgrp") { if (t.checked) delete S.opt.chalgrp; else S.opt.chalgrp = 0; optTouch(); save(); render(); return; }
 if (t.id === "opt-navtabs") { if (t.checked) delete S.opt.navtabs; else S.opt.navtabs = 0; optTouch(); save(); render(); return; }
 if (t.id === "opt-pnmode") { if (t.value === "list") S.opt.pnlist = 1; else delete S.opt.pnlist; optTouch(); save(); render(); renderPanel(); return; }
 if (t.id === "opt-rowmode") { if (t.value === "full") S.opt.rowfull = 1; else delete S.opt.rowfull; optTouch(); save(); render(); return; }
