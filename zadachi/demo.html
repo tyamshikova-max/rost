@@ -8573,7 +8573,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-280";
+var APPV = "zd-app-2026-10-16-281";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -13097,7 +13097,7 @@ var BKIND0 = { "траты": "flex", "стиль ж": "flex", "животные"
 var BKN = { flex: ["гибкая", "недельный лимит, перерасход и экономия переносятся"], pay: ["платёж", "план и факт на период, без деления на недели"], off: ["не считать", "показывать отдельно, в расходы не входит"] };
 var BMONS = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
 function buNorm(s) { return String(s || "").toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ").trim(); }
-function buOpt() { var o = S.opt.bud || {}; return { kinds: Object.assign({}, o.kinds || {}), fname: o.fname || "", fmt: o.fmt || 0 }; }
+function buOpt() { var o = S.opt.bud || {}; return { kinds: Object.assign({}, o.kinds || {}), fname: o.fname || "", fmt: o.fmt || 0, fdisk: o.fdisk }; }
 function buSet(k, v) { var o = S.opt.bud = Object.assign({}, S.opt.bud || {}); o[k] = v; optTouch(); save(); }
 function buKind(cat) { var k = buOpt().kinds[buNorm(cat)]; return k || BKIND0[buNorm(cat)] || "flex"; }
 function buPid(ms) { var d = new Date(ms), y = d.getFullYear(), m = d.getMonth(); if (d.getDate() >= 11) { m++; if (m > 11) { m = 0; y++; } } return "bp:" + y + "-" + p2(m + 1); }
@@ -13231,7 +13231,7 @@ var BUFH = null, BUFINFO = null;
 function buDB() { return new Promise(function (ok, no) { var r = indexedDB.open("zdemo-zd-bud", 1); r.onupgradeneeded = function () { r.result.createObjectStore("kv"); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); }; }); }
 function buKV(k, v) { return buDB().then(function (db) { return new Promise(function (ok, no) { var tx = db.transaction("kv", v === undefined ? "readonly" : "readwrite"), st = tx.objectStore("kv"), rq = v === undefined ? st.get(k) : v === null ? st.delete(k) : st.put(v, k); rq.onsuccess = function () { ok(rq.result); }; rq.onerror = function () { no(rq.error); }; }); }); }
 function buCanRemember() { return typeof window.showOpenFilePicker === "function"; }
-function buHandle() { return BUFH ? Promise.resolve(BUFH) : buKV("fh").then(function (h) { BUFH = h || null; return BUFH; }).catch(function () { return null; }); }
+function buHandle() { return BUFH ? Promise.resolve(BUFH) : buKV("fh").then(function (h) { if (!BUFH) BUFH = h || null; return BUFH; }).catch(function () { return BUFH || null; }); }
 function buPickInput() {
 return new Promise(function (ok, no) {
 var i = document.createElement("input"); i.type = "file"; i.accept = ".xlsx"; i.style.display = "none"; document.body.appendChild(i);
@@ -13244,17 +13244,101 @@ return window.showOpenFilePicker({ types: [{ description: "Книга Excel", ac
 BUFH = hs[0]; return buKV("fh", BUFH).catch(function () { /* не запомнился — выберете снова */ }).then(function () { return BUFH.getFile(); });
 }).then(function (f) { buSet("fname", f.name); BUFINFO = { n: f.name, mt: f.lastModified }; render(); toast("Файл запомнен: " + f.name); return f; });
 }
-function buFile() {
+function buLocal() {
 return buHandle().then(function (h) {
-if (!h) return buCanRemember() ? buChoose() : buPickInput();
-var go2 = function () { return h.getFile(); };
+if (!h) return null; var go2 = function () { return h.getFile(); };
 if (!h.queryPermission) return go2();
-return h.queryPermission({ mode: "read" }).then(function (p) { if (p === "granted") return go2(); return h.requestPermission({ mode: "read" }).then(function (p2) { if (p2 === "granted") return go2(); throw new Error("нет доступа к файлу — разрешите чтение"); }); });
+return h.queryPermission({ mode: "read" }).then(function (p) { if (p === "granted") return go2(); return h.requestPermission({ mode: "read" }).then(function (p2) { return p2 === "granted" ? go2() : null; }); });
+}).catch(function () { return null; });
+}
+function buFile() {
+return Promise.all([buLocal(), buDiskOn() ? BUDK.meta().catch(function () { return null; }) : Promise.resolve(null)]).then(function (r) {
+var loc = r[0], dm = r[1];
+return (loc ? buLocMt(loc) : Promise.resolve(0)).then(function (lm) {
+if (dm && (!loc || dm.mt > lm)) return buFromDisk(dm, loc, lm);
+if (loc) return lm !== loc.lastModified ? new File([loc], loc.name, { lastModified: lm }) : loc;
+return buCanRemember() ? buChoose() : buPickInput();
 });
+});
+}
+var BUDK = {
+on: function () { return !!(YD.on && YD.token()); },
+path: function (n) { return "app:/budget/" + String(n || "Финансы.xlsx").replace(/[\\/:*?"<>|]/g, "_"); },
+meta: function (n) { return YD.api("/resources?path=" + encodeURIComponent(BUDK.path(n || buOpt().fname)) + "&fields=name,size,modified,custom_properties", { ok: [404] }).then(function (j) { return j && j.name ? { n: j.name, mt: +((j.custom_properties || {}).mt) || Date.parse(j.modified) || 0, sz: j.size || 0 } : null; }); },
+get: function (n) { return YD.api("/resources/download?path=" + encodeURIComponent(BUDK.path(n))).then(function (j) { return fetch(j.href); }).then(function (r) { if (!r.ok) throw new Error("копия файла не скачалась с Диска"); return r.blob(); }); },
+put: function (f, mt) { var p = BUDK.path(f.name); return YD.folder("app:/budget").then(function () { return YD.api("/resources/upload?overwrite=true&path=" + encodeURIComponent(p)); }).then(function (j) { return fetch(j.href, { method: "PUT", body: f }); }).then(function (r) { if (!r.ok) throw new Error("копия файла не записалась на Диск"); return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PATCH", body: { custom_properties: { mt: String(mt) } } }); }); }
+};
+var BUDM = null, BUDMAT = 0, BUPCHK = -1;
+function buDiskOn() { return buOpt().fdisk !== false && BUDK.on(); }
+function buLocMt(loc) { return buKV("lsync").then(function (s) { return s && s.lm === loc.lastModified ? s.dm : loc.lastModified; }, function () { return loc.lastModified; }); }
+function buWriteLocal(h, f, dmt) {
+return h.createWritable().then(function (ws) { return ws.write(f).then(function () { return ws.close(); }); }).then(function () { return h.getFile(); })
+.then(function (nf) { BUFINFO = { n: nf.name, mt: nf.lastModified }; return buKV("lsync", { lm: nf.lastModified, dm: dmt }).catch(function () { /* не страшно */ }); }).then(function () { return true; });
+}
+function buFromDisk(dm, loc, lm) {
+return BUDK.get(dm.n).then(function (b) {
+var f = new File([b], dm.n, { lastModified: dm.mt }); f.__disk = true; BUDM = dm; BUDMAT = Date.now();
+buKV("dcopy", { b: b, n: dm.n, mt: dm.mt }).catch(function () { /* запасная копия не обязательна */ });
+buHandle().then(function (h) {
+if (!h || !h.createWritable || (loc && lm >= dm.mt)) return;
+var w = function () { return buWriteLocal(h, f, dm.mt).then(function () { toast("Файл бюджета на этом компьютере обновлён с Диска"); }); };
+return h.queryPermission({ mode: "readwrite" }).then(function (p) { if (p === "granted") return w(); return h.requestPermission({ mode: "readwrite" }).then(function (p2) { if (p2 === "granted") return w(); }); });
+}).catch(function () { /* без записи — данные всё равно взяты с Диска */ });
+return f;
+});
+}
+function buPushDisk(f) {
+if (!f || f.__disk || !buDiskOn()) return Promise.resolve(false);
+return BUDK.meta(f.name).then(function (dm) {
+var mt = f.lastModified; if (dm && dm.mt >= mt) return false;
+return BUDK.put(f, mt).then(function () { BUDM = { n: f.name, mt: mt, sz: f.size }; BUDMAT = Date.now(); if (V === "budget") softRender(); toast("Копия файла бюджета сохранена на Яндекс Диске — другие устройства возьмут её оттуда"); return true; });
+}).catch(function (e) { toast("Копию файла на Диск сохранить не удалось: " + (e && (e.msg || e.message) || e)); return false; });
+}
+function buDiskPeek(force) {
+if (!buDiskOn() || (!force && Date.now() - BUDMAT < 5 * 60000)) return Promise.resolve(); BUDMAT = Date.now();
+return BUDK.meta().then(function (dm) {
+var was = BUDM ? BUDM.mt : -1; BUDM = dm; if (dm && was !== dm.mt && V === "budget") softRender(); if (!dm) return;
+return buHandle().then(function (h) {
+if (!h || !h.queryPermission || !h.createWritable) return;
+return h.queryPermission({ mode: "readwrite" }).then(function (p) {
+if (p !== "granted") return;
+return h.getFile().then(buLocMt).then(function (lm) { if (lm >= dm.mt) return; return BUDK.get(dm.n).then(function (b) { return buWriteLocal(h, new File([b], dm.n, { lastModified: dm.mt }), dm.mt); }).then(function () { toast("Файл бюджета на этом компьютере обновлён с Диска"); }); });
+});
+});
+}).catch(function () { /* без Диска — ничего */ });
+}
+function buSaveCopy() {
+var nm = (BUDM && BUDM.n) || buOpt().fname || "Финансы.xlsx", dm = null;
+if (!window.showSaveFilePicker) return BUDK.get(nm).then(function (b) { var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = nm; document.body.appendChild(a); a.click(); a.remove(); toast("Копия файла скачана — в этом браузере её нельзя обновлять автоматически"); });
+return window.showSaveFilePicker({ suggestedName: nm, types: [{ description: "Книга Excel", accept: { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"] } }] }).then(function (h) {
+BUFH = h; return buKV("fh", h).catch(function () { /* не запомнился */ }).then(function () { return BUDK.meta(nm); }).then(function (m) { dm = m; if (!dm) throw new Error("на Диске пока нет копии файла"); return BUDK.get(dm.n); })
+.then(function (b) { return buWriteLocal(h, new File([b], dm.n, { lastModified: dm.mt }), dm.mt); });
+}).then(function () { if (!buOpt().fname) buSet("fname", dm.n); render(); toast("Копия файла сохранена на этом компьютере — дальше она обновляется с Диска сама"); })
+.catch(function (e) { if (e && e.name !== "AbortError") toast("Не получилось: " + (e.message || e.msg || e)); });
+}
+function buDiskHTML(o) {
+if (!buDiskOn()) return "";
+var fd = function (ms) { return new Date(ms).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); };
+if (!BUDM) return '<span class="muted">☁ копии на Диске пока нет — появится после «Обновить» на компьютере с файлом</span>';
+return '<span class="muted">☁ копия на Диске от ' + esc(fd(BUDM.mt)) + "</span>" + (o.fmt && BUDM.mt > o.fmt ? '<span class="buchg">на Диске версия новее загруженной — обновите</span>' : "") +
+(!BUFH && buCanRemember() ? '<button type="button" class="btn sm" data-a="busavecopy" title="Сохранить копию файла на этот компьютер: дальше она обновляется с Диска сама">💾 Копию на этот компьютер</button>' : "") +
+'<button type="button" class="ibtn" data-a="budiskchk" title="Проверить копию на Диске сейчас" aria-label="Проверить копию на Диске">↻</button>';
+}
+document.addEventListener("change", function (e) { if (e.target && e.target.id === "opt-fdisk") { buSet("fdisk", e.target.checked ? undefined : false); BUDMAT = 0; render(); toast(e.target.checked ? "Копия файла будет храниться на Яндекс Диске" : "Копия на Диске больше не обновляется — файл только на этом компьютере"); } });
+var BUUNDO = null;
+function buUndo() {
+var u = BUUNDO; if (!u) return; BUUNDO = null; S.bpers = S.bpers || [];
+u.pids.forEach(function (pid) {
+var P = buPer(pid), A = u.before[pid];
+if (A) { if (!P) { P = { id: pid }; S.bpers.push(P); } Object.keys(P).forEach(function (k) { if (k !== "id") delete P[k]; }); Object.keys(A).forEach(function (k) { if (k !== "id") P[k] = A[k]; }); touch(P); }
+else if (P) { P.del = 1; P.delAt = Date.now(); touch(P); }
+});
+if (u.fmt !== undefined) buSet("fmt", u.fmt); BULAST = null; buSnap(); save(); render(); toast("Обновление отменено — данные бюджета как были до него");
 }
 function buPeek() {
 buHandle().then(function (h) {
-if (!h || !h.queryPermission) return; return h.queryPermission({ mode: "read" }).then(function (p) { if (p !== "granted") return; return h.getFile().then(function (f) { var ch = !BUFINFO || BUFINFO.mt !== f.lastModified; BUFINFO = { n: f.name, mt: f.lastModified }; if (ch && V === "budget") softRender(); }); });
+if (!h || !h.queryPermission) return; return h.queryPermission({ mode: "read" }).then(function (p) { if (p !== "granted") return; return h.getFile().then(function (f) { var ch = !BUFINFO || BUFINFO.mt !== f.lastModified; BUFINFO = { n: f.name, mt: f.lastModified }; if (ch && V === "budget") softRender();
+if (!buDiskOn()) return; return buLocMt(f).then(function (lm) { if (lm === BUPCHK) return; BUPCHK = lm; return buPushDisk(lm !== f.lastModified ? new File([f], f.name, { lastModified: lm }) : f); }); }); });
 }).catch(function () { /* нет файла — ничего */ });
 }
 var BUBUSY = false;
@@ -13264,8 +13348,16 @@ var pids = [], wk = null;
 if (scope.k === "week") { wk = scope.mon; for (var i = 0; i < 7; i++) { var p = buPid(addDays(wk, i)); if (pids.indexOf(p) < 0) pids.push(p); } }
 else { var a = scope.a, b = scope.b || scope.a; if (a > b) { var t = a; a = b; b = t; } for (var q = a, n = 0; q <= b && n < 36; q = buPShift(q, 1), n++) pids.push(q); }
 var before = {}; pids.forEach(function (pid) { var P = buPer(pid); if (P) before[pid] = JSON.parse(JSON.stringify(P)); });
-var file;
-buFile().then(function (f) { file = f; return f.arrayBuffer(); }).then(buBook).then(function (bk) {
+var file, fmt0 = buOpt().fmt;
+buFile().then(function (f) {
+file = f;
+var cur = 0; pids.forEach(function (pid) { var P = buPer(pid); if (P && P.src && P.src.mt > cur) cur = P.src.mt; });
+if (cur && f.lastModified < cur - 1000) {
+var fd = function (ms) { return new Date(ms).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); };
+if (!window.confirm("Файл «" + f.name + "» изменён " + fd(f.lastModified) + ", а эти данные уже загружены из более новой версии — от " + fd(cur) + ".\n\nЕсли заменить, свежие суммы пропадут. Заменить всё равно?")) throw { abort: true };
+}
+return f.arrayBuffer();
+}).then(buBook).then(function (bk) {
 var jobs = pids.map(function (pid) {
 var nm = bk.names.filter(function (x) { return buNorm(x) === buNorm(buPName(pid)); })[0];
 if (!nm) return Promise.resolve({ pid: pid, miss: true });
@@ -13286,10 +13378,10 @@ P.src = { f: file.name, mt: file.lastModified, at: Date.now() }; touch(P);
 warns = warns.concat(x.warn || []);
 });
 buSet("fmt", file.lastModified); BUFINFO = { n: file.name, mt: file.lastModified };
-buSnap(); save(); BUBUSY = false; BUUPD = false;
+buSnap(); save(); BUBUSY = false; BUUPD = false; BUUNDO = { before: before, pids: pids, fmt: fmt0 }; buPushDisk(file);
 BULAST = { at: Date.now(), what: scope.k === "week" ? "неделя " + buWName(wk) : pids.length > 1 ? buPName(pids[0]) + " — " + buPName(pids[pids.length - 1]) : buPName(pids[0]), diff: buDiff(before, pids, wk), msgs: msgs, warns: warns.slice(0, 6) };
 render(); toast(msgs.length ? "Обновлено с замечаниями — см. вверху раздела" : "Бюджет обновлён: " + BULAST.what);
-}).catch(function (e) { BUBUSY = false; toast("Не удалось прочитать файл: " + (e && e.message || e)); });
+}).catch(function (e) { BUBUSY = false; if (e && e.abort) { toast("Обновление отменено — данные не тронуты"); return; } toast("Не удалось прочитать файл: " + (e && (e.message || e.msg) || e)); });
 }
 var BULAST = null, BUUPD = false;
 function buDiff(before, pids, wk) {
@@ -13380,9 +13472,9 @@ function vBudget() {
 var tab = buTab(), o = buOpt();
 var h = head("Бюджет", "Неделя — с понедельника по воскресенье, период — с 11-го по 10-е. Данные — из вашего файла Excel (туда пишет выгрузка из 1С); обновляйте выбранный период или неделю сколько угодно раз.");
 h += '<div class="bubar"><button type="button" class="btn sm pri" data-a="buupd" aria-expanded="' + BUUPD + '">⟳ Обновить из файла ▾</button>' +
-buStaleHTML() + (o.fname ? '<span class="muted">📄 ' + esc(o.fname) + (BUFINFO ? " · изменён " + esc(new Date(BUFINFO.mt).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) : "") + "</span>" + (BUFINFO && o.fmt && BUFINFO.mt > o.fmt ? '<span class="buchg">в файле есть изменения — обновите</span>' : "") : '<span class="muted">Файл не выбран — <a href="#" data-a="bufile">выбрать файл</a> (запомнится в настройках)</span>') + "</div>";
+buStaleHTML() + (o.fname ? '<span class="muted">📄 ' + esc(o.fname) + (BUFINFO ? " · изменён " + esc(new Date(BUFINFO.mt).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) : "") + "</span>" + (BUFINFO && o.fmt && BUFINFO.mt > o.fmt ? '<span class="buchg">в файле есть изменения — обновите</span>' : "") : '<span class="muted">Файл не выбран — <a href="#" data-a="bufile">выбрать файл</a> (запомнится в настройках)</span>') + buDiskHTML(o) + "</div>";
 if (BUUPD) h += buUpdHTML();
-if (BULAST) h += '<div class="bulast"><b>Обновлено: ' + esc(BULAST.what) + "</b>" + (BULAST.diff.length ? '<span class="muted">' + esc(BULAST.diff.slice(0, 12).join(" · ")) + (BULAST.diff.length > 12 ? " …" : "") + "</span>" : '<span class="muted">изменений нет</span>') + (BULAST.msgs.length ? '<span class="warnc">' + esc(BULAST.msgs.join("; ")) + "</span>" : "") + (BULAST.warns.length ? '<span class="muted">⚠ ' + esc(BULAST.warns.join("; ")) + "</span>" : "") + '<button type="button" class="ibtn" data-a="bulastx" title="Скрыть">×</button></div>';
+if (BULAST) h += '<div class="bulast"><b>Обновлено: ' + esc(BULAST.what) + "</b>" + (BULAST.diff.length ? '<span class="muted">' + esc(BULAST.diff.slice(0, 12).join(" · ")) + (BULAST.diff.length > 12 ? " …" : "") + "</span>" : '<span class="muted">изменений нет</span>') + (BULAST.msgs.length ? '<span class="warnc">' + esc(BULAST.msgs.join("; ")) + "</span>" : "") + (BULAST.warns.length ? '<span class="muted">⚠ ' + esc(BULAST.warns.join("; ")) + "</span>" : "") + (BUUNDO ? '<button type="button" class="btn sm" data-a="buundo" title="Вернуть периоды такими, какими они были до этого обновления">↶ Вернуть как было</button>' : "") + '<button type="button" class="ibtn" data-a="bulastx" title="Скрыть">×</button></div>';
 h += '<div class="htabs butabs">' + [["week", "Неделя"], ["per", "Период"], ["rep", "📊 Отчёты"], ["regs", "Регулярные платежи"], ["debts", "Долги"], ["sav", "📈 Накопления"], ["wish", "Желания"], ["bank", "🏦 Выписка"], ["fch", fcOpt().on ? "💰 Челлендж" : "Челлендж"]].map(function (x) { return '<button type="button" class="tb' + (tab === x[0] ? " on" : "") + '" data-a="butab" data-x="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>";
 if (tab === "bank") return h + bankHTML();
 if (tab === "rep") return h + burHTML();
@@ -13390,7 +13482,7 @@ if (tab === "debts") return h + fcDebtsHTML(); if (tab === "sav") return h + svp
 if (!buPers().length && tab !== "regs") return h + (tab === "week" ? bavHTML() : "") + (tab === "week" && live(S.bregs || []).some(bregOk) ? buRegsWeekHTML(monday(today0()), true) : "") + '<div class="card bunone"><b>Данных пока нет.</b><p class="muted">1. Выберите файл «Финансы … .xlsx» (кнопка выше или «Настройки» → «Бюджет»).<br>2. «⟳ Обновить из файла» → текущий период.<br>Читается только выбранное: период (лист «Ноябрь 2026» = 11.10–10.11), несколько периодов или одна неделя. Файл открывается прямо в браузере на этом компьютере и никуда не отправляется — в «Задачи» попадают только суммы по дням и статьям.</p></div>';
 if (tab === "per" || tab === "week") h += bavHTML();
 if (tab === "per") h += buPerHTML(); else if (tab === "regs") h += buRegsHTML(); else h += buWeekHTML();
-setTimeout(buPeek, 0);
+setTimeout(buPeek, 0); setTimeout(buDiskPeek, 0);
 return h;
 }
 function buUpdHTML() {
@@ -13492,7 +13584,8 @@ function buSetHTML() {
 var o = buOpt(), cats = buCatsKnown();
 return '<section class="card" id="s-budget"><h2>Бюджет</h2><p class="muted" style="margin:0">Откуда раздел «Бюджет» берёт данные и как считать статьи.</p>' +
 '<div class="wcr"><span>Файл</span><div class="r"><button type="button" class="btn sm" data-a="bufile">📄 ' + (o.fname ? "Другой файл…" : "Выбрать файл…") + "</button>" + (o.fname ? '<span>' + esc(o.fname) + "</span>" : '<span class="muted">не выбран</span>') + (o.fname && buCanRemember() ? '<button type="button" class="ibtn" data-a="bufilex" title="Забыть файл на этом компьютере">✕</button>' : "") + "</div></div>" +
-'<p class="muted">' + (buCanRemember() ? "Файл запоминается на этом компьютере (Chrome, Edge) — дальше «Обновить» читает его сам; при первом чтении за сеанс браузер спросит разрешение. На телефоне файл не нужен: обновлённые суммы приходят синхронизацией." : "В этом браузере файл нельзя запомнить — его нужно выбирать при каждом обновлении. На компьютере в Chrome или Edge он запоминается.") + " Сам файл никуда не отправляется — в «Задачи» попадают только суммы.</p>" +
+'<p class="muted">' + (buCanRemember() ? "Файл запоминается на этом компьютере (Chrome, Edge) — дальше «Обновить» читает его сам; при первом чтении за сеанс браузер спросит разрешение. На телефоне файл не нужен: обновлённые суммы приходят синхронизацией." : "В этом браузере файл нельзя запомнить — его нужно выбирать при каждом обновлении. На компьютере в Chrome или Edge он запоминается.") + (buOpt().fdisk === false ? " Сам файл никуда не отправляется — в «Задачи» попадают только суммы." : " Копия файла хранится на вашем Яндекс Диске (папка «Приложения → Задачи → budget»): на другом компьютере «Обновить» берёт её оттуда, если она новее, а файл этого компьютера, если он новее, сам попадает на Диск. Выгрузка из 1С в файл на компьютере — как раньше.") + "</p>" +
+'<div class="r"><label class="f"><span><input type="checkbox" id="opt-fdisk"' + (buOpt().fdisk === false ? "" : " checked") + "> Хранить копию файла на моём Яндекс Диске и брать самую свежую версию</span></label></div>" +
 '<div class="wcr"><span>Статьи</span><div class="bukinds">' + cats.map(function (c) { var k = buKind(c); return '<div class="r bukr"><span class="bukn">' + esc(c) + '</span><div class="seg">' + Object.keys(BKN).map(function (x) { return '<button type="button" data-a="bukind" data-c="' + esc(c) + '" data-v="' + x + '" class="' + (k === x ? "on" : "") + '" title="' + BKN[x][1] + '">' + BKN[x][0] + "</button>"; }).join("") + "</div></div>"; }).join("") + "</div></div>" +
 '<p class="muted">Гибкая — недельный лимит из остатка плана, перерасход и экономия переносятся на следующие недели. Платёж — план и факт на период. «Не считать» — показывается отдельно и не входит в расходы.</p>' +
 '<div class="wcr"><span>Правило «остывания»</span><div class="r"><span class="muted">от</span><input class="inp" data-fcth="th" value="' + fcOpt().th.toLocaleString("ru-RU") + '" inputmode="numeric" style="width:110px"><span class="muted">₽ — сутки, от</span><input class="inp" data-fcth="th30" value="' + fcOpt().th30.toLocaleString("ru-RU") + '" inputmode="numeric" style="width:110px"><span class="muted">₽ — 30 дней</span></div></div>' +
@@ -13513,6 +13606,9 @@ else if (k === "range") buUpdate({ k: "range", a: ($("bu2a") || {}).value, b: ($
 else buUpdate({ k: "week", mon: +(($("bu3") || {}).value) });
 return true;
 case "bufile": buChoose().catch(function (e) { if (e && e.name !== "AbortError") toast("Файл не выбран: " + (e.message || e)); }); return true;
+case "buundo": buUndo(); return true;
+case "busavecopy": buSaveCopy(); return true;
+case "budiskchk": buDiskPeek(true).then(function () { toast(BUDM ? "Копия на Диске от " + new Date(BUDM.mt).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "На Диске копии файла пока нет"); }); return true;
 case "bufilex": BUFH = null; BUFINFO = null; buKV("fh", null).catch(function () {}); buSet("fname", ""); render(); toast("Файл забыт на этом компьютере"); return true;
 case "bukind": var ks = Object.assign({}, buOpt().kinds); ks[buNorm(el.dataset.c)] = el.dataset.v; buSet("kinds", ks); render(); return true;
 case "buradd": S.bregs = S.bregs || []; S.bregs.push(touch({ id: uid(), n: "", cat: "Ком. усл", day: 10, amt: 0 })); save(); render(); setTimeout(function () { var i = document.querySelectorAll(".burgn"); if (i.length) i[i.length - 1].focus(); }, 40); return true;
@@ -18489,6 +18585,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["281", "☁ Файл бюджета — один для всех устройств", ["Копия файла Excel с бюджетом теперь хранится на вашем Яндекс Диске («Приложения → Задачи → budget»). Выгрузка из 1С — как раньше, в файл на компьютере: когда он стал новее копии, приложение само кладёт его на Диск (при открытии «Бюджета» или после «Обновить»).", "На другом компьютере «Обновить» берёт самую свежую версию: свою или с Диска. Если на этом компьютере запомнен свой файл и он старее — приложение обновит его копией с Диска. «💾 Копию на этот компьютер» — сохранить копию там, где своего файла ещё нет.", "Защита: если файл старее того, из которого уже загружены данные, приложение спросит, прежде чем заменять. После обновления есть «↶ Вернуть как было». Отключить копию на Диске — в настройках файла бюджета."]],
 ["280", "🏆 История прохождения челленджей", ["На странице «🏁 Челленджи» появилась «🏆 История прохождения»: каждое прохождение «Осанки и лица», «Дома», «Финансов», «Кухни» и челленджей целей — даты, сколько дней из скольких, сколько сделано, частично и пропущено, и полоска по дням.", "У прохождения видно состояние: «▶ идёт», «✓ пройден» или «⏸ прерван». История собирается из ежедневных заданий, поэтому видна, даже если сам челлендж выключился.", "У прерванного прохождения есть кнопка «▶ Продолжить с …»: челлендж снова включается с прежней датой старта, и дни идут дальше с того места."]],
 ["279", "🛟 Настройки больше не затираются другим устройством", ["Исправлена ошибка синхронизации: настройки (в них — запущенные челленджи «Дом», «Финансы», «Кухня», «Осанка», модули, раскладка главной и другое) раньше переносились между устройствами целиком, и устройство со «старыми» настройками, изменившее что-то позже, могло молча стереть чужие свежие — так челленджи «останавливались сами».", "Теперь каждая настройка синхронизируется отдельно и берётся с того устройства, где менялась позже. Новое или давно не открывавшееся устройство больше не затирает настройки на Диске при первом запуске."]],
 ["278", "🗂 Раскладки главной и отмена перестановок", ["Внизу главной появился выбор «Раскладка…»: готовые «Всё», «Простая», «Фокус» (только главное, «Сейчас» и привычки), «Утро» и «Вечер» одним нажатием прячут лишние карточки. Порядок и размеры карточек при этом не меняются.", "В «✎ Настроить главную» можно сохранить свою раскладку (порядок, размеры, группы, свёрнутое) под названием и переключаться на неё; ✕ рядом с названием удаляет её.", "Кнопка «↶ Отменить последнее изменение» в настройке главной возвращает раскладку на шаг назад (до 20 шагов, пока приложение открыто). Работает и в пространствах."]],
