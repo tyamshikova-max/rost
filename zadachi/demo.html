@@ -1831,6 +1831,7 @@ html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; backgro
 .motb { margin-top: 10px; gap: 6px; flex-wrap: wrap } .motl { display: block; margin: 0 0 10px; padding: 6px 10px; border-radius: 8px; background: var(--hover); color: var(--fg); text-decoration: none; font-size: calc(13px * var(--fs)); line-height: 1.4 } .motl span { font-family: Georgia, "Times New Roman", serif; font-style: italic } .motl i { color: var(--muted); font-style: normal }
 li.task.chalt { background: color-mix(in srgb, var(--acc) 7%, transparent); box-shadow: inset 3px 0 0 var(--acc); border-radius: 8px } li.task.chalt.done { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--acc) 35%, transparent) } .chalh { color: var(--acc) } .chalg { margin-bottom: 6px }
 li.task.sprt { background: color-mix(in srgb, #6b8fd6 8%, transparent); box-shadow: inset 3px 0 0 #6b8fd6; border-radius: 8px } li.task.sprt.done { box-shadow: inset 3px 0 0 color-mix(in srgb, #6b8fd6 35%, transparent) } .sprh { color: #5b7fc7 } .sprg { margin-bottom: 6px }
+body.bunofile [data-a="buupd"], body.bunofile [data-a="bufile"], body.bunofile [data-a="bufilex"], body.bunofile [data-a="busavecopy"], body.bunofile [data-a="budiskchk"], body.bunofile [data-a="bfxopen"], body.bunofile [data-a="fcimp"], body.bunofile .bufrow { display: none !important }
 .chhil { display: grid; gap: 8px; margin-bottom: 12px } .chhi { padding: 10px 12px } .chhih { display: flex; align-items: center; gap: 8px } .chhih b { flex: 1 } .chhis { font-size: calc(12px * var(--fs)); padding: 2px 9px; border-radius: 999px; background: var(--hover); color: var(--muted); white-space: nowrap } .chhis.ok { background: var(--acc-soft); color: var(--acc) } .chhis.act { color: var(--acc) }
 .chhiq { display: flex; flex-wrap: wrap; gap: 2px; margin: 6px 0 } .chhic { width: 10px; height: 10px; border-radius: 2px; background: var(--hover) } .chhic.s2 { background: var(--acc) } .chhic.s1 { background: color-mix(in srgb, var(--acc) 45%, transparent) } .chhic.s0 { background: color-mix(in srgb, var(--warn) 40%, transparent) } .chhic.sp { box-shadow: inset 0 0 0 1px var(--acc) }
 .hzpu { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); margin: 0 4px 4px 0; padding: 0 4px 0 10px } .hzpa, .hzpx { font: inherit; font-size: calc(13px * var(--fs)); border: 0; background: none; color: var(--fg); cursor: pointer; padding: 4px 3px } .hzpx { color: var(--muted) } .hzpx:hover { color: var(--warn) }
@@ -8573,7 +8574,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-281";
+var APPV = "zd-app-2026-10-16-282";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -13239,11 +13240,15 @@ i.addEventListener("change", function () { var f = i.files && i.files[0]; i.remo
 });
 }
 function buChoose() {
+if (buMobile()) return Promise.reject(new Error(BUMOBMSG));
 if (!buCanRemember()) return buPickInput().then(function (f) { buSet("fname", f.name); BUFINFO = { n: f.name, mt: f.lastModified }; render(); toast("Файл выбран: " + f.name + " — в этом браузере его придётся выбирать при каждом обновлении"); return f; });
 return window.showOpenFilePicker({ types: [{ description: "Книга Excel", accept: { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"] } }], multiple: false }).then(function (hs) {
 BUFH = hs[0]; return buKV("fh", BUFH).catch(function () { /* не запомнился — выберете снова */ }).then(function () { return BUFH.getFile(); });
 }).then(function (f) { buSet("fname", f.name); BUFINFO = { n: f.name, mt: f.lastModified }; render(); toast("Файл запомнен: " + f.name); return f; });
 }
+var BUMOB = null;
+function buMobile() { if (BUMOB !== null) return BUMOB; var ua = navigator.userAgent || ""; return /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1); }
+var BUMOBMSG = "на телефоне файл бюджета не загружается — суммы приходят с компьютера синхронизацией";
 function buLocal() {
 return buHandle().then(function (h) {
 if (!h) return null; var go2 = function () { return h.getFile(); };
@@ -13252,6 +13257,7 @@ return h.queryPermission({ mode: "read" }).then(function (p) { if (p === "grante
 }).catch(function () { return null; });
 }
 function buFile() {
+if (buMobile()) return Promise.reject(new Error(BUMOBMSG));
 return Promise.all([buLocal(), buDiskOn() ? BUDK.meta().catch(function () { return null; }) : Promise.resolve(null)]).then(function (r) {
 var loc = r[0], dm = r[1];
 return (loc ? buLocMt(loc) : Promise.resolve(0)).then(function (lm) {
@@ -13295,7 +13301,7 @@ return BUDK.put(f, mt).then(function () { BUDM = { n: f.name, mt: mt, sz: f.size
 }).catch(function (e) { toast("Копию файла на Диск сохранить не удалось: " + (e && (e.msg || e.message) || e)); return false; });
 }
 function buDiskPeek(force) {
-if (!buDiskOn() || (!force && Date.now() - BUDMAT < 5 * 60000)) return Promise.resolve(); BUDMAT = Date.now();
+if (buMobile() || !buDiskOn() || (!force && Date.now() - BUDMAT < 5 * 60000)) return Promise.resolve(); BUDMAT = Date.now();
 return BUDK.meta().then(function (dm) {
 var was = BUDM ? BUDM.mt : -1; BUDM = dm; if (dm && was !== dm.mt && V === "budget") softRender(); if (!dm) return;
 return buHandle().then(function (h) {
@@ -13471,9 +13477,11 @@ function buTab() { if (V === "budget" && ARG !== BUARG) { BUARG = ARG; if (/^(we
 function vBudget() {
 var tab = buTab(), o = buOpt();
 var h = head("Бюджет", "Неделя — с понедельника по воскресенье, период — с 11-го по 10-е. Данные — из вашего файла Excel (туда пишет выгрузка из 1С); обновляйте выбранный период или неделю сколько угодно раз.");
+document.body.classList.toggle("bunofile", buMobile());
+if (buMobile()) h += '<div class="bubar"><span class="muted">📱 На телефоне бюджет обновляется сам: суммы приходят с компьютера синхронизацией. Загрузка из файла — на компьютере.</span>' + buStaleHTML() + "</div>"; else
 h += '<div class="bubar"><button type="button" class="btn sm pri" data-a="buupd" aria-expanded="' + BUUPD + '">⟳ Обновить из файла ▾</button>' +
 buStaleHTML() + (o.fname ? '<span class="muted">📄 ' + esc(o.fname) + (BUFINFO ? " · изменён " + esc(new Date(BUFINFO.mt).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) : "") + "</span>" + (BUFINFO && o.fmt && BUFINFO.mt > o.fmt ? '<span class="buchg">в файле есть изменения — обновите</span>' : "") : '<span class="muted">Файл не выбран — <a href="#" data-a="bufile">выбрать файл</a> (запомнится в настройках)</span>') + buDiskHTML(o) + "</div>";
-if (BUUPD) h += buUpdHTML();
+if (BUUPD && !buMobile()) h += buUpdHTML();
 if (BULAST) h += '<div class="bulast"><b>Обновлено: ' + esc(BULAST.what) + "</b>" + (BULAST.diff.length ? '<span class="muted">' + esc(BULAST.diff.slice(0, 12).join(" · ")) + (BULAST.diff.length > 12 ? " …" : "") + "</span>" : '<span class="muted">изменений нет</span>') + (BULAST.msgs.length ? '<span class="warnc">' + esc(BULAST.msgs.join("; ")) + "</span>" : "") + (BULAST.warns.length ? '<span class="muted">⚠ ' + esc(BULAST.warns.join("; ")) + "</span>" : "") + (BUUNDO ? '<button type="button" class="btn sm" data-a="buundo" title="Вернуть периоды такими, какими они были до этого обновления">↶ Вернуть как было</button>' : "") + '<button type="button" class="ibtn" data-a="bulastx" title="Скрыть">×</button></div>';
 h += '<div class="htabs butabs">' + [["week", "Неделя"], ["per", "Период"], ["rep", "📊 Отчёты"], ["regs", "Регулярные платежи"], ["debts", "Долги"], ["sav", "📈 Накопления"], ["wish", "Желания"], ["bank", "🏦 Выписка"], ["fch", fcOpt().on ? "💰 Челлендж" : "Челлендж"]].map(function (x) { return '<button type="button" class="tb' + (tab === x[0] ? " on" : "") + '" data-a="butab" data-x="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>";
 if (tab === "bank") return h + bankHTML();
@@ -13583,9 +13591,9 @@ return h;
 function buSetHTML() {
 var o = buOpt(), cats = buCatsKnown();
 return '<section class="card" id="s-budget"><h2>Бюджет</h2><p class="muted" style="margin:0">Откуда раздел «Бюджет» берёт данные и как считать статьи.</p>' +
-'<div class="wcr"><span>Файл</span><div class="r"><button type="button" class="btn sm" data-a="bufile">📄 ' + (o.fname ? "Другой файл…" : "Выбрать файл…") + "</button>" + (o.fname ? '<span>' + esc(o.fname) + "</span>" : '<span class="muted">не выбран</span>') + (o.fname && buCanRemember() ? '<button type="button" class="ibtn" data-a="bufilex" title="Забыть файл на этом компьютере">✕</button>' : "") + "</div></div>" +
-'<p class="muted">' + (buCanRemember() ? "Файл запоминается на этом компьютере (Chrome, Edge) — дальше «Обновить» читает его сам; при первом чтении за сеанс браузер спросит разрешение. На телефоне файл не нужен: обновлённые суммы приходят синхронизацией." : "В этом браузере файл нельзя запомнить — его нужно выбирать при каждом обновлении. На компьютере в Chrome или Edge он запоминается.") + (buOpt().fdisk === false ? " Сам файл никуда не отправляется — в «Задачи» попадают только суммы." : " Копия файла хранится на вашем Яндекс Диске (папка «Приложения → Задачи → budget»): на другом компьютере «Обновить» берёт её оттуда, если она новее, а файл этого компьютера, если он новее, сам попадает на Диск. Выгрузка из 1С в файл на компьютере — как раньше.") + "</p>" +
-'<div class="r"><label class="f"><span><input type="checkbox" id="opt-fdisk"' + (buOpt().fdisk === false ? "" : " checked") + "> Хранить копию файла на моём Яндекс Диске и брать самую свежую версию</span></label></div>" +
+'<div class="wcr bufrow"><span>Файл</span><div class="r"><button type="button" class="btn sm" data-a="bufile">📄 ' + (o.fname ? "Другой файл…" : "Выбрать файл…") + "</button>" + (o.fname ? '<span>' + esc(o.fname) + "</span>" : '<span class="muted">не выбран</span>') + (o.fname && buCanRemember() ? '<button type="button" class="ibtn" data-a="bufilex" title="Забыть файл на этом компьютере">✕</button>' : "") + "</div></div>" +
+'<p class="muted bufrow">' + (buCanRemember() ? "Файл запоминается на этом компьютере (Chrome, Edge) — дальше «Обновить» читает его сам; при первом чтении за сеанс браузер спросит разрешение. На телефоне файл не нужен: обновлённые суммы приходят синхронизацией." : "В этом браузере файл нельзя запомнить — его нужно выбирать при каждом обновлении. На компьютере в Chrome или Edge он запоминается.") + (buOpt().fdisk === false ? " Сам файл никуда не отправляется — в «Задачи» попадают только суммы." : " Копия файла хранится на вашем Яндекс Диске (папка «Приложения → Задачи → budget»): на другом компьютере «Обновить» берёт её оттуда, если она новее, а файл этого компьютера, если он новее, сам попадает на Диск. Выгрузка из 1С в файл на компьютере — как раньше.") + "</p>" +
+'<div class="r bufrow"><label class="f"><span><input type="checkbox" id="opt-fdisk"' + (buOpt().fdisk === false ? "" : " checked") + "> Хранить копию файла на моём Яндекс Диске и брать самую свежую версию</span></label></div>" +
 '<div class="wcr"><span>Статьи</span><div class="bukinds">' + cats.map(function (c) { var k = buKind(c); return '<div class="r bukr"><span class="bukn">' + esc(c) + '</span><div class="seg">' + Object.keys(BKN).map(function (x) { return '<button type="button" data-a="bukind" data-c="' + esc(c) + '" data-v="' + x + '" class="' + (k === x ? "on" : "") + '" title="' + BKN[x][1] + '">' + BKN[x][0] + "</button>"; }).join("") + "</div></div>"; }).join("") + "</div></div>" +
 '<p class="muted">Гибкая — недельный лимит из остатка плана, перерасход и экономия переносятся на следующие недели. Платёж — план и факт на период. «Не считать» — показывается отдельно и не входит в расходы.</p>' +
 '<div class="wcr"><span>Правило «остывания»</span><div class="r"><span class="muted">от</span><input class="inp" data-fcth="th" value="' + fcOpt().th.toLocaleString("ru-RU") + '" inputmode="numeric" style="width:110px"><span class="muted">₽ — сутки, от</span><input class="inp" data-fcth="th30" value="' + fcOpt().th30.toLocaleString("ru-RU") + '" inputmode="numeric" style="width:110px"><span class="muted">₽ — 30 дней</span></div></div>' +
@@ -13747,7 +13755,7 @@ if (t.dataset.bfxna) { D.na = D.na || {}; D.na.ref = t.dataset.ref; D.na.lref = 
 });
 document.addEventListener("change", function (e) { var t = e.target; if (!t || !t.dataset || !t.dataset.bfxsch) return; buSet("mort", t.value ? { d0: t.value, step: 14 } : null); render(); });
 function bfxOpen(pid) {
-if (!buCanRemember()) { toast("Записать план в Excel можно на компьютере в Chrome или Edge — там приложение получает доступ к файлу"); return; }
+if (buMobile() || !buCanRemember()) { toast("Записать план в Excel можно на компьютере в Chrome или Edge — там приложение получает доступ к файлу"); return; }
 BFX = { pid: pid, busy: 1, step: "read" }; render();
 var file;
 buFile().then(function (f) { file = f; return f.arrayBuffer(); }).then(buBook).then(function (bk) {
@@ -18585,6 +18593,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["282", "📱 На телефоне — без загрузки из файла", ["На телефоне и планшете в «Бюджете» больше нет кнопок «⟳ Обновить из файла», выбора файла, «Записать план в Excel» и загрузки долгов из файла: 1С там нет, а суммы приходят с компьютера синхронизацией. Вверху «Бюджета» об этом короткая подсказка.", "На компьютере всё как было."]],
 ["281", "☁ Файл бюджета — один для всех устройств", ["Копия файла Excel с бюджетом теперь хранится на вашем Яндекс Диске («Приложения → Задачи → budget»). Выгрузка из 1С — как раньше, в файл на компьютере: когда он стал новее копии, приложение само кладёт его на Диск (при открытии «Бюджета» или после «Обновить»).", "На другом компьютере «Обновить» берёт самую свежую версию: свою или с Диска. Если на этом компьютере запомнен свой файл и он старее — приложение обновит его копией с Диска. «💾 Копию на этот компьютер» — сохранить копию там, где своего файла ещё нет.", "Защита: если файл старее того, из которого уже загружены данные, приложение спросит, прежде чем заменять. После обновления есть «↶ Вернуть как было». Отключить копию на Диске — в настройках файла бюджета."]],
 ["280", "🏆 История прохождения челленджей", ["На странице «🏁 Челленджи» появилась «🏆 История прохождения»: каждое прохождение «Осанки и лица», «Дома», «Финансов», «Кухни» и челленджей целей — даты, сколько дней из скольких, сколько сделано, частично и пропущено, и полоска по дням.", "У прохождения видно состояние: «▶ идёт», «✓ пройден» или «⏸ прерван». История собирается из ежедневных заданий, поэтому видна, даже если сам челлендж выключился.", "У прерванного прохождения есть кнопка «▶ Продолжить с …»: челлендж снова включается с прежней датой старта, и дни идут дальше с того места."]],
 ["279", "🛟 Настройки больше не затираются другим устройством", ["Исправлена ошибка синхронизации: настройки (в них — запущенные челленджи «Дом», «Финансы», «Кухня», «Осанка», модули, раскладка главной и другое) раньше переносились между устройствами целиком, и устройство со «старыми» настройками, изменившее что-то позже, могло молча стереть чужие свежие — так челленджи «останавливались сами».", "Теперь каждая настройка синхронизируется отдельно и берётся с того устройства, где менялась позже. Новое или давно не открывавшееся устройство больше не затирает настройки на Диске при первом запуске."]],
