@@ -2703,13 +2703,33 @@ stGet("state").then(function (raw) {
 if (!raw) return; var d; try { d = JSON.parse(raw); } catch (e) { return; }
 var n = 0;
 LISTS.forEach(function (k) { if (!Array.isArray(d[k]) || !d[k].length) return; var m = {}; S[k].forEach(function (x, i) { m[x.id] = i; }); d[k].forEach(function (x) { var i = m[x.id]; if (i === undefined) { S[k].push(x); n++; } else if ((x.upd || 0) > (S[k][i].upd || 0)) { S[k][i] = x; n++; } }); });
-if (d.opt && (d.opt.upd || 0) > (S.opt.upd || 0)) { S.opt = d.opt; n++; }
+if (d.opt && optMergeIn(d.opt)) n++;
 if (n) { DV++; softRender(); }
 });
 }
 function save(quiet) { try { unScan(); } catch (er) { /* отмена не мешает сохранению */ } try { histScan(); } catch (er) { /* история не мешает сохранению */ } if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); DV++; saveLocal(); if (!quiet) { SYNC.later(); SRV.later(); } }
 function live(a) { return a.filter(function (x) { return !x.del; }); }
-function optTouch() { S.opt.upd = Math.max(Date.now(), (S.opt.upd || 0) + 1); }
+var OPTSNAP = null;
+function optSnapKeys() { var r = {}; Object.keys(S.opt).forEach(function (k) { if (k !== "upd" && k !== "ku") r[k] = JSON.stringify(S.opt[k]); }); return r; }
+function optSnapReset() { OPTSNAP = optSnapKeys(); }
+function optTouch() {
+var now = Math.max(Date.now(), (S.opt.upd || 0) + 1), cur = optSnapKeys(), ku = Object.assign({}, S.opt.ku || {});
+if (OPTSNAP) { Object.keys(cur).forEach(function (k) { if (OPTSNAP[k] !== cur[k]) ku[k] = now; }); Object.keys(OPTSNAP).forEach(function (k) { if (cur[k] === undefined) ku[k] = now; }); }
+S.opt.ku = ku; S.opt.upd = now; OPTSNAP = cur;
+}
+function optMerge(L, R) {
+if (!R || typeof R !== "object") return L; if (!L || !Object.keys(L).length) return R;
+if (!L.ku && !R.ku) return (R.upd || 0) > (L.upd || 0) ? R : L;
+var Lk = L.ku || {}, Rk = R.ku || {}, lw = (L.upd || 0) >= (R.upd || 0), keys = {}, out = {}, ku = {};
+Object.keys(L).concat(Object.keys(R)).forEach(function (k) { if (k !== "upd" && k !== "ku") keys[k] = 1; });
+Object.keys(Lk).concat(Object.keys(Rk)).forEach(function (k) { keys[k] = 1; });
+Object.keys(keys).forEach(function (k) {
+var tl = Lk[k] || 0, tr = Rk[k] || 0, pl = tl !== tr ? tl > tr : L[k] === undefined ? false : R[k] === undefined ? true : lw, src = pl ? L : R;
+if (src[k] !== undefined) out[k] = src[k]; if (tl || tr) ku[k] = Math.max(tl, tr);
+});
+out.ku = ku; out.upd = Math.max(L.upd || 0, R.upd || 0); return out;
+}
+function optMergeIn(d) { if (!d || typeof d !== "object") return false; var m = optMerge(S.opt, d); if (JSON.stringify(m) === JSON.stringify(S.opt)) return false; S.opt = m; optSnapReset(); return true; }
 function touch(o) { o.upd = Date.now(); DV++; if (o && o.due && o.at && typeof o.t === "string") dlWatch(o); return o; }
 var DLATS = {}, DLQ = {}, DLT = null;
 function dlSnap() { live(S.tasks).forEach(function (t) { DLATS[t.id] = t.at || 0; }); }
@@ -3412,7 +3432,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-278";
+var APPV = "zd-app-2026-10-16-279";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -3542,7 +3562,7 @@ if (SYNC.busy) { SYNC.later(); return Promise.resolve(); }
 if (typeof DecompressionStream === "undefined" || typeof CompressionStream === "undefined") { SYNC.fail({ msg: "этот браузер слишком старый для синхронизации — обновите его (нужен Chrome 80+, Яндекс Браузер последней версии или Safari 16.4+)" }); return Promise.resolve(); }
 SYNC.busy = true; SYNC.st = "busy"; SYNC.show();
 var before = JSON.stringify(LISTS.map(function (k) { return S[k].length; })) + S.at, changed = false, remote = null, bad = [];
-function mergeIn(d) { if (!d) return; LISTS.forEach(function (k) { if (d[k] && d[k].length) { S[k] = mergeList(S[k], d[k], k); changed = true; } }); if (d.opt && (!S.opt.upd || (d.opt.upd || 0) > S.opt.upd)) { S.opt = d.opt; changed = true; } }
+function mergeIn(d) { if (!d) return; LISTS.forEach(function (k) { if (d[k] && d[k].length) { S[k] = mergeList(S[k], d[k], k); changed = true; } }); if (d.opt && optMergeIn(d.opt)) changed = true; }
 return SYNC.read3().then(function (r) {
 remote = r; SYNC.seen = SYNC.seen || {};
 var first = !Object.keys(r).length;
@@ -13328,6 +13348,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["279", "🛟 Настройки больше не затираются другим устройством", ["Исправлена ошибка синхронизации: настройки (в них — запущенные челленджи «Дом», «Финансы», «Кухня», «Осанка», модули, раскладка главной и другое) раньше переносились между устройствами целиком, и устройство со «старыми» настройками, изменившее что-то позже, могло молча стереть чужие свежие — так челленджи «останавливались сами».", "Теперь каждая настройка синхронизируется отдельно и берётся с того устройства, где менялась позже. Новое или давно не открывавшееся устройство больше не затирает настройки на Диске при первом запуске."]],
 ["278", "🗂 Раскладки главной и отмена перестановок", ["Внизу главной появился выбор «Раскладка…»: готовые «Всё», «Простая», «Фокус» (только главное, «Сейчас» и привычки), «Утро» и «Вечер» одним нажатием прячут лишние карточки. Порядок и размеры карточек при этом не меняются.", "В «✎ Настроить главную» можно сохранить свою раскладку (порядок, размеры, группы, свёрнутое) под названием и переключаться на неё; ✕ рядом с названием удаляет её.", "Кнопка «↶ Отменить последнее изменение» в настройке главной возвращает раскладку на шаг назад (до 20 шагов, пока приложение открыто). Работает и в пространствах."]],
 ["277", "🏁🏃 Челленджи и спринт — выделены и в одном месте", ["Задачи челленджей («Осанка и лицо», «Дом», «Финансы», «Кухня» и челленджи целей) теперь отмечены цветной полоской в любом списке, а задачи текущего спринта — синей.", "В «Сегодня» и «Все задачи» они собраны в отдельные группы «🏁 Челленджи» и «🏃 Спринт» в самом начале: ▾ сворачивает группу, число рядом — сколько задач ещё не сделано. Группы можно отключить: «Настройки» → «Общие» → «Выделение задач челленджей и спринта» (полоска останется)."]],
 ["276", "▾ Свернуть карточку и сделать копию", ["У каждой карточки на главной и в пространствах рядом с ⠿ появилась стрелка ▾: нажмите — карточка свернётся до заголовка (▸ — развернуть). Свёрнутое остаётся на месте и не мешает смотреть остальное.", "У собственных карточек (виджетов с досок) в «✎ Настроить главную» есть кнопка ⧉ «копия»: получается такая же карточка, которую можно настроить по-другому на доске (например, два списка задач — «на сегодня» и «по проекту»)."]],
@@ -20342,6 +20363,7 @@ $("themeBtn").addEventListener("click", function () {
 var dark = themePref() === "dark" || (themePref() === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
 LS.set("zd-theme", dark ? "light" : "dark"); applyTheme(); if (V === "settings") render();
 });
+optSnapReset(); /* от этой точки видно, какие настройки меняются, — для слияния по каждой настройке */
 applyTheme();
 if (LS.get("zd-mini") === "1") document.body.classList.add("mini");
 (function () {
@@ -20352,7 +20374,7 @@ if (!location.hash) { var last = LS.get("zd-last"); if (last && !/^search/.test(
 })();
 if (!S.tasks.length && !LS.get("zd-started")) {
 LS.set("zd-newdef", "1");
-if (!S.opt.mods) { S.opt.mods = {}; MODOFF0.forEach(function (k) { S.opt.mods[k] = 0; }); optTouch(); }
+if (!S.opt.mods) { S.opt.mods = {}; MODOFF0.forEach(function (k) { S.opt.mods[k] = 0; }); optSnapReset(); }
 var t0 = today0();
 S.tasks.push(touch({ id: uid(), t: "Нажмите на задачу, чтобы открыть подробности", at: t0, allday: true, rep: "", prio: 0, tags: [], pid: "", done: false, created: Date.now() }));
 S.tasks.push(touch({ id: uid(), t: "Попробуйте быстрый ввод: «завтра в 10 позвонить #дела»", at: 0, rep: "", prio: 2, tags: [], pid: "", done: false, created: Date.now() - 1 }));
