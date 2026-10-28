@@ -1831,6 +1831,8 @@ html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; backgro
 .motb { margin-top: 10px; gap: 6px; flex-wrap: wrap } .motl { display: block; margin: 0 0 10px; padding: 6px 10px; border-radius: 8px; background: var(--hover); color: var(--fg); text-decoration: none; font-size: calc(13px * var(--fs)); line-height: 1.4 } .motl span { font-family: Georgia, "Times New Roman", serif; font-style: italic } .motl i { color: var(--muted); font-style: normal }
 li.task.chalt { background: color-mix(in srgb, var(--acc) 7%, transparent); box-shadow: inset 3px 0 0 var(--acc); border-radius: 8px } li.task.chalt.done { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--acc) 35%, transparent) } .chalh { color: var(--acc) } .chalg { margin-bottom: 6px }
 li.task.sprt { background: color-mix(in srgb, #6b8fd6 8%, transparent); box-shadow: inset 3px 0 0 #6b8fd6; border-radius: 8px } li.task.sprt.done { box-shadow: inset 3px 0 0 color-mix(in srgb, #6b8fd6 35%, transparent) } .sprh { color: #5b7fc7 } .sprg { margin-bottom: 6px }
+.chhil { display: grid; gap: 8px; margin-bottom: 12px } .chhi { padding: 10px 12px } .chhih { display: flex; align-items: center; gap: 8px } .chhih b { flex: 1 } .chhis { font-size: calc(12px * var(--fs)); padding: 2px 9px; border-radius: 999px; background: var(--hover); color: var(--muted); white-space: nowrap } .chhis.ok { background: var(--acc-soft); color: var(--acc) } .chhis.act { color: var(--acc) }
+.chhiq { display: flex; flex-wrap: wrap; gap: 2px; margin: 6px 0 } .chhic { width: 10px; height: 10px; border-radius: 2px; background: var(--hover) } .chhic.s2 { background: var(--acc) } .chhic.s1 { background: color-mix(in srgb, var(--acc) 45%, transparent) } .chhic.s0 { background: color-mix(in srgb, var(--warn) 40%, transparent) } .chhic.sp { box-shadow: inset 0 0 0 1px var(--acc) }
 .hzpu { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); margin: 0 4px 4px 0; padding: 0 4px 0 10px } .hzpa, .hzpx { font: inherit; font-size: calc(13px * var(--fs)); border: 0; background: none; color: var(--fg); cursor: pointer; padding: 4px 3px } .hzpx { color: var(--muted) } .hzpx:hover { color: var(--warn) }
 .hzcl { width: 24px; height: 24px; min-width: 24px; padding: 0; font-size: 12px; color: var(--muted); margin-left: -2px } .hzc.hzcoll > :not(.hzh):not(.hzrs) { display: none } .hzc.hzcoll .hzh { margin-bottom: 0 } .hzc.hzcoll .hzrs { display: none }
 .hzgt { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 10px } .hzgtb { font: inherit; font-size: calc(13px * var(--fs)); padding: 3px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer } .hzgtb:hover { background: var(--hover) } .hzgtb.on { background: var(--acc-soft); border-color: var(--acc); color: var(--acc) } .hzgnew { margin: 10px 0 } .hz-g .hzwb { border: 0; background: none; box-shadow: none; padding: 0; min-height: 0; margin: 0 } .hz-g .hzwb .wb { padding: 0 }
@@ -8571,7 +8573,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-279";
+var APPV = "zd-app-2026-10-16-280";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -18487,6 +18489,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["280", "🏆 История прохождения челленджей", ["На странице «🏁 Челленджи» появилась «🏆 История прохождения»: каждое прохождение «Осанки и лица», «Дома», «Финансов», «Кухни» и челленджей целей — даты, сколько дней из скольких, сколько сделано, частично и пропущено, и полоска по дням.", "У прохождения видно состояние: «▶ идёт», «✓ пройден» или «⏸ прерван». История собирается из ежедневных заданий, поэтому видна, даже если сам челлендж выключился.", "У прерванного прохождения есть кнопка «▶ Продолжить с …»: челлендж снова включается с прежней датой старта, и дни идут дальше с того места."]],
 ["279", "🛟 Настройки больше не затираются другим устройством", ["Исправлена ошибка синхронизации: настройки (в них — запущенные челленджи «Дом», «Финансы», «Кухня», «Осанка», модули, раскладка главной и другое) раньше переносились между устройствами целиком, и устройство со «старыми» настройками, изменившее что-то позже, могло молча стереть чужие свежие — так челленджи «останавливались сами».", "Теперь каждая настройка синхронизируется отдельно и берётся с того устройства, где менялась позже. Новое или давно не открывавшееся устройство больше не затирает настройки на Диске при первом запуске."]],
 ["278", "🗂 Раскладки главной и отмена перестановок", ["Внизу главной появился выбор «Раскладка…»: готовые «Всё», «Простая», «Фокус» (только главное, «Сейчас» и привычки), «Утро» и «Вечер» одним нажатием прячут лишние карточки. Порядок и размеры карточек при этом не меняются.", "В «✎ Настроить главную» можно сохранить свою раскладку (порядок, размеры, группы, свёрнутое) под названием и переключаться на неё; ✕ рядом с названием удаляет её.", "Кнопка «↶ Отменить последнее изменение» в настройке главной возвращает раскладку на шаг назад (до 20 шагов, пока приложение открыто). Работает и в пространствах."]],
 ["277", "🏁🏃 Челленджи и спринт — выделены и в одном месте", ["Задачи челленджей («Осанка и лицо», «Дом», «Финансы», «Кухня» и челленджи целей) теперь отмечены цветной полоской в любом списке, а задачи текущего спринта — синей.", "В «Сегодня» и «Все задачи» они собраны в отдельные группы «🏁 Челленджи» и «🏃 Спринт» в самом начале: ▾ сворачивает группу, число рядом — сколько задач ещё не сделано. Группы можно отключить: «Настройки» → «Общие» → «Выделение задач челленджей и спринта» (полоска останется)."]],
@@ -21794,6 +21797,7 @@ var x = el.dataset.x, D0 = SPCD;
 switch (a) {
 case "spcnew": SPCD = null; go("spced-new"); return true;
 case "chlopen": if (task(x)) openTask(x); return true;
+case "chlres": chhResume(x, el.dataset.v); return true;
 case "mxrow": S.opt.mxrow = !mxRowOn(); optTouch(); save(); render(); return true;
 case "wk": var wt = task(x); if (wt) { if (wkOn(wt)) toast("Сегодня уже отмечено — время и прогресс можно добавить в меню задачи «◐»"); else wkMark(wt, 0); } return true;
 case "enfoff": enCtx(0); return true;
@@ -21874,8 +21878,61 @@ var L = chalList(), act = L.filter(function (c) { return c.on; }), off = L.filte
 var h = head(SPZ.chal[0] + " " + SPZ.chal[1], "Программы на несколько недель: каждый день задание само появляется в «Сегодня». Пропустили день — ничего страшного, задания идут дальше.");
 if (act.length) h += '<h3 class="apph">Идут сейчас</h3><div class="chlg">' + act.map(chalCard).join("") + "</div>";
 if (off.length) h += '<h3 class="apph">' + (act.length ? "Можно начать" : "Выберите, с чего начать") + '</h3><div class="chlg">' + off.map(chalCard).join("") + "</div>";
+h += chalHistHTML();
 h += '<p class="muted chlnote">Очки за задания челленджей идут в «🏆 Уровень и очки»; достижение «Прямая спина» — за 14 дней «Осанки и лица».</p>';
 return h;
+}
+var CHHT = { bch: ["bc", "🧘", "Осанка и лицо"], chal: ["ch", "🏁", "Дом"], fch: ["fc", "💰", "Финансы"], kch: ["kc", "🍳", "Кухня"] };
+function chhDayState(t) {
+var n = 0, d = 0; try { TXTD.innerHTML = t.body || ""; var lis = TXTD.querySelectorAll("ul.todo > li"); n = lis.length; d = [].filter.call(lis, function (l) { return l.getAttribute("data-checked") === "1"; }).length; } catch (e) { /* без чек-листа */ }
+if ((t.done && !t.canc) || (n && d >= n)) return 2; if (d) return 1; return t.done ? 0 : -1;
+}
+function chhOn(c) { return c === "bc" ? bcOpt().on : c === "ch" ? chOpt().on : c === "fc" ? fcOpt().on : c === "kc" ? kcOpt().on : false; }
+function chalHist() {
+var by = {}, out = [], tk = dKey(today0());
+S.tasks.forEach(function (t) {
+if (t.del || !t.id) return; var m = /^(bch|chal|fch|kch)-(\d{4}-\d{2}-\d{2})$/.exec(t.id), k, dk;
+if (m) { k = m[1]; dk = m[2]; } else { m = /^gch-(.+)-(\d{4}-\d{2}-\d{2})$/.exec(t.id); if (!m) return; k = "g:" + m[1]; dk = m[2]; }
+var sv = chhDayState(t); if (sv < 0 && dk < tk) sv = 0; /* незакрытый день в прошлом — пропущен */
+(by[k] = by[k] || {})[dk] = sv;
+});
+Object.keys(by).forEach(function (k) {
+var run = null; Object.keys(by[k]).sort().forEach(function (dk) { var ms = new Date(dk + "T00:00").getTime(); if (!run || ms - run.last > 7 * DAY) { run = { k: k, first: ms, last: ms, d: {} }; out.push(run); } run.last = ms; run.d[dk] = by[k][dk]; });
+});
+return out.map(chhInfo).sort(function (a, b) { return b.last - a.last; });
+}
+function chhInfo(r) {
+var tp = CHHT[r.k], g = /^g:/.test(r.k) ? goal(r.k.slice(2)) : null, vals = Object.keys(r.d).map(function (x) { return r.d[x]; }), tot, on, stt;
+if (tp) { var c = tp[0]; on = chhOn(c); stt = c === "bc" ? bcOpt().start : c === "ch" ? chOpt().start : c === "fc" ? fcOpt().start : kcOpt().start; }
+else { on = !!g && gchActive().some(function (x) { return x.id === g.id; }); stt = g && g.gch ? +g.gch.start || 0 : 0; }
+var act = on && r.last >= today0() - 2 * DAY;
+if (act && stt && sod(stt) < r.first && r.first - sod(stt) < 400 * DAY) r.first = sod(stt);
+var len = Math.round((r.last - r.first) / DAY) + 1, f = new Date(r.first);
+tot = !tp ? 30 : tp[0] === "bc" ? 42 : tp[0] === "kc" ? 56 : tp[0] === "ch" ? chWeeks() * 7 : Math.round((new Date(f.getFullYear(), f.getMonth() + 3, 10).getTime() - r.first) / DAY) + 1;
+var st = act ? "act" : len >= tot ? "done" : "stop", cnt = function (v) { return vals.filter(function (x) { return x === v; }).length; };
+return { k: r.k, c: tp ? tp[0] : "g", ic: tp ? tp[1] : (g && g.ic) || "🎯", n: tp ? tp[2] : "Цель: " + (g ? g.n : "удалённая цель"), first: r.first, last: r.last, len: len, tot: tot, st: st, d: r.d, done: cnt(2), part: cnt(1), miss: cnt(0) };
+}
+function chalHistHTML() {
+var L = chalHist(), h = '<h3 class="apph">🏆 История прохождения</h3>', seen = {};
+if (!L.length) return h + '<p class="muted">История появится, когда пройдёт первый день любого челленджа.</p>';
+var fd = function (ms) { return new Date(ms).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }); };
+return h + '<p class="muted">Каждое прохождение — по дням: ■ сделано, ▪ частично, красноватый — пропущен, пустой — задания не было.</p><div class="chhil">' + L.map(function (x) {
+var cells = "", d = Math.max(x.first, addDays(x.last, -119));
+for (; d <= x.last; d = addDays(d, 1)) { var v = x.d[dKey(d)]; cells += '<i class="chhic s' + (v === undefined ? "n" : v < 0 ? "p" : v) + '" title="' + fd(d) + (v === 2 ? " — сделано" : v === 1 ? " — частично" : v === 0 ? " — пропущен" : v < 0 ? " — сегодня" : " — задания не было") + '"></i>'; }
+var st = x.st === "act" ? '<span class="chhis act">▶ идёт</span>' : x.st === "done" ? '<span class="chhis ok">✓ пройден</span>' : '<span class="chhis">⏸ прерван</span>';
+var res = x.st === "stop" && !seen[x.k] && x.c !== "g" && !chhOn(x.c) ? '<div class="r"><button type="button" class="btn sm" data-a="chlres" data-x="' + x.c + '" data-v="' + dKey(x.first) + '" title="Снова включить челлендж с прежней датой старта: дни и задания пойдут дальше с того места">▶ Продолжить с ' + fd(x.first) + "</button></div>" : "";
+seen[x.k] = 1;
+return '<div class="card chhi" data-k="' + esc(x.k) + '"><div class="chhih"><span class="chli">' + x.ic + "</span><b>" + esc(x.n) + "</b>" + st + '</div><small class="muted">' + fd(x.first) + " – " + fd(x.last) + " · " + x.len + " " + plural(x.len, ["день", "дня", "дней"]) + (x.tot ? " из " + x.tot : "") + " · сделано " + x.done + (x.part ? " · частично " + x.part : "") + (x.miss ? " · пропущено " + x.miss : "") + '</small><div class="chhiq">' + cells + "</div>" + res + "</div>";
+}).join("") + "</div>";
+}
+function chhResume(c, dk) {
+var ms = new Date(dk + "T00:00").getTime(); if (!ms) return;
+if (c === "bc") { bcSet("start", ms); bcSet("on", true); bcAutoRun(); }
+else if (c === "ch") { chSet("start", ms); chSet("paused", 0); chSet("on", true); chAuto(); }
+else if (c === "fc") { fcSet("start", ms); fcSet("on", true); fcAutoRun(); }
+else if (c === "kc") { kcSet("start", ms); kcSet("on", true); kcAutoRun(); }
+else return;
+save(); render(); toast("Челлендж продолжается с " + new Date(ms).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + " — задание дня появится в «Сегодня»");
 }
 function spanIn(t, d0) { return !!(t && t.till && t.at && sod(t.at) <= d0 && d0 <= t.till); }
 function wkOn(t, d0) { return !!(t && t.wd && t.wd[dKey(d0 === undefined ? today0() : d0)]); }
