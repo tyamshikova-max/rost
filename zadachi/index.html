@@ -1855,6 +1855,8 @@ body.bunofile [data-a="buupd"], body.bunofile [data-a="bufile"], body.bunofile [
 .pgb { font: inherit; font-size: calc(13px * var(--fs)); padding: 5px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left }
 .pgb:hover { background: var(--hover) } .pgb.on { border-color: var(--acc); box-shadow: 0 0 0 1px var(--acc) } .pgb[data-v="when"] { background: var(--acc-soft); color: var(--acc); border-color: color-mix(in srgb, var(--acc) 45%, transparent) } .pgb.late { background: color-mix(in srgb, var(--warn) 10%, transparent); color: var(--warn); border-color: var(--warn) } .pgb.warn { color: var(--warn) } .pgb.doing { color: var(--acc) }
 .pgpop { position: absolute; left: 0; top: calc(100% + 6px); z-index: 6; width: min(480px, 100%); display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 8px 10px; align-items: center; padding: 10px 12px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--solid, var(--panel)); box-shadow: var(--shadow), 0 0 0 1px color-mix(in srgb, var(--fg) 6%, transparent); font-size: calc(14px * var(--fs)) } /* фон плотный: в «Стекле» --panel полупрозрачный, и поля под окошком просвечивали */
+.pnnav { display: inline-flex; align-items: center; gap: 1px; margin-right: 2px; flex: none } .pnnav .pnni { font-size: calc(12px * var(--fs)); color: var(--muted); font-variant-numeric: tabular-nums; padding: 0 2px; white-space: nowrap }
+.pn-top button.pnnb { width: 26px; height: 28px; font-size: calc(19px * var(--fs)); line-height: 1; padding-bottom: 3px } .pn-top button.pnnb:disabled { opacity: .35; cursor: default; background: none; color: var(--muted) }
 .pgpop[hidden] { display: none } .pgph { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px } .pgph b { font-size: calc(13px * var(--fs)); color: var(--muted); font-weight: 500 }
 .pgpop > .prow > span:first-child { color: var(--muted); font-size: calc(13px * var(--fs)); position: relative } .pgpop .rgrip { display: none } .pgpop .pmoreb { display: none }
 .pnside { display: flex; flex-wrap: wrap; gap: 2px 14px; margin: 8px 0 2px; font-size: calc(13px * var(--fs)) } .pskv { font: inherit; font-size: inherit; border: 0; background: none; color: var(--fg); cursor: pointer; padding: 2px 0; text-align: left } .pskv:hover { color: var(--acc) } .pskv.pskm { color: var(--muted) } .pskv.pskm:hover, .pskv.pskm.on { color: var(--acc) }
@@ -3490,7 +3492,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-299";
+var APPV = "zd-app-2026-10-16-300";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -13665,6 +13667,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["300", "‹ › Следующая задача, не закрывая карточку", ["В шапке карточки — стрелки «‹ 3/12 ›»: открывают предыдущую и следующую задачу из списка на экране. С клавиатуры — Alt+↑ и Alt+↓.", "Удобно разбирать «Входящие» или «Сегодня» одну за другой."]],
 ["299", "🗂 Окошки «когда, где, как» — на плотном фоне", ["В стиле «Стекло» окошко полей просвечивало, и описание под ним мешало читать. Теперь фон окошка непрозрачный во всех стилях, добавлена тонкая кромка."]],
 ["298", "🗂 Карточка задачи: «когда, где, как»", ["Под названием задачи вместо строки значков — три кнопки: «📅 когда» (срок, время, повтор, несколько дней, дедлайн, напоминание), «📁 где» (проект, секция, спринт) и «❗ как» (приоритет, статус, матрица, теги). Нажатие открывает окошко поверх карточки — остальное не сдвигается. Редкие поля (ответственный, учёт времени, входит в, зависимости, жду ответа) — строкой под кнопками, а на широкой карточке (от 760 px, потяните левый край) — столбиком справа от описания.", "Внизу вместо четырёх кнопок — «✓ Готово» и «📅 Перенести ▾»: сегодня, завтра, понедельник, через неделю, выбрать дату, когда-нибудь, отложить, убрать срок. На телефоне эти кнопки стоят сразу под названием.", "Вернуть прежний вид: «Настройки» → «Поля в карточке задачи» → «Значками» или «Списком»."]],
 ["297", "✍ Свои челленджи и итог прохождения", ["На странице «🏁 Челленджи» — карточка «Свой челлендж»: любая программа по дням. Название, значок, сколько дней и задания строками: обычная строка — на каждый день, «день 3: …» или «дни 8-14: …» — только в эти дни. Задание дня само появляется в «Сегодня», история — рядом со встроенными, «▶ Продолжить» работает и для своих. Все свои — по адресу «Свои» в крошках.", "Под каждым прохождением в «🏆 Истории прохождения» — итог словами: пройден или прерван на какой день и неделе, сколько сделано и пропущено, лучшая серия подряд, подсказка на следующий раз. И строка для вашего вывода — что получилось и что сделать иначе; она сохраняется и синхронизируется."]],
@@ -19347,6 +19350,20 @@ $("panel").addEventListener("pointerup", function (e) { if (!PWD) return; var w 
 $("panel").addEventListener("dblclick", function (e) { if (e.target.classList.contains("grip")) { LS.del("zd-pw"); document.documentElement.style.removeProperty("--pw"); toast("Ширина по умолчанию"); } });
 function autoH(el) { if (!el) return; if (el.clientWidth < 60) { el.style.height = ""; setTimeout(function () { if (el.isConnected && el.clientWidth >= 60) autoH(el); }, 60); return; } el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; }
 var PNID = "";
+function pnNavIds() { var out = [], seen = {}; [].forEach.call(document.querySelectorAll("#view li.task[data-id]"), function (li) { var id = li.dataset.id; if (seen[id] || !task(id)) return; seen[id] = 1; out.push(id); }); return out; }
+function pnNav(d) {
+if (!OPEN) return false; var nv = pnNavIds(), i = nv.indexOf(OPEN), j = i + d;
+if (i < 0 || j < 0 || j >= nv.length) { toast(d > 0 ? "Это последняя задача в списке" : "Это первая задача в списке"); return false; }
+flushBody(); saveTitle(); openTask(nv[j]);
+var li = document.querySelector('#view li.task[data-id="' + nv[j] + '"]'); if (li && li.scrollIntoView) try { li.scrollIntoView({ block: "nearest" }); } catch (er) { /* не критично */ }
+var sc = $("panel").querySelector(".pn-sc"); if (sc) sc.scrollTop = 0;
+return true;
+}
+document.addEventListener("keydown", function (e) {
+if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+if (!OPEN || $("panel").hidden || !$("ctx").hidden || !$("pal").hidden) return;
+e.preventDefault(); e.stopImmediatePropagation(); pnNav(e.key === "ArrowDown" ? 1 : -1);
+}, true);
 function renderPanel() {
 var t = task(OPEN), P = $("panel"), pa = document.activeElement;
 if (t && pa && P.contains(pa) && (pa.tagName === "SELECT" || /^(date|time|datetime-local|color)$/.test(pa.type || ""))) { PEND = true; RHOLD = pa; return; }
@@ -19359,7 +19376,9 @@ var crumbs = (p ? picon(ppath(p)[0]) + " " + ppath(p).map(function (x) { return 
 var anc = [], q = par, g = 0; while (q && g++ < 30) { anc.unshift(q); q = task(q.parent); }
 var full = LS.get("zd-pfull") === "1";
 var pb = function (p, icon, title, extra) { return '<button type="button" data-p="' + p + '" title="' + esc(title) + '" aria-label="' + esc(title) + '"' + (extra || "") + ">" + ic(icon) + "</button>"; };
+var nv = pnNavIds(), ni = nv.indexOf(t.id);
 var h = '<div class="pn-top"><div class="crumbs">' + crumbs + "</div>" +
+(nv.length > 1 && ni >= 0 ? '<span class="pnnav"><button type="button" class="pnnb" data-p="pnnav" data-v="-1"' + (ni > 0 ? ' title="Предыдущая задача в списке (Alt+↑)"' : ' disabled title="Это первая задача в списке"') + ' aria-label="Предыдущая задача">‹</button><span class="pnni" title="Номер задачи в открытом списке">' + (ni + 1) + "/" + nv.length + '</span><button type="button" class="pnnb" data-p="pnnav" data-v="1"' + (ni < nv.length - 1 ? ' title="Следующая задача в списке (Alt+↓)"' : ' disabled title="Это последняя задача в списке"') + ' aria-label="Следующая задача">›</button></span>' : "") +
 (t.fav ? pb("fav", "star", "Убрать из избранного", ' class="onstar"') : "") + (t.pin ? pb("pin", "pin", "Открепить", ' class="on"') : "") +
 pb("pomo", "tomato", "Помодоро 25 минут", ' class="pomob"') + pb("track", "watch", t.ttOn ? "Остановить учёт времени" : "Засечь время", t.ttOn ? ' class="on ttb"' : "") +
 pb("flag", "flag", flagOf(t) ? "Флажок: " + flagOf(t).n : "Флажок", flagOf(t) ? ' class="on" style="color:' + col(flagOf(t).c) + '"' : "") +
@@ -19687,6 +19706,7 @@ if (a === "link") { copyLink(t); return; }
 if (a === "share") { flushBody(); shareOut(t.t, shareTaskText(task(t.id) || t), "Текст задачи"); return; }
 if (a === "ai") { var rc = el.getBoundingClientRect(); ctxShow(rc.left - 180, rc.bottom + 4, [{ c: "sub", i: "⊞", l: "Разбить на подзадачи" }, { c: "check", i: "☑", l: "Чек-лист в описание" }, { c: "est", i: "⏱", l: "Оценить время" }, "-", { c: "cfg", i: "⚙", l: AI.ready() ? "ИИ: " + AI.name() + " — настройки" : "Подключить ИИ…" }], { k: "ai", id: t.id }); return; }
 if (a === "toggle") { flushBody(); toggle(t); renderPanel(); return; }
+if (a === "pnnav") { pnNav(+el.dataset.v); return; }
 if (a === "prio") { PNCH.prio = false; setTask(function (x) { x.prio = +el.dataset.v; }); return; }
 if (a === "remoff") { setTask(function (x) { var v = +el.dataset.v, o = remOffs(x).slice(), k = o.indexOf(v); if (k >= 0) { if (o.length > 1) o.splice(k, 1); } else o.push(v); x.remOff = o.sort(function (p, q) { return p - q; }); }); return; }
 if (a === "st") { PNCH.status = false; setTask(function (x) { x.st = el.dataset.v; }); return; }
