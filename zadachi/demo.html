@@ -8659,7 +8659,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-309";
+var APPV = "zd-app-2026-10-16-310";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -13756,11 +13756,17 @@ if (P.src) h += '<p class="muted">Данные периода из файла «
 return h;
 }
 function buCatsKnown() { var out = []; buPers().forEach(function (P) { (P.cats || []).forEach(function (c) { if (out.indexOf(c) < 0) out.push(c); }); }); if (!out.length) out = ["Траты", "Ипотека", "Ком. усл", "Фитнес/здоровье", "Животные", "Стиль ж", "Кредиты", "ФИН ЦЕЛИ", "Налог ПНД"]; return out; }
+function burDebtBtn(g) {
+var ds = live(S.debts || []).filter(function (x) { return !x.off; }); if (!ds.length) return "";
+var cur = g.debt ? live(S.debts || []).filter(function (x) { return x.id === g.debt; })[0] : null;
+var lab = g.debt === "" ? "не долг" : cur ? (cur.n.length > 14 ? cur.n.slice(0, 13) + "…" : cur.n) : "долг?";
+return '<button type="button" class="btn sm burdebt" data-a="burdebt" data-id="' + g.id + '" title="К какому долгу относится платёж — при отметке «✓» остаток долга уменьшится">💳 ' + esc(lab) + ' ▾</button>';
+}
 function buRegsHTML() {
 var l = live(S.bregs || []).sort(function (a, b) { return (a.per === "w" ? 0 : +a.day || 99) - (b.per === "w" ? 0 : +b.day || 99) || (a.n || "").localeCompare(b.n || ""); });
 var h = '<p class="muted" style="margin:0 0 8px">Платежи, которые повторяются каждый месяц или каждые несколько недель: ипотека, кредиты, коммунальные, мобильная связь, интернет, подписки и услуги. Число месяца — когда ожидается; если платёж идёт, например, раз в 2 недели — нажмите «каждый месяц ▾» и укажите дату ближайшего платежа; «Неделя» покажет платежи своей недели и оплачены ли они (по факту статьи с 11-го).</p>';
 h += '<div class="gsheet buregs">' + (l.length ? l.map(function (g) {
-return '<div class="bureg' + (g.off ? " off" : "") + '"><input class="inp burgn" data-bureg="n" data-id="' + g.id + '" value="' + esc(g.n || "") + '" placeholder="Название" aria-label="Название"><button type="button" class="btn sm" data-a="burcat" data-id="' + g.id + '">' + esc(g.cat || "статья") + ' ▾</button><button type="button" class="btn sm burper" data-a="burper" data-id="' + g.id + '" title="Как часто">' + bregPer(g) + ' ▾</button>' + (g.per === "w" ? '<span class="r"><span class="muted">с</span><input class="inp burf" type="date" data-bureg="from" data-id="' + g.id + '" value="' + esc(g.from || "") + '" aria-label="Дата платежа, от которой считать"></span>' + (bregOk(g) ? '<span class="muted burnx">след.: ' + new Date(bregNext(g, today0())).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + "</span>" : "") : '<span class="r"><input class="inp burd" type="number" min="1" max="31" data-bureg="day" data-id="' + g.id + '" value="' + (+g.day || "") + '" aria-label="Число месяца"><span class="muted">-го</span></span>') + '<span class="r"><input class="inp bura" type="text" inputmode="numeric" data-bureg="amt" data-id="' + g.id + '" value="' + (g.amt ? Math.round(g.amt).toLocaleString("ru-RU") : "") + '" aria-label="Сумма"><span class="muted">₽</span></span><button type="button" class="ibtn" data-a="buroff" data-id="' + g.id + '" title="' + (g.off ? "Включить" : "Временно не ждать") + '">' + (g.off ? "▶" : "⏸") + '</button><button type="button" class="ibtn" data-a="burdel" data-id="' + g.id + '" title="Удалить">🗑</button></div>';
+return '<div class="bureg' + (g.off ? " off" : "") + '"><input class="inp burgn" data-bureg="n" data-id="' + g.id + '" value="' + esc(g.n || "") + '" placeholder="Название" aria-label="Название"><button type="button" class="btn sm" data-a="burcat" data-id="' + g.id + '">' + esc(g.cat || "статья") + ' ▾</button>' + burDebtBtn(g) + '<button type="button" class="btn sm burper" data-a="burper" data-id="' + g.id + '" title="Как часто">' + bregPer(g) + ' ▾</button>' + (g.per === "w" ? '<span class="r"><span class="muted">с</span><input class="inp burf" type="date" data-bureg="from" data-id="' + g.id + '" value="' + esc(g.from || "") + '" aria-label="Дата платежа, от которой считать"></span>' + (bregOk(g) ? '<span class="muted burnx">след.: ' + new Date(bregNext(g, today0())).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + "</span>" : "") : '<span class="r"><input class="inp burd" type="number" min="1" max="31" data-bureg="day" data-id="' + g.id + '" value="' + (+g.day || "") + '" aria-label="Число месяца"><span class="muted">-го</span></span>') + '<span class="r"><input class="inp bura" type="text" inputmode="numeric" data-bureg="amt" data-id="' + g.id + '" value="' + (g.amt ? Math.round(g.amt).toLocaleString("ru-RU") : "") + '" aria-label="Сумма"><span class="muted">₽</span></span><button type="button" class="ibtn" data-a="buroff" data-id="' + g.id + '" title="' + (g.off ? "Включить" : "Временно не ждать") + '">' + (g.off ? "▶" : "⏸") + '</button><button type="button" class="ibtn" data-a="burdel" data-id="' + g.id + '" title="Удалить">🗑</button></div>';
 }).join("") : '<p class="muted" style="padding:8px 0">Пока пусто.</p>') + '</div><div class="r" style="margin-top:8px"><button type="button" class="btn sm" data-a="buradd">＋ Платёж</button></div>';
 var P = buPer(buPid(today0())); if (P && l.length) { var by = {}; l.filter(function (g) { return !g.off; }).forEach(function (g) { by[g.cat] = (by[g.cat] || 0) + (+g.amt || 0) * (g.per === "w" ? 30.44 / (7 * bregWk(g)) : 1); }); h += '<p class="muted">Регулярных в месяц против плана ' + esc(buPName(P.id)) + ": " + Object.keys(by).map(function (c) { return esc(c) + " " + buRub(by[c]) + " из " + buRub(+P.plan[c] || 0); }).join(" · ") + "</p>"; }
 return h;
@@ -13803,6 +13809,7 @@ case "burdel": var g = live(S.bregs || []).filter(function (x) { return x.id ===
 case "burper": var rp = el.getBoundingClientRect(), gp = live(S.bregs || []).filter(function (x) { return x.id === id; })[0] || {}; ctxShow(rp.left, rp.bottom + 4, [["m", "Каждый месяц (число месяца)"], ["w1", "Каждую неделю"], ["w2", "Каждые 2 недели"], ["w3", "Каждые 3 недели"], ["w4", "Каждые 4 недели"]].map(function (o) { var on = o[0] === "m" ? gp.per !== "w" : gp.per === "w" && "w" + bregWk(gp) === o[0]; return { c: o[0], i: on ? "✓" : "", l: o[1] }; }), { k: "burper", id: id }); return true;
 case "buroff": var g2 = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (g2) { g2.off = g2.off ? 0 : 1; touch(g2); save(); render(); } return true;
 case "burcat": var rc = el.getBoundingClientRect(), cur = (live(S.bregs || []).filter(function (x) { return x.id === id; })[0] || {}).cat; ctxShow(rc.left, rc.bottom + 4, buCatsKnown().map(function (c) { return { c: c, i: cur === c ? "✓" : "", l: c }; }), { k: "burcat", id: id }); return true;
+case "burdebt": var rdb = el.getBoundingClientRect(), gdb = live(S.bregs || []).filter(function (x) { return x.id === id; })[0] || {}; ctxShow(rdb.left, rdb.bottom + 4, [{ c: "~auto", i: gdb.debt === undefined ? "✓" : "", l: "Авто — по совпадению названия" }, { c: "~none", i: gdb.debt === "" ? "✓" : "", l: "— не долг (просто платёж)" }].concat(live(S.debts || []).filter(function (x) { return !x.off; }).map(function (d) { return { c: d.id, i: gdb.debt === d.id ? "✓" : "", l: "💳 " + d.n }; })), { k: "burdebt", id: id }); return true;
 }
 return false;
 }
@@ -15243,7 +15250,9 @@ return ch;
 }
 function fcFinOf(t) {
 if (t.fin) return t.fin; var m = /^pay-(.+)-(\d{4}-\d\d-\d\d)$/.exec(t.id || ""); if (!m) return null;
-var g = live(S.bregs || []).filter(function (x) { return x.id === m[1]; })[0], d = g && fcDebtOf(g.n); return d ? { d: [{ id: d.id, p: +g.amt || +d.min || 0, int: 1 }] } : null;
+var g = live(S.bregs || []).filter(function (x) { return x.id === m[1]; })[0]; if (!g) return null;
+var d = g.debt === "" ? null : g.debt ? live(S.debts || []).filter(function (y) { return y.id === g.debt; })[0] : fcDebtOf(g.n);
+return d ? { d: [{ id: d.id, p: +g.amt || +d.min || 0, int: 1 }] } : null;
 }
 function fcFinDone(t) {
 var f = fcFinOf(t); if (!f || t.finrec) return; var recs = [], msg = [], now = Date.now(); S.dbal = S.dbal || []; S.sops = S.sops || [];
@@ -18943,6 +18952,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["310", "💳 Регулярный платёж теперь можно привязать к долгу", ["Раньше платёж уменьшал долг, только если их названия совпадали (из-за разных окончаний — «Ипотека» и «Платёж по ипотеке» — это часто не срабатывало). Теперь в «Регулярных платежах» у каждого платежа кнопка «💳 долг ▾»: выберите долг — и при отметке задачи платежа «✓» его остаток уменьшится на сумму платежа (с учётом процентов за месяц).", "«Авто» — по-прежнему по названию; «не долг» — обычный платёж без списания."]],
 ["309", "🔒 Пароль больше не спрашивается при каждом обновлении", ["Раньше после обновления приложение иногда снова просило пароль. Теперь, если пароль уже вводился на этом устройстве, он запоминается и при обновлениях не запрашивается."]],
 ["308", "🧠 Ментальная карта дома", ["«План уборки» → вкладка «🧠 Карта»: дерево дома, где зоны — крупные ветки. К любой зоне или веточке добавляйте свои веточки (＋) — идеи, напоминания, что угодно; любую можно отметить галочкой, свернуть или превратить в задачу (✓→).", "Зоны берутся из «Плана уборки», веточки синхронизируются между устройствами."]],
 ["307", "📅 Календарь челленджа и значки", ["В карточке челленджа «Дом в порядке» — кнопка «📅 Календарь»: видно каждый день программы цветом — зелёный выполнен, жёлтый частично, красный пропущен, ☕ отдых, рамка — сегодня. Нажатие на день открывает его задания.", "Рядом — геймификация: серия 🔥, лучшая серия 🏆, полные дни ✅, очки и уровень, значки за первую неделю, серии и финиш. Новый значок отмечается всплывашкой."]],
@@ -25786,6 +25796,7 @@ if (k === "kpmv") { var kpm = pantry().filter(function (x) { return x.id === id;
 if (k === "ckzone") { var cq = live(S.chq || []).filter(function (x) { return x.id === id; })[0]; if (cq) { cq.zone = c; touch(cq); save(); render(); } return; }
 if (k === "burper") { var bp = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bp) { if (c === "m") { delete bp.per; } else { bp.per = "w"; bp.wk = +c.slice(1); } touch(bp); save(); render(); if (c !== "m" && !bp.from) toast("Укажите в поле «с» дату любого настоящего платежа — от неё считаются " + bregPer(bp)); } return; }
 if (k === "burcat") { var bg = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bg) { bg.cat = c; touch(bg); save(); render(); } return; }
+if (k === "burdebt") { var bdb = live(S.bregs || []).filter(function (x) { return x.id === id; })[0]; if (bdb) { if (c === "~auto") delete bdb.debt; else bdb.debt = c === "~none" ? "" : c; touch(bdb); save(); render(); toast(c === "~auto" ? "Долг подбирается по названию платежа" : c === "~none" ? "Платёж не связан с долгом" : "При отметке платежа «✓» остаток долга будет уменьшаться"); } return; }
 if (k === "tbpick") { var tl = tbList(); tl.forEach(function (b) { if (b.id === id) b.cat = c; }); tbSave(TBTAB, tl); render(); return; }
 if (k === "setfpj" || k === "setfsx" || k === "setfgl") { setFSet(id, { setfpj: "pid", setfsx: "sec", setfgl: "goal" }[k], c === "~" ? "" : c); return; }
 if (k === "ctxsel") { ctxSet(c); return; }
