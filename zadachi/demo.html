@@ -8660,7 +8660,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-319";
+var APPV = "zd-app-2026-10-16-320";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -19336,6 +19336,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["320", "★ Главное на сегодня: сделанные повторяющиеся задачи зачёркнуты", ["На главной странице в блоке «★ Главное на сегодня» задача, которую вы сегодня выполнили, теперь зачёркнута и отмечена ✓, даже если она повторяющаяся и уже ушла на следующий раз (рядом — когда он). Раньше зачёркивались только закрытые насовсем задачи. Блок «Сейчас» больше не предлагает начать с уже сделанного дела."]],
 ["319", "📈 Накопления: суммы по месяцам — с копейками", ["В таблице «По месяцам» все суммы, итоги и строка самопроверки показываются с двумя знаками после запятой (1 234,56 ₽), без округления до рубля. Вписать своё значение тоже можно с копейками."]],
 ["318", "📈 Накопления: таблицу по месяцам можно править", ["В таблице «По месяцам» ячейки прогноза «вложено», «проценты по вкладу» и «накоплено на конец» редактируются: нажмите на число, впишите своё, Enter. Следующие месяцы пересчитаются от вписанного (проценты — от нового остатка), остальные колонки не трогаются, итоги и самопроверка обновятся. Вписанные ячейки подчёркнуты, ✕ у месяца убирает его правки, «Вернуть расчёт везде» — все. Пустое поле возвращает расчёт.", "Правки общие для всех устройств и учитываются во всём расчёте накоплений (график, горизонт, цели)."]],
 ["317", "📄 Новый период: рамки недель, «Фин план» и «🔁 Обновить лист»", ["Рамки недель на новом листе теперь расставляются по дням недели: толстая линия под каждым воскресеньем и под последним днём периода, а не по строкам листа-образца. Хвост таблицы после последнего дня оформляется как у короткого месяца в файле.", "В листе «Фин план …» строки «план» и «факт» нового месяца получают формулы на его лист по образцу прошлого месяца; если блока месяца там нет — добавляется копия последнего.", "Кнопка «🔁 Обновить лист» в «Периоде» приводит в порядок уже существующий лист периода (даты, дни недели, число дней, рамки, хвост, формулы в «Фин плане»), не трогая суммы и план — так можно поправить лист, добавленный раньше."]],
@@ -21354,7 +21355,7 @@ function hzEve() { var r = dayRec(); return LS.get("zd-rit-shutdown") === dKey(t
 function hzGreet() { var h = new Date().getHours(); return h < 5 ? "Доброй ночи" : h < 12 ? "Доброе утро" : h < 17 ? "Добрый день" : h < 23 ? "Добрый вечер" : "Доброй ночи"; }
 function hzNext() { var now = Date.now(), end = today0() + DAY; return tasks().filter(function (t) { return !t.done && t.at && !t.allday && t.at >= now - 30 * 60000 && t.at < end; }).sort(function (a, b) { return a.at - b.at; }); }
 function hzSug() {
-var hr = new Date().getHours(), nx = hzNext(), tp = dayTop().filter(function (t) { return !t.done && !topMvKey(t); });
+var hr = new Date().getHours(), nx = hzNext(), tp = dayTop().filter(function (t) { return !t.done && !doneToday(t) && !topMvKey(t); });
 if (hr >= 17 && hzEve()) return hzEveCard();
 if (hr < 12 && !hzMorn()) return '<div class="hzs mo"><span class="hzsi">🌅</span><div><b>Утро — спланируйте день</b><small>2–3 минуты: входящие, хвосты, главное, время</small></div><a class="btn pri" href="#morning">Начать</a></div>';
 if (hr >= 17 && !hzEve()) return '<div class="hzs ev"><span class="hzsi">🌙</span><div><b>Вечер — закройте день</b><small>5 минут: сделанное, хвосты, пара строк в дневник, первое дело на завтра</small></div><a class="btn pri" href="#shutdown">Начать</a></div>';
@@ -21364,8 +21365,9 @@ if (tp.length) return '<div class="hzs dy"><span class="hzsi">★</span><div><b>
 return hr >= 17 ? '<div class="hzs ev"><span class="hzsi">✓</span><div><b>День закрыт</b><small>Отдыхайте — завтра начнём с чистого листа</small></div></div>' : "";
 }
 function hzRow(t, star, sk) {
-var on = (sk ? spcTopIds(sk) : ((dayRec() || {}).top) || []).indexOf(t.id) >= 0;
-return '<div class="hzr' + (t.done ? " dn" : "") + '"><button type="button" class="hzck" data-a="hztg" data-id="' + t.id + '" title="' + (t.done ? "Вернуть" : "Готово") + '" aria-label="Готово">' + (t.done ? "✓" : "") + '</button><a href="#task-' + t.id + '">' + esc(t.t) + "</a>" + (t.at && !t.allday ? '<small class="muted">' + hm(t.at) + "</small>" : "") + (star ? '<button type="button" class="hzst' + (on ? " on" : "") + '" data-a="hztop" data-id="' + t.id + '"' + (sk ? ' data-sp="' + esc(sk) + '"' : "") + ' title="' + (sk ? "Главное пространства на сегодня" : "Главное на сегодня") + '" aria-label="Главное">' + (on ? "★" : "☆") + "</button>" : "") + "</div>";
+var on = (sk ? spcTopIds(sk) : ((dayRec() || {}).top) || []).indexOf(t.id) >= 0,
+rd = !t.done && doneToday(t), dn = t.done || rd;
+return '<div class="hzr' + (dn ? " dn" : "") + '">' + (rd ? '<span class="hzck" title="Сделано сегодня" aria-label="Сделано сегодня">✓</span>' : '<button type="button" class="hzck" data-a="hztg" data-id="' + t.id + '" title="' + (t.done ? "Вернуть" : "Готово") + '" aria-label="Готово">' + (t.done ? "✓" : "") + '</button>') + '<a href="#task-' + t.id + '">' + esc(t.t) + "</a>" + (rd && t.rep ? '<small class="muted">следующий раз ' + esc(whenTxt(t).toLowerCase()) + "</small>" : "") + (t.at && !t.allday ? '<small class="muted">' + hm(t.at) + "</small>" : "") + (star ? '<button type="button" class="hzst' + (on ? " on" : "") + '" data-a="hztop" data-id="' + t.id + '"' + (sk ? ' data-sp="' + esc(sk) + '"' : "") + ' title="' + (sk ? "Главное пространства на сегодня" : "Главное на сегодня") + '" aria-label="Главное">' + (on ? "★" : "☆") + "</button>" : "") + "</div>";
 }
 function fstSteps() {
 var own = live(S.tasks).some(function (t) { return !/^(Нажмите на задачу, чтобы открыть подробности|Попробуйте быстрый ввод)/.test(t.t || ""); });
