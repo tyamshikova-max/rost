@@ -1855,7 +1855,7 @@ html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; backgro
 .motb { margin-top: 10px; gap: 6px; flex-wrap: wrap } .motl { display: block; margin: 0 0 10px; padding: 6px 10px; border-radius: 8px; background: var(--hover); color: var(--fg); text-decoration: none; font-size: calc(13px * var(--fs)); line-height: 1.4 } .motl span { font-family: Georgia, "Times New Roman", serif; font-style: italic } .motl i { color: var(--muted); font-style: normal }
 li.task.chalt { background: color-mix(in srgb, var(--acc) 7%, transparent); box-shadow: inset 3px 0 0 var(--acc); border-radius: 8px } li.task.chalt.done { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--acc) 35%, transparent) } .chalh { color: var(--acc) } .chalg { margin-bottom: 6px }
 li.task.sprt { background: color-mix(in srgb, #6b8fd6 8%, transparent); box-shadow: inset 3px 0 0 #6b8fd6; border-radius: 8px } li.task.sprt.done { box-shadow: inset 3px 0 0 color-mix(in srgb, #6b8fd6 35%, transparent) } .sprh { color: #5b7fc7 } .sprg { margin-bottom: 6px }
-body.bunofile [data-a="buupd"], body.bunofile [data-a="bufile"], body.bunofile [data-a="bufilex"], body.bunofile [data-a="busavecopy"], body.bunofile [data-a="budiskchk"], body.bunofile [data-a="bfxopen"], body.bunofile [data-a="fcimp"], body.bunofile .bufrow { display: none !important }
+body.bunofile [data-a="buupd"], body.bunofile [data-a="bufile"], body.bunofile [data-a="bufilex"], body.bunofile [data-a="busavecopy"], body.bunofile [data-a="budiskchk"], body.bunofile [data-a="bfxopen"], body.bunofile [data-a="bnpopen"], body.bunofile .bnpbar, body.bunofile [data-a="fcimp"], body.bunofile .bufrow { display: none !important }
 .chhil { display: grid; gap: 8px; margin-bottom: 12px } .chhi { padding: 10px 12px } .chhih { display: flex; align-items: center; gap: 8px } .chhih b { flex: 1 } .chhis { font-size: calc(12px * var(--fs)); padding: 2px 9px; border-radius: 999px; background: var(--hover); color: var(--muted); white-space: nowrap } .chhis.ok { background: var(--acc-soft); color: var(--acc) } .chhis.act { color: var(--acc) }
 .chhiq { display: flex; flex-wrap: wrap; gap: 2px; margin: 6px 0 } .chhic { width: 10px; height: 10px; border-radius: 2px; background: var(--hover) } .chhic.s2 { background: var(--acc) } .chhic.s1 { background: color-mix(in srgb, var(--acc) 45%, transparent) } .chhic.s0 { background: color-mix(in srgb, var(--warn) 40%, transparent) } .chhic.sp { box-shadow: inset 0 0 0 1px var(--acc) }
 .hzpu { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); margin: 0 4px 4px 0; padding: 0 4px 0 10px } .hzpa, .hzpx { font: inherit; font-size: calc(13px * var(--fs)); border: 0; background: none; color: var(--fg); cursor: pointer; padding: 4px 3px } .hzpx { color: var(--muted) } .hzpx:hover { color: var(--warn) }
@@ -8659,7 +8659,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-315";
+var APPV = "zd-app-2026-10-16-316";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -13727,7 +13727,7 @@ return '<div class="butile" title="Ячейка «Конец» листа: на�
 function buPerHTML() {
 var pid = BUPER || buPid(today0()), P = buPer(pid);
 var h = '<div class="r bunav"><button type="button" class="btn sm" data-a="buper" data-x="-1">‹</button><b>' + esc(buPName(pid)) + '</b><span class="muted">' + new Date(buPRange(pid).from).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + " – " + new Date(buPRange(pid).to).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + '</span><button type="button" class="btn sm" data-a="buper" data-x="1">›</button>' + (BUPER && BUPER !== buPid(today0()) ? '<button type="button" class="btn sm" data-a="buper" data-x="0">Текущий</button>' : "") + "</div>";
-h += bfxHTML(pid);
+h += bfxHTML(pid) + bnpHTML();
 if (!P) return h + '<p class="muted">За этот период данных нет — «⟳ Обновить из файла» → «Один период».</p>';
 var r = buPeriod(P), ep = r.el / r.pd * 100, ip = r.inc.plan - r.exp.plan, ifa = r.inc.fact - r.exp.fact;
 h += '<div class="butiles"><div class="butile"><small>Доходы' + buPct(r.inc.fact, r.inc.plan) + '</small><span>' + buRub(r.inc.fact) + '</span><small class="muted">план ' + buRub(r.inc.plan) + "</small></div>" +
@@ -13783,7 +13783,7 @@ buMainHTML() + '<div class="wcr bufrow"><span>Файл</span><div class="r"><but
 '<div class="wcr"><span>Напоминать о платежах</span><div class="r"><div class="seg"><button type="button" data-a="bupayrem" data-v="1" class="' + ((S.opt.bud || {}).payrem === false ? "" : "on") + '">за 2 дня</button><button type="button" data-a="bupayrem" data-v="0" class="' + ((S.opt.bud || {}).payrem === false ? "on" : "") + '">не напоминать</button></div><span class="muted">по справочнику регулярных платежей: задача «💳 …» за 2 дня, закрывается сама, когда по статье видно оплату</span></div></div></section>';
 }
 function buAct(a, el) {
-if (bfxAct(a, el) || burAct(a, el)) return true;
+if (bfxAct(a, el) || burAct(a, el) || bnpAct(a)) return true;
 var id = el.dataset.id;
 switch (a) {
 case "butab": BUTAB = el.dataset.x; LS.set("zd-butab", BUTAB); render(); return true;
@@ -13879,7 +13879,7 @@ function bfxHTML(pid) {
 if (BFXLAST === undefined) { BFXLAST = null; buKV("fixlast").then(function (v) { if (v) { BFXLAST = v; if (V === "budget") render(); } }).catch(function () {}); }
 if (!BFX || BFX.pid !== pid) {
 var L = BFXLAST && BFXLAST.pid === pid ? BFXLAST : null;
-return '<div class="r bfxbar"><button type="button" class="btn sm" data-a="bfxopen">✏️ Корректировка плана</button>' + (L ? '<span class="muted">Последняя: ' + esc(new Date(L.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) + " · " + L.ch.length + " " + plural(L.ch.length, ["статья", "статьи", "статей"]) + '</span><button type="button" class="btn sm" data-a="bfxundo">↶ Вернуть прежний план</button>' : "") + "</div>";
+return '<div class="r bfxbar"><button type="button" class="btn sm" data-a="bfxopen">✏️ Корректировка плана</button><button type="button" class="btn sm" data-a="bnpopen" title="Добавить в файл лист следующего периода по образцу последнего">📄 Новый период</button>' + (L ? '<span class="muted">Последняя: ' + esc(new Date(L.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) + " · " + L.ch.length + " " + plural(L.ch.length, ["статья", "статьи", "статей"]) + '</span><button type="button" class="btn sm" data-a="bfxundo">↶ Вернуть прежний план</button>' : "") + "</div>";
 }
 var D = BFX;
 if (D.busy) return '<div class="card bfx"><p class="muted" style="margin:0">' + (D.step === "write" ? "Записываю в файл…" : "Читаю план из файла…") + "</p></div>";
@@ -14010,14 +14010,17 @@ ents.push({ cd: u8.slice(off, off + len), name: new TextDecoder().decode(u8.suba
 }
 var byLoc = ents.slice().sort(function (a, b) { return a.loc - b.loc; });
 byLoc.forEach(function (x, j) { x.end = j + 1 < byLoc.length ? byLoc[j + 1].loc : cdo; });
-var enc = new TextEncoder();
-return Promise.all(ents.map(function (x) {
-if (!Object.prototype.hasOwnProperty.call(edits, x.name)) return null;
+var has = function (nm) { return Object.prototype.hasOwnProperty.call(edits, nm); }, old = {}; ents.forEach(function (x) { old[x.name] = 1; });
+var keep = ents.filter(function (x) { return !(has(x.name) && edits[x.name] === null); }), adds = Object.keys(edits).filter(function (nm) { return !old[nm] && edits[nm] !== null; }).map(function (nm) { return { name: nm, add: true }; });
+var enc = new TextEncoder(), all = keep.concat(adds);
+return Promise.all(all.map(function (x) {
+if (!has(x.name)) return null;
 var raw = enc.encode(edits[x.name]);
 return new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer().then(function (ab) { x.nw = { crc: crc32(raw), us: raw.length, data: new Uint8Array(ab) }; });
 })).then(function () {
-var parts = [], pos = 0;
+var parts = [], pos = 0, now = new Date(), dt = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate(), tm = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
 byLoc.forEach(function (x) {
+if (keep.indexOf(x) < 0) return;
 x.nloc = pos;
 if (!x.nw) { var seg = u8.subarray(x.loc, x.end); parts.push(seg); pos += seg.length; return; }
 var nb = u8.slice(x.loc + 30, x.loc + 30 + dv.getUint16(x.loc + 26, true)), hd = new Uint8Array(30 + nb.length), hv = new DataView(hd.buffer);
@@ -14026,13 +14029,22 @@ hv.setUint16(10, dv.getUint16(x.loc + 10, true), true); hv.setUint16(12, dv.getU
 hv.setUint32(14, x.nw.crc, true); hv.setUint32(18, x.nw.data.length, true); hv.setUint32(22, x.nw.us, true); hv.setUint16(26, nb.length, true); hv.setUint16(28, 0, true); hd.set(nb, 30);
 parts.push(hd, x.nw.data); pos += hd.length + x.nw.data.length;
 });
+adds.forEach(function (x) {
+x.nloc = pos; var nb = enc.encode(x.name), hd = new Uint8Array(30 + nb.length), hv = new DataView(hd.buffer);
+hv.setUint32(0, 0x04034b50, true); hv.setUint16(4, 20, true); hv.setUint16(6, 0, true); hv.setUint16(8, 8, true); hv.setUint16(10, tm, true); hv.setUint16(12, dt, true);
+hv.setUint32(14, x.nw.crc, true); hv.setUint32(18, x.nw.data.length, true); hv.setUint32(22, x.nw.us, true); hv.setUint16(26, nb.length, true); hv.setUint16(28, 0, true); hd.set(nb, 30);
+var c = new Uint8Array(46 + nb.length), cv = new DataView(c.buffer);
+cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true); cv.setUint16(8, 0, true); cv.setUint16(10, 8, true); cv.setUint16(12, tm, true); cv.setUint16(14, dt, true);
+cv.setUint32(16, x.nw.crc, true); cv.setUint32(20, x.nw.data.length, true); cv.setUint32(24, x.nw.us, true); cv.setUint16(28, nb.length, true); c.set(nb, 46); x.cd = c;
+parts.push(hd, x.nw.data); pos += hd.length + x.nw.data.length;
+});
 var cds = pos;
-ents.forEach(function (x) {
+all.forEach(function (x) {
 var c = x.cd.slice(), cv = new DataView(c.buffer); cv.setUint32(42, x.nloc, true);
 if (x.nw) { cv.setUint16(8, cv.getUint16(8, true) & 0xFFF6, true); cv.setUint16(10, 8, true); cv.setUint32(16, x.nw.crc, true); cv.setUint32(20, x.nw.data.length, true); cv.setUint32(24, x.nw.us, true); }
 parts.push(c); pos += c.length;
 });
-var eo = u8.slice(e), ev = new DataView(eo.buffer); ev.setUint32(12, pos - cds, true); ev.setUint32(16, cds, true); parts.push(eo); pos += eo.length;
+var eo = u8.slice(e), ev = new DataView(eo.buffer); ev.setUint16(8, all.length, true); ev.setUint16(10, all.length, true); ev.setUint32(12, pos - cds, true); ev.setUint32(16, cds, true); parts.push(eo); pos += eo.length;
 var out = new Uint8Array(pos), p = 0; parts.forEach(function (q) { out.set(q, p); p += q.length; }); return out;
 });
 }
@@ -14103,6 +14115,221 @@ case "bfxnext": if (BFX && bfxChanges(BFX).length && !bfxBad(BFX).length) { BFX.
 case "bfxback": if (BFX) { if (BFX.undo) BFX = null; else { BFX.step = "edit"; delete BFX.err; } render(); } return true;
 case "bfxundo": if (BFXLAST) { BFX = { pid: BFXLAST.pid, sheet: BFXLAST.sheet, step: "confirm", undo: true, nv: {}, exp: [], inc: [], chg: BFXLAST.ch.map(function (c) { return { ref: c.ref, c: c.c, from: c.to, to: c.from, inc: c.inc, kind: c.kind, fromF: c.toF, toF: c.fromF, fn: c.tn, tn: c.fn }; }) }; render(); } return true;
 case "bfxwrite": if (BFX && !BFX.busy) bfxWrite(); return true;
+}
+return false;
+}
+var BNP = null, BNPLAST;
+var BNP_R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships", BNP_CT = "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml";
+var BNP_WD = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+function bnpPid(name) { var m = /^([а-яё]+)\s+(\d{4})$/.exec(buNorm(name)); if (!m) return null; var i = BMONS.indexOf(m[1]); return i < 0 ? null : "bp:" + m[2] + "-" + p2(i + 1); }
+function bnpLatest(names) { var best = null; names.forEach(function (n) { var p = bnpPid(n); if (p && (!best || p > best.pid)) best = { pid: p, name: n }; }); return best; }
+function bnpSerial(ms) { var d = new Date(ms); return Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(1899, 11, 30)) / 864e5); }
+function bnpQ(name) { return "'" + String(name).replace(/'/g, "''") + "'"; }
+function bnpRef(r, c) { return bfxColL(c) + (r + 1); }
+function bnpEsc(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function bnpScan(G, name) {
+var all = Object.keys(G.cells).map(function (k) { var p = k.split(","); return [+p[0], +p[1]]; }), find = function (txt, pred) { txt = buNorm(txt); return all.filter(function (rc) { return buNorm(G.txt(rc[0], rc[1])) === txt && (!pred || pred(rc)); }).sort(function (a, b) { return a[1] - b[1] || a[0] - b[0]; }); };
+var ph = find("План", function (rc) { for (var r = rc[0] + 1; r < rc[0] + 6; r++) if (buNorm(G.txt(r, rc[1] - 1)) === "траты") return true; return false; })[0];
+if (!ph) throw new Error("на листе «" + name + "» не нашлась таблица «План / Факт» со статьёй «Траты»");
+var fh = find("Факт", function (rc) { return rc[1] < ph[1] - 1 && all.some(function (q) { return q[0] === rc[0] && buNorm(G.txt(q[0], q[1])) === "ипотека"; }); })[0];
+if (!fh) throw new Error("на листе «" + name + "» не нашлась строка заголовков с «Факт» и «Ипотека»");
+var dc = -1; for (var c0 = fh[1] - 1; c0 >= 0 && dc < 0; c0--) for (var r0 = fh[0] + 1; r0 < fh[0] + 4; r0++) { var dv = G.get(r0, c0); if (dv && typeof dv.v === "number" && !dv.f && dv.v > 40000 && dv.v < 80000) { dc = c0; break; } }
+if (dc < 0) throw new Error("на листе «" + name + "» не нашлась колонка с датами");
+var rows = []; for (var r2 = fh[0] + 1; r2 < fh[0] + 45; r2++) { var dd = G.get(r2, dc); if (!dd || typeof dd.v !== "number" || dd.f || dd.v < 40000) { if (rows.length) break; continue; } rows.push(r2); }
+if (!rows.length) throw new Error("на листе «" + name + "» нет строк с датами");
+if (rows[rows.length - 1] - rows[0] !== rows.length - 1) throw new Error("на листе «" + name + "» строки с датами идут не подряд");
+var wd = [], cd = [], n = rows.length;
+for (var c = dc + 1; c < ph[1] - 1; c++) {
+var isW = true, isC = true;
+rows.forEach(function (r, i) { var x = G.get(r, c); if (!x || x.f || x.v === null) { isW = isC = false; return; } if (!(typeof x.v === "string" && BNP_WD.indexOf(buNorm(x.v)) >= 0)) isW = false; if (x.v !== n - i) isC = false; });
+if (isW) wd.push(c); else if (isC) cd.push(c);
+}
+var zh = find("Зарплата")[0], inc = null;
+if (zh) { var srcs = []; for (var c3 = zh[1]; c3 < zh[1] + 12; c3++) { var h3 = G.txt(zh[0], c3); if (!h3 || /^всего|^к получ/i.test(h3)) break; srcs.push(c3); } for (var r3 = zh[0] + 1; r3 < zh[0] + 4; r3++) if (buNorm(G.txt(r3, zh[1] - 1)) === "факт") inc = { r: r3, cols: srcs }; }
+var st = find("начало")[0], en = st ? find("конец", function (rc) { return rc[0] === st[0]; })[0] : null;
+return { ph: ph, fh: fh, dc: dc, rows: rows, wd: wd, cd: cd, inc: inc, start: st ? [st[0] + 1, st[1]] : null, end: en ? [en[0] + 1, en[1]] : null, fact: function (c2) { return c2 > dc && c2 < ph[1] - 1 && wd.indexOf(c2) < 0 && cd.indexOf(c2) < 0; } };
+}
+function bnpSheetXML(xml, G, tname, prevName, npid) {
+var d = bfxDoc(xml), NS = d.documentElement.namespaceURI, L = bnpScan(G, tname), rg = buPRange(npid), N = buDaysIn(rg.from, rg.to), T = L.rows.length;
+var rows = {}, cells = {}; [].forEach.call(d.getElementsByTagNameNS(NS, "row"), function (r) { rows[+r.getAttribute("r")] = r; [].forEach.call(r.childNodes, function (c) { if (c.localName === "c") cells[c.getAttribute("r")] = c; }); });
+var fOf = function (c) { return c.getElementsByTagNameNS(NS, "f")[0] || null; };
+var clear = function (c) { while (c.firstChild) c.removeChild(c.firstChild); c.removeAttribute("t"); };
+var setNum = function (c, v) { clear(c); var v2 = d.createElementNS(NS, "v"); v2.textContent = String(v); c.appendChild(v2); };
+var setStr = function (c, s) { clear(c); c.setAttribute("t", "inlineStr"); var is = d.createElementNS(NS, "is"), te = d.createElementNS(NS, "t"); te.textContent = s; is.appendChild(te); c.appendChild(is); };
+var setF = function (c, f) { clear(c); var fe = d.createElementNS(NS, "f"); fe.textContent = f; c.appendChild(fe); };
+var rowEl = function (r1, like) {
+if (rows[r1]) return rows[r1]; var sd = d.getElementsByTagNameNS(NS, "sheetData")[0], row = d.createElementNS(NS, "row"); row.setAttribute("r", String(r1));
+if (like) [].forEach.call(like.attributes, function (a) { if (a.name !== "r" && a.name !== "spans") row.setAttribute(a.name, a.value); });
+sd.insertBefore(row, [].filter.call(sd.childNodes, function (q) { return q.localName === "row" && +q.getAttribute("r") > r1; })[0] || null); rows[r1] = row; return row;
+};
+var cellEl = function (r1, c, like) {
+var ref = bfxColL(c) + r1; if (cells[ref]) return cells[ref]; var row = rowEl(r1, like), ce = d.createElementNS(NS, "c"); ce.setAttribute("r", ref);
+var lc = like && [].filter.call(like.childNodes, function (q) { return q.localName === "c" && colIdx(q.getAttribute("r")) === c; })[0]; if (lc && lc.getAttribute("s")) ce.setAttribute("s", lc.getAttribute("s"));
+row.insertBefore(ce, [].filter.call(row.childNodes, function (q) { return q.localName === "c" && colIdx(q.getAttribute("r")) > c; })[0] || null); cells[ref] = ce; return ce;
+};
+var noRef = function (f) { return f.indexOf("!") < 0 && !/(^|[^A-Za-z_])\$?[A-Z]{1,3}\$?\d+(?![\w(])/.test(f); };
+var isFact = function (c) { var fe = fOf(c); if (!fe) return !!(c.getElementsByTagNameNS(NS, "v")[0] || c.getElementsByTagNameNS(NS, "is")[0]); return !fe.getAttribute("si") && !!fe.textContent && noRef(fe.textContent); };
+if (prevName) {
+var re = new RegExp(bnpEsc(bnpQ(prevName)) + "!" + (/^[A-Za-zА-Яа-яЁё0-9_.]+$/.test(prevName) ? "|(^|[^\\wА-Яа-яЁё.'])" + bnpEsc(prevName) + "!" : ""), "g");
+[].forEach.call(d.getElementsByTagNameNS(NS, "f"), function (fe) { if (fe.textContent && fe.textContent.indexOf("!") >= 0) fe.textContent = fe.textContent.replace(re, function (m, pre) { return (pre || "") + bnpQ(tname) + "!"; }); });
+}
+if (L.start && L.end) {
+var r = L.start[0], c = L.start[1], hops = 0, x;
+while ((x = G.get(r, c)) && x.f && hops++ < 8) { var m = /^\$?([A-Z]+)\$?(\d+)$/.exec(x.f.trim()); if (!m) break; r = +m[2] - 1; c = colIdx(m[1]); }
+var ce0 = cellEl(r + 1, c), fe0 = fOf(ce0), sm = fe0 && /^'((?:[^']|'')+)'!\$?[A-Z]+\$?\d+$/.exec(fe0.textContent || "");
+if (!fe0 || fe0.textContent.indexOf("!") < 0 || (sm && bnpPid(sm[1].replace(/''/g, "'")))) setF(ce0, bnpQ(tname) + "!" + bnpRef(L.end[0], L.end[1]));
+}
+if (L.inc) L.inc.cols.forEach(function (c2) { var ce = cells[bnpRef(L.inc.r, c2)]; if (ce && isFact(ce)) clear(ce); });
+var r0 = L.rows[0] + 1, lastT = L.rows[T - 1] + 1, lastN = r0 + N - 1, tpl = rows[lastT];
+var masters = {}; Object.keys(cells).forEach(function (ref) { var fe = fOf(cells[ref]); if (fe && fe.getAttribute("t") === "shared" && fe.getAttribute("ref")) masters[fe.getAttribute("si")] = fe; });
+var mEnd = function (fe) { var m2 = /^[A-Z]+(\d+):[A-Z]+(\d+)$/.exec(fe.getAttribute("ref") || ""); return m2 ? [+m2[1], +m2[2]] : null; };
+var longCol = function (si) { var fe = masters[si], e2 = fe && mEnd(fe); return e2 && e2[1] === lastT && e2[1] - e2[0] >= 2 ? fe : null; };
+var wdSample = L.wd.length ? String(G.get(L.rows[0], L.wd[0]).v) : "", wdFmt = function (s) { return wdSample === wdSample.toUpperCase() ? s.toUpperCase() : /^[А-ЯЁ]/.test(wdSample) ? s.charAt(0).toUpperCase() + s.slice(1) : s; };
+for (var i = 0; i < Math.max(T, N); i++) {
+var r1 = r0 + i, day = sod(addDays(rg.from, i)), extra = i >= N;
+if (!extra) {
+setNum(cellEl(r1, L.dc, tpl), bnpSerial(day));
+L.cd.forEach(function (c2) { setNum(cellEl(r1, c2, tpl), N - i); });
+L.wd.forEach(function (c2) { setStr(cellEl(r1, c2, tpl), wdFmt(BNP_WD[new Date(day).getDay()])); });
+}
+if (i < T) {
+[].slice.call(rows[r1] ? rows[r1].childNodes : []).forEach(function (ce) {
+if (ce.localName !== "c") return; var col = colIdx(ce.getAttribute("r"));
+if (col === L.dc || L.cd.indexOf(col) >= 0 || L.wd.indexOf(col) >= 0) { if (extra) clear(ce); return; }
+if (!L.fact(col)) return;
+if (isFact(ce)) { clear(ce); return; }
+var fe = fOf(ce); if (extra && fe && fe.getAttribute("si") && !fe.textContent && longCol(fe.getAttribute("si"))) { delete cells[ce.getAttribute("r")]; ce.parentNode.removeChild(ce); }
+});
+} else if (tpl) {
+[].forEach.call(tpl.childNodes, function (tc) {
+if (tc.localName !== "c") return; var col = colIdx(tc.getAttribute("r")); if (!L.fact(col) || isFact(tc) || cells[bfxColL(col) + r1]) return;
+var fe = fOf(tc); if (!fe) { if (tc.getAttribute("s")) cellEl(r1, col, tpl); return; }
+var si = fe.getAttribute("t") === "shared" ? fe.getAttribute("si") : null, ce = cellEl(r1, col, tpl);
+if (si !== null && longCol(si)) { var nf = d.createElementNS(NS, "f"); nf.setAttribute("t", "shared"); nf.setAttribute("si", si); ce.appendChild(nf); return; }
+var src = G.get(lastT - 1, col); if (src && src.f) setF(ce, buShift(src.f, r1 - lastT, 0)); else { delete cells[bfxColL(col) + r1]; ce.parentNode.removeChild(ce); }
+});
+}
+}
+if (N !== T) Object.keys(masters).forEach(function (si) { var fe = longCol(si); if (fe) fe.setAttribute("ref", fe.getAttribute("ref").replace(/\d+$/, String(lastN))); });
+if (N !== T) Object.keys(cells).forEach(function (ref) { var ce = cells[ref], rr = +ref.replace(/^[A-Z]+/, ""); if (rr > L.fh[0] || fOf(ce) || ce.getAttribute("t")) return; var ve = ce.getElementsByTagNameNS(NS, "v")[0]; if (ve && ve.textContent === String(T)) ve.textContent = String(N); });
+[].slice.call(d.getElementsByTagName("*")).forEach(function (el) { if (!el.parentNode) return; for (var k = 0; k < el.attributes.length; k++) if (el.attributes[k].namespaceURI === BNP_R) { el.parentNode.removeChild(el); return; } });
+["hyperlinks", "tableParts"].forEach(function (t) { [].slice.call(d.getElementsByTagNameNS(NS, t)).forEach(function (el) { if (!el.getElementsByTagNameNS(NS, "*").length) el.parentNode.removeChild(el); }); });
+[].forEach.call(d.getElementsByTagNameNS(NS, "sheetView"), function (sv) { sv.removeAttribute("tabSelected"); });
+[].forEach.call(d.getElementsByTagNameNS(NS, "c"), function (c2) { if (!fOf(c2)) return; var vs = c2.getElementsByTagNameNS(NS, "v"); while (vs.length) c2.removeChild(vs[0]); c2.removeAttribute("t"); });
+return bfxSer(d, xml);
+}
+function bnpBook(xml, tname, nname, rid) {
+var d = bfxDoc(xml), NS = d.documentElement.namespaceURI, sheets = d.getElementsByTagNameNS(NS, "sheet"), tplEl = null, maxId = 0, idx = -1;
+[].forEach.call(sheets, function (s, i) { maxId = Math.max(maxId, +s.getAttribute("sheetId") || 0); if (s.getAttribute("name") === tname) { tplEl = s; idx = i; } });
+if (!tplEl) throw new Error("в книге нет листа «" + tname + "»");
+var ne = d.createElementNS(NS, "sheet"); ne.setAttribute("name", nname); ne.setAttribute("sheetId", String(maxId + 1)); ne.setAttributeNS(BNP_R, "r:id", rid);
+tplEl.parentNode.insertBefore(ne, tplEl.nextSibling); var ni = idx + 1;
+[].forEach.call(d.getElementsByTagNameNS(NS, "workbookView"), function (v) { ["activeTab", "firstSheet"].forEach(function (a) { if (v.hasAttribute(a) && +v.getAttribute(a) >= ni) v.setAttribute(a, String(+v.getAttribute(a) + 1)); }); });
+[].forEach.call(d.getElementsByTagNameNS(NS, "definedName"), function (v) { if (v.hasAttribute("localSheetId") && +v.getAttribute("localSheetId") >= ni) v.setAttribute("localSheetId", String(+v.getAttribute("localSheetId") + 1)); });
+return bfxCalc(bfxSer(d, xml));
+}
+function bnpBookDel(xml, nname) {
+var d = bfxDoc(xml), NS = d.documentElement.namespaceURI, sheets = d.getElementsByTagNameNS(NS, "sheet"), el = null, idx = -1;
+[].forEach.call(sheets, function (s, i) { if (s.getAttribute("name") === nname) { el = s; idx = i; } });
+if (!el) throw new Error("в книге нет листа «" + nname + "»");
+el.parentNode.removeChild(el); var cnt = sheets.length;
+[].forEach.call(d.getElementsByTagNameNS(NS, "workbookView"), function (v) { ["activeTab", "firstSheet"].forEach(function (a) { if (!v.hasAttribute(a)) return; var n = +v.getAttribute(a); if (n > idx) n--; if (n >= cnt) n = Math.max(0, cnt - 1); v.setAttribute(a, String(n)); }); });
+[].slice.call(d.getElementsByTagNameNS(NS, "definedName")).forEach(function (v) { if (!v.hasAttribute("localSheetId")) return; var n = +v.getAttribute("localSheetId"); if (n === idx) v.parentNode.removeChild(v); else if (n > idx) v.setAttribute("localSheetId", String(n - 1)); });
+return bfxCalc(bfxSer(d, xml));
+}
+function bnpRels(xml, rid, target) { var d = bfxDoc(xml), NS = d.documentElement.namespaceURI, e = d.createElementNS(NS, "Relationship"); e.setAttribute("Id", rid); e.setAttribute("Type", BNP_R + "/worksheet"); e.setAttribute("Target", target); d.documentElement.appendChild(e); return bfxSer(d, xml); }
+function bnpRelsDel(xml, rid) { var d = bfxDoc(xml); [].slice.call(d.getElementsByTagName("Relationship")).forEach(function (e) { if (e.getAttribute("Id") === rid) e.parentNode.removeChild(e); }); return bfxSer(d, xml); }
+function bnpCT(xml, part) { var d = bfxDoc(xml), NS = d.documentElement.namespaceURI, e = d.createElementNS(NS, "Override"); e.setAttribute("PartName", part); e.setAttribute("ContentType", BNP_CT); d.documentElement.appendChild(e); return bfxSer(d, xml); }
+function bnpCTDel(xml, part) { var d = bfxDoc(xml); [].slice.call(d.getElementsByTagName("Override")).forEach(function (e) { if (e.getAttribute("PartName") === part) e.parentNode.removeChild(e); }); return bfxSer(d, xml); }
+var BNP_BASE = function (n) { return n === "[Content_Types].xml" || n === "xl/workbook.xml" || n === "xl/_rels/workbook.xml.rels"; };
+function bnpBuild(buf) {
+var bk, tpl, npid, nname, names = [], tpath;
+return buBook(buf).then(function (b) {
+bk = b; tpl = bnpLatest(bk.names); if (!tpl) throw new Error("в файле нет листов-периодов вида «Ноябрь 2026»");
+npid = buPShift(tpl.pid, 1); nname = buPName(npid);
+if (bk.names.some(function (n) { return buNorm(n) === buNorm(nname); })) throw new Error("лист «" + nname + "» уже есть в файле");
+tpath = bk.path(tpl.name);
+return Promise.all([bk.grid(tpl.name), unzip(buf, function (n) { names.push(n); return BNP_BASE(n) || n === tpath; })]);
+}).then(function (r) {
+var G = r[0], tx = r[1], prevPid = buPShift(tpl.pid, -1), prevName = bk.names.filter(function (n) { return bnpPid(n) === prevPid; })[0] || null;
+var no = 0; names.forEach(function (n) { var m = /^xl\/worksheets\/sheet(\d+)\.xml$/.exec(n); if (m) no = Math.max(no, +m[1]); });
+var npath = "xl/worksheets/sheet" + (no + 1) + ".xml", rn = 0; (tx["xl/_rels/workbook.xml.rels"].match(/Id="rId(\d+)"/g) || []).forEach(function (s) { rn = Math.max(rn, +s.replace(/\D/g, "")); });
+var rid = "rId" + (rn + 1), edits = {};
+edits[npath] = bnpSheetXML(tx[tpath], G, tpl.name, prevName, npid);
+edits["xl/workbook.xml"] = bnpBook(tx["xl/workbook.xml"], tpl.name, nname, rid);
+edits["xl/_rels/workbook.xml.rels"] = bnpRels(tx["xl/_rels/workbook.xml.rels"], rid, "worksheets/sheet" + (no + 1) + ".xml");
+edits["[Content_Types].xml"] = bnpCT(tx["[Content_Types].xml"], "/" + npath);
+return bfxZip(buf, edits).then(function (out) { return { out: out, name: nname, pid: npid, tpl: tpl.name, path: npath, rid: rid, days: buDaysIn(buPRange(npid).from, buPRange(npid).to) }; });
+}).then(function (res) {
+var ab = res.out.buffer.slice(res.out.byteOffset, res.out.byteOffset + res.out.byteLength);
+return buBook(ab).then(function (b2) { if (b2.names.indexOf(res.name) < 0) throw new Error("контрольное чтение: нового листа нет"); return b2.grid(res.name); }).then(function (G2) {
+var x = buParse(G2, res.name), ks = Object.keys(x.days);
+if (x.pid !== res.pid || ks.length !== res.days || !ks.every(function (k) { return buSum(x.days[k]) === 0; })) throw new Error("контрольное чтение не сошлось — файл не изменён");
+return res;
+});
+});
+}
+function bnpRemoveBuild(buf, info) {
+return unzip(buf, BNP_BASE).then(function (tx) {
+var edits = {}; edits[info.path] = null;
+edits["xl/workbook.xml"] = bnpBookDel(tx["xl/workbook.xml"], info.name);
+edits["xl/_rels/workbook.xml.rels"] = bnpRelsDel(tx["xl/_rels/workbook.xml.rels"], info.rid);
+edits["[Content_Types].xml"] = bnpCTDel(tx["[Content_Types].xml"], "/" + info.path);
+return bfxZip(buf, edits);
+}).then(function (out) {
+var ab = out.buffer.slice(out.byteOffset, out.byteOffset + out.byteLength);
+return buBook(ab).then(function (b2) { if (b2.names.indexOf(info.name) >= 0) throw new Error("контрольное чтение: лист остался — файл не изменён"); return out; });
+});
+}
+function bnpHTML() {
+if (BNPLAST === undefined) { BNPLAST = null; buKV("bnplast").then(function (v) { if (v) { BNPLAST = v; if (V === "budget") render(); } }).catch(function () {}); }
+var D = BNP, L = BNPLAST, fd = function (ms) { return new Date(ms).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); };
+if (!D) return L ? '<div class="r bfxbar bnpbar"><span class="muted">Лист «' + esc(L.name) + "» добавлен " + esc(fd(L.at)) + '</span><button type="button" class="btn sm" data-a="bnpundo">↶ Убрать лист</button></div>' : "";
+if (D.busy) return '<div class="card bfx"><p class="muted" style="margin:0">' + (D.step === "write" ? "Записываю лист в файл…" : "Читаю файл…") + "</p></div>";
+var rg = buPRange(D.pid), h = '<div class="card bfx"><b>' + (D.undo ? "Убрать лист из Excel" : "Новый период в Excel") + "</b>";
+h += D.undo ? '<p style="margin:0">Лист <b>«' + esc(D.name) + "»</b> будет удалён из файла вместе со всем, что на нём записано.</p>"
+: '<p style="margin:0">Последний период в файле — «' + esc(D.tpl) + "». Добавлю лист <b>«" + esc(D.name) + "»</b> (" + esc(buPDates(rg)) + ", " + D.days + " " + plural(D.days, ["день", "дня", "дней"]) + ") по его образцу: план, формулы и оформление — как там; даты и дни недели — новые; суммы по дням и факт доходов — пустые; «начало» — из «конца» листа «" + esc(D.tpl) + "».</p>";
+if (D.err) h += '<p class="bad" style="margin:0">' + esc(D.err) + "</p>";
+h += '<div class="bfxwarn">Если файл «' + esc(buOpt().fname || "Финансы") + "» сейчас открыт в Excel или LibreOffice — закройте его без сохранения, иначе при сохранении там новый лист пропадёт. Формулы книга пересчитает при открытии. Копия файла до записи останется в браузере.</div>";
+return h + '<div class="r"><button type="button" class="btn sm pri" data-a="bnpwrite">' + (D.undo ? "↶ Убрать лист из Excel" : "➕ Добавить лист в Excel") + '</button><button type="button" class="btn sm" data-a="bnpclose">Отмена</button></div></div>';
+}
+function bnpOpen() {
+if (buNoFile() || !buCanRemember()) { toast(buNoFile() && !buMobile() ? "Новый период в Excel добавляется на основном компьютере «" + buMain().n + "»" : "Новый период в Excel добавляется на компьютере в Chrome или Edge — там приложение получает доступ к файлу"); return; }
+BNP = { busy: 1, step: "read" }; render();
+buFile().then(function (f) { return f.arrayBuffer(); }).then(bnpBuild).then(function (res) { BNP = { step: "confirm", name: res.name, pid: res.pid, tpl: res.tpl, days: res.days }; render(); })
+.catch(function (e) { BNP = null; render(); if (e && e.name === "AbortError") return; toast("Не удалось подготовить лист: " + (e && e.message || e)); });
+}
+function bnpWrite() {
+var D = BNP, h0, file, src, res;
+D.busy = 1; D.step = "write"; delete D.err; render();
+buHandle().then(function (h) {
+if (!h || !h.createWritable || !h.requestPermission) throw new Error("нет доступа к файлу на запись — выберите файл заново (Chrome или Edge на компьютере)");
+h0 = h; return h.requestPermission({ mode: "readwrite" });
+}).then(function (p) {
+if (p !== "granted") throw new Error("запись в файл не разрешена");
+return h0.getFile();
+}).then(function (f) { file = f; return f.arrayBuffer(); }).then(function (buf) {
+src = buf; return D.undo ? bnpRemoveBuild(buf, BNPLAST).then(function (out) { return { out: out }; }) : bnpBuild(buf);
+}).then(function (r) {
+res = r;
+return buKV("bak", { n: file.name, at: Date.now(), mt: file.lastModified, sheet: D.name, buf: src }).catch(function () { /* без копии всё равно пишем */ })
+.then(function () { return h0.createWritable(); }).then(function (w) { return w.write(res.out).then(function () { return w.close(); }); });
+}).then(function () {
+BNP = null;
+if (D.undo) { BNPLAST = null; buKV("bnplast", null).catch(function () {}); var P = buPer(D.pid); if (P) { P.del = 1; P.delAt = Date.now(); touch(P); save(); } if (BUPER === D.pid) BUPER = ""; toast("Лист «" + D.name + "» убран из Excel"); render(); return; }
+BNPLAST = { name: res.name, pid: res.pid, path: res.path, rid: res.rid, at: Date.now() }; buKV("bnplast", BNPLAST).catch(function () {});
+BUPER = res.pid; toast("Лист «" + res.name + "» добавлен в Excel — читаю период");
+buUpdate({ k: "per", a: res.pid });
+}).catch(function (e) {
+D.busy = 0; D.step = "confirm"; D.err = e && e.name === "NotAllowedError" ? "Запись не разрешена браузером" : "Не записано: " + (e && e.message || e); if (BNP === D) render();
+});
+}
+function bnpAct(a) {
+switch (a) {
+case "bnpopen": bnpOpen(); return true;
+case "bnpclose": BNP = null; render(); return true;
+case "bnpundo": if (BNPLAST) { BNP = { step: "confirm", undo: true, name: BNPLAST.name, pid: BNPLAST.pid, tpl: "", days: 0 }; render(); } return true;
+case "bnpwrite": if (BNP && !BNP.busy) bnpWrite(); return true;
 }
 return false;
 }
@@ -18954,6 +19181,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["316", "📄 Новый период в файле Excel", ["«Бюджет» → «Период» → «📄 Новый период»: приложение само добавляет в файл «Финансы …» лист следующего месяца по образцу последнего листа-периода — план, формулы и оформление как там, даты и дни недели новые, суммы по дням и факт доходов пустые, «начало» берётся из «конца» прошлого месяца. Лист встаёт сразу после образца, Excel пересчитает его при открытии.", "Перед записью показывается, какой лист и по какому образцу будет добавлен; копия файла до записи остаётся в браузере, а «↶ Убрать лист» удаляет добавленный лист из файла. Работает на компьютере в Chrome или Edge, как «Корректировка плана»."]],
 ["315", "📝 «День за днём»: строка с датой стала аккуратнее", ["Поле даты теперь той же высоты, шрифта и скругления, что кнопки «← Вчера» и «Завтра →», отступы ровные, а «✎ Настроить страницу» прижата к правому краю.", "Карточки «Дня за днём» теперь сворачиваются: кнопка ▾ в шапке прячет содержимое, ▸ возвращает; свёрнутые запоминаются и синхронизируются между устройствами, как карточки главной."]],
 ["314", "📝 «День за днём»: заголовки и вкладки больше не ломаются", ["В режиме «✎ Настроить страницу» при трёх-четырёх колонках заголовки карточек сжимались кнопками ↑ ↓ ↔ и разваливались в столбик («★ / Главное»). Теперь заголовок остаётся на одной строке, а кнопки уходят на строку ниже.", "Вкладки раздела («Сегодня · По часам · … · Утро · Вечер · Неделя») на узком экране переносятся на вторую строку, а не обрезаются краем."]],
 ["313", "🏁 Карточка челленджа «Дом в порядке»: воскресенье без косяков", ["Строка «Отдых» больше не выглядит выполненным делом: вместо зелёного квадрата — значок ☕, название не зачёркивается.", "«Итоги недели» на неделе, где заданий ещё не было, показывают одну строку вместо пустых плиток «0 из 0»."]],
