@@ -8660,7 +8660,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-321";
+var APPV = "zd-app-2026-10-16-322";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -19336,6 +19336,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["322", "🔒 Изоляция пространства не терялась бы при переходе в «Сегодня»", ["Если боковая панель скрыта и пространство открыто через всплывающее меню полосы значков, переход из него в «Сегодня», календарь или другой раздел открывал раздел без изоляции. Теперь приложение помнит, в каком изолированном пространстве вы находитесь, независимо от панели: изоляция держится, пока вы не выйдете на Главную или не выберете другое пространство."]],
 ["321", "🧭 Советник в изолированном пространстве — только о его делах", ["На рабочем столе изолированного пространства карточка «🧭 Советник» теперь смотрит только на задачи и цели этого пространства: чужие просроченные цели, большие задачи, дедлайны и перегруз дней в советы не попадают. Личная статистика — темп выполнения плана, продуктивные часы, обзор недели, спринт, поправка к оценкам — показывается только на общей Главной."]],
 ["320", "★ Главное на сегодня: сделанные повторяющиеся задачи зачёркнуты", ["На главной странице в блоке «★ Главное на сегодня» задача, которую вы сегодня выполнили, теперь зачёркнута и отмечена ✓, даже если она повторяющаяся и уже ушла на следующий раз (рядом — когда он). Раньше зачёркивались только закрытые насовсем задачи. Блок «Сейчас» больше не предлагает начать с уже сделанного дела."]],
 ["319", "📈 Накопления: суммы по месяцам — с копейками", ["В таблице «По месяцам» все суммы, итоги и строка самопроверки показываются с двумя знаками после запятой (1 234,56 ₽), без округления до рубля. Вписать своё значение тоже можно с копейками."]],
@@ -19849,7 +19850,7 @@ var SPACES = { home: ["🏠", "Главная", "x-spaces"], day: ["☀", "Мо�
 var CPADD = { task: [["rev-on", "↻", "Проверка проектов"], ["newproj", "+", "Новый проект"]], know: [["nsec-new", "🗀", "Новый раздел заметок"], ["note-new", "+", "Новая заметка"]], home: [["bnew", "+", "Новая доска"]], tagx: [["newtag", "#", "Новый тег"], ["newfilter", "⛃", "Новый фильтр"]] };
 function cpOn() { return S.opt.rail !== false && window.innerWidth > 860; }
 function cpSpace() { var k = FLY || LS.get("zd-space") || "day"; return SPACES[k] ? k : "day"; }
-function cpSet(k) { if (SPACES[k]) LS.set("zd-space", k); }
+function cpSet(k) { if (SPACES[k]) { LS.set("zd-space", k); if (LS.get("zd-spcur") && LS.get("zd-spcur") !== k) LS.del("zd-spcur"); } } // v322: явный выбор другого пространства в панели — выход из изолированного
 function cpStrip(html) { return String(html || "").replace(/^<div class="lab"[\s\S]*?<\/div>/, ""); }
 function cpBody(k) { return spzBody(k); }
 function cpHTML(fly) {
@@ -19867,7 +19868,7 @@ var b = document.querySelector(".side .cpb"); if (!b) return; var q = CPQ.toLowe
 [].forEach.call(b.querySelectorAll(".cpg, .none"), function (x) { x.hidden = !!q; });
 }
 function cpRedraw() { try { $("side").innerHTML = sideHTML(); cpFilter(); railSync(); } catch (e) { render(); } }
-function cpFollow(v, a) { if (FLY) return; try { chFromKeep(v); if (v !== "sp" && spcCovers(cpSpace(), v, a)) return; var ci = spcGet(cpSpace()); if (ci && ci.iso && v !== "sp" && v !== "home") return; } catch (e) { /* ок; из изолированного пространства выходят только на Главную или в другое пространство */ } var k = spzOf(v, a); if (k && SPACES[k] && k !== cpSpace()) { cpSet(k); CPQ = ""; } }
+function cpFollow(v, a) { if (FLY) return; try { chFromKeep(v); if (v !== "sp" && spcCovers(cpSpace(), v, a)) return; var ck = LS.get("zd-spcur") || "", ci = (ck && spcGet(ck)) || spcGet(cpSpace()); if (ci && ci.iso && v !== "sp" && v !== "home") return; } catch (e) { /* ок; из изолированного пространства выходят только на Главную или в другое пространство */ } var k = spzOf(v, a); if (k && SPACES[k] && k !== cpSpace()) { cpSet(k); CPQ = ""; } }
 function cpFlyOff() { if (!FLY) return; FLY = ""; document.body.classList.remove("sidefly"); cpRedraw(); }
 var RAILD = ["apps", "home", "day", "task", "know", "life", "house", "chal", "find", "fav", "rec"];
 var RAILE = { apps: ["▦", "Все разделы (Alt+A)"], home: ["🏠", "Главная: сводка дня, избранное, доски"], day: ["☀", "Мой день: входящие, сегодня, планы, утро и вечер"], task: ["✅", "Задачи: проекты, списки, теги и фильтры"], know: ["📝", "Знания: заметки, карты, повторение"], life: ["🌿", "Жизнь: привычки, цели, самочувствие, люди"], house: ["🔑", "Дом и деньги: меню, уборка, бюджет, документы"], chal: ["🏁", "Челленджи: осанка и лицо, дом, финансы, кухня"], find: ["⌕", "Поиск и команды (Ctrl+K)"], fav: ["★", "Избранное"], rec: ["🕘", "Недавние"] };
@@ -22580,7 +22581,10 @@ if (out.length < n) (spcItems(k) || []).forEach(function (it) { var h = { p: "pr
 return out;
 }
 function spcAutoFocus() {
-var a = LS.get("zd-focauto") || "", k = V === "sp" ? (ARG !== "home" ? ARG : "") : V === "home" ? "" : LS.get("zd-space") || "", c = k ? spcGet(k) : null;
+var cur = LS.get("zd-spcur") || "";
+if (V === "sp") { if (ARG && ARG !== "home") LS.set("zd-spcur", ARG); else LS.del("zd-spcur"); } else if (V === "home") LS.del("zd-spcur");
+var ci = cur && V !== "sp" && V !== "home" ? spcGet(cur) : null;
+var a = LS.get("zd-focauto") || "", k = V === "sp" ? (ARG !== "home" ? ARG : "") : V === "home" ? "" : (ci && ci.iso ? cur : LS.get("zd-space") || ""), c = k ? spcGet(k) : null;
 if (c && (c.autof || c.iso)) { if (FOCUS !== "sp:" + k) { FOCUS = "sp:" + k; FSC = null; LS.set("zd-focus", FOCUS); } LS.set("zd-focauto", k); return; }
 if (a) { if (FOCUS === "sp:" + a) { FOCUS = ""; FSC = null; LS.del("zd-focus"); } LS.del("zd-focauto"); }
 }
