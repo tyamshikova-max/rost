@@ -1855,7 +1855,7 @@ html .hzc.hzw .wdg.hzwb { border: 0; border-radius: 0; box-shadow: none; backgro
 .motb { margin-top: 10px; gap: 6px; flex-wrap: wrap } .motl { display: block; margin: 0 0 10px; padding: 6px 10px; border-radius: 8px; background: var(--hover); color: var(--fg); text-decoration: none; font-size: calc(13px * var(--fs)); line-height: 1.4 } .motl span { font-family: Georgia, "Times New Roman", serif; font-style: italic } .motl i { color: var(--muted); font-style: normal }
 li.task.chalt { background: color-mix(in srgb, var(--acc) 7%, transparent); box-shadow: inset 3px 0 0 var(--acc); border-radius: 8px } li.task.chalt.done { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--acc) 35%, transparent) } .chalh { color: var(--acc) } .chalg { margin-bottom: 6px }
 li.task.sprt { background: color-mix(in srgb, #6b8fd6 8%, transparent); box-shadow: inset 3px 0 0 #6b8fd6; border-radius: 8px } li.task.sprt.done { box-shadow: inset 3px 0 0 color-mix(in srgb, #6b8fd6 35%, transparent) } .sprh { color: #5b7fc7 } .sprg { margin-bottom: 6px }
-body.bunofile [data-a="buupd"], body.bunofile [data-a="bufile"], body.bunofile [data-a="bufilex"], body.bunofile [data-a="busavecopy"], body.bunofile [data-a="budiskchk"], body.bunofile [data-a="bfxopen"], body.bunofile [data-a="bnpopen"], body.bunofile .bnpbar, body.bunofile [data-a="fcimp"], body.bunofile .bufrow { display: none !important }
+body.bunofile [data-a="buupd"], body.bunofile [data-a="bufile"], body.bunofile [data-a="bufilex"], body.bunofile [data-a="busavecopy"], body.bunofile [data-a="budiskchk"], body.bunofile [data-a="bfxopen"], body.bunofile [data-a="bnpopen"], body.bunofile [data-a="bnpfix"], body.bunofile .bnpbar, body.bunofile [data-a="fcimp"], body.bunofile .bufrow { display: none !important }
 .chhil { display: grid; gap: 8px; margin-bottom: 12px } .chhi { padding: 10px 12px } .chhih { display: flex; align-items: center; gap: 8px } .chhih b { flex: 1 } .chhis { font-size: calc(12px * var(--fs)); padding: 2px 9px; border-radius: 999px; background: var(--hover); color: var(--muted); white-space: nowrap } .chhis.ok { background: var(--acc-soft); color: var(--acc) } .chhis.act { color: var(--acc) }
 .chhiq { display: flex; flex-wrap: wrap; gap: 2px; margin: 6px 0 } .chhic { width: 10px; height: 10px; border-radius: 2px; background: var(--hover) } .chhic.s2 { background: var(--acc) } .chhic.s1 { background: color-mix(in srgb, var(--acc) 45%, transparent) } .chhic.s0 { background: color-mix(in srgb, var(--warn) 40%, transparent) } .chhic.sp { box-shadow: inset 0 0 0 1px var(--acc) }
 .hzpu { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); margin: 0 4px 4px 0; padding: 0 4px 0 10px } .hzpa, .hzpx { font: inherit; font-size: calc(13px * var(--fs)); border: 0; background: none; color: var(--fg); cursor: pointer; padding: 4px 3px } .hzpx { color: var(--muted) } .hzpx:hover { color: var(--warn) }
@@ -8659,7 +8659,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-316";
+var APPV = "zd-app-2026-10-16-317";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -13879,7 +13879,7 @@ function bfxHTML(pid) {
 if (BFXLAST === undefined) { BFXLAST = null; buKV("fixlast").then(function (v) { if (v) { BFXLAST = v; if (V === "budget") render(); } }).catch(function () {}); }
 if (!BFX || BFX.pid !== pid) {
 var L = BFXLAST && BFXLAST.pid === pid ? BFXLAST : null;
-return '<div class="r bfxbar"><button type="button" class="btn sm" data-a="bfxopen">✏️ Корректировка плана</button><button type="button" class="btn sm" data-a="bnpopen" title="Добавить в файл лист следующего периода по образцу последнего">📄 Новый период</button>' + (L ? '<span class="muted">Последняя: ' + esc(new Date(L.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) + " · " + L.ch.length + " " + plural(L.ch.length, ["статья", "статьи", "статей"]) + '</span><button type="button" class="btn sm" data-a="bfxundo">↶ Вернуть прежний план</button>' : "") + "</div>";
+return '<div class="r bfxbar"><button type="button" class="btn sm" data-a="bfxopen">✏️ Корректировка плана</button><button type="button" class="btn sm" data-a="bnpopen" title="Добавить в файл лист следующего периода по образцу последнего">📄 Новый период</button><button type="button" class="btn sm" data-a="bnpfix" title="Привести в порядок лист этого периода в файле: даты, дни недели, рамки недель, хвост таблицы, формулы в «Фин плане» — суммы и план не трогаются">🔁 Обновить лист</button>' + (L ? '<span class="muted">Последняя: ' + esc(new Date(L.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) + " · " + L.ch.length + " " + plural(L.ch.length, ["статья", "статьи", "статей"]) + '</span><button type="button" class="btn sm" data-a="bfxundo">↶ Вернуть прежний план</button>' : "") + "</div>";
 }
 var D = BFX;
 if (D.busy) return '<div class="card bfx"><p class="muted" style="margin:0">' + (D.step === "write" ? "Записываю в файл…" : "Читаю план из файла…") + "</p></div>";
@@ -14127,6 +14127,17 @@ function bnpSerial(ms) { var d = new Date(ms); return Math.round((Date.UTC(d.get
 function bnpQ(name) { return "'" + String(name).replace(/'/g, "''") + "'"; }
 function bnpRef(r, c) { return bfxColL(c) + (r + 1); }
 function bnpEsc(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function bnpRename(f, old, nw) {
+var re = new RegExp(bnpEsc(bnpQ(old)) + "!" + (/^[A-Za-zА-Яа-яЁё0-9_.]+$/.test(old) ? "|(^|[^\\wА-Яа-яЁё.'])" + bnpEsc(old) + "!" : ""), "g");
+return f.replace(re, function (m, pre) { return (typeof pre === "string" ? pre : "") + bnpQ(nw) + "!"; });
+}
+function bnpShiftLocal(f, dr) {
+return f.replace(/"[^"]*"|('(?:[^']|'')+'!|[A-Za-zА-Яа-яЁё_][\wА-Яа-яЁё.]*!)?(\$?)([A-Z]{1,3})(\$?)(\d+)(?![\w(])/g, function (m, sh, ca, col, ra, row, off, str) {
+if (m.charAt(0) === '"' || sh || /[A-Za-z_]/.test(str.charAt(off - 1))) return m;
+return ca + col + ra + (ra ? row : +row + dr);
+});
+}
+function bnpRefsPeriod(f) { var m, re = /'((?:[^']|'')+)'!/g; while ((m = re.exec(f || ""))) if (bnpPid(m[1].replace(/''/g, "'"))) return true; return false; }
 function bnpScan(G, name) {
 var all = Object.keys(G.cells).map(function (k) { var p = k.split(","); return [+p[0], +p[1]]; }), find = function (txt, pred) { txt = buNorm(txt); return all.filter(function (rc) { return buNorm(G.txt(rc[0], rc[1])) === txt && (!pred || pred(rc)); }).sort(function (a, b) { return a[1] - b[1] || a[0] - b[0]; }); };
 var ph = find("План", function (rc) { for (var r = rc[0] + 1; r < rc[0] + 6; r++) if (buNorm(G.txt(r, rc[1] - 1)) === "траты") return true; return false; })[0];
@@ -14149,7 +14160,44 @@ if (zh) { var srcs = []; for (var c3 = zh[1]; c3 < zh[1] + 12; c3++) { var h3 = 
 var st = find("начало")[0], en = st ? find("конец", function (rc) { return rc[0] === st[0]; })[0] : null;
 return { ph: ph, fh: fh, dc: dc, rows: rows, wd: wd, cd: cd, inc: inc, start: st ? [st[0] + 1, st[1]] : null, end: en ? [en[0] + 1, en[1]] : null, fact: function (c2) { return c2 > dc && c2 < ph[1] - 1 && wd.indexOf(c2) < 0 && cd.indexOf(c2) < 0; } };
 }
-function bnpSheetXML(xml, G, tname, prevName, npid) {
+function bnpXf(xml) {
+var d = bfxDoc(xml), NS = d.documentElement.namespaceURI, bs = d.getElementsByTagNameNS(NS, "borders")[0], xfs = d.getElementsByTagNameNS(NS, "cellXfs")[0], changed = false, cache = {};
+var kids = function (el, t) { return el ? [].filter.call(el.childNodes, function (n) { return n.localName === t; }) : []; };
+var border = function (sid) { var xf = kids(xfs, "xf")[+sid], b = xf && kids(bs, "border")[+xf.getAttribute("borderId") || 0]; return b || null; };
+var heavy = function (b, side) { var e = b && kids(b, side)[0]; return !!e && /^(medium|thick|double|mediumDash)/.test(e.getAttribute("style") || ""); };
+return {
+thick: function (sid) { if (sid === null || sid === undefined) return { t: false, b: false }; var b = border(sid); return { t: heavy(b, "top"), b: heavy(b, "bottom") }; },
+mix: function (top, bot) {
+var k = top + ":" + bot; if (cache[k] !== undefined) return cache[k];
+var bt = border(top), bb = border(bot); if (!bt || !bb) return (cache[k] = null);
+var nb = bt.cloneNode(true); kids(nb, "bottom").forEach(function (e) { nb.removeChild(e); }); var b2 = kids(bb, "bottom")[0]; if (b2) nb.insertBefore(b2.cloneNode(true), kids(nb, "diagonal")[0] || null);
+var ser = function (el) { return new XMLSerializer().serializeToString(el); }, nbS = ser(nb), bi = -1; kids(bs, "border").forEach(function (b, i) { if (bi < 0 && ser(b) === nbS) bi = i; });
+if (bi < 0) { bs.appendChild(nb); bi = kids(bs, "border").length - 1; bs.setAttribute("count", String(bi + 1)); changed = true; }
+var xt = kids(xfs, "xf")[+top], attrs = function (x) { var o = {}; [].forEach.call(x.attributes, function (a) { if (a.name !== "borderId" && a.name !== "applyBorder") o[a.name] = a.value; }); return JSON.stringify(o); }, want = attrs(xt), found = -1;
+kids(xfs, "xf").forEach(function (x, i) { if (found < 0 && +x.getAttribute("borderId") === bi && attrs(x) === want) found = i; });
+if (found >= 0) return (cache[k] = found);
+var xf = xt.cloneNode(true); xf.setAttribute("borderId", String(bi)); xf.setAttribute("applyBorder", "1"); xfs.appendChild(xf); xfs.setAttribute("count", String(kids(xfs, "xf").length)); changed = true;
+return (cache[k] = kids(xfs, "xf").length - 1);
+},
+xml: function () { return changed ? bfxSer(d, xml) : null; }
+};
+}
+function bnpDonor(xml, G, name) {
+var L = bnpScan(G, name), d = bfxDoc(xml), NS = d.documentElement.namespaceURI, st = {};
+[].forEach.call(d.getElementsByTagNameNS(NS, "c"), function (c) { st[c.getAttribute("r")] = c.getAttribute("s"); });
+return { N: L.rows.length, sid: function (c, k) { var s = st[bnpRef(L.rows[0] + k, c)]; return s === undefined ? null : s; } };
+}
+function bnpDonorFind(bk, buf, skip) {
+var cand = bk.names.filter(function (n) { return bnpPid(n) && n !== skip; }).sort(function (a, b) { return bnpPid(a) < bnpPid(b) ? 1 : -1; }).slice(0, 8);
+var go = function (i) {
+if (i >= cand.length) return Promise.resolve(null);
+var p = bk.path(cand[i]);
+return Promise.all([bk.grid(cand[i]), unzip(buf, function (n) { return n === p; })]).then(function (r) { var dn = bnpDonor(r[1][p], r[0], cand[i]); return dn.N < 31 ? dn : go(i + 1); }, function () { return go(i + 1); });
+};
+return go(0);
+}
+function bnpSheetXML(xml, G, tname, prevName, npid, opt) {
+opt = opt || {};
 var d = bfxDoc(xml), NS = d.documentElement.namespaceURI, L = bnpScan(G, tname), rg = buPRange(npid), N = buDaysIn(rg.from, rg.to), T = L.rows.length;
 var rows = {}, cells = {}; [].forEach.call(d.getElementsByTagNameNS(NS, "row"), function (r) { rows[+r.getAttribute("r")] = r; [].forEach.call(r.childNodes, function (c) { if (c.localName === "c") cells[c.getAttribute("r")] = c; }); });
 var fOf = function (c) { return c.getElementsByTagNameNS(NS, "f")[0] || null; };
@@ -14169,22 +14217,32 @@ row.insertBefore(ce, [].filter.call(row.childNodes, function (q) { return q.loca
 };
 var noRef = function (f) { return f.indexOf("!") < 0 && !/(^|[^A-Za-z_])\$?[A-Z]{1,3}\$?\d+(?![\w(])/.test(f); };
 var isFact = function (c) { var fe = fOf(c); if (!fe) return !!(c.getElementsByTagNameNS(NS, "v")[0] || c.getElementsByTagNameNS(NS, "is")[0]); return !fe.getAttribute("si") && !!fe.textContent && noRef(fe.textContent); };
-if (prevName) {
-var re = new RegExp(bnpEsc(bnpQ(prevName)) + "!" + (/^[A-Za-zА-Яа-яЁё0-9_.]+$/.test(prevName) ? "|(^|[^\\wА-Яа-яЁё.'])" + bnpEsc(prevName) + "!" : ""), "g");
-[].forEach.call(d.getElementsByTagNameNS(NS, "f"), function (fe) { if (fe.textContent && fe.textContent.indexOf("!") >= 0) fe.textContent = fe.textContent.replace(re, function (m, pre) { return (pre || "") + bnpQ(tname) + "!"; }); });
-}
+if (!opt.keep) {
+if (prevName) [].forEach.call(d.getElementsByTagNameNS(NS, "f"), function (fe) { if (fe.textContent && fe.textContent.indexOf("!") >= 0) fe.textContent = bnpRename(fe.textContent, prevName, tname); });
 if (L.start && L.end) {
 var r = L.start[0], c = L.start[1], hops = 0, x;
 while ((x = G.get(r, c)) && x.f && hops++ < 8) { var m = /^\$?([A-Z]+)\$?(\d+)$/.exec(x.f.trim()); if (!m) break; r = +m[2] - 1; c = colIdx(m[1]); }
-var ce0 = cellEl(r + 1, c), fe0 = fOf(ce0), sm = fe0 && /^'((?:[^']|'')+)'!\$?[A-Z]+\$?\d+$/.exec(fe0.textContent || "");
-if (!fe0 || fe0.textContent.indexOf("!") < 0 || (sm && bnpPid(sm[1].replace(/''/g, "'")))) setF(ce0, bnpQ(tname) + "!" + bnpRef(L.end[0], L.end[1]));
+var ce0 = cellEl(r + 1, c), fe0 = fOf(ce0);
+if (!fe0 || fe0.textContent.indexOf("!") < 0 || bnpRefsPeriod(fe0.textContent)) setF(ce0, bnpQ(tname) + "!" + bnpRef(L.end[0], L.end[1]));
 }
 if (L.inc) L.inc.cols.forEach(function (c2) { var ce = cells[bnpRef(L.inc.r, c2)]; if (ce && isFact(ce)) clear(ce); });
+}
 var r0 = L.rows[0] + 1, lastT = L.rows[T - 1] + 1, lastN = r0 + N - 1, tpl = rows[lastT];
 var masters = {}; Object.keys(cells).forEach(function (ref) { var fe = fOf(cells[ref]); if (fe && fe.getAttribute("t") === "shared" && fe.getAttribute("ref")) masters[fe.getAttribute("si")] = fe; });
 var mEnd = function (fe) { var m2 = /^[A-Z]+(\d+):[A-Z]+(\d+)$/.exec(fe.getAttribute("ref") || ""); return m2 ? [+m2[1], +m2[2]] : null; };
 var longCol = function (si) { var fe = masters[si], e2 = fe && mEnd(fe); return e2 && e2[1] === lastT && e2[1] - e2[0] >= 2 ? fe : null; };
 var wdSample = L.wd.length ? String(G.get(L.rows[0], L.wd[0]).v) : "", wdFmt = function (s) { return wdSample === wdSample.toUpperCase() ? s.toUpperCase() : /^[А-ЯЁ]/.test(wdSample) ? s.charAt(0).toUpperCase() + s.slice(1) : s; };
+var xf = opt.xf, dn = opt.donor, cols = [], roles = {};
+for (var cc = L.dc; cc < L.ph[1] - 1; cc++) cols.push(cc);
+if (xf) cols.forEach(function (c2) {
+var cnt = {}, top = null, wk = null, botLast = null, both = null;
+L.rows.forEach(function (r, i) { var ce = cells[bnpRef(r, c2)], s = ce ? ce.getAttribute("s") : null; if (s === null) return; var th = xf.thick(s); if (th.t && th.b) both = both || s; else if (th.t) top = top || s; else if (th.b) { if (i < T - 1) wk = wk || s; else botLast = s; } else cnt[s] = (cnt[s] || 0) + 1; });
+var mid = Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; })[0]; if (mid === undefined) return;
+var tail = false; if (!wk && !botLast) for (var rt = lastT + 1; rt <= r0 + 30; rt++) { var ct = cells[bfxColL(c2) + rt], st = ct ? ct.getAttribute("s") : null; if (st !== null && xf.thick(st).b && !xf.thick(st).t) { botLast = st; tail = true; break; } }
+var fixed = T < 31 ? tail : !!dn && xf.thick(dn.sid(c2, 30)).b && !xf.thick(dn.sid(c2, dn.N - 1)).b;
+if (!top && both) top = xf.mix(both, mid); if (!wk && !botLast && both) wk = xf.mix(mid, both);
+roles[c2] = { mid: mid, top: top, wk: wk, bot: wk || botLast, both: both, fixed: fixed };
+});
 for (var i = 0; i < Math.max(T, N); i++) {
 var r1 = r0 + i, day = sod(addDays(rg.from, i)), extra = i >= N;
 if (!extra) {
@@ -14197,12 +14255,13 @@ if (i < T) {
 if (ce.localName !== "c") return; var col = colIdx(ce.getAttribute("r"));
 if (col === L.dc || L.cd.indexOf(col) >= 0 || L.wd.indexOf(col) >= 0) { if (extra) clear(ce); return; }
 if (!L.fact(col)) return;
-if (isFact(ce)) { clear(ce); return; }
+if (!opt.keep && isFact(ce)) { clear(ce); return; }
 var fe = fOf(ce); if (extra && fe && fe.getAttribute("si") && !fe.textContent && longCol(fe.getAttribute("si"))) { delete cells[ce.getAttribute("r")]; ce.parentNode.removeChild(ce); }
 });
 } else if (tpl) {
 [].forEach.call(tpl.childNodes, function (tc) {
-if (tc.localName !== "c") return; var col = colIdx(tc.getAttribute("r")); if (!L.fact(col) || isFact(tc) || cells[bfxColL(col) + r1]) return;
+if (tc.localName !== "c") return; var col = colIdx(tc.getAttribute("r")), ex = cells[bfxColL(col) + r1];
+if (!L.fact(col) || isFact(tc) || (ex && (fOf(ex) || ex.getElementsByTagNameNS(NS, "v")[0] || ex.getElementsByTagNameNS(NS, "is")[0]))) return;
 var fe = fOf(tc); if (!fe) { if (tc.getAttribute("s")) cellEl(r1, col, tpl); return; }
 var si = fe.getAttribute("t") === "shared" ? fe.getAttribute("si") : null, ce = cellEl(r1, col, tpl);
 if (si !== null && longCol(si)) { var nf = d.createElementNS(NS, "f"); nf.setAttribute("t", "shared"); nf.setAttribute("si", si); ce.appendChild(nf); return; }
@@ -14212,9 +14271,70 @@ var src = G.get(lastT - 1, col); if (src && src.f) setF(ce, buShift(src.f, r1 - 
 }
 if (N !== T) Object.keys(masters).forEach(function (si) { var fe = longCol(si); if (fe) fe.setAttribute("ref", fe.getAttribute("ref").replace(/\d+$/, String(lastN))); });
 if (N !== T) Object.keys(cells).forEach(function (ref) { var ce = cells[ref], rr = +ref.replace(/^[A-Z]+/, ""); if (rr > L.fh[0] || fOf(ce) || ce.getAttribute("t")) return; var ve = ce.getElementsByTagNameNS(NS, "v")[0]; if (ve && ve.textContent === String(T)) ve.textContent = String(N); });
+if (xf) for (var i2 = 0; i2 < 31; i2++) (function (i2) {
+var r2 = r0 + i2, sun = i2 < N && new Date(sod(addDays(rg.from, i2))).getDay() === 0;
+cols.forEach(function (c2) {
+var R = roles[c2]; if (!R) return;
+if (i2 < N) {
+var wantT = i2 === 0 && !!R.top, wantB = (R.wk && sun) || (!R.fixed && i2 === N - 1 && R.bot) || (R.fixed && i2 === 30 && R.bot), s2;
+if (wantT && wantB) s2 = R.both || xf.mix(R.top, R.wk && sun ? R.wk : R.bot) || R.top; else if (wantT) s2 = R.top; else if (wantB) s2 = R.wk && sun ? R.wk : R.bot; else s2 = R.mid;
+if (s2 === null || s2 === undefined) s2 = R.mid;
+cellEl(r2, c2).setAttribute("s", String(s2));
+} else if (dn && dn.N < 31) {
+var sd = dn.sid(c2, i2 === 30 ? 30 : i2 >= dn.N ? i2 : dn.N), ce2 = cells[bnpRef(r2 - 1, c2)];
+if (sd !== null) cellEl(r2, c2).setAttribute("s", String(sd)); else if (ce2 && !fOf(ce2) && !ce2.getElementsByTagNameNS(NS, "v")[0]) ce2.removeAttribute("s");
+}
+});
+})(i2);
+if (!opt.keep) {
 [].slice.call(d.getElementsByTagName("*")).forEach(function (el) { if (!el.parentNode) return; for (var k = 0; k < el.attributes.length; k++) if (el.attributes[k].namespaceURI === BNP_R) { el.parentNode.removeChild(el); return; } });
 ["hyperlinks", "tableParts"].forEach(function (t) { [].slice.call(d.getElementsByTagNameNS(NS, t)).forEach(function (el) { if (!el.getElementsByTagNameNS(NS, "*").length) el.parentNode.removeChild(el); }); });
 [].forEach.call(d.getElementsByTagNameNS(NS, "sheetView"), function (sv) { sv.removeAttribute("tabSelected"); });
+}
+[].forEach.call(d.getElementsByTagNameNS(NS, "c"), function (c2) { if (!fOf(c2)) return; var vs = c2.getElementsByTagNameNS(NS, "v"); while (vs.length) c2.removeChild(vs[0]); c2.removeAttribute("t"); });
+return bfxSer(d, xml);
+}
+function bnpFinName(names, pid) { var l = names.filter(function (n) { return /^фин\s*план/.test(buNorm(n)); }); return l.filter(function (n) { return n.indexOf(pid.slice(3, 7)) >= 0; })[0] || l[l.length - 1] || null; }
+function bnpFinPlan(xml, G, newName, donorName) {
+var d = bfxDoc(xml), NS = d.documentElement.namespaceURI, rows = {}, cells = {};
+[].forEach.call(d.getElementsByTagNameNS(NS, "row"), function (r) { rows[+r.getAttribute("r")] = r; [].forEach.call(r.childNodes, function (c) { if (c.localName === "c") cells[c.getAttribute("r")] = c; }); });
+var fOf = function (c) { return c.getElementsByTagNameNS(NS, "f")[0] || null; }, fx = function (r, c) { var x = G.get(r, c); return x && x.f ? x.f : null; };
+var blocks = []; Object.keys(G.cells).forEach(function (k) { var p = k.split(","); if (+p[1] === 0 && bnpPid(G.txt(+p[0], 0))) blocks.push(+p[0]); }); blocks.sort(function (a, b) { return a - b; });
+if (!blocks.length) return null;
+var has = function (r, name) { for (var c = 0; c < 40; c++) { var f = fx(r, c); if (f && f.indexOf(bnpQ(name) + "!") >= 0) return true; } return false; };
+var donor = blocks.filter(function (r) { return buNorm(G.txt(r, 0)) === buNorm(donorName) && has(r, donorName); })[0];
+if (donor === undefined) { var l = blocks.filter(function (r) { var nm = G.txt(r, 0); return has(r, nm) || has(r + 1, nm); }); donor = l[l.length - 1]; if (donor === undefined) return null; donorName = G.txt(donor, 0); }
+var target = blocks.filter(function (r) { return buNorm(G.txt(r, 0)) === buNorm(newName); })[0], changed = false, fresh = false;
+var clear = function (c) { while (c.firstChild) c.removeChild(c.firstChild); c.removeAttribute("t"); };
+var setF = function (c, f) { clear(c); var fe = d.createElementNS(NS, "f"); fe.textContent = f; c.appendChild(fe); };
+var cellEl = function (r1, c) {
+var ref = bfxColL(c) + r1; if (cells[ref]) return cells[ref]; var row = rows[r1]; if (!row) { var sd = d.getElementsByTagNameNS(NS, "sheetData")[0]; row = d.createElementNS(NS, "row"); row.setAttribute("r", String(r1)); sd.insertBefore(row, [].filter.call(sd.childNodes, function (q) { return q.localName === "row" && +q.getAttribute("r") > r1; })[0] || null); rows[r1] = row; }
+var ce = d.createElementNS(NS, "c"); ce.setAttribute("r", ref); row.insertBefore(ce, [].filter.call(row.childNodes, function (q) { return q.localName === "c" && colIdx(q.getAttribute("r")) > c; })[0] || null); cells[ref] = ce; return ce;
+};
+if (target === undefined) {
+var last = blocks[blocks.length - 1], sh = 5, sd0 = d.getElementsByTagNameNS(NS, "sheetData")[0], lastName = G.txt(last, 0);
+for (var k = -2; k <= 2; k++) {
+var src = rows[last + 1 + k]; if (!src) continue; var nr = src.cloneNode(true); nr.setAttribute("r", String(last + 1 + k + sh)); nr.removeAttribute("spans");
+[].forEach.call(nr.childNodes, function (c) {
+if (c.localName !== "c") return; var col = colIdx(c.getAttribute("r")), rr = last + k; c.setAttribute("r", bfxColL(col) + (rr + 1 + sh));
+var fe = fOf(c); if (fe) { var f0 = fe.getAttribute("t") === "shared" ? fx(rr, col) : fe.textContent; fe.removeAttribute("t"); fe.removeAttribute("si"); fe.removeAttribute("ref"); fe.textContent = f0 ? bnpRename(bnpShiftLocal(f0, sh), lastName, newName) : ""; if (!f0) c.removeChild(fe); }
+cells[c.getAttribute("r")] = c;
+});
+sd0.appendChild(nr); rows[last + 1 + k + sh] = nr;
+}
+var mc = d.getElementsByTagNameNS(NS, "mergeCells")[0];
+if (mc) [].slice.call(mc.childNodes).forEach(function (m) { var mm = m.localName === "mergeCell" && /^([A-Z]+)(\d+):([A-Z]+)(\d+)$/.exec(m.getAttribute("ref") || ""); if (!mm || +mm[2] < last - 1 || +mm[4] > last + 3) return; var m2 = m.cloneNode(true); m2.setAttribute("ref", mm[1] + (+mm[2] + sh) + ":" + mm[3] + (+mm[4] + sh)); mc.appendChild(m2); mc.setAttribute("count", String([].filter.call(mc.childNodes, function (q) { return q.localName === "mergeCell"; }).length)); });
+target = last + sh; fresh = true; var a = cellEl(target + 1, 0); clear(a); a.setAttribute("t", "inlineStr"); var is = d.createElementNS(NS, "is"), te = d.createElementNS(NS, "t"); te.textContent = newName; is.appendChild(te); a.appendChild(is); changed = true;
+}
+[0, 1].forEach(function (k) {
+for (var c = 0; c < 40; c++) {
+var f = fx(donor + k, c); if (!f || f.indexOf(bnpQ(donorName) + "!") < 0) continue;
+var ce = cellEl(target + k + 1, c), fe = fOf(ce), cur = fe ? (fe.getAttribute("t") === "shared" ? fx(target + k, c) : fe.textContent) : "";
+if (!fresh && cur && bnpRefsPeriod(cur)) continue;
+setF(ce, bnpRename(bnpShiftLocal(f, target - donor), donorName, newName)); changed = true;
+}
+});
+if (!changed) return null;
 [].forEach.call(d.getElementsByTagNameNS(NS, "c"), function (c2) { if (!fOf(c2)) return; var vs = c2.getElementsByTagNameNS(NS, "v"); while (vs.length) c2.removeChild(vs[0]); c2.removeAttribute("t"); });
 return bfxSer(d, xml);
 }
@@ -14242,29 +14362,40 @@ function bnpRelsDel(xml, rid) { var d = bfxDoc(xml); [].slice.call(d.getElements
 function bnpCT(xml, part) { var d = bfxDoc(xml), NS = d.documentElement.namespaceURI, e = d.createElementNS(NS, "Override"); e.setAttribute("PartName", part); e.setAttribute("ContentType", BNP_CT); d.documentElement.appendChild(e); return bfxSer(d, xml); }
 function bnpCTDel(xml, part) { var d = bfxDoc(xml); [].slice.call(d.getElementsByTagName("Override")).forEach(function (e) { if (e.getAttribute("PartName") === part) e.parentNode.removeChild(e); }); return bfxSer(d, xml); }
 var BNP_BASE = function (n) { return n === "[Content_Types].xml" || n === "xl/workbook.xml" || n === "xl/_rels/workbook.xml.rels"; };
-function bnpBuild(buf) {
-var bk, tpl, npid, nname, names = [], tpath;
+function bnpBuild(buf, fixPid) {
+var bk, tpl, npid, nname, names = [], tpath, fix = !!fixPid, fin;
 return buBook(buf).then(function (b) {
-bk = b; tpl = bnpLatest(bk.names); if (!tpl) throw new Error("в файле нет листов-периодов вида «Ноябрь 2026»");
+bk = b;
+if (fix) { var nm = bk.names.filter(function (n) { return bnpPid(n) === fixPid; })[0]; if (!nm) throw new Error("в файле нет листа «" + buPName(fixPid) + "»"); tpl = { pid: fixPid, name: nm }; npid = fixPid; nname = nm; }
+else {
+tpl = bnpLatest(bk.names); if (!tpl) throw new Error("в файле нет листов-периодов вида «Ноябрь 2026»");
 npid = buPShift(tpl.pid, 1); nname = buPName(npid);
 if (bk.names.some(function (n) { return buNorm(n) === buNorm(nname); })) throw new Error("лист «" + nname + "» уже есть в файле");
-tpath = bk.path(tpl.name);
-return Promise.all([bk.grid(tpl.name), unzip(buf, function (n) { names.push(n); return BNP_BASE(n) || n === tpath; })]);
+}
+tpath = bk.path(tpl.name); fin = bnpFinName(bk.names, npid);
+var fpath = fin ? bk.path(fin) : null;
+return Promise.all([bk.grid(tpl.name), unzip(buf, function (n) { names.push(n); return BNP_BASE(n) || n === tpath || n === "xl/styles.xml" || n === fpath; }), bnpDonorFind(bk, buf, nname), fin ? bk.grid(fin) : null]);
 }).then(function (r) {
-var G = r[0], tx = r[1], prevPid = buPShift(tpl.pid, -1), prevName = bk.names.filter(function (n) { return bnpPid(n) === prevPid; })[0] || null;
+var G = r[0], tx = r[1], dn = r[2], GF = r[3]; if (!dn) { try { var own = bnpDonor(tx[tpath], G, tpl.name); if (own.N < 31) dn = own; } catch (e0) { /* образец без хвоста */ } } var prevPid = buPShift(tpl.pid, -1), prevName = bk.names.filter(function (n) { return bnpPid(n) === prevPid; })[0] || null;
+var xf = tx["xl/styles.xml"] ? bnpXf(tx["xl/styles.xml"]) : null, edits = {}, res = { name: nname, pid: npid, tpl: fix ? "" : tpl.name, days: buDaysIn(buPRange(npid).from, buPRange(npid).to), fix: fix, fin: "" };
+var sheet = bnpSheetXML(tx[tpath], G, tpl.name, prevName, npid, { keep: fix, xf: xf, donor: dn });
+if (fix) { edits[tpath] = sheet; res.path = tpath; edits["xl/workbook.xml"] = bfxCalc(tx["xl/workbook.xml"]); }
+else {
 var no = 0; names.forEach(function (n) { var m = /^xl\/worksheets\/sheet(\d+)\.xml$/.exec(n); if (m) no = Math.max(no, +m[1]); });
 var npath = "xl/worksheets/sheet" + (no + 1) + ".xml", rn = 0; (tx["xl/_rels/workbook.xml.rels"].match(/Id="rId(\d+)"/g) || []).forEach(function (s) { rn = Math.max(rn, +s.replace(/\D/g, "")); });
-var rid = "rId" + (rn + 1), edits = {};
-edits[npath] = bnpSheetXML(tx[tpath], G, tpl.name, prevName, npid);
-edits["xl/workbook.xml"] = bnpBook(tx["xl/workbook.xml"], tpl.name, nname, rid);
-edits["xl/_rels/workbook.xml.rels"] = bnpRels(tx["xl/_rels/workbook.xml.rels"], rid, "worksheets/sheet" + (no + 1) + ".xml");
+res.path = npath; res.rid = "rId" + (rn + 1); edits[npath] = sheet;
+edits["xl/workbook.xml"] = bnpBook(tx["xl/workbook.xml"], tpl.name, nname, res.rid);
+edits["xl/_rels/workbook.xml.rels"] = bnpRels(tx["xl/_rels/workbook.xml.rels"], res.rid, "worksheets/sheet" + (no + 1) + ".xml");
 edits["[Content_Types].xml"] = bnpCT(tx["[Content_Types].xml"], "/" + npath);
-return bfxZip(buf, edits).then(function (out) { return { out: out, name: nname, pid: npid, tpl: tpl.name, path: npath, rid: rid, days: buDaysIn(buPRange(npid).from, buPRange(npid).to) }; });
+}
+var sx = xf && xf.xml(); if (sx) edits["xl/styles.xml"] = sx;
+if (fin && GF) { var fp = bnpFinPlan(tx[bk.path(fin)], GF, nname, fix ? (prevName || tpl.name) : tpl.name); if (fp) { edits[bk.path(fin)] = fp; res.fin = fin; } }
+return bfxZip(buf, edits).then(function (out) { res.out = out; return res; });
 }).then(function (res) {
 var ab = res.out.buffer.slice(res.out.byteOffset, res.out.byteOffset + res.out.byteLength);
-return buBook(ab).then(function (b2) { if (b2.names.indexOf(res.name) < 0) throw new Error("контрольное чтение: нового листа нет"); return b2.grid(res.name); }).then(function (G2) {
+return buBook(ab).then(function (b2) { if (b2.names.indexOf(res.name) < 0) throw new Error("контрольное чтение: листа нет"); return b2.grid(res.name); }).then(function (G2) {
 var x = buParse(G2, res.name), ks = Object.keys(x.days);
-if (x.pid !== res.pid || ks.length !== res.days || !ks.every(function (k) { return buSum(x.days[k]) === 0; })) throw new Error("контрольное чтение не сошлось — файл не изменён");
+if (x.pid !== res.pid || ks.length !== res.days || (!res.fix && !ks.every(function (k) { return buSum(x.days[k]) === 0; }))) throw new Error("контрольное чтение не сошлось — файл не изменён");
 return res;
 });
 });
@@ -14281,22 +14412,24 @@ var ab = out.buffer.slice(out.byteOffset, out.byteOffset + out.byteLength);
 return buBook(ab).then(function (b2) { if (b2.names.indexOf(info.name) >= 0) throw new Error("контрольное чтение: лист остался — файл не изменён"); return out; });
 });
 }
-function bnpHTML() {
+function bnpHTML(pid) {
 if (BNPLAST === undefined) { BNPLAST = null; buKV("bnplast").then(function (v) { if (v) { BNPLAST = v; if (V === "budget") render(); } }).catch(function () {}); }
 var D = BNP, L = BNPLAST, fd = function (ms) { return new Date(ms).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); };
 if (!D) return L ? '<div class="r bfxbar bnpbar"><span class="muted">Лист «' + esc(L.name) + "» добавлен " + esc(fd(L.at)) + '</span><button type="button" class="btn sm" data-a="bnpundo">↶ Убрать лист</button></div>' : "";
 if (D.busy) return '<div class="card bfx"><p class="muted" style="margin:0">' + (D.step === "write" ? "Записываю лист в файл…" : "Читаю файл…") + "</p></div>";
-var rg = buPRange(D.pid), h = '<div class="card bfx"><b>' + (D.undo ? "Убрать лист из Excel" : "Новый период в Excel") + "</b>";
-h += D.undo ? '<p style="margin:0">Лист <b>«' + esc(D.name) + "»</b> будет удалён из файла вместе со всем, что на нём записано.</p>"
-: '<p style="margin:0">Последний период в файле — «' + esc(D.tpl) + "». Добавлю лист <b>«" + esc(D.name) + "»</b> (" + esc(buPDates(rg)) + ", " + D.days + " " + plural(D.days, ["день", "дня", "дней"]) + ") по его образцу: план, формулы и оформление — как там; даты и дни недели — новые; суммы по дням и факт доходов — пустые; «начало» — из «конца» листа «" + esc(D.tpl) + "».</p>";
+var rg = buPRange(D.pid), h = '<div class="card bfx"><b>' + (D.undo ? "Убрать лист из Excel" : D.fix ? "Обновить лист периода в Excel" : "Новый период в Excel") + "</b>";
+var finTxt = D.fin ? " В «" + esc(D.fin) + "» в строки «план» и «факт» этого месяца проброшу формулы на лист (ячейки, где формулы на лист уже стоят, не трогаю)." : "";
+h += D.undo ? '<p style="margin:0">Лист <b>«' + esc(D.name) + '»</b> будет удалён из файла вместе со всем, что на нём записано.</p>'
+: D.fix ? '<p style="margin:0">Лист <b>«' + esc(D.name) + "»</b> (" + esc(buPDates(rg)) + ", " + D.days + " " + plural(D.days, ["день", "дня", "дней"]) + "): заново расставлю даты, «до» и дни недели, число дней в шапке, рамки недель (понедельник — воскресенье: толстая линия под каждым воскресеньем и под последним днём), хвост таблицы после последнего дня. Суммы по дням, план, доходы и формулы остаются как есть." + finTxt + "</p>"
+: '<p style="margin:0">Последний период в файле — «' + esc(D.tpl) + '». Добавлю лист <b>«' + esc(D.name) + '»</b> (' + esc(buPDates(rg)) + ", " + D.days + " " + plural(D.days, ["день", "дня", "дней"]) + ") по его образцу: план, формулы и оформление — как там; даты, дни недели и рамки недель — новые; суммы по дням и факт доходов — пустые; «начало» — из «конца» листа «" + esc(D.tpl) + "»." + finTxt + "</p>";
 if (D.err) h += '<p class="bad" style="margin:0">' + esc(D.err) + "</p>";
-h += '<div class="bfxwarn">Если файл «' + esc(buOpt().fname || "Финансы") + "» сейчас открыт в Excel или LibreOffice — закройте его без сохранения, иначе при сохранении там новый лист пропадёт. Формулы книга пересчитает при открытии. Копия файла до записи останется в браузере.</div>";
-return h + '<div class="r"><button type="button" class="btn sm pri" data-a="bnpwrite">' + (D.undo ? "↶ Убрать лист из Excel" : "➕ Добавить лист в Excel") + '</button><button type="button" class="btn sm" data-a="bnpclose">Отмена</button></div></div>';
+h += '<div class="bfxwarn">Если файл «' + esc(buOpt().fname || "Финансы") + "» сейчас открыт в Excel или LibreOffice — закройте его без сохранения, иначе при сохранении там изменения пропадут. Формулы книга пересчитает при открытии. Копия файла до записи останется в браузере.</div>";
+return h + '<div class="r"><button type="button" class="btn sm pri" data-a="bnpwrite">' + (D.undo ? "↶ Убрать лист из Excel" : D.fix ? "🔁 Обновить лист в Excel" : "➕ Добавить лист в Excel") + '</button><button type="button" class="btn sm" data-a="bnpclose">Отмена</button></div></div>';
 }
-function bnpOpen() {
-if (buNoFile() || !buCanRemember()) { toast(buNoFile() && !buMobile() ? "Новый период в Excel добавляется на основном компьютере «" + buMain().n + "»" : "Новый период в Excel добавляется на компьютере в Chrome или Edge — там приложение получает доступ к файлу"); return; }
+function bnpOpen(fixPid) {
+if (buNoFile() || !buCanRemember()) { toast(buNoFile() && !buMobile() ? "Лист в Excel меняется на основном компьютере «" + buMain().n + "»" : "Лист в Excel меняется на компьютере в Chrome или Edge — там приложение получает доступ к файлу"); return; }
 BNP = { busy: 1, step: "read" }; render();
-buFile().then(function (f) { return f.arrayBuffer(); }).then(bnpBuild).then(function (res) { BNP = { step: "confirm", name: res.name, pid: res.pid, tpl: res.tpl, days: res.days }; render(); })
+buFile().then(function (f) { return f.arrayBuffer(); }).then(function (buf) { return bnpBuild(buf, fixPid); }).then(function (res) { BNP = { step: "confirm", fix: !!fixPid, name: res.name, pid: res.pid, tpl: res.tpl, days: res.days, fin: res.fin }; render(); })
 .catch(function (e) { BNP = null; render(); if (e && e.name === "AbortError") return; toast("Не удалось подготовить лист: " + (e && e.message || e)); });
 }
 function bnpWrite() {
@@ -14309,7 +14442,7 @@ h0 = h; return h.requestPermission({ mode: "readwrite" });
 if (p !== "granted") throw new Error("запись в файл не разрешена");
 return h0.getFile();
 }).then(function (f) { file = f; return f.arrayBuffer(); }).then(function (buf) {
-src = buf; return D.undo ? bnpRemoveBuild(buf, BNPLAST).then(function (out) { return { out: out }; }) : bnpBuild(buf);
+src = buf; return D.undo ? bnpRemoveBuild(buf, BNPLAST).then(function (out) { return { out: out }; }) : bnpBuild(buf, D.fix ? D.pid : null);
 }).then(function (r) {
 res = r;
 return buKV("bak", { n: file.name, at: Date.now(), mt: file.lastModified, sheet: D.name, buf: src }).catch(function () { /* без копии всё равно пишем */ })
@@ -14317,6 +14450,7 @@ return buKV("bak", { n: file.name, at: Date.now(), mt: file.lastModified, sheet:
 }).then(function () {
 BNP = null;
 if (D.undo) { BNPLAST = null; buKV("bnplast", null).catch(function () {}); var P = buPer(D.pid); if (P) { P.del = 1; P.delAt = Date.now(); touch(P); save(); } if (BUPER === D.pid) BUPER = ""; toast("Лист «" + D.name + "» убран из Excel"); render(); return; }
+if (D.fix) { toast("Лист «" + res.name + "» обновлён в Excel — читаю период"); buUpdate({ k: "per", a: res.pid }); return; }
 BNPLAST = { name: res.name, pid: res.pid, path: res.path, rid: res.rid, at: Date.now() }; buKV("bnplast", BNPLAST).catch(function () {});
 BUPER = res.pid; toast("Лист «" + res.name + "» добавлен в Excel — читаю период");
 buUpdate({ k: "per", a: res.pid });
@@ -14326,7 +14460,8 @@ D.busy = 0; D.step = "confirm"; D.err = e && e.name === "NotAllowedError" ? "З�
 }
 function bnpAct(a) {
 switch (a) {
-case "bnpopen": bnpOpen(); return true;
+case "bnpopen": bnpOpen(null); return true;
+case "bnpfix": bnpOpen(BUPER || buPid(today0())); return true;
 case "bnpclose": BNP = null; render(); return true;
 case "bnpundo": if (BNPLAST) { BNP = { step: "confirm", undo: true, name: BNPLAST.name, pid: BNPLAST.pid, tpl: "", days: 0 }; render(); } return true;
 case "bnpwrite": if (BNP && !BNP.busy) bnpWrite(); return true;
@@ -19181,6 +19316,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["317", "📄 Новый период: рамки недель, «Фин план» и «🔁 Обновить лист»", ["Рамки недель на новом листе теперь расставляются по дням недели: толстая линия под каждым воскресеньем и под последним днём периода, а не по строкам листа-образца. Хвост таблицы после последнего дня оформляется как у короткого месяца в файле.", "В листе «Фин план …» строки «план» и «факт» нового месяца получают формулы на его лист по образцу прошлого месяца; если блока месяца там нет — добавляется копия последнего.", "Кнопка «🔁 Обновить лист» в «Периоде» приводит в порядок уже существующий лист периода (даты, дни недели, число дней, рамки, хвост, формулы в «Фин плане»), не трогая суммы и план — так можно поправить лист, добавленный раньше."]],
 ["316", "📄 Новый период в файле Excel", ["«Бюджет» → «Период» → «📄 Новый период»: приложение само добавляет в файл «Финансы …» лист следующего месяца по образцу последнего листа-периода — план, формулы и оформление как там, даты и дни недели новые, суммы по дням и факт доходов пустые, «начало» берётся из «конца» прошлого месяца. Лист встаёт сразу после образца, Excel пересчитает его при открытии.", "Перед записью показывается, какой лист и по какому образцу будет добавлен; копия файла до записи остаётся в браузере, а «↶ Убрать лист» удаляет добавленный лист из файла. Работает на компьютере в Chrome или Edge, как «Корректировка плана»."]],
 ["315", "📝 «День за днём»: строка с датой стала аккуратнее", ["Поле даты теперь той же высоты, шрифта и скругления, что кнопки «← Вчера» и «Завтра →», отступы ровные, а «✎ Настроить страницу» прижата к правому краю.", "Карточки «Дня за днём» теперь сворачиваются: кнопка ▾ в шапке прячет содержимое, ▸ возвращает; свёрнутые запоминаются и синхронизируются между устройствами, как карточки главной."]],
 ["314", "📝 «День за днём»: заголовки и вкладки больше не ломаются", ["В режиме «✎ Настроить страницу» при трёх-четырёх колонках заголовки карточек сжимались кнопками ↑ ↓ ↔ и разваливались в столбик («★ / Главное»). Теперь заголовок остаётся на одной строке, а кнопки уходят на строку ниже.", "Вкладки раздела («Сегодня · По часам · … · Утро · Вечер · Неделя») на узком экране переносятся на вторую строку, а не обрезаются краем."]],
