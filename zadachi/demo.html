@@ -8659,7 +8659,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-311";
+var APPV = "zd-app-2026-10-16-312";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -14324,7 +14324,7 @@ if (!c) { if (t && !t.done && !t.del) { t.del = 1; t.delAt = Date.now(); touch(t
 var ck = cChecked(t), all = c.it.concat(c.hab).filter(function (x) { return x[4] !== "rest"; }), mins = c.it.reduce(function (s, x) { return s + (x[1] || 0); }, 0);
 var li = function (x) { var a = chAutoDone(x, d0), on = a === null ? !!ck[x[0]] : a; return "<li" + (on ? ' data-checked="1"' : "") + ">" + esc(x[0]) + "</li>"; };
 var body = '<ul class="todo">' + all.map(li).join("") + '</ul><p>Подсказки к каждому заданию — <a href="#clean">План уборки → Челлендж</a>.</p>';
-var title = "🏁 Челлендж · день " + c.day.n + (c.day.post ? "" : " из " + c.day.total * 7) + (c.day.sun ? " · отдых" : mins ? " · " + mins + " мин" : "");
+var title = "🏁 Дом в порядке · день " + c.day.n + (c.day.post ? "" : " из " + c.day.total * 7) + (c.day.sun ? " · отдых" : mins ? " · " + mins + " мин" : "");
 if (!t) { t = newTaskFrom(title, { day: d0 }); t.id = chTid(d0); t.at = d0; t.allday = true; t.rem = false; t.rep = ""; t.tags = []; }
 else if (t.del) { if (t.purged) return false; delete t.del; delete t.delAt; }
 var co = chOpt(), wantAt = d0, wantAd = true; if (/^\d\d:\d\d$/.test(co.time)) { wantAt = d0 + (+co.time.slice(0, 2) * 60 + +co.time.slice(3)) * 6e4; wantAd = false; }
@@ -18953,6 +18953,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["312", "🏁 Задача дня челленджа «Дом в порядке» теперь так и называется", ["В «Сегодня» задача этого челленджа называлась просто «🏁 Челлендж · день N», и рядом с «💰 Деньги» было непонятно, что это. Теперь — «🏁 Дом в порядке · день N из M». Остальные челленджи уже назывались по имени."]],
 ["311", "📅 Календарь и значки — во всех челленджах", ["Кнопка «📅 Календарь» теперь есть не только у «Дома», а у каждого челленджа: осанка и лицо, финансы, кухня, челленджи целей и свои челленджи. Сетка дней цветом (выполнен, частично, пропущен, без задания, сегодня), серии, очки, уровень и те же семь значков.", "Исправлено на странице «Меню»: в карточке «Эта неделя» длинные названия блюд обрезались, а точка-разделитель уезжала на новую строку — теперь каждый приём пищи на своей строке и переносится целиком."]],
 ["310", "💳 Регулярный платёж теперь можно привязать к долгу", ["Раньше платёж уменьшал долг, только если их названия совпадали (из-за разных окончаний — «Ипотека» и «Платёж по ипотеке» — это часто не срабатывало). Теперь в «Регулярных платежах» у каждого платежа кнопка «💳 долг ▾»: выберите долг — и при отметке задачи платежа «✓» его остаток уменьшится на сумму платежа (с учётом процентов за месяц).", "«Авто» — по-прежнему по названию; «не долг» — обычный платёж без списания."]],
 ["309", "🔒 Пароль больше не спрашивается при каждом обновлении", ["Раньше после обновления приложение иногда снова просило пароль. Теперь, если пароль уже вводился на этом устройстве, он запоминается и при обновлениях не запрашивается."]],
