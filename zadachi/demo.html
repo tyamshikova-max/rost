@@ -412,6 +412,14 @@ body.tdragging { user-select: none; -webkit-user-select: none }
 .fcwadd { gap: 6px; margin: 0 0 8px } .fcwish { padding: 4px 12px } .fcw { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line) } .fcw.dec { opacity: .6 } .fcwt { flex: 1 1 220px; min-width: 0 }
 .chtools { gap: 6px; margin: -4px 0 10px; flex-wrap: wrap } .chpaused { display: grid; gap: 6px; padding: 14px 16px; margin: 0 0 10px }
 .chsum { display: grid; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line) } .chmed { font-weight: 700; color: var(--ok) }
+.chcal { display: grid; gap: 10px; padding: 12px 14px; margin: 0 0 10px } .chcalh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px } .chcalh b { font-size: calc(15px * var(--fs)) }
+.chcalg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px } .chcwd { text-align: center; font-size: calc(11px * var(--fs)); color: var(--muted); padding-bottom: 2px }
+.chcd { position: relative; aspect-ratio: 1 / 1; min-height: 34px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); font-size: calc(14px * var(--fs)); line-height: 1; cursor: pointer; color: var(--fg) } .chcd:disabled { opacity: .25; cursor: default } .chcd .chcn { font-size: calc(10px * var(--fs)); color: var(--muted) }
+.chcd.sdone { background: color-mix(in srgb, var(--ok) 26%, var(--panel)); border-color: color-mix(in srgb, var(--ok) 45%, var(--line)) } .chcd.spart { background: color-mix(in srgb, #e9a83a 30%, var(--panel)); border-color: color-mix(in srgb, #e9a83a 50%, var(--line)) } .chcd.smiss { background: color-mix(in srgb, #e05a4f 16%, var(--panel)) } .chcd.srest { background: var(--hover) } .chcd.sfut { opacity: .5 } .chcd.stoday { font-weight: 700 } .chcd.tdy { box-shadow: 0 0 0 2px var(--acc); border-color: var(--acc) }
+.chleg { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: calc(11.5px * var(--fs)); color: var(--muted) } .chleg span { display: inline-flex; align-items: center; gap: 4px } .chleg i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--line); display: inline-block } .chleg i.sdone { background: color-mix(in srgb, var(--ok) 40%, var(--panel)) } .chleg i.spart { background: color-mix(in srgb, #e9a83a 45%, var(--panel)) } .chleg i.smiss { background: color-mix(in srgb, #e05a4f 25%, var(--panel)) } .chleg i.srest { background: var(--hover) } .chleg i.stoday { box-shadow: 0 0 0 2px var(--acc) }
+.chgame { display: grid; gap: 10px; padding: 12px 14px; margin: 0 0 10px } .chgtiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 8px } .chgt { display: grid; gap: 2px; padding: 8px 10px; border-radius: 10px; background: var(--hover); text-align: center } .chgt b { font-size: calc(17px * var(--fs)); font-variant-numeric: tabular-nums } .chgt small { font-size: calc(11px * var(--fs)); color: var(--muted) }
+.chglv { display: grid; gap: 2px } .chlvbar { height: 7px; border-radius: 4px; background: var(--hover); overflow: hidden } .chlvbar i { display: block; height: 100%; background: var(--acc) }
+.chbadges { display: flex; flex-wrap: wrap; gap: 8px } .chbd { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); font-size: calc(12.5px * var(--fs)) } .chbd .chbi { font-size: calc(16px * var(--fs)) } .chbd.got { background: color-mix(in srgb, var(--acc-soft) 70%, transparent); border-color: var(--acc) } .chbd.lk { opacity: .45 } .chbd.lk .chbi { filter: grayscale(1) }
 .chsos, .chfamp { display: grid; gap: 8px; margin: 0 0 10px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: color-mix(in srgb, var(--acc-soft) 60%, transparent) } .chsos .r, .chfamp .r { gap: 6px }
 .chtmrb { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin: 0 0 10px; padding: 10px 14px; border-radius: 12px; background: var(--acc-soft) } .chtmrb b { font-size: calc(20px * var(--fs)); font-variant-numeric: tabular-nums } .chtmrb .btn { margin-left: auto }
 .invseg button.on.iv3 { background: color-mix(in srgb, #e9a83a 40%, var(--panel)); color: var(--fg) }
@@ -8641,7 +8649,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-306";
+var APPV = "zd-app-2026-10-16-307";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -14281,7 +14289,76 @@ var t = S.tasks.filter(function (x) { return x.id === chTid(d0); })[0]; if (!t) 
 TXTD.innerHTML = t.body || ""; [].forEach.call(TXTD.querySelectorAll("ul.todo > li"), function (li) { if (li.textContent.trim() === txt) { if (li.getAttribute("data-checked") === "1") li.removeAttribute("data-checked"); else li.setAttribute("data-checked", "1"); } });
 t.body = TXTD.innerHTML; touch(t); chSync(d0); save(); render();
 }
-var CHVIEW = 0, CHINTRO = "", CHSESS = null;
+var CHVIEW = 0, CHINTRO = "", CHSESS = null, CHCAL = 0;
+function chDayStat(d0) {
+var day = chDay(d0); if (!day) return { t: "off" };
+if (day.sun) return { t: "rest", day: day };
+var t = S.tasks.filter(function (x) { return x.id === chTid(d0) && !x.del; })[0], c = 0, n = 0;
+if (t) { TXTD.innerHTML = t.body || ""; var lis = TXTD.querySelectorAll("ul.todo > li"); n = lis.length; c = [].filter.call(lis, function (l) { return l.getAttribute("data-checked") === "1"; }).length; }
+var t0 = today0();
+if (d0 > t0) return { t: "future", day: day, c: c, n: n };
+if (c && n && c === n) return { t: "done", day: day, c: c, n: n };
+if (c) return { t: "part", day: day, c: c, n: n };
+if (d0 === t0) return { t: "today", day: day, c: c, n: n };
+return { t: "miss", day: day, c: 0, n: n };
+}
+function chStats() {
+var o = chOpt(); if (!o.on || !o.start) return null;
+var total = chWeeks() * 7, first = sod(o.start), t0 = today0();
+var full = 0, part = 0, miss = 0, work = 0, best = 0, run = 0, pts = 0, d, s;
+for (d = first; d <= t0; d = addDays(d, 1)) {
+s = chDayStat(d); if (s.t === "off" || s.t === "rest") continue; work++;
+if (s.t === "today") continue; // сегодня ещё открыт — серию не рвёт и не продляет
+if (s.t === "done") { full++; pts += 10; run++; } else if (s.t === "part") { part++; pts += 5; run++; } else { miss++; run = 0; }
+if (run > best) best = run;
+}
+run = 0; for (d = t0; d >= first; d = addDays(d, -1)) { s = chDayStat(d); if (s.t === "off" || s.t === "rest" || s.t === "today") continue; if (s.t === "done" || s.t === "part") run++; else break; }
+var dn = chDay(t0); dn = dn ? dn.n : (t0 >= first ? Math.round((t0 - first) / DAY) + 1 : 0);
+return { full: full, part: part, miss: miss, work: work, cur: run, best: best, pts: pts, total: total, dn: Math.min(dn, total) };
+}
+var CHBADGES = [
+{ id: "start", ic: "🌱", n: "Первый шаг", d: "Первый день сделан", f: function (s) { return s.full >= 1; } },
+{ id: "week1", ic: "📅", n: "Первая неделя", d: "5 полных дней", f: function (s) { return s.full >= 5; } },
+{ id: "s7", ic: "🔥", n: "Серия 7", d: "7 дней подряд без пропусков", f: function (s) { return s.best >= 7; } },
+{ id: "half", ic: "⭐", n: "Половина пути", d: "Пройдена половина программы", f: function (s) { return s.dn >= Math.ceil(s.total / 2); } },
+{ id: "s14", ic: "⚡", n: "Серия 14", d: "14 дней подряд без пропусков", f: function (s) { return s.best >= 14; } },
+{ id: "d20", ic: "💪", n: "20 полных дней", d: "20 дней «всё сделано»", f: function (s) { return s.full >= 20; } },
+{ id: "fin", ic: "🏆", n: "Финиш", d: "Челлендж пройден до конца", f: function (s) { return s.dn >= s.total; } }
+];
+function chBadgesEarned(s) { return CHBADGES.filter(function (b) { return b.f(s); }).map(function (b) { return b.id; }); }
+function chCalCheer() {
+var s = chStats(); if (!s) return; var earned = chBadgesEarned(s), seen = [];
+try { seen = JSON.parse(LS.get("zd-chbadge") || "[]"); } catch (e) { seen = []; }
+var fresh = earned.filter(function (id) { return seen.indexOf(id) < 0; });
+if (fresh.length) { var b = CHBADGES.filter(function (x) { return x.id === fresh[fresh.length - 1]; })[0]; if (b) toast("🏅 Новый значок: " + b.ic + " " + b.n); }
+if (fresh.length || earned.length !== seen.length) LS.set("zd-chbadge", JSON.stringify(earned));
+}
+function chGameHTML() {
+var s = chStats(); if (!s) return "";
+var lvl = Math.floor(s.pts / 50) + 1, into = s.pts % 50, pctL = Math.round(into / 50 * 100), earned = chBadgesEarned(s);
+var tile = function (ic, v, lab) { return '<div class="chgt"><b>' + ic + " " + v + "</b><small>" + lab + "</small></div>"; };
+var h = '<div class="card chgame"><div class="chgtiles">' + tile("🔥", s.cur, "серия сейчас") + tile("🏆", s.best, "лучшая серия") + tile("✅", s.full, "полных дней") + tile("🧩", s.part, "частичных") + tile("⭐", s.pts, "очков · ур. " + lvl) + "</div>";
+h += '<div class="chglv"><div class="chlvbar"><i style="width:' + pctL + '%"></i></div><small class="muted">До уровня ' + (lvl + 1) + " — ещё " + (50 - into) + " очков (полный день +10, частичный +5)</small></div>";
+h += '<div class="chbadges">' + CHBADGES.map(function (b) { var got = earned.indexOf(b.id) >= 0; return '<div class="chbd ' + (got ? "got" : "lk") + '" title="' + esc(b.n + " — " + b.d) + '"><span class="chbi">' + b.ic + '</span><span class="chbn">' + esc(b.n) + "</span></div>"; }).join("") + "</div>";
+return h;
+}
+function chCalHTML() {
+var o = chOpt(), total = chWeeks() * 7, first = sod(o.start), t0 = today0(), last = Math.max(addDays(first, total - 1), t0);
+var start = monday(first), end = addDays(monday(last), 6);
+var nm = { done: "выполнен", part: "частично", miss: "пропущен", rest: "отдых", today: "сегодня", future: "впереди", off: "" };
+var cl = { done: "sdone", part: "spart", miss: "smiss", rest: "srest", today: "stoday", future: "sfut", off: "soff" };
+var mk = { done: "✓", part: "½", miss: "·", rest: "☕", today: "", future: "", off: "" };
+var h = '<div class="card chcal"><div class="chcalh"><b>📅 Календарь челленджа</b><span class="muted">нажмите на день — откроются его задания</span></div><div class="chcalg">';
+h += ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map(function (w) { return '<span class="chcwd">' + w + "</span>"; }).join("");
+for (var d = start; d <= end; d = addDays(d, 1)) {
+var s = chDayStat(d), off = s.t === "off", tdy = d === t0;
+var lab = off ? "" : (s.day ? "день " + s.day.n : "") + (nm[s.t] ? " · " + nm[s.t] : "") + (s.n ? " · " + s.c + "/" + s.n : "");
+var ti = new Date(d).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + (lab ? " — " + lab : "");
+h += '<button type="button" class="chcd ' + cl[s.t] + (tdy ? " tdy" : "") + '"' + (off ? " disabled" : ' data-a="chcalday" data-x="' + Math.round((d - t0) / DAY) + '" title="' + esc(ti) + '"') + '><span class="chcn">' + new Date(d).getDate() + "</span>" + mk[s.t] + "</button>";
+}
+h += '</div><div class="chleg"><span><i class="sdone"></i>выполнен</span><span><i class="spart"></i>частично</span><span><i class="smiss"></i>пропущен</span><span><i class="srest"></i>отдых</span><span><i class="stoday"></i>сегодня</span></div></div>';
+return h;
+}
 function chHTML() {
 var o = chOpt(), h = "";
 if (!o.on) {
@@ -14290,7 +14367,8 @@ return '<div class="card chstart"><h3 style="margin:0">🏁 Челлендж «�
 '<div class="r"><span class="muted">Старт</span><input type="date" class="inp" id="chstartd" value="' + iv("chstartd", dKey(m)) + '"><button type="button" class="btn sm pri" data-a="chstart">Начать челлендж</button><button type="button" class="btn sm" data-a="chstart" data-x="today">Начать сегодня</button><a class="btn sm" href="#help-home">📖 Гайд: система порядка</a></div><p class="muted" style="margin:0">Удобнее всего с понедельника. Порядок зон — как в «Настройки» → «Зоны». До старта проверьте инвентарь ниже.</p></div>' + invHTML();
 }
 var d0 = addDays(today0(), CHVIEW), c = chItems(d0), day = c && c.day;
-h += '<div class="r chnav"><button type="button" class="btn sm" data-a="chday" data-x="-1">‹</button><b>' + esc(new Date(d0).toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" })) + '</b><button type="button" class="btn sm" data-a="chday" data-x="1">›</button>' + (CHVIEW ? '<button type="button" class="btn sm" data-a="chday" data-x="0">Сегодня</button>' : "") + '<span class="muted chstop"><a href="#" data-a="chstop">остановить челлендж</a></span></div><div class="r chtools">' + (o.paused ? '<button type="button" class="btn sm pri" data-a="chresume">▶ Продолжить</button>' : '<button type="button" class="btn sm" data-a="chpause" title="Заболели, уехали — дни не сгорят, а сдвинутся">⏸ Пауза</button>') + '<button type="button" class="btn sm" data-a="chsos" title="Аварийный режим: «пять вещей»">🆘 Завал</button><button type="button" class="btn sm" data-a="chtime" title="Время задачи дня и напоминание">🕘 ' + (o.time || "весь день") + (o.rem && o.time ? " · 🔔" : "") + ' ▾</button><button type="button" class="btn sm' + (CHFAM ? " on" : "") + '" data-a="chfam">👪 Семья</button></div>' + (CHFAM ? chFamHTML() : "") + (CHSOS ? chSosHTML() : "") + (CHTMR ? chTmrHTML() : "");
+h += '<div class="r chnav"><button type="button" class="btn sm" data-a="chday" data-x="-1">‹</button><b>' + esc(new Date(d0).toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" })) + '</b><button type="button" class="btn sm" data-a="chday" data-x="1">›</button>' + (CHVIEW ? '<button type="button" class="btn sm" data-a="chday" data-x="0">Сегодня</button>' : "") + '<span class="muted chstop"><a href="#" data-a="chstop">остановить челлендж</a></span></div><div class="r chtools">' + '<button type="button" class="btn sm' + (CHCAL ? " on" : "") + '" data-a="chcal" title="Календарь и статистика челленджа">📅 Календарь</button>' + (o.paused ? '<button type="button" class="btn sm pri" data-a="chresume">▶ Продолжить</button>' : '<button type="button" class="btn sm" data-a="chpause" title="Заболели, уехали — дни не сгорят, а сдвинутся">⏸ Пауза</button>') + '<button type="button" class="btn sm" data-a="chsos" title="Аварийный режим: «пять вещей»">🆘 Завал</button><button type="button" class="btn sm" data-a="chtime" title="Время задачи дня и напоминание">🕘 ' + (o.time || "весь день") + (o.rem && o.time ? " · 🔔" : "") + ' ▾</button><button type="button" class="btn sm' + (CHFAM ? " on" : "") + '" data-a="chfam">👪 Семья</button></div>' + (CHFAM ? chFamHTML() : "") + (CHSOS ? chSosHTML() : "") + (CHTMR ? chTmrHTML() : "");
+if (CHCAL) h += chGameHTML() + chCalHTML();
 if (!c && o.paused && d0 >= sod(o.paused)) return h + '<div class="card chpaused"><b>⏸ Челлендж на паузе с ' + esc(new Date(o.paused).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })) + '</b><span class="muted">Задания не появляются и не сгорают. Нажмите «▶ Продолжить» — все дни сдвинутся на время паузы, и вы продолжите с того же места.</span></div>' + invHTML();
 if (!c) return h + '<p class="muted">' + (d0 < sod(o.start) ? "Челлендж начнётся " + esc(new Date(o.start).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })) + "." : "Челлендж завершён.") + "</p>";
 var total = day.total * 7, pct = Math.min(100, Math.round(day.n / total * 100)), wkName = day.post ? "Система: зона недели по кругу" : CHWEEK[day.wk] ? CHWEEK[day.wk][0] : "Зона недели: " + (CZONES[chZoneOf(day)] || "");
@@ -14374,6 +14452,8 @@ case "chsosend": CHSOS = 0; render(); toast("Комната снова рабо�
 case "chsosx": CHSOS = 0; render(); return true;
 case "chtmr": CHTMR = { until: Date.now() + (+el.dataset.m || 15) * 60000, m: +el.dataset.m || 15 }; render(); return true;
 case "chtmrx": CHTMR = null; render(); return true;
+case "chcal": CHCAL = CHCAL ? 0 : 1; if (CHCAL) chCalCheer(); render(); return true;
+case "chcalday": CHVIEW = +el.dataset.x || 0; render(); return true;
 case "chfam": CHFAM = !CHFAM; render(); return true;
 case "chfamk": var fm = Object.assign({}, chOpt().fam); fm[el.dataset.k] = fm[el.dataset.k] ? 0 : 1; chSet("fam", fm); chSync(today0()); save(); render(); return true;
 case "chtime": var tr = el.getBoundingClientRect(), co3 = chOpt(); ctxShow(tr.left, tr.bottom + 4, ["", "07:00", "08:00", "19:00", "20:00", "20:30", "21:00", "21:30"].map(function (v) { return { c: v || "-", i: co3.time === v ? "✓" : "", l: v ? "В " + v : "Весь день, без времени" }; }).concat(["-", { c: "rem", i: co3.rem ? "✓" : "", l: "🔔 Напоминать в Telegram (если время задано)" }]), { k: "chtime", id: "" }); return true;
@@ -18816,6 +18896,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["307", "📅 Календарь челленджа и значки", ["В карточке челленджа «Дом в порядке» — кнопка «📅 Календарь»: видно каждый день программы цветом — зелёный выполнен, жёлтый частично, красный пропущен, ☕ отдых, рамка — сегодня. Нажатие на день открывает его задания.", "Рядом — геймификация: серия 🔥, лучшая серия 🏆, полные дни ✅, очки и уровень, значки за первую неделю, серии и финиш. Новый значок отмечается всплывашкой."]],
 ["306", "🔒 Пароль на приложение", ["Платную сборку можно закрыть паролем: при первом открытии на устройстве приложение спрашивает пароль, запоминает его в этом браузере и дальше не спрашивает, а код хранится в зашифрованном виде. В «Настройках» → «Данные и синхронизация» — кнопка «Забыть пароль на этом устройстве», чтобы оно снова спросило пароль здесь.", "Открытая версия и демо работают как прежде."]],
 ["305", "📱 Окошки карточки на телефоне — шторкой снизу", ["На узком экране окошко «когда / где / как» выезжает снизу на всю ширину: крупные кнопки «Сегодня · Завтра · Пн», удобный календарик; фон за шторкой затемняется. Закрыть — смахнуть за шапку вниз, × или нажать мимо."]],
 ["304", "☆ Свои поля в кнопки под названием", ["В окошке «Ещё» у каждого поля — звёздочка ☆. Отметьте, например, «Ответственный» или «Учёт времени» — поле станет отдельной кнопкой рядом с «когда, где, как», на всех ваших устройствах. ★ в окошке поля возвращает его в «Ещё»."]],
