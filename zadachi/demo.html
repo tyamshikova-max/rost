@@ -8708,7 +8708,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-328";
+var APPV = "zd-app-2026-10-16-329";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -19385,6 +19385,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["329", "🌇 Режим «По солнцу»: тёмный от заката до рассвета", ["В «Настройки» → «Оформление» → «Режим» появился четвёртый вариант — «По солнцу». Укажите один раз город из списка (Москва, Казань, Минск, Алматы… — около 50 городов) или широту и долготу, и тёмный режим будет включаться на закате и выключаться на рассвете. Время заката считается прямо в приложении, без интернета; за полярным кругом учитываются полярный день и ночь.", "Геолокация не используется, пока вы сами не нажмёте «📍 Определить». Координаты общие для всех устройств, а выбранный режим — свой на каждом, как и раньше. Приложение проверяет время раз в минуту и переключает режим само."]],
 ["328", "🍅 Фокус-туман во время помидора", ["Новая настройка в «Оформлении»: пока идёт рабочая фаза помидора, всё на экране, кроме строки текущей задачи, её карточки и таймера, приглушается полупрозрачной пеленой. Нажимать можно всё как обычно — пелена только для глаз. На паузе и в перерыве туман снимается. Если в системе включено «уменьшить движение», туман появляется без анимации."]],
 ["327", "⌨ Команды через «/» в быстром вводе", ["В поле новой задачи наберите «/» — появится список команд: /сегодня, /завтра, /послезавтра, /проект Имя, /приоритет 1, /напомнить 18:00, /дедлайн пт, /когда-нибудь, /флажок. Команды можно ставить в любом месте строки: «/завтра купить хлеб /приоритет 1». «/проект» понимает названия из нескольких слов и ищет по началу названия; незнакомое имя создаст новый проект. «/напомнить 18:00» ставит время и включает напоминание, даже если автонапоминания выключены."]],
 ["326", "🔤 Шрифты стилей теперь работают без сети", ["Каждый стиль оформления использует свои шрифты Google. Раньше без интернета они могли не загрузиться, и приложение открывалось системным шрифтом. Теперь после первой загрузки шрифт откладывается в отдельный офлайн-кэш, который не стирается при обновлении версии; при выборе стиля приложение заранее скачивает и его шрифты. Интернет нужен один раз — когда вы выбираете стиль."]],
@@ -21556,7 +21557,7 @@ document.body.classList.toggle("tclean", S.opt.topfull !== true);
 function isDemo() { return !!document.getElementById("demo-data"); }
 function demoOpen() { var u = isDemo() ? "./" : "demo.html"; var w = window.open(u, "_blank", "noopener"); if (!w) location.href = u; }
 function prfMenu(el) {
-var r = el.getBoundingClientRect(), dark = themePref() === "dark" || (themePref() === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches), xs = xpOn() ? xpStats() : null;
+var r = el.getBoundingClientRect(), dark = isDark(), xs = xpOn() ? xpStats() : null;
 var it = [];
 if (YD.on) it.push({ c: "sync", i: "☁", l: !YD.token() ? "Войти через Яндекс" : SYNC.st === "err" ? "Нет связи с Диском — повторить" : "Синхронизировать" + (SYNC.at ? " · " + hm(SYNC.at) : "") });
 it = it.concat([{ c: "theme", i: "🌓", l: "Тема: " + (dark ? "тёмная → светлая" : "светлая → тёмная") }, { c: "settings", i: "⚙", l: "Настройки" }, { c: "mods", i: "🧩", l: "Модули" }, "-", { c: "help", i: "?", l: "Справка" }, { c: "keys", i: "⌨", l: "Горячие клавиши" }, { c: "news", i: "✨", l: "Что нового" }]);
@@ -25030,6 +25031,8 @@ tstMerge(j); render(); toast("Тестовые данные добавлены: 
 }).catch(function (er) { render(); toast("Не удалось загрузить: " + (er.message || "нет связи")); }); return;
 case "tstwipe-yes": var tn = wipeTest(); CONF = null; if (V === "board" && !board(ARG)) go("settings"); render(); toast("Тестовые данные удалены" + (tn ? " · задач: " + tn : "")); return;
 case "look": setLook(el.dataset.k, el.dataset.v); return;
+case "sunpos": sunPosSave(($("sunpos") || {}).value || ""); return;
+case "sungeo": if (!navigator.geolocation) { toast("Браузер не даёт местоположение — введите город или координаты"); return; } toast("Спрашиваю местоположение…"); navigator.geolocation.getCurrentPosition(function (g) { S.opt.sun = { lat: Math.round(g.coords.latitude * 100) / 100, lon: Math.round(g.coords.longitude * 100) / 100, n: "" }; optTouch(); save(); applyTheme(); render(); toast("Координаты сохранены"); }, function () { toast("Не удалось определить — введите город или координаты"); }, { timeout: 10000, maximumAge: 3600000 }); return;
 case "wpup": wpPick(); return;
 case "lookreset": e.preventDefault(); delete S.opt.look; optTouch(); save(); applyLook(true); render(); toast("Оформление сброшено: «Облако»"); return;
 case "wipe-yes": var wn = wipeAll(); go("inbox"); render(); toast("База очищена" + (wn ? " · удалено задач: " + wn : "")); return;
@@ -26775,7 +26778,33 @@ setTimeout(fontsWarm, 4000);
 function hexMix(x, y, t) { var p = parseInt(x.slice(1), 16), q = parseInt(y.slice(1), 16), r = function (sh) { return Math.round(((p >> sh) & 255) * (1 - t) + ((q >> sh) & 255) * t); }; return "#" + ((1 << 24) + (r(16) << 16) + (r(8) << 8) + r(0)).toString(16).slice(1); }
 function hexLum(x) { var n = parseInt(x.slice(1), 16), f = function (v) { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(n >> 16 & 255) + .7152 * f(n >> 8 & 255) + .0722 * f(n & 255); }
 function lookCfg() { var l = S.opt.look || {}; return { prio: l.prio === "color" ? "color" : "calm", style: STY[l.style] ? l.style : "cloud", acc: l.acc || "", pic: WPICS[l.pic] ? l.pic : "hills", dim: WDIM[l.dim] !== undefined ? +l.dim : 1, fs: FSIZES[l.fs] ? l.fs : "1", emo: l.emo === "color" ? "color" : "mono", fog: l.fog === "1" }; }
-function isDark() { var p = themePref(); return p === "dark" || (p === "system" && !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)); }
+function isDark() { var p = themePref(); if (p === "sun") return sunDark(); return p === "dark" || (p === "system" && !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)); }
+var SUNCITIES = [["Москва", 55.75, 37.62], ["Санкт-Петербург", 59.94, 30.31], ["Новосибирск", 55.03, 82.92], ["Екатеринбург", 56.84, 60.6], ["Казань", 55.8, 49.1], ["Нижний Новгород", 56.3, 44.0], ["Самара", 53.2, 50.15], ["Ростов-на-Дону", 47.23, 39.7], ["Краснодар", 45.04, 38.98], ["Сочи", 43.6, 39.73], ["Уфа", 54.74, 55.97], ["Пермь", 58.01, 56.23], ["Воронеж", 51.67, 39.2], ["Волгоград", 48.7, 44.5], ["Челябинск", 55.16, 61.4], ["Омск", 54.99, 73.37], ["Красноярск", 56.01, 92.87], ["Иркутск", 52.29, 104.3], ["Владивосток", 43.12, 131.9], ["Хабаровск", 48.48, 135.08], ["Калининград", 54.71, 20.51], ["Мурманск", 68.97, 33.08], ["Архангельск", 64.54, 40.54], ["Тюмень", 57.15, 65.53], ["Ярославль", 57.63, 39.87], ["Тверь", 56.86, 35.9], ["Минск", 53.9, 27.57], ["Киев", 50.45, 30.52], ["Алматы", 43.24, 76.9], ["Астана", 51.17, 71.43], ["Ташкент", 41.3, 69.24], ["Бишкек", 42.87, 74.59], ["Тбилиси", 41.69, 44.8], ["Ереван", 40.18, 44.51], ["Баку", 40.41, 49.87], ["Стамбул", 41.01, 28.98], ["Берлин", 52.52, 13.4], ["Лондон", 51.5, -0.12], ["Париж", 48.86, 2.35], ["Рим", 41.9, 12.5], ["Мадрид", 40.42, -3.7], ["Прага", 50.08, 14.44], ["Варшава", 52.23, 21.01], ["Белград", 44.8, 20.47], ["Нью-Йорк", 40.71, -74.0], ["Тель-Авив", 32.08, 34.78], ["Дубай", 25.2, 55.27], ["Бангкок", 13.76, 100.5], ["Бали", -8.65, 115.2], ["Пхукет", 7.89, 98.4]];
+function sunCityFind(q) { q = String(q || "").trim().toLowerCase(); if (!q) return null; return SUNCITIES.filter(function (c) { return c[0].toLowerCase() === q; })[0] || SUNCITIES.filter(function (c) { return c[0].toLowerCase().indexOf(q) === 0; })[0] || null; }
+function sunPos() { var s = S.opt.sun; return s && isFinite(+s.lat) && isFinite(+s.lon) ? { lat: +s.lat, lon: +s.lon, n: s.n || "" } : null; }
+function sunTimes(dayMs, lat, lon) {
+var rad = Math.PI / 180, n = Math.round(dayMs / 86400000 - 10957.5 + 0.0008), Js = n - lon / 360, M = (357.5291 + 0.98560028 * Js) % 360;
+var C = 1.9148 * Math.sin(M * rad) + 0.02 * Math.sin(2 * M * rad) + 0.0003 * Math.sin(3 * M * rad), L = (M + C + 180 + 102.9372) % 360;
+var Jt = 2451545.0 + Js + 0.0053 * Math.sin(M * rad) - 0.0069 * Math.sin(2 * L * rad), dec = Math.asin(Math.sin(L * rad) * Math.sin(23.4397 * rad));
+var cw = (Math.sin(-0.833 * rad) - Math.sin(lat * rad) * Math.sin(dec)) / (Math.cos(lat * rad) * Math.cos(dec));
+if (cw > 1) return { polar: "night" }; if (cw < -1) return { polar: "day" };
+var w = Math.acos(cw) / rad, ms = function (Jd) { return Math.round((Jd - 2440587.5) * 86400000); };
+return { rise: ms(Jt - w / 360), set: ms(Jt + w / 360) };
+}
+function sunDark(now) { var p = sunPos(); if (!p) return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches); now = now || Date.now(); var s = sunTimes(now, p.lat, p.lon); if (s.polar) return s.polar === "night"; return now < s.rise || now >= s.set; }
+function sunCheck() { if (themePref() !== "sun") return; var want = sunDark() ? "dark" : "light"; if (document.documentElement.getAttribute("data-theme") !== want) { applyTheme(); if (V === "settings") render(); } }
+function sunPosSave(v) {
+v = String(v || "").trim(); var m = /^(-?\d{1,2}(?:[.,]\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:[.,]\d+)?)$/.exec(v), pos = null;
+if (m) { var la = parseFloat(m[1].replace(",", ".")), lo = parseFloat(m[2].replace(",", ".")); if (Math.abs(la) <= 90 && Math.abs(lo) <= 180) pos = { lat: la, lon: lo, n: "" }; }
+else { var c = sunCityFind(v); if (c) pos = { lat: c[1], lon: c[2], n: c[0] }; }
+if (!pos) { toast(v ? "Не поняла место: напишите город из списка или «широта, долгота»" : "Введите город или координаты"); return false; }
+S.opt.sun = pos; optTouch(); save(); applyTheme(); render(); toast("Место сохранено: " + (pos.n || pos.lat + ", " + pos.lon)); return true;
+}
+function sunRowHTML() {
+var p = sunPos(), s = p ? sunTimes(Date.now(), p.lat, p.lon) : null;
+return '<div class="lkrow sunrow"><span class="lbl">Где вы</span><input class="inp" id="sunpos" value="' + esc(p ? (p.n || (p.lat + ", " + p.lon)) : "") + '" placeholder="Город (Москва, Казань…) или широта, долгота: 55.75, 37.62" aria-label="Город или координаты"><button type="button" class="btn sm" data-a="sunpos">Сохранить</button><button type="button" class="btn sm" data-a="sungeo" title="Спросить у браузера текущее местоположение">📍 Определить</button></div>' +
+'<p class="muted sunhint">' + (p ? (s.polar ? (s.polar === "night" ? "Полярная ночь — тёмный режим весь день." : "Полярный день — светлый режим весь день.") : "Сегодня: восход " + hm(s.rise) + ", закат " + hm(s.set) + " · сейчас " + (sunDark() ? "тёмный" : "светлый") + " режим.") + " Координаты одинаковы на всех устройствах." : "Укажите город или координаты — тёмный режим включится от заката до рассвета. Без координат — как в системе.") + "</p>";
+}
 function rgba(hex, a) { var n = parseInt(String(hex).slice(1), 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
 var LOOKKEY = "";
 function applyLook(force) {
@@ -26810,7 +26839,8 @@ function lookSection() {
 var L = lookCfg(), dk = isDark(), th = themePref();
 var seg = function (k, map, cur, order) { return '<div class="seg">' + (order || Object.keys(map)).map(function (x) { return '<button type="button" data-a="look" data-k="' + k + '" data-v="' + x + '" class="' + (cur === x ? "on" : "") + '">' + map[x] + "</button>"; }).join("") + "</div>"; };
 var h = '<section class="card" id="s-look"><h2>Оформление</h2>';
-h += '<div class="lkrow"><span class="lbl">Режим</span><div class="seg" role="radiogroup" aria-label="Тема">' + [["system", "Как в системе"], ["light", "Светлый"], ["dark", "Тёмный"]].map(function (o) { return '<button type="button" data-theme="' + o[0] + '" class="' + (th === o[0] ? "on" : "") + '" role="radio" aria-checked="' + (th === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div></div>";
+h += '<div class="lkrow"><span class="lbl">Режим</span><div class="seg" role="radiogroup" aria-label="Тема">' + [["system", "Как в системе"], ["light", "Светлый"], ["dark", "Тёмный"], ["sun", "По солнцу"]].map(function (o) { return '<button type="button" data-theme="' + o[0] + '" class="' + (th === o[0] ? "on" : "") + '" role="radio" aria-checked="' + (th === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div></div>";
+if (th === "sun") h += sunRowHTML();
 h += '<div class="lbl" style="margin-top:14px">Стиль</div><div class="lkgrid lkst">' + Object.keys(STY).map(function (k) {
 var Y = STY[k], c = Y[dk ? 3 : 2], t = Y[dk ? 5 : 4];
 return '<button type="button" class="lkcard' + (L.style === k ? " on" : "") + '" data-a="look" data-k="style" data-v="' + k + '"><span class="lksv lksv-' + k + '" style="--b:' + c[0] + ";--p:" + c[1] + ";--l:" + c[5] + ";--a:" + c[7] + ";--f:" + c[3] + ";--m:" + c[4] + ";--q1:" + (t[0] || c[1]) + ";--q2:" + (t[2] || c[1]) + ";--w1:" + c[9] + ";--w2:" + c[10] + '"><i class="s"></i><i class="x1"></i><i class="x2"></i><i class="r"></i><i class="r"></i></span><span class="lkn" style="font-family:' + (Y[6][3] ? "Lora, Georgia, serif" : "'" + Y[6][0] + "', system-ui") + '">' + Y[0] + '</span><small class="lkd">' + Y[1] + "</small></button>";
@@ -26835,9 +26865,9 @@ h += '<p class="muted" style="margin:10px 0 0">Стиль и оттенок од
 return h;
 }
 function themePref() { return LS.get("zd-theme") || "system"; }
-function applyTheme() { var p = themePref(); if (p === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", p); applyLook(); }
+function applyTheme() { var p = themePref(); if (p === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", p === "sun" ? (sunDark() ? "dark" : "light") : p); applyLook(); }
 $("themeBtn").addEventListener("click", function () {
-var dark = themePref() === "dark" || (themePref() === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+var dark = isDark();
 LS.set("zd-theme", dark ? "light" : "dark"); applyTheme(); if (V === "settings") render();
 });
 optSnapReset(); /* от этой точки видно, какие настройки меняются, — для слияния по каждой настройке */
@@ -26865,7 +26895,7 @@ function setsOpen() { if (SETGATE) return; SETGATE = true; softRender(); }
 if (SYNC.enabled()) { SYNC.run().then(setsOpen, setsOpen); setTimeout(setsOpen, 25000); } else setTimeout(setsOpen, 1200);
 SRV.start();
 pomoTick();
-setInterval(function () { if (!document.hidden) softRender(); }, 60000);
+setInterval(function () { if (!document.hidden) softRender(); try { sunCheck(); } catch (er) { /* режим по солнцу не обязателен */ } }, 60000);
 (function () {
 if (LS.get("zd-vmig") === "1") return;
 var ch = false;
