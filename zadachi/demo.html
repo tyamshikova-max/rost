@@ -1947,6 +1947,14 @@ body.pgsheet::after { content: ""; position: fixed; inset: 0; background: rgba(0
 .lksv-bento .x1 { background: var(--q1); border-radius: 8px } .lksv-bento .x2 { background: var(--q2); border-radius: 8px }
 .lksv-expr .x1 { background: var(--q1); border-radius: 12px } .lksv-expr .x2 { background: var(--q2); border-radius: 12px 12px 12px 3px } .lksv-expr .r:last-child { border-radius: 9px }
 #toast a[data-a="undo"] { display: inline-block; padding: 6px 10px; margin: -6px -4px -6px 0; border-radius: 8px; text-decoration: underline }
+.trgbar { margin: 0 0 10px; align-items: center; gap: 10px; flex-wrap: wrap }
+.trg { max-width: 640px; margin: 8px auto 0 }
+.trgtop { display: flex; align-items: center; gap: 12px; margin-bottom: 12px } .trgprog { flex: 1; height: 6px; border-radius: 3px; background: var(--hover); overflow: hidden } .trgprog i { display: block; height: 100%; background: var(--acc); transition: width .3s }
+.trgc { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 22px 22px 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, .08); touch-action: pan-y; transition: transform .15s, box-shadow .2s; min-height: 120px }
+.trgc.swr { box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 50%, transparent) } .trgc.swl { box-shadow: 0 0 0 3px color-mix(in srgb, var(--muted) 50%, transparent) }
+.trgt { font-size: calc(20px * var(--fs)); font-weight: 600; line-height: 1.3; overflow-wrap: anywhere } .trgn { margin: 10px 0 0; color: var(--muted) } .trgm { margin-top: 12px; font-size: calc(12.5px * var(--fs)) }
+.trgbtns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px } .trgb { display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px } .trgb kbd { font: 600 11px var(--mono); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; opacity: .7 } .trgb.dang { color: var(--bad, #b4361f) }
+@media (max-width: 700px) { .trgb { flex: 1 1 44%; justify-content: center } .trgb kbd { display: none } }
 html.pfog body::after { content: ""; position: fixed; inset: 0; z-index: 44; background: color-mix(in srgb, var(--bg) 74%, transparent); pointer-events: none; animation: pfogin .7s ease-out }
 @keyframes pfogin { from { opacity: 0 } to { opacity: 1 } }
 html.pfog .task.pomocur { position: relative; z-index: 45; background: var(--panel); border-radius: 12px; box-shadow: 0 8px 28px rgba(0, 0, 0, .18), 0 0 0 2px color-mix(in srgb, var(--acc) 45%, transparent) }
@@ -8709,7 +8717,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-330";
+var APPV = "zd-app-2026-10-16-331";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -9931,7 +9939,39 @@ if (quiet) return;
 touch(t); save(); render(); if (OPEN === t.id) renderPanel();
 }
 function std(title, sub, list, o) { return head(title, sub) + (o && o.pre ? o.pre : "") + (o && o.pav ? pavHTML(o.pav, { hideEmpty: true }) : "") + addBox() + toolbar(o) + listOrBoard(list, vopt(), o); }
-function vInbox() { return std("Входящие", "Без даты и без проекта: всё, что ещё не разобрано. Сюда же попадают сообщения боту в Telegram.", inboxList(), { empty: "Пусто — всё разобрано 🎉", scope: function (t) { return !t.pid && !t.at && !t.parent; } }); }
+function vInbox() {
+var il = inboxList().filter(function (t) { return !t.parent; });
+if (TRG) { trgSync(); if (TRG) return head("Входящие · разбор", "По одной задаче: решите, куда она — и дальше. Клавиши 1–5, свайп вправо — сегодня, влево — когда-нибудь.") + trgHTML(); }
+return std("Входящие", "Без даты и без проекта: всё, что ещё не разобрано. Сюда же попадают сообщения боту в Telegram.", inboxList(), { empty: "Пусто — всё разобрано 🎉", scope: function (t) { return !t.pid && !t.at && !t.parent; }, pre: il.length ? '<div class="r trgbar"><button type="button" class="btn sm pri" data-a="trgon">⚡ Разобрать</button><span class="muted">по одной задаче: сегодня · завтра · когда-нибудь · в проект · удалить</span></div>' : "" });
+}
+var TRG = null, TRGSW = null;
+function trgStart() { var ids = inboxList().filter(function (t) { return !t.parent; }).sort(cmpBy("smart")).map(function (t) { return t.id; }); if (!ids.length) { toast("Во «Входящих» пусто — разбирать нечего"); return; } TRG = { ids: ids, i: 0, n0: ids.length, done: 0 }; render(); }
+function trgStop(msg) { TRG = null; render(); if (msg) toast(msg); }
+function trgSync() { if (!TRG) return; var inb = {}; inboxList().forEach(function (t) { inb[t.id] = 1; }); TRG.ids = TRG.ids.filter(function (id) { return inb[id]; }); if (TRG.i >= TRG.ids.length) TRG.i = 0; if (!TRG.ids.length) { var n = TRG.done; TRG = null; toast(n ? "Входящие разобраны 🎉 · задач: " + n : "Во «Входящих» пусто"); } }
+function trgCur() { return TRG && TRG.ids.length ? task(TRG.ids[TRG.i]) : null; }
+function trgHTML() {
+var t = trgCur(); if (!t) return '<p class="empty">Пусто — всё разобрано 🎉</p>';
+var left = TRG.ids.length, note = String(t.note || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+var b = function (x, key, ic, l, cls) { return '<button type="button" class="btn trgb' + (cls ? " " + cls : "") + '" data-a="trgdo" data-x="' + x + '"><kbd>' + key + "</kbd>" + ic + " " + l + "</button>"; };
+return '<div class="trg"><div class="trgtop"><span class="muted">осталось ' + left + " из " + TRG.n0 + '</span><span class="trgprog"><i style="width:' + Math.round(100 * (TRG.n0 - left) / TRG.n0) + '%"></i></span><button type="button" class="btn sm" data-a="trgoff">Закончить</button></div>' +
+'<div class="trgc" id="trgc"><div class="trgt">' + esc(t.t) + "</div>" + (note ? '<p class="trgn">' + esc(note.slice(0, 300)) + "</p>" : "") + '<div class="trgm muted">добавлена ' + esc(dayName(t.created || Date.now()).toLowerCase()) + ((t.tags || []).length ? " · " + t.tags.map(function (g) { return "#" + esc(g); }).join(" ") : "") + ' · <a href="#task-' + t.id + '">открыть</a></div></div>' +
+'<div class="trgbtns">' + b("today", 1, "☀", "Сегодня", "pri") + b("tomorrow", 2, "→", "Завтра") + b("some", 3, "🗂", "Когда-нибудь") + b("proj", 4, "📁", "В проект…") + b("del", 5, "🗑", "Удалить", "dang") + '<button type="button" class="btn trgb" data-a="trgdo" data-x="skip"><kbd>→</kbd>Пропустить</button></div></div>';
+}
+function trgDo(x, arg, el) {
+var t = trgCur(); if (!t) { trgStop(); return; }
+if (x === "skip") { TRG.i = (TRG.i + 1) % TRG.ids.length; render(); return; }
+if (x === "proj") { var r = el ? el.getBoundingClientRect() : { left: 40, bottom: 200 }, its = ptreeF(t.pid).map(function (p) { return { c: p.p.id, i: piconH(p.p), l: p.p.n, pad: p.d }; }); if (!its.length) { toast("Проектов пока нет — создайте в «Планах»"); return; } ctxShow(r.left, r.bottom + 4, its, { k: "trgproj", id: t.id }); return; }
+var t0 = today0();
+if (x === "today") { t.at = t0; t.allday = true; }
+else if (x === "tomorrow") { t.at = t0 + DAY; t.allday = true; }
+else if (x === "some") t.some = true;
+else if (x === "del") { t.del = 1; t.delAt = Date.now(); }
+else if (x === "pid") { if (!proj(arg)) return; t.pid = arg; }
+touch(t); TRG.done++; save(); render();
+}
+document.addEventListener("touchstart", function (e) { var c = e.target.closest && e.target.closest("#trgc"); if (!c || e.touches.length !== 1) { TRGSW = null; return; } TRGSW = { c: c, x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0 }; }, { passive: true });
+document.addEventListener("touchmove", function (e) { if (!TRGSW) return; var dx = e.touches[0].clientX - TRGSW.x, dy = e.touches[0].clientY - TRGSW.y; if (Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx)) { TRGSW.c.style.transform = ""; TRGSW = null; return; } TRGSW.dx = Math.max(-160, Math.min(160, dx)); TRGSW.c.style.transform = "translateX(" + TRGSW.dx + "px) rotate(" + TRGSW.dx / 40 + "deg)"; TRGSW.c.classList.toggle("swr", TRGSW.dx > 80); TRGSW.c.classList.toggle("swl", TRGSW.dx < -80); }, { passive: true });
+document.addEventListener("touchend", function () { if (!TRGSW) return; var dx = TRGSW.dx, c = TRGSW.c; TRGSW = null; c.style.transform = ""; c.classList.remove("swr", "swl"); if (dx > 80) trgDo("today"); else if (dx < -80) trgDo("some"); });
 function b64u(u8) { var s2 = ""; for (var i = 0; i < u8.length; i += 0x8000) s2 += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s2).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
 function unb64u(s2) { s2 = s2.replace(/-/g, "+").replace(/_/g, "/"); while (s2.length % 4) s2 += "="; var b = atob(s2), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
 function shareList() {
@@ -19386,6 +19426,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["331", "⚡ Разбор «Входящих» по одной задаче", ["Во «Входящих» появилась кнопка «⚡ Разобрать»: задачи показываются по одной, большой карточкой, со счётчиком «осталось N из M». Под карточкой — кнопки «Сегодня», «Завтра», «Когда-нибудь», «В проект…», «Удалить» и «Пропустить».", "На компьютере — клавиши 1–5, стрелка → пропускает, Esc заканчивает. На телефоне — свайп по карточке: вправо — на сегодня, влево — в «Когда-нибудь». Когда очередь пуста, разбор закрывается сам. Любое решение можно отменить «Вернуть» или ↶ в меню профиля."]],
 ["330", "↶ Отменить последнее действие — и на телефоне", ["В меню профиля «Я» появился пункт «↶ Отменить» с описанием последнего действия («Отменить: выполнено …»). На телефоне, где нет Ctrl+Z, это главный способ вернуть всё как было.", "Подсказка «Вернуть» внизу экрана теперь появляется и после переноса задачи на другой день или время (раньше — только после «Готово», удаления и смены проекта), а сама ссылка стала крупнее — удобнее нажимать пальцем."]],
 ["329", "🌇 Режим «По солнцу»: тёмный от заката до рассвета", ["В «Настройки» → «Оформление» → «Режим» появился четвёртый вариант — «По солнцу». Укажите один раз город из списка (Москва, Казань, Минск, Алматы… — около 50 городов) или широту и долготу, и тёмный режим будет включаться на закате и выключаться на рассвете. Время заката считается прямо в приложении, без интернета; за полярным кругом учитываются полярный день и ночь.", "Геолокация не используется, пока вы сами не нажмёте «📍 Определить». Координаты общие для всех устройств, а выбранный режим — свой на каждом, как и раньше. Приложение проверяет время раз в минуту и переключает режим само."]],
 ["328", "🍅 Фокус-туман во время помидора", ["Новая настройка в «Оформлении»: пока идёт рабочая фаза помидора, всё на экране, кроме строки текущей задачи, её карточки и таймера, приглушается полупрозрачной пеленой. Нажимать можно всё как обычно — пелена только для глаз. На паузе и в перерыве туман снимается. Если в системе включено «уменьшить движение», туман появляется без анимации."]],
@@ -25035,6 +25076,9 @@ tstMerge(j); render(); toast("Тестовые данные добавлены: 
 }).catch(function (er) { render(); toast("Не удалось загрузить: " + (er.message || "нет связи")); }); return;
 case "tstwipe-yes": var tn = wipeTest(); CONF = null; if (V === "board" && !board(ARG)) go("settings"); render(); toast("Тестовые данные удалены" + (tn ? " · задач: " + tn : "")); return;
 case "look": setLook(el.dataset.k, el.dataset.v); return;
+case "trgon": trgStart(); return;
+case "trgoff": trgStop(); return;
+case "trgdo": trgDo(el.dataset.x, "", el); return;
 case "sunpos": sunPosSave(($("sunpos") || {}).value || ""); return;
 case "sungeo": if (!navigator.geolocation) { toast("Браузер не даёт местоположение — введите город или координаты"); return; } toast("Спрашиваю местоположение…"); navigator.geolocation.getCurrentPosition(function (g) { S.opt.sun = { lat: Math.round(g.coords.latitude * 100) / 100, lon: Math.round(g.coords.longitude * 100) / 100, n: "" }; optTouch(); save(); applyTheme(); render(); toast("Координаты сохранены"); }, function () { toast("Не удалось определить — введите город или координаты"); }, { timeout: 10000, maximumAge: 3600000 }); return;
 case "wpup": wpPick(); return;
@@ -25077,6 +25121,11 @@ if (e.key === "Escape" && selClear()) return;
 if ((e.ctrlKey || e.metaKey) && e.code === "KeyA" && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName) && !tg.isContentEditable && document.querySelector("#view li.task, #view .kcard")) { e.preventDefault(); [].forEach.call(document.querySelectorAll("#view li.task, #view .kcard"), function (x) { SELS[x.dataset.id] = 1; }); render(); return; }
 if ((e.key === "Delete" || e.key === "Backspace") && selIds().length > 1 && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName) && !tg.isContentEditable) { e.preventDefault(); var db = $("bulk").querySelector('[data-bk="del"]'); if (db) db.click(); return; }
 if (e.key === "n" && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName) && !tg.isContentEditable && !e.ctrlKey && !e.metaKey && !e.altKey && ADDOK) { e.preventDefault(); qOpen(); }
+if (TRG && V === "inbox" && !/INPUT|TEXTAREA|SELECT/.test(tg.tagName) && !tg.isContentEditable && !e.ctrlKey && !e.metaKey && !e.altKey && $("ctx").hidden) {
+var tk = { 1: "today", 2: "tomorrow", 3: "some", 4: "proj", 5: "del", ArrowRight: "skip" }[e.key];
+if (tk) { e.preventDefault(); trgDo(tk, "", document.querySelector('[data-a="trgdo"][data-x="proj"]')); return; }
+if (e.key === "Escape") { e.preventDefault(); trgStop(); return; }
+}
 });
 document.addEventListener("focusout", function (e) { if (e.target.matches && e.target.matches("input.rn") && RN) commitRename(e.target); });
 document.addEventListener("input", function (e) {
@@ -26287,6 +26336,7 @@ if (appCtx(k, id, c) || navCtx(k, id, c) || cpCtx(k, id, c) || ux2Ctx(k, id, c) 
 if (k === "startpick") { S.opt.start = c === "__last" ? "" : c; optTouch(); save(); render(); return; }
 if (k === "btplproj") { bFromTpl("proj", c); return; }
 if (k === "ptab") { ptCtx(id, c); return; }
+if (k === "trgproj") { trgDo("pid", c); return; }
 if (k === "mdish" || k === "fdish") { foodCtx(k, id, c); return; }
 if (k === "fire") { fireA(c); return; }
 if (k === "pnmore") { pnFire(c); return; }
