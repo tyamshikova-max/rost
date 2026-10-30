@@ -1498,7 +1498,7 @@ body.mini .side .lab .lq { display: none }
 .ptab.we { background: var(--side) } .ptab.td b { color: var(--acc) } .ptab.on { border-color: var(--acc); background: var(--acc-soft) } .ptab.dropin { outline: 2px dashed var(--acc) }
 .shl .ck { cursor: default } .shl li.task { cursor: default }
 @media print {
-#side, .top, #panel, #pomo, #ttw, #bulk, #toast, #errbar, #diagbox, .add, .tbar, .qfbar, .modebar, .revhint, .aibox, .acts, .fold, .r, .pmode, .pstrip, .dnh, .dnblk, .pdesc, .sact, .chips, .habt, #scrim { display: none !important }
+#side, .top, #panel, #pomo, #ttw, #bulk, #toast, #errbar, #diagbox, .add, .tbar, .qfbar, .modebar, .revhint, .aibox, .acts, .fold, .r, .pmode, .pstrip, .dnh, .dnblk, .pdesc, .pjnotes, .npproj, .sact, .chips, .habt, #scrim { display: none !important }
 body, .main, #view { background: #fff !important; color: #000 !important } .main { margin: 0 !important; padding: 0 !important } #view { max-width: none !important }
 li.task { break-inside: avoid; border-bottom: 1px solid #ccc } .ck { border-color: #000 !important; border-radius: 3px !important; background: none !important }
 .mt, .mt * { color: #333 !important } a { color: #000 !important; text-decoration: none }
@@ -1550,6 +1550,17 @@ h2[data-col].dropin { outline: 2px dashed var(--acc); outline-offset: 2px; borde
 .pdh { border: 0; background: none; padding: 2px 0; font: 600 calc(12px * var(--fs))/1.4 inherit; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; cursor: pointer; text-align: left; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .pdh .muted { text-transform: none; letter-spacing: 0; font-weight: 400 }
 .pdh:hover { color: var(--fg) }
+.pjnotes { margin: 4px 0 12px; max-width: 900px } .pjnh { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.pjnlist { display: flex; flex-direction: column; gap: 4px; margin-top: 4px } .pjnrow { display: flex; align-items: stretch; gap: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel) }
+.pjnr { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; padding: 8px 12px; color: var(--fg); text-decoration: none; border-radius: 10px } .pjnr:hover { background: var(--hover) }
+.pjnr b { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100% } .pjnd, .pjnsub { font-size: calc(12px * var(--fs)); color: var(--muted); white-space: nowrap }
+.pjnt { flex-basis: 100%; font-size: calc(13px * var(--fs)); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.pjnm { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: calc(18px * var(--fs)); line-height: 1; padding: 4px 10px; border-radius: 10px; min-width: 40px } .pjnm:hover { background: var(--hover); color: var(--fg) }
+.pjnempty { margin: 4px 0 0; font-size: calc(13px * var(--fs)) }
+.npproj { display: inline-flex; align-items: center; gap: 2px; margin: 2px 0 8px; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 2px 4px 2px 12px; max-width: 100%; font-size: calc(13px * var(--fs)) }
+.npproj a { color: var(--fg); text-decoration: none; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .npproj a:hover { text-decoration: underline }
+.npproj button { border: 0; background: none; color: var(--muted); cursor: pointer; padding: 2px 8px; border-radius: 999px; font-size: calc(13px * var(--fs)) } .npproj button:hover { background: var(--hover); color: var(--fg) }
+@media (max-width: 860px) { .pjnr { padding: 10px 12px } .pjnm, .npproj button { min-height: 40px; min-width: 40px } .npproj { padding-left: 12px } }
 #prte { min-height: 44px; margin-top: 4px; padding: 8px 12px; border: 1px solid transparent; border-radius: 10px }
 #prte:hover { border-color: var(--line) }
 #prte:focus { border-color: var(--line); background: var(--panel) }
@@ -8048,7 +8059,7 @@ var k = spFocK(); if (!k) return null;
 return memo("nsetf|" + FOCUS, function () {
 var c = spcGet(k), fs = focusSet(), o = {}, tg = {}, add = function (id) { if (o[id]) return; o[id] = 1; nKids(id).forEach(function (x) { add(x.id); }); };
 (c.items || []).forEach(function (it) { if (it.t === "n" && note(it.id)) add(it.id); if (it.t === "tag") tg[it.id] = 1; });
-notes().forEach(function (n) { if (n.sp === k || (n.tasks || []).some(function (id) { var t = task(id); return t && fsHas(fs, t); }) || (c.tagm && (n.tags || []).some(function (g) { return tg[g]; }))) add(n.id); });
+notes().forEach(function (n) { if (n.sp === k || (n.proj && fs[n.proj]) || (n.tasks || []).some(function (id) { var t = task(id); return t && fsHas(fs, t); }) || (c.tagm && (n.tags || []).some(function (g) { return tg[g]; }))) add(n.id); });
 return o;
 });
 }
@@ -8496,7 +8507,9 @@ ctxShow(rc.left, rc.bottom + 4, [{ c: "~", i: nParent(n) ? "" : "✓", l: "— �
 return false;
 }
 function newNote(o) { var n = newNote0(o); if (spFocK()) { n.sp = spFocK(); touch(n); } return n; }
-function newNote0(o) { var n = touch({ id: uid(), t: (o && o.t) || "", body: "", sec: (o && o.sec) || "", tags: (o && o.tags) || [], tasks: (o && o.tasks) || [], created: Date.now() }); S.notes.push(n); return n; }
+function newNote0(o) { var n = { id: uid(), t: (o && o.t) || "", body: "", sec: (o && o.sec) || "", tags: (o && o.tags) || [], tasks: (o && o.tasks) || [], created: Date.now() }; if (o && o.proj && proj(o.proj)) n.proj = o.proj; touch(n); S.notes.push(n); return n; }
+function nProjOf(n) { return n && n.proj ? proj(n.proj) : null; }
+function pNotes(p) { var ids = pdesc(p.id), s = noteSetF(); return notes().filter(function (n) { return n.proj && ids.indexOf(n.proj) >= 0 && (!s || s[n.id]); }).sort(function (a, b) { return (b.upd || b.created || 0) - (a.upd || a.created || 0); }); }
 function filters() { return live(S.filters).sort(function (a, b) { return (a.ord || 0) - (b.ord || 0); }); }
 function filt(id) { return id ? filters().filter(function (f) { return f.id === id; })[0] || null : null; }
 function monday(ms) { var d = new Date(ms); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.getTime(); }
@@ -8729,7 +8742,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-335";
+var APPV = "zd-app-2026-10-16-336";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -10066,6 +10079,7 @@ if (n.ic) h += '<button type="button" class="nicon' + (cov ? " oncov" : "") + '"
 if (!rd && (!n.ic || !cov)) h += '<div class="nadd">' + (n.ic ? "" : '<button type="button" data-a="npop" data-x="ic">☺ Значок</button>') + (cov ? "" : '<button type="button" data-a="npop" data-x="cov">🖼 Обложка</button>') + "</div>";
 if (!rd) h += nPopHTML(n);
 h += rd ? '<div class="ntitleR" role="heading" aria-level="1">' + esc(nTitle(n)) + "</div>" : '<input id="ntitle" class="ntitle" data-note="' + n.id + '" value="' + esc(n.t || "") + '" placeholder="Название заметки" autocomplete="off">';
+h += nProjBarHTML(n, rd);
 if (rd) h += nPropsChips(n);
 if (!rd && !n.tpl && !noteText(n)) h += '<div class="ntplst"><span class="muted">Начать с шаблона:</span>' + Object.keys(NTPL).map(function (k) { return '<button type="button" class="chip" data-a="ntplapply" data-v="' + k + '">' + NTPL[k].ic + " " + esc(NTPL[k].n) + "</button>"; }).join("") + nOwnTpls().map(function (x) { return '<button type="button" class="chip" data-a="ntplapply" data-v="' + esc(x.id) + '">' + esc(x.ic || "📄") + " " + esc(x.n) + "</button>"; }).join("") + "</div>";
 if (!rd && !nPropOpen()) h += nPropLine(n, tl);
@@ -10073,6 +10087,7 @@ if (!rd && nPropOpen()) h += '<div class="props nprops">' + '<span>Теги</spa
 nPropsRows(n) +
 '<span>Задачи</span><div class="v">' + tl.map(function (t) { return '<span class="chip ntk' + (t.done ? " dn" : "") + '"><a href="#task-' + t.id + '">' + (t.done ? "✓ " : "☐ ") + esc(t.t.slice(0, 60)) + '</a><button type="button" data-a="nunlink" data-v="' + t.id + '" title="Отвязать">×</button></span>'; }).join("") +
 '<button type="button" class="btn sm" data-a="ntpick">' + (TPICK ? "Готово" : "＋ Привязать к задаче") + "</button>" + (TPICK ? '<div class="npick"><input type="search" id="tpq" placeholder="Найти задачу" autocomplete="off"><div id="tpres">' + noteTaskPick(n, "") + "</div></div>" : "") + "</div>" +
+(nProjOf(n) ? "" : '<span>Проект</span><div class="v"><button type="button" class="btn sm" data-a="pnpick">📁 Привязать к проекту</button></div>') +
 '<span>Файлы</span><div class="v">' + (n.files || []).map(function (f) { return '<a class="chip" href="#" data-a="nfopen" data-v="' + esc(f.p) + '">📎 ' + esc(f.n.slice(0, 50)) + "</a>"; }).join("") + '<button type="button" class="btn sm" data-a="nfadd">📎 Прикрепить файл</button><button type="button" class="btn sm" data-a="nfimg">🖼 Картинка в текст</button></div>' +
 '<span></span><div class="v"><button type="button" class="btn sm" data-a="nprtg">▴ Свернуть свойства</button></div></div>';
 if (!rd && NPOP === "tph") h += nTphHTML(n);
@@ -10088,6 +10103,10 @@ if (NPOP === "hist" && !rd) h += nhHTML(n);
 if (NQ.trim()) setTimeout(nHiApply, 0);
 var side = nLinksSideHTML(n, rd, tocI, nk, nbl, tl);
 return (NDBP && !rd ? nDbPropPanel() : "") + '<div class="npage' + (side ? " hasside" : "") + (rd ? " nread" : "") + (LS.get("zd-nwide") === "1" ? " nwide" : "") + (LS.get("zd-nsmall") === "1" ? " nsmall" : "") + '">' + (side ? '<aside class="nside" aria-label="Связи страницы">' + side + "</aside>" : "") + '<div class="nmain">' + h + "</div></div>";
+}
+function nProjBarHTML(n, rd) {
+var p = nProjOf(n); if (!p) return "";
+return '<div class="npproj"><a href="#proj-' + p.id + '" title="Открыть проект">📁 Проект: <b>' + esc(p.n) + "</b></a>" + (rd ? "" : '<button type="button" data-a="pnpick" title="Сменить проект" aria-label="Сменить проект">⇄</button><button type="button" data-a="pnunl" title="Отвязать от проекта" aria-label="Отвязать от проекта">✕</button>') + "</div>";
 }
 function noteDel(n) { n.del = 1; n.delAt = Date.now(); touch(n); save(); var back = n.sec && nsec(n.sec) ? "nsec-" + n.sec : "notes"; go(back); toastUndo("Заметка удалена", function () { delete n.del; delete n.delAt; touch(n); save(); render(); }); }
 function vWaiting() { return std("Жду ответа", "Задачи, переданные кому-то. В день «спросить» задача появится в «Сегодня» — напомнить о себе. Пометить задачу: меню задачи → «⏳ Жду ответа…» или строка «Жду ответа» в карточке.", waitList(), { empty: "Ничего не ждёте — хорошо. Когда отдадите задачу кому-то, отметьте её «⏳ Жду ответа».", scope: function (t) { return !!t.wait; } }); }
@@ -10194,6 +10213,18 @@ if (isArch(p.id)) { SHOWARCH = true; try { return vProjIn(p); } finally { SHOWAR
 return vProjIn(p);
 }
 function pdFold(p) { var m = {}; try { m = JSON.parse(LS.get("zd-pdfold") || "{}") || {}; } catch (e) { m = {}; } return m[p.id] !== undefined ? !!m[p.id] : false; }
+function pnFold(p) { var m = {}; try { m = JSON.parse(LS.get("zd-pnfold") || "{}") || {}; } catch (e) { m = {}; } return !!m[p.id]; }
+function pnFirst(n) { var l = String(n.body || "").replace(/<\/(p|div|h[1-6]|li|tr|blockquote|pre)>|<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&[a-z]+;/g, " ").split("\n").map(function (x) { return x.replace(/\s+/g, " ").trim(); }).filter(Boolean)[0] || ""; return (l || noteText(n)).slice(0, 110); }
+function pnRowHTML(n, p) {
+var pr = nProjOf(n), tx = pnFirst(n), d = n.upd || n.created || 0;
+return '<div class="pjnrow"><a class="pjnr" href="#note-' + n.id + '" data-nid="' + n.id + '"><b>' + esc(nIc(n)) + " " + esc(nTitle(n)) + '</b><span class="pjnd">' + (d ? new Date(d).toLocaleDateString("ru-RU") : "") + "</span>" +
+(pr && pr.id !== p.id ? '<span class="pjnsub">подпроект «' + esc(pr.n) + "»</span>" : "") + (tx ? '<span class="pjnt">' + esc(tx) + "</span>" : "") + '</a><button type="button" class="pjnm" data-a="pnmenu" data-id="' + n.id + '" title="Действия с заметкой" aria-label="Действия">⋯</button></div>';
+}
+function pNotesHTML(p) {
+var l = pNotes(p), fold = pnFold(p);
+return '<div class="pjnotes' + (fold ? " fold" : "") + '"><div class="pjnh"><button type="button" class="pdh" data-a="pnfold" data-id="' + p.id + '">' + (fold ? "▸" : "▾") + " Заметки проекта" + (l.length ? ' <span class="muted">· ' + l.length + "</span>" : "") + '</button><button type="button" class="btn sm" data-a="pnnew" data-id="' + p.id + '">＋ Заметка</button></div>' +
+(fold ? "" : l.length ? '<div class="pjnlist">' + l.map(function (n) { return pnRowHTML(n, p); }).join("") + "</div>" : '<p class="muted pjnempty">Заметок пока нет. «＋ Заметка» создаст страницу, которая останется привязанной к проекту.</p>') + "</div>";
+}
 var REV = LS.get("zd-review") === "1";
 function revInt(p) { return p.rev !== undefined && p.rev !== null ? +p.rev : (S.opt.revDays !== undefined ? +S.opt.revDays : 7); }
 function revState(p) { var n = revInt(p); if (!n) return "never"; if (p.revAt && sod(p.revAt) === today0()) return "ok"; if (!p.revAt || p.revAt + n * DAY <= Date.now()) return "due"; return "wait"; }
@@ -10231,6 +10262,7 @@ if (CONF === "pdel") h += '<div class="confirm"><b>Удалить проект �
 var dfold = pdFold(p);
 h += '<div class="pdesc' + (dfold ? " fold" : "") + '"><button type="button" class="pdh" data-a="pdfold" data-id="' + p.id + '">' + (dfold ? "▸" : "▾") + " Описание" + (dfold && p.body ? ' <span class="muted">· ' + esc(String(p.body).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 80)) + "…</span>" : "") + "</button>" +
 (dfold ? "" : '<div id="prte" class="rte' + (p.body ? "" : " empty") + '" data-proj="' + p.id + '" contenteditable="true" spellcheck="true" data-ph="Опишите проект: цели, ссылки, заметки… «/» — заголовок, чек-лист, спойлер, таблица">' + (clean(p.body || "") || "<p><br></p>") + "</div>") + "</div>";
+h += pNotesHTML(p);
 var kids = pkids(p.id);
 h += '<p class="sub">Задач: ' + l.length + (kids.length ? " · подпроекты:" : "") + "</p>";
 if (kids.length) h += '<div class="chips">' + kids.map(function (c) { return '<a class="chip" href="#proj-' + c.id + '"><i style="background:' + col(c.c) + '"></i>' + esc(c.n) + ' <span class="muted">' + tasks().filter(function (t) { return t.pid === c.id && !t.done; }).length + "</span></a>"; }).join("") + "</div>";
@@ -19393,6 +19425,7 @@ var FEAT = [
 ["меню рецепты кухня продукты покупки", "🍲", "Меню и рецепты", "«Дом и деньги» → «Меню»", "menu"],
 ["уборка дом порядок", "🧹", "План уборки", "«Дом и деньги» → «Уборка»", "clean"],
 ["документы подписки полисы страховка", "📑", "Документы и подписки", "«Дом и деньги» → «Документы»", "docs"],
+["заметки проекта проект привязать заметку к проекту", "📁", "Заметки проекта", "страница проекта → «Заметки проекта» → «＋ Заметка»", "help-notes"],
 ["заметки база знаний", "📝", "Заметки", "пространство «Знания»", "notes"],
 ["теги заметок тег метки", "◆", "Теги заметок", "все теги базы знаний с поиском; в панели «Знаний» — свёрнутая строка «◆ Теги»", "ntags"],
 ["карта мыслей ментальная карта импорт xmind markdown файл", "🧠", "Карта мыслей из файла", "«Знания» → «＋ Создать…» → «Карта мыслей из файла»: XMind, FreeMind, OPML, Markdown-список, HTML-страница", "notes"],
@@ -19587,6 +19620,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["336", "📁 Заметки проекта", ["На странице проекта, между описанием и задачами, появился складной блок «Заметки проекта» со счётчиком и кнопкой «＋ Заметка». Новая заметка сразу привязана к проекту и открывается с курсором в названии; «назад» вернёт на страницу проекта.", "В списке — название, дата правки и первая строка текста; нажмите, чтобы открыть, а правой кнопкой (или «⋯») — «Открыть» или «Отвязать от проекта». Заметки подпроектов тоже видны, с пометкой подпроекта.", "В самой заметке под названием — плашка «Проект: Название»: ⇄ меняет проект, ✕ отвязывает. Привязать заметку без проекта можно в свойствах («Проект»).", "Команда «/заметка Название» на странице проекта создаёт заметку проекта. Удаление проекта заметки не удаляет — они остаются без проекта (вернёте проект из корзины — привязка вернётся). В изолированном пространстве заметки проекта чужих пространств не видны. Прежние заметки не менялись."]],
 ["335", "📄 «Итоги месяца»: деньги, PDF и картинка", ["«Отчёт» → «Месяц» теперь называется «Итоги месяца» и, кроме выполненного, фокуса, целей и привычек, показывает блок «Деньги»: расходы за календарный месяц по дням из файла бюджета, доход за бюджетный период и топ статей расходов.", "Две кнопки сверху: «📄 Сохранить в PDF» (окно печати → «Сохранить как PDF», печатный вид без лишних кнопок) и новая «🖼 Сохранить картинкой» — PNG шириной 1080 px с числами месяца, выполненным по дням, привычками и деньгами: удобно отправить в мессенджер или сохранить в галерею. Картинка рисуется прямо в приложении, без интернета. Для недели картинка тоже есть."]],
 ["334", "📈 Накопления: сценарии «а если»", ["«Бюджет» → «📈 Накопления» — под графиком появился блок «А если…»: две колонки параметров. Слева — как сейчас (ставка вклада, ежемесячный взнос, досрочное погашение долгов), справа — впишите другие числа, и приложение посчитает рядом: сколько накопится через выбранный срок, разница в чистом состоянии, в процентах по вкладу и по долгам, когда закроются долги.", "Общий график сравнения: сплошные линии — сейчас, пунктир — сценарий. Пустое поле — «как сейчас»; «Сбросить сценарий» убирает вторую колонку. Сценарий сохраняется и виден на всех устройствах."]],
 ["333", "🏦 Выписка банка: предпросмотр, правила по подстрокам, Сбер и простой CSV", ["«Бюджет» → «🏦 Выписка». Теперь файл сначала показывается в предпросмотре: даты, описания, суммы (расходы со знаком −), статья бюджета и отметка «новая» или «дубль». Загружаются только новые операции — повтор того же файла или пересекающихся выписок ничего не задвоит.", "Понимаются выписки Т-Банка, Сбера (где сумма без знака, а «Расход/Приход» отдельным столбцом) и простой CSV без заголовка: дата; сумма; описание.", "Правила категорий по подстрокам: «пятёрочка» → Продукты, «такси» → Транспорт. Правило срабатывает по описанию или категории банка и сильнее сопоставления категорий; правила общие для всех устройств. Сами операции, как и раньше, остаются только на этом устройстве."]],
@@ -20026,7 +20060,7 @@ save(); render(); toastUndo("Перенесено на " + (d ? "завтра" :
 }
 var CLI = [
 ["задача", "текст", "создать задачу (понимает «завтра в 10», #теги)", function (a) { if (!a) { toast("Напишите текст: /задача завтра в 10 позвонить"); return; } var t = newTaskFrom(a, {}); save(); render(); toast("Добавлено" + (t.at ? ": " + whenTxt(t) : "")); }],
-["заметка", "название", "новая заметка", function (a) { var n = newNote({ t: a || "" }); save(); NFOCUS = true; go("note-" + n.id); }],
+["заметка", "название", "новая заметка", function (a) { var n = newNote({ t: a || "", proj: V === "proj" && proj(ARG) ? ARG : "" }); save(); NFOCUS = true; go("note-" + n.id); }],
 ["перенести", "завтра | сегодня", "перенести все просроченные задачи", function (a) { cliShift(/^сег/i.test(a) ? 0 : 1); }],
 ["привычка", "название", "отметить привычку выполненной сегодня", function (a) { var hb = habits().filter(function (h) { return !h.arch && a && String(h.n || "").toLowerCase().indexOf(a.toLowerCase()) >= 0; })[0]; if (!hb) { toast(a ? "Привычка «" + a + "» не найдена" : "Напишите название: /привычка вода"); return; } hSet(hb, dKey(today0()), "done"); save(); render(); toast("✓ " + hb.n + " — сегодня отмечено"); }],
 ["лимит", "часы", "лимит часов на день (0 — выключить)", function (a) { S.opt.dayq = Math.max(0, +String(a).replace(",", ".") || 0); optTouch(); save(); render(); toast(S.opt.dayq ? "Лимит дня: " + fmtH(S.opt.dayq) + " ч" : "Лимит дня выключен"); }],
@@ -24682,9 +24716,12 @@ p.moved = tasks().filter(function (x) { return x.pid === p.id; }).map(function (
 p.moved.forEach(function (id) { var x = task(id); x.pid = ""; touch(x); });
 p.kidsOf = pkids(p.id).map(function (c) { return c.id; });
 p.kidsOf.forEach(function (id) { var c = proj(id); c.parent = p.parent || ""; touch(c); });
+p.pnotes = notes().filter(function (x) { return x.proj === p.id; }).map(function (x) { return x.id; });
+p.pnotes.forEach(function (id) { var x = note(id); delete x.proj; touch(x); });
 p.del = 1; p.delAt = Date.now(); touch(p);
 }
 function restoreProject(p) {
+(p.pnotes || []).forEach(function (id) { var x = note(id); if (x && !x.proj) { x.proj = p.id; touch(x); } }); delete p.pnotes;
 delete p.del; delete p.delAt; if (p.parent && !proj(p.parent)) p.parent = "";
 (p.moved || []).forEach(function (id) { var x = task(id); if (x && !x.pid) { x.pid = p.id; touch(x); } });
 (p.kidsOf || []).forEach(function (id) { var c = proj(id); if (c && (c.parent || "") === (p.parent || "")) { c.parent = p.id; touch(c); } });
@@ -24986,6 +25023,11 @@ if (tpls("proj").length && el.closest(".lab")) { var rp = el.getBoundingClientRe
 var np = newProject("Новый проект", ""); save(); RN = { where: "page", k: "proj", id: np.id }; go("proj-" + np.id); return;
 case "subproj": var sp = newProject("Новый подпроект", ARG); var par = proj(ARG); if (par && par.fold) { par.fold = false; touch(par); } save(); POP = null; RN = { where: "page", k: "proj", id: sp.id }; go("proj-" + sp.id); return;
 case "pdel": trashEntity("proj", ARG); return;
+case "pnfold": var pnf = proj(el.dataset.id); if (pnf) { var pm = {}; try { pm = JSON.parse(LS.get("zd-pnfold") || "{}") || {}; } catch (er) { pm = {}; } pm[pnf.id] = !pnFold(pnf); LS.set("zd-pnfold", JSON.stringify(pm)); render(); } return;
+case "pnnew": var pnp = proj(el.dataset.id); if (!pnp) { toast("Проект не найден — заметка не создана"); return; } if (BT) saveBody(); var pnn = newNote({ proj: pnp.id }); save(); NFOCUS = true; TPICK = false; go("note-" + pnn.id); return;
+case "pnmenu": var pnm = note(el.dataset.id); if (pnm) { var pr0 = el.getBoundingClientRect(); ctxShow(pr0.left - 120, pr0.bottom + 4, [{ c: "open", i: "↗", l: "Открыть" }, { c: "unlink", i: "✕", l: "Отвязать от проекта" }], { k: "pnote", id: pnm.id }); } return;
+case "pnunl": var pnu = note(ARG); if (pnu && pnu.proj) { var pnw = pnu.proj; delete pnu.proj; touch(pnu); save(); render(); toastUndo("Заметка отвязана от проекта", function () { pnu.proj = pnw; touch(pnu); }); } return;
+case "pnpick": var pnk = note(ARG); if (pnk) { var pr1 = el.getBoundingClientRect(); ctxShow(pr1.left, pr1.bottom + 4, [{ c: "~", i: pnk.proj ? "" : "✓", l: "— без проекта —" }, "-"].concat(ptreeF(pnk.proj).slice(0, 80).map(function (x) { return { c: x.p.id, i: pnk.proj === x.p.id ? "✓" : "", l: new Array(x.d + 1).join("· ") + x.p.n.slice(0, 50) }; })), { k: "npproj", id: pnk.id }); } return;
 case "pdfold": var pf2 = proj(el.dataset.id); if (pf2) { if (BT) saveBody(); var fm = {}; try { fm = JSON.parse(LS.get("zd-pdfold") || "{}") || {}; } catch (er) { fm = {}; } fm[pf2.id] = !pdFold(pf2); LS.set("zd-pdfold", JSON.stringify(fm)); render(); } return;
 case "gfold": var vkf = VIEWS[curKey()] = VIEWS[curKey()] || {}; vkf.gfold = vkf.gfold || {}; vkf.gfold[el.dataset.k] = !vkf.gfold[el.dataset.k]; LS.set("zd-views", JSON.stringify(VIEWS)); render(); return;
 case "dnfold": LS.set("zd-dnfold", LS.get("zd-dnfold") === "1" ? "0" : "1"); render(); return;
@@ -25023,7 +25065,7 @@ case "g-crit": LS.set("zd-gcrit", LS.get("zd-gcrit") === "1" ? "0" : "1"); rende
 case "g-shift": LS.set("zd-gshift", LS.get("zd-gshift") === "1" ? "0" : "1"); render(); toast(LS.get("zd-gshift") === "1" ? "Связанные задачи будут сдвигаться следом" : "Связанные задачи больше не сдвигаются сами"); return;
 case "g-open": openTask(el.dataset.id); return;
 case "pdel-yes":
-var pd = proj(ARG); if (pd) { tasks().forEach(function (x) { if (x.pid === pd.id) { x.pid = ""; touch(x); } }); pkids(pd.id).forEach(function (c) { c.parent = pd.parent || ""; touch(c); }); pd.del = 1; touch(pd); save(); }
+var pd = proj(ARG); if (pd) { tasks().forEach(function (x) { if (x.pid === pd.id) { x.pid = ""; touch(x); } }); pkids(pd.id).forEach(function (c) { c.parent = pd.parent || ""; touch(c); }); notes().forEach(function (x) { if (x.proj === pd.id) { delete x.proj; touch(x); } }); pd.del = 1; touch(pd); save(); }
 CONF = null; POP = null; go(pd && pd.parent ? "proj-" + pd.parent : "inbox"); toast("Проект удалён"); return;
 case "newtag": var base = "новый_тег", nm = base, i2 = 2; while (tagObj(nm)) nm = base + "_" + i2++; ensureTag(nm); save(); RN = { where: "page", k: "tag", id: nm }; go("tag-" + nm); return;
 case "tdel": trashEntity("tag", ARG); return;
@@ -26495,6 +26537,8 @@ if (c === "del") { del(t); return; }
 }
 document.addEventListener("contextmenu", function (e) {
 if (!e.target.closest || e.target.closest(".rte,input,textarea,#ctx,#ctx2")) return;
+var pnr = e.target.closest(".pjnr[data-nid]");
+if (pnr && note(pnr.dataset.nid)) { e.preventDefault(); ctxShow(e.clientX, e.clientY, [{ c: "open", i: "↗", l: "Открыть" }, { c: "unlink", i: "✕", l: "Отвязать от проекта" }], { k: "pnote", id: pnr.dataset.nid }); return; }
 var hcx = e.target.closest(".hc[data-h]");
 if (hcx && !hcx.disabled) { e.preventDefault(); var hcs = hSt(hab(hcx.dataset.h) || {}, hcx.dataset.d); ctxShow(e.clientX, e.clientY, [{ c: "done", i: "●", l: "Выполнено", k: hcs === "done" ? "✓" : "" }, { c: "part", i: "◐", l: "Частично — 50 %", k: hcs === "part" ? "✓" : "" }, { c: "skip", i: "‖", l: "Пауза — не прерывает серию", k: hcs === "skip" ? "✓" : "" }, { c: "none", i: "○", l: "Не выполнено", k: hcs ? "" : "✓" }, "-", { c: "help:habits", i: "?", l: "Справка о привычках" }], { k: "hst", id: hcx.dataset.h + "|" + hcx.dataset.d }); return; }
 var li = e.target.closest("li.task") || e.target.closest(".kcard"), a = e.target.closest(".nav a[data-k]");
@@ -26599,6 +26643,8 @@ if (c === "file:note" || c === "file:map") { nNewFromFile(c.slice(5)); return; }
 if (c.indexOf("del:") === 0) { var did = c.slice(4), dt = nOwnTpls().filter(function (x) { return x.id === did; })[0]; S.opt.ntpls = nOwnTpls().filter(function (x) { return x.id !== did; }); optTouch(); save(); render(); if (dt) toast("Шаблон «" + dt.n + "» удалён"); return; }
 var ns = newNote({ sec: V === "nsec" ? ARG : V === "note" && note(ARG) ? note(ARG).sec : "", tags: V === "ntag" ? [ARG] : [] }); if (c !== "~") nApplyTpl(ns, c); save(); NFOCUS = true; TPICK = false; go("note-" + ns.id); return;
 }
+if (k === "pnote") { var pnx = note(id); if (!pnx) return; if (c === "open") { go("note-" + id); return; } if (c === "unlink") { var pw = pnx.proj; delete pnx.proj; touch(pnx); save(); render(); toastUndo("Заметка отвязана от проекта", function () { pnx.proj = pw; touch(pnx); }); } return; }
+if (k === "npproj") { var npx = note(id); if (!npx) return; if (c === "~") delete npx.proj; else if (proj(c)) npx.proj = c; else return; touch(npx); save(); render(); toast(c === "~" ? "Заметка без проекта" : "Проект заметки: «" + proj(c).n + "»"); return; }
 if (k === "nnest") { var nnn = note(id); if (nnn) { if (c === "~") { nnn.parent = ""; touch(nnn); } else if (!nMoveInto(nnn, note(c))) { toast("Нельзя вложить страницу саму в себя"); return; } save(); render(); toast(c === "~" ? "Страница — на верхнем уровне раздела" : "Страница вложена в «" + nTitle(note(c)) + "»"); } return; }
 if (k === "blk") { if (BHM) blockCmd(c, BHM.r, BHM.b); return; }
 if (k === "flagcol") { var fcc = flagObj(id); if (fcc) { fcc.c = +c.slice(2); touch(fcc); save(); render(); } return; }
@@ -27293,6 +27339,7 @@ optTouch(); save();
 }
 if (LS.get("demo-seeded") !== DEMOV) { try { seed(); render(); } catch (e) { toast("Демо: не удалось загрузить данные — " + e.message); } }
 if (LS.get("demo-bud") !== "1") { try { demoBud(); LS.set("demo-bud", "1"); render(); } catch (e) { toast("Демо: бюджет не загрузился — " + e.message); } }
+if (LS.get("demo-pnotes") !== "1") { try { var pkn = projects().filter(function (p) { return p.n === "Ремонт кухни"; })[0]; if (pkn) { [["Выбор плитки для фартука", "<p>Белая глянцевая 10×10 или тёмно-зелёная. Решить до пятницы, когда приедет мастер.</p>"], ["Список материалов", "<p>Грунтовка, клей для плитки, затирка, герметик, малярный скотч.</p>"]].forEach(function (x) { if (!notes().some(function (n) { return n.t === x[0]; })) { var nn = newNote({ t: x[0], proj: pkn.id }); nn.body = x[1]; touch(nn); } }); save(); } LS.set("demo-pnotes", "1"); render(); } catch (e) { /* заметки проекта в демо не обязательны */ } }
 document.title = "Задачи · демо";
 var bar = document.createElement("div");
 bar.id = "demobar";
