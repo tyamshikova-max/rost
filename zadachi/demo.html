@@ -1983,7 +1983,22 @@ html.pfog body::after { content: ""; position: fixed; inset: 0; z-index: 44; bac
 html.pfog .task.pomocur { position: relative; z-index: 45; background: var(--panel); border-radius: 12px; box-shadow: 0 8px 28px rgba(0, 0, 0, .18), 0 0 0 2px color-mix(in srgb, var(--acc) 45%, transparent) }
 html.pfog body.pnpomo #panel { z-index: 45 }
 html.pfog #pomo { z-index: 46; box-shadow: 0 10px 30px rgba(0, 0, 0, .22), 0 0 0 3px color-mix(in srgb, var(--acc) 35%, transparent) }
-@media (prefers-reduced-motion: reduce) { html.pfog body::after { animation: none } }</style>
+@media (prefers-reduced-motion: reduce) { html.pfog body::after { animation: none } }
+.slclose { display: none }
+@media (min-width: 861px) {
+html.slide body.pnopen:not(.pnfull)::after { content: ""; position: fixed; inset: 0; z-index: 49; background: rgba(18, 24, 32, .42); animation: slfade .2s ease-out }
+html.slide #panel { top: 0; z-index: 55; width: var(--pw, min(740px, 68vw)); max-width: calc(100vw - 64px); box-shadow: -14px 0 44px rgba(0, 0, 0, .3); animation: slin .24s cubic-bezier(.2, .8, .2, 1) }
+html.slide #panel.full { left: 0; width: auto; max-width: none; box-shadow: none; animation: none }
+html.slide body.pnopen:not(.pnfull) .layout { margin-right: 0 }
+html.slide body.pnopen:not(.pnfull) #fab { right: 24px }
+html.slide body.pnopen:not(.pnfull) #totop { right: 31px }
+html.slide body.pnopen:not(.pnfull) .add.qfloat { left: 50%; width: min(720px, calc(100vw - 32px)) }
+html.slide #panel:not(.full) .slclose { display: grid; place-items: center; position: absolute; left: -46px; top: 14px; width: 36px; height: 36px; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font-size: 16px; line-height: 1; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, .25) }
+html.slide #panel:not(.full) .slclose:hover { background: var(--acc); border-color: var(--acc); color: var(--onacc, #fff) }
+}
+@keyframes slin { from { transform: translateX(48px); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes slfade { from { opacity: 0 } to { opacity: 1 } }
+@media (prefers-reduced-motion: reduce) { html.slide #panel, html.slide body.pnopen:not(.pnfull)::after { animation: none } }</style>
 <style>#demobar{position:fixed;left:12px;bottom:12px;z-index:90;display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:calc(100vw - 96px);padding:6px 8px 6px 12px;border-radius:12px;background:#fdf1d6;color:#5c3d06;border:1px solid #e9c46a;font:13px/1.3 var(--sans,system-ui);box-shadow:0 2px 8px rgba(0,0,0,.12)}#demobar b{font-weight:600}#demobar button{font:inherit;padding:3px 10px;border-radius:8px;border:1px solid #d9a93a;background:#fff8e6;color:#5c3d06;cursor:pointer}@media (max-width:860px){#demobar{bottom:72px}#demobar span{display:none}}</style>
 <script type="application/json" id="demo-data">{
  "format": "zadachi-backup",
@@ -8742,7 +8757,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-336";
+var APPV = "zd-app-2026-10-16-337";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -19620,6 +19635,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["337", "◧ Карточка задачи — шторка, как в Битрикс24", ["Карточка задачи теперь выезжает справа поверх страницы: страница под ней затемняется, у левого края карточки появляется круглая кнопка «✕». Закрыть можно крестиком, клавишей Esc или щелчком по затемнённой области. Ширина — как раньше: потяните за левый край, двойной щелчок вернёт по умолчанию.", "Не нравится — в меню «⋯» карточки выберите «Обычная панель, без затемнения»: вернётся прежний вид (панель сбоку, страница рядом). Выбор запоминается на этом устройстве. На телефоне ничего не изменилось."]],
 ["336", "📁 Заметки проекта", ["На странице проекта, между описанием и задачами, появился складной блок «Заметки проекта» со счётчиком и кнопкой «＋ Заметка». Новая заметка сразу привязана к проекту и открывается с курсором в названии; «назад» вернёт на страницу проекта.", "В списке — название, дата правки и первая строка текста; нажмите, чтобы открыть, а правой кнопкой (или «⋯») — «Открыть» или «Отвязать от проекта». Заметки подпроектов тоже видны, с пометкой подпроекта.", "В самой заметке под названием — плашка «Проект: Название»: ⇄ меняет проект, ✕ отвязывает. Привязать заметку без проекта можно в свойствах («Проект»).", "Команда «/заметка Название» на странице проекта создаёт заметку проекта. Удаление проекта заметки не удаляет — они остаются без проекта (вернёте проект из корзины — привязка вернётся). В изолированном пространстве заметки проекта чужих пространств не видны. Прежние заметки не менялись."]],
 ["335", "📄 «Итоги месяца»: деньги, PDF и картинка", ["«Отчёт» → «Месяц» теперь называется «Итоги месяца» и, кроме выполненного, фокуса, целей и привычек, показывает блок «Деньги»: расходы за календарный месяц по дням из файла бюджета, доход за бюджетный период и топ статей расходов.", "Две кнопки сверху: «📄 Сохранить в PDF» (окно печати → «Сохранить как PDF», печатный вид без лишних кнопок) и новая «🖼 Сохранить картинкой» — PNG шириной 1080 px с числами месяца, выполненным по дням, привычками и деньгами: удобно отправить в мессенджер или сохранить в галерею. Картинка рисуется прямо в приложении, без интернета. Для недели картинка тоже есть."]],
 ["334", "📈 Накопления: сценарии «а если»", ["«Бюджет» → «📈 Накопления» — под графиком появился блок «А если…»: две колонки параметров. Слева — как сейчас (ставка вклада, ежемесячный взнос, досрочное погашение долгов), справа — впишите другие числа, и приложение посчитает рядом: сколько накопится через выбранный срок, разница в чистом состоянии, в процентах по вкладу и по долгам, когда закроются долги.", "Общий график сравнения: сплошные линии — сейчас, пунктир — сценарий. Пустое поле — «как сейчас»; «Сбросить сценарий» убирает вторую колонку. Сценарий сохраняется и виден на всех устройствах."]],
@@ -25416,6 +25432,8 @@ var was = OCL; OCL = null; if (!was || (e.target.closest && e.target.closest(OCL
 setTimeout(function () { if (OPEN === was && !$("panel").hidden && !document.body.classList.contains("pnfull") && $("ctx").hidden && $("pal").hidden) closeTask(); }, 0);
 });
 function closeTask() { if (/^#task-/.test(location.hash)) try { history.replaceState(null, "", "#" + V + (ARG ? "-" + ARG : "")); } catch (er) { /* ok */ } flushBody(); OPEN = null; $("panel").hidden = true; document.body.classList.remove("pnopen", "pnfull", "pgsheet"); slashClose(); fmtHide(); render(); }
+function slideOn() { return LS.get("zd-slide") !== "0"; }
+document.documentElement.classList.toggle("slide", slideOn());
 function setPW(w) { w = Math.round(Math.max(380, Math.min(w, innerWidth - 80))); document.documentElement.style.setProperty("--pw", w + "px"); return w; }
 (function () { var w = +LS.get("zd-pw"); if (w) setPW(w); })();
 var PWD = null;
@@ -25517,7 +25535,7 @@ return out + '<div class="msg" data-cid="' + c.id + '"><div class="mh"><b>' + (c
 h += '<p class="pn-foot">Создана: ' + new Date(t.created || t.upd || Date.now()).toLocaleString("ru-RU") + (t.upd > 1e11 ? " · изменена: " + new Date(t.upd).toLocaleString("ru-RU") : "") + (t.src === "tg" ? " · из Telegram" : "") + "</p>";
 h += '<div class="pn-act">' + (t.done ? '<button type="button" class="btn" data-p="toggle">↺ Вернуть в работу</button>' : '<button type="button" class="btn pri" data-p="toggle">✓ Готово</button>' + (pnNew() ? '<button type="button" class="btn" data-p="pnmove" title="Перенести на другой день или отложить">📅 Перенести ▾</button>' : '<button type="button" class="btn" data-p="qdate" data-v="1">Завтра</button><button type="button" class="btn" data-p="qdate" data-v="7">+ неделя</button><button type="button" class="btn" data-p="snzbar">💤 Отложить…</button>')) + "</div>";
 if (BT && BTE && P.contains(BTE)) saveBody();
-var NP = document.createElement("div"); NP.innerHTML = '<div class="grip" title="Потяните, чтобы изменить ширину; двойной клик — ширина по умолчанию"></div><div class="pn-sc"><div class="pn-in">' + h + "</div></div>";
+var NP = document.createElement("div"); NP.innerHTML = '<button type="button" class="slclose" data-p="close" title="Закрыть (Esc)" aria-label="Закрыть карточку">✕</button><div class="grip" title="Потяните, чтобы изменить ширину; двойной клик — ширина по умолчанию"></div><div class="pn-sc"><div class="pn-in">' + h + "</div></div>";
 pnLayout(NP);
 var SECH = { desc: "editor", subs: "sub", files: "files", notes: "notes", chat: "chat" };
 [].forEach.call(NP.querySelectorAll(".pn-in > .pn-sec[data-sec]"), function (x) { var h3 = x.querySelector("h3"); if (h3 && SECH[x.dataset.sec] && !h3.querySelector(".hq")) h3.insertAdjacentHTML("beforeend", hq(SECH[x.dataset.sec])); });
@@ -25781,11 +25799,12 @@ var mb = e.target.closest('[data-a="mic"]'); if (mb) { voice(mb); return; }
 var el = e.target.closest("[data-p]"); if (!el) return;
 var a = el.dataset.p, t = task(OPEN); if (!t) return;
 if (a === "close") { closeTask(); return; }
+if (a === "slide") { LS.set("zd-slide", slideOn() ? "0" : "1"); document.documentElement.classList.toggle("slide", slideOn()); toast(slideOn() ? "Карточка открывается шторкой поверх страницы" : "Карточка — обычная панель справа"); return; }
 if (a === "full") { LS.set("zd-pfull", LS.get("zd-pfull") === "1" ? "0" : "1"); flushBody(); renderPanel(); return; }
 if (a === "del") { flushBody(); del(t); return; }
 if (a === "flag") { var rpf = el.getBoundingClientRect(); ctxShow(rpf.left - 170, rpf.bottom + 4, flagMenu(t), { k: "task", id: t.id }); return; }
 if (a === "pin") { setTask(function (x) { x.pin = !x.pin; }); return; }
-if (a === "pnmore") { var pmr = el.getBoundingClientRect(), fl0 = document.body.classList.contains("pnfull"); ctxShow(pmr.right - 250, pmr.bottom + 4, (innerWidth > 860 ? [{ c: "full", i: fl0 ? "⤡" : "⤢", l: fl0 ? "Свернуть в панель" : "Развернуть на весь экран" }] : []).concat([{ c: "fav", i: t.fav ? "★" : "☆", l: t.fav ? "Убрать из избранного" : "В избранное" }, { c: "pin", i: "📌", l: t.pin ? "Открепить" : "Закрепить наверху списка" }, { c: "ai", i: "✨", l: "ИИ-помощник" }, { c: "share", i: "📤", l: "Поделиться текстом задачи" }, { c: "link", i: "🔗", l: "Скопировать ссылку на задачу" }, "-", { c: "del", i: "🗑", l: "Удалить в корзину", warn: 1 }]), { k: "pnmore", id: t.id }); return; }
+if (a === "pnmore") { var pmr = el.getBoundingClientRect(), fl0 = document.body.classList.contains("pnfull"); ctxShow(pmr.right - 250, pmr.bottom + 4, (innerWidth > 860 ? [{ c: "full", i: fl0 ? "⤡" : "⤢", l: fl0 ? "Свернуть в панель" : "Развернуть на весь экран" }, { c: "slide", i: "◧", l: slideOn() ? "Обычная панель, без затемнения" : "Шторка поверх страницы, как в Битрикс24" }] : []).concat([{ c: "fav", i: t.fav ? "★" : "☆", l: t.fav ? "Убрать из избранного" : "В избранное" }, { c: "pin", i: "📌", l: t.pin ? "Открепить" : "Закрепить наверху списка" }, { c: "ai", i: "✨", l: "ИИ-помощник" }, { c: "share", i: "📤", l: "Поделиться текстом задачи" }, { c: "link", i: "🔗", l: "Скопировать ссылку на задачу" }, "-", { c: "del", i: "🗑", l: "Удалить в корзину", warn: 1 }]), { k: "pnmore", id: t.id }); return; }
 if (a === "pchip") { var pk = el.dataset.v; PNCH[pk] = !PNCH[pk]; var prw = $("panel").querySelector('.prow[data-row="' + pk + '"]'); if (prw) prw.classList.toggle("pshow", !!PNCH[pk]); el.classList.toggle("on", !!PNCH[pk]); el.setAttribute("aria-expanded", !!PNCH[pk]); return; }
 if (a === "qdate") { PNCH.due = false; PNCH.g = null; taskCmd(t, "d:" + el.dataset.v); return; }
 if (a === "pgrp") { pgSet(PNCH.g === el.dataset.v ? null : el.dataset.v); return; }
