@@ -7137,6 +7137,7 @@ html.pfog #pomo { z-index: 46; box-shadow: 0 10px 30px rgba(0, 0, 0, .22), 0 0 0
   <input class="q" id="q" type="search" placeholder="Поиск · Ctrl+K — команды" aria-label="Поиск по задачам">
   <span id="xpSlot"></span><button class="ibtn" id="fsBtn" type="button" data-a="fsnd" title="Звуки для фокуса">🎧</button><button class="ibtn" id="enBtn" type="button" data-a="enf" title="Сколько сил сейчас: показать только подходящие задачи">🔋</button><button class="ibtn ctxb" id="ctxBtn" type="button" hidden title="Где я сейчас: показывать только задачи для этого места (и задачи без контекста)"></button>
   <button class="ibtn sync" id="syncBtn" type="button" hidden></button>
+  <button class="ibtn sync" id="zsBtn" type="button" hidden></button>
   <button class="ibtn" id="themeBtn" type="button" aria-label="Тема"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
   <button class="prfb" id="prfBtn" type="button" data-a="prfmenu" title="Профиль: синхронизация, тема, настройки, справка" aria-label="Профиль"><span>Я</span><i class="prfdot" hidden></i></button>
 </header>
@@ -7958,7 +7959,7 @@ if (d.opt && optMergeIn(d.opt)) n++;
 if (n) { DV++; softRender(); }
 });
 }
-function save(quiet) { try { unScan(); } catch (er) { /* отмена не мешает сохранению */ } try { histScan(); } catch (er) { /* история не мешает сохранению */ } if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); DV++; saveLocal(); if (!quiet) { SYNC.later(); SRV.later(); } }
+function save(quiet) { try { unScan(); } catch (er) { /* отмена не мешает сохранению */ } try { histScan(); } catch (er) { /* история не мешает сохранению */ } if (typeof DIAG !== "undefined" && DIAG.on) dlog("сохранение" + (quiet ? " (тихое)" : ""), "← " + dstack()); S.at = Date.now(); DV++; saveLocal(); if (!quiet) { SYNC.later(); SRV.later(); if (typeof ZS === "object") ZS.later(); } }
 function live(a) { return a.filter(function (x) { return !x.del; }); }
 var OPTSNAP = null, OPTMETA = { upd: 1, ku: 1, ki: 1, kx: 1 };
 function optSnapKeys() { var r = {}; Object.keys(S.opt).forEach(function (k) { if (!OPTMETA[k]) r[k] = JSON.stringify(S.opt[k]); }); return r; }
@@ -8742,7 +8743,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-336";
+var APPV = "zd-app-2026-10-16-337";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -19620,6 +19621,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["337", "☁ Синхронизация через наш сервер (бета)", ["«Настройки» → «Данные и синхронизация» → «Синхронизация через наш сервер»: адрес сервера, почта, код из письма — и задачи, проекты, заметки и остальные списки хранятся на сервере и одинаково видны на всех устройствах.", "Правка с одного устройства появляется на другом за несколько секунд, пока приложение открыто. Без сети всё работает как обычно и уходит на сервер само, когда связь вернётся.", "В шапке рядом с часами — значок «Сервер» с временем последней синхронизации; если вход истёк, он подскажет войти снова.", "Яндекс Диск работает отдельно: можно пользоваться любым путём или обоими. Настройки оформления пока не синхронизируются."]],
 ["336", "📁 Заметки проекта", ["На странице проекта, между описанием и задачами, появился складной блок «Заметки проекта» со счётчиком и кнопкой «＋ Заметка». Новая заметка сразу привязана к проекту и открывается с курсором в названии; «назад» вернёт на страницу проекта.", "В списке — название, дата правки и первая строка текста; нажмите, чтобы открыть, а правой кнопкой (или «⋯») — «Открыть» или «Отвязать от проекта». Заметки подпроектов тоже видны, с пометкой подпроекта.", "В самой заметке под названием — плашка «Проект: Название»: ⇄ меняет проект, ✕ отвязывает. Привязать заметку без проекта можно в свойствах («Проект»).", "Команда «/заметка Название» на странице проекта создаёт заметку проекта. Удаление проекта заметки не удаляет — они остаются без проекта (вернёте проект из корзины — привязка вернётся). В изолированном пространстве заметки проекта чужих пространств не видны. Прежние заметки не менялись."]],
 ["335", "📄 «Итоги месяца»: деньги, PDF и картинка", ["«Отчёт» → «Месяц» теперь называется «Итоги месяца» и, кроме выполненного, фокуса, целей и привычек, показывает блок «Деньги»: расходы за календарный месяц по дням из файла бюджета, доход за бюджетный период и топ статей расходов.", "Две кнопки сверху: «📄 Сохранить в PDF» (окно печати → «Сохранить как PDF», печатный вид без лишних кнопок) и новая «🖼 Сохранить картинкой» — PNG шириной 1080 px с числами месяца, выполненным по дням, привычками и деньгами: удобно отправить в мессенджер или сохранить в галерею. Картинка рисуется прямо в приложении, без интернета. Для недели картинка тоже есть."]],
 ["334", "📈 Накопления: сценарии «а если»", ["«Бюджет» → «📈 Накопления» — под графиком появился блок «А если…»: две колонки параметров. Слева — как сейчас (ставка вклада, ежемесячный взнос, досрочное погашение долгов), справа — впишите другие числа, и приложение посчитает рядом: сколько накопится через выбранный срок, разница в чистом состоянии, в процентах по вкладу и по долгам, когда закроются долги.", "Общий график сравнения: сплошные линии — сейчас, пунктир — сценарий. Пустое поле — «как сейчас»; «Сбросить сценарий» убирает вторую колонку. Сценарий сохраняется и виден на всех устройствах."]],
@@ -23715,6 +23717,7 @@ h += '<section class="card" id="s-ai"><h2>ИИ-помощник</h2><p class="mu
 (ac.prov === "yandex" ? '<label class="f" style="flex:1 1 260px">Адрес облачной функции<input type="url" class="inp" id="ai-url" value="' + esc(ac.url || "") + '" placeholder="https://functions.yandexcloud.net/…"></label><label class="f">Секрет приложения<input type="text" class="inp" id="ai-secret" value="' + esc(ac.secret || "") + '"></label><label class="f">Модель<input type="text" class="inp" id="ai-model" value="' + esc(ac.model || "yandexgpt/latest") + '"></label>' : "") +
 '</div><div class="r"><button class="btn pri" type="button" data-a="ai-save">Сохранить</button><button class="btn" type="button" data-a="ai-test"' + (AI.ready() ? "" : " disabled") + '>Проверить связь</button><span class="' + (AI.ready() ? "okc" : "muted") + '">' + (AI.ready() ? "✓ Подключено: " + esc(AI.name()) : "Выберите сервис и нажмите «Сохранить»") + "</span></div>" +
 '<p class="muted">Как получить ключ — «Справка» → «ИИ-помощник». YandexGPT подключается так же, как в «Электронном универе» (облачная функция-посредник).</p></section>';
+h += zsHTML();
 h += '<section class="card" id="s-sync"><h2>Синхронизация через Яндекс Диск</h2>';
 if (!YD.on) h += '<p class="muted" style="margin:0">Работает в приложении по адресу <a href="' + APPURL + '">' + APPURL + "</a>.</p>";
 else if (!YD.token()) h += '<p class="muted" style="margin:0">Задачи, проекты, теги и фильтры будут одинаковыми на компьютере и телефоне. Приложение видит только свою папку в «Приложениях» на Диске.</p><div class="r"><button class="btn pri" type="button" data-a="yd-login">Войти через Яндекс</button></div>';
@@ -23757,11 +23760,11 @@ h += '<section class="card" id="s-wipe"><h2>Очистка базы</h2><p class
 return h;
 }
 var STABS = [["general", "settings", "Общие"], ["look", "palette", "Оформление"], ["flags", "flag", "Флажки"], ["srv", "timer", "Напоминания и Telegram"], ["sync", "cloud", "Данные и синхронизация"], ["ai", "spark", "ИИ-помощник"]];
-function stabOf(a) { a = { bnotif: "srv", lists: "general", "": "general", side: "general", theme: "general", backup: "sync", data: "sync", wipe: "sync", test: "sync", diag: "sync", digest: "srv" }[a] || a; return STABS.some(function (x) { return x[0] === a; }) ? a : "general"; }
+function stabOf(a) { a = { bnotif: "srv", lists: "general", "": "general", side: "general", theme: "general", backup: "sync", zs: "sync", data: "sync", wipe: "sync", test: "sync", diag: "sync", digest: "srv" }[a] || a; return STABS.some(function (x) { return x[0] === a; }) ? a : "general"; }
 function vSettingsTabs() {
 var cur = stabOf(ARG), parts = vSettings().split('<section'), by = {};
 parts.slice(1).forEach(function (x) {
-var k = /id="s-look"/.test(x) ? "look" : /id="s-(srv|digest|bnotif)"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-(sync|backup|wipe|diag|test|lock)"/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
+var k = /id="s-look"/.test(x) ? "look" : /id="s-(srv|digest|bnotif)"/.test(x) ? "srv" : /id="s-ai"/.test(x) ? "ai" : /id="s-(sync|zs|backup|wipe|diag|test|lock)"/.test(x) ? "sync" : /id="s-flags"/.test(x) ? "flags" : "general";
 by[k] = (by[k] || "") + "<section" + x;
 });
 if (STQ.trim()) return auxHead("Настройки") + stqBar() + stqRes(parts);
@@ -23772,7 +23775,7 @@ var HTABS = [["money", "budget", "Деньги и бюджет", ["mg-how", "mg-
 var add = function (k, ids) { var t = HTABS.filter(function (x) { return x[0] === k; })[0]; if (t) t[3] = t[3].concat(ids); };
 var si = 0; HTABS.forEach(function (x, i) { if (x[0] === "start") si = i + 1; });
 HTABS.splice(si, 0, ["howto", "goal", "Как применять: сценарии", ["x-sc-day", "x-sc-proj", "x-sc-study", "x-sc-home", "x-sc-health", "x-sc-read"]], ["nav", "all", "Навигация", ["x-home", "x-spaces", "myspace", "x-profile", "x-mods", "x-rail", "x-apps", "x-crumbs", "x-ntf", "x-cmd", "x-keys2", "x-mobile", "x-news", "x-market"]], ["day", "today", "Ритм дня", ["x-morning", "x-shutdown", "x-tbox", "x-autoplan", "x-snooze", "x-stuck", "x-weekly", "x-dnote", "x-multi"]]);
-add("notes", ["x-live", "x-btn", "x-tplvars", "x-ndb", "x-srs", "x-quotes", "x-canvas"]); add("lists", ["x-gantt2"]); add("money", ["x-bank"]); add("data", ["x-dens", "x-offline"]); add("rem", ["x-tg2"]);
+add("notes", ["x-live", "x-btn", "x-tplvars", "x-ndb", "x-srs", "x-quotes", "x-canvas"]); add("lists", ["x-gantt2"]); add("money", ["x-bank"]); add("data", ["x-dens", "x-offline", "zs"]); add("rem", ["x-tg2"]);
 HTABS.push(["self", "habits", "Развитие и здоровье", ["x-health", "x-wheel", "x-xp", "x-garden", "x-recap", "x-bch"]], ["life", "wait", "Люди и документы", ["x-people", "x-docs"]], ["together", "cloud", "Вместе с близкими", ["x-shared", "x-dlg", "x-mail"]]);
 })();
 var HQ = "";
@@ -24167,10 +24170,10 @@ document.addEventListener("mousedown", function (e) { if (!QOPEN || !e.target.cl
 document.addEventListener("mousedown", function (e) { if (!POP || !e.target.closest) return; if (e.target.closest(".pop, [data-a=pop], #ctx, #ctx2")) return; POP = null; setTimeout(render, 0); });
 function hq(id, title) { return '<a class="hq" href="#help-' + id + '" title="' + esc(title || "Справка по этому разделу") + '" aria-label="Справка">?</a>'; }
 var VHELP = { inbox: "lists", today: "lists", plans: "lists", someday: "lists", flag: "flags", all: "lists", done: "status", tarch: "tarch", report: "report", clean: "clean", budget: "budget", menu: "food", menunew: "food", recipes: "food", recipe: "food", rhave: "food", kitchen: "kitchen", rpt: "reports", ngraph: "notes", prods: "food", shop: "food", rimp: "food", cal: "cal", gantt: "gantt", matrix: "matrix", habits: "habits", sprint: "sprint", sprints: "sprint", stats: "stats", trash: "trash", archive: "arch", templates: "arch", proj: "tree", tag: "tags", filter: "filters", notes: "notes", nsec: "notes", ntag: "notes", note: "notes", board: "dash", goals: "goals", goal: "goals", daily: "daily", waiting: "deps", journal: "journal", search: "pal", share: "share" };
-var SHELP = { "s-lists": "mini", "s-review": "focus", "s-flags": "flags", "s-srv": "srv", "s-digest": "digest", "s-ai": "ai", "s-sync": "sync", "s-backup": "backup", "s-diag": "diag", "s-wipe": "backup", "s-test": "backup" };
+var SHELP = { "s-lists": "mini", "s-review": "focus", "s-flags": "flags", "s-srv": "srv", "s-digest": "digest", "s-ai": "ai", "s-sync": "sync", "s-zs": "zs", "s-backup": "backup", "s-diag": "diag", "s-wipe": "backup", "s-test": "backup" };
 var SLOC = { "s-people": "all", "s-routine": "all", "s-day": "all", "s-start": "all", "s-tarch": "all", "s-review": "all", "s-flags": "all", "s-digest": "all", "s-mailin": "all",
 "s-budget": ["mix", "настройки бюджета — на всех устройствах; загруженные банковские выписки — только на этом"], "s-look": ["mix", "стиль, цвет, шрифт и фон — на всех устройствах; светлая или тёмная тема — на этом"],
-"s-look-dens": "dev", "s-bnotif": "dev", "s-ai": ["dev", "ключ ИИ хранится только в этом браузере и никуда не синхронизируется"], "s-sync": ["dev", "вход в Яндекс — на каждом устройстве свой"], "s-ptabs": "dev", "s-diag": "dev",
+"s-look-dens": "dev", "s-bnotif": "dev", "s-ai": ["dev", "ключ ИИ хранится только в этом браузере и никуда не синхронизируется"], "s-sync": ["dev", "вход в Яндекс — на каждом устройстве свой"], "s-zs": ["dev", "вход на сервер — на каждом устройстве свой; сами данные лежат на сервере и едут на все устройства"], "s-ptabs": "dev", "s-diag": "dev",
 "s-srv": ["mix", "адрес сервера — на этом устройстве; привязка Telegram — на сервере, для всех"], "s-lists": ["mix", "скрытые пункты — на всех устройствах; свёрнутая панель — на этом"], "s-hints": ["mix", "значки «?» — на всех устройствах; вопрос о сроке — на этом"],
 "s-backup": ["mix", "автокопии на Диске — общие; копии на устройстве — в этом браузере"] };
 function slocMarks(v) {
@@ -25196,6 +25199,7 @@ SRV.check().then(function () { render(); if (SRV.st.ok === true && SRV.ready()) 
 case "srv-check": SRV.check().then(render); render(); return;
 case "srv-link": SRV.call("link", { method: "POST" }).then(function (j) { SRV.st.code = j.code; SRV.st.bot = j.bot || SRV.st.bot; render(); }).catch(function (er) { toast("Не получилось: " + er.msg); }); return;
 case "srv-copy": if (SRV.st.code) copyText("/start " + SRV.st.code, "Код скопирован"); return;
+case "zs-url-save": case "zs-urlchg": case "zs-back": case "zs-send": case "zs-verify": case "zs-now": case "zs-full": case "zs-out": zsAct(a); return;
 case "yd-login": YD.login(); return;
 case "yd-logout": YD.logout(); SYNC.st = "off"; SYNC.show(); render(); toast("Вы вышли из Яндекса на этом устройстве"); return;
 case "sync-now": SYNC.run().then(function () { render(); toast(SYNC.st === "ok" ? "Синхронизировано" : "Нет связи с Диском"); }); return;
@@ -27162,6 +27166,203 @@ $("themeBtn").addEventListener("click", function () {
 var dark = isDark();
 LS.set("zd-theme", dark ? "light" : "dark"); applyTheme(); if (V === "settings") render();
 });
+var ZSMSG = { code_wrong: "Неверный код", code_expired: "Код устарел — запросите новый", too_many_attempts: "Слишком много попыток — запросите новый код", plan_required: "Синхронизация входит в тариф «Про»", limit_projects: "Достигнут лимит проектов тарифа", not_member: "Нет доступа к этому пространству", role_forbidden: "Ваша роль не позволяет это делать", need_login: "Нужно войти снова", bad_kind: "Сервер не знает такой раздел" };
+var ZS = {
+acc: "", exp: 0, st: "off", msg: "", at: 0, busy: false, again: false, t: null, ctl: null, waiting: false, started: false, retry: 0, dirty: {},
+ui: { step: "", mail: "", err: "", info: "", dev: "", wait: false },
+url: function () { return String(LS.get("zd-zs-url") || "").trim().replace(/\/+$/, ""); },
+on: function () { return !!ZS.url() && LS.get("zd-zs-on") === "1"; },
+sp: function () { return LS.get("zd-zs-sp") || ""; },
+spq: function (first) { return ZS.sp() ? (first ? "?" : "&") + "space_id=" + encodeURIComponent(ZS.sp()) : ""; },
+cur: function () { return +LS.get("zd-zs-cur") || 0; },
+wm: function () { return +LS.get("zd-zs-wm") || 0; },
+call: function (path, opt) {
+opt = opt || {}; var hd = { Accept: "application/json" };
+if (opt.auth !== false && ZS.acc) hd.Authorization = "Bearer " + ZS.acc;
+if (opt.body) hd["Content-Type"] = "application/json";
+return fetch(ZS.url() + path, { method: opt.method || "GET", headers: hd, body: opt.body ? JSON.stringify(opt.body) : undefined, credentials: "include", signal: opt.signal })
+.catch(function (e) { if (e && e.name === "AbortError") throw { aborted: true }; throw { status: 0, msg: "нет связи с сервером" }; })
+.then(function (r) {
+return r.text().then(function (t) {
+var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) { /* не JSON */ }
+if (!r.ok) { var d = (j && j.detail) || {}; if (typeof d !== "object") d = {}; throw { status: r.status, code: d.code || "", msg: ZSMSG[d.code] || "ошибка сервера (" + r.status + ")", detail: d }; }
+return j || {};
+});
+});
+},
+token: function (j) {
+ZS.acc = j.access_token; ZS.exp = Date.now() + (j.expires_in || 600) * 1000;
+if (j.space_id && j.space_id !== ZS.sp()) { LS.set("zd-zs-sp", j.space_id); LS.set("zd-zs-cur", "0"); LS.set("zd-zs-wm", "0"); }
+return j;
+},
+auth: function () {
+if (ZS.acc && Date.now() < ZS.exp - 30000) return Promise.resolve();
+return ZS.call("/auth/refresh", { method: "POST", auth: false }).then(ZS.token).then(function () { return 0; })
+.catch(function (e) { if (e && e.status === 401) throw { status: 401, code: "need_login", msg: ZSMSG.need_login }; throw e; });
+},
+req: function (path, opt) {
+opt = opt || {};
+return ZS.auth().then(function () { return ZS.call(path, opt); }).catch(function (e) {
+if (e && e.status === 401 && !opt.again && e.code !== "need_login") { ZS.acc = ""; ZS.exp = 0; opt.again = 1; return ZS.req(path, opt); }
+throw e;
+});
+},
+devName: function () { return ("Браузер · " + (navigator.platform || "устройство")).slice(0, 100); },
+verify: function (mail, code) {
+return ZS.call("/auth/verify", { method: "POST", auth: false, body: { email: mail, code: code, device_name: ZS.devName() } }).then(function (j) {
+ZS.token(j); LS.set("zd-zs-mail", mail); LS.set("zd-zs-on", "1"); ZS.retry = 0; ZS.st = "busy"; return j;
+});
+},
+logout: function () {
+ZS.stop(); var done = ZS.call("/auth/logout", { method: "POST", auth: false }).catch(function () { /* без сети выйти всё равно можно */ });
+ZS.acc = ""; ZS.exp = 0; ZS.st = "off"; LS.set("zd-zs-on", "0"); LS.del("zd-zs-sp"); LS.del("zd-zs-cur"); LS.del("zd-zs-wm"); ZS.dirty = {};
+ZS.show(); return done;
+},
+stop: function () { clearTimeout(ZS.t); if (ZS.ctl) { try { ZS.ctl.abort(); } catch (e) { /* ok */ } } ZS.ctl = null; ZS.waiting = false; },
+later: function () { if (!ZS.on()) return; clearTimeout(ZS.t); ZS.t = setTimeout(ZS.run, 1500); },
+apply: function (items) {
+var by = {}, n = 0;
+items.forEach(function (it) { if (LISTS.indexOf(it.kind) < 0 || !it.data || it.data.id === undefined) return; (by[it.kind] = by[it.kind] || []).push(it.data); });
+Object.keys(by).forEach(function (k) {
+var have = {}; (S[k] || []).forEach(function (x) { have[x.id] = x.upd || 0; });
+by[k].forEach(function (x) { if (have[x.id] === undefined || (x.upd || 0) > have[x.id]) n++; });
+S[k] = mergeList(S[k] || [], by[k], k);
+var now = {}; S[k].forEach(function (x) { now[x.id] = x; });
+by[k].forEach(function (x) { var y = now[x.id]; if (y && canon(y) !== canon(x)) ZS.dirty[k + "|" + x.id] = 1; });
+});
+return n;
+},
+pullAll: function () {
+var got = 0;
+function page() {
+return ZS.req("/sync/pull?since=" + ZS.cur() + "&limit=500" + ZS.spq(false)).then(function (j) {
+got += ZS.apply(j.items || []);
+LS.set("zd-zs-cur", String(j.cursor));
+if (j.space_id && !ZS.sp()) LS.set("zd-zs-sp", j.space_id);
+return j.more ? page() : got;
+});
+}
+return page().then(function (n) { if (n) { prune(); DV++; saveLocal(); softRender(); } return n; });
+},
+outbox: function () {
+var wm = ZS.wm(), first = !wm, items = [];
+LISTS.forEach(function (k) { (S[k] || []).forEach(function (x) { if (x && x.id !== undefined && (first || (x.upd || 0) > wm || ZS.dirty[k + "|" + x.id])) items.push({ kind: k, id: String(x.id), upd: x.upd || 0, data: x }); }); });
+return items;
+},
+pushAll: function (t0) {
+var items = ZS.outbox(), batches = [], cur = [], size = 0;
+items.forEach(function (it) { var sz = JSON.stringify(it.data).length; if (cur.length && (cur.length >= 200 || size + sz > 700000)) { batches.push(cur); cur = []; size = 0; } cur.push(it); size += sz; });
+if (cur.length) batches.push(cur);
+var back = [];
+var chain = batches.reduce(function (p, b) {
+return p.then(function () {
+return ZS.req("/sync/push", { method: "POST", body: { space_id: ZS.sp() || null, items: b } }).then(function (j) {
+(j.rejected || []).forEach(function (r) { if (r.server && r.server.data) back.push({ kind: r.kind, data: r.server.data }); });
+});
+});
+}, Promise.resolve());
+return chain.then(function () {
+if (back.length && ZS.apply(back)) { prune(); DV++; saveLocal(); softRender(); }
+ZS.dirty = {}; LS.set("zd-zs-wm", String(t0 - 2000)); return items.length;
+});
+},
+run: function () {
+if (!ZS.on()) { ZS.show(); return Promise.resolve(); }
+if (ZS.busy) { ZS.again = true; return Promise.resolve(); }
+ZS.busy = true; ZS.st = "busy"; ZS.show();
+var t0 = Date.now();
+return ZS.pullAll().then(function () { return ZS.pushAll(t0); }).then(function (n) { return n ? ZS.pullAll() : 0; })
+.then(function () { ZS.st = "ok"; ZS.msg = ""; ZS.at = Date.now(); ZS.retry = 0; })
+.catch(ZS.fail)
+.then(function () { ZS.busy = false; ZS.show(); if (ZS.again) { ZS.again = false; ZS.later(); } if (ZS.st === "ok") ZS.listen(); });
+},
+fail: function (e) {
+var c = (e && e.code) || "";
+if (e && e.aborted) return;
+if (c === "need_login" || (e && e.status === 401)) { ZS.st = "auth"; ZS.msg = ZSMSG.need_login; }
+else if (e && e.status === 402) { ZS.st = "plan"; ZS.msg = ZSMSG[c] || ZSMSG.plan_required; }
+else if (e && e.status === 0) { ZS.st = "off"; ZS.msg = "нет связи с сервером"; ZS.again2(); }
+else { ZS.st = "err"; ZS.msg = (e && e.msg) || "ошибка"; ZS.again2(); }
+try { console.warn("Сервер синхронизации:", e); } catch (er) { /* ok */ }
+},
+again2: function () { ZS.retry = Math.min(60000, (ZS.retry || 2500) * 2); clearTimeout(ZS.t); ZS.t = setTimeout(ZS.run, ZS.retry); },
+listen: function () {
+if (ZS.waiting || !ZS.on() || document.hidden || ZS.st !== "ok") return;
+ZS.waiting = true; ZS.ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+ZS.req("/sync/wait?since=" + ZS.cur() + "&timeout=25" + ZS.spq(false), { signal: ZS.ctl ? ZS.ctl.signal : undefined }).then(function (j) {
+ZS.waiting = false; ZS.ctl = null;
+if (j.changed) ZS.run(); else ZS.listen();
+}).catch(function (e) {
+ZS.waiting = false; ZS.ctl = null; if (e && e.aborted) return;
+if (e && e.status === 401) { ZS.fail(e); ZS.show(); return; }
+setTimeout(function () { ZS.listen(); }, 8000);
+});
+},
+show: function () {
+var b = $("zsBtn"); if (!b) return; b.hidden = !ZS.on(); if (!ZS.on()) return;
+var txt = ZS.st === "busy" ? "Синхронизирую…" : ZS.st === "ok" ? "Сервер · " + hm(ZS.at || Date.now()) : ZS.st === "auth" ? "Войти" : ZS.st === "plan" ? "Нужен «Про»" : ZS.st === "off" ? "Нет связи" : "Ошибка";
+b.innerHTML = '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M8 7h.01M8 17h.01"/></svg><span>' + esc(txt) + "</span>";
+b.classList.toggle("bad", ZS.st === "auth" || ZS.st === "err" || ZS.st === "off" || ZS.st === "plan");
+b.classList.toggle("spin", ZS.st === "busy");
+b.title = (ZS.st === "ok" ? "Данные на сервере. " : ZS.msg ? ZS.msg + ". " : "") + "Клик — синхронизировать сейчас";
+},
+start: function () {
+if (ZS.started) return; ZS.started = true; ZS.show();
+if (ZS.on()) setTimeout(ZS.run, 1200);
+setInterval(function () { if (!document.hidden && ZS.on() && !ZS.busy && ZS.st !== "auth" && ZS.st !== "plan") ZS.run(); }, 90000);
+document.addEventListener("visibilitychange", function () { if (!ZS.on()) return; if (document.hidden) ZS.stop(); else ZS.run(); });
+window.addEventListener("online", function () { if (ZS.on()) ZS.run(); });
+}
+};
+$("zsBtn").addEventListener("click", function () {
+if (ZS.st === "auth") { location.hash = "#settings-zs"; return; }
+ZS.run().then(function () { render(); toast(ZS.st === "ok" ? "Синхронизировано" : ZS.msg || "Не получилось"); });
+});
+function zsStatusHTML() {
+var t = ZS.st === "ok" ? '<span class="okc">✓ Синхронизировано' + (ZS.at ? " в " + hm(ZS.at) : "") + "</span>" : ZS.st === "busy" ? "Синхронизирую…" : '<span class="warnc">' + esc(ZS.msg || "Нет связи") + "</span>";
+return t;
+}
+function zsHTML() {
+var u = ZS.ui, url = ZS.url(), h = '<section class="card" id="s-zs"><h2>Синхронизация через наш сервер (бета)</h2>';
+var step = !url ? "url" : (ZS.on() && ZS.st !== "auth") ? "on" : (u.step === "code" ? "code" : "mail");
+h += '<p class="muted" style="margin:0">Задачи, проекты, заметки и остальные списки хранятся на сервере и одинаково видны на всех ваших устройствах, а правки приходят за секунды. Без сети приложение работает как обычно и отправит всё позже. Настройки оформления пока не синхронизируются. Яндекс Диск работает отдельно и не мешает.</p>';
+if (step === "url") h += '<div class="r"><label class="f" style="flex:1 1 320px">Адрес сервера<input type="url" class="inp" id="zs-url" placeholder="https://… или http://localhost:8000" value="" spellcheck="false"></label><button class="btn pri" type="button" data-a="zs-url-save">Подключить</button></div>';
+if (step === "mail") h += '<p class="muted" style="margin:8px 0 0">Сервер: <b>' + esc(url) + '</b> <button class="btn sm" type="button" data-a="zs-urlchg">изменить</button></p><div class="r"><label class="f" style="flex:1 1 280px">Ваша почта<input type="email" class="inp" id="zs-mail" autocomplete="email" value="' + esc(u.mail || LS.get("zd-zs-mail") || "") + '"></label><button class="btn pri" type="button" data-a="zs-send">Получить код</button></div>';
+if (step === "code") h += '<p class="muted" style="margin:8px 0 0">' + esc(u.info || "") + '</p><div class="r"><label class="f">Код из письма<input type="text" class="inp" id="zs-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" value="' + esc(u.dev || "") + '"></label><button class="btn pri" type="button" data-a="zs-verify">Войти</button><button class="btn" type="button" data-a="zs-back">Назад</button></div>';
+if (step === "on") h += '<p style="margin:8px 0 0">Вход выполнен: <b>' + esc(LS.get("zd-zs-mail") || "") + "</b>. " + zsStatusHTML() + '</p><div class="r"><button class="btn" type="button" data-a="zs-now">Синхронизировать сейчас</button><button class="btn" type="button" data-a="zs-full">Отправить и загрузить всё заново</button><button class="btn warn" type="button" data-a="zs-out">Выйти на этом устройстве</button></div><p class="muted" style="margin:6px 0 0;font-size:calc(12px * var(--fs))">Выход не удаляет данные: на этом устройстве они остаются, на сервере тоже.</p>';
+if (ZS.on() && ZS.st === "auth" && step !== "on") h += '<p class="warnc" style="margin:8px 0 0">Вход истёк — войдите снова, данные не потеряны.</p>';
+if (u.err) h += '<p class="warnc" style="margin:8px 0 0">' + esc(u.err) + "</p>";
+return h + "</section>";
+}
+function zsAct(a) {
+var u = ZS.ui, v;
+if (a === "zs-url-save") {
+v = ($("zs-url").value || "").trim().replace(/\/+$/, "");
+if (!/^https:\/\/[^\s/]+/i.test(v) && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(v)) { u.err = "Адрес должен начинаться с https:// (для проверки на этом компьютере подойдёт http://localhost:8000)."; render(); return; }
+LS.set("zd-zs-url", v); u.err = ""; u.step = "mail"; render(); return;
+}
+if (a === "zs-urlchg") { ZS.stop(); LS.del("zd-zs-url"); LS.set("zd-zs-on", "0"); u.step = ""; u.err = ""; ZS.show(); render(); return; }
+if (a === "zs-back") { u.step = "mail"; u.err = ""; render(); return; }
+if (a === "zs-send") {
+v = ($("zs-mail").value || "").trim().toLowerCase();
+if (!/^\S+@\S+\.\S+$/.test(v)) { u.err = "Введите почту, например name@example.com."; render(); return; }
+u.mail = v; u.err = "";
+ZS.call("/auth/request-code", { method: "POST", auth: false, body: { email: v } }).then(function (j) { u.step = "code"; u.dev = j.dev_code || ""; u.info = j.dev_code ? "Режим разработки: код подставлен сам." : "Код отправлен на " + v + ". Он действует 10 минут."; render(); }).catch(function (e) { u.err = e.msg; render(); });
+return;
+}
+if (a === "zs-verify") {
+v = ($("zs-code").value || "").trim();
+ZS.verify(u.mail, v).then(function (j) {
+u.err = ""; u.step = ""; ZS.start(); ZS.show(); render();
+toast(j.plan === "free" ? "Вход выполнен. Синхронизация входит в тариф «Про»" : "Вход выполнен, синхронизирую…");
+return ZS.run().then(render);
+}).catch(function (e) { u.err = e.msg || "Не получилось войти"; render(); });
+return;
+}
+if (a === "zs-now") { ZS.run().then(function () { render(); toast(ZS.st === "ok" ? "Синхронизировано" : ZS.msg || "Не получилось"); }); render(); return; }
+if (a === "zs-full") { LS.set("zd-zs-cur", "0"); LS.set("zd-zs-wm", "0"); ZS.dirty = {}; ZS.run().then(render); toast("Отправляю и загружаю всё заново…"); render(); return; }
+if (a === "zs-out") { ZS.logout().then(function () { render(); toast("Вы вышли. Данные на устройстве остались"); }); u.step = "mail"; render(); return; }
+}
 optSnapReset(); /* от этой точки видно, какие настройки меняются, — для слияния по каждой настройке */
 applyTheme();
 if (LS.get("zd-mini") === "1") document.body.classList.add("mini");
@@ -27186,6 +27387,7 @@ SYNC.show();
 function setsOpen() { if (SETGATE) return; SETGATE = true; softRender(); }
 if (SYNC.enabled()) { SYNC.run().then(setsOpen, setsOpen); setTimeout(setsOpen, 25000); } else setTimeout(setsOpen, 1200);
 SRV.start();
+ZS.start();
 pomoTick();
 setInterval(function () { if (!document.hidden) softRender(); try { sunCheck(); } catch (er) { /* режим по солнцу не обязателен */ } }, 60000);
 (function () {
