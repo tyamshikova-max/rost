@@ -1946,6 +1946,7 @@ body.pgsheet::after { content: ""; position: fixed; inset: 0; background: rgba(0
 .lksv-glass .x1, .lksv-glass .x2, .lksv-glass .s { background: color-mix(in srgb, var(--p) 55%, transparent); border: 1px solid color-mix(in srgb, #fff 60%, transparent); border-radius: 7px }
 .lksv-bento .x1 { background: var(--q1); border-radius: 8px } .lksv-bento .x2 { background: var(--q2); border-radius: 8px }
 .lksv-expr .x1 { background: var(--q1); border-radius: 12px } .lksv-expr .x2 { background: var(--q2); border-radius: 12px 12px 12px 3px } .lksv-expr .r:last-child { border-radius: 9px }
+.bkpv { border-color: var(--acc) } .bkpv .ndbw { max-height: 420px; overflow: auto } .bkrules .chip { gap: 4px } .bkrules .ibtn { width: 20px; height: 20px; font-size: 11px } .bkradd { flex-wrap: wrap; gap: 8px; margin-top: 8px } .bkradd #bkrq { min-width: 220px }
 .sdbar { margin: 0 0 10px } .sdbtn { width: 100%; padding: 12px 16px; font-size: calc(16px * var(--fs)); border-radius: 14px }
 .sdsheet { position: fixed; inset: 0; z-index: 48; background: var(--bg); overflow: auto; -webkit-overflow-scrolling: touch; animation: sdin .25s ease-out } @keyframes sdin { from { transform: translateY(24px); opacity: 0 } to { transform: none; opacity: 1 } }
 .sdin { max-width: 560px; margin: 0 auto; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px calc(28px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 12px }
@@ -8725,7 +8726,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-332";
+var APPV = "zd-app-2026-10-16-333";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -18753,36 +18754,116 @@ return lines.map(function (l) { var out = [], cur = "", q = false; for (var i = 
 function bkNum(s) { s = String(s || "").replace(/[\s ₽]|RUB|руб\.?/gi, "").replace(",", "."); var v = parseFloat(s); return isFinite(v) ? v : null; }
 function bkDate(s) { var m = /(\d{1,2})\.(\d{1,2})\.(\d{2,4})/.exec(s || ""); if (m) return new Date(+(m[3].length === 2 ? "20" + m[3] : m[3]), +m[2] - 1, +m[1]).getTime(); m = /(\d{4})-(\d{2})-(\d{2})/.exec(s || ""); return m ? new Date(+m[1], +m[2] - 1, +m[3]).getTime() : 0; }
 function bkParse(txt) {
-var rows = bkRows(txt); if (rows.length < 2) throw new Error("в файле нет строк с операциями"); var h = rows[0].map(function (x) { return x.toLowerCase(); }), f = function (re, not) { for (var i = 0; i < h.length; i++) if (re.test(h[i]) && !(not && not.test(h[i]))) return i; return -1; };
+var rows = bkRows(txt); if (!rows.length) throw new Error("в файле нет строк с операциями");
+if (rows.length && bkDate(rows[0][0]) && !rows[0].some(function (c) { return /дата|сумма|date|amount/i.test(c); })) {
+var w = rows[0].length, col = function (fn) { for (var i = 0; i < w; i++) if (rows.slice(0, 5).every(function (r) { return fn(r[i]); })) return i; return -1; };
+var hd = [], iD0 = 0, iA0 = col(function (c) { return c !== undefined && bkNum(c) !== null && !bkDate(c); }), iT0 = -1, best = -1;
+for (var ci = 0; ci < w; ci++) { if (ci === iD0 || ci === iA0) continue; var ln = rows.reduce(function (s, r) { return s + String(r[ci] || "").replace(/[\d\s.,:\-]/g, "").length; }, 0); if (ln > best) { best = ln; iT0 = ci; } }
+if (iA0 < 0) throw new Error("не нашлись столбцы даты и суммы — нужен CSV из интернет-банка (Т-Банк, Сбер, Альфа и т. п.) или простой: дата; сумма; описание");
+for (var hi = 0; hi < w; hi++) hd.push(hi === iD0 ? "дата" : hi === iA0 ? "сумма" : hi === iT0 ? "описание" : "");
+rows = [hd].concat(rows);
+}
+if (rows.length < 2) throw new Error("в файле нет строк с операциями"); var h = rows[0].map(function (x) { return x.toLowerCase(); }), f = function (re, not) { for (var i = 0; i < h.length; i++) if (re.test(h[i]) && !(not && not.test(h[i]))) return i; return -1; };
 var iD = f(/^дата операции/); if (iD < 0) iD = f(/дата|date/); var iA = f(/сумма платежа/); if (iA < 0) iA = f(/сумма операции/); if (iA < 0) iA = f(/^сумма|amount/, /кэшбэк|бонус/); var iOut = f(/расход|списан|дебет/), iIn = f(/приход|зачисл|поступл|кредит/);
-var iC = f(/категори|category/), iT = f(/описание|назначение|контрагент|description|получатель/), iS = f(/статус|status/);
+var iC = f(/категори|category/), iT = f(/описание|назначение|контрагент|description|получатель/), iS = f(/статус|status/), iK = f(/^тип|вид операции|приход\/расход|дебет\/кредит/);
 if (iD < 0 || (iA < 0 && iOut < 0)) throw new Error("не нашлись столбцы даты и суммы — нужен CSV из интернет-банка (Т-Банк, Сбер, Альфа и т. п.)");
 var out = [];
-rows.slice(1).forEach(function (r) { if (iS >= 0 && /fail|отказ|отклон/i.test(r[iS] || "")) return; var d = bkDate(r[iD]); if (!d) return; var a = iA >= 0 ? bkNum(r[iA]) : (bkNum(r[iIn]) || 0) - Math.abs(bkNum(r[iOut]) || 0); if (a === null || !a) return; out.push({ d: d, a: Math.round(a * 100) / 100, c: (iC >= 0 ? r[iC] : "") || "Без категории", t: (iT >= 0 ? r[iT] : "").slice(0, 120) }); });
+rows.slice(1).forEach(function (r) { if (iS >= 0 && /fail|отказ|отклон/i.test(r[iS] || "")) return; var d = bkDate(r[iD]); if (!d) return; var a = iA >= 0 ? bkNum(r[iA]) : (bkNum(r[iIn]) || 0) - Math.abs(bkNum(r[iOut]) || 0); if (a === null || !a) return;
+if (iK >= 0) { var kv = String(r[iK] || "").toLowerCase(); if (/расход|списан|покупк|оплат|перевод исход|debit/.test(kv)) a = -Math.abs(a); else if (/приход|зачисл|поступл|пополн|credit/.test(kv)) a = Math.abs(a); }
+out.push({ d: d, a: Math.round(a * 100) / 100, c: (iC >= 0 ? r[iC] : "") || "Без категории", t: (iT >= 0 ? r[iT] : "").slice(0, 120) }); });
 if (!out.length) throw new Error("операций не нашлось");
 return out;
+}
+var BKPV = null;
+function bkRules() { return (S.opt.bkrules || []).filter(function (r) { return r && r.q && r.c; }); }
+function bkRuleFor(o) { var s = ((o.t || "") + " " + (o.c || "")).toLowerCase(), rs = bkRules(); for (var i = 0; i < rs.length; i++) if (s.indexOf(String(rs[i].q).toLowerCase()) >= 0) return rs[i].c; return ""; }
+function bkStat(o, map) { return bkRuleFor(o) || (map || S.opt.bkmap || {})[o.c] || ""; }
+function bkRuleAdd(q, c) { q = String(q || "").trim().slice(0, 60); if (!q || !c) { toast("Впишите подстроку и выберите статью"); return false; } var rs = bkRules().filter(function (r) { return r.q.toLowerCase() !== q.toLowerCase(); }); rs.push({ q: q, c: c }); S.opt.bkrules = rs; optTouch(); save(); render(); return true; }
+function bkRuleDel(q) { S.opt.bkrules = bkRules().filter(function (r) { return r.q !== q; }); optTouch(); save(); render(); }
+function bkKey(o) { return o.d + "|" + o.a + "|" + o.t; }
+function bkMerge(have, ops) { var seen = {}; (have || []).forEach(function (o) { seen[bkKey(o)] = 1; }); var add = [], dup = []; ops.forEach(function (o) { var k = bkKey(o); if (seen[k]) dup.push(o); else { seen[k] = 1; add.push(o); } }); return { add: add, dup: dup }; }
+function bkPreview(txt, fname) {
+var ops = bkParse(txt);
+return bkLoad().then(function (have) { var m = bkMerge(have, ops); BKPV = { ops: ops, add: m.add, dup: m.dup, fname: fname || "" }; render(); return BKPV; });
+}
+function bkPvOk() {
+if (!BKPV) return; var add = BKPV.add;
+bkLoad().then(function (have) { var m = bkMerge(have, add); BKOPS = have.concat(m.add).sort(function (a, b) { return a.d - b.d; }); return bkKV("ops", BKOPS).then(function () { return m.add.length; }); })
+.then(function (n) { var dup = BKPV ? BKPV.dup.length : 0; BKPV = null; render(); toast("Выписка загружена: новых операций " + n + (dup ? ", дублей пропущено " + dup : "")); }).catch(function (e) { toast("Не получилось сохранить: " + ((e && e.message) || e)); });
+}
+var BKPV = null;
+function bkRules() { return (S.opt.bkrules || []).filter(function (r) { return r && r.q && r.c; }); }
+function bkRuleFor(o) { var s = ((o.t || "") + " " + (o.c || "")).toLowerCase(), rs = bkRules(); for (var i = 0; i < rs.length; i++) if (s.indexOf(String(rs[i].q).toLowerCase()) >= 0) return rs[i].c; return ""; }
+function bkStat(o, map) { return bkRuleFor(o) || (map || S.opt.bkmap || {})[o.c] || ""; }
+function bkRuleAdd(q, c) { q = String(q || "").trim().slice(0, 60); if (!q || !c) { toast("Впишите подстроку и выберите статью"); return false; } var rs = bkRules().filter(function (r) { return r.q.toLowerCase() !== q.toLowerCase(); }); rs.push({ q: q, c: c }); S.opt.bkrules = rs; optTouch(); save(); render(); return true; }
+function bkRuleDel(q) { S.opt.bkrules = bkRules().filter(function (r) { return r.q !== q; }); optTouch(); save(); render(); }
+function bkKey(o) { return o.d + "|" + o.a + "|" + o.t; }
+function bkMerge(have, ops) { var seen = {}; (have || []).forEach(function (o) { seen[bkKey(o)] = 1; }); var add = [], dup = []; ops.forEach(function (o) { var k = bkKey(o); if (seen[k]) dup.push(o); else { seen[k] = 1; add.push(o); } }); return { add: add, dup: dup }; }
+function bkPreview(txt, fname) {
+var ops = bkParse(txt);
+return bkLoad().then(function (have) { var m = bkMerge(have, ops); BKPV = { ops: ops, add: m.add, dup: m.dup, fname: fname || "" }; render(); return BKPV; });
+}
+function bkPvOk() {
+if (!BKPV) return; var add = BKPV.add;
+bkLoad().then(function (have) { var m = bkMerge(have, add); BKOPS = have.concat(m.add).sort(function (a, b) { return a.d - b.d; }); return bkKV("ops", BKOPS).then(function () { return m.add.length; }); })
+.then(function (n) { var dup = BKPV ? BKPV.dup.length : 0; BKPV = null; render(); toast("Выписка загружена: новых операций " + n + (dup ? ", дублей пропущено " + dup : "")); }).catch(function (e) { toast("Не получилось сохранить: " + ((e && e.message) || e)); });
+}
+var BKPV = null;
+function bkRules() { return (S.opt.bkrules || []).filter(function (r) { return r && r.q && r.c; }); }
+function bkRuleFor(o) { var s = ((o.t || "") + " " + (o.c || "")).toLowerCase(), rs = bkRules(); for (var i = 0; i < rs.length; i++) if (s.indexOf(String(rs[i].q).toLowerCase()) >= 0) return rs[i].c; return ""; }
+function bkStat(o, map) { return bkRuleFor(o) || (map || S.opt.bkmap || {})[o.c] || ""; }
+function bkRuleAdd(q, c) { q = String(q || "").trim().slice(0, 60); if (!q || !c) { toast("Впишите подстроку и выберите статью"); return false; } var rs = bkRules().filter(function (r) { return r.q.toLowerCase() !== q.toLowerCase(); }); rs.push({ q: q, c: c }); S.opt.bkrules = rs; optTouch(); save(); render(); return true; }
+function bkRuleDel(q) { S.opt.bkrules = bkRules().filter(function (r) { return r.q !== q; }); optTouch(); save(); render(); }
+function bkKey(o) { return o.d + "|" + o.a + "|" + o.t; }
+function bkMerge(have, ops) { var seen = {}; (have || []).forEach(function (o) { seen[bkKey(o)] = 1; }); var add = [], dup = []; ops.forEach(function (o) { var k = bkKey(o); if (seen[k]) dup.push(o); else { seen[k] = 1; add.push(o); } }); return { add: add, dup: dup }; }
+function bkPreview(txt, fname) {
+var ops = bkParse(txt);
+return bkLoad().then(function (have) { var m = bkMerge(have, ops); BKPV = { ops: ops, add: m.add, dup: m.dup, fname: fname || "" }; render(); return BKPV; });
+}
+function bkPvOk() {
+if (!BKPV) return; var add = BKPV.add;
+bkLoad().then(function (have) { var m = bkMerge(have, add); BKOPS = have.concat(m.add).sort(function (a, b) { return a.d - b.d; }); return bkKV("ops", BKOPS).then(function () { return m.add.length; }); })
+.then(function (n) { var dup = BKPV ? BKPV.dup.length : 0; BKPV = null; render(); toast("Выписка загружена: новых операций " + n + (dup ? ", дублей пропущено " + dup : "")); }).catch(function (e) { toast("Не получилось сохранить: " + ((e && e.message) || e)); });
 }
 function bkImport() {
 var i = document.createElement("input"); i.type = "file"; i.accept = ".csv,.txt"; i.style.display = "none"; document.body.appendChild(i);
 i.addEventListener("change", function () {
 var fl = i.files && i.files[0]; i.remove(); if (!fl) return;
-fl.arrayBuffer().then(function (buf) { var txt; try { txt = new TextDecoder("utf-8", { fatal: true }).decode(buf); } catch (e) { txt = new TextDecoder("windows-1251").decode(buf); } var ops = bkParse(txt); return bkLoad().then(function (have) { var seen = {}; have.forEach(function (o) { seen[o.d + "|" + o.a + "|" + o.t] = 1; }); var add = ops.filter(function (o) { var k = o.d + "|" + o.a + "|" + o.t; if (seen[k]) return false; seen[k] = 1; return true; }); BKOPS = have.concat(add).sort(function (a, b) { return a.d - b.d; }); return bkKV("ops", BKOPS).then(function () { return [ops.length, add.length]; }); }); })
-.then(function (r) { render(); toast("Выписка: операций в файле " + r[0] + ", новых " + r[1]); }).catch(function (e) { toast("Не получилось: " + ((e && e.message) || e)); });
+fl.arrayBuffer().then(function (buf) { var txt; try { txt = new TextDecoder("utf-8", { fatal: true }).decode(buf); } catch (e) { txt = new TextDecoder("windows-1251").decode(buf); } return bkPreview(txt, fl.name); })
+.catch(function (e) { toast("Не получилось: " + ((e && e.message) || e)); });
 });
 i.click();
+}
+function bkPvHTML(cats) {
+var P = BKPV, rows = P.add.concat(P.dup).sort(function (a, b) { return a.d - b.d; }), dupk = {}; P.dup.forEach(function (o) { dupk[bkKey(o)] = 1; });
+var h = '<div class="card bkc bkpv"><div class="bch"><b>Предпросмотр выписки' + (P.fname ? " · " + esc(P.fname) : "") + '</b><span class="muted">операций в файле ' + P.ops.length + " · новых " + P.add.length + " · уже загружено (дубли) " + P.dup.length + "</span></div>";
+h += '<p class="muted">Проверьте, что даты и суммы разобраны верно (расходы — со знаком −). Дубли — операции с той же датой, суммой и описанием, они не загрузятся второй раз. Статья ставится по правилам ниже или по сопоставлению категорий банка.</p>';
+h += '<div class="r"><button type="button" class="btn pri" data-a="bkpvok"' + (P.add.length ? "" : " disabled") + ">✓ Загрузить " + P.add.length + " " + plural(P.add.length, ["новую операцию", "новые операции", "новых операций"]) + '</button><button type="button" class="btn" data-a="bkpvno">Отмена</button></div>';
+h += '<div class="ndbw"><table class="ndbt bkt"><thead><tr><th>Дата</th><th>Описание</th><th>Категория банка</th><th>Статья</th><th class="ndbnum">Сумма</th><th></th></tr></thead><tbody>' + rows.slice(0, 60).map(function (o) { var d = dupk[bkKey(o)], s = bkStat(o); return "<tr" + (d ? ' class="muted"' : "") + "><td>" + esc(new Date(o.d).toLocaleDateString("ru-RU")) + "</td><td>" + esc(o.t || "") + '</td><td class="muted">' + esc(o.c) + "</td><td>" + (s ? esc(s) : '<span class="muted">—</span>') + '</td><td class="ndbnum' + (o.a < 0 ? "" : " ok") + '">' + buRub2(o.a) + "</td><td>" + (d ? '<span class="muted">дубль</span>' : "новая") + "</td></tr>"; }).join("") + "</tbody></table></div>" + (rows.length > 60 ? '<p class="muted">Показаны первые 60 из ' + rows.length + ".</p>" : "");
+return h + "</div>";
+}
+function bkRulesHTML(cats) {
+var rs = bkRules();
+return '<h3>Правила: подстрока в описании → статья бюджета</h3><p class="muted">Например: «пятёрочка» → Продукты, «яндекс такси» → Транспорт. Правило сильнее сопоставления категорий банка. Правила общие для всех устройств.</p>' +
+(rs.length ? '<div class="chips bkrules">' + rs.map(function (r) { return '<span class="chip">«' + esc(r.q) + "» → " + esc(r.c) + ' <button type="button" class="ibtn" data-a="bkrdel" data-x="' + esc(r.q) + '" aria-label="Удалить правило">✕</button></span>'; }).join("") + "</div>" : "") +
+'<div class="r bkradd"><input class="inp" id="bkrq" placeholder="подстрока, например пятёрочка" maxlength="60"><select class="inp" id="bkrc"><option value="">— статья —</option>' + cats.map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + "</option>"; }).join("") + '</select><button type="button" class="btn sm" data-a="bkradd">＋ Правило</button></div>';
 }
 function bankHTML() {
 if (!BKOPS) { bkLoad().then(render); return '<p class="muted">Загружаю…</p>'; }
 var pers = buPers(), cur = buPid(today0()), ids = pers.map(function (P) { return P.id; }); if (ids.indexOf(cur) < 0) ids.push(cur); (BKOPS || []).forEach(function (o) { var pi = buPid(o.d); if (ids.indexOf(pi) < 0) ids.push(pi); }); if (!BKP || ids.indexOf(BKP) < 0) BKP = cur; var rg = buPRange(BKP), P = pers.filter(function (x) { return x.id === BKP; })[0], map = S.opt.bkmap || {};
 var ops = (BKOPS || []).filter(function (o) { return o.d >= rg.from && o.d < rg.to + DAY; }), exp = ops.filter(function (o) { return o.a < 0; }), inc = ops.filter(function (o) { return o.a > 0; }), byC = {}, byS = {};
-exp.forEach(function (o) { byC[o.c] = (byC[o.c] || 0) - o.a; var s = map[o.c]; if (s && s !== "-") byS[s] = (byS[s] || 0) - o.a; });
+exp.forEach(function (o) { byC[o.c] = (byC[o.c] || 0) - o.a; var s = bkStat(o, map); if (s && s !== "-") byS[s] = (byS[s] || 0) - o.a; });
 var cats = []; pers.forEach(function (x) { (x.cats || []).forEach(function (c) { if (cats.indexOf(c) < 0) cats.push(c); }); });
-var h = '<div class="card bkc"><div class="bch"><b>🏦 Выписка банка — сверка с бюджетом</b><span class="muted">операций загружено: ' + (BKOPS || []).length + (BKOPS && BKOPS.length ? " · " + esc(new Date(BKOPS[0].d).toLocaleDateString("ru-RU")) + " — " + esc(new Date(BKOPS[BKOPS.length - 1].d).toLocaleDateString("ru-RU")) : "") + '</span></div><p class="muted">Загрузите CSV из интернет-банка (Т-Банк: «Операции» → «Выгрузить» → CSV; в других банках — «Выписка» → CSV). Операции остаются только на этом устройстве и никуда не отправляются; на других устройствах — загрузите файл там. Повторная загрузка того же файла не задвоит операции.</p><div class="r"><button type="button" class="btn sm pri" data-a="bkload">📥 Загрузить выписку (CSV)</button>' + ((BKOPS || []).length ? '<button type="button" class="btn sm" data-a="bkclr">Очистить на этом устройстве</button>' : "") + '<label class="f">Период <select class="inp" id="bkper">' + ids.sort().map(function (id) { return '<option value="' + id + '"' + (id === BKP ? " selected" : "") + ">" + esc(buPName(id)) + "</option>"; }).join("") + "</select></label></div>";
-if (!ops.length) return h + '<p class="muted">В этом периоде операций из выписки нет.</p></div>';
+var h = BKPV ? bkPvHTML(cats) : "";
+h += '<div class="card bkc"><div class="bch"><b>🏦 Выписка банка — сверка с бюджетом</b><span class="muted">операций загружено: ' + (BKOPS || []).length + (BKOPS && BKOPS.length ? " · " + esc(new Date(BKOPS[0].d).toLocaleDateString("ru-RU")) + " — " + esc(new Date(BKOPS[BKOPS.length - 1].d).toLocaleDateString("ru-RU")) : "") + '</span></div><p class="muted">Загрузите CSV из интернет-банка (Т-Банк: «Операции» → «Выгрузить» → CSV; в других банках — «Выписка» → CSV). Операции остаются только на этом устройстве и никуда не отправляются; на других устройствах — загрузите файл там. Повторная загрузка того же файла не задвоит операции.</p><div class="r"><button type="button" class="btn sm pri" data-a="bkload">📥 Загрузить выписку (CSV)</button>' + ((BKOPS || []).length ? '<button type="button" class="btn sm" data-a="bkclr">Очистить на этом устройстве</button>' : "") + '<label class="f">Период <select class="inp" id="bkper">' + ids.sort().map(function (id) { return '<option value="' + id + '"' + (id === BKP ? " selected" : "") + ">" + esc(buPName(id)) + "</option>"; }).join("") + "</select></label></div>";
+if (!ops.length) return h + '<p class="muted">В этом периоде операций из выписки нет.</p>' + bkRulesHTML(cats) + "</div>";
 h += '<div class="butiles"><div class="butile"><small>Расходы по выписке</small><span>' + buRub(exp.reduce(function (s, o) { return s - o.a; }, 0)) + '</span><small class="muted">' + exp.length + ' операций</small></div><div class="butile"><small>Поступления</small><span class="ok">' + buRub(inc.reduce(function (s, o) { return s + o.a; }, 0)) + "</span></div></div>";
 if (P) { var st = (P.cats || []).filter(function (c) { return byS[c] || buFact(P, c); }); if (st.length) h += '<h3>Статьи бюджета: файл и выписка</h3><div class="ndbw"><table class="ndbt bkt"><thead><tr><th>Статья</th><th class="ndbnum">По файлу</th><th class="ndbnum">По выписке</th><th class="ndbnum">Разница</th></tr></thead><tbody>' + st.map(function (c) { var a = buFact(P, c), b = byS[c] || 0, d = b - a; return "<tr><td>" + esc(c) + '</td><td class="ndbnum">' + buRub(a) + '</td><td class="ndbnum">' + (byS[c] ? buRub(b) : '<span class="muted">не сопоставлено</span>') + '</td><td class="ndbnum ' + (Math.abs(d) < 1 ? "ok" : d > 0 ? "bad" : "") + '">' + (byS[c] ? (d > 0 ? "+" : "") + buRub(d) : "") + "</td></tr>"; }).join("") + "</tbody></table></div>"; }
 else h += '<p class="muted">Для этого периода нет данных из файла Excel — показываю только выписку.</p>';
 h += '<h3>Категории банка → статьи бюджета</h3><div class="ndbw"><table class="ndbt bkt"><thead><tr><th>Категория в банке</th><th class="ndbnum">Сумма</th><th>Статья бюджета</th></tr></thead><tbody>' + Object.keys(byC).sort(function (a, b) { return byC[b] - byC[a]; }).map(function (c) { var m = map[c] || ""; return "<tr><td>" + esc(c) + '</td><td class="ndbnum">' + buRub(byC[c]) + '</td><td><select class="inp" data-bkmap="' + esc(c) + '"><option value="">— выбрать —</option><option value="-"' + (m === "-" ? " selected" : "") + ">не учитывать</option>" + cats.map(function (s) { return '<option value="' + esc(s) + '"' + (m === s ? " selected" : "") + ">" + esc(s) + "</option>"; }).join("") + "</select></td></tr>"; }).join("") + "</tbody></table></div>";
+h += bkRulesHTML(cats);
+h += bkRulesHTML(cats);
+h += bkRulesHTML(cats);
 h += svbHTML(ops);
 h += '<details class="bkop"><summary>Крупные траты периода</summary><div class="ndbw"><table class="ndbt bkt"><tbody>' + exp.slice().sort(function (a, b) { return a.a - b.a; }).slice(0, 15).map(function (o) { return "<tr><td>" + esc(new Date(o.d).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })) + "</td><td>" + esc(o.t || o.c) + '</td><td class="muted">' + esc(o.c) + '</td><td class="ndbnum">' + buRub(-o.a) + "</td></tr>"; }).join("") + "</tbody></table></div></details>";
 return h + "</div>";
@@ -19434,6 +19515,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["333", "🏦 Выписка банка: предпросмотр, правила по подстрокам, Сбер и простой CSV", ["«Бюджет» → «🏦 Выписка». Теперь файл сначала показывается в предпросмотре: даты, описания, суммы (расходы со знаком −), статья бюджета и отметка «новая» или «дубль». Загружаются только новые операции — повтор того же файла или пересекающихся выписок ничего не задвоит.", "Понимаются выписки Т-Банка, Сбера (где сумма без знака, а «Расход/Приход» отдельным столбцом) и простой CSV без заголовка: дата; сумма; описание.", "Правила категорий по подстрокам: «пятёрочка» → Продукты, «такси» → Транспорт. Правило срабатывает по описанию или категории банка и сильнее сопоставления категорий; правила общие для всех устройств. Сами операции, как и раньше, остаются только на этом устройстве."]],
 ["332", "🌅 «Начать день» на телефоне", ["На телефоне вверху «Сегодня» появилась одна большая кнопка «🌅 Начать день» (днём — «☀ Мой день», вечером — «🌙 Мой день»). Она открывает шторку: приветствие, подсказка дня (утренний план или «сейчас»), числа — сколько во входящих, просрочено и сделано, ссылки на утренний план и разбор входящих, «★ Главное на сегодня», «🌱 Привычки сегодня» и «▶ Первое дело» с кнопками «🍅 Помидор 25 мин» и «✓ Готово».", "Отметки в шторке сразу обновляют её; ✕ или Esc закрывают. На компьютере кнопки нет — там всё это уже на Главной."]],
 ["331", "⚡ Разбор «Входящих» по одной задаче", ["Во «Входящих» появилась кнопка «⚡ Разобрать»: задачи показываются по одной, большой карточкой, со счётчиком «осталось N из M». Под карточкой — кнопки «Сегодня», «Завтра», «Когда-нибудь», «В проект…», «Удалить» и «Пропустить».", "На компьютере — клавиши 1–5, стрелка → пропускает, Esc заканчивает. На телефоне — свайп по карточке: вправо — на сегодня, влево — в «Когда-нибудь». Когда очередь пуста, разбор закрывается сам. Любое решение можно отменить «Вернуть» или ↶ в меню профиля."]],
 ["330", "↶ Отменить последнее действие — и на телефоне", ["В меню профиля «Я» появился пункт «↶ Отменить» с описанием последнего действия («Отменить: выполнено …»). На телефоне, где нет Ctrl+Z, это главный способ вернуть всё как было.", "Подсказка «Вернуть» внизу экрана теперь появляется и после переноса задачи на другой день или время (раньше — только после «Готово», удаления и смены проекта), а сама ссылка стала крупнее — удобнее нажимать пальцем."]],
@@ -23577,7 +23659,7 @@ by[k] = (by[k] || "") + "<section" + x;
 if (STQ.trim()) return auxHead("Настройки") + stqBar() + stqRes(parts);
 return auxHead("Настройки") + stqBar() + '<div class="stabs"><nav class="stnav" aria-label="Разделы настроек">' + STABS.map(function (x) { return '<a href="#settings-' + x[0] + '" class="' + (cur === x[0] ? "on" : "") + '">' + ic(x[1]) + "<span>" + x[2] + "</span></a>"; }).join("") + '</nav><div class="stbody">' + (by[cur] || "") + "</div></div>";
 }
-var HTABS = [["money", "budget", "Деньги и бюджет", ["mg-how", "mg-kinds", "mg-week", "mg-per", "mg-regs", "mg-debts", "mg-paid", "mg-whatif", "mg-sav", "mg-wish", "mg-hab", "mg-hour", "mg-chal", "mg-sv", "mg-faq", "budget"]], ["home", "clean", "Гайд: порядок дома", ["hg-why", "hg-princ", "hg-levels", "hg-base", "hg-clean", "hg-zone", "hg-decl", "hg-sos", "hg-check", "hg-inv", "hg-family", "hg-mist", "hg-app", "hg-chal", "hg-places", "hg-faq", "hg-read"]], ["start", "help", "С чего начать", ["start", "demo", "flow", "switch", "phone", "ptabs", "quick", "mini", "pal", "keys"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "resp", "undo", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "food", "clean", "routine", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data", "lock"]]];
+var HTABS = [["money", "budget", "Деньги и бюджет", ["mg-how", "mg-kinds", "mg-week", "mg-per", "mg-regs", "mg-debts", "mg-paid", "mg-whatif", "mg-sav", "mg-bank", "mg-wish", "mg-hab", "mg-hour", "mg-chal", "mg-sv", "mg-faq", "budget"]], ["home", "clean", "Гайд: порядок дома", ["hg-why", "hg-princ", "hg-levels", "hg-base", "hg-clean", "hg-zone", "hg-decl", "hg-sos", "hg-check", "hg-inv", "hg-family", "hg-mist", "hg-app", "hg-chal", "hg-places", "hg-faq", "hg-read"]], ["start", "help", "С чего начать", ["start", "demo", "flow", "switch", "phone", "ptabs", "quick", "mini", "pal", "keys"]], ["tasks", "done", "Задачи", ["card", "editor", "dates", "status", "sub", "deps", "track", "files", "share", "menu", "resp", "undo", "multi", "chat", "hist", "trash", "tarch"]], ["lists", "all", "Списки и виды", ["lists", "views", "board", "cal", "gantt", "matrix"]], ["dash", "board", "Доски", ["dash"]], ["projects", "archive", "Проекты", ["tree", "sec", "focus", "arch"]], ["notes", "note", "Заметки", ["notes"]], ["org", "flag", "Теги, флажки, фильтры", ["tags", "ctx", "flags", "fav", "filters"]], ["plan", "sprint", "Планирование", ["daily", "sets", "food", "clean", "routine", "now", "journal", "goals", "sprint", "habits", "pomo", "stats", "time", "report"]], ["rem", "timer", "Напоминания и Telegram", ["rem", "bnotif", "digest", "bot", "srv"]], ["ai", "spark", "Голос и ИИ", ["voice", "ai"]], ["data", "cloud", "Данные и настройки", ["sync", "backup", "test", "look", "settings", "diag", "data", "lock"]]];
 (function () {
 var add = function (k, ids) { var t = HTABS.filter(function (x) { return x[0] === k; })[0]; if (t) t[3] = t[3].concat(ids); };
 var si = 0; HTABS.forEach(function (x, i) { if (x[0] === "start") si = i + 1; });
@@ -25101,6 +25183,10 @@ tstMerge(j); render(); toast("Тестовые данные добавлены: 
 }).catch(function (er) { render(); toast("Не удалось загрузить: " + (er.message || "нет связи")); }); return;
 case "tstwipe-yes": var tn = wipeTest(); CONF = null; if (V === "board" && !board(ARG)) go("settings"); render(); toast("Тестовые данные удалены" + (tn ? " · задач: " + tn : "")); return;
 case "look": setLook(el.dataset.k, el.dataset.v); return;
+case "bkpvok": bkPvOk(); return;
+case "bkpvno": BKPV = null; render(); return;
+case "bkradd": if (bkRuleAdd(($("bkrq") || {}).value, ($("bkrc") || {}).value)) toast("Правило добавлено"); return;
+case "bkrdel": bkRuleDel(el.dataset.x); return;
 case "sdopen": sdOpen(); return;
 case "sdclose": sdClose(); return;
 case "sdgo": sdClose(); return; /* ссылка сработает сама */
