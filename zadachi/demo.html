@@ -1946,6 +1946,7 @@ body.pgsheet::after { content: ""; position: fixed; inset: 0; background: rgba(0
 .lksv-glass .x1, .lksv-glass .x2, .lksv-glass .s { background: color-mix(in srgb, var(--p) 55%, transparent); border: 1px solid color-mix(in srgb, #fff 60%, transparent); border-radius: 7px }
 .lksv-bento .x1 { background: var(--q1); border-radius: 8px } .lksv-bento .x2 { background: var(--q2); border-radius: 8px }
 .lksv-expr .x1 { background: var(--q1); border-radius: 12px } .lksv-expr .x2 { background: var(--q2); border-radius: 12px 12px 12px 3px } .lksv-expr .r:last-child { border-radius: 9px }
+#toast a[data-a="undo"] { display: inline-block; padding: 6px 10px; margin: -6px -4px -6px 0; border-radius: 8px; text-decoration: underline }
 html.pfog body::after { content: ""; position: fixed; inset: 0; z-index: 44; background: color-mix(in srgb, var(--bg) 74%, transparent); pointer-events: none; animation: pfogin .7s ease-out }
 @keyframes pfogin { from { opacity: 0 } to { opacity: 1 } }
 html.pfog .task.pomocur { position: relative; z-index: 45; background: var(--panel); border-radius: 12px; box-shadow: 0 8px 28px rgba(0, 0, 0, .18), 0 0 0 2px color-mix(in srgb, var(--acc) 45%, transparent) }
@@ -8708,7 +8709,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-329";
+var APPV = "zd-app-2026-10-16-330";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -19385,6 +19386,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["330", "↶ Отменить последнее действие — и на телефоне", ["В меню профиля «Я» появился пункт «↶ Отменить» с описанием последнего действия («Отменить: выполнено …»). На телефоне, где нет Ctrl+Z, это главный способ вернуть всё как было.", "Подсказка «Вернуть» внизу экрана теперь появляется и после переноса задачи на другой день или время (раньше — только после «Готово», удаления и смены проекта), а сама ссылка стала крупнее — удобнее нажимать пальцем."]],
 ["329", "🌇 Режим «По солнцу»: тёмный от заката до рассвета", ["В «Настройки» → «Оформление» → «Режим» появился четвёртый вариант — «По солнцу». Укажите один раз город из списка (Москва, Казань, Минск, Алматы… — около 50 городов) или широту и долготу, и тёмный режим будет включаться на закате и выключаться на рассвете. Время заката считается прямо в приложении, без интернета; за полярным кругом учитываются полярный день и ночь.", "Геолокация не используется, пока вы сами не нажмёте «📍 Определить». Координаты общие для всех устройств, а выбранный режим — свой на каждом, как и раньше. Приложение проверяет время раз в минуту и переключает режим само."]],
 ["328", "🍅 Фокус-туман во время помидора", ["Новая настройка в «Оформлении»: пока идёт рабочая фаза помидора, всё на экране, кроме строки текущей задачи, её карточки и таймера, приглушается полупрозрачной пеленой. Нажимать можно всё как обычно — пелена только для глаз. На паузе и в перерыве туман снимается. Если в системе включено «уменьшить движение», туман появляется без анимации."]],
 ["327", "⌨ Команды через «/» в быстром вводе", ["В поле новой задачи наберите «/» — появится список команд: /сегодня, /завтра, /послезавтра, /проект Имя, /приоритет 1, /напомнить 18:00, /дедлайн пт, /когда-нибудь, /флажок. Команды можно ставить в любом месте строки: «/завтра купить хлеб /приоритет 1». «/проект» понимает названия из нескольких слов и ищет по началу названия; незнакомое имя создаст новый проект. «/напомнить 18:00» ставит время и включает напоминание, даже если автонапоминания выключены."]],
@@ -21560,6 +21562,7 @@ function prfMenu(el) {
 var r = el.getBoundingClientRect(), dark = isDark(), xs = xpOn() ? xpStats() : null;
 var it = [];
 if (YD.on) it.push({ c: "sync", i: "☁", l: !YD.token() ? "Войти через Яндекс" : SYNC.st === "err" ? "Нет связи с Диском — повторить" : "Синхронизировать" + (SYNC.at ? " · " + hm(SYNC.at) : "") });
+var ug = UNDOS[UNDOS.length - 1]; it.push({ c: "undo", i: "↶", l: ug ? "Отменить: " + unDesc(ug).t.toLowerCase() : "Отменить последнее действие", k: ug ? "" : "—" }, "-");
 it = it.concat([{ c: "theme", i: "🌓", l: "Тема: " + (dark ? "тёмная → светлая" : "светлая → тёмная") }, { c: "settings", i: "⚙", l: "Настройки" }, { c: "mods", i: "🧩", l: "Модули" }, "-", { c: "help", i: "?", l: "Справка" }, { c: "keys", i: "⌨", l: "Горячие клавиши" }, { c: "news", i: "✨", l: "Что нового" }]);
 if (xs) it.push({ c: "xp", i: "⭐", l: "Уровень " + xs.lvl + " · " + xs.xp + " очков" });
 it.push(isDemo() ? { c: "demo", i: "↗", l: "Открыть основное приложение" } : { c: "demo", i: "▶", l: "Демо-версия — все возможности на примерах" });
@@ -21581,6 +21584,7 @@ ctxShow(r.left, r.bottom + 4, it, { k: "pgm" });
 function hzCtx(k, id, c) {
 if (k === "prf") {
 if (c === "demo") { demoOpen(); return true; }
+if (c === "undo") { if (!undoLast()) toast("Отменять нечего"); return true; }
 if (c === "sync") $("syncBtn").click(); else if (c === "theme") { $("themeBtn").click(); render(); } else if (c === "keys") keysShow(); else if (c === "xp") { STTAB = "xp"; LS.set("zd-sttab", "xp"); go("stats"); }
 else if (c === "topfull") { S.opt.topfull = S.opt.topfull === true ? false : true; optTouch(); save(); prfSync(); railSync(); toast(S.opt.topfull ? "В верхней строке снова все кнопки" : "Верхняя строка — только главное; остальное в меню профиля"); }
 else go(c); return true;
@@ -24211,9 +24215,10 @@ if (!o.del && n.del) { kind = kind || "del"; big = true; }
 else if (!o.done && n.done) { kind = kind || "done"; big = true; }
 else if (o.done && !n.done) { kind = kind || "undone"; big = true; }
 else if ((o.pid || "") !== (n.pid || "") || (o.parent || "") !== (n.parent || "")) { kind = kind || "move"; big = true; }
+else if (!n.done && (o.at || 0) !== (n.at || 0) && o.at) { kind = kind || "resch"; big = true; } // v330: перенос на другой день / время
 });
 var one = ts.length === 1 && task(ts[0].id), nm = one ? "«" + (String(one.t || "").length > 40 ? String(one.t).slice(0, 39) + "…" : String(one.t || "")) + "»" : "";
-var t = { del: "Удалено", done: "Выполнено", undone: "Снова не выполнено", move: "Перенесено" }[kind] || "Изменено";
+var t = { del: "Удалено", done: "Выполнено", undone: "Снова не выполнено", move: "Перенесено", resch: "Перенесено" + (ts.length === 1 && task(ts[0].id) && task(ts[0].id).at ? " на " + whenTxt(task(ts[0].id)).toLowerCase() : "") }[kind] || "Изменено";
 t += ts.length > 1 ? ": задач " + ts.length : nm ? ": " + nm : "";
 return { big: big, t: t };
 }
@@ -24236,12 +24241,11 @@ DV++; save();
 render(); if (OPEN) renderPanel();
 return true;
 }
+function undoLast() { var g = UNDOS[UNDOS.length - 1], d = g ? unDesc(g).t : ""; if (!g && UNDOF) { var uf = UNDOF; UNDOF = null; if (uf.un) uf(); else { uf(); save(); render(); if (OPEN) renderPanel(); } $("toast").hidden = true; toast("↶ Отменено"); return true; } if (unDo(g)) { $("toast").hidden = true; UNDOF = null; toast("↶ Отменено — " + d); return true; } return false; }
 document.addEventListener("keydown", function (e) {
 if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || e.code !== "KeyZ") return;
 var tg = e.target; if (tg && (tg.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName))) return; // в полях — обычная отмена ввода
-e.preventDefault();
-var g = UNDOS[UNDOS.length - 1], d = g ? unDesc(g).t : "";
-if (unDo(g)) { $("toast").hidden = true; UNDOF = null; toast("↶ Отменено — " + d); }
+e.preventDefault(); undoLast();
 });
 function bkObj() { var o = { format: "zadachi-backup", v: 2, at: new Date().toISOString() }; LISTS.forEach(function (k) { o[k] = S[k] || []; }); o.opt = S.opt; return o; }
 var BKDIR = "app:/tasks/backups", BKL = null, BKBUSY = false;
