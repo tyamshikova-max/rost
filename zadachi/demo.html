@@ -8601,6 +8601,20 @@ var m = /^(\d{1,2})\.(\d{1,2})(?:\.(\d{2,4}))?$/.exec(tok); if (m) { var yy = m[
 var w = wdOf(tok); if (w >= 0) { var add = (w - new Date().getDay() + 7) % 7; return t00 + (add || 7) * DAY; }
 return null;
 }
+cut(/\s\/(сегодня|завтра|послезавтра)(?=\s)/gi, function (a, w) { out.day = dayFrom(w); });
+cut(/\s\/приоритет\s?([1-3])(?=\s)/gi, function (a, n) { out.prio = +n; });
+cut(/\s\/(когда-нибудь|когда_нибудь|потом)(?=\s)/gi, function () { out.some = true; });
+cut(/\s\/(флажок|флаг)(?=\s)/gi, function () { out.flag = out.flag || true; });
+cut(/\s\/напомнить\s(?:(сегодня|завтра|послезавтра)\s)?(?:в\s)?(\d{1,2})(?::(\d{2}))?(?=\s)/gi, function (a, d, h, mi) { if (+h < 24 && +(mi || 0) < 60) { out.time = [+h, +(mi || 0)]; out.rem = 1; if (d) out.day = dayFrom(d); } });
+cut(new RegExp("\\s\\/(?:дедлайн|срок)\\s(сегодня|завтра|послезавтра|\\d{1,2}\\.\\d{1,2}(?:\\.\\d{2,4})?|" + WDRE + ")(?=\\s)", "gi"), function (a, tok) { var d = dayFrom(tok); if (d !== null) out.due = d; });
+var pm = /\s\/проект\s+/i.exec(s);
+if (pm) {
+var rest = s.slice(pm.index + pm[0].length), rl = rest.toLowerCase(), best = null;
+projects().forEach(function (p) { if (isArch(p.id)) return; var nm = p.n.toLowerCase(); if (rl.indexOf(nm + " ") === 0 && (!best || nm.length > best.n.length)) best = p; });
+var used = best ? best.n.length : ((/^\S+/.exec(rest) || [""])[0]).length;
+if (best) out.pid = best.id; else if (used) { var w1 = rest.slice(0, used), fp = findProj(w1); if (fp) out.pid = fp.id; else out.newProj = w1.replace(/_/g, " "); }
+s = s.slice(0, pm.index) + " " + rest.slice(used);
+}
 cut(new RegExp("\\s(?:до|к|дедлайн)\\s(сегодня|завтра|послезавтра|\\d{1,2}\\.\\d{1,2}(?:\\.\\d{2,4})?|" + WDRE + ")(?=\\s)", "gi"), function (a, tok) { var d = dayFrom(tok); if (d !== null) out.due = d; });
 var snzOf = function (n, u) { u = u.toLowerCase(); var d = new Date(t00); if (/^(п|пол)/.test(u)) d.setMonth(d.getMonth() + 6); else if (/^д/.test(u)) d.setDate(d.getDate() + n); else if (/^н/.test(u)) d.setDate(d.getDate() + 7 * n); else if (/^(г|л)/.test(u)) d.setFullYear(d.getFullYear() + n); else d.setMonth(d.getMonth() + n); return d.getTime(); };
 cut(/\s(?:вернуться|отложить|напомнить)\s(?:через|на)\s(?:(\d+)\s)?(полгода|дн[яей]|день|недел[июь]|месяц[аев]*|год[а]?|лет)(?=\s)/gi, function (a, n, u) { out.snz = snzOf(n ? +n : 1, u); });
@@ -8658,6 +8672,7 @@ if (q.due) bits.push("⏰ до " + dayName(q.due).toLowerCase());
 if (q.pid) bits.push("📁 " + pname(proj(q.pid))); else if (q.newProj) bits.push("📁 новый проект «" + q.newProj + "»");
 q.tags.forEach(function (t) { bits.push("#" + t); });
 if (q.prio) bits.push("приоритет " + q.prio);
+if (q.rem) bits.push("🔔 напомнить"); if (q.some) bits.push("🗂 когда-нибудь");
 if (q.flag) { var qf = q.flag === true ? flagObj(defFlag()) : flagObj(q.flag); bits.push("🚩 " + (qf ? qf.n : "флажок")); }
 return bits.join("  ·  ");
 }
@@ -8687,7 +8702,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-326";
+var APPV = "zd-app-2026-10-16-327";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -9750,7 +9765,7 @@ var QOPEN = false, ADDOK = false;
 function addBox() {
 ADDOK = true; if (!QOPEN) return "";
 return '<div class="add qfloat"><button type="button" class="qx" data-a="qclose" title="Закрыть (Esc)" aria-label="Закрыть">✕</button><div class="r1"><input class="t" id="qa" type="text" autocomplete="off" placeholder="Новая задача — например: завтра 10:00 позвонить в банк #дела" value="' + esc(QPV) + '"><button class="btn mic" type="button" data-a="mic" data-for="qa" title="Сказать задачу голосом">🎤</button><button class="btn mic" type="button" data-a="imgt" title="Задачи с картинки: скриншот расписания, записи, списка дел">📷</button><button class="btn pri" type="button" data-a="add">Добавить</button></div>' +
-'<div class="pv" id="qpv"></div><div class="hint">Можно сразу: <code>сегодня</code> <code>завтра</code> <code>пт</code> <code>20.10</code> <code>в 18:30</code> · <code>#тег</code> · <code>+Проект</code> · <code>!1</code> приоритет · <code>!!</code> флажок · <code>каждый день</code></div></div>';
+'<div class="pv" id="qpv"></div><div class="hint">Можно сразу: <code>сегодня</code> <code>завтра</code> <code>пт</code> <code>20.10</code> <code>в 18:30</code> · <code>#тег</code> · <code>+Проект</code> · <code>!1</code> приоритет · <code>!!</code> флажок · <code>каждый день</code> · <code>/</code> — команды</div></div>';
 }
 function subHidden() { try { var a = JSON.parse(LS.get("zd-subhide") || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
 function head(title, sub) {
@@ -19364,6 +19379,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["327", "⌨ Команды через «/» в быстром вводе", ["В поле новой задачи наберите «/» — появится список команд: /сегодня, /завтра, /послезавтра, /проект Имя, /приоритет 1, /напомнить 18:00, /дедлайн пт, /когда-нибудь, /флажок. Команды можно ставить в любом месте строки: «/завтра купить хлеб /приоритет 1». «/проект» понимает названия из нескольких слов и ищет по началу названия; незнакомое имя создаст новый проект. «/напомнить 18:00» ставит время и включает напоминание, даже если автонапоминания выключены."]],
 ["326", "🔤 Шрифты стилей теперь работают без сети", ["Каждый стиль оформления использует свои шрифты Google. Раньше без интернета они могли не загрузиться, и приложение открывалось системным шрифтом. Теперь после первой загрузки шрифт откладывается в отдельный офлайн-кэш, который не стирается при обновлении версии; при выборе стиля приложение заранее скачивает и его шрифты. Интернет нужен один раз — когда вы выбираете стиль."]],
 ["325", "⏱ Скорость открытия проверена", ["Замерили, за сколько защищённая паролем сборка показывает первый экран в Chrome на компьютере: холодный старт (ввод пароля, вычисление ключа, расшифровка, запуск) — около 0,6–0,8 секунды, тёплый старт (ключ уже сохранён) — около 0,6 секунды; без защиты — около 0,8 секунды. Это заметно быстрее порога в 2 секунды, поэтому делить приложение на подгружаемые части не стали: один файл открывается и без сети, как раньше.", "Свой запуск на любом устройстве видно в «Настройки» → «Диагностика» → «⏱ Скорость запуска»: сравните компьютер и телефон. Для разработчика добавлен скрипт tools/measure_start.py — он собирает защищённую копию с тестовым паролем и трижды замеряет холодный и тёплый старт."]],
 ["324", "🔒 Изоляция пространства проверена во всех разделах", ["Автотест теперь проходит все разделы приложения, доску со всеми виджетами, рабочий стол пространства и карточку задачи в изолированном пространстве и проверяет, что чужих задач, проектов, целей, заметок и привычек там нет.", "Заделаны найденные дыры: «Обзор недели» и «Баланс сфер» показывали все проекты, «Дневник целей», «План пространства» и виджеты «Цели» и «Привычки» на доске — все цели и привычки, «Отчёты» считали чужие задачи, а выбор проекта в карточке задачи и в меню предлагал проекты других пространств. Страница чужой цели по прямой ссылке теперь говорит, что цель вне пространства."]],
@@ -20024,16 +20040,18 @@ if (e.key === "Escape" && KFOC) { KFOC = ""; kfocPaint(); }
 var QAC = null;
 function qacEl() { var d = $("qacdd"); if (!d) { d = document.createElement("div"); d.id = "qacdd"; d.className = "tagdd"; d.hidden = true; d.setAttribute("role", "listbox"); document.body.appendChild(d); d.addEventListener("mousedown", function (e) { e.preventDefault(); var b = e.target.closest("[data-qi]"); if (b && QAC) { QAC.i = +b.dataset.qi; qacPick(); } }); } return d; }
 function qacHide() { QAC = null; var d = $("qacdd"); if (d) d.hidden = true; }
+var QCMDS = [["/сегодня", "на сегодня"], ["/завтра", "на завтра"], ["/послезавтра", "на послезавтра"], ["/проект", "в проект — дальше его имя"], ["/приоритет 1", "приоритет 1, 2 или 3"], ["/напомнить 18:00", "напоминание в это время (можно: завтра 9:00)"], ["/дедлайн завтра", "крайний срок: завтра, пт, 20.10"], ["/когда-нибудь", "без даты — в «Когда-нибудь»"], ["/флажок", "поставить флажок"]];
 function qacShow(inp) {
-var v = inp.value, pos = inp.selectionStart === null ? v.length : inp.selectionStart, m = v.slice(0, pos).match(/(^|\s)([+#@!])([^\s+#@!]*)$/); if (!m) { qacHide(); return; }
+var v = inp.value, pos = inp.selectionStart === null ? v.length : inp.selectionStart, m = v.slice(0, pos).match(/(^|\s)([+#@!\/])([^\s+#@!\/]*)$/); if (!m) { qacHide(); return; }
 var ch = m[2], q = m[3].toLowerCase().replace(/_/g, " "), items = [];
 if (ch === "#") items = tags().filter(function (g) { return !isCtx(g.n) && g.n.toLowerCase().indexOf(q) >= 0; }).slice(0, 12).map(function (g) { return { ins: "#" + g.n, l: "#" + g.n, c: col(g.c) }; });
 else if (ch === "@") items = tags().filter(function (g) { return isCtx(g.n) && g.n.toLowerCase().indexOf(q) >= 0; }).slice(0, 12).map(function (g) { return { ins: g.n, l: g.n, c: col(g.c) }; });
 else if (ch === "+") items = projects().filter(function (p) { return !isArch(p.id) && p.n.toLowerCase().indexOf(q) >= 0; }).slice(0, 12).map(function (p) { return { ins: "+" + p.n.replace(/\s+/g, "_"), l: pname(p), c: col(p.c) }; });
+else if (ch === "/") items = QCMDS.filter(function (x) { return !q || x[0].slice(1).indexOf(q) === 0; }).map(function (x) { return { ins: x[0], l: x[0] + " — " + x[1] }; });
 else items = [["!1", "срочно"], ["!2", "важно"], ["!3", "желательно"], ["!!", "флажок"]].filter(function (x) { return !q || x[0].slice(1).indexOf(q) === 0; }).map(function (x) { return { ins: x[0], l: x[0] + " — " + x[1] }; });
 if (!items.length) { qacHide(); return; }
 var d = qacEl(); QAC = { inp: inp, items: items, i: QAC && QAC.inp === inp ? Math.min(QAC.i, items.length - 1) : 0, from: pos - m[3].length - 1, to: pos };
-d.innerHTML = '<div class="tde">' + (ch === "+" ? "Проект" : ch === "#" ? "Тег" : ch === "@" ? "Контекст" : "Приоритет или флажок") + " · Tab или Enter — вставить</div>" + items.map(function (x, i) { return '<button type="button" role="option" data-qi="' + i + '" class="' + (i === QAC.i ? "on" : "") + '">' + (x.c ? '<i style="background:' + x.c + '"></i>' : "") + esc(x.l) + "</button>"; }).join("");
+d.innerHTML = '<div class="tde">' + (ch === "+" ? "Проект" : ch === "#" ? "Тег" : ch === "@" ? "Контекст" : ch === "/" ? "Команда" : "Приоритет или флажок") + " · Tab или Enter — вставить</div>" + items.map(function (x, i) { return '<button type="button" role="option" data-qi="' + i + '" class="' + (i === QAC.i ? "on" : "") + '">' + (x.c ? '<i style="background:' + x.c + '"></i>' : "") + esc(x.l) + "</button>"; }).join("");
 var r = inp.getBoundingClientRect(); d.hidden = false; d.style.left = Math.max(8, Math.min(r.left + 8, innerWidth - 268)) + "px";
 var below = innerHeight - r.bottom > 230; d.style.top = below ? r.bottom + 4 + "px" : ""; d.style.bottom = below ? "" : innerHeight - r.top + 4 + "px";
 }
@@ -23998,14 +24016,14 @@ if (ctx.parent) { var par = task(ctx.parent); if (par && !q.pid) t.pid = par.pid
 if (ctx.pid && !t.pid) t.pid = ctx.pid;
 (ctx.tags || []).forEach(function (g) { if (t.tags.indexOf(g) < 0) t.tags.push(g); });
 if (ctx.flag) t.flag = ctx.flag === true ? defFlag() : ctx.flag;
-if (ctx.some && !t.at && !t.due) t.some = true;
+if ((ctx.some || q.some) && !t.at && !t.due) t.some = true;
 if (q.snz && q.snz > today0()) { t.snz = q.snz; t.snzAt = Date.now(); }
 if (ctx.day && !t.at && !t.due) { t.at = ctx.day; t.allday = true; }
 if (ctx.sprint) t.sprint = ctx.sprint;
 if (ctx.goal && goal(ctx.goal)) t.goal = ctx.goal;
 if (ctx.today && !t.at) { t.at = today0(); t.allday = true; }
 t.tags.forEach(ensureTag);
-t.rem = !!(t.at && !t.allday && S.opt.autoRem);
+t.rem = !!(t.at && !t.allday && (S.opt.autoRem || q.rem));
 S.tasks.unshift(touch(t));
 return t;
 }
