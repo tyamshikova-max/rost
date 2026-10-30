@@ -135,7 +135,7 @@ h2 .c { font: 500 calc(12px * var(--fs)) var(--mono); color: var(--muted) }
 .add .pv { font-size: calc(12.5px * var(--fs)); color: var(--acc); padding: 0 8px 4px }
 .btn { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 13px; cursor: pointer; font-size: calc(14px * var(--fs)); font-weight: 500; white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; text-decoration: none; color: var(--fg) }
 .btn:hover { background: var(--hover) }
-.btn.pri { background: var(--acc); border-color: var(--acc); color: #fff }
+.btn.pri { background: var(--acc); border-color: var(--acc); color: var(--onacc, #fff) }
 .btn.warn { color: var(--warn) }
 .btn.sm { padding: 3px 9px; font-size: calc(13px * var(--fs)) }
 .btn:disabled { opacity: .45; cursor: default }
@@ -220,7 +220,7 @@ h2 .c { font: 500 calc(12px * var(--fs)) var(--mono); color: var(--muted) }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden }
 @media (max-width: 600px) { .main .seg { flex-wrap: wrap; max-width: 100% } }
 .seg button { border: 0; background: var(--panel); padding: 6px 12px; cursor: pointer; font-size: calc(13.5px * var(--fs)) }
-.seg button.on { background: var(--acc); color: #fff }
+.seg button.on { background: var(--acc); color: var(--onacc, #fff) }
 .help h2 { font-size: calc(18px * var(--fs)); margin-top: 26px }
 .help p, .help li, .help td { overflow-wrap: anywhere }
 .help table { border-collapse: collapse; width: 100%; font-size: calc(14px * var(--fs)) }
@@ -1721,6 +1721,30 @@ html.st-expr .ck { border-color: var(--acc) }
 html.st-expr .task.done .ck, html.st-expr .hzr.dn .hzck { animation: xpop .4s cubic-bezier(.3, 1.6, .5, 1) }
 @keyframes xpop { 0% { transform: scale(.6) } 60% { transform: scale(1.2) } 100% { transform: scale(1) } }
 @media (prefers-reduced-motion: reduce) { html.st-expr .task.done .ck, html.st-expr .hzr.dn .hzck { animation: none } html.st-expr .btn { transition: none } }
+html.st-graphite .card, html.st-graphite .wdg, html.st-graphite .btn, html.st-graphite .nav a, html.st-graphite .chip, html.st-graphite .hzs, html.st-graphite .hzs2 { border-radius: 6px }
+html.st-graphite .task.done .tt { text-decoration: none; opacity: .5 }
+html.st-graphite h1 { letter-spacing: -.02em }
+html.st-paper .card, html.st-paper .wdg { border-radius: 8px; box-shadow: none }
+html.st-paper .ck, html.st-paper .hzck { border-color: var(--acc) }
+html.st-north .card, html.st-north .wdg { border-radius: 10px }
+html.st-north h1 { letter-spacing: -.01em }
+html.st-term .card, html.st-term .wdg, html.st-term .btn, html.st-term .chip, html.st-term .nav a, html.st-term .hzs, html.st-term .hzs2 { border-radius: 4px }
+html.st-term .ck, html.st-term .hzck { border-radius: 3px }
+html.st-clay .top, html.st-clay .side { border-color: transparent }
+html.st-clay .card, html.st-clay .wdg, html.st-clay .hzs { border: 0; border-radius: 16px; box-shadow: 0 1px 2px rgba(60, 40, 20, .06) }
+html.st-clay .btn { border: 0; border-radius: 999px; background: var(--hover) } html.st-clay .btn.pri { background: var(--acc) }
+html.st-clay .chip { border: 0; background: var(--hover) } html.st-clay .nav a { border-radius: 12px }
+html.st-sage .card, html.st-sage .wdg { border-radius: 10px }
+html.st-indigo .card, html.st-indigo .wdg { border-radius: 10px }
+html.st-indigo .hzclk, html.st-indigo .wnum { font-family: var(--numf, var(--mono)); font-weight: 500; letter-spacing: -.01em }
+html.st-outline .card, html.st-outline .wdg, html.st-outline .btn, html.st-outline .chip, html.st-outline .nav a, html.st-outline .hzs, html.st-outline .hzs2, html.st-outline .top .q, html.st-outline input, html.st-outline select, html.st-outline textarea, html.st-outline .ck, html.st-outline .hzck { border-radius: 0 }
+html.st-outline .card, html.st-outline .wdg { border: 1px solid var(--line); box-shadow: none; background: var(--bg) }
+html.st-outline .btn { background: transparent } html.st-outline .btn.pri { background: var(--acc); border-color: var(--acc) }
+html.st-outline .nav a.on { background: transparent; box-shadow: inset 0 0 0 1px var(--line) }
+html.st-dune .card, html.st-dune .wdg, html.st-dune .hzs { border-radius: 16px } html.st-dune .btn, html.st-dune .chip { border-radius: 999px }
+html.st-mist .top, html.st-mist .side { border-color: transparent }
+html.st-mist .card, html.st-mist .wdg, html.st-mist .hzs { border-color: transparent; border-radius: 14px } html.st-mist .btn { border-radius: 10px }
+.lksv-term i, .lksv-outline i, .lksv-graphite i { border-radius: 1px } .lksv-outline { border-color: var(--f) }
 html.st-cloud .hzs { background: transparent; border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; padding-left: 2px; padding-right: 2px }
 html.st-cloud .hzs2 { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding-left: 2px }
 html.st-glass .hzs { background: var(--panel); border-color: var(--gedge); border-radius: 20px; backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5) }
@@ -8660,7 +8684,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-322";
+var APPV = "zd-app-2026-10-16-323";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -19336,6 +19360,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["323", "🎨 Десять новых стилей оформления", ["В «Настройки» → «Оформление» к четырём стилям добавились ещё десять: Графит, Бумага, Север, Терминал, Глина, Шалфей, Индиго, Контур, Дюна и Туман. У каждого — светлая и тёмная версии, свои шрифты и формы; оттенок, значки и размер текста настраиваются поверх любого стиля, как раньше.", "Главная кнопка и переключатели теперь подбирают цвет текста под акцент: на светлом акценте тёмный, на тёмном — белый."]],
 ["322", "🔒 Изоляция пространства не терялась бы при переходе в «Сегодня»", ["Если боковая панель скрыта и пространство открыто через всплывающее меню полосы значков, переход из него в «Сегодня», календарь или другой раздел открывал раздел без изоляции. Теперь приложение помнит, в каком изолированном пространстве вы находитесь, независимо от панели: изоляция держится, пока вы не выйдете на Главную или не выберете другое пространство."]],
 ["321", "🧭 Советник в изолированном пространстве — только о его делах", ["На рабочем столе изолированного пространства карточка «🧭 Советник» теперь смотрит только на задачи и цели этого пространства: чужие просроченные цели, большие задачи, дедлайны и перегруз дней в советы не попадают. Личная статистика — темп выполнения плана, продуктивные часы, обзор недели, спринт, поправка к оценкам — показывается только на общей Главной."]],
 ["320", "★ Главное на сегодня: сделанные повторяющиеся задачи зачёркнуты", ["На главной странице в блоке «★ Главное на сегодня» задача, которую вы сегодня выполнили, теперь зачёркнута и отмечена ✓, даже если она повторяющаяся и уже ушла на следующий раз (рядом — когда он). Раньше зачёркивались только закрытые насовсем задачи. Блок «Сейчас» больше не предлагает начать с уже сделанного дела."]],
@@ -26571,7 +26596,47 @@ bento: ["Бенто", "Плитки с мягкими цветными фона�
 expr: ["Экспрессив", "Тональные заливки, очень круглые формы, кнопки-таблетки, живые анимации",
 ["#fbf8ff", "#ffffff", "#f3edf7", "#1d1b20", "#6b6672", "#e9e2ee", "#efe8f4", "#6750a4", "#e8def8", "#ffd8e4", "#eaddff"],
 ["#141218", "#1d1b20", "#1a1820", "#e6e0e9", "#a8a1ae", "#322f37", "#2b2930", "#d0bcff", "#4a4458", "#5a3a45", "#3b3350"],
-["#eaddff", "#ffffff", "#ffd8e4", "#ffffff", "#e8def8", "#ffffff"], ["#3b3350", "#1d1b20", "#4a2f3a", "#1d1b20", "#352f45", "#1d1b20"], ["Rubik", "Rubik", 600, 0]]
+["#eaddff", "#ffffff", "#ffd8e4", "#ffffff", "#e8def8", "#ffffff"], ["#3b3350", "#1d1b20", "#4a2f3a", "#1d1b20", "#352f45", "#1d1b20"], ["Rubik", "Rubik", 600, 0]],
+graphite: ["Графит", "Чёрный, белый и серые; цвет только у просрочки. Сделанное не зачёркивается, а приглушается",
+["#f6f6f4", "#ffffff", "#f0f0ee", "#1b1b1a", "#7a7a76", "#e2e2df", "#ececea", "#1b1b1a", "#e9e9e6", "#bdbdb8", "#9a9a95"],
+["#141414", "#1c1c1c", "#111111", "#ececea", "#8a8a86", "#2a2a2a", "#242424", "#ececea", "#262626", "#4a4a4a", "#6a6a6a"],
+["", "", "", "", "", ""], ["", "", "", "", "", ""], ["Inter", "Inter Tight", 600, 0]],
+paper: ["Бумага", "Тёплая бумага и чернильно-терракотовый акцент; заголовки с засечками, текст без",
+["#f3efe6", "#faf7f0", "#ede8dd", "#2a2622", "#8a8278", "#e1dacc", "#e8e2d6", "#8c3b2e", "#f1ddd6", "#d9c4a3", "#b5a58a"],
+["#1f1c18", "#27231e", "#1a1714", "#e9e2d6", "#8f8679", "#352f28", "#2f2a24", "#d98a72", "#3a2a24", "#6a5a45", "#4a4238"],
+["", "", "", "", "", ""], ["", "", "", "", "", ""], ["Source Sans 3", "Fraunces", 500, 1]],
+north: ["Север", "Голубовато-серый фон, стальной синий, много воздуха; строгая сетка",
+["#eef1f4", "#ffffff", "#e7ebef", "#1f2933", "#7b8794", "#d9e0e7", "#e2e8ee", "#3a6ea5", "#e1ebf6", "#b8c7d6", "#9fb3c6"],
+["#161b22", "#1d232c", "#12161c", "#dbe2ea", "#7d8a98", "#2a323c", "#232a34", "#7fb0e6", "#1f2e40", "#3a4a5c", "#2c3a4a"],
+["", "", "", "", "", ""], ["", "", "", "", "", ""], ["IBM Plex Sans", "Manrope", 600, 0]],
+term: ["Терминал", "Один моноширинный шрифт, квадратные отметки, зелёный акцент",
+["#fafaf8", "#ffffff", "#f3f3f0", "#202020", "#8a8a86", "#dedede", "#ededeb", "#2f7d5a", "#e4f1ea", "#c9d9cf", "#b8c4bc"],
+["#0f1210", "#151916", "#0b0e0c", "#d6dbd2", "#7c847a", "#242a25", "#1b201c", "#6fcf97", "#16261d", "#2f4a3a", "#263a30"],
+["", "", "", "", "", ""], ["", "", "", "", "", ""], ["JetBrains Mono", "JetBrains Mono", 500, 0]],
+clay: ["Глина", "Песок, глина, оливковый; крупные скругления, панели без рамок",
+["#f4ede4", "#fbf7f1", "#efe6da", "#3a2f28", "#92847a", "#e6dccf", "#ebe2d6", "#b4654a", "#f3e1d8", "#d8c3a5", "#a9b48e"],
+["#211c19", "#2a2420", "#1b1715", "#eadfd4", "#8f8177", "#352d28", "#332b26", "#dd9a7e", "#3c2b24", "#5a4a38", "#4a5a3e"],
+["", "", "", "", "", ""], ["", "", "", "", "", ""], ["Onest", "Onest", 600, 0]],
+sage: ["Шалфей", "Глубокий шалфейный акцент, прохладный фон, геометрический гротеск",
+["#eef1ec", "#f8faf7", "#e6ebe5", "#1f2b25", "#7f8a84", "#d8e0da", "#e1e8e2", "#5b7f6b", "#e0eae3", "#c4d3c8", "#b2c3c9"],
+["#151a17", "#1b211d", "#111613", "#dde3df", "#7e8984", "#28302b", "#222a25", "#9cc2ad", "#22302a", "#3a4a40", "#34444a"],
+["", "", "", "", "", ""], ["", "", "", "", "", ""], ["Golos Text", "Golos Text", 600, 0]],
+indigo: ["Индиго", "Чёрно-синий фон и лавандовый акцент в тёмном режиме; крупные табличные цифры",
+["#f2f3f8", "#ffffff", "#eaecf4", "#1a1d33", "#7c80a0", "#dcdfeb", "#e6e8f1", "#4049a6", "#e4e6f8", "#c5c9ea", "#b5bfe0"],
+["#0f1124", "#161930", "#0b0d1c", "#e0e2f2", "#7a7f9e", "#242846", "#1c203a", "#9aa1ff", "#22264a", "#3a3f70", "#2e3560"],
+["", "", "", "", "", ""], ["", "", "", "", "", ""], ["Inter", "Inter", 600, 0, "Unbounded"]],
+outline: ["Контур", "Только линии, прямые углы, никаких плашек; один оранжево-красный акцент",
+["#ffffff", "#ffffff", "#ffffff", "#111111", "#7c7c7c", "#3a3a3a", "#f1f1f1", "#e4572e", "#fbe6df", "#cfcfcf", "#e0e0e0"],
+["#0b0b0b", "#0b0b0b", "#0b0b0b", "#f2f2f2", "#8a8a8a", "#c8c8c8", "#1a1a1a", "#ff7a4d", "#3a2318", "#3a3a3a", "#2a2a2a"],
+["", "", "", "", "", ""], ["", "", "", "", "", ""], ["Space Grotesk", "Space Grotesk", 500, 0]],
+dune: ["Дюна", "Днём песок с почти чёрным акцентом, ночью чёрный с золотым; кнопки-таблетки",
+["#efe7d8", "#f7f1e5", "#e8dfcd", "#2b2419", "#8e8470", "#ddd2bd", "#e6dccb", "#2b2419", "#e4dac6", "#d8b56a", "#c9a26a"],
+["#1a1712", "#221e18", "#151310", "#efe7d8", "#8a8170", "#312b22", "#2a2520", "#d8b56a", "#332c1e", "#5a4a2a", "#4a3f2a"],
+["", "", "", "", "", ""], ["", "", "", "", "", ""], ["Wix Madefor Text", "Wix Madefor Text", 600, 0]],
+mist: ["Туман", "Дымчатый фон, приглушённый лиловый, тихий контраст второстепенного",
+["#f1eff4", "#faf9fc", "#eae7ef", "#26232e", "#8b8597", "#e1dde8", "#e7e3ed", "#6f5f8f", "#e8e2f1", "#cfc6df", "#bfc4de"],
+["#17151c", "#1e1b24", "#121017", "#e3e0e8", "#827c8e", "#2b2834", "#25222d", "#b3a3d6", "#2a2538", "#4a4060", "#3a4060"],
+["", "", "", "", "", ""], ["", "", "", "", "", ""], ["Nunito Sans", "Figtree", 600, 0]]
 };
 var ACCENTS = ["#4f7568", "#2f6b58", "#2f6f8f", "#4a6fa5", "#6750a4", "#8a5a7a", "#b06a5a", "#9a7a3a", "#4f5660"];
 function accFix(hex, dk) {
@@ -26683,6 +26748,7 @@ var F = Y[6], emo = L.emo === "mono" ? ', "Noto Emoji"' : "";
 v["--sans"] = '"' + F[0] + '"' + emo + ', "Onest", "Segoe UI", system-ui, sans-serif';
 v["--hf"] = '"' + F[1] + '"' + emo + (F[3] ? ", Georgia, serif" : ', "Onest", system-ui, sans-serif'); v["--hw"] = String(F[2]);
 var fam = ["family=" + F[0].replace(/ /g, "+") + ":wght@400;500;600;700"]; if (F[1] !== F[0]) fam.push("family=" + F[1].replace(/ /g, "+") + ":wght@400;500;600"); if (emo) fam.push("family=Noto+Emoji:wght@400");
+if (F[4]) { fam.push("family=" + F[4].replace(/ /g, "+") + ":wght@500"); v["--numf"] = '"' + F[4] + '", ' + v["--sans"]; } else v["--numf"] = "var(--mono)";
 fontLink(fam.join("&"), "fontlink");
 Object.keys(v).forEach(function (x) { st.setProperty(x, v[x]); });
 var cl = document.documentElement.classList; Object.keys(STY).forEach(function (k) { cl.toggle("st-" + k, k === L.style); }); cl.toggle("glass", gl); cl.toggle("emomono", L.emo === "mono"); cl.toggle("prcalm", L.prio !== "color");
