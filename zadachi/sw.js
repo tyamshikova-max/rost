@@ -1,5 +1,6 @@
 // Офлайн-кэш приложения «Задачи»
-const CACHE = 'zd-app-2026-10-16-325';
+const CACHE = 'zd-app-2026-10-16-326';
+const FONTS = 'zd-fonts'; // шрифты стилей: отдельный кэш, который не стирается при обновлении версии
 const CORE = ['./', 'index.html', 'help.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'brand-64.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
@@ -15,9 +16,24 @@ self.addEventListener('fetch', e => {
     e.respondWith(fetch(fresh).then(r => { const cp = r.clone(); caches.open(CACHE).then(c => c.put(req, cp)); return r; })
       .catch(() => caches.match(req, { ignoreSearch: true }).then(r => r || caches.match('index.html'))));
   } else if (/fonts\.(googleapis|gstatic)\.com$/.test(url.hostname)) {
-    e.respondWith(caches.match(req).then(r => r || fetch(req).then(n => { const cp = n.clone(); caches.open(CACHE).then(c => c.put(req, cp)); return n; })));
+    // шрифты Google: сначала кэш (без сети стиль не теряет шрифт), иначе сеть и в кэш
+    e.respondWith(caches.open(FONTS).then(c => c.match(req, { ignoreVary: true }).then(r => r || fetch(req).then(n => { if (n.ok || n.type === 'opaque') c.put(req, n.clone()); return n; }))));
   }
 });
+// прогрев шрифтов: приложение присылает адреса CSS Google Fonts выбранного стиля — скачиваем CSS и все файлы шрифтов из него,
+// чтобы они были в кэше ещё до того, как понадобятся без сети
+async function warmFonts(urls) {
+  const c = await caches.open(FONTS);
+  for (const u of urls) {
+    try {
+      let css = await c.match(u, { ignoreVary: true });
+      if (!css) { const r = await fetch(u, { mode: 'cors' }); if (!r.ok) continue; await c.put(u, r.clone()); css = r; }
+      const txt = await css.clone().text(), m = txt.match(/https:\/\/fonts\.gstatic\.com\/[^)\s'"]+/g) || [];
+      for (const f of m) { if (await c.match(f, { ignoreVary: true })) continue; try { const fr = await fetch(f, { mode: 'cors' }); if (fr.ok) await c.put(f, fr); } catch (x) { /* без сети — в следующий раз */ } }
+    } catch (x) { /* без сети — в следующий раз */ }
+  }
+}
+self.addEventListener('message', e => { const d = e.data || {}; if (d.zd === 'fonts' && Array.isArray(d.urls)) e.waitUntil(warmFonts(d.urls.filter(u => /^https:\/\/fonts\.googleapis\.com\//.test(u)))); });
 // напоминания в браузере: клик по уведомлению или кнопки «Готово» / «+15 мин»
 self.addEventListener('notificationclick', e => {
   const id = (e.notification.data || {}).id || '', act = e.action || 'open';
