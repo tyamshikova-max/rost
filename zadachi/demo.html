@@ -8027,6 +8027,9 @@ return o;
 }
 function notesF() { var s = noteSetF(); return s ? notes().filter(function (n) { return s[n.id]; }) : notes(); }
 function goalsF() { var k = spFocK(); if (!k) return goals(); var g = focusSet().__g || {}; return goals().filter(function (x) { return g[x.id]; }); }
+function projectsF() { var fs = spFocK() ? focusSet() : null; return fs ? projects().filter(function (p) { return fs[p.id]; }) : projects(); }
+function ptreeF(keep) { var fs = spFocK() ? focusSet() : null; return fs ? ptree().filter(function (x) { return fs[x.p.id] || x.p.id === keep; }) : ptree(); }
+function goalInF(g) { var k = spFocK(); return !k || !g || !!(focusSet().__g || {})[g.id]; }
 function habitsF() { var k = spFocK(); if (!k) return habits(); var hs = spcGet(k).habs || []; return habits().filter(function (h) { return h.sp === k || hs.indexOf(h.id) >= 0; }); }
 function setFocus(id) { FOCUS = id || ""; FSC = null; if (FOCUS) LS.set("zd-focus", FOCUS); else LS.del("zd-focus"); render(); toast(FOCUS ? "🎯 Фокус: «" + (/^sp:/.test(FOCUS) ? spcName(FOCUS.slice(3)) : (proj(FOCUS) || {}).n) + "» — видны только его задачи" : "Фокус снят — видны все задачи"); }
 function task(id) {
@@ -8684,7 +8687,7 @@ throw e;
 folder: function (p) { return YD.api("/resources?path=" + encodeURIComponent(p), { method: "PUT", ok: [409] }); }
 };
 var CHUNK = 900, ROOT = "app:/tasks/state", ROOT3 = "app:/tasks/s3", LEGACY_UNTIL = new Date("2026-12-31T00:00:00").getTime();
-var APPV = "zd-app-2026-10-16-323";
+var APPV = "zd-app-2026-10-16-324";
 function hash32(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + "." + s.length.toString(36); }
 function canon(o) { if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]"; if (o && typeof o === "object") return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + canon(o[k]); }).join(",") + "}"; return JSON.stringify(o === undefined ? null : o); }
 function cname3(seg, i) { return ROOT3 + "/" + seg + "-c" + ("00" + i).slice(-3); }
@@ -10923,6 +10926,7 @@ return h;
 }
 function vGoal() {
 var g = goal(ARG); if (!g) return head("Цель не найдена", '<a href="#goals">Все цели</a>');
+if (!goalInF(g)) return head("Цель вне этого пространства", '<p class="muted">Вы в изолированном пространстве «' + esc(spcName(spFocK())) + '», а эта цель к нему не относится.</p><div class="r"><a class="btn sm" href="#goals">Цели пространства</a><a class="btn sm" href="#home">Выйти на Главную</a></div>');
 var pr = goalProg(g), ps = goalProjs(g), tl = live(S.tasks).filter(function (t) { return t.goal === g.id; }), open = tl.filter(function (t) { return !t.done; });
 var h = '<div class="crumbs"><a href="#goals">Цели</a> /</div><div class="bhd"><h1 class="bh1"><button type="button" class="gicb" data-a="gic" title="Сменить значок">' + (g.ic || "🎯") + '</button><input class="btitle" data-goal="' + g.id + '" data-gf="n" value="' + esc(g.n) + '" aria-label="Название цели" autocomplete="off"></h1>' +
 '<span class="r bbar"><button type="button" class="btn sm" data-a="gmap" title="Карта мыслей: цель → проекты → задачи">🧠 Карта</button>' + (g.st === "done" ? '<span class="gbadge">🎉 Достигнута</span><button type="button" class="btn sm" data-a="gst" data-x="active">Вернуть в работу</button>' : g.st === "drop" ? '<span class="gbadge">⏸ Отложена</span><button type="button" class="btn sm" data-a="gst" data-x="active">Вернуть в работу</button>' : '<button type="button" class="btn sm pri" data-a="gst" data-x="done">🎉 Цель достигнута</button><button type="button" class="btn sm" data-a="gst" data-x="drop">⏸ Отложить</button>') + '<button type="button" class="ibtn" data-a="gdel" title="Удалить цель">🗑</button></span></div>';
@@ -11267,7 +11271,7 @@ var nx = op.filter(function (t) { return !t.parent; }).sort(cmpBy("smart")).slic
 if (nx.length) h += '<div class="wsub" style="margin-top:6px">Дальше:</div>' + renderTree(nx, "smart", { noProj: true }).replace(/ draggable="true"/g, "");
 return h;
 case "habits":
-var hl = habits().filter(function (x) { return !x.arch; }); if (!hl.length) return '<p class="wempty">Привычек пока нет — <a href="#habits">добавить</a></p>';
+var hl = habitsF().filter(function (x) { return !x.arch; }); if (!hl.length) return '<p class="wempty">Привычек пока нет — <a href="#habits">добавить</a></p>';
 var ds = []; for (var j = 4; j >= 0; j--) ds.push(addDays(today0(), -j));
 return '<div class="whab">' + hl.map(function (x) { return '<div class="whr" style="--hc:' + col(x.c || 0) + '"><span class="whn">' + hMarkIco(x) + esc(x.n) + "</span>" + ds.map(function (d) { return hCell(x, d); }).join("") + '<span class="whs">🔥' + fmtN(hStreak(x)) + "</span></div>"; }).join("") + "</div>";
 case "note":
@@ -11313,7 +11317,7 @@ if (!ttot) return '<p class="wempty">Засечённого времени за 
 var tl3 = Object.keys(tbp).map(function (k) { var p = proj(k); return { l: p ? picon(p) + " " + p.n : "📥 Без проекта", v: tbp[k], c: p ? col(p.c) : "var(--muted)" }; }).sort(function (a, b) { return b.v - a.v; }).slice(0, 6);
 return '<div class="wnum" style="font-size:calc(30px * var(--fs))">' + hfmt(ttot) + '</div><div class="wsub">фокуса за ' + tdd + " дн. · в среднем " + hfmt(ttot / tdd) + " в день</div>" + tl3.map(function (x) { return '<div class="hbar wide"><span>' + esc(x.l) + '</span><i style="width:' + Math.round(x.v / tl3[0].v * 100) + "%;background:" + x.c + '"></i><b>' + hfmt(x.v) + "</b></div>"; }).join("");
 case "goals":
-var gl2 = c.gid ? [goal(c.gid)].filter(Boolean) : goals().filter(function (g) { return (g.st || "active") === "active"; });
+var gl2 = c.gid ? [goal(c.gid)].filter(Boolean) : goalsF().filter(function (g) { return (g.st || "active") === "active"; });
 if (!gl2.length) return '<p class="wempty">Целей пока нет — <a href="#goals">поставить цель</a></p>';
 return '<div class="wgl">' + gl2.map(function (g) { var pr = goalProg(g), nx = goalNext(g, 1)[0]; return '<a class="wg" href="#goal-' + g.id + '"><span class="wgn">' + (g.ic || "🎯") + " " + esc(g.n) + '</span><span class="wgp">' + pr.pct + "%</span>" + gBar(g, pr) + '<small class="muted">' + esc(pr.txt) + (g.due ? " · " + dleft(g.due).t : "") + (nx ? " · дальше: " + esc(nx.t) : "") + "</small></a>"; }).join("") + "</div>";
 case "routine": return tbWidget();
@@ -16343,7 +16347,7 @@ return { from: from, to: to };
 function rqPerTxt(c, r) { var f = function (ms) { return new Date(ms).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" }); }; return (c.per === "custom" ? "" : (RQP[c.per] || RQP.d30) + ": ") + f(r.from) + " — " + f(addDays(r.to, -1)); }
 function rqSnap(c) { return c.met === "open" || c.met === "late"; }
 function rqItems(c, r) {
-var pred = c.src ? wsrcPred(c.src) : function () { return true; }, ok = function (t) { return t && !t.purged && (c.sub || !t.parent) && pred(t); }, out = [];
+var pred = c.src ? wsrcPred(c.src) : function () { return true; }, fsq = spFocK() ? focusSet() : null, ok = function (t) { return t && !t.purged && (c.sub || !t.parent) && pred(t) && (!fsq || fsHas(fsq, t)); }, out = [];
 if (c.met === "done" || c.met === "est") doneEvents().forEach(function (e) { if (e.d < r.from || e.d >= r.to) return; var t = taskAnyId(e.t); if (!ok(t) || t.canc) return; var v = c.met === "est" ? tHours(t) : 1; if (v) out.push({ t: t, d: e.d, v: v }); });
 else if (c.met === "created") S.tasks.forEach(function (t) { if (!t.del && t.created >= r.from && t.created < r.to && ok(t)) out.push({ t: t, d: t.created, v: 1 }); });
 else if (c.met === "canc") S.tasks.forEach(function (t) { if (t.canc && t.dt >= r.from && t.dt < r.to && ok(t)) out.push({ t: t, d: t.dt, v: 1 }); });
@@ -18867,7 +18871,7 @@ return h;
 }
 function vWeekly() {
 if (LS.get("zd-wrgo") !== wrKey()) LS.set("zd-wrgo", wrKey());
-var r = wrRec(), t0 = today0(), inbox = inboxList().length, late = tasks().filter(function (t) { return !t.done && isLate(t); }).length, noNext = projects().filter(function (p) { return !p.arch && !isArch(p.id) && !p.done && !pkids(p.id).length && !tasks().some(function (t) { return t.pid === p.id && !t.done; }); }), wait = waitList().length, some = (typeof somedayList === "function" ? somedayList() : []).length, gl = live(S.goals || []).filter(function (g) { return (g.st || "active") === "active"; });
+var r = wrRec(), t0 = today0(), inbox = inboxList().length, late = tasks().filter(function (t) { return !t.done && isLate(t); }).length, noNext = projectsF().filter(function (p) { return !p.arch && !isArch(p.id) && !p.done && !pkids(p.id).length && !tasks().some(function (t) { return t.pid === p.id && !t.done; }); }), wait = waitList().length, some = (typeof somedayList === "function" ? somedayList() : []).length, gl = live(S.goals || []).filter(function (g) { return (g.st || "active") === "active"; });
 var cnt = { inbox: inbox, late: late, proj: noNext.length, wait: wait, some: some, goals: gl.length, gjr: gjMissing().length }, link = { inbox: "#inbox", late: "#all", wait: "#waiting", some: "#someday", goals: "#goals" }, done = WRVS.filter(function (s) { return r.st[s[0]]; }).length;
 var h = head("🗓 Обзор недели", "Неделя с " + new Date(monday(t0)).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + ". Пройдите шаги сверху вниз — отмечайте сделанное. Обзор раз в неделю держит систему в порядке: ничего не теряется, главное видно.");
 h += wsumHTML();
@@ -18876,7 +18880,7 @@ h += '<div class="bcbar wrbar"><i style="width:' + Math.round(done / WRVS.length
 var k = s[0], on = !!r.st[k], extra = "";
 if (k === "proj" && noNext.length) extra = '<div class="wrx">' + noNext.slice(0, 12).map(function (p) { return '<a class="chip" href="#proj-' + p.id + '">' + esc(picon(p)) + " " + esc(p.n) + "</a>"; }).join("") + "</div>";
 if (k === "top") { var cand = tasks().filter(function (t) { return !t.done && !t.parent; }).sort(function (a, b) { return ((a.prio || 9) - (b.prio || 9)) || ((a.due || 9e15) - (b.due || 9e15)); }).slice(0, 40); extra = '<div class="wrx">' + (r.top || []).map(task).filter(Boolean).map(function (t) { return '<span class="chip on">⭐ ' + esc(t.t.slice(0, 50)) + ' <button type="button" data-a="wrtopx" data-id="' + t.id + '" aria-label="Убрать">×</button></span>'; }).join("") + ((r.top || []).length < 3 ? '<select class="inp" id="wrtopadd"><option value="">＋ выбрать задачу…</option>' + cand.filter(function (t) { return (r.top || []).indexOf(t.id) < 0; }).map(function (t) { return '<option value="' + t.id + '">' + esc(t.t.slice(0, 70)) + "</option>"; }).join("") + "</select>" : "") + "</div>"; }
-if (k === "goals") { var ga = gchActive(), gs3 = gchStalled(); if (ga.length || gs3.length) extra = '<div class="wrx">' + ga.map(function (g) { var st3 = gchStat(g); return '<a class="chip" href="#gch-' + g.id + '">🎯 ' + esc(g.n) + " · день " + Math.min(st3.n, GCHN) + " · " + st3.pct + "% · как идёт?</a>"; }).join("") + gs3.map(function (g) { return '<a class="chip" href="#gch-' + g.id + '">⏸ ' + esc(g.n) + " — стоит, запустить челлендж</a>"; }).join("") + "</div>"; }
+if (k === "goals") { var ga = gchActive().filter(goalInF), gs3 = gchStalled().filter(goalInF); if (ga.length || gs3.length) extra = '<div class="wrx">' + ga.map(function (g) { var st3 = gchStat(g); return '<a class="chip" href="#gch-' + g.id + '">🎯 ' + esc(g.n) + " · день " + Math.min(st3.n, GCHN) + " · " + st3.pct + "% · как идёт?</a>"; }).join("") + gs3.map(function (g) { return '<a class="chip" href="#gch-' + g.id + '">⏸ ' + esc(g.n) + " — стоит, запустить челлендж</a>"; }).join("") + "</div>"; }
 if (k === "gjr") extra = gjHTML();
 if (k === "sprint") { var tsp = sprint(sprintId(spPlanMon())); extra = '<div class="wrx"><a class="btn sm pri" href="#spplan">🧭 ' + (spPlanned(tsp) ? "Посмотреть план" : "Спланировать") + " — " + esc(spName(tsp || { start: spPlanMon() })) + "</a>" + (spPlanned(tsp) ? ' <span class="okc">✓ спланирован</span>' : "") + "</div>"; }
 if (k === "note") extra = '' + rtxHTML("week", wrKey(), "Что получилось, что нет, что поменять на следующей неделе") + "";
@@ -18907,7 +18911,7 @@ fs.forEach(function (a) { var t = a.t && S.tasks.filter(function (x) { return x.
 var h = '<div class="card balc"><div class="balg"><div>' + radarSVG(A.map(function (a) { return +wh[a.id] || 0; }), A.map(function (a) { return a.ic + " " + a.n; }), 10) + '</div><div><h3>Как я оцениваю сферы на этой неделе (1–10)</h3><div class="balr">' + A.map(function (a) { var v = +wh[a.id] || 0; return '<div class="balrow"><span>' + esc(a.ic + " " + a.n) + '</span><span class="balsc">' + [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (i) { return '<button type="button" data-a="balsc" data-k="' + a.id + '" data-v="' + i + '" class="' + (i <= v ? "on" : "") + '" aria-label="' + i + '">' + i + "</button>"; }).join("") + "</span></div>"; }).join("") + "</div></div></div>";
 var mx = Math.max.apply(null, [1].concat(A.map(function (a) { return cnt[a.id] || 0; })).concat([cnt[""] || 0]));
 h += '<h3>Куда ушли дела и время на этой неделе</h3>' + A.concat([{ id: "", n: "Без сферы", ic: "◌" }]).map(function (a) { var c = cnt[a.id] || 0, m = mins[a.id] || 0; return '<div class="hbar"><span>' + esc(a.ic + " " + a.n) + '</span><i style="width:' + Math.round(c / mx * 100) + '%;background:' + (a.id ? col(a.c || 0) : "var(--muted)") + '"></i><b>' + c + (m ? ' <small class="muted">· ' + Math.round(m / 6) / 10 + " ч</small>" : "") + "</b></div>"; }).join("");
-var roots = projects().filter(function (p) { return !p.parent && !p.arch; });
+var roots = projectsF().filter(function (p) { return !p.parent && !p.arch; });
 h += '<h3>Сферы проектов</h3><p class="muted">Задачи берут сферу у своего проекта (у вложенных — у верхнего) или у цели.</p><div class="balp">' + roots.map(function (p) { return '<label class="f"><span>' + esc(picon(p) + " " + p.n) + '</span><select class="inp" data-parea="' + p.id + '"><option value="">— без сферы —</option>' + A.map(function (a) { return '<option value="' + a.id + '"' + (p.area === a.id ? " selected" : "") + ">" + esc(a.ic + " " + a.n) + "</option>"; }).join("") + "</select></label>"; }).join("") + "</div></div>";
 return h;
 }
@@ -19360,6 +19364,7 @@ return true;
 var APNEW = { home: 1, mods: 1, tbox: 1, dnote: 1, recap: 1, garden: 1, shared: 1, morning: 1, shutdown: 1, snoozed: 1, weekly: 1, health: 1, people: 1, docs: 1, srs: 1, market: 1, news: 1 };
 function appNewB(k) { return APNEW[k] && !appUseMap()[k] && Date.now() < new Date("2027-01-15").getTime() ? '<em class="apnew">NEW</em>' : ""; }
 var CHLOG = [
+["324", "🔒 Изоляция пространства проверена во всех разделах", ["Автотест теперь проходит все разделы приложения, доску со всеми виджетами, рабочий стол пространства и карточку задачи в изолированном пространстве и проверяет, что чужих задач, проектов, целей, заметок и привычек там нет.", "Заделаны найденные дыры: «Обзор недели» и «Баланс сфер» показывали все проекты, «Дневник целей», «План пространства» и виджеты «Цели» и «Привычки» на доске — все цели и привычки, «Отчёты» считали чужие задачи, а выбор проекта в карточке задачи и в меню предлагал проекты других пространств. Страница чужой цели по прямой ссылке теперь говорит, что цель вне пространства."]],
 ["323", "🎨 Десять новых стилей оформления", ["В «Настройки» → «Оформление» к четырём стилям добавились ещё десять: Графит, Бумага, Север, Терминал, Глина, Шалфей, Индиго, Контур, Дюна и Туман. У каждого — светлая и тёмная версии, свои шрифты и формы; оттенок, значки и размер текста настраиваются поверх любого стиля, как раньше.", "Главная кнопка и переключатели теперь подбирают цвет текста под акцент: на светлом акценте тёмный, на тёмном — белый."]],
 ["322", "🔒 Изоляция пространства не терялась бы при переходе в «Сегодня»", ["Если боковая панель скрыта и пространство открыто через всплывающее меню полосы значков, переход из него в «Сегодня», календарь или другой раздел открывал раздел без изоляции. Теперь приложение помнит, в каком изолированном пространстве вы находитесь, независимо от панели: изоляция держится, пока вы не выйдете на Главную или не выберете другое пространство."]],
 ["321", "🧭 Советник в изолированном пространстве — только о его делах", ["На рабочем столе изолированного пространства карточка «🧭 Советник» теперь смотрит только на задачи и цели этого пространства: чужие просроченные цели, большие задачи, дедлайны и перегруз дней в советы не попадают. Личная статистика — темп выполнения плана, продуктивные часы, обзор недели, спринт, поправка к оценкам — показывается только на общей Главной."]],
@@ -20148,7 +20153,7 @@ b += '<label class="goal">Что получилось, что улучшить' 
 }
 if (gjGoals().length) b += "<h3>📔 Дневник целей</h3>" + gjHTML();
 } else if (k === "goal") {
-var vel = spVel(), ag = goals().filter(function (g) { return (g.st || "active") === "active"; });
+var vel = spVel(), ag = goalsF().filter(function (g) { return (g.st || "active") === "active"; });
 b = '<h2>Цель недели</h2><label class="goal">Чего хотим добиться к воскресенью' + rtxHTML("spgoal", tgt.id, "Например: «сдать отчёт за квартал и пройти модуль 4»") + "</label>" +
 '<div class="r spwcapr"><label>Вместимость недели <input type="number" min="1" step="1" data-cap="1" value="' + cap + '"> ч</label><span class="muted">сколько часов реально уйдёт на задачи за неделю, без встреч и рутины' + (vel ? " · по прошлым " + vel.n + " " + plural(vel.n, ["спринту", "спринтам", "спринтам"]) + " вы закрываете в среднем <b>" + (vel.h ? fmtH(vel.v) + " ч" : Math.round(vel.v) + " задач") + "</b> в неделю" : "") + "</span></div>";
 if (ag.length) b += '<h3>Ваши цели — что продвинуть на этой неделе</h3>' + ag.map(function (g) { var nx = goalNext(g, 2); return '<div class="spwg"><a href="#goal-' + g.id + '">' + esc((g.ic || "🎯") + " " + g.n) + "</a> <small class=\"muted\">" + goalProg(g).pct + "%</small>" + (nx.length ? '<div class="muted">следующие шаги: ' + nx.map(function (t) { return esc(t.t); }).join(" · ") + "</div>" : '<div class="muted">шагов нет — добавьте задачу в цель</div>') + "</div>"; }).join("");
@@ -20302,7 +20307,7 @@ function vGch() {
 if (ARG === "how") return vGchHow();
 var g = ARG ? goal(ARG) : null;
 if (!g) {
-var sl = gchStalled(), act = gchActive(), rest = goals().filter(function (x) { return (x.st || "active") === "active" && !gchOf(x) && sl.indexOf(x) < 0; });
+var sl = gchStalled().filter(goalInF), act = gchActive().filter(goalInF), rest = goalsF().filter(function (x) { return (x.st || "active") === "active" && !gchOf(x) && sl.indexOf(x) < 0; });
 var h0 = head("🎯 Челлендж цели", "30 дней маленьких шагов для любой цели, которая стоит. Каждый рабочий день — короткое задание в «Сегодня»: неделя «Разгон», «Ритм», «Глубина», «Итог». Одновременно — не больше двух.") + '<p>' + gchHowLink() + "</p>";
 var li = function (x, why) { return '<a class="spzp" href="#gch-' + x.id + '"><span>' + esc(x.ic || "🎯") + "</span><b>" + esc(x.n) + "</b><small>" + esc(why) + "</small>" + appBar(goalProg(x).pct) + "</a>"; };
 if (act.length) h0 += '<h3 class="apph">Идут сейчас</h3><div class="spzpl">' + act.map(function (x) { var st = gchStat(x); return li(x, "день " + Math.min(st.n, GCHN) + " из " + GCHN + " · серия " + st.streak); }).join("") + "</div>";
@@ -20388,7 +20393,7 @@ if (x === "drop") { gchEnd(g, "drop"); g.st = "drop"; touch(g); save(); go("goal
 return true;
 }
 function gjMon() { var wd = new Date().getDay(), m = monday(today0()); return wd === 1 && new Date().getHours() < 12 ? addDays(m, -7) : m; } // в понедельник утром закрываем прошлую неделю
-function gjGoals() { return goals().filter(function (g) { return (g.st || "active") === "active"; }); }
+function gjGoals() { return goalsF().filter(function (g) { return (g.st || "active") === "active"; }); }
 function gjHas(g, mon) { return (g.log || []).some(function (x) { return x.d >= mon; }); }
 function gjMissing() { var m = gjMon(); return gjGoals().filter(function (g) { return !gjHas(g, m); }); }
 function gjHTML() {
@@ -25155,7 +25160,7 @@ h += '<div class="props">' +
 '<span>Несколько дней</span><div class="v spnv"><span class="muted">до</span><input type="date" data-pf="till" value="' + (t.till ? dKey(t.till) : "") + '"' + (t.at ? ' min="' + dKey(t.at) + '"' : "") + ' title="Последний день, когда занимаетесь задачей">' + (t.till ? '<select data-pf="prog" title="Сколько уже готово">' + [0, 10, 25, 50, 75, 90].map(function (v) { return '<option value="' + v + '"' + ((t.prog || 0) === v ? " selected" : "") + ">" + (v ? "готово " + v + "%" : "прогресс —") + "</option>"; }).join("") + '</select><button class="btn sm" type="button" data-p="wk"' + (wkOn(t) ? " disabled" : "") + ">◐ " + (wkOn(t) ? "Сегодня ✓" : "Сегодня поработала") + '</button><button class="btn sm" type="button" data-p="dsplit" title="Подзадачи «День N» на каждый день периода">🗂 По дням</button><button class="btn sm" type="button" data-p="notill" title="Убрать период">✕</button>' : '<span class="muted">— большая задача: будет в «Сегодня» каждый день до этой даты и не уйдёт в просроченное</span>') + "</div>" +
 '<span>Дедлайн</span><div class="v"><input type="date" data-pf="due" value="' + (t.due ? dKey(t.due) : "") + '">' + (t.due ? '<button class="btn sm" type="button" data-p="nodue" title="Убрать дедлайн">✕</button>' + (t.due < today0() && !t.done ? '<span class="warnc">просрочен</span>' : "") : '<span class="muted">крайний срок, если он отличается от даты начала</span>') + "</div>" +
 (psecs(proj(t.pid)).length ? '<span>Секция</span><div class="v"><select data-pf="sec"><option value="">— без секции —</option>' + psecs(proj(t.pid)).map(function (x) { return '<option value="' + x.id + '"' + (t.sec === x.id ? " selected" : "") + ">" + esc(x.n) + "</option>"; }).join("") + "</select></div>" : "") +
-'<span>Проект</span><div class="v"><select data-pf="pid"><option value="">Входящие (без проекта)</option>' + ptree().map(function (x) { return '<option value="' + x.p.id + '"' + (t.pid === x.p.id ? " selected" : "") + ">" + "  ".repeat(x.d).replace(/ /g, "&nbsp;") + picon(x.p) + " " + esc(x.p.n) + "</option>"; }).join("") + '</select><button type="button" class="ibtn pnp" data-p="pnew" title="Новый проект для этой задачи">＋</button>' + (PNP ? '<div class="pnpbox"><input type="text" id="pn-np" placeholder="Название нового проекта" autocomplete="off" maxlength="60"><button type="button" class="btn pri sm" data-p="pnewok">Создать</button><button type="button" class="btn sm" data-p="pnewx">Отмена</button></div>' : "") + "</div>" +
+'<span>Проект</span><div class="v"><select data-pf="pid"><option value="">Входящие (без проекта)</option>' + ptreeF(t.pid).map(function (x) { return '<option value="' + x.p.id + '"' + (t.pid === x.p.id ? " selected" : "") + ">" + "  ".repeat(x.d).replace(/ /g, "&nbsp;") + picon(x.p) + " " + esc(x.p.n) + "</option>"; }).join("") + '</select><button type="button" class="ibtn pnp" data-p="pnew" title="Новый проект для этой задачи">＋</button>' + (PNP ? '<div class="pnpbox"><input type="text" id="pn-np" placeholder="Название нового проекта" autocomplete="off" maxlength="60"><button type="button" class="btn pri sm" data-p="pnewok">Создать</button><button type="button" class="btn sm" data-p="pnewx">Отмена</button></div>' : "") + "</div>" +
 '<span>Ответственный</span><div class="v"><select data-pf="resp">' + respOptions(t.resp) + "</select></div>" +
 '<span>Спринт</span><div class="v"><select data-pf="sprint">' + spOptions(t) + '</select><span class="muted">оценка</span><input type="number" min="0" step="1" data-estin="h" value="' + (+t.est ? Math.floor(Math.round(t.est * 60) / 60) : "") + '" placeholder="0" style="width:56px" aria-label="Оценка: часов"><span class="muted">ч</span><input type="number" min="0" max="59" step="5" data-estin="m" value="' + (+t.est ? Math.round(t.est * 60) % 60 : "") + '" placeholder="0" style="width:56px" aria-label="Оценка: минут"><span class="muted">мин</span></div>' +
 (t.done ? "" : '<span>Статус</span><div class="v"><div class="seg"><button type="button" data-p="st" data-v="" class="' + (t.st !== "doing" ? "on" : "") + '">Нужно сделать</button><button type="button" data-p="st" data-v="doing" class="' + (t.st === "doing" ? "on" : "") + '">В работе</button></div></div>') +
@@ -26135,7 +26140,7 @@ t.done ? { c: "undone", i: "↺", l: "Вернуть в работу" } : { i: "
 { i: "💤", l: "Отложить до…", sub: snzMenu(t) },
 { i: "❗", l: "Приоритет", sub: [[1, "1 — срочно"], [2, "2 — важно"], [3, "3 — желательно"], [0, "обычный"]].map(function (x) { return { c: "p:" + x[0], i: ck((t.prio || 0) === x[0]), l: x[1], k: "Alt+" + x[0] }; }) },
 { i: flagIc(flagOf(t)), l: "Флажок", sub: flagMenu(t) },
-{ i: "✥", l: "Изменить проект", k: "Ctrl+Shift+M", sub: [{ c: "m:", i: ck(!t.pid), l: "📥 Входящие (без проекта)" }].concat(ptree().map(function (x) { return { c: "m:" + x.p.id, i: ck(t.pid === x.p.id), l: picon(x.p) + " " + x.p.n, pad: x.d }; })) },
+{ i: "✥", l: "Изменить проект", k: "Ctrl+Shift+M", sub: [{ c: "m:", i: ck(!t.pid), l: "📥 Входящие (без проекта)" }].concat(ptreeF(t.pid).map(function (x) { return { c: "m:" + x.p.id, i: ck(t.pid === x.p.id), l: picon(x.p) + " " + x.p.n, pad: x.d }; })) },
 { i: "🏷", l: "Теги", k: "Ctrl+G", sub: tags().map(function (g) { return { c: "t:" + g.n, i: ck((t.tags || []).indexOf(g.n) >= 0), l: tlab(g.n) }; }).concat(["-", { c: "t:+", i: "＋", l: "Новый тег…" }]) },
 { c: "sub", i: "⊞", l: "Новая подзадача", k: "Alt+Shift+N" },
 { c: "check", i: "☑", l: "Чек-лист", k: "Ctrl+I" },
