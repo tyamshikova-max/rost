@@ -1,7 +1,7 @@
 // Офлайн-кэш приложения «Задачи»
-const CACHE = 'zd-app-2026-10-16-338';
+const CACHE = 'zd-app-2026-10-16-339';
 const FONTS = 'zd-fonts'; // шрифты стилей: отдельный кэш, который не стирается при обновлении версии
-const CORE = ['./', 'index.html', 'help.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'brand-64.png'];
+const CORE = ['./', 'index.html', 'help.js', 'zde.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'brand-64.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('zd-app-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
